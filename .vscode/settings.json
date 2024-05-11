@@ -4,10 +4,12 @@
     "**/.git": true
   },
   "npm.packageManager": "npm",
-  "sort-imports.on-save": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always"
   },
+  "editor.formatOnSave": true,
   "editor.quickSuggestions": {
     "strings": true
   },
@@ -45,5 +47,6 @@
   },
   "[mdx]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "java.compile.nullAnalysis.mode": "automatic"
 }

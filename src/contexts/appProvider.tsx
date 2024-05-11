@@ -1,9 +1,9 @@
+import { GlobalProvider } from './global-provider';
+import { Colors } from '../styles';
+
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 
-import { Colors } from '../styles';
 // import ErrorBoundary from '../components/ErrorBoundary';
-import React from 'react';
-import { GlobalProvider } from './global-provider';
 
 interface AppProviderProps {
   children: React.ReactNode;

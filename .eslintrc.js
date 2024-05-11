@@ -6,10 +6,11 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
-    '@react-native-community',
+    // '@react-native-community',
     'prettier',
     'plugin:import/recommended',
     'plugin:import/typescript',
+    '@react-native',
   ],
   ignorePatterns: [
     '**/*/*.js',
@@ -31,6 +32,9 @@ module.exports = {
     '@typescript-eslint',
     'promise',
     'unused-imports',
+    // 'sort-imports',
+    'sort-keys-plus',
+    'jest',
   ],
   env: {
     browser: true,
@@ -51,13 +55,14 @@ module.exports = {
   },
   rules: {
     quotes: [
-      'error',
+      'warn',
       'single',
       {
         avoidEscape: true,
       },
     ],
-    'max-len': ['error', 150],
+    'react/react-in-jsx-scope': 'off',
+    'max-len': ['warn', 150],
     '@typescript-eslint/ban-ts-comment': 2,
     '@typescript-eslint/no-explicit-any': 1,
     'react-native/no-unused-styles': 2,
@@ -68,14 +73,14 @@ module.exports = {
     'prefer-destructuring': 2,
     'no-nested-ternary': 2,
     'prettier/prettier': [
-      'error',
+      'warn',
       {
         endOfLine: 'auto',
       },
     ],
-    'import/no-unused-modules': 'error',
+    'import/no-unused-modules': 'warn',
     'import/order': [
-      'error',
+      'warn',
       {
         groups: [
           'builtin',
@@ -97,17 +102,22 @@ module.exports = {
             position: 'before',
           },
           {
-            pattern: '@*/*',
+            pattern: '@*',
             group: 'external',
             position: 'before',
           },
+          // {
+          //   pattern: '**/*.+(ts|tsx|js|jsx)',
+          //   group: 'internal',
+          //   position: 'after',
+          // },
           {
-            pattern: '**/*.+(ts|tsx|js|jsx)',
+            pattern: './*',
             group: 'internal',
             position: 'after',
           },
           {
-            pattern: '.*/*',
+            pattern: '@/*',
             group: 'internal',
             position: 'after',
           },
@@ -120,17 +130,18 @@ module.exports = {
         },
       },
     ],
-    'sort-imports': [
-      'error',
-      {
-        allowSeparatedGroups: true,
-        ignoreCase: true,
-        ignoreDeclarationSort: true,
-        ignoreMemberSort: false,
-      },
-    ],
-    'sort-keys-plus/sort-keys': 'warning',
-    'unused-imports/no-unused-imports': 'warning',
+    'sort-imports': 'off',
+    // [
+    //   'warn',
+    //   {
+    //     allowSeparatedGroups: true,
+    //     ignoreCase: true,
+    //     ignoreDeclarationSort: true,
+    //     ignoreMemberSort: false,
+    //   },
+    // ],
+    'sort-keys-plus/sort-keys': 'warn',
+    'unused-imports/no-unused-imports': 'warn',
     'unused-imports/no-unused-vars': [
       'warn',
       {

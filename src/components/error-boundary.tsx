@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '../styles';
@@ -50,12 +51,12 @@ class ErrorBoundary extends React.Component<
 
 const styles = StyleSheet.create({
   errorHolder: {
+    alignItems: 'center',
     backgroundColor: Colors.app.background,
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    width: '100%',
   },
 });
 

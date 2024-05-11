@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useMemo } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 
-import { useNetInfo } from '@react-native-community/netinfo';
+// import { useNetInfo } from '@react-native-community/netinfo';
 import { Theme } from '../types';
+
 import { defaultTheme } from '../styles/theme';
 
 interface Props {
@@ -17,11 +18,11 @@ const GlobalContext = createContext<BloablContextValue>({
 });
 
 export const GlobalProvider: React.FC<Props> = ({ children }) => {
-  const netinfo = useNetInfo();
+  // const netinfo = useNetInfo();
 
-  useEffect(() => {
-    console.log('netinfo', netinfo);
-  }, [netinfo]);
+  // useEffect(() => {
+  //   console.log('netinfo', netinfo);
+  // }, [netinfo]);
 
   const memoedValue = useMemo(() => {
     return {
