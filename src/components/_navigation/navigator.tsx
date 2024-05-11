@@ -14,3 +14,9 @@ export const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+
+// const styles = StyleSheet.create({
+//   tabBar: {
+//     backgroundColor: 'red',
+//   },
+// });

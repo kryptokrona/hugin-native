@@ -7,7 +7,9 @@
       "@/components": ["./components/index"],
       "@/types": ["./types/index"],
       "@/utils": ["./utils/index"],
-      "@/contexts": ["./contexts/index"]
+      "@/contexts": ["./contexts/index"],
+      "@/styles": ["./styles/index"],
+      "@/services": ["./services/index"]
     }
   }
 }

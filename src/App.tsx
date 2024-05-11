@@ -1,4 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { Appearance } from 'react-native';
+
+import { setTheme } from 'services';
 
 import { AppNavigator } from '@/components';
 import { AppProvider } from '@/contexts';
@@ -6,11 +10,17 @@ import { AppProvider } from '@/contexts';
 // import SplashScreen from 'react-native-splash-screen';
 // import { useEffect } from 'react';
 const App = () => {
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     SplashScreen.hide();
-  //   }, 1500);
-  // }, []);
+  useEffect(() => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      setTheme(colorScheme);
+    });
+
+    return () => subscription.remove();
+
+    // setTimeout(() => {
+    //   SplashScreen.hide();
+    // }, 1500);
+  }, []);
 
   return (
     <AppProvider>
