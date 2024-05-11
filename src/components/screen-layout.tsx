@@ -6,7 +6,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const Card: React.FC<Props> = ({ children }) => {
+export const ScreenLayout: React.FC<Props> = ({ children }) => {
   const { theme } = useGlobalStore();
   const backgroundColor = theme.backgroundAccent;
 
