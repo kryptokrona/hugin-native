@@ -1,13 +1,13 @@
 import { StyleSheet, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
-// import React from 'react';
 
 interface Props {
   children: React.ReactNode;
 }
 
 export const ScreenLayout: React.FC<Props> = ({ children }) => {
+  const isArray = Array.isArray(children);
   const { theme } = useGlobalStore();
   const backgroundColor = theme.backgroundAccent;
 
@@ -18,8 +18,6 @@ export const ScreenLayout: React.FC<Props> = ({ children }) => {
       </View>
     );
   }
-
-  const isArray = Array.isArray(children);
 
   return (
     children && (
