@@ -9,7 +9,7 @@ interface Props {
 export const ScreenLayout: React.FC<Props> = ({ children }) => {
   const isArray = Array.isArray(children);
   const { theme } = useGlobalStore();
-  const backgroundColor = theme.backgroundAccent;
+  const backgroundColor = theme.background;
   if (!children) {
     return null;
   }
@@ -33,9 +33,7 @@ export const ScreenLayout: React.FC<Props> = ({ children }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'stretch',
-    backgroundColor: 'red',
     flex: 1,
-    height: '100%',
     padding: 12,
   },
   divider: {
