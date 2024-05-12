@@ -41,7 +41,6 @@ export const XKRLogo: React.FC<Props> = () => {
       '#5ff2f0',
     ],
   });
-
   return (
     <Animated.View
       style={[
@@ -50,7 +49,10 @@ export const XKRLogo: React.FC<Props> = () => {
           backgroundColor: interpolateColor,
         },
       ]}>
-      <Image style={styles.image} source={require('../assets/img/hugin.png')} />
+      <Image
+        style={styles.image}
+        source={require('../../assets/img/hugin-logo.svg')}
+      />
     </Animated.View>
   );
 };

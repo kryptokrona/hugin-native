@@ -1,6 +1,6 @@
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { SafeAreaView, StatusBar } from 'react-native';
 
-// import { Colors } from '../styles';
+import { useGlobalStore } from '@/services';
 
 // import ErrorBoundary from '../components/ErrorBoundary';
 
@@ -9,23 +9,16 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const { theme } = useGlobalStore();
+  const backgroundColor = theme.background;
+  const barStyle = theme.mode === 'light' ? 'dark-content' : 'light-content';
+
   return (
-    <SafeAreaView style={styles.safeAreaView}>
-      <StatusBar
-        // backgroundColor={Colors.app.background}
-        barStyle="dark-content"
-      />
-      {/* <GlobalProvider> */}
+    <SafeAreaView style={{ backgroundColor, flex: 1 }}>
+      <StatusBar backgroundColor={backgroundColor} barStyle={barStyle} />
       {children}
-      {/* </GlobalProvider> */}
       {/* <NetworkNotification />
         <PermissionsNotification /> */}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  safeAreaView: {
-    backgroundColor: 'white',
-  },
-});

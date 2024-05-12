@@ -1,7 +1,6 @@
 import { StyleSheet, Text } from 'react-native';
 
-import { useGlobalStore } from 'services';
-
+import { useGlobalStore } from '@/services';
 import { fontSizes } from '@/styles';
 
 type TextType = 'primary' | 'secondary' | 'error';

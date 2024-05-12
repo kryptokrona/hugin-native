@@ -1,4 +1,5 @@
 export interface Theme {
+  mode: 'light' | 'dark';
   backgroundAccent: string;
   background: string;
   border: string;

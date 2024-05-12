@@ -1,6 +1,6 @@
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { useGlobalStore } from 'services';
+import { useGlobalStore } from '@/services';
 
 import { TextField } from './text-field';
 
