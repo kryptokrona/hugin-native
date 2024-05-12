@@ -1,6 +1,6 @@
 import { ColorSchemeName } from 'react-native';
 
-import { Themes } from 'styles/colors';
+import { Themes } from '@/styles';
 
 import { useGlobalStore } from './global-store';
 

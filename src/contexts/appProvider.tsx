@@ -1,6 +1,5 @@
 import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
 
-import { GlobalProvider } from './global-provider';
 // import { Colors } from '../styles';
 
 // import ErrorBoundary from '../components/ErrorBoundary';
@@ -16,7 +15,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // backgroundColor={Colors.app.background}
         barStyle="dark-content"
       />
-      <GlobalProvider>{children}</GlobalProvider>
+      {/* <GlobalProvider> */}
+      {children}
+      {/* </GlobalProvider> */}
       {/* <NetworkNotification />
         <PermissionsNotification /> */}
     </SafeAreaView>

@@ -3,8 +3,6 @@ import { createContext, useContext, useMemo } from 'react';
 // import { useNetInfo } from '@react-native-community/netinfo';
 import { Theme } from '../types';
 
-import { defaultTheme } from '../styles/theme';
-
 interface Props {
   children: React.ReactNode;
 }

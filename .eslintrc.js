@@ -112,12 +112,12 @@ module.exports = {
           //   position: 'after',
           // },
           {
-            pattern: './*',
+            pattern: '@/*',
             group: 'internal',
             position: 'after',
           },
           {
-            pattern: '@/*',
+            pattern: './*',
             group: 'internal',
             position: 'after',
           },

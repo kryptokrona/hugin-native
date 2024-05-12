@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 
-import { Themes } from 'styles/colors';
-
+import { Themes } from '@/styles';
 import type { Theme } from '@/types';
 
 type GlobalStore = {

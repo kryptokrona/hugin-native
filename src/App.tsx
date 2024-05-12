@@ -2,10 +2,9 @@ import React, { useEffect } from 'react';
 
 import { Appearance } from 'react-native';
 
-import { setTheme } from 'services';
-
 import { AppNavigator } from '@/components';
 import { AppProvider } from '@/contexts';
+import { setTheme } from '@/services';
 
 // import SplashScreen from 'react-native-splash-screen';
 // import { useEffect } from 'react';
