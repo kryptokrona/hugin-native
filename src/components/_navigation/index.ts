@@ -1,1 +1,2 @@
-export * from './navigator';
+export * from './auth-navigator';
+export * from './main-navigator';

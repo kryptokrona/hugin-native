@@ -1,24 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { AppNavigator } from '@/components';
+import { AppNavigator, ScreenLayout, XKRLogo } from '@/components';
 import { AppProvider } from '@/contexts';
 import { init } from '@/services';
 
 // import SplashScreen from 'react-native-splash-screen';
 // import { useEffect } from 'react';
 const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
   useEffect(() => {
     init();
-    // setTimeout(() => {
-    //   SplashScreen.hide();
-    // }, 1500);
   }, []);
+  setTimeout(() => {
+    setShowSplash(false);
+  }, 3000);
 
-  return (
-    <AppProvider>
-      <AppNavigator />
-    </AppProvider>
-  );
+  if (showSplash) {
+    <ScreenLayout>
+      <XKRLogo />
+    </ScreenLayout>;
+  } else {
+    return (
+      <AppProvider>
+        <AppNavigator />
+      </AppProvider>
+    );
+  }
 };
 
 export default App;
