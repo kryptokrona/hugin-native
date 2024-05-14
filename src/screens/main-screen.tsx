@@ -9,7 +9,7 @@ import { useGlobalStore } from '@/services';
 import type { MainScreens, MainStackParamList } from '@/types';
 
 interface Props {
-  route: RouteProp<MainStackParamList, typeof MainScreens.Main.name>;
+  route: ScreenComponentType<MainStackParamList, typeof MainScreens.Main.name>;
 }
 
 export const MainScreen: React.FC<Props> = ({ route: _route }) => {

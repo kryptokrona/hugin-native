@@ -33,7 +33,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
         const { options } = descriptors[route.key];
 
         const isFocused = state.index === index;
-
+        console.log({ route: route.key });
         const onPress = () => {
           const event = navigation.emit({
             canPreventDefault: true,

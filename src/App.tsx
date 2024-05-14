@@ -10,15 +10,17 @@ const App = () => {
   const [showSplash, setShowSplash] = useState(true);
   useEffect(() => {
     init();
+    setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
   }, []);
-  setTimeout(() => {
-    setShowSplash(false);
-  }, 3000);
 
   if (showSplash) {
-    <ScreenLayout>
-      <XKRLogo />
-    </ScreenLayout>;
+    return (
+      <ScreenLayout>
+        <XKRLogo />
+      </ScreenLayout>
+    );
   } else {
     return (
       <AppProvider>

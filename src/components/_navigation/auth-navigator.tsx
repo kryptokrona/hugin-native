@@ -1,53 +1,89 @@
 import React from 'react';
 
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import {
-  type BottomTabBarProps,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+  ChooseAuthMethodScreen,
+  CreateWalletScreen,
+  DisclaimerScreen,
+  ForgotPinScreen,
+  ImportKeysOrSeedScreen,
+  ImportKeysScreen,
+  ImportSeedScreen,
+  ImportWalletScreen,
+  PickBlockHeightScreen,
+  PickExaktBlockHeightScreen,
+  PickMonthScreen,
+  RequestHardwareAuthScreen,
+  RequestPinScreen,
+  SetPinScreen,
+  WalletOptionScreen,
+} from 'screens/_auth-screens';
 
 import { AuthScreens, AuthStackParamList } from '@/types';
 
-import { MyTabBar } from './tab-bar';
-
-const screens: any[] = [
-  // {TestScreen: }
-  //  export const AuthScreens = {
-  //   {ChooseAuthMethod: },
-  //   {CreateWallet: },
-  //   {Disclaimer: },
-  //   {ForgotPin: },
-  //   {ImportKeys: },
-  //   {ImportKeysOrSeed: },
-  //   {ImportSeed: },
-  //   {ImportWallet: },
-  //   {PickBlockHeight: },
-  //   {PickExactBlockHeight:},
-  //   {PickMonth: },
-  //   {RequestHardwareAuth:},
-  //  { RequestPin: },
-  //   SetPin,
-  //   {Splash:},
-  //  {  WalletOption: }
-];
-
-const Tab = createBottomTabNavigator<AuthStackParamList>();
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthNavigator = () => {
-  function itemMapper(item: keyof typeof AuthScreens) {
-    const screen = AuthScreens[item];
-    const key = screen.name;
-    const value = screens.find((item) => item[key])![key];
-
-    return <Tab.Screen key={key} name={key} component={value} />;
-  }
-
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        tabBar={(props: BottomTabBarProps) => <MyTabBar {...props} />}>
-        {screens.map(itemMapper)}
-      </Tab.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator>
+      <Stack.Screen
+        name={AuthScreens.ChooseAuthMethod.name}
+        component={ChooseAuthMethodScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.CreateWallet.name}
+        component={CreateWalletScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.Disclaimer.name}
+        component={DisclaimerScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.ForgotPin.name}
+        component={ForgotPinScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.ImportKeys.name}
+        component={ImportKeysScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.ImportKeysOrSeed.name}
+        component={ImportKeysOrSeedScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.ImportSeed.name}
+        component={ImportSeedScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.ImportWallet.name}
+        component={ImportWalletScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.PickBlockHeight.name}
+        component={PickBlockHeightScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.PickExactBlockHeight.name}
+        component={PickExaktBlockHeightScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.PickMonth.name}
+        component={PickMonthScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.RequestHardwareAuth.name}
+        component={RequestHardwareAuthScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.RequestPin.name}
+        component={RequestPinScreen}
+      />
+      <Stack.Screen name={AuthScreens.SetPin.name} component={SetPinScreen} />
+      <Stack.Screen
+        name={AuthScreens.WalletOption.name}
+        component={WalletOptionScreen}
+      />
+    </Stack.Navigator>
   );
 };
