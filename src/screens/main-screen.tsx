@@ -2,15 +2,16 @@ import { useState } from 'react';
 
 import { RefreshControl, ScrollView, Text } from 'react-native';
 
-import { type RouteProp } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { ScreenLayout } from '@/components';
 import { useGlobalStore } from '@/services';
 import type { MainScreens, MainStackParamList } from '@/types';
 
-interface Props {
-  route: ScreenComponentType<MainStackParamList, typeof MainScreens.Main.name>;
-}
+type Props = NativeStackScreenProps<
+  MainStackParamList,
+  typeof MainScreens.Main.name
+>;
 
 export const MainScreen: React.FC<Props> = ({ route: _route }) => {
   const { theme } = useGlobalStore();

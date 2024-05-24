@@ -18,8 +18,7 @@ import {
   RequestPinScreen,
   SetPinScreen,
   WalletOptionScreen,
-} from 'screens/_auth-screens';
-
+} from '@/screens';
 import { AuthScreens, AuthStackParamList } from '@/types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();

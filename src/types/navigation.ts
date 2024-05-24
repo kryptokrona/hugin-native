@@ -111,6 +111,13 @@ export const MainScreens = {
   },
 } as const;
 
+export const TabBar = {
+  Main: {
+    description: 'Main tab bar for the wallet',
+    name: 'MainTabBar',
+  },
+} as const;
+
 export const Stacks = {
   AuthStack: 'AuthStack',
   MainStack: 'MainStack',

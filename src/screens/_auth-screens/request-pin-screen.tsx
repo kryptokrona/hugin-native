@@ -2,8 +2,8 @@ import { Text } from 'react-native';
 
 import { RouteProp } from '@react-navigation/native';
 
-import { ScreenLayout } from 'components/screen-layout';
-import { AuthStackParamList, AuthScreens } from 'types/navigation';
+import { ScreenLayout } from '@/components';
+import type { AuthStackParamList, AuthScreens } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.RequestPin.name>;

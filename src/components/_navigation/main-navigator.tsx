@@ -1,48 +1,14 @@
-import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import {
-  type BottomTabBarProps,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { MainScreen } from '@/screens';
+import { MainScreens, MainStackParamList } from '@/types';
 
-import { MainScreens, type MainStackParamList } from '@/types';
+const MainStack = createNativeStackNavigator<MainStackParamList>();
 
-import { MainStackNavigator } from './stack-main';
-import { MyTabBar } from './tab-bar';
-
-const Tab = createBottomTabNavigator<MainStackParamList>();
-
-export const MainNavigator = () => {
+export const MainStackNavigator = () => {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        tabBar={(props: BottomTabBarProps) => <MyTabBar {...props} />}>
-        <Tab.Screen
-          name={MainScreens.Groups.name}
-          component={GroupStackNavigator}
-        />
-        <Tab.Screen
-          name={MainScreens.Main.name}
-          component={MainStackNavigator}
-        />
-        <Tab.Screen
-          name={MainScreens.Recipients.name}
-          component={RecipientStackNavigator}
-        />
-        <Tab.Screen
-          name={MainScreens.Settings.name}
-          component={SettingsStackNavigator}
-        />
-        <Tab.Screen
-          name={MainScreens.Transactions.name}
-          component={TransactionStackNavigator}
-        />
-        <Tab.Screen
-          name={MainScreens.Transfer.name}
-          component={TransferStackNavigator}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <MainStack.Navigator>
+      <MainStack.Screen name={MainScreens.Main.name} component={MainScreen} />
+    </MainStack.Navigator>
   );
 };
