@@ -7,7 +7,7 @@ interface Props {
 }
 
 export const ScreenHeader: React.FC<Props> = ({ text }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   const color = theme.primary;
 
   return (

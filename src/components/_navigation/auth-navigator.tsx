@@ -27,60 +27,60 @@ export const AuthNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name={AuthScreens.ChooseAuthMethod.name}
+        name={AuthScreens.ChooseAuthMethodScreen}
         component={ChooseAuthMethodScreen}
       />
       <Stack.Screen
-        name={AuthScreens.CreateWallet.name}
+        name={AuthScreens.CreateWalletScreen}
         component={CreateWalletScreen}
       />
       <Stack.Screen
-        name={AuthScreens.Disclaimer.name}
+        name={AuthScreens.DisclaimerScreen}
         component={DisclaimerScreen}
       />
       <Stack.Screen
-        name={AuthScreens.ForgotPin.name}
+        name={AuthScreens.ForgotPinScreen}
         component={ForgotPinScreen}
       />
       <Stack.Screen
-        name={AuthScreens.ImportKeys.name}
+        name={AuthScreens.ImportKeysScreen}
         component={ImportKeysScreen}
       />
       <Stack.Screen
-        name={AuthScreens.ImportKeysOrSeed.name}
+        name={AuthScreens.ImportKeysOrSeedScreen}
         component={ImportKeysOrSeedScreen}
       />
       <Stack.Screen
-        name={AuthScreens.ImportSeed.name}
+        name={AuthScreens.ImportSeedScreen}
         component={ImportSeedScreen}
       />
       <Stack.Screen
-        name={AuthScreens.ImportWallet.name}
+        name={AuthScreens.ImportWalletScreen}
         component={ImportWalletScreen}
       />
       <Stack.Screen
-        name={AuthScreens.PickBlockHeight.name}
+        name={AuthScreens.PickBlockHeightScreen}
         component={PickBlockHeightScreen}
       />
       <Stack.Screen
-        name={AuthScreens.PickExactBlockHeight.name}
+        name={AuthScreens.PickExactBlockHeightScreen}
         component={PickExaktBlockHeightScreen}
       />
       <Stack.Screen
-        name={AuthScreens.PickMonth.name}
+        name={AuthScreens.PickMonthScreen}
         component={PickMonthScreen}
       />
       <Stack.Screen
-        name={AuthScreens.RequestHardwareAuth.name}
+        name={AuthScreens.RequestHardwareAuthScreen}
         component={RequestHardwareAuthScreen}
       />
       <Stack.Screen
-        name={AuthScreens.RequestPin.name}
+        name={AuthScreens.RequestPinScreen}
         component={RequestPinScreen}
       />
-      <Stack.Screen name={AuthScreens.SetPin.name} component={SetPinScreen} />
+      <Stack.Screen name={AuthScreens.SetPinScreen} component={SetPinScreen} />
       <Stack.Screen
-        name={AuthScreens.WalletOption.name}
+        name={AuthScreens.WalletOptionScreen}
         component={WalletOptionScreen}
       />
     </Stack.Navigator>

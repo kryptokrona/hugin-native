@@ -13,6 +13,7 @@ module.exports = {
           '@/types': './src/types',
           '@/contexts': './src/contexts',
           '@/styles': './src/styles',
+          '@/config': './src/config',
         },
       },
     ],

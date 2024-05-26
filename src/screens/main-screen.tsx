@@ -10,11 +10,11 @@ import type { MainScreens, MainStackParamList } from '@/types';
 
 type Props = NativeStackScreenProps<
   MainStackParamList,
-  typeof MainScreens.Main.name
+  typeof MainScreens.MainScreen
 >;
 
 export const MainScreen: React.FC<Props> = ({ route: _route }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   const [refreshing, setRefreshing] = useState(false);
 
   function onRefresh() {

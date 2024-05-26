@@ -1,18 +1,81 @@
-import { Text } from 'react-native';
+import { useState } from 'react';
 
-import { RouteProp } from '@react-navigation/native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { ScreenLayout } from '@/components';
-import type { AuthStackParamList, AuthScreens } from '@/types';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import moment from 'moment';
+import { useTranslation } from 'react-i18next';
+import MonthSelectorCalendar from 'react-native-month-selector';
+
+import { Button, ScreenHeader, ScreenLayout } from '@/components';
+import { config } from '@/config';
+import { dateToScanHeight, useGlobalStore } from '@/services';
+import {
+  AuthStackParamList,
+  AuthScreens,
+  AuthStackNavigationType,
+} from '@/types';
 
 interface Props {
-  route: RouteProp<AuthStackParamList, typeof AuthScreens.PickMonth.name>;
+  route: RouteProp<AuthStackParamList, typeof AuthScreens.PickMonthScreen>;
 }
 
 export const PickMonthScreen: React.FC<Props> = () => {
+  const { t } = useTranslation();
+  const theme = useGlobalStore((state) => state.theme);
+  const [month, setMonth] = useState(moment().startOf('month'));
+  const navigation = useNavigation<AuthStackNavigationType>();
+
+  const onPress = () =>
+    navigation.navigate(AuthScreens.ImportKeysOrSeedScreen, {
+      scanHeight: dateToScanHeight(month),
+    });
+
   return (
     <ScreenLayout>
-      <Text>Pick Month Screen</Text>
+      <ScreenHeader text={t('whichMonth')} />
+
+      <View style={styles.calendarContainer}>
+        <MonthSelectorCalendar
+          minDate={moment(config.chainLaunchTimestamp)}
+          selectedBackgroundColor={theme.primary}
+          monthTextStyle={{ color: theme.primary }}
+          monthDisabledStyle={{ color: theme.secondary }}
+          currentMonthTextStyle={{ color: theme.primary }}
+          seperatorColor={theme.primary}
+          nextIcon={
+            <Text style={[styles.navText, { color: theme.primary }]}>
+              {t('next')}
+            </Text>
+          }
+          prevIcon={
+            <Text style={[styles.navText, { color: theme.primary }]}>
+              {t('previous')}
+            </Text>
+          }
+          yearTextStyle={{ color: theme.primary }}
+          selectedDate={month}
+          onMonthTapped={(date: any) => setMonth(date)}
+          containerStyle={{
+            backgroundColor: theme.background,
+          }}
+        />
+      </View>
+
+      <Button onPress={onPress}>{t('continue')}</Button>
     </ScreenLayout>
   );
 };
+
+const styles = StyleSheet.create({
+  calendarContainer: {
+    alignItems: 'stretch',
+    justifyContent: 'center',
+  },
+
+  navText: {
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 16,
+    marginRight: 10,
+  },
+});

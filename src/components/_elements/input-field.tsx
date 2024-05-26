@@ -10,6 +10,8 @@ interface Props {
   onChange: (value: string | number) => void;
   error?: boolean;
   errorText?: string;
+  keyboardType?: 'default' | 'number-pad';
+  maxLength?: number;
 }
 
 export const InputField: React.FC<Props> = ({
@@ -18,19 +20,29 @@ export const InputField: React.FC<Props> = ({
   onChange,
   error,
   errorText,
+  maxLength,
+  keyboardType = 'default',
 }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   return (
     <View style={styles.container}>
-      <TextField text={label} size="small" type="secondary" />
+      <TextField size="small" type="secondary">
+        {label}
+      </TextField>
       <TextInput
         placeholderTextColor={theme.secondary}
         style={styles.input}
         value={value.toString()}
-        onChangeText={onChange}
+        onChangeText={(text) =>
+          onChange(keyboardType === 'number-pad' ? Number(text) : text)
+        }
+        keyboardType={keyboardType}
+        maxLength={maxLength}
       />
       {errorText && error && (
-        <TextField text={errorText} size="small" type="error" />
+        <TextField size="small" type="error">
+          {errorText}
+        </TextField>
       )}
     </View>
   );

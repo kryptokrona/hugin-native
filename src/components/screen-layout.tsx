@@ -8,7 +8,7 @@ interface Props {
 
 export const ScreenLayout: React.FC<Props> = ({ children }) => {
   const isArray = Array.isArray(children);
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.background;
   if (!children) {
     return null;

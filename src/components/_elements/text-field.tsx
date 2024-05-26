@@ -7,21 +7,21 @@ type TextType = 'primary' | 'secondary' | 'error';
 type SizeType = 'small' | 'medium' | 'large';
 
 interface Props {
-  text: string;
+  children: string;
   type?: TextType;
   size?: SizeType;
 }
 
 export const TextField: React.FC<Props> = ({
-  text,
+  children,
   type = 'primary',
   size = 'medium',
 }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   const color = theme?.[type];
   const fontSize = fontSizes[size] ?? fontSizes.medium;
 
-  return <Text style={[styles.text, { color, fontSize }]}>{text}</Text>;
+  return <Text style={[styles.text, { color, fontSize }]}>{children}</Text>;
 };
 
 const styles = StyleSheet.create({

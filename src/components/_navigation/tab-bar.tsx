@@ -20,7 +20,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   return (
     <View
       style={{

@@ -10,6 +10,6 @@ interface Props {
 }
 
 export const CustomIcon: React.FC<Props> = ({ name, size = 24 }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   return <MCI name={name} size={size} color={theme.primary} />;
 };

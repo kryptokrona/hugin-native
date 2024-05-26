@@ -1,0 +1,158 @@
+{
+    "nodes": [
+        {
+            "name": "Blocksum",
+            "url": "blocksum.org",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.1",
+            "fee": "0.00",
+            "proxy_url": "blocksum"
+        },
+        {
+            "name": "XKR.la SSL",
+            "url": "node.xkr.la",
+            "port": 443,
+            "ssl": true,
+            "cache": false,
+            "version": "1.1.3",
+            "fee": "0.00",
+            "proxy_url": "XKRla"
+        },
+        {
+            "name": "WoWoXu.Com SSL",
+            "url": "node.wowoxu.com",
+            "port": 443,
+            "ssl": true,
+            "cache": false,
+            "version": "1.1.3",
+            "fee": "0.00",
+            "proxy_url": "WoWoXu"
+        },
+        {
+            "name": "Privacy Mine",
+            "url": "privacymine.net",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.0",
+            "fee": "0.00",
+            "proxy_url": "privacymine"
+        },
+        {
+            "name": "Privacy Mine SSL",
+            "url": "privacymine.net",
+            "port": 21898,
+            "ssl": true,
+            "cache": false,
+            "version": "1.1.0",
+            "fee": "0.00",
+            "proxy_url": "privacymine"
+        },
+        {
+            "name": "TechyNode",
+            "url": "techy.ddns.net",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.3",
+            "fee": "0.1",
+            "proxy_url": "TechyNode"
+        },
+        {
+            "name": "XKR Dutch Pool",
+            "url": "kryptokrona.kalf.org",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.3",
+            "fee": "0.1",
+            "proxy_url": "DutchPool"
+        },
+        {
+            "name": "Wasa",
+            "url": "wasa.kryptokrona.se",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.1",
+            "fee": "0.0",
+            "proxy_url": "wasa"
+        },
+        {
+            "name": "Tohelo's Node",
+            "url": "xkr-tohelo101.duckdns.org",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.1",
+            "fee": "0.0",
+            "proxy_url": "tohelo"
+        },
+        {
+            "name": "XKR.network",
+            "url": "node.xkr.network",
+            "port": 80,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.1",
+            "fee": "0.0",
+            "proxy_url": "xkrnetwork"
+        },
+        {
+            "name": "XKR.network SSL",
+            "url": "node.xkr.network",
+            "port": 443,
+            "ssl": true,
+            "cache": false,
+            "version": "1.1.1",
+            "fee": "0.0",
+            "proxy_url": "xkrnetwork"
+        },
+	{
+            "name": "Kryptokrona.no",
+            "url": "node.kryptokrona.no",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.1",
+            "fee": "0.0",
+            "proxy_url": "kryptokronano"
+        },
+	{
+            "name": "KTH Node",
+            "url": "130.237.83.246",
+            "port": 20046,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.3",
+            "fee": "0.0",
+            "proxy_url": "kth"
+        },
+	    {
+            "name": "Spider Pig",
+            "url": "spider-pig.hopto.org",
+            "port": 11898,
+            "ssl": false,
+            "cache": false,
+            "version": "1.1.3",
+            "fee": "0.0",
+            "proxy_url": "spider-pig"
+        }
+    ],
+    "apis": [
+        {
+            "url": "http://95.216.136.222",
+            "name": "TechyPool API",
+            "description": "The official TechyPool Hugin API"
+        },
+	    {
+            "url": "http://130.237.83.249:2592",
+            "name": "KTH Hugin API",
+            "description": "Hugin API hosted at KTH"
+        }
+      ],
+    "hugin": [
+    ]
+}

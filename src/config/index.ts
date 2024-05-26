@@ -1,1 +1,2 @@
-export const CONFIG = {};
+export * from './config';
+export * from './globals';

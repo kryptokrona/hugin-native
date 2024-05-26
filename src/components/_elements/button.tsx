@@ -4,19 +4,27 @@ import { useGlobalStore } from '@/services';
 
 interface Props {
   children: React.ReactNode;
-  type?: 'primary' | 'secondary';
+  type?: 'primary' | 'secondary' | 'error';
   onPress: () => void;
   icon?: React.ReactNode;
+  disabled?: boolean;
 }
 
-export const Button: React.FC<Props> = ({ children, onPress, type, icon }) => {
-  const { theme } = useGlobalStore();
+export const Button: React.FC<Props> = ({
+  children,
+  onPress,
+  type,
+  icon,
+  disabled,
+}) => {
+  const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.primary;
   const borderColor = type === 'secondary' ? theme.secondary : theme.primary;
-  const color = theme.primary;
+  const color = type === 'error' ? theme.error : theme.primary;
 
   return (
     <TouchableOpacity
+      disabled={disabled}
       onPress={onPress}
       style={[styles.button, { backgroundColor, borderColor }]}>
       {icon}
