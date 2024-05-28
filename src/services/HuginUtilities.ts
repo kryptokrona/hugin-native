@@ -2,19 +2,20 @@
 //
 // Please see the included LICENSE file for more information.
 
-// TODO fix this file
-
-import { Linking } from 'react-native';
-
 import Identicon from 'identicon.js';
 import { Address, Crypto, CryptoNote } from 'kryptokrona-utils';
-// import { PushNotification } from 'react-native-push-notification';
+// import PushNotification from 'react-native-push-notification';
+// import BackgroundFetch from 'react-native-background-fetch';
+import BackgroundFetch from 'react-native-background-fetch';
+import * as Keychain from 'react-native-keychain';
 import nacl from 'tweetnacl';
 import * as NaclSealed from 'tweetnacl-sealed-box';
 import naclUtil from 'tweetnacl-util';
 
-import { globals } from '@/config';
+import { config, globals } from '@/config';
+import { FromPayee } from '@/types';
 
+import { backgroundSync } from './BackgroundSync';
 import {
   emptyKnownTXs,
   updateGroupMessage,
@@ -29,6 +30,7 @@ import {
   saveMessage,
   messageExists,
   saveKnownTransaction,
+  boardsMessageExists,
 } from './Database';
 
 /**
@@ -52,50 +54,59 @@ import { delay, toastPopUp } from './Utilities';
 
 let optimizing = false;
 
-export async function getBestNode(ssl = true): any {
+export async function getBestNode(ssl = true): Promise<any> {
+  console.log('HERE 1');
   let recommended_node;
 
-  await globals.updateNodeList();
-
-  // const node_requests = [];
-  let ssl_nodes = [];
-  if (ssl) {
-    ssl_nodes = globals.daemons.filter((node) => {
-      return node.ssl;
-    });
-  } else {
-    ssl_nodes = globals.daemons.filter((node) => {
-      return !node.ssl;
-    });
+  try {
+    await globals.updateNodeList();
+  } catch (e) {
+    console.error('Error updating node list:', e);
   }
 
-  ssl_nodes = ssl_nodes.sort((_a, _b) => 0.5 - Math.random());
+  let ssl_nodes = [];
+  if (ssl) {
+    console.log('HERE 2');
+    ssl_nodes = globals.daemons.filter((node) => node.ssl);
+  } else {
+    ssl_nodes = globals.daemons.filter((node) => !node.ssl);
+  }
 
-  for (const node in ssl_nodes) {
-    const this_node = ssl_nodes[node];
+  ssl_nodes = ssl_nodes.sort(() => 0.5 - Math.random());
 
+  console.log('HERE 3');
+  for (const this_node of ssl_nodes) {
     const nodeURL = `${this_node.ssl ? 'https://' : 'http://'}${
       this_node.url
     }:${this_node.port}/info`;
+    console.log(`Attempting to fetch from ${nodeURL}`);
     try {
-      const resp = await fetch(
-        nodeURL,
-        {
-          method: 'GET',
-        },
-        1000,
-      );
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1000);
+
+      const resp = await fetch(nodeURL, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      console.log('HERE 4', resp.status);
 
       if (resp.ok) {
         recommended_node = this_node;
+        console.log('Found recommended node:', recommended_node);
         return this_node;
+      } else {
+        console.log('Fetch failed with status:', resp.status);
       }
     } catch (e) {
-      console.log(e);
+      console.error('Fetch error:', e);
     }
   }
+  console.log('HERE 5');
 
-  if (recommended_node == undefined) {
+  if (recommended_node === undefined) {
+    console.log('HERE 6');
     const recommended_non_ssl_node = await getBestNode(false);
     return recommended_non_ssl_node;
   }
@@ -195,42 +206,42 @@ function trimExtra(extra: any) {
   }
 }
 
-PushNotification.configure({
-  onNotification: handleNotification,
+// PushNotification.configure({
+//   onNotification: handleNotification,
 
-  permissions: {
-    alert: true,
-    badge: true,
-    sound: true,
-  },
+//   permissions: {
+//     alert: true,
+//     badge: true,
+//     sound: true,
+//   },
 
-  popInitialNotification: true,
+//   popInitialNotification: true,
 
-  requestPermissions: true,
-});
-function handleNotification(notification: any) {
-  if (notification.transaction != undefined) {
-    return;
-  }
+//   requestPermissions: true,
+// });
+// function handleNotification(notification: any) {
+//   if (notification.transaction != undefined) {
+//     return;
+//   }
 
-  let payee = notification.userInfo;
+//   let payee = notification.userInfo;
 
-  if (payee.address) {
-    payee = new URLSearchParams(payee).toString();
+//   if (payee.address) {
+//     payee = new URLSearchParams(payee).toString();
 
-    const url = 'xkr://'.replace('address=', '') + payee;
+//     const url = 'xkr://'.replace('address=', '') + payee;
 
-    Linking.openURL(url);
-  } else if (payee.key) {
-    const url = `xkr://?group=${payee.key}`;
+//     Linking.openURL(url);
+//   } else if (payee.key) {
+//     const url = `xkr://?group=${payee.key}`;
 
-    Linking.openURL(url);
-  } else {
-    const url = 'xkr://?board=' + payee;
+//     Linking.openURL(url);
+//   } else {
+//     const url = 'xkr://?board=' + payee;
 
-    Linking.openURL(url);
-  }
-}
+//     Linking.openURL(url);
+//   }
+// }
 
 export function intToRGB(int: number) {
   if (typeof int !== 'number') {
@@ -270,12 +281,7 @@ export function get_avatar(hash: string, size: number) {
   // Options for avatar
   const options = {
     // rgba black
-    background: [
-      parseInt(rgb.red / 10),
-      parseInt(rgb.green / 10),
-      parseInt(rgb.blue / 10),
-      0,
-    ] as number[],
+    background: [rgb.red / 10, rgb.green / 10, rgb.blue / 10, 0] as number[],
     foreground: [rgb.red, rgb.green, rgb.blue, 255],
     // 420px square
     format: 'png',
@@ -329,7 +335,7 @@ export function handle_links(message: string) {
       } else if (imagetypes.indexOf(links_in_message[j].substr(-4)) > -1) {
         // Embeds image links
         message = message.replace(links_in_message[j], '');
-        image_attached_url = links_in_message[j];
+        const image_attached_url = links_in_message[j];
         image_attached =
           '<img class="attachment" src="' + image_attached_url + '" />';
       } else {
@@ -359,15 +365,16 @@ export function handle_links(message: string) {
 //   return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
 // }
 
-export function getBoardColors(board) {
-  let board_color = intToRGB(hashCode(board));
+export function getBoardColors(board: any) {
+  const board_color = intToRGB(hashCode(board));
 
-  board_color = `rgb(${board_color.red},${board_color.green},${board_color.blue})`;
+  // board_color = `rgb(${board_color.red},${board_color.green},${board_color.blue})`;
+  const boardColorStr = `rgb(${board_color.red},${board_color.green},${board_color.blue})`;
 
   const comp_color = `rgb(${board_color.red + 50},${board_color.green + 50},${
     board_color.blue + 50
   })`;
-  return [board_color, comp_color];
+  return [boardColorStr, comp_color];
 }
 
 export function nonceFromTimestamp(tmstmp: any) {
@@ -408,7 +415,7 @@ export function getKeyPairOld() {
   return keyPair;
 }
 
-export function toHex(str, hex) {
+export function toHex(str: string, hex?: string) {
   try {
     hex = unescape(encodeURIComponent(str))
       .split('')
@@ -427,7 +434,7 @@ async function optimizeTimer() {
   optimizing = false;
 }
 
-export async function optimizeMessages(nbrOfTxs, force = false) {
+export async function optimizeMessages(nbrOfTxs: any, force = false) {
   if (!globals?.wallet) {
     return false;
   }
@@ -501,8 +508,8 @@ export async function optimizeMessages(nbrOfTxs, force = false) {
   return false;
 }
 
-export async function sendMessageWithHuginAPI(payload_hex) {
-  if (globals.preferences.cacheEnabled != 'true') {
+export async function sendMessageWithHuginAPI(payload_hex: any) {
+  if (globals.preferences.cacheEnabled !== 'true') {
     globals.preferences.cacheEnabled = 'true';
     savePreferencesToDatabase(globals.preferences);
     toastPopUp(
@@ -513,7 +520,7 @@ export async function sendMessageWithHuginAPI(payload_hex) {
 
   const cacheURL = globals.preferences.cache
     ? globals.preferences.cache
-    : Config.defaultCache;
+    : config.defaultCache;
 
   console.log('Sending messag with', cacheURL);
 
@@ -544,7 +551,7 @@ export async function cacheSync(_first = true, page = 1) {
     //console.log('Last message was:', new Date(latest_board_message_timestamp).toISOString().replace('T', ' ').replace(/\.\d+Z$/, ''))
 
     //if (globals.lastMessageTimestamp > latest_board_message_timestamp)
-    latest_board_message_timestamp = globals.lastMessageTimestamp;
+    const latest_board_message_timestamp = globals.lastMessageTimestamp;
     globals.logger.addLogMessage(
       `Syncing group messages from ${new Date(latest_board_message_timestamp)
         .toISOString()
@@ -556,16 +563,16 @@ export async function cacheSync(_first = true, page = 1) {
     );
     const cacheURL = globals.preferences.cache
       ? globals.preferences.cache
-      : Config.defaultCache;
+      : config.defaultCache;
     console.log(
-      `${cacheURL}/api/v1/posts-encrypted-group?from=${parseInt(
-        latest_board_message_timestamp / 1000,
-      )}&to=${parseInt(Date.now() / 1000)}&size=50&page=` + page,
+      `${cacheURL}/api/v1/posts-encrypted-group?from=${
+        latest_board_message_timestamp / 1000
+      }&to=${Date.now() / 1000}&size=50&page=` + page,
     );
     fetch(
-      `${cacheURL}/api/v1/posts-encrypted-group?from=${parseInt(
-        latest_board_message_timestamp / 1000,
-      )}&to=${parseInt(Date.now() / 1000)}&size=50&page=` + page,
+      `${cacheURL}/api/v1/posts-encrypted-group?from=${
+        latest_board_message_timestamp / 1000
+      }&to=${Date.now() / 1000}&size=50&page=` + page,
     )
       .then((response) => response.json())
       .then(async (json) => {
@@ -577,10 +584,10 @@ export async function cacheSync(_first = true, page = 1) {
         globals.logger.addLogMessage(
           `Found ${json.total_items} group messages.. 💌`,
         );
-        for (item in items) {
+        for (const item in items) {
           globals.logger.addLogMessage(
             `Syncing group message ${
-              parseInt(item) + parseInt((json.current_page - 1) * 50)
+              parseInt(item) + (Number(json.current_page) - 1) * 50
             }/${json.total_items} 💌`,
           );
 
@@ -589,7 +596,7 @@ export async function cacheSync(_first = true, page = 1) {
           if (await groupMessageExists(items[item].tx_timestamp)) {
             continue;
           }
-          if (globals.knownTXs.indexOf(items[item].tx_hash) != -1) {
+          if (globals.knownTXs.indexOf(items[item].tx_hash) !== -1) {
             continue;
           }
 
@@ -632,21 +639,21 @@ export async function cacheSyncDMs(_first = true, page = 1) {
 
       // if (globals.lastDMTimestamp > latest_board_message_timestamp)
 
-      latest_board_message_timestamp = globals.lastDMTimestamp;
+      const latest_board_message_timestamp = globals.lastDMTimestamp;
 
       const cacheURL = globals.preferences.cache
         ? globals.preferences.cache
-        : Config.defaultCache;
+        : config.defaultCache;
 
       console.log(
-        `${cacheURL}/api/v1/posts-encrypted?from=${parseInt(
-          latest_board_message_timestamp / 1000,
-        )}&to=${parseInt(Date.now() / 1000)}&size=50&page=` + page,
+        `${cacheURL}/api/v1/posts-encrypted?from=${
+          latest_board_message_timestamp / 1000
+        }&to=${Date.now() / 1000}&size=50&page=` + page,
       );
       fetch(
-        `${cacheURL}/api/v1/posts-encrypted?from=${parseInt(
-          latest_board_message_timestamp / 1000,
-        )}&to=${parseInt(Date.now() / 1000)}&size=50&page=` + page,
+        `${cacheURL}/api/v1/posts-encrypted?from=${
+          latest_board_message_timestamp / 1000
+        }&to=${Date.now() / 1000}&size=50&page=` + page,
       )
         .then((response) => response.json())
         .then(async (json) => {
@@ -659,10 +666,10 @@ export async function cacheSyncDMs(_first = true, page = 1) {
             return;
           }
           console.log('Looping items');
-          for (item in items) {
+          for (const item in items) {
             globals.logger.addLogMessage(
               `Syncing private message ${
-                parseInt(item) + parseInt((json.current_page - 1) * 50)
+                parseInt(item) + (Number(json.current_page) - 1) * 50
               }/${json.total_items} 💌`,
             );
             globals.lastSyncEvent = Date.now();
@@ -670,7 +677,7 @@ export async function cacheSyncDMs(_first = true, page = 1) {
             if (await messageExists(items[item].tx_timestamp)) {
               continue;
             }
-            if (globals.knownTXs.indexOf(items[item].tx_hash) != -1) {
+            if (globals.knownTXs.indexOf(items[item].tx_hash) !== -1) {
               continue;
             }
             console.log('Item doesnt exist');
@@ -708,10 +715,10 @@ export async function createGroup() {
 }
 
 export async function sendGroupsMessage(
-  message,
-  group,
-  temp_timestamp,
-  reply = false,
+  message: any,
+  group: any,
+  temp_timestamp: any,
+  reply = '',
 ) {
   console.log('reply', reply);
 
@@ -731,13 +738,14 @@ export async function sendGroupsMessage(
     k: my_address,
     m: message,
     n: globals.preferences.nickname,
+    r: undefined,
     s: signature,
   };
 
   if (reply) {
-    message_json.r = reply;
+    message_json.r = reply; // FIX
   } else {
-    reply = '';
+    reply = undefined;
   }
 
   console.log(message_json);
@@ -794,10 +802,10 @@ export async function sendGroupsMessage(
 }
 
 export async function sendMessage(
-  message,
-  receiver,
-  messageKey,
-  temp_timestamp,
+  message: any,
+  receiver: any,
+  messageKey: any,
+  temp_timestamp: any,
 ) {
   if (message.length == 0) {
     return;
@@ -960,7 +968,7 @@ async function getGroupMessage(tx: any) {
 
   const { groups } = globals;
 
-  let key;
+  let key: any;
 
   let i = 0;
 
@@ -1030,18 +1038,18 @@ async function getGroupMessage(tx: any) {
   const nickname = payload_json.n ? payload_json.n : 'Anonymous';
 
   const group_object = globals.groups.filter((group) => {
-    return group.key == key;
+    return group.key === key;
   });
 
   const groupname = await getGroupName(key);
 
   if (globals.activeGroup != key && !from_myself) {
     globals.notificationQueue.push({
-      data: tx.t,
+      data: tx.t, //TODO Check this
 
       largeIconUrl: get_avatar(from, 64),
       //'Incoming transaction received!',
-      //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), Config)}`,
+      //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), config)}`,
       message: payload_json.m,
       title: `${nickname} in ${groupname}`,
       userInfo: group_object[0],
@@ -1052,13 +1060,13 @@ async function getGroupMessage(tx: any) {
 }
 
 export async function getMessage(
-  extra,
-  hash,
-  navigation,
+  extra: any,
+  hash: any,
+  navigation: any,
   fromBackground = false,
 ) {
   globals.logger.addLogMessage('Getting payees..');
-
+  let from_payee: FromPayee;
   return new Promise(async (resolve, reject) => {
     setTimeout(() => {
       resolve('Promise timed out!');
@@ -1096,7 +1104,7 @@ export async function getMessage(
       return;
     }
 
-    let decryptBox = false;
+    let decryptBox: any;
     let createNewPayee = false;
 
     let key = '';
@@ -1135,8 +1143,8 @@ export async function getMessage(
 
     const payees = await loadPayeeDataFromDatabase();
 
-    while (!decryptBox && i < payees?.length) {
-      const possibleKey = payees[i].paymentID;
+    while (!decryptBox && payees && i < payees.length) {
+      const possibleKey = payees?.[i].paymentID;
 
       i += 1;
 
@@ -1172,22 +1180,22 @@ export async function getMessage(
 
     const from_address = from;
 
-    let from_payee = {};
+    // let from_payee: FromPayee;
 
-    if (!from_myself) {
-      for (payee in payees) {
-        if (payees[payee].address == from) {
-          from = payees[payee].nickname;
+    if (!from_myself && payees) {
+      for (const payee of payees) {
+        if (payee.address == from) {
+          from = payee.nickname;
           createNewPayee = false;
 
           from_payee = {
             address: from_address,
             name: from,
-            paymentID: payees[payee].paymentID,
+            paymentID: payee.paymentID,
           };
         }
       }
-    } else {
+    } else if (payees && payees?.length > 0) {
       from_payee = payees.filter((payee) => {
         return payee.paymentID == key;
       });
@@ -1208,7 +1216,7 @@ export async function getMessage(
     let received = 'received';
 
     if (from_myself) {
-      payload_json.from = from_payee[0].address;
+      payload_json.from = from_payee.address;
       received = 'sent';
     }
 
@@ -1240,31 +1248,31 @@ export async function getMessage(
       }
       if (!from_myself && !missed) {
         console.log('Notifying call..');
-        PushNotification.localNotification({
-          data: payload_json.t,
-          largeIconUrl: get_avatar(payload_json.from, 64),
-          message: missed ? 'Call missed' : 'Call received',
-          title: from,
-          userInfo: {
-            address: from_payee.address,
-            nickname: from_payee.name,
-            paymentID: from_payee.paymentID,
-          },
-        });
-      } else if (!from_myself && missed) {
-        globals.notificationQueue.push({
-          data: payload_json.t,
+        //   PushNotification.localNotification({
+        //     data: payload_json.t,
+        //     largeIconUrl: get_avatar(payload_json.from, 64),
+        //     message: missed ? 'Call missed' : 'Call received',
+        //     title: from,
+        //     userInfo: {
+        //       address: from_payee.address,
+        //       nickname: from_payee.name,
+        //       paymentID: from_payee.paymentID,
+        //     },
+        //   });
+        // } else if (!from_myself && missed) {
+        //   globals.notificationQueue.push({
+        //     data: payload_json.t,
 
-          largeIconUrl: get_avatar(payload_json.from, 64),
-          //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), Config)}`,
-          message: 'Call missed',
-          title: from,
-          userInfo: {
-            address: from_payee.address,
-            nickname: from_payee.name,
-            paymentID: from_payee.paymentID,
-          },
-        });
+        //     largeIconUrl: get_avatar(payload_json.from, 64),
+        //     //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), config)}`,
+        //     message: 'Call missed',
+        //     title: from,
+        //     userInfo: {
+        //       address: from_payee.address,
+        //       nickname: from_payee.name,
+        //       paymentID: from_payee.paymentID,
+        //     },
+        //   });
       }
       payload_json.msg = 'Call received';
       saveMessage(payload_json.from, received, 'Call received', payload_json.t);
@@ -1306,29 +1314,29 @@ export async function getMessage(
   });
 }
 
-export async function sendNotifications() {
+export const sendNotifications = async () => {
   console.log('Sending', globals.notificationQueue);
   if (globals.notificationQueue.length > 2) {
-    PushNotification.localNotification({
-      message: `You've received ${globals.notificationQueue.length} new messages.`,
-      title: 'New messages received!',
-    });
+    // PushNotification.localNotification({
+    //   message: `You've received ${globals.notificationQueue.length} new messages.`,
+    //   title: 'New messages received!',
+    // });
   } else if (
     globals.notificationQueue.length > 0 &&
     globals.notificationQueue.length <= 2
   ) {
-    for (n in globals.notificationQueue) {
-      PushNotification.localNotification({
-        data: globals.notificationQueue[n].data,
-        largeIconUrl: globals.notificationQueue[n].largeIconUrl,
-        message: globals.notificationQueue[n].message,
-        title: globals.notificationQueue[n].title,
-        userInfo: globals.notificationQueue[n].userInfo,
-      });
+    for (const n in globals.notificationQueue) {
+      // PushNotification.localNotification({
+      //   data: globals.notificationQueue[n].data,
+      //   largeIconUrl: globals.notificationQueue[n].largeIconUrl,
+      //   message: globals.notificationQueue[n].message,
+      //   title: globals.notificationQueue[n].title,
+      //   userInfo: globals.notificationQueue[n].userInfo,
+      // });
     }
   }
   globals.notificationQueue = [];
-}
+};
 
 export const changeNode = async () => {
   const node = await getBestNode();
@@ -1338,4 +1346,83 @@ export const changeNode = async () => {
   await savePreferencesToDatabase(globals.preferences);
 
   globals.wallet.swapNode(globals.getDaemon());
+  console.log('HEEREEE');
 };
+
+export const deletePinCode = async () => {
+  await Keychain.resetGenericPassword();
+};
+
+export function initBackgroundSync() {
+  BackgroundFetch.configure(
+    {
+      enableHeadless: true,
+      forceReload: false,
+
+      minimumFetchInterval: 15,
+
+      requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+
+      startOnBoot: true,
+      // <-- minutes (15 is minimum allowed)
+      stopOnTerminate: false,
+    },
+    async () => {
+      await backgroundSync();
+    },
+    (error) => {
+      globals.logger.addLogMessage(
+        '[js] RNBackgroundFetch failed to start: ' + error.toString(),
+      );
+    },
+  );
+}
+
+export async function sendNotification(transaction: any) {
+  // /* Don't show notifications if disabled */
+
+  console.log('WTFWTFWTF');
+
+  const this_addr = await Address.fromAddress(
+    globals.wallet.getPrimaryAddress(),
+  );
+
+  const my_public_key = this_addr.spend.publicKey;
+
+  const amount_received = transaction.transfers.get(my_public_key);
+
+  // const payments = [];
+
+  const nbrOfTxs = amount_received / 100000;
+
+  console.log('Receieved ', nbrOfTxs);
+
+  if (nbrOfTxs < 1) {
+    return;
+  }
+  console.log(transaction);
+  console.log(transaction.paymentID);
+  let isTip = await boardsMessageExists(transaction.paymentID);
+  console.log('isTip', isTip);
+  let tippedMsg;
+  isTip = isTip && transaction.paymentID != '';
+  console.log('isTip2', isTip);
+  if (isTip) {
+    // tippedMsg = await getBoardsMessage(transaction.paymentID); // TODO Does not exist
+  }
+  console.log(tippedMsg);
+  // const title = isTip ? 'Tip received' : 'Payment received';
+  // const message = isTip
+  //   ? `You just received a tip for your post "${tippedMsg[0].message}" in ${tippedMsg[0].board} worth ${nbrOfTxs} XKR`
+  //   : `You just received ${nbrOfTxs} XKR`;
+
+  // PushNotification.localNotification({ // TODO
+  //   data: JSON.stringify(transaction.hash),
+
+  //   //'Incoming transaction received!',
+  //   //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), Config)}`,
+  //   message: message,
+  //   title: title,
+  //   transaction: JSON.stringify(transaction.hash),
+  // });
+}

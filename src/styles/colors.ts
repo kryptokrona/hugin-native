@@ -4,7 +4,7 @@ const colors = {
   alert: '#F2CB5F',
   dark: '#121212',
   darkAccent: '#1F1F1F',
-  darkBorder: '##474747',
+  darkBorder: '#474747',
   darkText: '#C2C2C2',
   darkTextSecondary: '#8F8F8F',
 
@@ -25,7 +25,7 @@ export const Themes: {
   dark: {
     background: colors.dark,
     backgroundAccent: colors.darkAccent,
-    border: colors.darkBorder,
+    border: colors.lightBorder,
     error: colors.error,
     mode: 'dark',
     primary: colors.darkText,
@@ -34,7 +34,7 @@ export const Themes: {
   light: {
     background: colors.light,
     backgroundAccent: colors.lightAccent,
-    border: colors.lightBorder,
+    border: colors.darkBorder,
     error: colors.error,
     mode: 'light',
     primary: colors.lightText,

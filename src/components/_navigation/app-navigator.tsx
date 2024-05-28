@@ -1,10 +1,6 @@
 import React from 'react';
 
-import {
-  type BottomTabBarProps,
-  createBottomTabNavigator,
-} from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { TabBar } from '@/types';
 
@@ -15,11 +11,8 @@ const Tab = createBottomTabNavigator<any>();
 
 export const AppNavigator = () => {
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        tabBar={(props: BottomTabBarProps) => <MyTabBar {...props} />}>
-        <Tab.Screen name={TabBar.Main.name} component={MainStackNavigator} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <Tab.Navigator tabBar={(props) => <MyTabBar {...props} />}>
+      <Tab.Screen name={TabBar.Main.name} component={MainStackNavigator} />
+    </Tab.Navigator>
   );
 };

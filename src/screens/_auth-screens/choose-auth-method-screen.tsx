@@ -1,17 +1,14 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { StyleSheet, Switch, View } from 'react-native';
 
-import {
-  deleteUserPinCode,
-  hasUserSetPinCode,
-} from '@haskkor/react-native-pincode';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import * as Keychain from 'react-native-keychain';
 
 import { Button, ScreenLayout, TextField } from '@/components';
 import { globals } from '@/config';
-import { savePreferencesToDatabase } from '@/services';
+import { deletePinCode, savePreferencesToDatabase } from '@/services';
 import {
   AuthScreens,
   AuthStackNavigationType,
@@ -24,42 +21,39 @@ interface Props {
     typeof AuthScreens.ChooseAuthMethodScreen
   >;
 }
+
+// Helper functions for Keychain operations
+// const savePinCode = async (pinCode: string) => {
+//   await Keychain.setGenericPassword('userPin', pinCode);
+// };
+
+const getPinCode = async () => {
+  const credentials = await Keychain.getGenericPassword();
+  return credentials ? credentials.password : null;
+};
+
 export const ChooseAuthMethodScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
-
-  const [hardwareAuth, setHardwareAuth] = useState(
-    globals.preferences.authenticationMethod === 'hardware-auth',
-  );
-  const [pinCode, setPinCode] = useState(
-    globals.preferences.authenticationMethod === 'pincode',
-  );
-  const [noAuth, setNoAuth] = useState(
-    globals.preferences.authenticationMethod === 'none',
-  );
+  const [authMethod, setAuthMethod] = useState<
+    'none' | 'hardware-auth' | 'pincode'
+  >(globals.preferences.authenticationMethod);
 
   const handleContinue = async () => {
-    let method: 'none' | 'hardware-auth' | 'pincode' = 'none';
+    const pinCode = await getPinCode();
 
-    if (hardwareAuth) {
-      method = 'hardware-auth';
-    } else if (pinCode) {
-      method = 'pincode';
-    }
-
-    const havePincode = await hasUserSetPinCode();
-    globals.preferences.authenticationMethod = method;
+    globals.preferences.authenticationMethod = authMethod;
 
     const nextRoute = route?.params?.nextRoute;
 
-    if (method === 'none') {
-      await deleteUserPinCode();
+    if (authMethod === 'none') {
+      await deletePinCode();
       await savePreferencesToDatabase(globals.preferences);
 
       if (nextRoute) {
         navigation.navigate(nextRoute as keyof AuthStackParamList);
       }
-    } else if (method === 'hardware-auth' && havePincode) {
+    } else if (authMethod === 'hardware-auth' && pinCode) {
       if (nextRoute) {
         navigation.navigate(nextRoute as keyof AuthStackParamList);
       }
@@ -73,53 +67,37 @@ export const ChooseAuthMethodScreen: React.FC<Props> = ({ route }) => {
     <ScreenLayout>
       <View style={styles.innerContainer}>
         <TextField>{t('authenticateHow')}</TextField>
-
         <View style={styles.optionContainer}>
           <Switch
-            value={hardwareAuth}
+            value={authMethod === 'hardware-auth'}
             onValueChange={(value) => {
-              setHardwareAuth(value);
-              setPinCode(value ? false : pinCode);
-              setNoAuth(value ? false : noAuth);
+              setAuthMethod(value ? 'hardware-auth' : 'none');
             }}
             style={styles.switch}
           />
           <TextField type="secondary">{t('useHardware')}</TextField>
         </View>
-
         <View style={styles.optionContainer}>
           <Switch
-            value={pinCode}
+            value={authMethod === 'pincode'}
             onValueChange={(value) => {
-              setHardwareAuth(value ? false : hardwareAuth);
-              setPinCode(value);
-              setNoAuth(value ? false : noAuth);
+              setAuthMethod(value ? 'pincode' : 'hardware-auth');
             }}
             style={styles.switch}
           />
           <TextField type="secondary">{t('usePinCode')}</TextField>
         </View>
-
         <View style={styles.optionContainer}>
           <Switch
-            value={noAuth}
+            value={authMethod === 'none'}
             onValueChange={(value) => {
-              setHardwareAuth(value ? false : hardwareAuth);
-              setPinCode(value ? false : pinCode);
-              setNoAuth(value);
+              setAuthMethod(value ? 'none' : 'hardware-auth');
             }}
             style={styles.switch}
           />
           <TextField>{t('noAuth')}</TextField>
         </View>
-
-        <Button
-          onPress={handleContinue}
-          disabled={!(noAuth || pinCode || hardwareAuth)}
-          // screenProps={screenProps}
-        >
-          {t('continue')}
-        </Button>
+        <Button onPress={handleContinue}>{t('continue')}</Button>
       </View>
     </ScreenLayout>
   );
@@ -138,7 +116,6 @@ const styles = StyleSheet.create({
     marginLeft: 25,
     marginRight: 20,
   },
-
   switch: {
     marginRight: 15,
   },

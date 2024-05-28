@@ -27,12 +27,12 @@ export const AuthNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name={AuthScreens.ChooseAuthMethodScreen}
-        component={ChooseAuthMethodScreen}
-      />
-      <Stack.Screen
         name={AuthScreens.CreateWalletScreen}
         component={CreateWalletScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.ChooseAuthMethodScreen}
+        component={ChooseAuthMethodScreen}
       />
       <Stack.Screen
         name={AuthScreens.DisclaimerScreen}

@@ -6,11 +6,11 @@ export interface UnreadMessages {
 
 export interface Preferences {
   authConfirmation: boolean;
-  authenticationMethod: string;
+  authenticationMethod: 'none' | 'pincode' | 'hardware-auth';
   autoOptimize: boolean;
   autoPickCache: string;
   cache: string;
-  cacheEnabled: string;
+  cacheEnabled: string; // TODO Should be boolean
   currency: string;
   language: string;
   limitData: boolean;
@@ -26,6 +26,12 @@ export interface Payee {
   nickname: string | (string | null)[];
   address?: string;
   paymentID?: string | (string | null)[];
+}
+
+export interface FromPayee {
+  name?: string;
+  address?: string;
+  paymentID?: string;
 }
 export interface Group {
   key: string;

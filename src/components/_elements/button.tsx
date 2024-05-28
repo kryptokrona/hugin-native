@@ -18,7 +18,7 @@ export const Button: React.FC<Props> = ({
   disabled,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.primary;
+  const backgroundColor = theme.backgroundAccent;
   const borderColor = type === 'secondary' ? theme.secondary : theme.primary;
   const color = type === 'error' ? theme.error : theme.primary;
 
@@ -28,7 +28,7 @@ export const Button: React.FC<Props> = ({
       onPress={onPress}
       style={[styles.button, { backgroundColor, borderColor }]}>
       {icon}
-      <Text style={{ color }}>{children}</Text>
+      <Text style={[{ color }, styles.text]}>{children}</Text>
     </TouchableOpacity>
   );
 };
@@ -38,10 +38,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 15,
     borderWidth: 1,
-    flex: 1,
     flexDirection: 'row',
-    marginVertical: 4,
+    justifyContent: 'center',
+    marginVertical: 8,
     minHeight: 50,
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });

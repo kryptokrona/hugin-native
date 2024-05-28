@@ -2,7 +2,7 @@ import RNLanguageDetector from '@os-team/i18next-react-native-language-detector'
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import { globals } from 'config/globals';
+import { globals } from '@/config';
 
 import ben from './translations/ben.json';
 import bho from './translations/bho.json';

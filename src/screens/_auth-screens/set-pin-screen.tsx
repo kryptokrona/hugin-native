@@ -1,11 +1,12 @@
-import { useCallback, useLayoutEffect } from 'react';
+import React, { useCallback, useLayoutEffect } from 'react';
 
-import PINCode from '@haskkor/react-native-pincode';
+import { View } from 'react-native';
+
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
-import { ScreenLayout } from '@/components';
-import { config, globals } from '@/config';
-import { savePreferencesToDatabase, useGlobalStore } from '@/services';
+import { Pincode, ScreenLayout } from '@/components';
+import { globals } from '@/config';
+import { savePreferencesToDatabase } from '@/services';
 import {
   AuthStackNavigationType,
   AuthStackParamList,
@@ -17,41 +18,26 @@ interface Props {
 }
 
 export const SetPinScreen: React.FC<Props> = ({ route }) => {
-  const theme = useGlobalStore((state) => state.theme);
   const navigation = useNavigation<AuthStackNavigationType>();
 
-  const continueFunction = useCallback(
-    (_pinCode?: string) => {
-      savePreferencesToDatabase(globals.preferences);
-      if (route?.params?.nextRoute) {
-        navigation.navigate(route.params.nextRoute as keyof AuthStackParamList);
-      }
-    },
-    [navigation, route?.params?.nextRoute],
-  );
+  const continueFunction = useCallback(() => {
+    savePreferencesToDatabase(globals.preferences);
+    if (route?.params?.nextRoute) {
+      navigation.navigate(route.params.nextRoute as keyof AuthStackParamList);
+    }
+  }, [navigation, route?.params?.nextRoute]);
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: '' }); // TODO Figure out
+    navigation.setOptions({ title: '' });
   }, [navigation]);
 
-  const subtitle = `to keep your ${config.coinName} secure`;
+  // const subtitle = `to keep your ${config.coinName} secure`; // TODO
+
   return (
     <ScreenLayout>
-      <PINCode
-        status="choose"
-        finishProcess={continueFunction}
-        subtitleChoose={subtitle}
-        passwordLength={6}
-        touchIDDisabled
-        colorPassword={theme.primary}
-        stylePinCodeColorSubtitle={theme.primary}
-        stylePinCodeColorTitle={theme.primary}
-        stylePinCodeButtonNumber={theme.secondary}
-        numbersButtonOverlayColor={theme.secondary}
-        stylePinCodeDeleteButtonColorShowUnderlay={theme.primary}
-        stylePinCodeDeleteButtonColorHideUnderlay={theme.primary}
-        colorCircleButtons={theme.background}
-      />
+      <View style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+        <Pincode onFinish={continueFunction} />
+      </View>
     </ScreenLayout>
   );
 };

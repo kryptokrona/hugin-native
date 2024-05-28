@@ -11,6 +11,12 @@ module.exports = {
         ios: null,
       },
     },
+    'react-native-background-fetch': {
+      platforms: {
+        android: null,
+        ios: null,
+      },
+    },
   },
   // dependencies: {
   //     'react-native-flipper': {

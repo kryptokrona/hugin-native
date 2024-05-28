@@ -1,3 +1,1 @@
-export * from './auth-navigator';
-export * from './app-navigator';
-export * from './main-navigator';
+export { RootNavigator } from './root-navigator';

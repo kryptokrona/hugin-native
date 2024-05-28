@@ -527,7 +527,6 @@ export async function openDB() {
 }
 
 export async function savePreferencesToDatabase(preferences: Preferences) {
-  console.log('-----', { preferences });
   await database.transaction(
     (tx: { executeSql: (arg0: string, arg1: any[]) => void }) => {
       tx.executeSql(

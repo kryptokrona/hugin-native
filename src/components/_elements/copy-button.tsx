@@ -1,6 +1,10 @@
-import React from 'react';
-
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Clipboard, // TODO FIX SHIT
+} from 'react-native';
 
 import { toastPopUp, useGlobalStore } from '@/services';
 
@@ -11,14 +15,14 @@ interface CopyButtonProps {
 }
 
 export const CopyButton: React.FC<CopyButtonProps> = ({
-  //   data,
+  data,
   name,
   style,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
 
   const handleCopy = () => {
-    // Clipboard.setString(data); // TODO when lib is updated tow ork with RN 0.74
+    Clipboard.setString(data);
     toastPopUp(`${name} copied`);
   };
 

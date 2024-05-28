@@ -6,14 +6,15 @@
 // @ts-ignore
 import { Alert, Platform } from 'react-native';
 
-import { deleteUserPinCode } from '@haskkor/react-native-pincode';
 import NetInfo from '@react-native-community/netinfo';
 import { Daemon } from 'kryptokrona-wallet-backend-js';
 import _ from 'lodash';
+import { PushNotificationObject } from 'react-native-push-notification';
 import request from 'request-promise-native';
 
 import {
   deleteDB,
+  deletePinCode,
   getBoardsMessages,
   getBoardSubscriptions,
   getKnownTransactions,
@@ -87,10 +88,10 @@ class Globals {
   localWebcamOn: boolean;
   localMicOn: boolean;
   speakerOn: boolean;
-  notificationQueue: any[] | boolean; // temp added
+  notificationQueue: PushNotificationObject[]; // temp added
   lastMessageTimestamp: number;
   lastDMTimestamp: number;
-  webSocketStatus: string;
+  webSocketStatus: 'offline' | 'online';
   socket: WebSocket | undefined;
   initalSyncOccurred: boolean;
   websockets: number;
@@ -98,7 +99,7 @@ class Globals {
   messagesLoaded: number;
   lastSyncEvent: number;
   navigation: any;
-  activeBoard: string;
+  activeBoard: 'Home' | null;
   boardsSubscriptions: {
     board: any;
     key: any;
@@ -113,7 +114,7 @@ class Globals {
     this.syncingMessages = false;
     this.syncingMessagesCount = 0;
     this.syncSkips = 0;
-    this.activeBoard = '';
+    this.activeBoard = null;
     this.boardsSubscriptions = [];
 
     this.preferences = {
@@ -186,7 +187,7 @@ class Globals {
     await deleteDB();
     await openDB();
     await setHaveWallet(false);
-    await deleteUserPinCode();
+    await deletePinCode();
     initGlobals();
   }
 
@@ -263,7 +264,7 @@ class Globals {
 
   async updateBoardsMessages() {
     console.log(this.activeBoard);
-    if (this.activeBoard !== '') {
+    if (this.activeBoard) {
       this.boardsMessages = await getBoardsMessages(this.activeBoard);
     } else if (this.activeBoard === 'Home' || this.activeBoard === '') {
       this.boardsMessages = await getBoardsMessages();

@@ -10,10 +10,9 @@ import { Button, ScreenLayout, SeedComponent, TextField } from '@/components';
 import { config, globals } from '@/config';
 import { changeNode, saveToDatabase } from '@/services';
 import {
+  MainScreens,
   type AuthScreens,
   type AuthStackParamList,
-  MainScreens,
-  type MainStackNavigationType,
 } from '@/types';
 
 interface Props {
@@ -21,27 +20,34 @@ interface Props {
 }
 export const CreateWalletScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation<MainStackNavigationType>();
+  const navigation = useNavigation();
   const [mSeed, setMSeed] = useState(null);
 
-  useEffect(() => {
-    const initializeWallet = async () => {
-      globals.wallet = await WalletBackend.createWallet(
-        globals.getDaemon(),
-        config,
-      );
-      const [seed] = await globals.wallet.getMnemonicSeed();
-      await changeNode();
-      setMSeed(seed);
-      saveToDatabase(globals.wallet);
-    };
+  const initializeWallet = async () => {
+    const wallet = await WalletBackend.createWallet(
+      globals.getDaemon(),
+      config,
+    );
+    console.log({ wallet });
+    globals.wallet = wallet;
 
+    const [seed] = await globals.wallet.getMnemonicSeed();
+    console.log({ seed });
+    setMSeed(seed);
+    await changeNode();
+  };
+
+  useEffect(() => {
     initializeWallet();
   }, []);
 
-  const onPress = () => {
+  const onPress = async () => {
+    await saveToDatabase(globals.wallet);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'App' }],
+    });
     navigation.navigate(MainScreens.MainScreen);
-    // navigate to Home // TODO
   };
 
   return (
@@ -50,16 +56,9 @@ export const CreateWalletScreen: React.FC<Props> = () => {
       <TextField type="secondary">{t('walletCreatedSubtitle')}</TextField>
       <TextField type="error">{t('walletCreatedSubtitleSubtitle')}</TextField>
 
-      <View
-        style={{ alignItems: 'center', flex: 1, justifyContent: 'flex-start' }}>
-        {mSeed && <SeedComponent seed={mSeed} />}
-
-        <Button
-          onPress={onPress}
-          // {...this.props}
-        >
-          {t('continue')}
-        </Button>
+      <View>
+        <SeedComponent seed={mSeed} />
+        <Button onPress={onPress}>{t('continue')}</Button>
       </View>
     </ScreenLayout>
   );

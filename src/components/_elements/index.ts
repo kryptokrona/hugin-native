@@ -4,3 +4,4 @@ export * from './input-field';
 export * from './text-field';
 export * from './xkr-logo';
 export * from './copy-button';
+export * from './pincode';
