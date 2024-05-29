@@ -133,12 +133,12 @@ async function action() {
   // configure
 
   if (options.configure) {
-    // if (ios) {
-    //   commands.push(() => bareConfigure(optionsIos));
-    // }
-    // if (iosSim) {
-    //   commands.push(() => bareConfigure(optionsIosSimulator));
-    // }
+    if (ios) {
+      commands.push(() => bareConfigure(optionsIos));
+    }
+    if (iosSim) {
+      commands.push(() => bareConfigure(optionsIosSimulator));
+    }
     if (androidArm64) {
       commands.push(() => bareConfigure(optionsAndroidArm64));
     }
@@ -155,12 +155,12 @@ async function action() {
 
   // build
 
-  // if (ios) {
-  //   commands.push(() => bareBuild(optionsIos));
-  // }
-  // if (iosSim) {
-  //   commands.push(() => bareBuild(optionsIosSimulator));
-  // }
+  if (ios) {
+    commands.push(() => bareBuild(optionsIos));
+  }
+  if (iosSim) {
+    commands.push(() => bareBuild(optionsIosSimulator));
+  }
   if (androidArm64) {
     commands.push(() => bareBuild(optionsAndroidArm64));
   }
@@ -176,12 +176,12 @@ async function action() {
 
   // package
 
-  // if (ios) {
-  //   commands.push(() => cmakeInstall(buildOptionsIos));
-  // }
-  // if (iosSim) {
-  //   commands.push(() => cmakeInstall(buildOptionsIosSimulator));
-  // }
+  if (ios) {
+    commands.push(() => cmakeInstall(buildOptionsIos));
+  }
+  if (iosSim) {
+    commands.push(() => cmakeInstall(buildOptionsIosSimulator));
+  }
   if (androidArm64) {
     commands.push(() => cmakeInstall(buildOptionsAndroidArm64));
   }
