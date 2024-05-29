@@ -5,8 +5,6 @@
 import Identicon from 'identicon.js';
 import { Address, Crypto, CryptoNote } from 'kryptokrona-utils';
 // import PushNotification from 'react-native-push-notification';
-// import BackgroundFetch from 'react-native-background-fetch';
-import BackgroundFetch from 'react-native-background-fetch';
 import * as Keychain from 'react-native-keychain';
 import nacl from 'tweetnacl';
 import * as NaclSealed from 'tweetnacl-sealed-box';
@@ -15,7 +13,6 @@ import naclUtil from 'tweetnacl-util';
 import { config, globals } from '@/config';
 import { FromPayee } from '@/types';
 
-import { backgroundSync } from './BackgroundSync';
 import {
   emptyKnownTXs,
   updateGroupMessage,
@@ -30,7 +27,6 @@ import {
   saveMessage,
   messageExists,
   saveKnownTransaction,
-  boardsMessageExists,
 } from './Database';
 
 /**
@@ -1353,76 +1349,76 @@ export const deletePinCode = async () => {
   await Keychain.resetGenericPassword();
 };
 
-export function initBackgroundSync() {
-  BackgroundFetch.configure(
-    {
-      enableHeadless: true,
-      forceReload: false,
+// export function initBackgroundSync() {
+//   BackgroundFetch.configure(
+//     {
+//       enableHeadless: true,
+//       forceReload: false,
 
-      minimumFetchInterval: 15,
+//       minimumFetchInterval: 15,
 
-      requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+//       requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
 
-      startOnBoot: true,
-      // <-- minutes (15 is minimum allowed)
-      stopOnTerminate: false,
-    },
-    async () => {
-      await backgroundSync();
-    },
-    (error) => {
-      globals.logger.addLogMessage(
-        '[js] RNBackgroundFetch failed to start: ' + error.toString(),
-      );
-    },
-  );
-}
+//       startOnBoot: true,
+//       // <-- minutes (15 is minimum allowed)
+//       stopOnTerminate: false,
+//     },
+//     async () => {
+//       await backgroundSync();
+//     },
+//     (error) => {
+//       globals.logger.addLogMessage(
+//         '[js] RNBackgroundFetch failed to start: ' + error.toString(),
+//       );
+//     },
+//   );
+// }
 
-export async function sendNotification(transaction: any) {
-  // /* Don't show notifications if disabled */
+// export async function sendNotification(transaction: any) {
+//   // /* Don't show notifications if disabled */
 
-  console.log('WTFWTFWTF');
+//   console.log('WTFWTFWTF');
 
-  const this_addr = await Address.fromAddress(
-    globals.wallet.getPrimaryAddress(),
-  );
+//   const this_addr = await Address.fromAddress(
+//     globals.wallet.getPrimaryAddress(),
+//   );
 
-  const my_public_key = this_addr.spend.publicKey;
+//   const my_public_key = this_addr.spend.publicKey;
 
-  const amount_received = transaction.transfers.get(my_public_key);
+//   const amount_received = transaction.transfers.get(my_public_key);
 
-  // const payments = [];
+//   // const payments = [];
 
-  const nbrOfTxs = amount_received / 100000;
+//   const nbrOfTxs = amount_received / 100000;
 
-  console.log('Receieved ', nbrOfTxs);
+//   console.log('Receieved ', nbrOfTxs);
 
-  if (nbrOfTxs < 1) {
-    return;
-  }
-  console.log(transaction);
-  console.log(transaction.paymentID);
-  let isTip = await boardsMessageExists(transaction.paymentID);
-  console.log('isTip', isTip);
-  let tippedMsg;
-  isTip = isTip && transaction.paymentID != '';
-  console.log('isTip2', isTip);
-  if (isTip) {
-    // tippedMsg = await getBoardsMessage(transaction.paymentID); // TODO Does not exist
-  }
-  console.log(tippedMsg);
-  // const title = isTip ? 'Tip received' : 'Payment received';
-  // const message = isTip
-  //   ? `You just received a tip for your post "${tippedMsg[0].message}" in ${tippedMsg[0].board} worth ${nbrOfTxs} XKR`
-  //   : `You just received ${nbrOfTxs} XKR`;
+//   if (nbrOfTxs < 1) {
+//     return;
+//   }
+//   console.log(transaction);
+//   console.log(transaction.paymentID);
+//   let isTip = await boardsMessageExists(transaction.paymentID);
+//   console.log('isTip', isTip);
+//   let tippedMsg;
+//   isTip = isTip && transaction.paymentID != '';
+//   console.log('isTip2', isTip);
+//   if (isTip) {
+//     // tippedMsg = await getBoardsMessage(transaction.paymentID); // TODO Does not exist
+//   }
+//   console.log(tippedMsg);
+// const title = isTip ? 'Tip received' : 'Payment received';
+// const message = isTip
+//   ? `You just received a tip for your post "${tippedMsg[0].message}" in ${tippedMsg[0].board} worth ${nbrOfTxs} XKR`
+//   : `You just received ${nbrOfTxs} XKR`;
 
-  // PushNotification.localNotification({ // TODO
-  //   data: JSON.stringify(transaction.hash),
+// PushNotification.localNotification({ // TODO
+//   data: JSON.stringify(transaction.hash),
 
-  //   //'Incoming transaction received!',
-  //   //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), Config)}`,
-  //   message: message,
-  //   title: title,
-  //   transaction: JSON.stringify(transaction.hash),
-  // });
-}
+//   //'Incoming transaction received!',
+//   //message: `You were sent ${prettyPrintAmount(transaction.totalAmount(), Config)}`,
+//   message: message,
+//   title: title,
+//   transaction: JSON.stringify(transaction.hash),
+// });
+// }
