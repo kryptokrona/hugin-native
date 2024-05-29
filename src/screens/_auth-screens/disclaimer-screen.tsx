@@ -5,7 +5,7 @@ import { Switch, View } from 'react-native';
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Button, ScreenHeader, ScreenLayout, TextField } from '@/components';
+import { ScreenLayout, TextButton, TextField } from '@/components';
 import { config } from '@/config';
 import {
   AuthScreens,
@@ -38,7 +38,7 @@ export const DisclaimerScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('disclaimer')} />
+      {/* <ScreenHeader text={t('disclaimer')} /> */}
       <View
         style={{
           alignItems: 'flex-start',
@@ -115,11 +115,11 @@ export const DisclaimerScreen: React.FC<Props> = ({ route }) => {
           </View>
         </View>
 
-        <Button
+        <TextButton
           onPress={onPress}
           disabled={!feeAccepted || !keyOwnershipAccepted || !warrantyAccepted}>
           {t('continue')}
-        </Button>
+        </TextButton>
       </View>
     </ScreenLayout>
   );

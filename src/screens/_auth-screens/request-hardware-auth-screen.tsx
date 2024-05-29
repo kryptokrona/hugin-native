@@ -6,7 +6,7 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics, { TouchID } from 'react-native-biometrics';
 
-import { Button, ScreenLayout, TextField, XKRLogo } from '@/components';
+import { TextButton, ScreenLayout, TextField, XKRLogo } from '@/components';
 import {
   AuthStackParamList,
   AuthScreens,
@@ -168,9 +168,9 @@ export const RequestHardwareAuthScreen: React.FC<Props> = ({ route }) => {
           </View>
 
           <View style={{ bottom: 20, position: 'absolute', width: '100%' }}>
-            <Button onPress={onPress} type="secondary">
+            <TextButton onPress={onPress} type="secondary">
               Or enter your PIN
-            </Button>
+            </TextButton>
           </View>
         </View>
       )}

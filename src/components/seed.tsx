@@ -5,7 +5,7 @@ import { View, Text } from 'react-native';
 import { useGlobalStore } from '@/services';
 
 import { CopyButton } from './_elements';
-import { Card } from './card';
+import { Card } from './_elements/card';
 
 interface SeedComponentProps {
   seed?: string | null;

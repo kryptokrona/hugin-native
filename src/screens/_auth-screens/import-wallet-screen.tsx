@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Button, ScreenHeader, ScreenLayout, TextField } from '@/components';
+import { TextButton, ScreenLayout, TextField } from '@/components';
 import {
   type AuthStackParamList,
   AuthScreens,
@@ -20,40 +20,40 @@ export const ImportWalletScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('whenCreated')} />
+      {/* <ScreenHeader text={t('whenCreated')} /> */}
       <TextField>{t('whenCreatedSubtitle')}</TextField>
 
       <View style={styles.buttonsContainer}>
         <View style={styles.buttonWrapper}>
-          <Button
+          <TextButton
             type="primary"
             onPress={() => navigation.navigate(AuthScreens.PickMonthScreen)}>
             {t('pickMonth')}
-          </Button>
+          </TextButton>
         </View>
 
         <View style={styles.buttonWrapper}>
-          <Button
+          <TextButton
             type="primary"
             onPress={() =>
               navigation.navigate(AuthScreens.PickBlockHeightScreen)
             }>
             {t('pickApproxBlockHeight')}
-          </Button>
+          </TextButton>
         </View>
 
         <View style={styles.buttonWrapper}>
-          <Button
+          <TextButton
             type="primary"
             onPress={() =>
               navigation.navigate(AuthScreens.PickExactBlockHeightScreen)
             }>
             {t('pickExactBlockHeight')}
-          </Button>
+          </TextButton>
         </View>
 
         <View style={styles.buttonWrapper}>
-          <Button
+          <TextButton
             type="primary"
             onPress={() =>
               navigation.navigate(AuthScreens.ImportKeysOrSeedScreen, {
@@ -61,7 +61,7 @@ export const ImportWalletScreen: React.FC<Props> = () => {
               })
             }>
             {t('idk')}
-          </Button>
+          </TextButton>
         </View>
       </View>
     </ScreenLayout>

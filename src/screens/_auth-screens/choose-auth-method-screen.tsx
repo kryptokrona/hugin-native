@@ -6,7 +6,7 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Keychain from 'react-native-keychain';
 
-import { Button, ScreenLayout, TextField } from '@/components';
+import { TextButton, ScreenLayout, TextField } from '@/components';
 import { globals } from '@/config';
 import { deletePinCode, savePreferencesToDatabase } from '@/services';
 import {
@@ -97,7 +97,7 @@ export const ChooseAuthMethodScreen: React.FC<Props> = ({ route }) => {
           />
           <TextField>{t('noAuth')}</TextField>
         </View>
-        <Button onPress={handleContinue}>{t('continue')}</Button>
+        <TextButton onPress={handleContinue}>{t('continue')}</TextButton>
       </View>
     </ScreenLayout>
   );
