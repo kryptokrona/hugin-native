@@ -19,7 +19,6 @@ export const ScreenHeader: React.FC<Props> = ({ text }) => {
 
 const styles = StyleSheet.create({
   container: {
-    fontFamily: 'Montserrat-SemiBold',
     marginVertical: 16,
     padding: 12,
   },

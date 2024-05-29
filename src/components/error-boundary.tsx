@@ -2,8 +2,6 @@ import React, { ReactNode } from 'react';
 
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors } from '../styles';
-
 type ErrorBoundaryProps = { children: ReactNode };
 type ErrorBoundaryState = { error: null | unknown };
 
@@ -52,7 +50,7 @@ class ErrorBoundary extends React.Component<
 const styles = StyleSheet.create({
   errorHolder: {
     alignItems: 'center',
-    backgroundColor: Colors.app.background,
+    // backgroundColor: Colors.app.background,
     display: 'flex',
     height: '100%',
     justifyContent: 'center',
