@@ -19,7 +19,7 @@ export const Button: React.FC<Props> = ({
 }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.backgroundAccent;
-  const borderColor = type === 'secondary' ? theme.secondary : theme.primary;
+  const borderColor = type === 'secondary' ? theme.border : theme.border;
   const color = type === 'error' ? theme.error : theme.primary;
 
   return (

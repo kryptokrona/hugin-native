@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 
 import { View } from 'react-native';
 
-import { type RouteProp, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  type RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
 import { WalletBackend } from 'kryptokrona-wallet-backend-js';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +15,7 @@ import { config, globals } from '@/config';
 import { changeNode, saveToDatabase } from '@/services';
 import {
   MainScreens,
+  MainStackNavigationType,
   type AuthScreens,
   type AuthStackParamList,
 } from '@/types';
@@ -20,7 +25,7 @@ interface Props {
 }
 export const CreateWalletScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation();
+  const navigation = useNavigation<MainStackNavigationType>();
   const [mSeed, setMSeed] = useState(null);
 
   const initializeWallet = async () => {
@@ -43,11 +48,24 @@ export const CreateWalletScreen: React.FC<Props> = () => {
 
   const onPress = async () => {
     await saveToDatabase(globals.wallet);
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'App' }],
-    });
-    navigation.navigate(MainScreens.MainScreen);
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: 'App' }],
+    // });
+    // navigation.navigate("App", MainScreens.MainScreen);
+    navigation?.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'App',
+            params: {
+              screen: MainScreens.MainScreen,
+            },
+          },
+        ],
+      }),
+    );
   };
 
   return (

@@ -27,24 +27,30 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   };
 
   return (
-    <View style={[styles.container, style, { borderColor: theme.border }]}>
+    <View style={[styles.button, style, { borderColor: theme.border }]}>
       <TouchableOpacity onPress={handleCopy}>
-        <Text style={[styles.buttonText, { color: theme.primary }]}>Copy</Text>
+        {/* TODO i18n copy */}
+        <Text style={[styles.text, { color: theme.primary }]}>Copy</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  buttonText: {
-    marginTop: -3,
-    textDecorationLine: 'none',
-  },
-  container: {
-    alignItems: 'flex-start',
-    borderRadius: 3,
+  button: {
+    alignItems: 'center',
+    borderRadius: 15,
     borderWidth: 1,
-    marginTop: 10,
-    paddingTop: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 8,
+    minHeight: 50,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
