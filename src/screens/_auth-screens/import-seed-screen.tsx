@@ -10,13 +10,7 @@ import {
 } from 'kryptokrona-wallet-backend-js';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Button,
-  InputField,
-  ScreenHeader,
-  ScreenLayout,
-  TextField,
-} from '@/components';
+import { TextButton, InputField, ScreenLayout, TextField } from '@/components';
 import { config, globals } from '@/config';
 import { saveToDatabase } from '@/services';
 import {
@@ -107,7 +101,7 @@ export const ImportSeedScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('enterMnemonic')} />
+      {/* <ScreenHeader text={t('enterMnemonic')} /> */}
       <TextField>{t('enterMnemonicSubtitle')}</TextField>
 
       <View style={styles.inputContainer}>
@@ -125,9 +119,9 @@ export const ImportSeedScreen: React.FC<Props> = ({ route }) => {
         />
       </View>
 
-      <Button onPress={importWallet} disabled={!seedIsGood}>
+      <TextButton onPress={importWallet} disabled={!seedIsGood}>
         {t('continue')}
-      </Button>
+      </TextButton>
     </ScreenLayout>
   );
 };

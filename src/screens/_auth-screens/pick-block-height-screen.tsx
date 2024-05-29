@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { RouteProp, useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
 
-import { Button, ScreenHeader, ScreenLayout } from '@/components';
+import { TextButton, ScreenLayout } from '@/components';
 import { getApproximateBlockHeight } from '@/services';
 import {
   AuthStackParamList,
@@ -21,7 +20,7 @@ interface Props {
 }
 
 export const PickBlockHeightScreen: React.FC<Props> = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
   const [jumps, setJumps] = useState([[0, 0]]);
 
@@ -42,11 +41,11 @@ export const PickBlockHeightScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('betweenWhichBlocks')} />
+      {/* <ScreenHeader text={t('betweenWhichBlocks')} /> */}
       <View style={styles.buttonsContainer}>
         {jumps.map(([startHeight, endHeight]) => (
           <View key={startHeight} style={styles.buttonWrapper}>
-            <Button
+            <TextButton
               type="primary"
               onPress={() =>
                 navigation.navigate(AuthScreens.ImportKeysOrSeedScreen, {
@@ -54,7 +53,7 @@ export const PickBlockHeightScreen: React.FC<Props> = () => {
                 })
               }>
               {`${startHeight} - ${endHeight}`}
-            </Button>
+            </TextButton>
           </View>
         ))}
       </View>

@@ -10,7 +10,12 @@ import {
 import { WalletBackend } from 'kryptokrona-wallet-backend-js';
 import { useTranslation } from 'react-i18next';
 
-import { Button, ScreenLayout, SeedComponent, TextField } from '@/components';
+import {
+  TextButton,
+  ScreenLayout,
+  SeedComponent,
+  TextField,
+} from '@/components';
 import { config, globals } from '@/config';
 import { changeNode, saveToDatabase } from '@/services';
 import {
@@ -76,7 +81,7 @@ export const CreateWalletScreen: React.FC<Props> = () => {
 
       <View>
         <SeedComponent seed={mSeed} />
-        <Button onPress={onPress}>{t('continue')}</Button>
+        <TextButton onPress={onPress}>{t('continue')}</TextButton>
       </View>
     </ScreenLayout>
   );

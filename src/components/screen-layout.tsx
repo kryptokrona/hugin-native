@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { StyleSheet, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
@@ -10,9 +12,6 @@ export const ScreenLayout: React.FC<Props> = ({ children }) => {
   const isArray = Array.isArray(children);
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.background;
-  if (!children) {
-    return null;
-  }
 
   function itemMapper(item: React.ReactNode, index: number) {
     return (
@@ -24,15 +23,13 @@ export const ScreenLayout: React.FC<Props> = ({ children }) => {
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      {isArray && children.map(itemMapper)}
-      {!isArray && children}
+      {isArray ? children.map(itemMapper) : children}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'stretch',
     flex: 1,
     padding: 12,
   },

@@ -3,7 +3,7 @@ module.exports = {
     ios: {},
     android: {},
   },
-  assets: ['./assets/fonts'],
+  assets: ['./src/assets/fonts'],
   dependencies: {
     // Avoid adding react-native-vector-icons to bundle
     'react-native-vector-icons': {

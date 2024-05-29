@@ -6,13 +6,7 @@ import { type RouteProp, useNavigation } from '@react-navigation/native';
 import { WalletBackend } from 'kryptokrona-wallet-backend-js';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Button,
-  InputField,
-  ScreenHeader,
-  ScreenLayout,
-  TextField,
-} from '@/components';
+import { TextButton, InputField, ScreenLayout, TextField } from '@/components';
 import { config, globals } from '@/config';
 import { saveToDatabase } from '@/services';
 import {
@@ -101,7 +95,7 @@ export const ImportKeysScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('enterKeys')} />
+      {/* <ScreenHeader text={t('enterKeys')} /> */}
       <TextField type="primary" size="medium">
         {t('enterKeysSubtitle')}
       </TextField>
@@ -130,9 +124,12 @@ export const ImportKeysScreen: React.FC<Props> = ({ route }) => {
         />
       </View>
 
-      <Button type="primary" onPress={importWallet} disabled={!continueEnabled}>
+      <TextButton
+        type="primary"
+        onPress={importWallet}
+        disabled={!continueEnabled}>
         {t('continue')}
-      </Button>
+      </TextButton>
     </ScreenLayout>
   );
 };

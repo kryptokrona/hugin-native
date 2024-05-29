@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
-import { ScreenLayout, ScreenHeader } from '@/components';
+import { TextButton, Container, ScreenLayout } from '@/components';
 import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
@@ -119,6 +119,7 @@ export const MainScreen: React.FC = () => {
   return (
     <ScreenLayout>
       <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -126,66 +127,21 @@ export const MainScreen: React.FC = () => {
             title="Updating coin price..."
           />
         }>
-        <ScreenHeader text="Home" />
-        {/* <TouchableOpacity onPress={() => setAddressOnly(!addressOnly)}>
-          <Card>
-            <Image
-              style={{ height: 112, width: 112 }}
-              source={{ uri: get_avatar(address, 112) }}
-            />
-            <Button
-              onPress={() => {
-              }}>
-              {address}
-            </Button>
-            <TextField>
-              {addressOnly ? 'Show Balance' : 'Hide Balance'}
-            </TextField>
-            <QRCode
-              value={`xkr://${address}?paymentid=${Buffer.from(
-                getKeyPair().publicKey,
-              ).toString('hex')}`}
-              size={175}
-              backgroundColor={'transparent'}
-            />
-          </Card>
-        </TouchableOpacity> */}
-        {/* {!addressOnly && (
-          <Button onPress={() => navigation.navigate(MainScreens.C)}>
-            <BalanceComponent
-              unlockedBalance={unlockedBalance}
-              lockedBalance={lockedBalance}
-              coinValue={coinValue}
-              address={address}
-            />
-          </Button>
-        )} */}
-        {/* {!addressOnly && (
-          <Card>
-            <Button onPress={() => navigation.navigate('Groups')}>
-              Groups {groupMessages.length}
-            </Button>
-            <Button
-              onPress={() => navigation.navigate(MainScreens.RecipientsScreen)}>
-              Messages {messages.length}
-            </Button>
-          </Card>
-        )} */}
-        {/* <SyncComponent /> */}
+        <Container bottom row>
+          <TextButton
+            onPress={function (): void {
+              throw new Error('Function not implemented.');
+            }}>
+            Send
+          </TextButton>
+          <TextButton
+            onPress={function (): void {
+              throw new Error('Function not implemented.');
+            }}>
+            Send
+          </TextButton>
+        </Container>
       </ScrollView>
     </ScreenLayout>
   );
 };
-
-// const styles = StyleSheet.create({
-//   cardStyle: {
-//     alignContent: 'center',
-//     backgroundColor: 'backgroundEmphasis',
-//     borderColor: 'borderColour',
-//     borderRadius: 15,
-//     borderWidth: 1,
-//     flex: 1,
-//     flexDirection: 'row',
-//     padding: 10,
-//   },
-// });

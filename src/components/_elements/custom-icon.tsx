@@ -5,6 +5,9 @@ import MI from 'react-native-vector-icons/MaterialIcons';
 import { useGlobalStore } from '@/services';
 // import icoMoonConfig from '../../config/selection-icons.json';
 
+// Search from here
+//  https://oblador.github.io/react-native-vector-icons
+
 interface Props {
   name: string;
   size?: number;

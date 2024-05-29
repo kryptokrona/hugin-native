@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 
-import { Button, ScreenLayout, TextField } from '@/components';
+import { ScreenLayout, TextButton, TextField } from '@/components';
 import { globals } from '@/config';
 import {
   AuthStackParamList,
@@ -58,9 +58,9 @@ export const ForgotPinScreen: React.FC<Props> = () => {
         </TextField>
       </View>
 
-      <Button onPress={onPress} type="error">
+      <TextButton onPress={onPress} type="error">
         Delete Account
-      </Button>
+      </TextButton>
     </ScreenLayout>
   );
 };

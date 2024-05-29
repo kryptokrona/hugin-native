@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Button, ScreenHeader, ScreenLayout } from '@/components';
+import { TextButton, ScreenLayout } from '@/components';
 import {
   AuthStackParamList,
   AuthScreens,
@@ -24,25 +24,25 @@ export const ImportKeysOrSeedScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('howToImport')} />
+      {/* <ScreenHeader text={t('howToImport')} /> */}
       <View style={styles.buttonsContainer}>
         <View style={styles.buttonWrapper}>
-          <Button
+          <TextButton
             type="primary"
             onPress={() =>
               navigation.navigate(AuthScreens.ImportSeedScreen, { scanHeight })
             }>
             {t('mnemonic')}
-          </Button>
+          </TextButton>
         </View>
         <View style={styles.buttonWrapper}>
-          <Button
+          <TextButton
             type="primary"
             onPress={() =>
               navigation.navigate(AuthScreens.ImportKeysScreen, { scanHeight })
             }>
             {t('privateKeys')}
-          </Button>
+          </TextButton>
         </View>
       </View>
     </ScreenLayout>

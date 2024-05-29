@@ -5,7 +5,7 @@ import { View, Alert } from 'react-native';
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 
-import { Button, Pincode, ScreenLayout } from '@/components';
+import { TextButton, Pincode, ScreenLayout } from '@/components';
 import {
   type AuthStackParamList,
   AuthScreens,
@@ -44,7 +44,7 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
     <ScreenLayout>
       <View style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
         <Pincode onFinish={verifyPin} />
-        <Button onPress={handleForgotPin}>Forgot PIN?</Button>
+        <TextButton onPress={handleForgotPin}>Forgot PIN?</TextButton>
       </View>
     </ScreenLayout>
   );

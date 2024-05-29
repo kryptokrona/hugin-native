@@ -7,7 +7,7 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import MonthSelectorCalendar from 'react-native-month-selector';
 
-import { Button, ScreenHeader, ScreenLayout } from '@/components';
+import { TextButton, ScreenLayout } from '@/components';
 import { config } from '@/config';
 import { dateToScanHeight, useGlobalStore } from '@/services';
 import {
@@ -33,7 +33,7 @@ export const PickMonthScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('whichMonth')} />
+      {/* <ScreenHeader text={t('whichMonth')} /> */}
 
       <View style={styles.calendarContainer}>
         <MonthSelectorCalendar
@@ -62,7 +62,7 @@ export const PickMonthScreen: React.FC<Props> = () => {
         />
       </View>
 
-      <Button onPress={onPress}>{t('continue')}</Button>
+      <TextButton onPress={onPress}>{t('continue')}</TextButton>
     </ScreenLayout>
   );
 };

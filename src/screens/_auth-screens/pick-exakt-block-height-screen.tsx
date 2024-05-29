@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Button, InputField, ScreenHeader, ScreenLayout } from '@/components';
+import { TextButton, InputField, ScreenLayout } from '@/components';
 import {
   type AuthStackParamList,
   AuthScreens,
@@ -61,7 +61,7 @@ export const PickExaktBlockHeightScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
-      <ScreenHeader text={t('whichBlock')} />
+      {/* <ScreenHeader text={t('whichBlock')} /> */}
       <View style={{ alignItems: 'flex-start', justifyContent: 'center' }}>
         <InputField
           label={'Block'} // TODO figure out props.label
@@ -73,7 +73,7 @@ export const PickExaktBlockHeightScreen: React.FC<Props> = () => {
         />
       </View>
 
-      <Button
+      <TextButton
         type="primary"
         onPress={() =>
           navigation.navigate(AuthScreens.ImportKeysOrSeedScreen, {
@@ -82,7 +82,7 @@ export const PickExaktBlockHeightScreen: React.FC<Props> = () => {
         }
         disabled={!valid}>
         {t('continue')}
-      </Button>
+      </TextButton>
     </ScreenLayout>
   );
 };

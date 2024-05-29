@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Button, ScreenLayout, TextField, XKRLogo } from '@/components';
+import { TextButton, ScreenLayout, TextField, XKRLogo } from '@/components';
 import type { AuthStackParamList, AuthScreens } from '@/types';
 
 interface Props {
@@ -50,12 +50,12 @@ export const WalletOptionScreen: React.FC<Props> = () => {
             width: '100%',
           },
         ]}>
-        <Button
+        <TextButton
           // title={}
           /* Request a pin for the new wallet */
           onPress={onDisclaimerPress}>
           {t('createNewAccount')}
-        </Button>
+        </TextButton>
       </View>
 
       <View
@@ -69,12 +69,12 @@ export const WalletOptionScreen: React.FC<Props> = () => {
             width: '100%',
           },
         ]}>
-        <Button
+        <TextButton
           // title={}
           /* Request a pin for the new wallet */
           onPress={onRestorePress}>
           {t('restoreAccount')}
-        </Button>
+        </TextButton>
       </View>
     </ScreenLayout>
   );

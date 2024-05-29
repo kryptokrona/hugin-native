@@ -26,6 +26,7 @@ export const TextField: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   text: {
+    fontFamily: 'Montserrat-Regular',
     marginVertical: 2,
   },
 });

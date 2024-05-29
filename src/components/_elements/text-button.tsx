@@ -10,7 +10,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export const Button: React.FC<Props> = ({
+export const TextButton: React.FC<Props> = ({
   children,
   onPress,
   type,
@@ -38,16 +38,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 15,
     borderWidth: 1,
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
+    marginHorizontal: 4,
     marginVertical: 8,
     minHeight: 50,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   text: {
+    fontFamily: 'Montserrat-Regular',
     fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
   },
 });
