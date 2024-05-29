@@ -2,7 +2,40 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 # Getting Started
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+Make sure you have installed on your system:
+
+- `CMake` >= 3.25.
+- For Android, installing Android Studio is recommended (you can follow [React Native docs](https://reactnative.dev/docs/0.72/environment-setup?platform=android)), also make sure Android NDK version `25.1.8937393` is installed and set the `ANDROID_HOME` environment variable (see `Configure the ANDROID_HOME environment variable` section on React Native docs).
+
+# Install Bare
+
+Clone this repo follow these steps:
+
+```sh
+git submodule update --init --recursive
+```
+
+Enable Expo plugin:
+
+```sh
+npx install-expo-modules@latest
+```
+
+> [!NOTE]
+> From now on, you should run `npx bare-dev vendor sync` after updating `bare` git submodule.
+
+Now install all the dependencies running `npm install` or your package manager of preference.
+
+For ease we added a helper script you can simply install running `npm link` in the project's root -or `bin/hello-pear.js` or npx `hello-pear`-.
+
+> [!IMPORTANT]
+> The first time you run it you need to append the `--configure` flag:
+>
+> ```sh
+> hello-pear --configure
+> ```
+
+> **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
 ## Step 1: Start the Metro Server
 
