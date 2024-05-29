@@ -7,7 +7,7 @@ interface Props {
 }
 
 export const Card: React.FC<Props> = ({ children }) => {
-  const { theme } = useGlobalStore();
+  const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.backgroundAccent;
   const borderColor = theme.border;
 

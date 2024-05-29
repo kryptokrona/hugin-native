@@ -9,7 +9,8 @@
       "@/utils": ["./utils/index"],
       "@/contexts": ["./contexts/index"],
       "@/styles": ["./styles/index"],
-      "@/services": ["./services/index"]
+      "@/services": ["./services/index"],
+      "@/config": ["./config/index"]
     }
   }
 }

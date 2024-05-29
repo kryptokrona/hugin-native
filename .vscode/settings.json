@@ -1,6 +1,5 @@
 {
   "files.exclude": {
-    "node_modules": true,
     "**/.git": true
   },
   "npm.packageManager": "npm",
@@ -48,5 +47,6 @@
   "[mdx]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

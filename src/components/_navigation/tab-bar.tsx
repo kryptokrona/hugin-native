@@ -1,13 +1,18 @@
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
+
+import { useGlobalStore } from '@/services';
 
 import { CustomIcon } from '../_elements';
 
 const tabIcons = {
-  Main: 'profile',
-  Profile: 'user',
-  Settings: 'cog',
+  Groups: 'account-group-outline',
+  Main: 'account-outline',
+  Recipients: 'message-outline',
+  Settings: 'cog-outline',
+  Transactions: 'wallet-outline',
+  Transfer: 'cash-fast',
 };
 
 export const MyTabBar: React.FC<BottomTabBarProps> = ({
@@ -15,22 +20,20 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
+  const theme = useGlobalStore((state) => state.theme);
   return (
-    <View style={{ flexDirection: 'row' }}>
+    <View
+      style={{
+        backgroundColor: theme.backgroundAccent,
+        flexDirection: 'row',
+        height: 50,
+      }}>
       {state.routes.map((route, index) => {
-        console.log({ descriptors, index, route });
-        console.log({ route });
         const iconName = tabIcons[route.name as keyof typeof tabIcons];
         const { options } = descriptors[route.key];
-        // const label = ' defsault';
-        //   options.tabBarLabel !== undefined
-        //     ? options.tabBarLabel
-        //     : options.title !== undefined
-        //     ? options.title
-        //     : route.name;
 
         const isFocused = state.index === index;
-
+        console.log({ route: route.key });
         const onPress = () => {
           const event = navigation.emit({
             canPreventDefault: true,
@@ -59,7 +62,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{ flex: 1 }}>
+            style={styles.tab}>
             <CustomIcon name={iconName} size={24} />
             {/* <Text style={{ color: isFocused ? '#673ab7' : '#222' }}>
               {label}
@@ -71,4 +74,10 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   );
 };
 
-// ...
+const styles = StyleSheet.create({
+  tab: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+});

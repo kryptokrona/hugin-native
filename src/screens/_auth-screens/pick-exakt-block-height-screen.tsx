@@ -1,0 +1,88 @@
+import { useState } from 'react';
+
+import { View } from 'react-native';
+
+import { type RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
+import { Button, InputField, ScreenHeader, ScreenLayout } from '@/components';
+import {
+  type AuthStackParamList,
+  AuthScreens,
+  type AuthStackNavigationType,
+} from '@/types';
+
+interface Props {
+  route: RouteProp<
+    AuthStackParamList,
+    typeof AuthScreens.PickExactBlockHeightScreen
+  >;
+}
+
+export const PickExaktBlockHeightScreen: React.FC<Props> = () => {
+  const { t } = useTranslation();
+  const navigation = useNavigation<AuthStackNavigationType>();
+
+  const [value, setValue] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [valid, setValid] = useState(false);
+
+  const scanHeightIsValid = (
+    scanHeightText?: string,
+  ): { valid: boolean; text: string } => {
+    if (scanHeightText === '' || scanHeightText === undefined) {
+      return { text: 'Scan height is empty.', valid: false };
+    }
+
+    const scanHeight = Number(scanHeightText);
+
+    if (isNaN(scanHeight)) {
+      return { text: 'Scan height is not a number.', valid: false };
+    }
+
+    if (scanHeight < 0) {
+      return { text: 'Scan height is less than 0.', valid: false };
+    }
+
+    if (!Number.isInteger(scanHeight)) {
+      return { text: 'Scan height is not an integer.', valid: false };
+    }
+
+    return { text: '', valid: true };
+  };
+
+  const onChangeText = (text: string | number) => {
+    const { valid: mValid, text: mText } = scanHeightIsValid(text.toString());
+
+    setValue(mText.toString());
+    setErrorMessage(mText);
+    setValid(mValid);
+  };
+
+  return (
+    <ScreenLayout>
+      <ScreenHeader text={t('whichBlock')} />
+      <View style={{ alignItems: 'flex-start', justifyContent: 'center' }}>
+        <InputField
+          label={'Block'} // TODO figure out props.label
+          value={value}
+          onChange={onChangeText}
+          error={!!errorMessage}
+          errorText={errorMessage ?? undefined}
+          keyboardType="number-pad"
+        />
+      </View>
+
+      <Button
+        type="primary"
+        onPress={() =>
+          navigation.navigate(AuthScreens.ImportKeysOrSeedScreen, {
+            scanHeight: Number(value),
+          })
+        }
+        disabled={!valid}>
+        {t('continue')}
+      </Button>
+    </ScreenLayout>
+  );
+};

@@ -4,18 +4,66 @@ buildscript {
         minSdkVersion = 23
         compileSdkVersion = 34
         targetSdkVersion = 34
-        ndkVersion = "26.1.10909125"
+        ndkVersion = "25.1.8937393"
         kotlinVersion = "1.9.22"
     }
     repositories {
+        mavenLocal()
+        maven {
+            // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+            url("$rootDir/../node_modules/react-native/android")
+            url("$rootDir/../node_modules/react-native-background-fetch/android/libs")
+        }
+        maven {
+            // Android JSC is installed from npm
+            url("$rootDir/../node_modules/jsc-android/dist")
+        }
+
+        maven { 
+        url 'https://jitpack.io' }
         google()
         mavenCentral()
+    }
+    subprojects {
+        afterEvaluate {
+            project ->
+                if (project.hasProperty("android")) {
+                    android {
+                        compileSdkVersion = rootProject.ext.compileSdkVersion
+                        buildToolsVersion = rootProject.ext.buildToolsVersion
+                    }
+                }
+        }
     }
     dependencies {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.10"
     }
 }
+
+// allprojects {
+//  repositories {
+//    mavenCentral()
+//    mavenLocal()
+//    maven {
+//      // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+//      url("$rootDir/../node_modules/react-native/android")
+//    }
+//    maven {
+//      // Android JSC is installed from npm
+//      url("$rootDir/../node_modules/jsc-android/dist")
+//    }
+//    maven {
+//      url("https://maven.fpregistry.io/releases")
+//    }
+//    maven {
+//      url("https://www.jitpack.io")
+//    }
+//    google()
+//  }
+// }
+
+
 
 apply plugin: "com.facebook.react.rootproject"
