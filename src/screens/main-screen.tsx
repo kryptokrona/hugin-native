@@ -2,13 +2,19 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
+import { RouteProp } from '@react-navigation/native';
+
+import { MainScreens, MainStackParamList } from 'types/navigation';
+
 import { TextButton, Container, ScreenLayout } from '@/components';
 import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
 // import { BalanceComponent, SyncComponent } from './SharedComponents';
-
-export const MainScreen: React.FC = () => {
+interface Props {
+  route: RouteProp<MainStackParamList, typeof MainScreens.MainScreen>;
+}
+export const MainScreen: React.FC<Props> = () => {
   // const [addressOnly, setAddressOnly] = useState(false);
   // const [unlockedBalance, setUnlockedBalance] = useState(0);
   // const [lockedBalance, setLockedBalance] = useState(0);

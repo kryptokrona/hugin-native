@@ -27,36 +27,6 @@ export type MainStackParamList = {
   [MainScreens.MainScreen]: undefined;
 };
 
-export const TransactionsScreens = {
-  TransactionDetailsScreen: 'TransactionDetailsScreen',
-  TransactionsScreen: 'TransactionsScreen',
-} as const;
-
-export type TransactionsStackParamList = {
-  [TransactionsScreens.TransactionsScreen]: undefined;
-  [TransactionsScreens.TransactionDetailsScreen]: { id: string };
-};
-
-export const TransferScreens = {
-  ChoosePayeeScreen: 'ChoosePayeeScreen',
-  ConfirmScreen: 'ConfirmScreen',
-  NewPayeeScreen: 'NewPayeeScreen',
-  QrScannerScreen: 'QrScannerScreen',
-  // RequestHardwareAuthScreen: 'RequestHardwareAuthScreen',
-  // RequestPinScreen: 'RequestPinScreen',
-  SendTransactionScreen: 'SendTransactionScreen',
-  TransferScreen: 'TransferScreen',
-} as const;
-
-export type TransferStackParamList = {
-  [TransferScreens.TransferScreen]: undefined;
-  [TransferScreens.ChoosePayeeScreen]: undefined;
-  [TransferScreens.ConfirmScreen]: { amount: number; payee: string };
-  [TransferScreens.NewPayeeScreen]: undefined;
-  [TransferScreens.QrScannerScreen]: undefined;
-  [TransferScreens.SendTransactionScreen]: { amount: number; payee: string };
-};
-
 export const SettingsScreens = {
   // ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
   DisableDozeScreen: 'DisableDozeScreen',
@@ -87,22 +57,6 @@ export type SettingsStackParamList = {
   [SettingsScreens.SwapNodeScreen]: undefined;
 };
 
-export const RecipientsScreens = {
-  CallScreen: 'CallScreen',
-  ChatScreen: 'ChatScreen',
-  ModifyPayeeScreen: 'ModifyPayeeScreen',
-  NewPayeeScreen: 'NewPayeeScreen',
-  RecipientsScreen: 'RecipientsScreen',
-} as const;
-
-export type RecipientStackParamList = {
-  [RecipientsScreens.RecipientsScreen]: undefined;
-  [RecipientsScreens.CallScreen]: undefined;
-  [RecipientsScreens.ChatScreen]: undefined;
-  [RecipientsScreens.ModifyPayeeScreen]: undefined;
-  [RecipientsScreens.NewPayeeScreen]: undefined;
-};
-
 export const GroupsScreens = {
   GroupChatScreen: 'GroupChatScreen',
   GroupsScreen: 'GroupsScreen',
@@ -117,12 +71,87 @@ export type GroupStackParamList = {
   [GroupsScreens.NewGroupScreen]: undefined;
 };
 
+export const MessagesScreens = {
+  MessageScreen: 'MessageScreen',
+} as const;
+
+export type MessagesStackParamList = {
+  [MessagesScreens.MessageScreen]: undefined;
+};
+
+// export const RecipientsScreens = {
+//   CallScreen: 'CallScreen',
+//   ChatScreen: 'ChatScreen',
+//   ModifyPayeeScreen: 'ModifyPayeeScreen',
+//   NewPayeeScreen: 'NewPayeeScreen',
+//   RecipientsScreen: 'RecipientsScreen',
+// } as const;
+
+// export type RecipientStackParamList = {
+//   [RecipientsScreens.RecipientsScreen]: undefined;
+//   [RecipientsScreens.CallScreen]: undefined;
+//   [RecipientsScreens.ChatScreen]: undefined;
+//   [RecipientsScreens.ModifyPayeeScreen]: undefined;
+//   [RecipientsScreens.NewPayeeScreen]: undefined;
+// };
+
+// export const TransactionsScreens = {
+//   TransactionDetailsScreen: 'TransactionDetailsScreen',
+//   TransactionsScreen: 'TransactionsScreen',
+// } as const;
+
+// export type TransactionsStackParamList = {
+//   [TransactionsScreens.TransactionsScreen]: undefined;
+//   [TransactionsScreens.TransactionDetailsScreen]: { id: string };
+// };
+
+// export const TransferScreens = {
+//   ChoosePayeeScreen: 'ChoosePayeeScreen',
+//   ConfirmScreen: 'ConfirmScreen',
+//   NewPayeeScreen: 'NewPayeeScreen',
+//   QrScannerScreen: 'QrScannerScreen',
+//   // RequestHardwareAuthScreen: 'RequestHardwareAuthScreen',
+//   // RequestPinScreen: 'RequestPinScreen',
+//   SendTransactionScreen: 'SendTransactionScreen',
+//   TransferScreen: 'TransferScreen',
+// } as const;
+
+// export type TransferStackParamList = {
+//   [TransferScreens.TransferScreen]: undefined;
+//   [TransferScreens.ChoosePayeeScreen]: undefined;
+//   [TransferScreens.ConfirmScreen]: { amount: number; payee: string };
+//   [TransferScreens.NewPayeeScreen]: undefined;
+//   [TransferScreens.QrScannerScreen]: undefined;
+//   [TransferScreens.SendTransactionScreen]: { amount: number; payee: string };
+// };
+
 export const TabBar = {
-  Groups: 'GroupsTab',
-  Main: 'MainTab',
-  Settings: 'SettingsTab',
-  Transaction: 'TransactionTab',
-  Transfer: 'TransferTab',
+  GroupsTab: { iconName: 'wechat', iconType: 'MI', tabName: 'GroupsTab' },
+  MainTab: {
+    iconName: 'view-dashboard-outline',
+    iconType: 'MCI',
+    tabName: 'MainTab',
+  },
+  MessagesTab: {
+    iconName: 'message-reply-text-outline',
+    iconType: 'MCI',
+    tabName: 'MessagesTab',
+  },
+  SettingsTab: {
+    iconName: 'cog-outline',
+    iconType: 'MCI',
+    tabName: 'SettingsTab',
+  },
+  // TransactionsTab: {
+  //   iconName: 'bank-transfer',
+  //   iconType: 'MCI',
+  //   tabName: 'TransactionsTab',
+  // },
+  // TransferTab: {
+  //   iconName: 'bank-transfer-out',
+  //   iconType: 'MCI',
+  //   tabName: 'TransferTab',
+  // },
 } as const;
 
 export const Stacks = {

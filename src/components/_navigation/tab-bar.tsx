@@ -3,17 +3,9 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { useGlobalStore } from '@/services';
+import { TabBar, type IconType } from '@/types';
 
 import { CustomIcon } from '../_elements';
-
-const tabIcons = {
-  Groups: 'account-group-outline',
-  Main: 'account-outline',
-  Recipients: 'message-outline',
-  Settings: 'cog-outline',
-  Transactions: 'wallet-outline',
-  Transfer: 'cash-fast',
-};
 
 export const MyTabBar: React.FC<BottomTabBarProps> = ({
   state,
@@ -29,11 +21,10 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
         height: 50,
       }}>
       {state.routes.map((route, index) => {
-        const iconName = tabIcons[route.name as keyof typeof tabIcons];
+        const icon = TabBar[route.name as keyof typeof TabBar];
         const { options } = descriptors[route.key];
 
         const isFocused = state.index === index;
-        console.log({ route: route.key });
         const onPress = () => {
           const event = navigation.emit({
             canPreventDefault: true,
@@ -52,7 +43,6 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             type: 'tabLongPress',
           });
         };
-
         return (
           <TouchableOpacity
             key={`TabBar-${index}`}
@@ -62,11 +52,8 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={styles.tab}>
-            <CustomIcon name={iconName} size={24} />
-            {/* <Text style={{ color: isFocused ? '#673ab7' : '#222' }}>
-              {label}
-            </Text> */}
+            style={[styles.tab]}>
+            <CustomIcon name={icon.iconName} type={icon.iconType as IconType} />
           </TouchableOpacity>
         );
       })}

@@ -14,7 +14,7 @@ export const MainStackNavigator = () => {
         name={MainScreens.MainScreen}
         component={MainScreen}
         options={() => ({
-          header: (_props) => <Header title={'MainScreen'} />,
+          header: (_props) => <Header title={'Dashboard'} />,
         })}
       />
     </Stack.Navigator>

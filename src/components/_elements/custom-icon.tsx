@@ -1,8 +1,10 @@
 // import { createIconSetFromIcoMoon } from 'react-native-vector-icons';
+import FA from 'react-native-vector-icons/FontAwesome';
 import MCI from 'react-native-vector-icons/MaterialCommunityIcons';
 import MI from 'react-native-vector-icons/MaterialIcons';
 
 import { useGlobalStore } from '@/services';
+import type { IconType } from '@/types';
 // import icoMoonConfig from '../../config/selection-icons.json';
 
 // Search from here
@@ -11,7 +13,7 @@ import { useGlobalStore } from '@/services';
 interface Props {
   name: string;
   size?: number;
-  type?: 'MCI' | 'MI';
+  type?: IconType;
 }
 
 export const CustomIcon: React.FC<Props> = ({ name, type, size = 24 }) => {
@@ -20,6 +22,9 @@ export const CustomIcon: React.FC<Props> = ({ name, type, size = 24 }) => {
   switch (type) {
     case 'MI':
       return <MI name={name} size={size} color={theme.primary} />;
+
+    case 'FA':
+      return <FA name={name} size={size} color={theme.primary} />;
     default:
       return <MCI name={name} size={size} color={theme.primary} />;
   }
