@@ -2,10 +2,8 @@ const HyperSwarm = require('hyperswarm');
 const { get_new_peer_keys } = require('./utils');
 let active_swarms = [];
 
-const create_swarm = async () => {
+const create_swarm = async (key) => {
   console.log('Creating swarm!');
-  const key =
-    '650068fcd99d5649ea148c4b92cd3f9c831485eb0ba2feb095587dd89fbd5fba';
   const [base_keys, dht_keys, sig] = get_new_peer_keys(key);
 
   //The topic is public so lets use the pubkey from the new base keypair
