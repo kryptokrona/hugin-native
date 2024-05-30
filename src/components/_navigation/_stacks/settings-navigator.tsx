@@ -1,7 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { MainScreen } from '@/screens';
-import { SettingsScreens, SettingsStackParamList } from '@/types';
+import { SettingsScreen } from '@/screens';
+import { SettingsScreens, type SettingsStackParamList } from '@/types';
+
+import { Header } from '../header';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
@@ -10,9 +12,12 @@ export const SettingsStackNavigator = () => {
     <Stack.Navigator>
       <Stack.Screen
         name={SettingsScreens.SettingsScreen}
-        component={MainScreen}
+        component={SettingsScreen}
+        options={() => ({
+          header: (_props) => <Header title={'Settings'} />,
+        })}
       />
-      <Stack.Screen
+      {/* <Stack.Screen
         name={SettingsScreens.DisableDozeScreen}
         component={MainScreen}
       />
@@ -40,7 +45,7 @@ export const SettingsStackNavigator = () => {
       <Stack.Screen
         name={SettingsScreens.SwapNodeScreen}
         component={MainScreen}
-      />
+      /> */}
     </Stack.Navigator>
   );
 };

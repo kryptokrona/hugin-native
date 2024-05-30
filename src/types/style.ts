@@ -7,3 +7,5 @@ export interface Theme {
   secondary: string; // Text
   error: string;
 }
+
+export type IconType = 'MCI' | 'MI' | 'FA';
