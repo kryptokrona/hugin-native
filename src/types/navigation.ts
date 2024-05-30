@@ -142,16 +142,6 @@ export const TabBar = {
     iconType: 'MCI',
     tabName: 'SettingsTab',
   },
-  // TransactionsTab: {
-  //   iconName: 'bank-transfer',
-  //   iconType: 'MCI',
-  //   tabName: 'TransactionsTab',
-  // },
-  // TransferTab: {
-  //   iconName: 'bank-transfer-out',
-  //   iconType: 'MCI',
-  //   tabName: 'TransferTab',
-  // },
 } as const;
 
 export const Stacks = {

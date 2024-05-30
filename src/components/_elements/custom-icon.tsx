@@ -1,11 +1,9 @@
-// import { createIconSetFromIcoMoon } from 'react-native-vector-icons';
 import FA from 'react-native-vector-icons/FontAwesome';
 import MCI from 'react-native-vector-icons/MaterialCommunityIcons';
 import MI from 'react-native-vector-icons/MaterialIcons';
 
 import { useGlobalStore } from '@/services';
 import type { IconType } from '@/types';
-// import icoMoonConfig from '../../config/selection-icons.json';
 
 // Search from here
 //  https://oblador.github.io/react-native-vector-icons
