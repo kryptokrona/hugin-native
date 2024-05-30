@@ -6,7 +6,12 @@ import { TextButton, Container, ScreenLayout } from '@/components';
 import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
+import { joinSwarm } from '../../lib/native';
+
 // import { BalanceComponent, SyncComponent } from './SharedComponents';
+
+//Random test key
+const key = 'lol';
 
 export const MainScreen: React.FC = () => {
   // const [addressOnly, setAddressOnly] = useState(false);
@@ -20,7 +25,9 @@ export const MainScreen: React.FC = () => {
   // const [_unreads, setUnreads] = useState(globals.unreadMessages);
   // const [coinValue, setCoinValue] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-
+  const onJoinSwarmPress = () => {
+    joinSwarm(key);
+  };
   // const navigation = useNavigation<MainStackNavigationType>();
 
   const updateBalance = useCallback(async () => {
@@ -128,15 +135,10 @@ export const MainScreen: React.FC = () => {
           />
         }>
         <Container bottom row>
+          <TextButton onPress={onJoinSwarmPress}>Send</TextButton>
           <TextButton
             onPress={function (): void {
-              throw new Error('Function not implemented.');
-            }}>
-            Send
-          </TextButton>
-          <TextButton
-            onPress={function (): void {
-              throw new Error('Function not implemented.');
+              // joinSwarm(key);
             }}>
             Send
           </TextButton>

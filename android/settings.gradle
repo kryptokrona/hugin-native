@@ -1,4 +1,11 @@
 rootProject.name = 'Hugin'
+
+buildCache {
+    local {
+        directory = new File(rootDir, 'build-cache')
+        removeUnusedEntriesAfterDays = 2
+    }
+}
 dependencyResolutionManagement {
   versionCatalogs {
     reactAndroidLibs {
