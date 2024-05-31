@@ -4,3 +4,6 @@ export * from './balance';
 export * from './screen-layout';
 export * from './seed';
 export * from './sync';
+export * from './message-preview-item';
+export * from './message-item';
+export * from './message-input';

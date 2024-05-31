@@ -261,7 +261,7 @@ export function intToRGB(int: number) {
   };
 }
 
-export function hashCode(str: any) {
+export function hashCode(str: any): number {
   const hash = Math.abs(str.hashCode()) * 0.007812499538;
   return Math.floor(hash);
 }

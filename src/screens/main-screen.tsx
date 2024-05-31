@@ -2,32 +2,19 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
-import { TextButton, Container, ScreenLayout } from '@/components';
+import { Container, ScreenLayout } from '@/components';
 import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
-import { joinSwarm } from '../../lib/native';
+// import { joinSwarm } from '../../lib/native';
 
-// import { BalanceComponent, SyncComponent } from './SharedComponents';
-
-//Random test key
 const key = 'lol';
 
 export const MainScreen: React.FC = () => {
-  // const [addressOnly, setAddressOnly] = useState(false);
-  // const [unlockedBalance, setUnlockedBalance] = useState(0);
-  // const [lockedBalance, setLockedBalance] = useState(0);
-  // const [address, _setAddress] = useState(globals.wallet.getPrimaryAddress());
-  // const [messages, _setMessages] = useState(globals?.messages?.length);
-  // const [groupMessages, _setGroupMessages] = useState(
-  //   globals.groupMessages.length,
-  // );
-  // const [_unreads, setUnreads] = useState(globals.unreadMessages);
-  // const [coinValue, setCoinValue] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-  const onJoinSwarmPress = () => {
-    joinSwarm(key);
-  };
+  // const onJoinSwarmPress = () => {
+  //   joinSwarm(key);
+  // };
   // const navigation = useNavigation<MainStackNavigationType>();
 
   const updateBalance = useCallback(async () => {
@@ -135,13 +122,13 @@ export const MainScreen: React.FC = () => {
           />
         }>
         <Container bottom row>
-          <TextButton onPress={onJoinSwarmPress}>Send</TextButton>
-          <TextButton
+          {/* <TextButton>Send</TextButton> */}
+          {/* <TextButton
             onPress={function (): void {
               // joinSwarm(key);
             }}>
             Send
-          </TextButton>
+          </TextButton> */}
         </Container>
       </ScrollView>
     </ScreenLayout>

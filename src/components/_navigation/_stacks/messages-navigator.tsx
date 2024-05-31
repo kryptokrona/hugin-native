@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { MessagesScreen } from '@/screens';
+import { MessageScreen, MessagesScreen } from '@/screens';
 import { MessagesScreens, type MessagesStackParamList } from '@/types';
 
 import { Header } from '../header';
@@ -11,11 +11,15 @@ export const MessagesStackNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name={MessagesScreens.MessageScreen}
+        name={MessagesScreens.MessagesScreen}
         component={MessagesScreen}
         options={() => ({
           header: (_props) => <Header title={'Messages'} />,
         })}
+      />
+      <Stack.Screen
+        name={MessagesScreens.MessageScreen}
+        component={MessageScreen}
       />
     </Stack.Navigator>
   );

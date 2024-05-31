@@ -1,6 +1,4 @@
 import { requireNativeModule } from 'expo-modules-core';
-import ce from 'compact-encoding';
-import RPC from 'tiny-buffer-rpc';
 
 requireNativeModule('HelloBare').install();
 
@@ -8,14 +6,14 @@ requireNativeModule('HelloBare').install();
 HelloBare.onLog = console.log;
 
 // RPC
-const rpc = new RPC(HelloBare.sendMessage);
-HelloBare.onMessage = rpc.recv.bind(rpc);
+// const rpc = new RPC(HelloBare.senDMessage);
+// HelloBare.onMessage = rpc.recv.bind(rpc);
 
 // const ipc = rpc.register(0, {
 //   request: ce.string,
 //   response: ce.string,
 // });
 
-export const joinSwarm = (key) => {
+export const joinSwarm = (key: string) => {
   console.log('LOLO');
 };

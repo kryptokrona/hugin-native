@@ -7,3 +7,4 @@ export * from './input-field';
 export * from './pincode';
 export * from './text-field';
 export * from './xkr-logo';
+export * from './avatar';
