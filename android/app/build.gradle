@@ -79,7 +79,7 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
-def hermesEnabled = false
+def hermesEnabled = true
 android {
     ndkVersion rootProject.ext.ndkVersion
 
