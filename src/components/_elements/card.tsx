@@ -20,10 +20,11 @@ export const Card: React.FC<Props> = ({ children }) => {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
+    alignSelf: 'flex-start',
+    borderRadius: 8,
     borderWidth: 1,
     elevation: 5,
-    marginVertical: 10,
+    marginVertical: 2,
     padding: 10,
   },
 });

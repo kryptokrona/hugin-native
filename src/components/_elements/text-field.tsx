@@ -10,18 +10,34 @@ interface Props {
   children: string;
   type?: TextType;
   size?: SizeType;
+  maxLength?: number;
+  bold?: boolean;
+  style?: object | false;
 }
 
 export const TextField: React.FC<Props> = ({
   children,
   type = 'primary',
   size = 'medium',
+  maxLength,
+  bold,
+  style,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
   const color = theme?.[type];
   const fontSize = fontSizes[size] ?? fontSizes.medium;
+  const fontWeight = bold ? 'bold' : 'normal';
 
-  return <Text style={[styles.text, { color, fontSize }]}>{children}</Text>;
+  const truncatedText =
+    maxLength && children.length > maxLength
+      ? `${children.substring(0, maxLength)}...`
+      : children;
+
+  return (
+    <Text style={[styles.text, { color, fontSize, fontWeight, ...style }]}>
+      {truncatedText}
+    </Text>
+  );
 };
 
 const styles = StyleSheet.create({

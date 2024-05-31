@@ -1,5 +1,7 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
+import type { HuginUser, MessageUser } from './messages';
+
 export const AuthScreens = {
   ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
   CreateWalletScreen: 'CreateWalletScreen',
@@ -73,10 +75,12 @@ export type GroupStackParamList = {
 
 export const MessagesScreens = {
   MessageScreen: 'MessageScreen',
+  MessagesScreen: 'MessagesScreen',
 } as const;
 
 export type MessagesStackParamList = {
-  [MessagesScreens.MessageScreen]: undefined;
+  [MessagesScreens.MessagesScreen]: { user: MessageUser };
+  [MessagesScreens.MessageScreen]: { user: HuginUser };
 };
 
 // export const RecipientsScreens = {
@@ -126,20 +130,24 @@ export type MessagesStackParamList = {
 // };
 
 export const TabBar = {
-  GroupsTab: { iconName: 'wechat', iconType: 'MI', tabName: 'GroupsTab' },
+  GroupsTab: {
+    iconName: 'comment-text-multiple-outline',
+    iconType: 'MCI',
+    tabName: 'GroupsTab',
+  },
   MainTab: {
     iconName: 'view-dashboard-outline',
     iconType: 'MCI',
     tabName: 'MainTab',
   },
   MessagesTab: {
-    iconName: 'message-reply-text-outline',
+    iconName: 'comment-text-outline',
     iconType: 'MCI',
     tabName: 'MessagesTab',
   },
   SettingsTab: {
-    iconName: 'cog-outline',
-    iconType: 'MCI',
+    iconName: 'sliders',
+    iconType: 'FA',
     tabName: 'SettingsTab',
   },
 } as const;
@@ -186,6 +194,11 @@ export type AuthStackParamList = {
 
 export type AuthStackNavigationType =
   NativeStackNavigationProp<AuthStackParamList>;
-
 export type MainStackNavigationType =
   NativeStackNavigationProp<MainStackParamList>;
+export type SettingsStackNavigationType =
+  NativeStackNavigationProp<SettingsStackParamList>;
+export type GroupStackNavigationType =
+  NativeStackNavigationProp<GroupStackParamList>;
+export type MessagesStackNavigationType =
+  NativeStackNavigationProp<MessagesStackParamList>;

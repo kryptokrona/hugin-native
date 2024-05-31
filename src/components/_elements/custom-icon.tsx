@@ -1,4 +1,6 @@
 import FA from 'react-native-vector-icons/FontAwesome';
+import FA6 from 'react-native-vector-icons/FontAwesome6';
+import IO from 'react-native-vector-icons/Ionicons';
 import MCI from 'react-native-vector-icons/MaterialCommunityIcons';
 import MI from 'react-native-vector-icons/MaterialIcons';
 
@@ -23,6 +25,13 @@ export const CustomIcon: React.FC<Props> = ({ name, type, size = 24 }) => {
 
     case 'FA':
       return <FA name={name} size={size} color={theme.primary} />;
+
+    case 'FA6':
+      return <FA6 name={name} size={size} color={theme.primary} />;
+
+    case 'IO':
+      return <IO name={name} size={size} color={theme.primary} />;
+
     default:
       return <MCI name={name} size={size} color={theme.primary} />;
   }

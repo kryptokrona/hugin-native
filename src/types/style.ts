@@ -8,4 +8,4 @@ export interface Theme {
   error: string;
 }
 
-export type IconType = 'MCI' | 'MI' | 'FA';
+export type IconType = 'MCI' | 'MI' | 'FA' | 'FA6' | 'IO';

@@ -11,9 +11,11 @@ import { CustomIcon, TextField } from '../_elements';
 
 interface Props {
   title?: string;
+  backButton?: boolean;
+  right?: React.ReactNode;
 }
 
-export const Header: React.FC<Props> = ({ title }) => {
+export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const navigation = useNavigation();
   const theme = useGlobalStore((state) => state.theme);
 
@@ -25,19 +27,24 @@ export const Header: React.FC<Props> = ({ title }) => {
   const backgroundColor = theme?.background;
   const borderColor = theme?.border;
 
+  function onBackPress() {
+    navigation.goBack();
+  }
+
   return (
     <View style={[styles.container, { backgroundColor, borderColor }]}>
-      <View style={styles.left}>
-        <TouchableOpacity>
-          <CustomIcon name={'arrow-back-ios'} type={'MI'} />
-        </TouchableOpacity>
+      <View style={styles.side}>
+        {backButton && (
+          <TouchableOpacity onPress={onBackPress}>
+            <CustomIcon name={'arrow-back-ios'} type={'MI'} />
+          </TouchableOpacity>
+        )}
+        {!backButton && <HuginSvg style={styles.logo} />}
       </View>
       <View style={styles.center}>
         {title && <TextField>{title}</TextField>}
       </View>
-      <View style={styles.right}>
-        <HuginSvg style={styles.logo} />
-      </View>
+      <View style={styles.side}>{right}</View>
     </View>
   );
 };
@@ -58,16 +65,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
-  left: {
+  logo: {
+    height: 24,
+    width: 24,
+  },
+  side: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 50,
-  },
-  logo: {
-    height: 30,
-    width: 30,
-  },
-  right: {
     width: 50,
   },
 });

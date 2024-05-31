@@ -15,3 +15,9 @@ declare module 'int-encoder' {
   const encoder: Encoder;
   export default encoder;
 }
+
+declare global {
+  interface String {
+    hash_code(): number;
+  }
+}

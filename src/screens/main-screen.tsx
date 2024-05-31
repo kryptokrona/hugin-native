@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
-import { TextButton, Container, ScreenLayout } from '@/components';
+import { Container, ScreenLayout } from '@/components';
 import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
@@ -122,13 +122,13 @@ export const MainScreen: React.FC = () => {
           />
         }>
         <Container bottom row>
-          <TextButton onPress={onJoinSwarmPress}>Send</TextButton>
-          <TextButton
+          {/* <TextButton>Send</TextButton> */}
+          {/* <TextButton
             onPress={function (): void {
               // joinSwarm(key);
             }}>
             Send
-          </TextButton>
+          </TextButton> */}
         </Container>
       </ScrollView>
     </ScreenLayout>
