@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Betaaladres",
   "messageKey": "Berichtsleutel",
+  "generate": "Genereer",
   "copy": "kopie",
   "copied": " gekopieerd",
   "noTxMessage": "Je hebt nog geen transacties 😥",

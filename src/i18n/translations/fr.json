@@ -1,6 +1,7 @@
 {
   "PaymentAddress": "Adresse de paiement",
   "messageKey": "Clé de message",
+  "generate": "Générer",
   "copy": "Copie",
   "copied": "copié",
   "noTxMessage": "Vous n’avez pas encore de transactions 😥",

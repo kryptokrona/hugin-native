@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Betaladress",
   "messageKey": "Meddelandenyckel",
+  "generate": "Generera",
   "copy": "Kopiera",
   "copied": " har kopierats",
   "noTxMessage": "Du har inte gjort några transaktioner än 😥",

@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Alamat pembayaran",
   "messageKey": "Kunci pesan",
+  "generate": "Buat",
   "copy": "Salin",
   "copied": " disalin",
   "noTxMessage": "Anda belum memiliki transaksi 😥",

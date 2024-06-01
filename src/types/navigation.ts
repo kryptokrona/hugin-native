@@ -60,17 +60,17 @@ export type SettingsStackParamList = {
 };
 
 export const GroupsScreens = {
+  AddGroupScreen: 'AddGroupScreen',
   GroupChatScreen: 'GroupChatScreen',
   GroupsScreen: 'GroupsScreen',
   ModifyGroupScreen: 'ModifyGroupScreen',
-  NewGroupScreen: 'NewGroupScreen',
 } as const;
 
 export type GroupStackParamList = {
   [GroupsScreens.GroupsScreen]: undefined;
   [GroupsScreens.GroupChatScreen]: undefined;
   [GroupsScreens.ModifyGroupScreen]: undefined;
-  [GroupsScreens.NewGroupScreen]: undefined;
+  [GroupsScreens.AddGroupScreen]: undefined;
 };
 
 export const MessagesScreens = {

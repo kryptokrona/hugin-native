@@ -12,6 +12,7 @@ import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
 import { useTranslation } from 'react-i18next';
 
 import { prettyPrintAmountMainScreen, useGlobalStore } from '@/services';
+import { Styles } from '@/styles';
 
 import { TextField } from './_elements';
 
@@ -124,7 +125,7 @@ const styles = StyleSheet.create({
   },
   balanceContainer: {
     alignItems: 'center',
-    borderRadius: 15,
+    borderRadius: Styles.borderRadius.medium,
     borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',

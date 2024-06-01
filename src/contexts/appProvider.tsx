@@ -1,17 +1,11 @@
-import { SafeAreaView } from 'react-native';
-
 // import ErrorBoundary from '../components/ErrorBoundary';
+
+import { SafeAreaView } from 'react-native';
 
 interface AppProviderProps {
   children: React.ReactNode;
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {children}
-      {/* <NetworkNotification />
-        <PermissionsNotification /> */}
-    </SafeAreaView>
-  );
+  return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>;
 };
