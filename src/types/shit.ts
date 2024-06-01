@@ -33,10 +33,6 @@ export interface FromPayee {
   address?: string;
   paymentID?: string;
 }
-export interface Group {
-  key: string;
-  group?: string; // temp test
-}
 
 export interface TransactionDetail {
   hash: string;

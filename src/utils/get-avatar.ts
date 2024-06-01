@@ -2,7 +2,7 @@ import Identicon, { IdenticonOptions } from 'identicon.js';
 
 function hashCode(str: string) {
   let hash = 0;
-  if (str.length === 0) {
+  if (!str || str.length === 0) {
     return hash;
   }
   for (let i = 0; i < str.length; i++) {

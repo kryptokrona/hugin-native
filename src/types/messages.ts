@@ -1,34 +1,30 @@
 export interface MessageUser {
   key: string;
-  id: string;
+  name: string;
+}
+export interface HuginUser {
+  hash: string;
+  name: string;
+}
+
+export interface Group {
+  hash: string;
   name: string;
 }
 
 export interface Message {
-  id: string;
-  text: string;
-  user: MessageUser;
+  msg: string;
+  chat: string;
+  sent: boolean;
   timestamp: number;
-}
-
-export interface HuginUser {
-  key: string;
-  id: string;
   name: string;
+  hash: string;
+  reply: string;
+  address: string;
+  signature: string;
 }
 
-export interface PreviewChat {
-  id: string;
-  user: HuginUser;
-  lastMessage: {
-    id: string;
-    text: string;
-  };
-}
-
-export interface Group {
-  id: string;
-  name: string;
-  // users: HuginUser[];
-  // messages: Message[];
+export interface GroupMessage extends Message {
+  grp: string;
+  channel?: string;
 }

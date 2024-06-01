@@ -2,11 +2,11 @@ import { useState } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
-import { RouteProp } from '@react-navigation/native';
+import { type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
-import { GroupsScreens, GroupStackParamList } from '@/types';
+import { GroupsScreens, type GroupStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
@@ -16,6 +16,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const [name, setName] = useState<string | null>(null);
   const [key, setKey] = useState<string | null>(null);
+
   function onCreatePress() {
     console.log('Create pressed');
   }
@@ -34,7 +35,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <View style={styles.inputGroup}>
+      <View>
         <InputField label={t('name')} value={name} onChange={onNameChange} />
         <InputField
           label={t('messageKey')}
@@ -51,7 +52,6 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
           {t('continue')}
         </TextButton>
       </View>
-      <View />
     </ScreenLayout>
   );
 };
@@ -59,8 +59,5 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   generateButton: {
     alignSelf: 'flex-start',
-  },
-  inputGroup: {
-    // marginHorizontal: 20,
   },
 });

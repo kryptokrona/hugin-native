@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { CustomIcon } from '@/components';
-import { AddGroupScreen, GroupsScreen } from '@/screens';
+import { AddGroupScreen, GroupChatScreen, GroupsScreen } from '@/screens';
 import {
   GroupsScreens,
   GroupStackNavigationType,
@@ -47,13 +47,23 @@ export const GroupStackNavigator = () => {
           header: (_props) => <Header backButton title={'Add group'} />,
         })}
       />
-      {/* <Stack.Screen
-        name={GroupsScreens.ModifyGroupScreen}
-        component={GroupsScreen}
+      <Stack.Screen
+        name={GroupsScreens.GroupChatScreen}
+        component={GroupChatScreen}
         options={() => ({
-          header: (_props) => <Header title={'Modify group'} />,
+          header: (_props) => (
+            <Header
+              title={'Untitled'}
+              backButton
+              right={
+                <TouchableOpacity onPress={onAddGroupPress}>
+                  <CustomIcon type="MI" name="mode-edit" size={26} />
+                </TouchableOpacity>
+              }
+            />
+          ),
         })}
-      /> */}
+      />
     </Stack.Navigator>
   );
 };

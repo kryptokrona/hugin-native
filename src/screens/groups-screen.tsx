@@ -1,34 +1,37 @@
 import React, { useEffect, useState } from 'react';
 
-import { type RouteProp } from '@react-navigation/native';
+import { FlatList } from 'react-native';
+
+import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Container, ScreenLayout, TextField } from '@/components';
-import { Group, GroupsScreens, GroupStackParamList } from '@/types';
+import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
+import {
+  Group,
+  GroupsScreens,
+  GroupStackNavigationType,
+  GroupStackParamList,
+} from '@/types';
+import { mockGroups } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupsScreen>;
 }
 
-export const GroupsScreen: React.FC<Props> = ({ route }) => {
+export const GroupsScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  // const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<GroupStackNavigationType>();
   const [groups, setGroups] = useState<Group[]>([]);
 
-  // useLayoutEffect(() => {
-  //   navigation.setOptions({
-  //     header: () => (
-  //       <Header
-  //         title={t('groups')}
-  //         right={<CustomIcon type="MI" name="add-box" size={30} />}
-  //       />
-  //     ),
-  //   });
-  // }, []);
-
   useEffect(() => {
-    setGroups([]);
+    setGroups(mockGroups);
   }, []);
+
+  function onPress(hash: string, name: string) {
+    navigation.navigate(GroupsScreens.GroupChatScreen, {
+      group: { hash, name },
+    });
+  }
 
   return (
     <ScreenLayout>
@@ -37,6 +40,11 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
           <TextField size="large">{t('emptyAddressBook')}</TextField>
         </Container>
       )}
+      <FlatList
+        data={groups}
+        keyExtractor={(item, i) => `${item.hash}-${i}`}
+        renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
+      />
     </ScreenLayout>
   );
 };
