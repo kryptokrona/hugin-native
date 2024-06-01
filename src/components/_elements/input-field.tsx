@@ -1,12 +1,13 @@
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
+import { Styles } from '@/styles';
 
 import { TextField } from './text-field';
 
 interface Props {
   label: string;
-  value: string | number;
+  value: string | number | null;
   onChange: (value: string | number) => void;
   error?: boolean;
   errorText?: string;
@@ -24,15 +25,17 @@ export const InputField: React.FC<Props> = ({
   keyboardType = 'default',
 }) => {
   const theme = useGlobalStore((state) => state.theme);
+  const backgroundColor = theme.backgroundAccent;
+  const color = theme.primary;
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <TextField size="small" type="secondary">
         {label}
       </TextField>
       <TextInput
         placeholderTextColor={theme.secondary}
-        style={styles.input}
-        value={value.toString()}
+        style={[styles.input, { backgroundColor, color }]}
+        value={value?.toString()}
         onChangeText={(text) =>
           onChange(keyboardType === 'number-pad' ? Number(text) : text)
         }
@@ -53,7 +56,9 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   input: {
-    borderBottomWidth: 1,
+    // borderBottomWidth: 1,
+    borderRadius: Styles.borderRadius.small,
+    marginTop: 4,
     padding: 5,
   },
 });

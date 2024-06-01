@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
+import { Styles } from '@/styles';
 
 import { CustomIcon } from './_elements';
 
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     alignItems: 'center',
-    borderRadius: 10,
+    borderRadius: Styles.borderRadius.small,
     flexDirection: 'row',
   },
   inputField: {

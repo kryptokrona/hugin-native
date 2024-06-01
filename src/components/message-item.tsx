@@ -5,6 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useGlobalStore } from '@/services';
+import { Styles } from '@/styles';
 import {
   Message,
   MessagesScreens,
@@ -12,7 +13,7 @@ import {
 } from '@/types';
 import { prettyPrintDateFromLocale } from '@/utils';
 
-import { Avatar, Card, TextField } from './_elements';
+import { Avatar, TextField } from './_elements';
 
 interface Props extends Message {
   inverted: boolean;
@@ -53,10 +54,14 @@ export const MessageItem: React.FC<Props> = ({
               {date}
             </TextField>
           </View>
-          <View style={styles.card}>
-            <Card>
+          <View style={[styles.messageContainer]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: theme.backgroundAccent },
+              ]}>
               <TextField size="small">{text}</TextField>
-            </Card>
+            </View>
           </View>
         </>
       )}
@@ -66,9 +71,13 @@ export const MessageItem: React.FC<Props> = ({
             {date}
           </TextField>
           <View style={styles.invertedCard}>
-            <Card>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: theme.backgroundAccent },
+              ]}>
               <TextField size="small">{text}</TextField>
-            </Card>
+            </View>
           </View>
         </View>
       )}
@@ -78,7 +87,9 @@ export const MessageItem: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   card: {
-    paddingRight: 30,
+    alignSelf: 'flex-start',
+    borderRadius: Styles.borderRadius.small,
+    padding: 12,
   },
   container: {
     marginLeft: 4,
@@ -94,6 +105,9 @@ const styles = StyleSheet.create({
   invertedContainer: {
     alignItems: 'flex-end',
     paddingLeft: 30,
+  },
+  messageContainer: {
+    paddingRight: 30,
   },
   user: {
     flexDirection: 'row',

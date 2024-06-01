@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Payment address",
   "messageKey": "Message key",
+  "generate": "Generate",
   "copy": "I-copy",
   "copied": "Na-copy",
   "noTxMessage": "Wala ka pang transaksyon 😥",

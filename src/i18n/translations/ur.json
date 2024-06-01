@@ -1,6 +1,7 @@
 {
   "paymentAddress": "ادائیگی کا پتہ",
   "messageKey": "پیغام کی کلید",
+  "generate": "پیدا کریں",
   "copy": "کاپی",
   "copied": " کاپی",
   "noTxMessage": "آپ کے پاس ابھی تک کوئی لین دین نہیں ہے۔",

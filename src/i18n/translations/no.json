@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Betalings adresse",
   "messageKey": "Meldings nøkkel",
+  "generate": "Generer",
   "copy": "kopier",
   "copied": " kopiert",
   "noTxMessage": "Du har ingen transaksjoner ennå 😥",

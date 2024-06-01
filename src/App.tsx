@@ -8,7 +8,8 @@ import React from 'react';
 // } from 'react-native-push-notification';
 
 import { RootNavigator } from '@/components';
-import { AppProvider } from '@/contexts';
+
+import { AppProvider } from './contexts';
 
 // import SplashScreen from 'react-native-splash-screen';
 // import { useEffect } from 'react';

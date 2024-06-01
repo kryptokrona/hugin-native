@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 12,
+    // paddingBottom: 30,
   },
   divider: {
     marginBottom: 12,

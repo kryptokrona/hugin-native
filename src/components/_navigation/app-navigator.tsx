@@ -16,7 +16,9 @@ const Tab = createBottomTabNavigator<any>();
 
 export const AppNavigator = () => {
   return (
-    <Tab.Navigator tabBar={(props) => <MyTabBar {...props} />}>
+    <Tab.Navigator
+      screenOptions={{ tabBarHideOnKeyboard: true }}
+      tabBar={(props) => <MyTabBar {...props} />}>
       <Tab.Screen
         name={TabBar.MainTab.tabName}
         component={MainStackNavigator}

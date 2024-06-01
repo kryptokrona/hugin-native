@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Rechnungsadresse",
   "messageKey": "Kernbotschaft",
+  "generate": "Erzeugen",
   "copy": "Kopieren",
   "copied": "Kopiert",
   "noTxMessage": "Sie haben noch keine Transaction 😥",

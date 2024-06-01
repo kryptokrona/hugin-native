@@ -32,7 +32,10 @@ export const CustomIcon: React.FC<Props> = ({ name, type, size = 24 }) => {
     case 'IO':
       return <IO name={name} size={size} color={theme.primary} />;
 
-    default:
+    case 'MCI':
       return <MCI name={name} size={size} color={theme.primary} />;
+
+    default:
+      return null;
   }
 };

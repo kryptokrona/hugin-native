@@ -20,7 +20,9 @@ const styles = StyleSheet.create({
   bottom: {
     justifyContent: 'flex-end',
   },
+
   container: {
+    alignSelf: 'stretch',
     flex: 1,
   },
   innerContainer: {

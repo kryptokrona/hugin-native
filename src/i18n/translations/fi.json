@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Maksu osoite",
   "messageKey": "Viesti avain",
+  "generate": "Generoi",
   "copy": "Kopioi",
   "copied": " kopioitu",
   "noTxMessage": "Sinulla ei ole yhtään tapahtumaa 😥",

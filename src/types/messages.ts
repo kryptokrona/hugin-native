@@ -16,3 +16,19 @@ export interface HuginUser {
   id: string;
   name: string;
 }
+
+export interface PreviewChat {
+  id: string;
+  user: HuginUser;
+  lastMessage: {
+    id: string;
+    text: string;
+  };
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  // users: HuginUser[];
+  // messages: Message[];
+}

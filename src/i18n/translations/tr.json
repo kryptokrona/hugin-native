@@ -1,6 +1,7 @@
 {
   "paymentAddress": "Ödeme adresi",
   "messageKey": "Mesaj anahtarı",
+  "generate": "Oluştur",
   "copy": "Kopyala",
   "copied": " Kopyalandı",
   "noTxMessage": "Henüz herhangi bir işleminiz yok 😥",

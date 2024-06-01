@@ -9,3 +9,4 @@ export * from './transaction-screen';
 export * from './transfer-screen';
 export * from './messages-screen';
 export * from './message-screen';
+export * from './add-group-screen';

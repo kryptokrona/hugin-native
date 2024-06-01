@@ -1,6 +1,7 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleProp, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { useGlobalStore } from '@/services';
+import { Styles } from '@/styles';
 
 interface Props {
   children: React.ReactNode;
@@ -8,6 +9,8 @@ interface Props {
   onPress: () => void;
   icon?: React.ReactNode;
   disabled?: boolean;
+  style?: StyleProp<any> | undefined;
+  small?: boolean;
 }
 
 export const TextButton: React.FC<Props> = ({
@@ -16,19 +19,38 @@ export const TextButton: React.FC<Props> = ({
   type,
   icon,
   disabled,
+  style,
+  small,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.backgroundAccent;
   const borderColor = type === 'secondary' ? theme.border : theme.border;
   const color = type === 'error' ? theme.error : theme.primary;
+  const smallButtonStyle = small
+    ? {
+        borderRadius: Styles.borderRadius.small,
+        minHeight: 40,
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+      }
+    : {};
+  const smallTextStyle = small
+    ? { fontSize: Styles.fontSizes.small }
+    : { fontSizes: Styles.fontSizes.medium };
 
   return (
     <TouchableOpacity
       disabled={disabled}
       onPress={onPress}
-      style={[styles.button, { backgroundColor, borderColor }]}>
+      style={[
+        styles.button,
+        style,
+        { backgroundColor, borderColor, ...smallButtonStyle },
+      ]}>
       {icon}
-      <Text style={[{ color }, styles.text]}>{children}</Text>
+      <Text style={[styles.text, { color, ...smallTextStyle }]}>
+        {children}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -36,7 +58,7 @@ export const TextButton: React.FC<Props> = ({
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    borderRadius: 15,
+    borderRadius: Styles.borderRadius.medium,
     borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
@@ -49,6 +71,5 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: 'Montserrat-Regular',
-    fontSize: 16,
   },
 });

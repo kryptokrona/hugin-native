@@ -1,6 +1,7 @@
 {
   "paymentAddress": "XKR地址",
   "messageKey": "消息密钥",
+  "generate": "生成",
   "copy": "拷贝",
   "copied": "已拷贝",
   "noTxMessage": "您还没有任何交易记录!",
