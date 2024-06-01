@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   inputGroup: {
-    marginHorizontal: 20,
+    // marginHorizontal: 20,
   },
 });

@@ -31,8 +31,7 @@ export const ScreenLayout: React.FC<Props> = ({ children }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 12,
-    // paddingBottom: 30,
+    padding: 20,
   },
   divider: {
     marginBottom: 12,

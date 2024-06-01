@@ -44,7 +44,7 @@ export const GroupStackNavigator = () => {
         name={GroupsScreens.AddGroupScreen}
         component={AddGroupScreen}
         options={() => ({
-          header: (_props) => <Header title={'Add group'} />,
+          header: (_props) => <Header backButton title={'Add group'} />,
         })}
       />
       {/* <Stack.Screen
