@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import type { HuginUser, MessageUser } from './messages';
+import type { Group, HuginUser, MessageUser } from './messages';
 
 export const AuthScreens = {
   ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
@@ -68,7 +68,9 @@ export const GroupsScreens = {
 
 export type GroupStackParamList = {
   [GroupsScreens.GroupsScreen]: undefined;
-  [GroupsScreens.GroupChatScreen]: undefined;
+  [GroupsScreens.GroupChatScreen]: {
+    group: Group;
+  };
   [GroupsScreens.ModifyGroupScreen]: undefined;
   [GroupsScreens.AddGroupScreen]: undefined;
 };

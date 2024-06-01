@@ -43,11 +43,11 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         <Header
           backButton
           title={user.name}
-          right={<Avatar hash={user.key} />}
+          right={<Avatar hash={user.name} />}
         />
       ),
     });
-  }, [user.key]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -56,13 +56,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   }, [user]);
 
   const onSend = (text: string) => {
-    const newMessage = {
-      id: String(messages.length + 1),
-      text,
-      timestamp: Date.now(),
-      user,
-    };
-    setMessages([...messages, newMessage]);
+    console.log('Message sent:', text);
   };
 
   return (
@@ -73,9 +67,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <FlatList
           data={messages}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.timestamp.toString()}
           renderItem={({ item }) => (
-            <MessageItem inverted={item.user.id === user.id} {...item} />
+            // TODO inverted: message from me
+            <MessageItem inverted={false} {...item} />
           )}
           contentContainerStyle={styles.flatListContent}
         />
@@ -89,7 +84,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
 const styles = StyleSheet.create({
   flatListContent: {
-    paddingBottom: 80, // Adjust based on your input field height
+    paddingBottom: 80,
   },
   inputWrapper: {
     bottom: 0,

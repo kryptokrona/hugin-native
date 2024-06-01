@@ -2,43 +2,35 @@ import { useState } from 'react';
 
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
-
 import { useGlobalStore } from '@/services';
-import {
-  MessagesScreens,
-  type MessagesStackNavigationType,
-  type MessageUser,
-} from '@/types';
 
 import { Avatar, TextField } from './_elements';
 
 interface Props {
-  lastMessage: {
-    id: string;
-    text: string;
-  };
-  user: MessageUser;
+  name: string;
+  hash: string;
+  onPress: (hash: string, name: string) => void;
 }
 
-export const MessagePreviewItem: React.FC<Props> = ({ lastMessage, user }) => {
-  const navigation = useNavigation<MessagesStackNavigationType>();
+export const PreviewItem: React.FC<Props> = ({ name, hash, onPress }) => {
   const [isPressed, setIsPressed] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
-  const isNew = lastMessage.id === '123abc'; // Dummy condition
+  const isNew = true; // dummy
   const borderColor = isNew ? theme.primary : theme.border;
 
+  console.log({ hash, name });
   function handleLongPress() {
     setIsPressed(true);
     // Do something like a popup?
   }
 
   function handlePress() {
-    navigation.navigate(MessagesScreens.MessageScreen, { user });
+    onPress(hash, name);
   }
 
   return (
     <TouchableOpacity
+      onPress={handlePress}
       style={[
         styles.container,
         {
@@ -47,16 +39,17 @@ export const MessagePreviewItem: React.FC<Props> = ({ lastMessage, user }) => {
         },
       ]}
       onLongPress={handleLongPress}
-      onPress={handlePress}
       onPressOut={() => setIsPressed(false)}>
-      <Avatar size={50} hash={user.key} />
+      <Avatar size={50} hash={hash} />
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">
-          {user.name}
+          {name}
         </TextField>
-        <TextField bold={isNew} maxLength={80} size="small">
-          {lastMessage.text}
-        </TextField>
+        {/* {lastMessage && (
+          <TextField bold={isNew} maxLength={65} size="small">
+            {lastMessage.text}
+          </TextField>
+        )} */}
       </View>
     </TouchableOpacity>
   );

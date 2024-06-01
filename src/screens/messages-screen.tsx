@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react';
 
 import { FlatList } from 'react-native';
 
-import { type RouteProp } from '@react-navigation/native';
+import { useNavigation, type RouteProp } from '@react-navigation/native';
 
-import { MessagePreviewItem, ScreenLayout } from '@/components';
-import type {
+import { PreviewItem, ScreenLayout } from '@/components';
+import {
+  type Message,
   MessagesScreens,
-  MessagesStackParamList,
-  PreviewChat,
+  MessagesStackNavigationType,
+  type MessagesStackParamList,
 } from '@/types';
-import { mockChats } from '@/utils';
+import { mockMessages } from '@/utils';
 
 interface Props {
   route: RouteProp<
@@ -20,18 +21,25 @@ interface Props {
 }
 
 export const MessagesScreen: React.FC<Props> = () => {
-  const [chats, setChats] = useState<PreviewChat[]>([]);
+  const navigation = useNavigation<MessagesStackNavigationType>();
+  const [chats, setChats] = useState<Message[]>([]);
 
   useEffect(() => {
-    setChats(mockChats);
+    setChats(mockMessages);
   }, []);
+
+  function onPress(hash: string, name: string) {
+    navigation.navigate(MessagesScreens.MessageScreen, {
+      user: { hash, name },
+    });
+  }
 
   return (
     <ScreenLayout>
       <FlatList
         data={chats}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <MessagePreviewItem {...item} />}
+        keyExtractor={(item, i) => `${item.hash}-${i}`}
+        renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
     </ScreenLayout>
   );
