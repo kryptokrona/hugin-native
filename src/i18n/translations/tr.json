@@ -169,5 +169,6 @@
   "recoverWalletTitle": "Cüzdan kurtarılsın mı?",
   "recoverWalletDescr": "Bu, mevcut tüm fonları kullanılamaz hale getirecek (ancak özel anahtarlarınızla kurtarılabilir).",
   "groupsRecommendations": "Önerilen",
-  "changeTheme": "Tema değiştir"
+  "changeTheme": "Tema değiştir",
+  "changeLanguage": "Dili değiştir"
 }

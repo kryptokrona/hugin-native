@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
   settingsItem: {
     alignItems: 'center',
     flexDirection: 'row',
+    marginVertical: 6,
     padding: 16,
   },
 });

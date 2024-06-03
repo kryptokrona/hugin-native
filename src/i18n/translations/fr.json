@@ -183,5 +183,6 @@
   "loadMore": "Charger plus",
   "transactionHash": "Hachage de la transaction",
   "transactionHistory": "Historique des transactions",
-  "changeTheme": "Changer de thème"
+  "changeTheme": "Changer de thème",
+  "changeLanguage": "Changer de langue"
 }

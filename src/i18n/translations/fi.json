@@ -169,5 +169,6 @@
   "recoverWalletTitle": "Palauta lompakko?",
   "recoverWalletDescr": "Tämä tekee kaikki nykyiset varat saatamattomaksi (mutta ovat palautettavissa sinun yksityis avaimilla).",
   "groupsRecommendations": "Suositellut taulut",
-  "changeTheme": "Vaihda teemaa"
+  "changeTheme": "Vaihda teemaa",
+  "changeLanguage": "Vaihda kieltä"
 }

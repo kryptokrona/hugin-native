@@ -183,5 +183,6 @@
   "loadMore": "अधिक लोड करू",
   "transactionHash": "लेनदेन हैश",
   "transactionHistory": "लेनदेन इतिहास",
-  "changeTheme": "थीम बदलू"
+  "changeTheme": "थीम बदलू",
+  "changeLanguage": "भाषा बदलू"
 }

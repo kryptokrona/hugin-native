@@ -183,5 +183,6 @@
   "loadMore": "Muat lebih banyak",
   "transactionHash": "Hash transaksi",
   "transactionHistory": "Riwayat transaksi",
-  "changeTheme": "Ubah tema"
+  "changeTheme": "Ubah tema",
+  "changeLanguage": "Ubah bahasa"
 }

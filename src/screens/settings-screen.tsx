@@ -66,10 +66,11 @@ const items: Item[] = [
     icon: { name: 'theme-light-dark', type: 'MCI' },
     title: 'changeTheme',
   },
-  // {
-  //   name: 'changeLanguage',
-  //   icon: { name: 'translate', type: 'MCI' },
-  // },
+  {
+    icon: { name: 'globe', type: 'SLI' },
+    screen: SettingsScreens.ChangeLanguageScreen,
+    title: 'changeLanguage',
+  },
   // {
   //   name: 'changePassword',
   //   icon: { name: 'lock', type: 'MCI' },

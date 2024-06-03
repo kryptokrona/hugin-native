@@ -65,10 +65,7 @@ useGlobalStore.subscribe(
     if (!preferences) {
       return;
     }
-    setStorageValue(
-      ASYNC_STORAGE_KEYS.PREFERENCES,
-      JSON.stringify(preferences),
-    );
+    setStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES, preferences);
   },
 );
 

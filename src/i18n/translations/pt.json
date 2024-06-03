@@ -169,5 +169,6 @@
   "recoverWalletTitle": "Recuperar Carteira?",
   "recoverWalletDescr": "Isso tornará todos os fundos atuais indisponíveis (mas recuperável com suas chaves privadas).",
   "groupsRecommendations": "Boards recomendados",
-  "changeTheme": "Alterar tema"
+  "changeTheme": "Alterar tema",
+  "changeLanguage": "Alterar idioma"
 }

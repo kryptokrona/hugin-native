@@ -7,3 +7,13 @@ export const setStorageValue = async (key: string, value: any) => {
     console.error(`Error setting async storage key ${key}`, error);
   }
 };
+
+// const clearAsyncStorage = async () => {
+//   try {
+//     await AsyncStorage.clear();
+//     console.log('AsyncStorage cleared.');
+//   } catch (error) {
+//     console.error('Error clearing AsyncStorage', error);
+//   }
+// };
+// clearAsyncStorage();

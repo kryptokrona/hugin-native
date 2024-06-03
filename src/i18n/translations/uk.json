@@ -182,5 +182,6 @@
   "callTerminated": "Виклик припинено",
   "loadMore": "Завантажити ще",
   "transactionHash": "Хеш транзакції",
-  "changeTheme": "Змінити тему"
+  "changeTheme": "Змінити тему",
+  "changeLanguage": "Змінити мову"
 }

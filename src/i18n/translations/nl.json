@@ -183,5 +183,6 @@
   "loadMore": "Laad meer",
   "transactionHash": "Transactiehash",
   "transactionHistory": "Transactiegeschiedenis",
-  "changeTheme": "Thema wijzigen"
+  "changeTheme": "Thema wijzigen",
+  "changeLanguage": "Taal wijzigen"
 }

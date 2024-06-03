@@ -194,5 +194,6 @@
   "pickAPIList": "পাবলিক API",
   "swappingAPI": "API পরিবর্তন করা হচ্ছে..",
   "APISwapped": "API সফলভাবে পরিবর্তন করা হয়েছে!",
-  "changeTheme": "থিম পরিবর্তন করুন"
+  "changeTheme": "থিম পরিবর্তন করুন",
+  "changeLanguage": "ভাষা পরিবর্তন করুন"
 }

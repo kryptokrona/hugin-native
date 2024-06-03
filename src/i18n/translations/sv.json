@@ -180,5 +180,6 @@
   "waitingForAnswer": "Väntar på svar..",
   "connecting": "Ansluter..",
   "callTerminated": "Samtalet avslutat",
-  "changeTheme": "Byt tema"
+  "changeTheme": "Byt tema",
+  "changeLanguage": "Byt språk"
 }
