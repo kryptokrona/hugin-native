@@ -20,9 +20,9 @@ interface Props {
 export const SettingsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<SettingsStackNavigationType>();
   const itemMapper = (item: Item) => {
-    function onPress() {
+    async function onPress() {
       if (item.title === 'changeTheme') {
-        toggleTheme();
+        await toggleTheme();
       } else if (item.screen) {
         navigation.navigate(item.screen);
       }

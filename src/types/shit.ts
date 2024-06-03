@@ -1,3 +1,5 @@
+import { ColorSchemeName } from 'react-native';
+
 export interface UnreadMessages {
   boards: number;
   groups: number;
@@ -7,19 +9,19 @@ export interface UnreadMessages {
 export interface Preferences {
   authConfirmation: boolean;
   authenticationMethod: 'none' | 'pincode' | 'hardware-auth';
-  autoOptimize: boolean;
-  autoPickCache: string;
-  cache: string;
-  cacheEnabled: string; // TODO Should be boolean
+  // autoOptimize: boolean;
+  // autoPickCache: string;
+  // cache: string;
+  // cacheEnabled: boolean;
   currency: string;
   language: string;
   limitData: boolean;
   nickname: string;
-  node: string;
+  // node: string;
   notificationsEnabled: boolean;
   scanCoinbaseTransactions: boolean;
-  theme: string;
-  websocketEnabled: string;
+  themeMode: ColorSchemeName;
+  websocketEnabled: boolean;
 }
 
 export interface Payee {

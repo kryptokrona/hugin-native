@@ -1,10 +1,9 @@
-import { ColorSchemeName } from 'react-native';
+import { type ColorSchemeName } from 'react-native';
 
 import { Themes } from '@/styles';
+import type { Preferences } from '@/types';
 
 import { useGlobalStore } from './global-store';
-
-import { ASYNC_STORAGE_KEYS, setStorageValue } from '../async-storage';
 
 export const setTheme = (payload: ColorSchemeName) => {
   const theme = Themes[payload as 'light' | 'dark'];
@@ -12,12 +11,15 @@ export const setTheme = (payload: ColorSchemeName) => {
   useGlobalStore.setState({ theme });
 };
 
-export const toggleTheme = () => {
-  const theme =
-    useGlobalStore.getState().theme.mode === 'light'
-      ? Themes.dark
-      : Themes.light;
+export const toggleTheme = async () => {
+  const { theme } = useGlobalStore.getState();
 
-  useGlobalStore.setState({ theme });
-  setStorageValue(ASYNC_STORAGE_KEYS.THEME_MODE, theme.mode);
+  setTheme(theme.mode === 'light' ? 'dark' : 'light');
 };
+
+export const setPreferences = (preferences: Preferences) => {
+  useGlobalStore.setState({ preferences });
+};
+
+// Do never set individual preferences here, always set the whole preferences object
+// Should be set to storage and then to the store
