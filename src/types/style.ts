@@ -9,3 +9,9 @@ export interface Theme {
 }
 
 export type IconType = 'MCI' | 'MI' | 'FA' | 'FA6' | 'IO';
+
+export interface CustomIconProps {
+  name: string;
+  size?: number;
+  type?: IconType;
+}

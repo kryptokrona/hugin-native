@@ -179,5 +179,6 @@
   "callAnswered": "Svarade på samtalet",
   "waitingForAnswer": "Väntar på svar..",
   "connecting": "Ansluter..",
-  "callTerminated": "Samtalet avslutat"
+  "callTerminated": "Samtalet avslutat",
+  "changeTheme": "Byt tema"
 }

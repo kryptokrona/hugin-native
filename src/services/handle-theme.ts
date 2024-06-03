@@ -8,8 +8,6 @@ import {
   setStorageValue,
 } from './async-storage';
 
-// TODO
-// Add feature to switch theme as user
 export const handleTheme = async () => {
   const themeMode = (await getStorageValue(ASYNC_STORAGE_KEYS.THEME_MODE)) as
     | 'light'

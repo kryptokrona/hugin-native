@@ -182,5 +182,6 @@
   "callTerminated": "Natapos ang tawag",
   "loadMore": " Mag load ng higit pa",
   "transactionHash": "Hash ng transaksyon",
-  "transactionHistory": "history ng transaksyon"
+  "transactionHistory": "history ng transaksyon",
+  "changeTheme": "Baguhin ang tema"
 }

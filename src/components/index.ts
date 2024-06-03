@@ -7,3 +7,4 @@ export * from './sync';
 export * from './preview-item';
 export * from './message-item';
 export * from './message-input';
+export * from './settings-item';

@@ -2,6 +2,7 @@ import { TouchableOpacity } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 import { CustomIcon } from '@/components';
 import { AddGroupScreen, GroupChatScreen, GroupsScreen } from '@/screens';
@@ -16,6 +17,7 @@ import { Header } from '../header';
 const Stack = createNativeStackNavigator<GroupStackParamList>();
 
 export const GroupStackNavigator = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation<GroupStackNavigationType>();
 
   function onAddGroupPress() {
@@ -30,7 +32,7 @@ export const GroupStackNavigator = () => {
         options={() => ({
           header: (_props) => (
             <Header
-              title={'Groups'}
+              title={t('groups')}
               right={
                 <TouchableOpacity onPress={onAddGroupPress}>
                   <CustomIcon type="MI" name="add-box" size={30} />
@@ -44,7 +46,7 @@ export const GroupStackNavigator = () => {
         name={GroupsScreens.AddGroupScreen}
         component={AddGroupScreen}
         options={() => ({
-          header: (_props) => <Header backButton title={'Add group'} />,
+          header: (_props) => <Header backButton title={t('subscribe')} />,
         })}
       />
       <Stack.Screen

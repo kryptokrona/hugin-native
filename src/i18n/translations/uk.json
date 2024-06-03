@@ -181,5 +181,6 @@
   "connecting": "Підключення..",
   "callTerminated": "Виклик припинено",
   "loadMore": "Завантажити ще",
-  "transactionHash": "Хеш транзакції"
+  "transactionHash": "Хеш транзакції",
+  "changeTheme": "Змінити тему"
 }

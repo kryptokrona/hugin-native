@@ -182,5 +182,6 @@
   "callTerminated": "Oproep beëindigd",
   "loadMore": "Laad meer",
   "transactionHash": "Transactiehash",
-  "transactionHistory": "Transactiegeschiedenis"
+  "transactionHistory": "Transactiegeschiedenis",
+  "changeTheme": "Thema wijzigen"
 }

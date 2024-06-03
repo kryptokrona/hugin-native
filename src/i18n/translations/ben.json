@@ -193,5 +193,6 @@
   "autoSelectAPI": "স্বয়ংক্রিয়ভাবে API নির্বাচন করুন",
   "pickAPIList": "পাবলিক API",
   "swappingAPI": "API পরিবর্তন করা হচ্ছে..",
-  "APISwapped": "API সফলভাবে পরিবর্তন করা হয়েছে!"
+  "APISwapped": "API সফলভাবে পরিবর্তন করা হয়েছে!",
+  "changeTheme": "থিম পরিবর্তন করুন"
 }

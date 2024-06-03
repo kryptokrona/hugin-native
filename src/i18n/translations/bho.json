@@ -182,5 +182,6 @@
   "callTerminated": "कॉल समाप्त हो गइल",
   "loadMore": "अधिक लोड करीं",
   "transactionHash": "लेनदेन हैश",
-  "transactionHistory": "लेनदेन के इतिहास"
+  "transactionHistory": "लेनदेन के इतिहास",
+  "changeTheme": "थीम बदलीं"
 }

@@ -5,18 +5,16 @@ import MCI from 'react-native-vector-icons/MaterialCommunityIcons';
 import MI from 'react-native-vector-icons/MaterialIcons';
 
 import { useGlobalStore } from '@/services';
-import type { IconType } from '@/types';
+import type { CustomIconProps } from '@/types';
 
 // Search from here
 //  https://oblador.github.io/react-native-vector-icons
 
-interface Props {
-  name: string;
-  size?: number;
-  type?: IconType;
-}
-
-export const CustomIcon: React.FC<Props> = ({ name, type, size = 24 }) => {
+export const CustomIcon: React.FC<CustomIconProps> = ({
+  name,
+  type,
+  size = 24,
+}) => {
   const theme = useGlobalStore((state) => state.theme);
 
   switch (type) {

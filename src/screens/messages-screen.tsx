@@ -8,7 +8,7 @@ import { PreviewItem, ScreenLayout } from '@/components';
 import {
   type Message,
   MessagesScreens,
-  MessagesStackNavigationType,
+  type MessagesStackNavigationType,
   type MessagesStackParamList,
 } from '@/types';
 import { mockMessages } from '@/utils';

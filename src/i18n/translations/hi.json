@@ -181,5 +181,6 @@
   "connecting": "कनेक्टिंग..",
   "callTerminated": "कॉल समाप्त हो गई",
   "loadMore": "और लोड करें",
-  "transactionHash": "लेन-देन हैश"
+  "transactionHash": "लेन-देन हैश",
+  "changeTheme": "थीम बदलें"
 }
