@@ -3,7 +3,7 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 project.ext.react = [
-    enableHermes: false,  // clean and rebuild if changing
+    enableHermes: false,  // clean and rebuild if changing 
 ]
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
@@ -79,7 +79,7 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  * this variant is about 6MiB larger per architecture than default.
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
-def hermesEnabled = true
+def hermesEnabled = false
 android {
     ndkVersion rootProject.ext.ndkVersion
 

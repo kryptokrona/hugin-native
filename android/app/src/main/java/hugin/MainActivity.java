@@ -57,11 +57,4 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "Hugin";
     }
-
-  @Override
-  protected ReactActivityDelegate createReactActivityDelegate() {
-    return new ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
-      new ReactActivityDelegate(this, getMainComponentName())
-    );
-  }
 }
