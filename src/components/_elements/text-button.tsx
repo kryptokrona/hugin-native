@@ -36,7 +36,7 @@ export const TextButton: React.FC<Props> = ({
     : {};
   const smallTextStyle = small
     ? { fontSize: Styles.fontSizes.small }
-    : { fontSizes: Styles.fontSizes.medium };
+    : { fontSize: Styles.fontSizes.medium };
 
   return (
     <TouchableOpacity
