@@ -182,5 +182,7 @@
   "callTerminated": "कॉल समाप्त",
   "loadMore": "अधिक लोड करू",
   "transactionHash": "लेनदेन हैश",
-  "transactionHistory": "लेनदेन इतिहास"
+  "transactionHistory": "लेनदेन इतिहास",
+  "changeTheme": "थीम बदलू",
+  "changeLanguage": "भाषा बदलू"
 }

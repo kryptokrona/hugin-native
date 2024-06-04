@@ -182,5 +182,7 @@
   "callTerminated": "કોલ સમાપ્ત થઇ ગઈ",
   "loadMore": "વધુ લોડ કરો",
   "transactionHash": "લેન-દેન હેશ",
-  "transactionHistory": "લેન-દેન ઇતિહાસ"
+  "transactionHistory": "લેન-દેન ઇતિહાસ",
+  "changeTheme": "થીમ બદલો",
+  "changeLanguage": "ભાષા બદલો"
 }

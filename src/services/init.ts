@@ -1,5 +1,11 @@
-import { handleTheme } from './handle-theme';
+import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
+import { defaultPreferences, setPreferences } from './zustand';
 
 export const init = async () => {
-  await handleTheme();
+  const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
+  if (!preferences) {
+    setPreferences(defaultPreferences);
+  } else {
+    setPreferences(preferences);
+  }
 };

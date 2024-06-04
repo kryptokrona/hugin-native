@@ -168,5 +168,7 @@
   "nickname": "прозвище",
   "recoverWalletTitle": "Восстановить кошелек?",
   "recoverWalletDescr": "Это сделает все текущие средства недоступными (но их можно будет восстановить с помощью ваших личных ключей)",
-  "groupsRecommendations": "Рекомендуется"
+  "groupsRecommendations": "Рекомендуется",
+  "changeTheme": "Изменить тему",
+  "changeLanguage": "Изменить язык"
 }

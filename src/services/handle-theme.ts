@@ -1,20 +1,11 @@
 import { Appearance } from 'react-native';
 
-import { setTheme } from '@/services';
+import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
+import { getStoreTheme, setTheme } from './zustand';
 
-import {
-  ASYNC_STORAGE_KEYS,
-  getStorageValue,
-  setStorageValue,
-} from './async-storage';
-
-// TODO
-// Add feature to switch theme as user
 export const handleTheme = async () => {
-  const themeMode = (await getStorageValue(ASYNC_STORAGE_KEYS.THEME_MODE)) as
-    | 'light'
-    | 'dark'
-    | null;
+  const themeMode = (await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES))
+    ?.themeMode as 'light' | 'dark' | null;
 
   if (themeMode) {
     setTheme(themeMode);
@@ -22,6 +13,11 @@ export const handleTheme = async () => {
     const colorScheme =
       Appearance.getColorScheme() === 'dark' ? 'dark' : 'light';
     setTheme(colorScheme);
-    setStorageValue(ASYNC_STORAGE_KEYS.THEME_MODE, colorScheme);
   }
+};
+
+export const toggleTheme = async () => {
+  const theme = getStoreTheme();
+
+  setTheme(theme.mode === 'light' ? 'dark' : 'light');
 };

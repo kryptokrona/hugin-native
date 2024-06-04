@@ -18,7 +18,6 @@ export const PreviewItem: React.FC<Props> = ({ name, hash, onPress }) => {
   const isNew = true; // dummy
   const borderColor = isNew ? theme.primary : theme.border;
 
-  console.log({ hash, name });
   function handleLongPress() {
     setIsPressed(true);
     // Do something like a popup?

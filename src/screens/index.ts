@@ -1,5 +1,6 @@
 export * from './_auth-screens';
 export * from './add-group-screen';
+export * from './change-language-screen';
 export * from './create-screen';
 export * from './group-chat-screen';
 export * from './groups-screen';

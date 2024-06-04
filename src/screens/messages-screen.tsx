@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { FlatList } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
-import { PreviewItem, ScreenLayout } from '@/components';
+import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
 import {
   type Message,
   MessagesScreens,
-  MessagesStackNavigationType,
+  type MessagesStackNavigationType,
   type MessagesStackParamList,
 } from '@/types';
 import { mockMessages } from '@/utils';
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export const MessagesScreen: React.FC<Props> = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation<MessagesStackNavigationType>();
   const [chats, setChats] = useState<Message[]>([]);
 
@@ -36,6 +38,11 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
+      {chats.length === 0 && (
+        <Container>
+          <TextField size="large">{t('noMessages')}</TextField>
+        </Container>
+      )}
       <FlatList
         data={chats}
         keyExtractor={(item, i) => `${item.hash}-${i}`}

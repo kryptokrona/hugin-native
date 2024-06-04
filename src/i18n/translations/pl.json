@@ -180,5 +180,7 @@
   "waitingForAnswer": "Czekam na odpowiedź..",
   "connecting": "Łączenie..",
   "callTerminated": "Połączenie zakończone",
-  "loadMore": "Wyświetl więcej"
+  "loadMore": "Wyświetl więcej",
+  "changeTheme": "Zmień motyw",
+  "changeLanguage": "Zmień język"
 }

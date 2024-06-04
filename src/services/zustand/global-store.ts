@@ -1,24 +1,78 @@
 import { create } from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 
+// import { defaultPreferences } from '@/config';
 import { Themes } from '@/styles';
-import type { Group, Theme } from '@/types';
+import type { Preferences, Theme } from '@/types';
+
+import { setPreferences } from './setters';
+
+import { ASYNC_STORAGE_KEYS, setStorageValue } from '../async-storage';
+
+// HACK prevent cycling import, fix this
+export const defaultPreferences: Preferences = {
+  authConfirmation: false,
+  authenticationMethod: 'hardware-auth',
+  //   autoOptimize: false,
+  //   autoPickCache: 'true',
+  // cache: Config.defaultCache,
+  //   cacheEnabled: true,
+
+  currency: 'usd',
+
+  // node: Config.defaultDaemon.getConnectionString(),
+  language: 'en',
+
+  limitData: false,
+
+  nickname: 'Anonymous',
+
+  notificationsEnabled: true,
+
+  scanCoinbaseTransactions: false,
+  themeMode: 'dark',
+  websocketEnabled: true,
+};
 
 type GlobalStore = {
   theme: Theme;
-  recommendedGroups: Group[];
+  preferences: Preferences;
 
   setTheme: (payload: Theme) => void;
-  setRecommendedGroups: (payload: Group[]) => void;
+  setPreferences: (preferences: Preferences) => void;
 };
 
-export const useGlobalStore = create<GlobalStore>((set) => ({
-  recommendedGroups: [],
-  setRecommendedGroups(payload: Group[]) {
-    set({ recommendedGroups: payload });
-  },
+export const useGlobalStore = create<
+  GlobalStore,
+  [['zustand/subscribeWithSelector', never]]
+>(
+  subscribeWithSelector((set) => ({
+    preferences: defaultPreferences,
+    setPreferences: (preferences: Preferences) => {
+      set({ preferences });
+    },
 
-  setTheme(payload: Theme) {
-    set({ theme: payload });
+    setTheme: (payload: Theme) => {
+      set({ theme: payload });
+    },
+    theme: Themes.dark,
+  })),
+);
+
+useGlobalStore.subscribe(
+  (state) => state.preferences,
+  (preferences) => {
+    if (!preferences) {
+      return;
+    }
+    setStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES, preferences);
   },
-  theme: Themes.dark,
-}));
+);
+
+useGlobalStore.subscribe(
+  (state) => state.theme,
+  (theme) => {
+    const { preferences } = useGlobalStore.getState();
+    setPreferences({ ...preferences, themeMode: theme.mode });
+  },
+);

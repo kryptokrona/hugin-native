@@ -168,5 +168,7 @@
   "nickname": "Betiteln",
   "recoverWalletTitle": "Wallet wiederherstellen?",
   "recoverWalletDescr": "Dadurch werden alle aktuellen Gelder nicht verfügbar (aber mit Ihren privaten Schlüsseln wiederherstellbar).",
-  "groupsRecommendations": "Empfohlen"
+  "groupsRecommendations": "Empfohlen",
+  "changeTheme": "Thema ändern",
+  "changeLanguage": "Sprache ändern"
 }

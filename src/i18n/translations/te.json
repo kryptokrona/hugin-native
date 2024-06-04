@@ -182,5 +182,7 @@
   "callTerminated": "కాల్ ముగించబడింది",
   "loadMore": "మరింత లోడ్ చేయండి",
   "transactionHash": "లావాదేవీ హాష్",
-  "transactionHistory": "లావాదేవీ చరిత్ర"
+  "transactionHistory": "లావాదేవీ చరిత్ర",
+  "changeTheme": "థీమ్ మార్చు",
+  "changeLanguage": "భాషను మార్చు"
 }

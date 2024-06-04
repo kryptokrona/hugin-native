@@ -8,4 +8,18 @@ export interface Theme {
   error: string;
 }
 
-export type IconType = 'MCI' | 'MI' | 'FA' | 'FA6' | 'IO';
+export type IconType =
+  | 'MCI'
+  | 'MI'
+  | 'FA'
+  | 'FA6'
+  | 'FA5'
+  | 'IO'
+  | 'FI'
+  | 'SLI';
+
+export interface CustomIconProps {
+  name: string;
+  size?: number;
+  type?: IconType;
+}

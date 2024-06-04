@@ -182,5 +182,7 @@
   "callTerminated": "Panggilan berakhir",
   "loadMore": "Muat lebih banyak",
   "transactionHash": "Hash transaksi",
-  "transactionHistory": "Riwayat transaksi"
+  "transactionHistory": "Riwayat transaksi",
+  "changeTheme": "Ubah tema",
+  "changeLanguage": "Ubah bahasa"
 }

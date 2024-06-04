@@ -1,3 +1,4 @@
-export * from './config';
 export * from './globals';
 export * from './constants';
+// export * from './defaults';
+export * from './old-config';

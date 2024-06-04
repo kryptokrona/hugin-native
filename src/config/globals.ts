@@ -38,7 +38,7 @@ import {
 } from '@/services';
 import type { Preferences, Payee, Group, TransactionDetail } from '@/types';
 
-import { config } from './config';
+import { config } from './old-config';
 
 import offline_cache_list from './sheets/apis.json';
 import offline_groups_list from './sheets/groups.json';

@@ -168,5 +168,7 @@
   "nickname": "Kallenavn",
   "recoverWalletTitle": "Gjenopprette lommebok?",
   "recoverWalletDescr": "Dette vil gjøre alle gjeldende midler utilgjengelige (men kan gjenvinnes med dine private nøkler).",
-  "groupsRecommendations": "Anbefalt"
+  "groupsRecommendations": "Anbefalt",
+  "changeTheme": "Endre tema",
+  "changeLanguage": "Endre språk"
 }

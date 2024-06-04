@@ -30,10 +30,13 @@ export type MainStackParamList = {
 };
 
 export const SettingsScreens = {
+  ChangeLanguageScreen: 'ChangeLanguageScreen',
   // ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
   DisableDozeScreen: 'DisableDozeScreen',
   ExportKeysScreen: 'ExportKeysScreen',
+
   FaqScreen: 'FaqScreen',
+
   // ForgotPinScreen: 'ForgotPinScreen',
   // LoggingScreen: 'LoggingScreen',
   OptimizeScreen: 'OptimizeScreen',
@@ -43,7 +46,6 @@ export const SettingsScreens = {
   SettingsScreen: 'SettingsScreen',
   SwapAPIScreen: 'SwapAPIScreen',
   SwapCurrencyScreen: 'SwapCurrencyScreen',
-  SwapLanguageScreen: 'SwapLanguageScreen',
   SwapNodeScreen: 'SwapNodeScreen',
 } as const;
 
@@ -55,7 +57,7 @@ export type SettingsStackParamList = {
   [SettingsScreens.OptimizeScreen]: undefined;
   [SettingsScreens.SwapAPIScreen]: undefined;
   [SettingsScreens.SwapCurrencyScreen]: undefined;
-  [SettingsScreens.SwapLanguageScreen]: undefined;
+  [SettingsScreens.ChangeLanguageScreen]: undefined;
   [SettingsScreens.SwapNodeScreen]: undefined;
 };
 
