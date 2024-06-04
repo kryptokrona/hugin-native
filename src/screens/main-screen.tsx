@@ -2,21 +2,20 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
-import { Container, ScreenLayout } from '@/components';
+import { Container, ScreenLayout, TextButton } from '@/components';
 import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
-// import { joinSwarm } from '../../lib/native';
+import { bare, swarm } from '../../lib/native.js';
 
 const key = 'lol';
-
+bare();
 export const MainScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   // const onJoinSwarmPress = () => {
   //   joinSwarm(key);
   // };
   // const navigation = useNavigation<MainStackNavigationType>();
-
   const updateBalance = useCallback(async () => {
     const tmpPrice = await getCoinPriceFromAPI();
     if (tmpPrice !== undefined) {
@@ -122,13 +121,12 @@ export const MainScreen: React.FC = () => {
           />
         }>
         <Container bottom row>
-          {/* <TextButton>Send</TextButton> */}
-          {/* <TextButton
+          <TextButton
             onPress={function (): void {
-              // joinSwarm(key);
+              swarm(key);
             }}>
             Send
-          </TextButton> */}
+          </TextButton>
         </Container>
       </ScrollView>
     </ScreenLayout>
