@@ -1,8 +1,8 @@
 package com.hugin;
 import expo.modules.ReactActivityDelegateWrapper;
 import com.facebook.react.ReactActivityDelegate;
-
 import com.facebook.react.ReactActivity;
+
 // import android.view.WindowManager;
 // import android.view.View;
 // import android.os.Build;
@@ -53,6 +53,13 @@ public class MainActivity extends ReactActivity {
     //
     //     super.onCreate(savedInstanceState);
     // }
+
+  //    @Override
+  // protected ReactActivityDelegate createReactActivityDelegate() {
+  //   return new ReactActivityDelegateWrapper(this, false,
+  //     new ReactActivityDelegate(this, getMainComponentName())
+  //   );
+  // }
 
     protected String getMainComponentName() {
         return "Hugin";

@@ -8,18 +8,15 @@ import com.hugin.BuildConfig;
 import android.app.Application;
 import android.content.Intent;
 import android.util.Log;
-
 import com.facebook.react.PackageList;
 import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
 import com.facebook.react.bridge.JavaScriptExecutorFactory;
-import com.facebook.react.modules.systeminfo.AndroidInfoHelpers;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.modules.network.OkHttpClientFactory;
 import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.facebook.soloader.SoLoader;
-import io.csie.kudo.reactnative.v8.executor.V8ExecutorFactory;
 import java.util.List;
 import java.io.IOException;
 
@@ -48,14 +45,6 @@ public class MainApplication extends Application implements ReactApplication {
         return "index";
     }
 
-    @Override
-    protected JavaScriptExecutorFactory getJavaScriptExecutorFactory() {
-        return new V8ExecutorFactory(
-            getApplicationContext(),
-            getPackageName(),
-            AndroidInfoHelpers.getFriendlyDeviceName(),              
-            getUseDeveloperSupport());
-      }
   });
 
   @Override
