@@ -7,9 +7,8 @@ import { globals } from '@/config';
 import { getCoinPriceFromAPI } from '@/services';
 
 import { bare, swarm } from '../../lib/native.js';
-
-const key = 'lol';
 bare();
+const key = 'lol';
 export const MainScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   // const onJoinSwarmPress = () => {
