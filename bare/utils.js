@@ -1,4 +1,4 @@
-const DHT = require('@hyperswarm/dht');
+const DHT = require('hyperdht');
 const Keychain = require('keypear');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
@@ -30,11 +30,11 @@ function sign(m) {
 
 const sanitize_join_swarm_data = (data) => {
   const address = sanitizeHtml(data.address);
-  if (address.length !== 99) return false;
+  // if (address.length !== 99) return false;
   const message = sanitizeHtml(data.message);
   if (message.length > 64) return false;
   const signature = sanitizeHtml(data.signature);
-  if (signature.length !== 128) return false;
+  // if (signature.length !== 128) return false;
   const topic = sanitizeHtml(data.topic);
   if (topic.length !== 64) return false;
   const name = sanitizeHtml(data.name);
@@ -51,22 +51,22 @@ const sanitize_join_swarm_data = (data) => {
 
   const channels = [];
 
-  if (data.channels.length) {
-    //Disable channels
+  // if (data.channels.length) {
+  //   //Disable channels
 
-    // if (data.channels.length > 100) return false
-    // for (const a of data.channels) {
-    //     let channel = sanitizeHtml(a)
-    //     if (channel.length > 50) return false
-    //     channels.push(channel)
-    // }
-    return false;
-  }
+  //   // if (data.channels.length > 100) return false
+  //   // for (const a of data.channels) {
+  //   //     let channel = sanitizeHtml(a)
+  //   //     if (channel.length > 50) return false
+  //   //     channels.push(channel)
+  //   // }
+  //   return false;
+  // }
 
   const clean_object = {
     address: address,
     message: message,
-    signature: signature,
+    signature: '',
     topic: topic,
     name: name,
     voice: voice,
@@ -79,7 +79,7 @@ const sanitize_join_swarm_data = (data) => {
   return clean_object;
 };
 
-const sanitize_group_message = (msg, hash) => {
+const sanitize_group_message = (msg) => {
   let timestamp = sanitizeHtml(msg.t);
   if (timestamp.length > 20) return false;
   let group = sanitizeHtml(msg.g);
@@ -94,8 +94,8 @@ const sanitize_group_message = (msg, hash) => {
   if (sig.length > 200) return false;
   let nick = sanitizeHtml(msg.n);
   if (nick.length > 50) return false;
-  let txHash = sanitizeHtml(hash);
-  if (txHash.length > 64) return false;
+  let txHash = sanitizeHtml(msg.hash);
+  // if (txHash.length > 64) return false;
 
   const clean_object = {
     message: text,
@@ -107,7 +107,7 @@ const sanitize_group_message = (msg, hash) => {
     reply: reply,
     hash: txHash,
     sent: msg.sent,
-    channel: channel,
+    channel: 'channel',
     hash: txHash,
   };
 

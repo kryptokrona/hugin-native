@@ -4,9 +4,10 @@ const ce = require('compact-encoding');
 const { Hugin } = require('./account');
 let RPC;
 let RPC_SENDER;
-let LOCAL_VOICE_STATUS_OFFLINE = [
+const LOCAL_VOICE_STATUS_OFFLINE = [
   JSON.stringify({ voice: false, video: false, topic: '' }),
 ];
+let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 
 class Swarm {
   constructor(rpc) {
@@ -18,7 +19,7 @@ class Swarm {
   }
 
   async end() {
-    await end_swarm(key);
+    await end_swarm(topic);
   }
 
   channel() {
@@ -46,17 +47,7 @@ const create_swarm = async (key) => {
   let discovery;
   let swarm;
   try {
-    swarm = new HyperSwarm(
-      {
-        firewall(remotePublicKey, payload) {
-          //We are already checking payloads in hyperswarm
-          return false;
-        },
-      },
-      sig,
-      dht_keys,
-      base_keys,
-    );
+    swarm = new HyperSwarm({}, sig, dht_keys, base_keys);
   } catch (e) {
     error_message('Error starting swarm');
     return;
@@ -95,9 +86,8 @@ const create_swarm = async (key) => {
   const topic = Buffer.alloc(32).fill(hash);
   discovery = swarm.join(topic, { server: true, client: true });
   active.discovery = discovery;
-  await discovery.flushed();
-  check_if_online(hash);
-  return hash;
+  // check_if_online(hash);
+  // return hash;
 };
 
 const new_connection = (connection, hash, key) => {
@@ -145,7 +135,7 @@ const send_joined_message = async (topic) => {
   let [voice, video] = get_local_voice_status(topic);
   if (video) voice = true;
   //const channels = await get_my_channels(key)
-
+  console.log('Video?', video);
   const data = JSON.stringify({
     address: Hugin.address,
     signature: sig,
@@ -178,7 +168,7 @@ const send_swarm_message = (message, topic) => {
 };
 
 const incoming_message = async (data, topic, connection, key) => {
-  const str = new TextDecoder().decode(data);
+  const str = ce.string.decode(data);
   console.log('Str!', str);
   if (str === 'Ping') return;
   // Check
@@ -188,14 +178,9 @@ const incoming_message = async (data, topic, connection, key) => {
     return;
   }
   if (check) return;
-  const hash = str.substring(0, 64);
-  // let [message, time, hsh] = await decryptSwarmMessage(str, hash, key)
-  // if (!message) return;
-  // const msg = await saveGroupMsg(message, hsh, time, false, true)
-  // if (!msg) return;
-  //Send new board message to frontend.
-  // sender('groupRtcMsg', msg)
-  sender('swarm-message', { data });
+  console.log('Got data!', data);
+  const message = sanitize_group_message(data);
+  sender('swarm-message', { message, topic });
 };
 
 const check_data_message = async (data, connection, topic) => {
@@ -334,6 +319,12 @@ const end_swarm = async (topic) => {
   const still_active = active_swarms.filter((a) => a.topic !== topic);
   active_swarms = still_active;
   console.log('***** Ended swarm *****');
+};
+
+const update_local_voice_channel_status = (data) => {
+  const updated = data;
+  active_voice_channel = [updated];
+  return true;
 };
 
 const get_local_voice_status = (topic) => {

@@ -31,7 +31,7 @@ rpc.register(3, {
   response: ce.string,
   onrequest: async (key) => {
     end_swarm(key);
-    return 'swarm';
+    return 'endswarm';
   },
 });
 
