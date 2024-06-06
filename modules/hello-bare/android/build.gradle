@@ -52,6 +52,7 @@ afterEvaluate {
 
 android {
 
+
   def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
   if (agpVersion.tokenize('.')[0].toInteger() < 8) {
     compileOptions {
@@ -111,6 +112,13 @@ android {
   publishing {
     singleVariant("release") {
       withSourcesJar()
+    }
+  }
+
+// TODO Experimental
+  tasks.whenTaskAdded { task ->
+    if (task.name == "assembleDebug") {
+        task.dependsOn "clean"
     }
   }
 }

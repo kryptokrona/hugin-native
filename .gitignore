@@ -81,3 +81,8 @@ bare/bundle.js.h.d
 bare-libs/
 bin/hello-pear.js
 
+
+# Expo
+.expo
+dist/
+web-build/
