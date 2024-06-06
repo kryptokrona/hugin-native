@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@hyperswarm/dht": "^6.5.1",
+    "@hyperswarm/secret-stream": "^6.4.0",
     "@os-team/i18next-react-native-language-detector": "^1.0.33",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/netinfo": "^11.3.2",
@@ -38,6 +39,7 @@
     "expo": "^50.0.0",
     "fs": "^0.0.1-security",
     "https-browserify": "~0.0.0",
+    "hyperdht": "^6.15.1",
     "hyperswarm": "^4.7.14",
     "i18next": "^23.11.5",
     "identicon.js": "^2.3.3",
@@ -72,7 +74,6 @@
     "react-native-svg-transformer": "^1.4.0",
     "react-native-tcp": "^4.0.0",
     "react-native-udp": "^4.1.7",
-    "react-native-v8": "^2.3.0",
     "react-native-vector-icons": "^10.1.0",
     "readable-stream": "1.0.33",
     "request-promise-native": "^1.0.9",
@@ -82,7 +83,6 @@
     "tweetnacl-sealed-box": "^1.0.5",
     "tweetnacl-util": "^0.15.1",
     "url": "~0.10.1",
-    "v8-android-jit": "^11.1000.4",
     "vm-browserify": "0.0.4",
     "zustand": "^4.5.2"
   },
