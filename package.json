@@ -73,7 +73,7 @@
     "react-native-tcp": "^4.0.0",
     "react-native-udp": "^4.1.7",
     "react-native-v8": "^2.3.0",
-    "react-native-vector-icons": "^10.1.0",
+    "react-native-vector-icons": "10.0.0",
     "readable-stream": "1.0.33",
     "request-promise-native": "^1.0.9",
     "sodium-native": "^4.1.1",

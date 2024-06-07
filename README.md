@@ -51,6 +51,22 @@ hello-pear --ios-sim x64
 
 hello-pear --ios --ios-sim arm64
 
+# Android only arm archs
+
+hello-pear --android arm64 arm
+
+# Android only arm64
+
+hello-pear --android arm64
+
+# Android only x86 archs
+
+hello-pear --android x64 ia32
+
+# help
+
+hello-pear --help
+
 ## Step 2: Start your Application
 
 Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your React Native project. Run the following command to start your _Android_ or _iOS_ app:
@@ -104,3 +120,5 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+Added: sudo gem install cocoapods-fix-react-native, included in podfile

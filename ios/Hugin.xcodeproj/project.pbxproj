@@ -10,15 +10,16 @@
 		00E356F31AD99517003FC87E /* HuginTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* HuginTests.m */; };
 		048848C92DC04058B4C0BC9F /* Roboto-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 59B3497C32624D07AADA8ECF /* Roboto-Thin.ttf */; };
 		085166117CC770E932515610 /* libPods-Hugin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D69EAEEE1A64CF227A75EF8 /* libPods-Hugin.a */; };
-		09C7CBCE783E163F20614391 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14BBD7D6418467F2B9DF759C /* ExpoModulesProvider.swift */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		16FF29976C6B4CB9A611316D /* Montserrat-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB1CFF59AEC54F5DB494AA09 /* Montserrat-ExtraLight.ttf */; };
 		30F4E9A0E3F24269803CFA03 /* Montserrat-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0035EC09969A4AAF90E67356 /* Montserrat-Light.ttf */; };
 		3EACBD322C1106FF00960317 /* libHelloBare.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EACBD312C1106FF00960317 /* libHelloBare.a */; };
+		3ED5B1762C120C97004CFE89 /* HelloBare.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3ED5B1722C120C97004CFE89 /* HelloBare.mm */; };
+		3ED5B1772C120C97004CFE89 /* HelloBare.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 3ED5B1732C120C97004CFE89 /* HelloBare.podspec */; };
+		3ED5B1782C120C97004CFE89 /* HelloBareModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ED5B1742C120C97004CFE89 /* HelloBareModule.swift */; };
 		49232F28BF0B2375BB263026 /* libPods-Hugin-HuginTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 16869DDA100097F2EBA75710 /* libPods-Hugin-HuginTests.a */; };
-		4EEDF7185AC18FC30BD20ABE /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD5E7C0EE151AA4D6A5B7FFA /* ExpoModulesProvider.swift */; };
 		4F96809E00304521A1D16DE3 /* Montserrat-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B9BEF04A67474451B1AA7544 /* Montserrat-Thin.ttf */; };
 		6311024F685D47DAB572A5CE /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55E26584F1ED499A886E78F6 /* Roboto-Regular.ttf */; };
 		7DDDDA75A50843E6B5E7B985 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6F9E2389FCA34C289A4FB948 /* Roboto-Bold.ttf */; };
@@ -56,7 +57,6 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Hugin/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Hugin/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Hugin/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		14BBD7D6418467F2B9DF759C /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Hugin-HuginTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		16869DDA100097F2EBA75710 /* libPods-Hugin-HuginTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Hugin-HuginTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D69EAEEE1A64CF227A75EF8 /* libPods-Hugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Hugin.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2C753714BB2B4A4D95028B7A /* Montserrat-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraBold.ttf"; path = "../src/assets/fonts/Montserrat-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -64,6 +64,11 @@
 		3B13E1268E3302F2760D5B20 /* Pods-Hugin.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin.debug.xcconfig"; path = "Target Support Files/Pods-Hugin/Pods-Hugin.debug.xcconfig"; sourceTree = "<group>"; };
 		3EACBD2F2C10FED800960317 /* libHelloBare.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libHelloBare.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EACBD312C1106FF00960317 /* libHelloBare.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libHelloBare.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		3ED5B1712C120C97004CFE89 /* HelloBare.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HelloBare.h; sourceTree = "<group>"; };
+		3ED5B1722C120C97004CFE89 /* HelloBare.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HelloBare.mm; sourceTree = "<group>"; };
+		3ED5B1732C120C97004CFE89 /* HelloBare.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = HelloBare.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		3ED5B1742C120C97004CFE89 /* HelloBareModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HelloBareModule.swift; sourceTree = "<group>"; };
+		3EF768B42C12212E0083C676 /* HelloBare-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "HelloBare-Bridging-Header.h"; sourceTree = "<group>"; };
 		450882FFA2D04E1AA2E203BB /* Roboto-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Light.ttf"; path = "../src/assets/fonts/Roboto-Light.ttf"; sourceTree = "<group>"; };
 		53763BC343EC400F9F28EF9D /* Roboto-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Black.ttf"; path = "../src/assets/fonts/Roboto-Black.ttf"; sourceTree = "<group>"; };
 		55E26584F1ED499A886E78F6 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Regular.ttf"; path = "../src/assets/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
@@ -78,7 +83,6 @@
 		A9304A63C390281A765CF925 /* Pods-Hugin-HuginTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin-HuginTests.debug.xcconfig"; path = "Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B9BEF04A67474451B1AA7544 /* Montserrat-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Thin.ttf"; path = "../src/assets/fonts/Montserrat-Thin.ttf"; sourceTree = "<group>"; };
 		CB1CFF59AEC54F5DB494AA09 /* Montserrat-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraLight.ttf"; path = "../src/assets/fonts/Montserrat-ExtraLight.ttf"; sourceTree = "<group>"; };
-		CD5E7C0EE151AA4D6A5B7FFA /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Hugin/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -147,6 +151,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		3ED5B1752C120C97004CFE89 /* HelloBare */ = {
+			isa = PBXGroup;
+			children = (
+				3ED5B1712C120C97004CFE89 /* HelloBare.h */,
+				3ED5B1722C120C97004CFE89 /* HelloBare.mm */,
+				3ED5B1732C120C97004CFE89 /* HelloBare.podspec */,
+				3ED5B1742C120C97004CFE89 /* HelloBareModule.swift */,
+				3EF768B42C12212E0083C676 /* HelloBare-Bridging-Header.h */,
+			);
+			path = HelloBare;
+			sourceTree = "<group>";
+		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
@@ -157,6 +173,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				3ED5B1752C120C97004CFE89 /* HelloBare */,
 				13B07FAE1A68108700A75B9A /* Hugin */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* HuginTests */,
@@ -164,7 +181,6 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
 				B629E6EC3127433D8C484F3A /* Resources */,
-				F6F521CAD53BFDD914E7B04D /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -178,14 +194,6 @@
 				00E356EE1AD99517003FC87E /* HuginTests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		A3A7AF7B358B439C10699FFA /* Hugin */ = {
-			isa = PBXGroup;
-			children = (
-				CD5E7C0EE151AA4D6A5B7FFA /* ExpoModulesProvider.swift */,
-			);
-			name = Hugin;
 			sourceTree = "<group>";
 		};
 		B629E6EC3127433D8C484F3A /* Resources */ = {
@@ -208,14 +216,6 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		B9D8A9926EEC7B5E42E8BFA1 /* HuginTests */ = {
-			isa = PBXGroup;
-			children = (
-				14BBD7D6418467F2B9DF759C /* ExpoModulesProvider.swift */,
-			);
-			name = HuginTests;
-			sourceTree = "<group>";
-		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -225,15 +225,6 @@
 				9E7543ECEEECDF8362F7F25E /* Pods-Hugin-HuginTests.release.xcconfig */,
 			);
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		F6F521CAD53BFDD914E7B04D /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				A3A7AF7B358B439C10699FFA /* Hugin */,
-				B9D8A9926EEC7B5E42E8BFA1 /* HuginTests */,
-			);
-			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -249,6 +240,7 @@
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
 				B3AFCE45B958E101F2B184B4 /* [CP] Copy Pods Resources */,
+				DD71B4F4DC6D266CF18933C8 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -271,6 +263,7 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				53A04846F19B427F330187C0 /* [CP] Copy Pods Resources */,
+				B46EA4BC3A9F6E45F420D55E /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -332,6 +325,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				D91053670CB58E93792F1E04 /* PrivacyInfo.xcprivacy in Resources */,
+				3ED5B1772C120C97004CFE89 /* HelloBare.podspec in Resources */,
 				92475B7FDE014E53ADC3331C /* Montserrat-Black.ttf in Resources */,
 				FBFEDE2D0B28489A80C30051 /* Montserrat-ExtraBold.ttf in Resources */,
 				16FF29976C6B4CB9A611316D /* Montserrat-ExtraLight.ttf in Resources */,
@@ -442,6 +436,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		B46EA4BC3A9F6E45F420D55E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		D5F19C89E872FC99668B6950 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -460,6 +471,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Hugin-HuginTests/expo-configure-project.sh\"\n";
+		};
+		DD71B4F4DC6D266CF18933C8 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		F3A3858142475BA592B4F410 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -491,7 +519,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				00E356F31AD99517003FC87E /* HuginTests.m in Sources */,
-				09C7CBCE783E163F20614391 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,9 +526,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3ED5B1782C120C97004CFE89 /* HelloBareModule.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				4EEDF7185AC18FC30BD20ABE /* ExpoModulesProvider.swift in Sources */,
+				3ED5B1762C120C97004CFE89 /* HelloBare.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,6 +622,7 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = Hugin;
+				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = "$(SRCROOT)/HelloBare/HelloBare-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -707,7 +736,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				USE_HERMES = false;
+				USE_HERMES = true;
 			};
 			name = Debug;
 		};
@@ -783,7 +812,7 @@
 				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				USE_HERMES = false;
+				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

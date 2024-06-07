@@ -1,3 +1,4 @@
+// HelloBareModule.swift.
 import ExpoModulesCore
 
 public class HelloBareModule: Module {

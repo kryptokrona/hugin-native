@@ -1,4 +1,5 @@
-hb_root = File.join(__dir__, "..", "..", "..", "bare-libs", "ios")
+hb_root = File.join(__dir__, "..", "..", "bare-libs", "ios")
+bare_root = File.join(__dir__, "..", "..", "bare")
 
 Pod::Spec.new do |s|
   s.name           = 'HelloBare'
@@ -12,14 +13,12 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'React'
-  s.dependency 'React-Core'
-  s.dependency 'React-RCTBridge'
-  s.dependency 'ReactCommon/turbomodule/core'
 
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
-    'SWIFT_COMPILATION_MODE' => 'wholemodule'
+    'SWIFT_COMPILATION_MODE' => 'wholemodule',
+    'HEADER_SEARCH_PATHS' => "$(inherited) #{bare_root} #{hb_root}"
   }
 
   s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"

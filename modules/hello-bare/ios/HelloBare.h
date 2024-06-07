@@ -1,3 +1,4 @@
+// HelloBare.h
 #import <Foundation/Foundation.h>
 
 #import <React/RCTBridge.h>

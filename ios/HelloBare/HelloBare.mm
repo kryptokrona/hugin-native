@@ -1,12 +1,10 @@
 // HelloBare.mm
 #import "HelloBare.h"
-
 #import <React/RCTBridge.h>
 #import <ReactCommon/RCTTurboModule.h>
+#import "hello-bare-jsi.hpp"
 
-#import <hello-bare-jsi.hpp>
-
-@interface RCTBridge (KeetCore)
+@interface RCTBridge (HelloBare)
 
 -(void*)runtime;
 
@@ -29,8 +27,8 @@
   if (!bridge) {
     return;
   }
-  
-  auto rt = [bridge respondsToSelector:@selector(runtime)] 
+
+  auto rt = [bridge respondsToSelector:@selector(runtime)]
     ? reinterpret_cast<jsi::Runtime*>(bridge.runtime)
     : nullptr;
   if (!rt) {
@@ -39,7 +37,7 @@
 
   static bool installed = false;
   bool already_installed = installed;
-  
+
   rn_data_t* rn_data = (rn_data_t*)malloc(sizeof(rn_data_t));
   rn_data->rt = rt;
   rn_data->call_invoker = bridge.jsCallInvoker.get();
