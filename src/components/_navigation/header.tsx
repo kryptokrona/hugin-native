@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -59,13 +59,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     flexDirection: 'row',
-    height: Platform.OS === 'ios' ? 44 : 56,
+    height: 56,
     justifyContent: 'space-between',
-    paddingBottom: Platform.OS === 'ios' ? 0 : 10,
+    paddingBottom: 10,
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
   logo: {
+    borderRadius: 50,
     height: 24,
     width: 24,
   },
