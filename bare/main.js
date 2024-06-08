@@ -55,6 +55,25 @@ const end_swarm = async (topic) => {
   await swarm.end(swarm.topic);
 };
 
+const send_swarm_message = (message) => {
+  const swarm = Hugin.rooms.find((a) => a.topic === message.topic);
+  let message_json = {
+    m: 'Message ',
+    k: 'my_address',
+    s: 'signature',
+    g: 'group == key',
+    n: Hugin.name,
+    r: 'reply hash',
+    c: 'Maybe a channel',
+  };
+  //If reply change this to the hash of the message
+  if (message.r) {
+    message_json.r = message.r;
+  }
+
+  swarm.send_message(JSON.stringify(message_json), swarm.topic);
+};
+
 //BEAM
 
 // tell app we're ready

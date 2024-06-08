@@ -27,6 +27,10 @@ class Swarm {
     await end_swarm(topic);
   }
 
+  send_message(m, topic) {
+    send_swarm_message(m, topic);
+  }
+
   channel() {
     if (RPC) return;
     //Set up stream rpc if we need to send files somewhere
