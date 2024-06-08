@@ -28,7 +28,24 @@ class Swarm {
   }
 
   send_message(m, topic) {
-    send_swarm_message(m, topic);
+    let message_json = {
+      m: 'Message ',
+      k: 'my_address',
+      s: 'signature',
+      g: 'group == key',
+      n: Hugin.name,
+      r: 'reply hash',
+      c: 'Room',
+      t: Date.now(),
+    };
+    //If reply change this to the hash of the message
+    if (message.r) {
+      message_json.r = message.r;
+    }
+
+    const send = JSON.stringify(message_json);
+
+    send_swarm_message(send, topic);
   }
 
   channel() {
