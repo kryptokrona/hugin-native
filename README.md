@@ -32,10 +32,40 @@ For ease we added a helper script you can simply install running `npm link` in t
 > The first time you run it you need to append the `--configure` flag:
 >
 > ```sh
-> hello-pear --configure
+> npx hello-pear --configure
 > ```
 
 > **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+
+## Updating hello pear stuff
+
+# iOS simulator only
+
+npx hello-pear --configure --ios-sim
+
+# iOS simulator only with x64 architecture
+
+npx hello-pear --configure --ios-sim x64
+
+# iOS and iOS simulator
+
+npx hello-pear --configure --ios --ios-sim arm64
+
+# Android only arm archs
+
+npx hello-pear --configure --android arm64 arm
+
+# Android only arm64
+
+npx hello-pear --configure --android arm64
+
+# Android only x86 archs
+
+npx hello-pear --configure --android x64 ia32
+
+# help
+
+hello-pear --help
 
 ## Step 2: Start your Application
 
@@ -52,6 +82,8 @@ yarn android
 ```
 
 ### For iOS
+
+Strongly suggest running through xcode
 
 ```bash
 # using npm
@@ -96,3 +128,10 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+## Resolved problems iOS
+
+Changing react-native-vector-icons to v 10.0.0. Carefully update this package in the future,
+Duplicate symbols fix: pod 'Flipper-DoubleConversion', :podspec => '<https://github.com/facebook/flipper.git>' (?)
+Duplicate symbols fix: gem "cocoapods-fix-react-native" (?)
+**Duplicate symbols fix: Remove link to GDASYNC in pods -> TcpSockets -> Build phases -> Compile sources (Need to be done every time you run pod install) Awaiting permanent fix.**
