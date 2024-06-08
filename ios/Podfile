@@ -6,7 +6,7 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '14.0'
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -23,6 +23,11 @@ target 'Hugin' do
     rescue => e
       Pod::UI.warn e
     end
+    begin
+      expo_patch_react_imports!(installer)
+    rescue => e
+      Pod::UI.warn e
+    end
   end
   config = use_native_modules!
 
@@ -31,6 +36,8 @@ target 'Hugin' do
     # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
+  pod 'HelloBare', :path => '../modules/hello-bare/ios'
 
   target 'HuginTests' do
     inherit! :complete

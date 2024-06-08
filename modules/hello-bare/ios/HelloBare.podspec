@@ -16,7 +16,8 @@ Pod::Spec.new do |s|
   # Swift/Objective-C compatibility
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
-    'SWIFT_COMPILATION_MODE' => 'wholemodule'
+    'SWIFT_COMPILATION_MODE' => 'wholemodule',
+    'HEADER_SEARCH_PATHS' => "$(inherited) #{hb_root}/../../bare"
   }
 
   s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
@@ -29,6 +30,6 @@ Pod::Spec.new do |s|
     'HB_ROOT[sdk=iphoneos*]' =>  "#{hb_root}/iphoneos",
     'HB_ROOT[sdk=iphonesimulator*]' =>  "#{hb_root}/iphonesimulator",
     'LIBRARY_SEARCH_PATHS' => "$(inherited) $(HB_ROOT)",
-    'OTHER_LDFLAGS' => "$(inherited) -ObjC -lv8 -ljs $(HB_ROOT)/misc/libc++.a -force_load $(HB_ROOT)/libhello_bare.a -force_load $(HB_ROOT)/libbare.a",
+    'OTHER_LDFLAGS' => "$(inherited) -ObjC -lv8 -ljs $(HB_ROOT)/misc/libc++.a -force_load $(HB_ROOT)/libhello_bare.a -force_load $(HB_ROOT)/libbare.a"
   }
 end
