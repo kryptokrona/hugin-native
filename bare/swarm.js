@@ -1,5 +1,10 @@
 const HyperSwarm = require('hyperswarm');
-const { get_new_peer_keys } = require('./utils');
+const {
+  get_new_peer_keys,
+  sanitize_group_message,
+  sanitize_join_swarm_data,
+  sanitize_voice_status_data,
+} = require('./utils');
 const ce = require('compact-encoding');
 const { Hugin } = require('./account');
 let RPC;
@@ -86,8 +91,8 @@ const create_swarm = async (key) => {
   const topic = Buffer.alloc(32).fill(hash);
   discovery = swarm.join(topic, { server: true, client: true });
   active.discovery = discovery;
-  // check_if_online(hash);
-  // return hash;
+  check_if_online(hash);
+  return hash;
 };
 
 const new_connection = (connection, hash, key) => {
@@ -168,18 +173,17 @@ const send_swarm_message = (message, topic) => {
 };
 
 const incoming_message = async (data, topic, connection, key) => {
-  const str = ce.string.decode(data);
+  const str = data.toString();
   console.log('Str!', str);
   if (str === 'Ping') return;
   // Check
-  const check = await check_data_message(data, connection, topic);
+  const check = await check_data_message(str, connection, topic);
   if (check === 'Error') {
     connection_closed(connection, topic);
     return;
   }
   if (check) return;
-  console.log('Got data!', data);
-  const message = sanitize_group_message(data);
+  const message = sanitize_group_message(JSON.parse(str));
   sender('swarm-message', { message, topic });
 };
 
@@ -187,7 +191,7 @@ const check_data_message = async (data, connection, topic) => {
   try {
     data = JSON.parse(data);
   } catch (e) {
-    return false;
+    return 'Error';
   }
 
   //Check if active in this topic
@@ -272,10 +276,12 @@ const check_data_message = async (data, connection, topic) => {
       con.video = joined.video;
       console.log('Connection updated: Joined:', con.joined);
       sender('peer-connected', joined);
+      return true;
     }
     if ('voice' in data) {
       const voice_status = check_peer_voice_status(data, con);
       if (!voice_status) return 'Error';
+      return true;
     }
   }
 
@@ -324,6 +330,32 @@ const end_swarm = async (topic) => {
 const update_local_voice_channel_status = (data) => {
   const updated = data;
   active_voice_channel = [updated];
+  return true;
+};
+
+const check_peer_voice_status = (data, con) => {
+  const voice_data = sanitize_voice_status_data(data);
+  if (!voice_data) return false;
+  const updated = update_voice_channel_status(voice_data, con);
+  if (!updated) return false;
+  return true;
+};
+
+const update_voice_channel_status = (data, con) => {
+  ////Already know this status
+  if (data.voice === con.voice) return true;
+  //Just doublechecking the address
+  if (data.address !== con.address) return false;
+  //Set voice status
+  con.voice = data.voice;
+  con.video = data.video;
+  console.log(
+    'Updating voice channel status for this connection Voice, Video:',
+    con.voice,
+    con.video,
+  );
+  //Send status to front-end
+  sender('voice-channel-status', { data });
   return true;
 };
 

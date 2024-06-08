@@ -30,11 +30,11 @@ function sign(m) {
 
 const sanitize_join_swarm_data = (data) => {
   const address = sanitizeHtml(data.address);
-  // if (address.length !== 99) return false;
+  if (address.length > 99) return false;
   const message = sanitizeHtml(data.message);
   if (message.length > 64) return false;
   const signature = sanitizeHtml(data.signature);
-  // if (signature.length !== 128) return false;
+  if (data.signature.length > 128) return false;
   const topic = sanitizeHtml(data.topic);
   if (topic.length !== 64) return false;
   const name = sanitizeHtml(data.name);
@@ -95,7 +95,7 @@ const sanitize_group_message = (msg) => {
   let nick = sanitizeHtml(msg.n);
   if (nick.length > 50) return false;
   let txHash = sanitizeHtml(msg.hash);
-  // if (txHash.length > 64) return false;
+  if (txHash.length > 64) return false;
 
   const clean_object = {
     message: text,
@@ -114,9 +114,45 @@ const sanitize_group_message = (msg) => {
   return clean_object;
 };
 
+const sanitize_voice_status_data = (data) => {
+  const address = sanitizeHtml(data.address);
+  if (address.length > 99) return false;
+  const message = sanitizeHtml(data.message);
+  if (message.length > 64) return false;
+  const signature = sanitizeHtml(data.signature);
+  if (signature.length > 128) return false;
+  const topic = sanitizeHtml(data.topic);
+  if (topic.length !== 64) return false;
+  const name = sanitizeHtml(data.name);
+  if (name.length > 50) return false;
+  const voice = data.voice;
+  if (typeof voice !== 'boolean') return false;
+  const video = data.video;
+  if (typeof video !== 'boolean') return false;
+
+  const clean_object = {
+    address: address,
+    message: message,
+    signature: signature,
+    topic: topic,
+    name: name,
+    voice: voice,
+    video: video,
+  };
+
+  return clean_object;
+};
+
+const sanitizeHtml = (data) => {
+  //Bare js seems not to be working with sanitize-html package.
+  //Sanitze input later and only check relevant types and length for now
+  return data;
+};
+
 module.exports = {
   get_new_peer_keys,
   sign,
   sanitize_join_swarm_data,
   sanitize_group_message,
+  sanitize_voice_status_data,
 };
