@@ -1,3 +1,5 @@
+import { group_key } from './utils';
+
 require('./runtime');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
