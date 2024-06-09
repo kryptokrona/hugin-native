@@ -19,7 +19,8 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const navigation = useNavigation();
   const theme = useGlobalStore((state) => state.theme);
   const avatar = useGlobalStore((state) => state.user?.avatar);
-
+  const state = useGlobalStore((state) => state);
+  console.log({ state });
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
     return unsubscribe;
