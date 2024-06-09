@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { GroupsScreens, type GroupStackParamList } from '@/types';
+
+import { group_key, swarm } from '../../lib/native';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
@@ -18,8 +20,30 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const [key, setKey] = useState<string | null>(null);
 
   function onCreatePress() {
-    console.log('Create pressed');
+    if (key) {
+      swarm(key);
+    }
   }
+
+  async function onGeneratePress() {
+    try {
+      const mKey = await group_key();
+      if (mKey) {
+        setKey(mKey);
+      }
+    } catch (e) {
+      console.error('----------------', e);
+    }
+    // const mKey = await group_key();
+
+    // if (mKey) {
+    //   setKey(mKey);
+    // }
+  }
+
+  useEffect(() => {
+    console.log({ key });
+  }, [key]);
 
   function onNameChange(value: string | number) {
     setName(value.toString());
@@ -27,10 +51,6 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
   function onKeyChange(value: string | number) {
     setKey(value.toString());
-  }
-
-  function onGeneratePress() {
-    console.log('Generating new message key');
   }
 
   return (

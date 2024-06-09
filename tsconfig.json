@@ -10,7 +10,8 @@
       "@/contexts": ["./contexts/index"],
       "@/styles": ["./styles/index"],
       "@/services": ["./services/index"],
-      "@/config": ["./config/index"]
+      "@/config": ["./config/index"],
+      "@/p2p": ["./services/p2p/index"]
     }
   }
 }

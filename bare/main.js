@@ -1,6 +1,5 @@
-import { group_key } from './utils';
-
 require('./runtime');
+require('./utils');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const { Swarm } = require('./swarm');
@@ -84,7 +83,7 @@ const get_room = (topic) => {
   return Hugin.rooms.find((a) => a.topic === topic);
 };
 
-export const get_random_group_key = () => {
+const get_random_group_key = () => {
   return group_key();
 };
 

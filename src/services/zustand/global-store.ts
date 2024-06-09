@@ -76,3 +76,11 @@ useGlobalStore.subscribe(
     setPreferences({ ...preferences, themeMode: theme.mode });
   },
 );
+
+// useGlobalStore.subscribe(
+//   (state) => state.preferences.themeMode,
+//   (themeMode) => {
+
+//     setStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES, preferences);
+//   },
+// )
