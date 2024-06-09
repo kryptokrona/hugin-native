@@ -1,7 +1,11 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
-import { ChangeLanguageScreen, SettingsScreen } from '@/screens';
+import {
+  ChangeLanguageScreen,
+  SettingsScreen,
+  UpdateProfileScreen,
+} from '@/screens';
 import { SettingsScreens, type SettingsStackParamList } from '@/types';
 
 import { Header } from '../header';
@@ -24,6 +28,13 @@ export const SettingsStackNavigator = () => {
         component={ChangeLanguageScreen}
         options={() => ({
           header: (_props) => <Header title={t('changeLanguage')} backButton />,
+        })}
+      />
+      <Stack.Screen
+        name={SettingsScreens.UpdateProfileScreen}
+        component={UpdateProfileScreen}
+        options={() => ({
+          header: (_props) => <Header title={t('updateProfile')} backButton />,
         })}
       />
       {/* <Stack.Screen

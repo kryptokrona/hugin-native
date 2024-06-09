@@ -47,6 +47,7 @@ export const SettingsScreens = {
   SwapAPIScreen: 'SwapAPIScreen',
   SwapCurrencyScreen: 'SwapCurrencyScreen',
   SwapNodeScreen: 'SwapNodeScreen',
+  UpdateProfileScreen: 'UpdateProfileScreen',
 } as const;
 
 export type SettingsStackParamList = {
@@ -59,6 +60,7 @@ export type SettingsStackParamList = {
   [SettingsScreens.SwapCurrencyScreen]: undefined;
   [SettingsScreens.ChangeLanguageScreen]: undefined;
   [SettingsScreens.SwapNodeScreen]: undefined;
+  [SettingsScreens.UpdateProfileScreen]: undefined;
 };
 
 export const GroupsScreens = {

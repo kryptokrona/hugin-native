@@ -7,8 +7,8 @@ import { TextField } from './text-field';
 
 interface Props {
   label: string;
-  value: string | number | null;
-  onChange: (value: string | number) => void;
+  value: string | null;
+  onChange: (value: string) => void;
   error?: boolean;
   errorText?: string;
   keyboardType?: 'default' | 'number-pad';
@@ -36,9 +36,7 @@ export const InputField: React.FC<Props> = ({
         placeholderTextColor={theme.secondary}
         style={[styles.input, { backgroundColor, color }]}
         value={value?.toString()}
-        onChangeText={(text) =>
-          onChange(keyboardType === 'number-pad' ? Number(text) : text)
-        }
+        onChangeText={(text) => onChange(text)}
         keyboardType={keyboardType}
         maxLength={maxLength}
       />
@@ -58,7 +56,7 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: Styles.borderRadius.small,
     marginTop: 4,
-    padding: 5,
+    padding: 8,
     paddingHorizontal: 10,
   },
 });

@@ -4,6 +4,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
 // import { defaultPreferences } from '@/config';
 import { Themes } from '@/styles';
 import type { Preferences, Theme, User } from '@/types';
+import { createAvatar } from '@/utils';
 
 import { ASYNC_STORAGE_KEYS, setStorageValue } from '../async-storage';
 
@@ -87,6 +88,6 @@ export const defaultPreferences: Preferences = {
 export const defaultUser = {
   address:
     'SEKReTXy5NuZNf9259RRXDR3PsM5r1iKe2sgkDV5QU743f4FspoVAnY4TfRPLBMpCA1HQgZVnmZafQTraoYsS9K41iePDjPZbme',
-  avatar: null,
+  avatar: createAvatar(),
   name: 'Anon',
 };

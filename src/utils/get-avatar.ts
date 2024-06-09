@@ -53,7 +53,6 @@ export function getAvatar(
     size = 200;
   }
 
-  // Get custom color scheme based on address
   const rgb = intToRGB(hashCode(hash));
 
   // Options for avatar
@@ -72,5 +71,21 @@ export function getAvatar(
   };
 
   // create a base64 encoded PNG
-  return 'data:image/png;base64,' + new Identicon(hash, options).toString();
+  return new Identicon(hash, options).toString();
 }
+
+const generateRandomHash = (length: number): string => {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let hash = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    hash += characters[randomIndex];
+  }
+  return hash;
+};
+
+export const createAvatar = () => {
+  const hash = generateRandomHash(64);
+  return getAvatar(hash);
+};

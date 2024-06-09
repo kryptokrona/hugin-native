@@ -51,10 +51,10 @@ export const PickExaktBlockHeightScreen: React.FC<Props> = () => {
     return { text: '', valid: true };
   };
 
-  const onChangeText = (text: string | number) => {
-    const { valid: mValid, text: mText } = scanHeightIsValid(text.toString());
+  const onChangeText = (text: string) => {
+    const { valid: mValid, text: mText } = scanHeightIsValid(text);
 
-    setValue(mText.toString());
+    setValue(mText);
     setErrorMessage(mText);
     setValid(mValid);
   };

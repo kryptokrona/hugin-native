@@ -42,6 +42,6 @@ export interface TransactionDetail {
 
 export interface User {
   address: string;
-  avatar: string | null;
+  avatar: string;
   name: string;
 }

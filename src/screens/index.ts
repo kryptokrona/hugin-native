@@ -12,3 +12,4 @@ export * from './recipients-screen';
 export * from './settings-screen';
 export * from './transaction-screen';
 export * from './transfer-screen';
+export * from './update-profile-screen';

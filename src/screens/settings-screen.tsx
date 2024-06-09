@@ -3,7 +3,7 @@ import { FlatList } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import { toggleTheme, updateAvatar } from '@/services';
+import { toggleTheme } from '@/services';
 import {
   CustomIconProps,
   SettingsScreens,
@@ -30,9 +30,9 @@ const items: Item[] = [
     title: 'changeLanguage',
   },
   {
-    function: updateAvatar,
     icon: { name: 'user-circle', type: 'FA6' },
-    title: 'updateAvatar',
+    screen: SettingsScreens.UpdateProfileScreen,
+    title: 'updateProfile',
   },
 ];
 interface Props {

@@ -42,13 +42,7 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
         )}
         {!backButton && (
           <View style={styles.logoContainer}>
-            {avatar && (
-              <Avatar
-                base64={avatar}
-                // style={{ height: 30, width: 30 }}
-                size={30}
-              />
-            )}
+            {avatar && <Avatar base64={avatar} size={30} />}
             {!avatar && <HuginSvg style={styles.logo} />}
           </View>
         )}

@@ -46,12 +46,12 @@ export const AddGroupScreen: React.FC<Props> = () => {
     console.log({ key });
   }, [key]);
 
-  function onNameChange(value: string | number) {
-    setName(value.toString());
+  function onNameChange(value: string) {
+    setName(value);
   }
 
-  function onKeyChange(value: string | number) {
-    setKey(value.toString());
+  function onKeyChange(value: string) {
+    setKey(value);
   }
 
   return (
