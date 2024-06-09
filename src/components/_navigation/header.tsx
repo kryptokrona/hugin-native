@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useGlobalStore } from '@/services';
 
 import HuginSvg from '../../assets/hugin.svg';
-import { CustomIcon, TextField } from '../_elements';
+import { Avatar, CustomIcon, TextField } from '../_elements';
 
 interface Props {
   title?: string;
@@ -18,6 +18,7 @@ interface Props {
 export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const navigation = useNavigation();
   const theme = useGlobalStore((state) => state.theme);
+  const avatar = useGlobalStore((state) => state.user?.avatar);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
@@ -41,7 +42,14 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
         )}
         {!backButton && (
           <View style={styles.logoContainer}>
-            <HuginSvg style={styles.logo} />
+            {avatar && (
+              <Avatar
+                base64={avatar}
+                // style={{ height: 30, width: 30 }}
+                size={30}
+              />
+            )}
+            {!avatar && <HuginSvg style={styles.logo} />}
           </View>
         )}
       </View>

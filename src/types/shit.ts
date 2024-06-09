@@ -39,3 +39,9 @@ export interface FromPayee {
 export interface TransactionDetail {
   hash: string;
 }
+
+export interface User {
+  address: string;
+  avatar: string | null;
+  name: string;
+}

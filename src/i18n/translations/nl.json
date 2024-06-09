@@ -184,5 +184,6 @@
   "transactionHash": "Transactiehash",
   "transactionHistory": "Transactiegeschiedenis",
   "changeTheme": "Thema wijzigen",
-  "changeLanguage": "Taal wijzigen"
+  "changeLanguage": "Taal wijzigen",
+  "updateAvatar": "Avatar bijwerken"
 }

@@ -4,7 +4,7 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { ScreenLayout, TextField } from '@/components';
-import { useGlobalStore } from '@/services';
+import { updateLanguage, useGlobalStore } from '@/services';
 import { SettingsScreens, type SettingsStackParamList } from '@/types';
 
 import { languages } from '../i18n';
@@ -35,6 +35,7 @@ export const ChangeLanguageScreen: React.FC<Props> = () => {
   const itemMapper = (item: { name: string; code: string }) => {
     async function onPress() {
       await i18n.changeLanguage(item.code);
+      await updateLanguage(item.code);
       navigation.goBack();
     }
     const active = currentLanguage === item.code;

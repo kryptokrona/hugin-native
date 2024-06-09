@@ -49,7 +49,7 @@ export const MessageItem: React.FC<Props> = ({
       {!inverted && (
         <>
           <View style={styles.user}>
-            <Avatar hash={user.key} size={40} />
+            <Avatar base64={user.key} size={40} />
             <TextField size="small" style={styles.date}>
               {date}
             </TextField>

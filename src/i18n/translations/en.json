@@ -201,5 +201,6 @@
   "alreadyOptimizing": "Already optimizing. Please wait until the ongoing optimization completes.",
   "deleteContactWarning": "Are you sure you want to delete this contact?",
   "changeTheme": "Change theme",
-  "changeLanguage": "Change language"
+  "changeLanguage": "Change language",
+  "updateAvatar": "Update avatar"
 }

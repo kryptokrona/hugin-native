@@ -8,4 +8,6 @@ export * from './Logger';
 export * from './NativeCode';
 export * from './SDPParser';
 export * from './Utilities';
+
+export * from './handle-user';
 export * from './zustand';

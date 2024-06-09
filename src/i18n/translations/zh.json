@@ -198,5 +198,6 @@
   "alreadyOptimizing": "开始优化.请等待直到优化完成...",
   "deleteContactWarning": "您确定要删除此联系人吗？",
   "changeTheme": "更改主题",
-  "changeLanguage": "更改语言"
+  "changeLanguage": "更改语言",
+  "updateAvatar": "更新头像"
 }

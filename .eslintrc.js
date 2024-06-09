@@ -70,7 +70,7 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 1,
     'react-hooks/rules-of-hooks': 2,
     'react-hooks/exhaustive-deps': 0,
-    'prefer-destructuring': 2,
+    'prefer-destructuring': 1,
     'no-nested-ternary': 2,
     'prettier/prettier': [
       'warn',

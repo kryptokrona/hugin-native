@@ -3,7 +3,7 @@ import { FlatList } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import { toggleTheme } from '@/services';
+import { toggleTheme, updateAvatar } from '@/services';
 import {
   CustomIconProps,
   SettingsScreens,
@@ -11,6 +11,30 @@ import {
   type SettingsStackParamList,
 } from '@/types';
 
+interface Item {
+  title: string;
+  icon: CustomIconProps;
+  screen?: keyof typeof SettingsScreens;
+  function?: () => Promise<void>;
+}
+
+const items: Item[] = [
+  {
+    function: toggleTheme,
+    icon: { name: 'theme-light-dark', type: 'MCI' },
+    title: 'changeTheme',
+  },
+  {
+    icon: { name: 'globe', type: 'SLI' },
+    screen: SettingsScreens.ChangeLanguageScreen,
+    title: 'changeLanguage',
+  },
+  {
+    function: updateAvatar,
+    icon: { name: 'user-circle', type: 'FA6' },
+    title: 'updateAvatar',
+  },
+];
 interface Props {
   route: RouteProp<
     SettingsStackParamList,
@@ -19,10 +43,11 @@ interface Props {
 }
 export const SettingsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<SettingsStackNavigationType>();
+
   const itemMapper = (item: Item) => {
     async function onPress() {
-      if (item.title === 'changeTheme') {
-        await toggleTheme();
+      if (item.function) {
+        await item.function();
       } else if (item.screen) {
         navigation.navigate(item.screen);
       }
@@ -54,29 +79,3 @@ export const SettingsScreen: React.FC<Props> = () => {
 //     padding: 16,
 //   },
 // });
-
-interface Item {
-  title: string;
-  icon: CustomIconProps;
-  screen?: keyof typeof SettingsScreens;
-}
-
-const items: Item[] = [
-  {
-    icon: { name: 'theme-light-dark', type: 'MCI' },
-    title: 'changeTheme',
-  },
-  {
-    icon: { name: 'globe', type: 'SLI' },
-    screen: SettingsScreens.ChangeLanguageScreen,
-    title: 'changeLanguage',
-  },
-  // {
-  //   name: 'changePassword',
-  //   icon: { name: 'lock', type: 'MCI' },
-  // },
-  // {
-  //   name: 'logout',
-  //   icon: { name: 'logout', type: 'MCI' },
-  // },
-];

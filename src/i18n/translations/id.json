@@ -184,5 +184,6 @@
   "transactionHash": "Hash transaksi",
   "transactionHistory": "Riwayat transaksi",
   "changeTheme": "Ubah tema",
-  "changeLanguage": "Ubah bahasa"
+  "changeLanguage": "Ubah bahasa",
+  "updateAvatar": "Perbarui avatar"
 }

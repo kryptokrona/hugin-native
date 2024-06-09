@@ -9,7 +9,7 @@ export const getStoreTheme = () => {
 };
 
 export const getPreferences = () => {
-  const { preferences } = useGlobalStore.getState();
+  const storePreferences = useGlobalStore.getState().preferences;
 
-  return preferences;
+  return storePreferences;
 };

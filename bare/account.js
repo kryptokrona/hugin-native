@@ -13,6 +13,12 @@ class Account {
     this.address = data.address;
     this.avatar = data.avatar;
   }
+
+  update(data) {
+    this.name = data.name;
+    this.address = data.address;
+    this.avatar = data.avatar;
+  }
 }
 
 let Hugin = new Account();

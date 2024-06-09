@@ -170,5 +170,6 @@
   "recoverWalletDescr": "Dette vil gjøre alle gjeldende midler utilgjengelige (men kan gjenvinnes med dine private nøkler).",
   "groupsRecommendations": "Anbefalt",
   "changeTheme": "Endre tema",
-  "changeLanguage": "Endre språk"
+  "changeLanguage": "Endre språk",
+  "updateAvatar": "Oppdater avatar"
 }

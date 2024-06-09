@@ -1,14 +1,12 @@
 import { Image } from 'react-native';
 
-import { getAvatar } from '@/utils';
-
 interface Props {
-  hash: string;
+  base64: string;
   size?: number;
 }
 
-export const Avatar: React.FC<Props> = ({ hash, size }) => {
-  const uri = getAvatar(hash);
+export const Avatar: React.FC<Props> = ({ base64, size }) => {
+  const uri = `data:image/png;base64,${base64}`;
   return (
     <Image
       source={{ uri }}

@@ -43,7 +43,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         <Header
           backButton
           title={user.name}
-          right={<Avatar hash={user.name} />}
+          right={<Avatar base64={user.name} />}
         />
       ),
     });

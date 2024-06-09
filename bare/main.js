@@ -53,7 +53,7 @@ rpc.register(5, {
 });
 
 async function init_bare_main(data) {
-  console.log('Bare main started. maybe some account data from front end ');
+  Hugin.init(data);
 }
 
 //SWARM

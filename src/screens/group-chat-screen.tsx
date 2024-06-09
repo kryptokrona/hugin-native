@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
 import { Header, MessageInput, ScreenLayout } from '@/components';
+import { onSendGroupMessage } from '@/p2p';
 import type {
   GroupsScreens,
   GroupStackNavigationType,
@@ -26,7 +27,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, [topic, name]);
 
   function onSend(text: string) {
-    console.log({ text });
+    onSendGroupMessage(topic, text);
   }
 
   return (

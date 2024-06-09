@@ -40,7 +40,7 @@ export const PreviewItem: React.FC<Props> = ({ name, topic, onPress }) => {
       onLongPress={handleLongPress}
       onPressOut={() => setIsPressed(false)}>
       {/*  TODO */}
-      {/* <Avatar size={50} hash={hash} /> */}
+      {/* <Avatar size={50} base64={hash} /> */}
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">
           {name}

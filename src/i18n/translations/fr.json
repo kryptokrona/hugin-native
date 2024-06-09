@@ -184,5 +184,6 @@
   "transactionHash": "Hachage de la transaction",
   "transactionHistory": "Historique des transactions",
   "changeTheme": "Changer de thème",
-  "changeLanguage": "Changer de langue"
+  "changeLanguage": "Changer de langue",
+  "updateAvatar": "Mettre à jour l'avatar"
 }

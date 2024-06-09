@@ -3,12 +3,10 @@ import React, { useCallback, useState } from 'react';
 import { ScrollView, RefreshControl } from 'react-native';
 
 import { Container, ScreenLayout, TextButton } from '@/components';
-import { globals } from '@/config';
-import { getCoinPriceFromAPI } from '@/services';
 
-import { bare, swarm } from '../../lib/native.js';
-bare();
-const key = 'lol';
+import { swarm } from '../../lib/native.js';
+
+const key = '';
 export const MainScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   // const onJoinSwarmPress = () => {
@@ -16,18 +14,16 @@ export const MainScreen: React.FC = () => {
   // };
   // const navigation = useNavigation<MainStackNavigationType>();
   const updateBalance = useCallback(async () => {
-    const tmpPrice = await getCoinPriceFromAPI();
-    if (tmpPrice !== undefined) {
-      globals.coinPrice = tmpPrice;
-    }
-
+    // const tmpPrice = await getCoinPriceFromAPI();
+    // if (tmpPrice !== undefined) {
+    //   globals.coinPrice = tmpPrice;
+    // }
     // const unreads = await getUnreadMessages();
     // const [unlockedBalance, lockedBalance] = await globals.wallet.getBalance();
     // const coinValue = await coinsToFiat(
     //   unlockedBalance + lockedBalance,
     //   globals.preferences.currency,
     // );
-
     // setUnlockedBalance(unlockedBalance);
     // setLockedBalance(lockedBalance);
     // setCoinValue(Number(coinValue)); // Convert coinValue to a number before setting it in the state

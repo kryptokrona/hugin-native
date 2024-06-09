@@ -170,5 +170,6 @@
   "recoverWalletDescr": "Bu, mevcut tüm fonları kullanılamaz hale getirecek (ancak özel anahtarlarınızla kurtarılabilir).",
   "groupsRecommendations": "Önerilen",
   "changeTheme": "Tema değiştir",
-  "changeLanguage": "Dili değiştir"
+  "changeLanguage": "Dili değiştir",
+  "updateAvatar": "Avatarı güncelle"
 }
