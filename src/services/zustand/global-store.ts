@@ -77,10 +77,11 @@ useGlobalStore.subscribe(
   },
 );
 
-// useGlobalStore.subscribe(
-//   (state) => state.preferences.themeMode,
-//   (themeMode) => {
-
-//     setStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES, preferences);
-//   },
-// )
+useGlobalStore.subscribe(
+  (state) => state.preferences.themeMode,
+  (themeMode) => {
+    if (themeMode) {
+      useGlobalStore.getState().setTheme(Themes[themeMode]);
+    }
+  },
+);

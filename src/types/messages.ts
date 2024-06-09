@@ -8,7 +8,7 @@ export interface HuginUser {
 }
 
 export interface Group {
-  hash: string;
+  topic: string;
   name: string;
 }
 

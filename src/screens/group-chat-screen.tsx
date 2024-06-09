@@ -1,15 +1,30 @@
+import { useLayoutEffect } from 'react';
+
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 
-import { MessageInput, ScreenLayout } from '@/components';
-import type { GroupsScreens, GroupStackParamList } from '@/types';
+import { Header, MessageInput, ScreenLayout } from '@/components';
+import type {
+  GroupsScreens,
+  GroupStackNavigationType,
+  GroupStackParamList,
+} from '@/types';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupChatScreen>;
 }
 
 export const GroupChatScreen: React.FC<Props> = ({ route }) => {
+  const navigation = useNavigation<GroupStackNavigationType>();
+  const { topic, name } = route.params;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      header: () => <Header backButton title={name} />,
+    });
+  }, [topic, name]);
+
   function onSend(text: string) {
     console.log({ text });
   }
@@ -38,9 +53,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  flatListContent: {
-    paddingBottom: 80,
-  },
+  // flatListContent: {
+  //   paddingBottom: 80,
+  // },
   inputWrapper: {
     bottom: 0,
     left: 0,

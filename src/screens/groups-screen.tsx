@@ -27,10 +27,8 @@ export const GroupsScreen: React.FC<Props> = () => {
     setGroups(mockGroups);
   }, []);
 
-  function onPress(hash: string, name: string) {
-    navigation.navigate(GroupsScreens.GroupChatScreen, {
-      group: { hash, name },
-    });
+  function onPress(topic: string, name: string) {
+    navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
   }
 
   return (
@@ -42,7 +40,7 @@ export const GroupsScreen: React.FC<Props> = () => {
       )}
       <FlatList
         data={groups}
-        keyExtractor={(item, i) => `${item.hash}-${i}`}
+        keyExtractor={(item, i) => `${item.topic}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
     </ScreenLayout>

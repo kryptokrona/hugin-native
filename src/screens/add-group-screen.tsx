@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
-import { type RouteProp } from '@react-navigation/native';
+import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
-import { GroupsScreens, type GroupStackParamList } from '@/types';
+import {
+  GroupsScreens,
+  GroupStackNavigationType,
+  type GroupStackParamList,
+} from '@/types';
 
 import { group_key, swarm } from '../../lib/native';
 
@@ -14,14 +18,16 @@ interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
 }
 
-export const AddGroupScreen: React.FC<Props> = ({ route }) => {
+export const AddGroupScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
+  const navigation = useNavigation<GroupStackNavigationType>();
   const [name, setName] = useState<string | null>(null);
   const [key, setKey] = useState<string | null>(null);
 
-  function onCreatePress() {
-    if (key) {
-      swarm(key);
+  async function onCreatePress() {
+    if (key && name) {
+      const topic: string = await swarm(key);
+      navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
     }
   }
 
@@ -32,13 +38,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
         setKey(mKey);
       }
     } catch (e) {
-      console.error('----------------', e);
+      console.error('Error create random group key', e);
     }
-    // const mKey = await group_key();
-
-    // if (mKey) {
-    //   setKey(mKey);
-    // }
   }
 
   useEffect(() => {

@@ -21,7 +21,10 @@ function get_new_peer_keys(key) {
 
 function randomKey() {
   let key = Buffer.alloc(32);
-  return sodium.randombytes_buf(key);
+
+  sodium.randombytes_buf(key);
+
+  return key;
 }
 
 function group_key() {

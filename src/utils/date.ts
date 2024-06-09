@@ -1,10 +1,11 @@
 import moment from 'moment';
 
-import { globals } from '@/config';
+import { getPreferences } from '@/services';
 
 export const prettyPrintDateFromLocale = (timestamp: number) => {
+  const preferences = getPreferences();
   const date = new Date(timestamp * 1000);
-  return date.toLocaleString(globals.language);
+  return date.toLocaleString(preferences.language);
 };
 
 export const prettyPrintDate = (date?: moment.Moment) => {

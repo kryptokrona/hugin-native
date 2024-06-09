@@ -39,7 +39,11 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
             <CustomIcon name={'arrow-back-ios'} type={'MI'} />
           </TouchableOpacity>
         )}
-        {!backButton && <HuginSvg style={styles.logo} />}
+        {!backButton && (
+          <View style={styles.logoContainer}>
+            <HuginSvg style={styles.logo} />
+          </View>
+        )}
       </View>
       <View style={styles.center}>
         {title && <TextField>{title}</TextField>}
@@ -66,9 +70,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   logo: {
-    borderRadius: 50,
-    height: 24,
-    width: 24,
+    height: 30,
+    width: 30,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    borderRadius: 100,
+    height: 30,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    width: 30,
   },
   side: {
     alignItems: 'center',

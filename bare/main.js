@@ -1,5 +1,5 @@
 require('./runtime');
-require('./utils');
+const { group_key } = require('./utils');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const { Swarm } = require('./swarm');
@@ -22,8 +22,7 @@ rpc.register(1, {
   request: ce.string,
   response: ce.string,
   onrequest: async (key) => {
-    new_swarm(key);
-    return 'swarm';
+    return new_swarm(key);
   },
 });
 
@@ -65,6 +64,7 @@ const new_swarm = async (key) => {
   if (!swarm) return;
   const topic = await swarm.start(key);
   Hugin.rooms.push({ swarm, topic });
+  return topic;
 };
 
 const end_swarm = async (topic) => {
