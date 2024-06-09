@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
 
   container: {
     alignSelf: 'stretch',
-    flex: 1,
+    flexGrow: 1,
   },
   innerContainer: {
     flexDirection: 'column',

@@ -6,6 +6,7 @@ import { Themes } from '@/styles';
 import type { Preferences, Theme, User } from '@/types';
 import { createAvatar } from '@/utils';
 
+import { update_bare_user } from '../../../lib/native';
 import { ASYNC_STORAGE_KEYS, setStorageValue } from '../async-storage';
 
 type GlobalStore = {
@@ -58,6 +59,7 @@ useGlobalStore.subscribe(
       return;
     }
     await setStorageValue(ASYNC_STORAGE_KEYS.USER, user);
+    await update_bare_user(user);
   },
 );
 
@@ -78,7 +80,7 @@ export const defaultPreferences: Preferences = {
   currency: 'usd',
   language: 'en',
   limitData: false,
-  nickname: 'Anonymous',
+  nickname: 'Anon',
   notificationsEnabled: true,
   scanCoinbaseTransactions: false,
   themeMode: 'dark',

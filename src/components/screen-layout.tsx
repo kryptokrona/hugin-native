@@ -30,7 +30,8 @@ export const ScreenLayout: React.FC<Props> = ({ children }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexDirection: 'column',
+    flexGrow: 1,
     paddingHorizontal: 10,
     paddingVertical: 10,
   },

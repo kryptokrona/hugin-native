@@ -22,4 +22,5 @@ export interface CustomIconProps {
   name: string;
   size?: number;
   type?: IconType;
+  color?: string;
 }

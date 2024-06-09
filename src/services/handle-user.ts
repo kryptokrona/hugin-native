@@ -43,6 +43,9 @@ export const updateAvatar = async () => {
   };
   const result = await launchImageLibrary(options);
   const base64 = result.assets?.[0].base64;
+  if (!base64) {
+    return;
+  }
   await updateUser({ avatar: base64 });
 };
 

@@ -52,8 +52,21 @@ rpc.register(5, {
   },
 });
 
+rpc.register(6, {
+  request: ce.string,
+  response: ce.string,
+  onrequest: (data) => {
+    update_bare_main(data);
+    return 'update';
+  },
+});
+
 async function init_bare_main(data) {
   Hugin.init(data);
+}
+
+async function update_bare_main(data) {
+  Hugin.update(data);
 }
 
 //SWARM
