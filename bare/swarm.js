@@ -27,9 +27,9 @@ class Swarm {
     await end_swarm(topic);
   }
 
-  send_message(m, topic) {
+  send_message(message, topic) {
     let message_json = {
-      m: 'Message ',
+      m: 'Message',
       k: 'my_address',
       s: 'signature',
       g: 'group == key',
@@ -44,7 +44,6 @@ class Swarm {
     }
 
     const send = JSON.stringify(message_json);
-
     send_swarm_message(send, topic);
   }
 

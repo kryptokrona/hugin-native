@@ -24,6 +24,10 @@ function randomKey() {
   return sodium.randombytes_buf(key);
 }
 
+function group_key() {
+  return randomKey().toString('hex');
+}
+
 function sign(m) {
   return;
 }
@@ -155,4 +159,5 @@ module.exports = {
   sanitize_join_swarm_data,
   sanitize_group_message,
   sanitize_voice_status_data,
+  group_key,
 };

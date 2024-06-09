@@ -35,6 +35,23 @@ rpc.register(3, {
   },
 });
 
+rpc.register(4, {
+  request: ce.string,
+  response: ce.string,
+  onrequest: (data, topic) => {
+    send_room_message(data, topic);
+    return 'sendroommsg';
+  },
+});
+
+rpc.register(5, {
+  request: ce.string,
+  response: ce.string,
+  onrequest: () => {
+    return get_random_group_key();
+  },
+});
+
 async function init_bare_main(data) {
   console.log('Bare main started. maybe some account data from front end ');
 }
@@ -58,11 +75,15 @@ const end_swarm = async (topic) => {
 const send_room_message = (message, topic) => {
   const swarm = get_room(topic);
   if (!swarm) return;
-  swarm.send_message(JSON.stringify(message), topic);
+  swarm.send_message(message, topic);
 };
 
 const get_room = (topic) => {
   return Hugin.rooms.find((a) => a.topic === topic);
+};
+
+export const get_random_group_key = () => {
+  return group_key();
 };
 
 //BEAM
