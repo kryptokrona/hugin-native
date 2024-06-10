@@ -1,5 +1,7 @@
 import { StyleSheet, TextInput, View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
 
@@ -13,6 +15,7 @@ interface Props {
   errorText?: string;
   keyboardType?: 'default' | 'number-pad';
   maxLength?: number;
+  onSubmitEditing?: () => void;
 }
 
 export const InputField: React.FC<Props> = ({
@@ -22,8 +25,10 @@ export const InputField: React.FC<Props> = ({
   error,
   errorText,
   maxLength,
+  onSubmitEditing,
   keyboardType = 'default',
 }) => {
+  const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.backgroundAccent;
   const color = theme.primary;
@@ -33,6 +38,9 @@ export const InputField: React.FC<Props> = ({
         {label}
       </TextField>
       <TextInput
+        returnKeyLabel={t('done')}
+        returnKeyType={'done'}
+        onSubmitEditing={onSubmitEditing}
         placeholderTextColor={theme.secondary}
         style={[styles.input, { backgroundColor, color }]}
         value={value?.toString()}

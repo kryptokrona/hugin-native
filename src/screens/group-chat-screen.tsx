@@ -1,15 +1,21 @@
 import { useLayoutEffect } from 'react';
 
-import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import { RouteProp, useNavigation } from '@react-navigation/native';
+import { type RouteProp, useNavigation } from '@react-navigation/native';
 
-import { Header, MessageInput, ScreenLayout } from '@/components';
+import { CustomIcon, Header, MessageInput, ScreenLayout } from '@/components';
 import { onSendGroupMessage } from '@/p2p';
-import type {
+import {
   GroupsScreens,
-  GroupStackNavigationType,
-  GroupStackParamList,
+  type GroupStackNavigationType,
+  type GroupStackParamList,
 } from '@/types';
 
 interface Props {
@@ -20,9 +26,23 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<GroupStackNavigationType>();
   const { topic, name } = route.params;
 
+  function onCustomizeGroupPress() {
+    navigation.navigate(GroupsScreens.ModifyGroupScreen);
+  }
+
   useLayoutEffect(() => {
     navigation.setOptions({
-      header: () => <Header backButton title={name} />,
+      header: () => (
+        <Header
+          backButton
+          title={name}
+          right={
+            <TouchableOpacity onPress={onCustomizeGroupPress}>
+              <CustomIcon type="MCI" name="cog-outline" />
+            </TouchableOpacity>
+          }
+        />
+      ),
     });
   }, [topic, name]);
 

@@ -171,5 +171,6 @@
   "groupsRecommendations": "Boards recomendados",
   "changeTheme": "Alterar tema",
   "changeLanguage": "Alterar idioma",
-  "updateAvatar": "Atualizar avatar"
+  "save": "Salvar",
+  "updateProfile": "Atualizar perfil"
 }

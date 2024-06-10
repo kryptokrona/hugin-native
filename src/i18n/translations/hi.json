@@ -184,5 +184,6 @@
   "transactionHash": "लेन-देन हैश",
   "changeTheme": "थीम बदलें",
   "changeLanguage": "भाषा बदलें",
-  "updateAvatar": "अवतार अपडेट करें"
+  "save": "सहेजें",
+  "updateProfile": "प्रोफ़ाइल अपडेट करें"
 }

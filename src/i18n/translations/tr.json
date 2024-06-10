@@ -171,5 +171,6 @@
   "groupsRecommendations": "Önerilen",
   "changeTheme": "Tema değiştir",
   "changeLanguage": "Dili değiştir",
-  "updateAvatar": "Avatarı güncelle"
+  "save": "Kaydet",
+  "updateProfile": "Profili güncelle"
 }

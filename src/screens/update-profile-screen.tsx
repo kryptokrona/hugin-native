@@ -13,12 +13,13 @@ import {
   ScreenLayout,
   TextButton,
 } from '@/components';
-import { updateAvatar, updateUser, useGlobalStore } from '@/services';
+import { updateUser, useGlobalStore } from '@/services';
 import {
   SettingsScreens,
   SettingsStackNavigationType,
   SettingsStackParamList,
 } from '@/types';
+import { pickAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<
@@ -43,11 +44,18 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     navigation.goBack();
   };
 
+  async function onUpdateAvatar() {
+    const base64 = await pickAvatar();
+    if (base64) {
+      await updateUser({ avatar: base64 });
+    }
+  }
+
   return (
     <ScreenLayout>
       <View style={styles.container}>
         <View style={styles.top}>
-          <TouchableOpacity onPress={updateAvatar} style={styles.header}>
+          <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
             <View style={styles.avatarContainer}>
               <Avatar base64={avatar} size={70} />
             </View>
@@ -60,7 +68,12 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
               />
             </View>
           </TouchableOpacity>
-          <InputField label={t('name')} value={value} onChange={onNameInput} />
+          <InputField
+            label={t('name')}
+            value={value}
+            onChange={onNameInput}
+            onSubmitEditing={onSave}
+          />
         </View>
         <Container bottom row>
           <TextButton onPress={onSave}>{t('save')}</TextButton>

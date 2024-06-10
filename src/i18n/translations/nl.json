@@ -185,5 +185,6 @@
   "transactionHistory": "Transactiegeschiedenis",
   "changeTheme": "Thema wijzigen",
   "changeLanguage": "Taal wijzigen",
-  "updateAvatar": "Avatar bijwerken"
+  "save": "Opslaan",
+  "updateProfile": "Profiel bijwerken"
 }

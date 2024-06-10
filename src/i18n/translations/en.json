@@ -202,7 +202,8 @@
   "deleteContactWarning": "Are you sure you want to delete this contact?",
   "changeTheme": "Change theme",
   "changeLanguage": "Change language",
-  "updateAvatar": "Update avatar",
   "updateProfile": "Update profile",
-  "save": "Save"
+  "save": "Save",
+  "copyInvite": "Copy invite link", // EN only
+  "done": "Done" // EN only
 }

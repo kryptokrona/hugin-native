@@ -171,5 +171,6 @@
   "groupsRecommendations": "Anbefalt",
   "changeTheme": "Endre tema",
   "changeLanguage": "Endre språk",
-  "updateAvatar": "Oppdater avatar"
+  "save": "Lagre",
+  "updateProfile": "Oppdater profil"
 }

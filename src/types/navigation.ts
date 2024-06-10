@@ -76,7 +76,7 @@ export type GroupStackParamList = {
     topic: string;
     name: string;
   };
-  [GroupsScreens.ModifyGroupScreen]: undefined;
+  [GroupsScreens.ModifyGroupScreen]: { topic: string; name: string };
   [GroupsScreens.AddGroupScreen]: undefined;
 };
 

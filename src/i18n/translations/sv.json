@@ -182,5 +182,6 @@
   "callTerminated": "Samtalet avslutat",
   "changeTheme": "Byt tema",
   "changeLanguage": "Byt språk",
-  "updateAvatar": "Uppdatera avatar"
+  "save": "Spara",
+  "updateProfile": "Uppdatera profil"
 }

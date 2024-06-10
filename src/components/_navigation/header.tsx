@@ -19,8 +19,6 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const navigation = useNavigation();
   const theme = useGlobalStore((state) => state.theme);
   const avatar = useGlobalStore((state) => state.user?.avatar);
-  const state = useGlobalStore((state) => state);
-  console.log({ state });
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
     return unsubscribe;
@@ -42,10 +40,10 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
           </TouchableOpacity>
         )}
         {!backButton && (
-          <View style={styles.logoContainer}>
+          <>
             {avatar && <Avatar base64={avatar} size={30} />}
             {!avatar && <HuginSvg style={styles.logo} />}
-          </View>
+          </>
         )}
       </View>
       <View style={styles.center}>
@@ -76,14 +74,7 @@ const styles = StyleSheet.create({
     height: 30,
     width: 30,
   },
-  logoContainer: {
-    alignItems: 'center',
-    borderRadius: 100,
-    height: 30,
-    justifyContent: 'center',
-    overflow: 'hidden',
-    width: 30,
-  },
+
   side: {
     alignItems: 'center',
     justifyContent: 'center',

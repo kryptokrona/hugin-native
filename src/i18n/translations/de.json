@@ -171,5 +171,6 @@
   "groupsRecommendations": "Empfohlen",
   "changeTheme": "Thema ändern",
   "changeLanguage": "Sprache ändern",
-  "updateAvatar": "Avatar aktualisieren"
+  "save": "Speichern",
+  "updateProfile": "Profil aktualisieren"
 }

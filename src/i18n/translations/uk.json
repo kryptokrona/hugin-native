@@ -184,5 +184,6 @@
   "transactionHash": "Хеш транзакції",
   "changeTheme": "Змінити тему",
   "changeLanguage": "Змінити мову",
-  "updateAvatar": "Оновити аватар"
+  "save": "Зберегти",
+  "updateProfile": "Оновити профіль"
 }

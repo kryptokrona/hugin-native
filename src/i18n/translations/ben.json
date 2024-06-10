@@ -196,5 +196,6 @@
   "APISwapped": "API সফলভাবে পরিবর্তন করা হয়েছে!",
   "changeTheme": "থিম পরিবর্তন করুন",
   "changeLanguage": "ভাষা পরিবর্তন করুন",
-  "updateAvatar": "অবতার আপডেট করুন"
+  "save": "সংরক্ষণ করুন",
+  "updateProfile": "প্রোফাইল আপডেট করুন"
 }

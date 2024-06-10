@@ -5,7 +5,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
 import { CustomIcon } from '@/components';
-import { AddGroupScreen, GroupChatScreen, GroupsScreen } from '@/screens';
+import {
+  AddGroupScreen,
+  GroupChatScreen,
+  GroupsScreen,
+  ModifyGroupScreen,
+} from '@/screens';
 import {
   GroupsScreens,
   GroupStackNavigationType,
@@ -35,7 +40,7 @@ export const GroupStackNavigator = () => {
               title={t('groups')}
               right={
                 <TouchableOpacity onPress={onAddGroupPress}>
-                  <CustomIcon type="MI" name="add-box" size={30} />
+                  <CustomIcon type="IO" name="add-outline" />
                 </TouchableOpacity>
               }
             />
@@ -55,15 +60,18 @@ export const GroupStackNavigator = () => {
         options={() => ({
           header: (_props) => (
             <Header
+              // Is set in screen
               title={'Untitled'}
               backButton
-              right={
-                <TouchableOpacity onPress={onAddGroupPress}>
-                  <CustomIcon type="MI" name="mode-edit" size={26} />
-                </TouchableOpacity>
-              }
             />
           ),
+        })}
+      />
+      <Stack.Screen
+        name={GroupsScreens.ModifyGroupScreen}
+        component={ModifyGroupScreen}
+        options={() => ({
+          header: (_props) => <Header backButton title={t('modify')} />,
         })}
       />
     </Stack.Navigator>

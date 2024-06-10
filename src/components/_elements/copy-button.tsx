@@ -6,31 +6,33 @@ import {
   Clipboard, // TODO FIX SHIT
 } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { toastPopUp, useGlobalStore } from '@/services';
 
 interface CopyButtonProps {
   data: string;
-  name: string;
   style?: object;
+  text: string;
 }
 
 export const CopyButton: React.FC<CopyButtonProps> = ({
   data,
-  name,
   style,
+  text,
 }) => {
+  const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
 
   const handleCopy = () => {
     Clipboard.setString(data);
-    toastPopUp(`${name} copied`);
+    toastPopUp(`${t('copied')}`);
   };
 
   return (
     <View style={[styles.button, style, { borderColor: theme.border }]}>
       <TouchableOpacity onPress={handleCopy}>
-        {/* TODO i18n copy */}
-        <Text style={[styles.text, { color: theme.primary }]}>Copy</Text>
+        <Text style={[styles.text, { color: theme.primary }]}>{text}</Text>
       </TouchableOpacity>
     </View>
   );

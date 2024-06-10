@@ -185,5 +185,6 @@
   "transactionHistory": "लेनदेन इतिहास",
   "changeTheme": "थीम बदलू",
   "changeLanguage": "भाषा बदलू",
-  "updateAvatar": "अवतार अद्यतन करू"
+  "save": "सुरक्षित करू",
+  "updateProfile": "प्रोफाइल अद्यतन करू"
 }

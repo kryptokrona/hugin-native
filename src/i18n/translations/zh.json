@@ -199,5 +199,6 @@
   "deleteContactWarning": "您确定要删除此联系人吗？",
   "changeTheme": "更改主题",
   "changeLanguage": "更改语言",
-  "updateAvatar": "更新头像"
+  "save": "保存",
+  "updateProfile": "更新个人资料"
 }

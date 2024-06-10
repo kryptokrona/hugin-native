@@ -1,21 +1,28 @@
-import { Image } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 interface Props {
   base64: string;
   size?: number;
 }
 
-export const Avatar: React.FC<Props> = ({ base64, size }) => {
+export const Avatar: React.FC<Props> = ({ base64, size = 70 }) => {
   const uri = `data:image/png;base64,${base64}`;
+  const style = {
+    height: size,
+    width: size,
+  };
+
   return (
-    <Image
-      source={{ uri }}
-      style={[
-        {
-          height: size,
-          width: size,
-        },
-      ]}
-    />
+    <View style={[styles.container, style]}>
+      <Image source={{ uri }} style={[style]} />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    borderRadius: 100,
+    overflow: 'hidden',
+  },
+});

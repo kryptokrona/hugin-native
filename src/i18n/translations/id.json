@@ -185,5 +185,6 @@
   "transactionHistory": "Riwayat transaksi",
   "changeTheme": "Ubah tema",
   "changeLanguage": "Ubah bahasa",
-  "updateAvatar": "Perbarui avatar"
+  "save": "Simpan",
+  "updateProfile": "Perbarui profil"
 }

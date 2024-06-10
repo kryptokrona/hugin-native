@@ -185,5 +185,6 @@
   "transactionHistory": "history ng transaksyon",
   "changeTheme": "Baguhin ang tema",
   "changeLanguage": "Baguhin ang wika",
-  "updateAvatar": "I-update ang avatar"
+  "save": "I-save",
+  "updateProfile": "I-update ang profile"
 }
