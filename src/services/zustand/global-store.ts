@@ -26,7 +26,6 @@ export const useGlobalStore = create<
   subscribeWithSelector((set) => ({
     preferences: defaultPreferences,
     setPreferences: (preferences: Preferences) => {
-      console.log('Setting preferences:', preferences);
       set({ preferences });
     },
     setTheme: (theme: Theme) => {
@@ -44,7 +43,6 @@ export const useGlobalStore = create<
 useGlobalStore.subscribe(
   (state) => state.preferences,
   async (preferences) => {
-    console.log({ preferences });
     if (!preferences) {
       return;
     }
@@ -67,7 +65,6 @@ useGlobalStore.subscribe(
   (state) => state.preferences?.themeMode,
   (themeMode) => {
     if (themeMode) {
-      console.log('themeMode', themeMode);
       useGlobalStore.getState().setTheme(Themes[themeMode]);
     }
   },
