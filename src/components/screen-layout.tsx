@@ -32,8 +32,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'column',
     flexGrow: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
   divider: {
     marginBottom: 12,

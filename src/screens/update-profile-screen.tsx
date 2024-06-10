@@ -49,13 +49,13 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
         <View style={styles.top}>
           <TouchableOpacity onPress={updateAvatar} style={styles.header}>
             <View style={styles.avatarContainer}>
-              <Avatar base64={avatar} size={100} />
+              <Avatar base64={avatar} size={70} />
             </View>
             <View style={styles.avatarButton}>
               <CustomIcon
                 type="MI"
                 name="mode-edit"
-                size={26}
+                size={20}
                 color={theme.secondary}
               />
             </View>
@@ -72,19 +72,18 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 
 const styles = StyleSheet.create({
   avatarButton: {
+    bottom: 12,
     position: 'absolute',
-    right: -24,
-    top: 0,
+    right: 10,
   },
   avatarContainer: {
     alignItems: 'center',
-    borderRadius: 100,
-    height: 100,
-    marginBottom: 20,
+    borderRadius: 70,
+    height: 70,
+    margin: 20,
     overflow: 'hidden',
-    width: 100,
+    width: 70,
   },
-
   container: {
     flex: 1,
     justifyContent: 'space-between',
