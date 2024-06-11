@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flexGrow: 1,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 4,
   },
   divider: {
     marginBottom: 12,

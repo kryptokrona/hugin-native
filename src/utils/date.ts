@@ -8,10 +8,15 @@ export const prettyPrintDateFromLocale = (timestamp: number) => {
   return date.toLocaleString(preferences.language);
 };
 
-export const prettyPrintDate = (date?: moment.Moment) => {
+export const prettyPrintMomentDate = (date?: moment.Moment) => {
   const currentDate = date || moment();
   if (moment().year() === currentDate.year()) {
     return currentDate.format('D MMM, HH:mm');
   }
   return currentDate.format('D MMM, YYYY HH:mm');
+};
+
+export const prettyPrintDate = (date: Date) => {
+  const currentDate = moment(date);
+  return prettyPrintMomentDate(currentDate);
 };

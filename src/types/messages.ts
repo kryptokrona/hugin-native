@@ -13,15 +13,15 @@ export interface Group {
 }
 
 export interface Message {
-  msg: string;
-  chat: string;
-  sent: boolean;
-  timestamp: number;
-  name: string;
+  m: string;
+  k: string;
+  s: string;
+  g: string; // Group key
+  n: string;
+  r: string; // Can be empty string
+  c: string; // Channel
+  t: Date;
   hash: string;
-  reply: string;
-  address: string;
-  signature: string;
 }
 
 export interface GroupMessage extends Message {

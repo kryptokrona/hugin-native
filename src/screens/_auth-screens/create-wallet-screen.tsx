@@ -76,7 +76,7 @@
 //   return (
 //     <ScreenLayout>
 //       <TextField>{t('walletCreated')}</TextField>
-//       <TextField type="secondary">{t('walletCreatedSubtitle')}</TextField>
+//       <TextField type="inverted">{t('walletCreatedSubtitle')}</TextField>
 //       <TextField type="error">{t('walletCreatedSubtitleSubtitle')}</TextField>
 
 //       <View>

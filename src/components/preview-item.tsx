@@ -15,8 +15,8 @@ interface Props {
 export const PreviewItem: React.FC<Props> = ({ name, topic, onPress }) => {
   const [isPressed, setIsPressed] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
-  const isNew = true; // dummy
-  const borderColor = isNew ? theme.primary : theme.border;
+  const isNew = false; // dummy
+  const borderColor = isNew ? theme.primary : theme.borderSecondary;
 
   function handleLongPress() {
     setIsPressed(true);
@@ -33,7 +33,7 @@ export const PreviewItem: React.FC<Props> = ({ name, topic, onPress }) => {
       style={[
         styles.container,
         {
-          backgroundColor: isPressed ? theme.backgroundAccent : 'transparent',
+          backgroundColor: isPressed ? theme.backgroundTertiary : 'transparent',
           borderColor,
         },
       ]}
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
     flexDirection: 'row',
-    padding: 16,
+    paddingVertical: 16,
   },
   content: {
     flex: 1,

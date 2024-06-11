@@ -23,9 +23,25 @@ export const TextButton: React.FC<Props> = ({
   small,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.backgroundAccent;
-  const borderColor = type === 'secondary' ? theme.border : theme.border;
-  const color = type === 'error' ? theme.error : theme.primary;
+  const backgroundColors = {
+    error: theme.error,
+    primary: theme.backgroundSecondary,
+    secondary: theme.background,
+  };
+
+  const colors = {
+    error: theme.primary,
+    primary: theme.inverted,
+    secondary: theme.primary,
+  };
+
+  const backgroundColor = type
+    ? backgroundColors[type]
+    : theme.backgroundSecondary;
+
+  const borderColor = type ? colors[type] : theme.inverted;
+
+  const color = type ? colors[type] : theme.inverted;
   const smallButtonStyle = small
     ? {
         borderRadius: Styles.borderRadius.small,
@@ -58,7 +74,7 @@ export const TextButton: React.FC<Props> = ({
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
-    borderRadius: Styles.borderRadius.medium,
+    borderRadius: Styles.borderRadius.small,
     borderWidth: 1,
     flexDirection: 'row',
     flexGrow: 1,

@@ -11,7 +11,6 @@ export const Avatar: React.FC<Props> = ({ base64, size = 70 }) => {
     height: size,
     width: size,
   };
-
   return (
     <View style={[styles.container, style]}>
       <Image source={{ uri }} style={[style]} />

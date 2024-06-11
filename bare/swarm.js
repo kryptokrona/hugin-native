@@ -37,6 +37,7 @@ class Swarm {
       r: 'reply hash',
       c: 'Room',
       t: Date.now(),
+      hash: 'hash',
     };
     //If reply change this to the hash of the message
     if (message.r) {

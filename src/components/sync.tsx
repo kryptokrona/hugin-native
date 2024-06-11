@@ -81,7 +81,7 @@ export const SyncComponent: React.FC<any> = (props) => {
     <View style={styles.container}>
       <Animatable.Text
         ref={syncRef}
-        style={[styles.text, { color: theme.secondary }]}>
+        style={[styles.text, { color: theme.inverted }]}>
         {syncStatus.walletHeight} / {syncStatus.networkHeight} -{' '}
         {syncStatus.percent}%
       </Animatable.Text>

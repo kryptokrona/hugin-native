@@ -24,8 +24,8 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
     return unsubscribe;
   }, [navigation]);
 
-  const backgroundColor = theme?.background;
-  const borderColor = theme?.border;
+  const backgroundColor = theme.background;
+  const borderColor = theme.borderAccent;
 
   function onBackPress() {
     navigation.goBack();

@@ -64,7 +64,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
                 type="MI"
                 name="mode-edit"
                 size={20}
-                color={theme.secondary}
+                color={theme.inverted}
               />
             </View>
           </TouchableOpacity>

@@ -20,7 +20,7 @@ export const ChangeLanguageScreen: React.FC<Props> = () => {
   const { i18n } = useTranslation();
   const navigation = useNavigation();
   const theme = useGlobalStore((state) => state.theme);
-  const borderColor = theme.border;
+  const borderColor = theme.backgroundTertiary;
   const currentLanguage = i18n.language;
   const sortedLanguages = [...languages].sort((a, b) => {
     if (a.code === currentLanguage) {

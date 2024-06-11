@@ -64,7 +64,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
               type="MI"
               name="mode-edit"
               size={20}
-              color={theme.secondary}
+              color={theme.inverted}
             />
           </View>
         </TouchableOpacity>
@@ -72,6 +72,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           label={t('name')}
           value={name}
           onChange={onNameInput}
+          maxLength={25}
           // onSubmitEditing={onSave}
         />
         <Container bottom row>
@@ -93,6 +94,6 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   inner: {
-    flex: 1,
+    // flex: 1,
   },
 });

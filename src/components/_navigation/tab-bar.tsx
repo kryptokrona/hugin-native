@@ -15,11 +15,13 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   const theme = useGlobalStore((state) => state.theme);
   return (
     <View
-      style={{
-        backgroundColor: theme.backgroundAccent,
-        flexDirection: 'row',
-        height: 50,
-      }}>
+      style={[
+        styles.tabBar,
+        {
+          backgroundColor: theme.background,
+          borderColor: theme.borderAccent,
+        },
+      ]}>
       {state.routes.map((route, index) => {
         const icon = TabBar[route.name as keyof typeof TabBar];
         const { options } = descriptors[route.key];
@@ -66,5 +68,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+  },
+  tabBar: {
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    height: 50,
   },
 });

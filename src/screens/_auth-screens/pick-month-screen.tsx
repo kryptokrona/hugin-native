@@ -40,7 +40,7 @@ export const PickMonthScreen: React.FC<Props> = () => {
           minDate={moment(config.chainLaunchTimestamp)}
           selectedBackgroundColor={theme.primary}
           monthTextStyle={{ color: theme.primary }}
-          monthDisabledStyle={{ color: theme.secondary }}
+          monthDisabledStyle={{ color: theme.inverted }}
           currentMonthTextStyle={{ color: theme.primary }}
           seperatorColor={theme.primary}
           nextIcon={

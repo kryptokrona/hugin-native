@@ -1,11 +1,15 @@
 export interface Theme {
-  mode: 'light' | 'dark';
-  backgroundAccent: string;
-  background: string;
   border: string;
+  borderSecondary: string;
+  backgroundSecondary: string;
+  backgroundTertiary: string;
+  background: string;
+  error: string;
+  mode: 'light' | 'dark';
   primary: string; // Text
   secondary: string; // Text
-  error: string;
+  inverted: string; // Text
+  borderAccent: string;
 }
 
 export type IconType =

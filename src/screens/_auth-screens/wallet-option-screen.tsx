@@ -35,7 +35,7 @@ export const WalletOptionScreen: React.FC<Props> = () => {
         <TextField size="large" type="primary">
           Hugin Messenger
         </TextField>
-        <TextField type="secondary">{t('welcomeMessage')}</TextField>
+        <TextField type="inverted">{t('welcomeMessage')}</TextField>
       </View>
 
       <View

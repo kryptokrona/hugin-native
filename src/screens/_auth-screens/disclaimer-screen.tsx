@@ -64,7 +64,7 @@ export const DisclaimerScreen: React.FC<Props> = ({ route }) => {
             />
 
             <View style={{ flex: 1 }}>
-              <TextField type="secondary">
+              <TextField type="inverted">
                 {`
                  I understand that the fee for sending transactions is{' '}
                   ${config.devFeePercentage.toString()}%.
@@ -91,7 +91,7 @@ export const DisclaimerScreen: React.FC<Props> = ({ route }) => {
           />
 
           <View style={{ flex: 1 }}>
-            <TextField type="secondary">{t('privateKeyWarning')}</TextField>
+            <TextField type="inverted">{t('privateKeyWarning')}</TextField>
           </View>
         </View>
 
@@ -111,7 +111,7 @@ export const DisclaimerScreen: React.FC<Props> = ({ route }) => {
           />
 
           <View style={{ flex: 1 }}>
-            <TextField type="secondary">{t('warrantyWarning')}</TextField>
+            <TextField type="inverted">{t('warrantyWarning')}</TextField>
           </View>
         </View>
 

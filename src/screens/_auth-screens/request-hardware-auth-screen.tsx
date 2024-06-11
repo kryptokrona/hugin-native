@@ -144,7 +144,7 @@ export const RequestHardwareAuthScreen: React.FC<Props> = ({ route }) => {
             style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
             <XKRLogo />
 
-            <TextField type="secondary" size="large">
+            <TextField type="inverted" size="large">
               {`
              Touch the fingerprint sensor{' '}
              `}
@@ -168,7 +168,7 @@ export const RequestHardwareAuthScreen: React.FC<Props> = ({ route }) => {
           </View>
 
           <View style={{ bottom: 20, position: 'absolute', width: '100%' }}>
-            <TextButton onPress={onPress} type="secondary">
+            <TextButton onPress={onPress} type="inverted">
               Or enter your PIN
             </TextButton>
           </View>

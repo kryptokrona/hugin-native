@@ -3,8 +3,8 @@ import { StyleSheet, Text } from 'react-native';
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
 
-type TextType = 'primary' | 'secondary' | 'error';
-type SizeType = 'small' | 'medium' | 'large';
+type TextType = 'primary' | 'secondary' | 'error' | 'inverted';
+type SizeType = 'xsmall' | 'small' | 'medium' | 'large';
 
 interface Props {
   children: string;
@@ -29,7 +29,7 @@ export const TextField: React.FC<Props> = ({
   const fontWeight = bold ? 'bold' : 'normal';
 
   const truncatedText =
-    maxLength && children.length > maxLength
+    maxLength && children?.length > maxLength
       ? `${children.substring(0, maxLength)}...`
       : children;
 

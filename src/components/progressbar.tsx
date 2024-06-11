@@ -46,13 +46,13 @@ export const ProgressBar: React.FC<any> = (props) => {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.backgroundAccent },
+        { backgroundColor: theme.backgroundInverted },
         props.style,
       ]}>
       <Animated.View
         style={[
           styles.fill,
-          { backgroundColor: theme.primary, width: fillWidth },
+          { backgroundColor: theme.inverted, width: fillWidth },
         ]}
       />
     </View>

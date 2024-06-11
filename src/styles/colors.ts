@@ -1,21 +1,13 @@
 import { Theme } from '@/types';
 
 const colors = {
-  alert: '#F2CB5F',
-  dark: '#121212',
-  darkAccent: '#1F1F1F',
-  darkBorder: '#333333',
-  darkText: '#C2C2C2',
-  darkTextSecondary: '#8F8F8F',
-
-  error: '#FF190C',
-
-  light: '#F2F2F2',
-  lightAccent: '#E5E5E5',
-  lightBorder: '#DCDCDC',
-  lightText: '#121212',
-
-  lightTextSecondary: '#474747',
+  dark: '#18181B',
+  error: '#F2CB5F',
+  grey_100: '#F4F4F5',
+  grey_200: '#E5E5E5',
+  grey_300: '#828283',
+  grey_400: '#39393B',
+  light: '#FFFFFF',
 };
 
 export const Themes: {
@@ -24,20 +16,28 @@ export const Themes: {
 } = {
   dark: {
     background: colors.dark,
-    backgroundAccent: colors.darkAccent,
-    border: colors.darkBorder,
+    backgroundSecondary: colors.light,
+    backgroundTertiary: colors.grey_400,
+    border: colors.light,
+    borderAccent: colors.grey_400,
+    borderSecondary: colors.grey_400,
     error: colors.error,
+    inverted: colors.dark,
     mode: 'dark',
-    primary: colors.darkText,
-    secondary: colors.darkTextSecondary,
+    primary: colors.light,
+    secondary: colors.grey_300,
   },
   light: {
     background: colors.light,
-    backgroundAccent: colors.lightAccent,
-    border: colors.lightBorder,
+    backgroundSecondary: colors.dark,
+    backgroundTertiary: colors.grey_200,
+    border: colors.dark,
+    borderAccent: colors.grey_100,
+    borderSecondary: colors.grey_200,
     error: colors.error,
+    inverted: colors.light,
     mode: 'light',
-    primary: colors.lightText,
-    secondary: colors.lightTextSecondary,
+    primary: colors.dark,
+    secondary: colors.grey_300,
   },
 };

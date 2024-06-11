@@ -75,7 +75,7 @@ export const ChooseAuthMethodScreen: React.FC<Props> = ({ route }) => {
             }}
             style={styles.switch}
           />
-          <TextField type="secondary">{t('useHardware')}</TextField>
+          <TextField type="inverted">{t('useHardware')}</TextField>
         </View>
         <View style={styles.optionContainer}>
           <Switch
@@ -85,7 +85,7 @@ export const ChooseAuthMethodScreen: React.FC<Props> = ({ route }) => {
             }}
             style={styles.switch}
           />
-          <TextField type="secondary">{t('usePinCode')}</TextField>
+          <TextField type="inverted">{t('usePinCode')}</TextField>
         </View>
         <View style={styles.optionContainer}>
           <Switch

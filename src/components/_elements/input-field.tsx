@@ -30,7 +30,8 @@ export const InputField: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.backgroundAccent;
+  const backgroundColor = theme.background;
+  const borderColor = theme.borderSecondary;
   const color = theme.primary;
   return (
     <View style={[styles.container]}>
@@ -41,8 +42,8 @@ export const InputField: React.FC<Props> = ({
         returnKeyLabel={t('done')}
         returnKeyType={'done'}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.secondary}
-        style={[styles.input, { backgroundColor, color }]}
+        placeholderTextColor={theme.inverted}
+        style={[styles.input, { backgroundColor, borderColor, color }]}
         value={value?.toString()}
         onChangeText={(text) => onChange(text)}
         keyboardType={keyboardType}
@@ -63,6 +64,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderRadius: Styles.borderRadius.small,
+    borderWidth: 1,
     marginTop: 4,
     padding: 8,
     paddingHorizontal: 10,

@@ -65,6 +65,7 @@ export const AddGroupScreen: React.FC<Props> = () => {
         />
         <TextButton
           small
+          type="secondary"
           style={styles.generateButton}
           onPress={onGeneratePress}>
           {t('generate')}

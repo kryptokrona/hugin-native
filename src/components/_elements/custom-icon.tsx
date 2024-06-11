@@ -20,7 +20,7 @@ export const CustomIcon: React.FC<CustomIconProps> = ({
   size = 24,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const mColor = color || theme.primary;
+  const mColor = color ?? theme.primary;
   switch (type) {
     case 'MI':
       return <MI name={name} size={size} color={mColor} />;

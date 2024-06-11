@@ -31,18 +31,18 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
       <View
         style={[
           styles.inputContainer,
-          { backgroundColor: theme.backgroundAccent },
+          { backgroundColor: theme.backgroundSecondary },
         ]}>
         <TextInput
-          style={[styles.inputField, { color: theme.primary }]}
+          style={[styles.inputField, { color: theme.inverted }]}
           value={text}
           onChangeText={onChange}
           placeholder="Type a message..."
-          placeholderTextColor={theme.secondary}
+          placeholderTextColor={theme.inverted}
           multiline
         />
         <TouchableOpacity onPress={handleSend} style={styles.btn}>
-          <CustomIcon name="send" type="IO" size={24} />
+          <CustomIcon name="send" type="IO" size={24} color={theme.inverted} />
         </TouchableOpacity>
       </View>
     </View>

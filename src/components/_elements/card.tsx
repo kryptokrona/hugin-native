@@ -9,8 +9,8 @@ interface Props {
 
 export const Card: React.FC<Props> = ({ children }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.backgroundAccent;
-  const borderColor = theme.border;
+  const backgroundColor = theme.background;
+  const borderColor = theme.borderSecondary;
 
   return (
     <View style={[styles.card, { backgroundColor, borderColor }]}>
@@ -21,10 +21,8 @@ export const Card: React.FC<Props> = ({ children }) => {
 
 const styles = StyleSheet.create({
   card: {
-    // alignSelf: 'flex-start',
     borderRadius: Styles.borderRadius.small,
     borderWidth: 1,
-    elevation: 5,
     marginVertical: 2,
     padding: 10,
   },

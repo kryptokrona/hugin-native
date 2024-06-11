@@ -6,33 +6,33 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
-import {
-  Message,
-  MessagesScreens,
-  type MessagesStackNavigationType,
-} from '@/types';
-import { prettyPrintDateFromLocale } from '@/utils';
+import { type MessagesStackNavigationType } from '@/types';
+import { prettyPrintDate } from '@/utils';
 
 import { Avatar, TextField } from './_elements';
 
-interface Props extends Message {
+interface Props {
   inverted: boolean;
+  message: string;
+  avatar: string;
+  date: Date;
+  name: string;
 }
 
 export const MessageItem: React.FC<Props> = ({
-  text,
-  user,
-  timestamp,
   inverted,
+  message,
+  avatar,
+  date,
+  name,
 }) => {
   const navigation = useNavigation<MessagesStackNavigationType>();
   const [isPressed, setIsPressed] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
-  const date = prettyPrintDateFromLocale(timestamp);
+  const dateString = prettyPrintDate(date);
 
   function handleLongPress() {
     setIsPressed(true);
-    navigation.navigate(MessagesScreens.MessageScreen, { user });
   }
 
   return (
@@ -41,7 +41,7 @@ export const MessageItem: React.FC<Props> = ({
         styles.container,
         !inverted ? styles.container : styles.invertedContainer,
         {
-          backgroundColor: isPressed ? theme.backgroundAccent : 'transparent',
+          backgroundColor: isPressed ? theme.backgroundTertiary : 'transparent',
         },
       ]}
       onLongPress={handleLongPress}
@@ -49,18 +49,14 @@ export const MessageItem: React.FC<Props> = ({
       {!inverted && (
         <>
           <View style={styles.user}>
-            <Avatar base64={user.key} size={40} />
+            <Avatar base64={avatar} size={30} />
             <TextField size="small" style={styles.date}>
-              {date}
+              {dateString}
             </TextField>
           </View>
           <View style={[styles.messageContainer]}>
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: theme.backgroundAccent },
-              ]}>
-              <TextField size="small">{text}</TextField>
+            <View style={[styles.card, { backgroundColor: theme.tertiary }]}>
+              <TextField size="small">{message}</TextField>
             </View>
           </View>
         </>
@@ -68,15 +64,15 @@ export const MessageItem: React.FC<Props> = ({
       {inverted && (
         <View>
           <TextField size="small" style={styles.date}>
-            {date}
+            {dateString}
           </TextField>
           <View style={styles.invertedCard}>
             <View
               style={[
                 styles.card,
-                { backgroundColor: theme.backgroundAccent },
+                { backgroundColor: theme.backgroundTertiary },
               ]}>
-              <TextField size="small">{text}</TextField>
+              <TextField size="small">{message}</TextField>
             </View>
           </View>
         </View>
@@ -98,6 +94,7 @@ const styles = StyleSheet.create({
   date: {
     alignSelf: 'flex-end',
     marginBottom: 6,
+    marginLeft: 6,
   },
   invertedCard: {
     alignSelf: 'flex-end',
