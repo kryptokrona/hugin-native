@@ -1,5 +1,7 @@
 import { Image, StyleSheet, View } from 'react-native';
 
+import { Styles } from '@/styles';
+
 interface Props {
   base64: string;
   size?: number;
@@ -21,7 +23,7 @@ export const Avatar: React.FC<Props> = ({ base64, size = 70 }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    borderRadius: 100,
+    borderRadius: Styles.borderRadius.small,
     overflow: 'hidden',
   },
 });

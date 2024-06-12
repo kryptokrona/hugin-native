@@ -1,22 +1,10 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
-import {
-  Avatar,
-  Header,
-  MessageInput,
-  MessageItem,
-  ScreenLayout,
-} from '@/components';
+import { Avatar, Header, MessageInput, ScreenLayout } from '@/components';
 import {
   Message,
   MessagesScreens,
@@ -65,7 +53,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <FlatList
+        {/* <FlatList
           data={messages}
           keyExtractor={(item) => item.timestamp.toString()}
           renderItem={({ item }) => (
@@ -73,7 +61,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
             <MessageItem inverted={false} {...item} />
           )}
           contentContainerStyle={styles.flatListContent}
-        />
+        /> */}
         <View style={styles.inputWrapper}>
           <MessageInput onSend={onSend} />
         </View>

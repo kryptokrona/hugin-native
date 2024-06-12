@@ -56,15 +56,13 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
       <View style={styles.container}>
         <View style={styles.top}>
           <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
-            <View style={styles.avatarContainer}>
-              <Avatar base64={avatar} size={70} />
-            </View>
+            <Avatar base64={avatar} size={70} />
             <View style={styles.avatarButton}>
               <CustomIcon
                 type="MI"
                 name="mode-edit"
                 size={20}
-                color={theme.inverted}
+                color={theme.primary}
               />
             </View>
           </TouchableOpacity>
@@ -75,7 +73,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
             onSubmitEditing={onSave}
           />
         </View>
-        <Container bottom row>
+        <Container bottom>
           <TextButton onPress={onSave}>{t('save')}</TextButton>
         </Container>
       </View>
@@ -85,17 +83,9 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 
 const styles = StyleSheet.create({
   avatarButton: {
-    bottom: 12,
     position: 'absolute',
-    right: 10,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    borderRadius: 70,
-    height: 70,
-    margin: 20,
-    overflow: 'hidden',
-    width: 70,
+    right: -6,
+    top: -6,
   },
   container: {
     flex: 1,
@@ -103,6 +93,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignSelf: 'flex-start',
+    marginBottom: 12,
     position: 'relative',
   },
   top: {

@@ -19,6 +19,7 @@
     "@hyperswarm/secret-stream": "^6.4.0",
     "@os-team/i18next-react-native-language-detector": "^1.0.33",
     "@react-native-async-storage/async-storage": "1.21.0",
+    "@react-native-clipboard/clipboard": "^1.14.1",
     "@react-native-community/netinfo": "11.1.0",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",

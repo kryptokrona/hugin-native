@@ -14,14 +14,6 @@ import { AppProvider } from './contexts';
 // import SplashScreen from 'react-native-splash-screen';
 // import { useEffect } from 'react';
 const App = () => {
-  // const [showSplash, setShowSplash] = useState(true);
-  // useEffect(() => {
-  //   init();
-  //   setTimeout(() => {
-  //     setShowSplash(false);
-  //   }, 3000);
-  // }, []);
-
   // useEffect(() => {
   //   // Configure Push Notification
   //   PushNotification.configure({
@@ -55,19 +47,12 @@ const App = () => {
   //     senderID: 'YOUR GCM (OR FCM) SENDER ID',
   //   });
   // }, []);
-  // if (showSplash) {
-  //   return (
-  //     <ScreenLayout>
-  //       <XKRLogo />
-  //     </ScreenLayout>
-  //   );
-  // } else {
+
   return (
     <AppProvider>
       <RootNavigator />
     </AppProvider>
   );
-  // }
 };
 
 // function handleNotification(notification: PushNotificationObject) {

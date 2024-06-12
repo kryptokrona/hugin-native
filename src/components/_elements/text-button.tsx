@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     borderRadius: Styles.borderRadius.small,
     borderWidth: 1,
     flexDirection: 'row',
-    flexGrow: 1,
+    // flexGrow: 1,
     justifyContent: 'center',
     // marginHorizontal: 4,
     marginVertical: 8,
@@ -86,6 +86,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   text: {
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Montserrat-SemiBold',
   },
 });

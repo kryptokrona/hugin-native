@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { useTranslation } from 'react-i18next';
+
 import { useGlobalStore } from '@/services';
-import { Styles } from '@/styles';
+import { commonInputProps, Styles } from '@/styles';
 
 import { CustomIcon } from './_elements';
 
@@ -12,19 +14,29 @@ interface Props {
 }
 
 export const MessageInput: React.FC<Props> = ({ onSend }) => {
+  const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
   const [text, setText] = useState('');
+  const [focus, setFocus] = useState(false);
 
-  const handleSend = () => {
+  function handleSend() {
     if (text.trim()) {
       onSend(text);
       setText('');
     }
-  };
+  }
 
-  const onChange = (text: string) => {
+  function onChange(text: string) {
     setText(text);
-  };
+  }
+
+  function onBlur() {
+    setFocus(false);
+  }
+
+  function onFocus() {
+    setFocus(true);
+  }
 
   return (
     <View style={styles.container}>
@@ -37,12 +49,24 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
           style={[styles.inputField, { color: theme.inverted }]}
           value={text}
           onChangeText={onChange}
-          placeholder="Type a message..."
-          placeholderTextColor={theme.inverted}
+          onBlur={onBlur}
+          onFocus={onFocus}
+          placeholder="  Aa..."
+          placeholderTextColor={theme.secondary}
           multiline
+          autoCapitalize="sentences"
+          autoCorrect
+          returnKeyLabel={t('send')}
+          returnKeyType="send"
+          {...commonInputProps}
         />
         <TouchableOpacity onPress={handleSend} style={styles.btn}>
-          <CustomIcon name="send" type="IO" size={24} color={theme.inverted} />
+          <CustomIcon
+            name="send"
+            type="IO"
+            size={24}
+            color={focus ? theme.inverted : theme.secondary}
+          />
         </TouchableOpacity>
       </View>
     </View>
@@ -60,9 +84,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: Styles.borderRadius.small,
     flexDirection: 'row',
+    margin: 10,
   },
   inputField: {
     flex: 1,
     minHeight: 50,
+    paddingLeft: 4,
   },
 });

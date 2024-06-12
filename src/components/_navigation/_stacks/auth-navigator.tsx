@@ -2,23 +2,7 @@ import React from 'react';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import {
-  ChooseAuthMethodScreen,
-  CreateWalletScreen,
-  DisclaimerScreen,
-  ForgotPinScreen,
-  ImportKeysOrSeedScreen,
-  ImportKeysScreen,
-  ImportSeedScreen,
-  ImportWalletScreen,
-  PickBlockHeightScreen,
-  PickExaktBlockHeightScreen,
-  PickMonthScreen,
-  RequestHardwareAuthScreen,
-  RequestPinScreen,
-  SetPinScreen,
-  WalletOptionScreen,
-} from '@/screens';
+import { SplashScreen } from '@/screens';
 import { AuthScreens, AuthStackParamList } from '@/types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -27,6 +11,14 @@ export const AuthNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
+        name={AuthScreens.SplashScreen}
+        component={SplashScreen}
+        options={() => ({
+          header: () => null,
+        })}
+      />
+
+      {/* <Stack.Screen
         name={AuthScreens.CreateWalletScreen}
         component={CreateWalletScreen}
       />
@@ -82,7 +74,7 @@ export const AuthNavigator = () => {
       <Stack.Screen
         name={AuthScreens.WalletOptionScreen}
         component={WalletOptionScreen}
-      />
+      /> */}
     </Stack.Navigator>
   );
 };

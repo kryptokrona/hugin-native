@@ -1,6 +1,5 @@
 export * from './text-button';
 export * from './card';
-export * from './container';
 export * from './copy-button';
 export * from './custom-icon';
 export * from './input-field';

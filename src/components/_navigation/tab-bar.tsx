@@ -1,4 +1,6 @@
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+
+import { TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native';
 
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
@@ -13,10 +15,33 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   navigation,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
+  const [keyboardShow, setKeyboardShow] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardShow(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardShow(false);
+      },
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   return (
-    <View
+    <Animated.View
       style={[
         styles.tabBar,
+        keyboardShow && styles.hideTabNavigation,
         {
           backgroundColor: theme.background,
           borderColor: theme.borderAccent,
@@ -59,11 +84,14 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
           </TouchableOpacity>
         );
       })}
-    </View>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
+  hideTabNavigation: {
+    display: 'none',
+  },
   tab: {
     alignItems: 'center',
     flex: 1,

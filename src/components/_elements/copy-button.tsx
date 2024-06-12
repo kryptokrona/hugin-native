@@ -1,6 +1,4 @@
-import {
-  Clipboard, // TODO FIX SHIT
-} from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import { TextButton } from './text-button';
 

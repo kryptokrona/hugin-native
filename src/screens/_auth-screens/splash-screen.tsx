@@ -1,21 +1,15 @@
-// import { useEffect } from 'react';
+import { useEffect } from 'react';
 
-// import { Alert } from 'react-native';
+import { type RouteProp, useNavigation } from '@react-navigation/native';
 
-// import { useNavigation } from '@react-navigation/native';
-// import { WalletBackend } from 'kryptokrona-wallet-backend-js';
-
-// import { ScreenLayout, XKRLogo } from '@/components';
-// import { config, globals } from '@/config';
-// import { delay, haveWallet, loadWallet } from '@/services';
-// import {
-//   AuthScreens,
-//   AuthStackNavigationType,
-//   MainScreens,
-//   MainStackNavigationType,
-// } from '@/types';
-
-// import { Authenticate } from './authenticate';
+import { ScreenLayout, XKRLogo } from '@/components';
+import {
+  AuthScreens,
+  AuthStackParamList,
+  MainScreens,
+  Stacks,
+  TabBar,
+} from '@/types';
 
 // const fail = (msg: string) => {
 //   globals.logger.addLogMessage(msg);
@@ -50,41 +44,67 @@
 //   }
 // };
 
-// export const SplashScreen: React.FC = () => {
-//   const navigation = useNavigation<AuthStackNavigationType>();
-//   const mainNavigation = useNavigation<MainStackNavigationType>();
+interface Props {
+  route: RouteProp<AuthStackParamList, typeof AuthScreens.SplashScreen>;
+}
 
-//   useEffect(() => {
-//     const init = async () => {
-//       const hasWallet = await haveWallet();
+export const SplashScreen: React.FC<Props> = () => {
+  //   const navigation = useNavigation<AuthStackNavigationType>();
+  const navigation = useNavigation<any>();
 
-//       await delay(2000);
+  useEffect(() => {
+    setTimeout(() => {
+      // navigation.dispatch(
+      //   CommonActions.reset({
+      //     index: 0,
+      //     routes: [
+      //       {
+      //         name: Stacks.AppStack,
+      //         params: { screen: MainScreens.MainScreen },
+      //       },
+      //     ],
+      //   }),
+      // );
+      navigation.navigate(Stacks.AppStack, {
+        params: {
+          screen: MainScreens.MainScreen,
+        },
+        screen: TabBar.MainTab.tabName,
+      });
+    }, 3000);
+  }, []);
 
-//       if (hasWallet) {
-//         Authenticate(
-//           navigation,
-//           'to unlock your account',
-//           tryLoadWallet(mainNavigation),
-//           true,
-//         );
-//       } else {
-//         navigation.navigate(AuthScreens.WalletOptionScreen);
-//         navigation.reset({
-//           index: 0,
-//           routes: [{ name: AuthScreens.WalletOptionScreen }],
-//         });
-//         // navigation.dispatch(
-//         //   navigateWithDisabledBack(AuthScreens.WalletOptionScreen),
-//         // );
-//       }
-//     };
+  //   useEffect(() => {
+  //     const init = async () => {
+  //       const hasWallet = await haveWallet();
 
-//     init();
-//   }, [navigation]);
+  //       await delay(2000);
 
-//   return (
-//     <ScreenLayout>
-//       <XKRLogo />
-//     </ScreenLayout>
-//   );
-// };
+  //       if (hasWallet) {
+  //         Authenticate(
+  //           navigation,
+  //           'to unlock your account',
+  //           tryLoadWallet(mainNavigation),
+  //           true,
+  //         );
+  //       } else {
+  //         navigation.navigate(AuthScreens.WalletOptionScreen);
+  //         navigation.reset({
+  //           index: 0,
+  //           routes: [{ name: AuthScreens.WalletOptionScreen }],
+  //         });
+  //         // navigation.dispatch(
+  //         //   navigateWithDisabledBack(AuthScreens.WalletOptionScreen),
+  //         // );
+  //       }
+  //     };
+
+  //     init();
+  //   }, [navigation]);
+
+  return (
+    <ScreenLayout>
+      <XKRLogo />
+    </ScreenLayout>
+  );
+};

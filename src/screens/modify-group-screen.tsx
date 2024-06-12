@@ -48,37 +48,33 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <View style={styles.inner}>
-        <Card>
-          <TextField>
-            SekrHUGINADDRESSTIHIHHIHIHIHIHihihhihihi345i34ti4girg
-          </TextField>
-        </Card>
-        <CopyButton text={t('copyInvite')} data={'TBD'} />
-        <TouchableOpacity
-          onPress={onUploadAvatar}
-          style={styles.avatarContainer}>
-          <Avatar base64={tempAvatar} />
-          <View style={styles.avatarButton}>
-            <CustomIcon
-              type="MI"
-              name="mode-edit"
-              size={20}
-              color={theme.inverted}
-            />
-          </View>
-        </TouchableOpacity>
-        <InputField
-          label={t('name')}
-          value={name}
-          onChange={onNameInput}
-          maxLength={25}
-          // onSubmitEditing={onSave}
-        />
-        <Container bottom row>
-          <TextButton onPress={onSave}>{t('save')}</TextButton>
-        </Container>
-      </View>
+      <Card>
+        <TextField>
+          SekrHUGINADDRESSTIHIHHIHIHIHIHihihhihihi345i34ti4girg
+        </TextField>
+      </Card>
+      <CopyButton text={t('copyInvite')} data={'TBD'} />
+      <TouchableOpacity onPress={onUploadAvatar} style={styles.avatarContainer}>
+        <Avatar base64={tempAvatar} />
+        <View style={styles.avatarButton}>
+          <CustomIcon
+            type="MI"
+            name="mode-edit"
+            size={20}
+            color={theme.inverted}
+          />
+        </View>
+      </TouchableOpacity>
+      <InputField
+        label={t('name')}
+        value={name}
+        onChange={onNameInput}
+        maxLength={25}
+        // onSubmitEditing={onSave}
+      />
+      <Container bottom>
+        <TextButton onPress={onSave}>{t('save')}</TextButton>
+      </Container>
     </ScreenLayout>
   );
 };
@@ -92,8 +88,5 @@ const styles = StyleSheet.create({
   avatarContainer: {
     alignSelf: 'flex-start',
     position: 'relative',
-  },
-  inner: {
-    // flex: 1,
   },
 });

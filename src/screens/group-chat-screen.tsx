@@ -1,13 +1,6 @@
 import { useLayoutEffect } from 'react';
 
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 
@@ -65,43 +58,35 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoidingView}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <FlatList
-          data={mockMessages}
-          keyExtractor={(item, i) => `${item.k}${i}`}
-          renderItem={({ item }) => (
-            <GroupMessageItem
-              message={item.m}
-              date={item.t}
-              avatar={mockAvatar}
-              name={item.n}
-              userAddress={item.k}
-            />
-          )}
-          contentContainerStyle={styles.flatListContent}
-        />
-        <View style={styles.inputWrapper}>
-          <MessageInput onSend={onSend} />
-        </View>
-      </KeyboardAvoidingView>
+      <FlatList
+        data={mockMessages}
+        keyExtractor={(item, i) => `${item.k}${i}`}
+        renderItem={({ item }) => (
+          <GroupMessageItem
+            message={item.m}
+            date={item.t}
+            avatar={mockAvatar}
+            name={item.n}
+            userAddress={item.k}
+          />
+        )}
+        contentContainerStyle={styles.flatListContent}
+      />
+      <View style={styles.inputWrapper}>
+        <MessageInput onSend={onSend} />
+      </View>
     </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
   flatListContent: {
-    paddingBottom: 80,
+    paddingBottom: 60,
   },
   inputWrapper: {
     bottom: 0,
     left: 0,
     position: 'absolute',
     right: 0,
-  },
-  keyboardAvoidingView: {
-    flex: 1,
   },
 });

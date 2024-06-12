@@ -17,7 +17,9 @@ const Tab = createBottomTabNavigator<any>();
 export const AppNavigator = () => {
   return (
     <Tab.Navigator
-      screenOptions={{ tabBarHideOnKeyboard: true }}
+      screenOptions={{
+        tabBarHideOnKeyboard: true,
+      }}
       tabBar={(props) => <MyTabBar {...props} />}>
       <Tab.Screen
         name={TabBar.MainTab.tabName}
@@ -39,16 +41,6 @@ export const AppNavigator = () => {
         component={SettingsStackNavigator}
         options={{ headerShown: false }}
       />
-      {/* <Tab.Screen
-        name={TabBar.TransferTab.tabName}
-        component={TransferStackNavigator}
-        options={{ headerShown: false }}
-      />
-      <Tab.Screen
-        name={TabBar.TransactionsTab.tabName}
-        component={TransactionsStackNavigator}
-        options={{ headerShown: false }}
-      /> */}
     </Tab.Navigator>
   );
 };

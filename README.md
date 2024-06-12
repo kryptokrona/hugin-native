@@ -37,31 +37,36 @@ For ease we added a helper script you can simply install running `npm link` in t
 
 ## Updating hello pear stuff
 
-# iOS simulator only
+### Good to know
+
+After linking assets with **npx react-native-asset** you need to run npx hello-pear configure again.
+As well as when updating anything regarding bare.
+
+### iOS simulator only
 
 npx hello-pear --configure --ios-sim
 
-# iOS simulator only with x64 architecture
+### iOS simulator only with x64 architecture
 
 npx hello-pear --configure --ios-sim x64
 
-# iOS and iOS simulator
+### iOS and iOS simulator
 
 npx hello-pear --configure --ios --ios-sim arm64
 
-# Android only arm archs
+### Android only arm archs
 
 npx hello-pear --configure --android arm64 arm
 
-# Android only arm64
+### Android only arm64
 
 npx hello-pear --configure --android arm64
 
-# Android only x86 archs
+### Android only x86 archs
 
 npx hello-pear --configure --android x64 ia32
 
-# help
+### help
 
 hello-pear --help
 
