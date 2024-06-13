@@ -21,6 +21,16 @@ export const Themes: {
     border: colors.light,
     borderAccent: colors.grey_400,
     borderSecondary: colors.grey_400,
+    boxShadow: {
+      elevation: 3,
+      shadowColor: colors.light,
+      shadowOffset: {
+        height: 2,
+        width: 0,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+    },
     error: colors.error,
     inverted: colors.dark,
     mode: 'dark',
@@ -34,6 +44,16 @@ export const Themes: {
     border: colors.dark,
     borderAccent: colors.grey_100,
     borderSecondary: colors.grey_200,
+    boxShadow: {
+      elevation: 3,
+      shadowColor: colors.dark,
+      shadowOffset: {
+        height: 2,
+        width: 0,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
     error: colors.error,
     inverted: colors.light,
     mode: 'light',

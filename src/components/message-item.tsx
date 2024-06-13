@@ -10,6 +10,7 @@ import { type MessagesStackNavigationType } from '@/types';
 import { prettyPrintDate } from '@/utils';
 
 import { Avatar, TextField } from './_elements';
+import { ModalBottom } from './_layout';
 
 interface Props {
   inverted: boolean;
@@ -28,11 +29,17 @@ export const MessageItem: React.FC<Props> = ({
 }) => {
   const navigation = useNavigation<MessagesStackNavigationType>();
   const [isPressed, setIsPressed] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
   const dateString = prettyPrintDate(date);
 
   function handleLongPress() {
     setIsPressed(true);
+    setModalVisible(true);
+  }
+
+  function onClose() {
+    setModalVisible(false);
   }
 
   return (
@@ -46,6 +53,7 @@ export const MessageItem: React.FC<Props> = ({
       ]}
       onLongPress={handleLongPress}
       onPressOut={() => setIsPressed(false)}>
+      <ModalBottom visible={modalVisible} closeModal={onClose} />
       {!inverted && (
         <>
           <View style={styles.user}>
@@ -55,7 +63,11 @@ export const MessageItem: React.FC<Props> = ({
             </TextField>
           </View>
           <View style={[styles.messageContainer]}>
-            <View style={[styles.card, { backgroundColor: theme.tertiary }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: theme.backgroundTertiary },
+              ]}>
               <TextField size="small">{message}</TextField>
             </View>
           </View>

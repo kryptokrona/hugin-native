@@ -11,9 +11,10 @@ export const Card: React.FC<Props> = ({ children }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.background;
   const borderColor = theme.borderSecondary;
+  const { boxShadow } = theme;
 
   return (
-    <View style={[styles.card, { backgroundColor, borderColor }]}>
+    <View style={[styles.card, { backgroundColor, borderColor, ...boxShadow }]}>
       {children}
     </View>
   );

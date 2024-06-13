@@ -1,4 +1,10 @@
-import { StyleProp, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
@@ -23,6 +29,7 @@ export const TextButton: React.FC<Props> = ({
   small,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
+  const shadow = theme.boxShadow;
   const backgroundColors = {
     error: theme.error,
     primary: theme.backgroundSecondary,
@@ -40,11 +47,11 @@ export const TextButton: React.FC<Props> = ({
     : theme.backgroundSecondary;
 
   const borderColor = type ? colors[type] : theme.inverted;
-
   const color = type ? colors[type] : theme.inverted;
   const smallButtonStyle = small
     ? {
         borderRadius: Styles.borderRadius.small,
+        marginVertical: 6,
         minHeight: 40,
         paddingHorizontal: 10,
         paddingVertical: 8,
@@ -60,10 +67,10 @@ export const TextButton: React.FC<Props> = ({
       onPress={onPress}
       style={[
         styles.button,
+        { backgroundColor, borderColor, ...shadow, ...smallButtonStyle },
         style,
-        { backgroundColor, borderColor, ...smallButtonStyle },
       ]}>
-      {icon}
+      {icon && <View style={styles.icon}>{icon}</View>}
       <Text style={[styles.text, { color, ...smallTextStyle }]}>
         {children}
       </Text>
@@ -77,14 +84,19 @@ const styles = StyleSheet.create({
     borderRadius: Styles.borderRadius.small,
     borderWidth: 1,
     flexDirection: 'row',
-    // flexGrow: 1,
     justifyContent: 'center',
     // marginHorizontal: 4,
     marginVertical: 8,
     minHeight: 50,
     paddingHorizontal: 16,
     paddingVertical: 12,
+    position: 'relative',
   },
+  icon: {
+    left: 18,
+    position: 'absolute',
+  },
+
   text: {
     fontFamily: 'Montserrat-SemiBold',
   },

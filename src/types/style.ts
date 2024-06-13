@@ -10,6 +10,16 @@ export interface Theme {
   secondary: string; // Text
   inverted: string; // Text
   borderAccent: string;
+  boxShadow: {
+    elevation: number;
+    shadowColor: string;
+    shadowOffset: {
+      height: number;
+      width: number;
+    };
+    shadowOpacity: number;
+    shadowRadius: number;
+  };
 }
 
 export type IconType =

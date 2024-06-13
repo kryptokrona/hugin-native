@@ -18,11 +18,12 @@ export const SettingsItem: React.FC<Props> = ({ title, icon, onPress }) => {
   const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.backgroundTertiary;
+  const shadow = theme.boxShadow;
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.settingsItem, { backgroundColor }]}>
+      style={[styles.settingsItem, { backgroundColor, ...shadow }]}>
       <CustomIcon name={icon.name} type={icon.type} size={24} />
       <TextField style={{ color: theme.primary, marginLeft: 24 }}>
         {t(title)}

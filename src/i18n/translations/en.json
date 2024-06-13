@@ -205,5 +205,8 @@
   "updateProfile": "Update profile",
   "save": "Save",
   "copyInvite": "Copy invite link", // EN only
-  "done": "Done" // EN only
+  "done": "Done", // EN only
+  "blockUser": "Block user", // EN only
+  "copyText": "Copy text", // EN only
+  "reply": "Reply" // EN only
 }

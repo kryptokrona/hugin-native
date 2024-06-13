@@ -12,6 +12,7 @@ export const fontSizes = {
 const borderRadius = {
   large: 12,
   medium: 10,
+  round: 100,
   small: 6,
 };
 

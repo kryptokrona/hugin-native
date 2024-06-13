@@ -87,6 +87,7 @@
     "tiny-buffer-rpc": "^2.1.0",
     "tweetnacl-sealed-box": "^1.0.5",
     "tweetnacl-util": "^0.15.1",
+    "unicode-emoji-json": "^0.6.0",
     "url": "~0.10.1",
     "vm-browserify": "0.0.4",
     "zustand": "^4.5.2"
