@@ -1,5 +1,6 @@
 require('./runtime');
 const { group_key } = require('./utils');
+const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const { Swarm } = require('./swarm');
@@ -63,6 +64,7 @@ rpc.register(6, {
 
 async function init_bare_main(data) {
   Hugin.init(data);
+  // hyperBee();
 }
 
 async function update_bare_main(data) {
