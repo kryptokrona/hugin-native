@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -8,17 +8,17 @@ import { useTranslation } from 'react-i18next';
 import {
   Avatar,
   Card,
-  Container,
   CopyButton,
   CustomIcon,
   InputField,
   ScreenLayout,
   TextButton,
   TextField,
+  UserItem,
 } from '@/components';
 import { useGlobalStore } from '@/services';
-import { GroupsScreens, type GroupStackParamList } from '@/types';
-import { createAvatar, pickAvatar } from '@/utils';
+import { GroupsScreens, User, type GroupStackParamList } from '@/types';
+import { createAvatar, onlineUsers, pickAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
@@ -46,8 +46,21 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     // TODO
   }
 
+  function OnlineUserMapper({ item }: { item: User }) {
+    return <UserItem {...item} />;
+  }
+
   return (
     <ScreenLayout>
+      <FlatList
+        scrollEnabled={true}
+        numColumns={3}
+        data={onlineUsers}
+        renderItem={OnlineUserMapper}
+        keyExtractor={(item) => item.name}
+        contentContainerStyle={{ height: 200 }}
+      />
+      {/* <ScrollView> */}
       <Card>
         <TextField>
           SekrHUGINADDRESSTIHIHHIHIHIHIHihihhihihi345i34ti4girg
@@ -61,7 +74,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
             type="MI"
             name="mode-edit"
             size={20}
-            color={theme.inverted}
+            color={theme.primary}
           />
         </View>
       </TouchableOpacity>
@@ -72,9 +85,8 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         maxLength={25}
         // onSubmitEditing={onSave}
       />
-      <Container bottom>
-        <TextButton onPress={onSave}>{t('save')}</TextButton>
-      </Container>
+      <TextButton onPress={onSave}>{t('save')}</TextButton>
+      {/* </ScrollView> */}
     </ScreenLayout>
   );
 };

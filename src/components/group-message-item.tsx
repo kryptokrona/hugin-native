@@ -10,11 +10,12 @@ import {
   Avatar,
   CopyButton,
   CustomIcon,
-  EmojiPicker,
+  Reactions,
   TextButton,
   TextField,
 } from './_elements';
 import { ModalBottom } from './_layout';
+import { EmojiPicker } from './emoji-picker';
 
 interface Props {
   message: string;
@@ -22,6 +23,7 @@ interface Props {
   date: Date;
   name: string;
   userAddress: string;
+  reactions: string[];
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -30,6 +32,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   date,
   name,
   userAddress,
+  reactions,
 }) => {
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,6 +117,7 @@ export const GroupMessageItem: React.FC<Props> = ({
         <TextField size="small" style={styles.message}>
           {message}
         </TextField>
+        <Reactions items={reactions} />
       </View>
     </TouchableOpacity>
   );
@@ -136,6 +140,7 @@ const styles = StyleSheet.create({
   left: {},
   message: {
     flexShrink: 1,
+    marginBottom: 8,
     paddingRight: 10,
   },
 });

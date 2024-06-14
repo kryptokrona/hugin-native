@@ -37,6 +37,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   useLayoutEffect(() => {
+    const isAdmin = true; // TODO
+    const icon = isAdmin ? 'users-cog' : 'users';
     navigation.setOptions({
       header: () => (
         <Header
@@ -44,7 +46,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           title={name}
           right={
             <TouchableOpacity onPress={onCustomizeGroupPress}>
-              <CustomIcon type="MCI" name="cog-outline" />
+              <CustomIcon type="FA5" name={icon} />
             </TouchableOpacity>
           }
         />
@@ -68,6 +70,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             avatar={mockAvatar}
             name={item.n}
             userAddress={item.k}
+            reactions={item.reactions}
           />
         )}
         contentContainerStyle={styles.flatListContent}

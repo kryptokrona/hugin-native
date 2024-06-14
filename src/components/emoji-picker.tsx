@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   View,
@@ -16,7 +16,7 @@ import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
 import { Emoji, EmojiCategory } from '@/types';
 
-import { CustomIcon } from './custom-icon';
+import { CustomIcon } from './_elements/custom-icon';
 
 interface Props {
   hideActions: () => void;
@@ -33,15 +33,18 @@ export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
   const { width } = Dimensions.get('window');
   const columns = Math.floor(width / 36);
 
-  const filteredEmojis: EmojiCategory[] = emojiDataByGroup.map(
-    (group: { name: string; emojis: Emoji[] }) => ({
+  const filteredEmojis = useMemo(() => {
+    return emojiDataByGroup.map((group: { name: string; emojis: Emoji[] }) => ({
       category: group.name,
       emojis: group.emojis,
-    }),
-  );
+    }));
+  }, []);
 
-  const currentCategoryEmojis =
-    filteredEmojis.find((item) => item.category === category)?.emojis || [];
+  const currentCategoryEmojis = useMemo(() => {
+    return (
+      filteredEmojis.find((item) => item.category === category)?.emojis || []
+    );
+  }, [category, filteredEmojis]);
 
   function onEmojiPress() {
     setOpen(true);

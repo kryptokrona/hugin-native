@@ -8,7 +8,7 @@ import { useGlobalStore } from '@/services';
 
 import { CopyButton } from './_elements';
 
-import { Card } from './_elements/card';
+import { Card } from './_layout';
 
 interface SeedComponentProps {
   seed?: string | null;

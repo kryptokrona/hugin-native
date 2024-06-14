@@ -10,7 +10,7 @@ interface Props {
   children: string;
   type?: TextType;
   size?: SizeType;
-  maxLength?: number;
+  maxLength?: number | null;
   bold?: boolean;
   style?: object | false;
 }

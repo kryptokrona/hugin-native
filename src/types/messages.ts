@@ -22,6 +22,7 @@ export interface Message {
   c: string; // Channel
   t: Date;
   hash: string;
+  reactions: string[];
 }
 
 export interface GroupMessage extends Message {
