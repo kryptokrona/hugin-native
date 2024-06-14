@@ -4,15 +4,21 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
 
-import { TextField } from './_elements';
+import { Avatar, TextField } from './_elements';
 
 interface Props {
   name: string;
   topic: string;
+  avatar: string;
   onPress: (hash: string, name: string) => void;
 }
 
-export const PreviewItem: React.FC<Props> = ({ name, topic, onPress }) => {
+export const PreviewItem: React.FC<Props> = ({
+  name,
+  topic,
+  avatar,
+  onPress,
+}) => {
   const [isPressed, setIsPressed] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
   const isNew = false; // dummy
@@ -39,8 +45,7 @@ export const PreviewItem: React.FC<Props> = ({ name, topic, onPress }) => {
       ]}
       onLongPress={handleLongPress}
       onPressOut={() => setIsPressed(false)}>
-      {/*  TODO */}
-      {/* <Avatar size={50} base64={hash} /> */}
+      <Avatar size={50} base64={avatar} />
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">
           {name}

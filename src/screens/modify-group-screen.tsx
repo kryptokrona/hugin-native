@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import { type RouteProp } from '@react-navigation/native';
+import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -10,14 +16,21 @@ import {
   Card,
   CopyButton,
   CustomIcon,
+  Header,
   InputField,
   ScreenLayout,
   TextButton,
   TextField,
   UserItem,
 } from '@/components';
+import { nameMaxLength } from '@/config';
 import { useGlobalStore } from '@/services';
-import { GroupsScreens, User, type GroupStackParamList } from '@/types';
+import {
+  GroupsScreens,
+  GroupStackNavigationType,
+  User,
+  type GroupStackParamList,
+} from '@/types';
 import { createAvatar, onlineUsers, pickAvatar } from '@/utils';
 
 interface Props {
@@ -26,10 +39,17 @@ interface Props {
 
 export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
+  const navigation = useNavigation<GroupStackNavigationType>();
   const { theme } = useGlobalStore();
   const [avatar, setAvatar] = useState<string | null>(null);
   const [name, setName] = useState<string>('Some group name'); // route.params.name
   const tempAvatar = createAvatar();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      header: () => <Header backButton title={'{groupname} details'} />,
+    });
+  }, [name]);
 
   function onNameInput(value: string) {
     setName(value);
@@ -50,43 +70,53 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     return <UserItem {...item} />;
   }
 
+  function onDelete() {
+    // TODO
+  }
+
   return (
     <ScreenLayout>
-      <FlatList
-        scrollEnabled={true}
-        numColumns={3}
-        data={onlineUsers}
-        renderItem={OnlineUserMapper}
-        keyExtractor={(item) => item.name}
-        contentContainerStyle={{ height: 200 }}
-      />
-      {/* <ScrollView> */}
-      <Card>
-        <TextField>
-          SekrHUGINADDRESSTIHIHHIHIHIHIHihihhihihi345i34ti4girg
-        </TextField>
-      </Card>
-      <CopyButton text={t('copyInvite')} data={'TBD'} />
-      <TouchableOpacity onPress={onUploadAvatar} style={styles.avatarContainer}>
-        <Avatar base64={tempAvatar} />
-        <View style={styles.avatarButton}>
-          <CustomIcon
-            type="MI"
-            name="mode-edit"
-            size={20}
-            color={theme.primary}
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+        <View style={styles.flatListContainer}>
+          <FlatList
+            nestedScrollEnabled
+            numColumns={2}
+            data={onlineUsers}
+            renderItem={OnlineUserMapper}
+            keyExtractor={(item, i) => `${item.name}-${i}`}
           />
         </View>
-      </TouchableOpacity>
-      <InputField
-        label={t('name')}
-        value={name}
-        onChange={onNameInput}
-        maxLength={25}
-        // onSubmitEditing={onSave}
-      />
-      <TextButton onPress={onSave}>{t('save')}</TextButton>
-      {/* </ScrollView> */}
+        <Card>
+          <TextField>
+            SekrHUGINADDRESSTIHIHHIHIHIHIHihihhihihi345i34ti4girg
+          </TextField>
+        </Card>
+        <CopyButton text={t('copyInvite')} data={'TBD'} />
+        <TouchableOpacity
+          onPress={onUploadAvatar}
+          style={styles.avatarContainer}>
+          <Avatar base64={tempAvatar} />
+          <View style={styles.avatarButton}>
+            <CustomIcon
+              type="MI"
+              name="mode-edit"
+              size={20}
+              color={theme.primary}
+            />
+          </View>
+        </TouchableOpacity>
+        <InputField
+          label={t('name')}
+          value={name}
+          onChange={onNameInput}
+          maxLength={nameMaxLength}
+          // onSubmitEditing={onSave}
+        />
+        <TextButton onPress={onSave}>{t('save')}</TextButton>
+        <TextButton onPress={onDelete} type="error">
+          {t('delete')}
+        </TextButton>
+      </ScrollView>
     </ScreenLayout>
   );
 };
@@ -100,5 +130,12 @@ const styles = StyleSheet.create({
   avatarContainer: {
     alignSelf: 'flex-start',
     position: 'relative',
+  },
+  flatListContainer: {
+    height: 200,
+    marginBottom: 12,
+  },
+  scrollViewContainer: {
+    flexGrow: 1,
   },
 });

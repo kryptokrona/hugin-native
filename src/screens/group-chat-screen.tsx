@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -26,6 +26,7 @@ interface Props {
 
 export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<GroupStackNavigationType>();
+  const flatListRef = useRef<FlatList>(null);
   const { name: userName } = useGlobalStore((state) => state.user);
   const { topic, name } = route.params;
 
@@ -54,6 +55,18 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     });
   }, [topic, name]);
 
+  useLayoutEffect(() => {
+    const timeout = setTimeout(() => {
+      if (flatListRef.current && mockMessages && mockMessages.length > 0) {
+        flatListRef.current.scrollToEnd({ animated: true });
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
   function onSend(text: string) {
     onSendGroupMessage(topic, text);
   }
@@ -61,6 +74,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   return (
     <ScreenLayout>
       <FlatList
+        ref={flatListRef}
         data={mockMessages}
         keyExtractor={(item, i) => `${item.k}${i}`}
         renderItem={({ item }) => (

@@ -34,7 +34,10 @@ export const TextField: React.FC<Props> = ({
       : children;
 
   return (
-    <Text style={[styles.text, { color, fontSize, fontWeight, ...style }]}>
+    <Text
+      textBreakStrategy="highQuality"
+      ellipsizeMode="clip"
+      style={[styles.text, { color, fontSize, fontWeight, ...style }]}>
       {truncatedText}
     </Text>
   );

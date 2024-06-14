@@ -2,4 +2,4 @@
 
 ### Basic auth
 
-### Permissions iOS read/write files
+### Permissions iOS read/write files, camera, microphone

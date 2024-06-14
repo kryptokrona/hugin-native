@@ -14,7 +14,7 @@ import {
   TextButton,
   TextField,
 } from './_elements';
-import { ModalBottom } from './_layout';
+import { ModalBottom, ModalCenter } from './_layout';
 import { EmojiPicker } from './emoji-picker';
 
 interface Props {
@@ -35,18 +35,19 @@ export const GroupMessageItem: React.FC<Props> = ({
   reactions,
 }) => {
   const { t } = useTranslation();
-  const [modalVisible, setModalVisible] = useState(false);
+  const [actionsModal, setActionsModal] = useState(false);
+  const [userModal, setUserVisible] = useState(false);
   const [actions, setActions] = useState(true);
 
   const dateString = prettyPrintDate(date);
   const color = getColorFromHash(userAddress);
 
   function handleLongPress() {
-    setModalVisible(true);
+    setActionsModal(true);
   }
 
-  function onClose() {
-    setModalVisible(false);
+  function onCloseActionsModal() {
+    setActionsModal(false);
   }
 
   function onBlockUser() {
@@ -61,6 +62,14 @@ export const GroupMessageItem: React.FC<Props> = ({
     console.log('onReaction press', emoji);
   }
 
+  function onPress() {
+    setUserVisible(true);
+  }
+
+  function onCloseUserModal() {
+    setUserVisible(false);
+  }
+
   useEffect(() => {
     // Set actions visible onClose
     return () => {
@@ -72,9 +81,10 @@ export const GroupMessageItem: React.FC<Props> = ({
     <TouchableOpacity
       style={styles.container}
       onLongPress={handleLongPress}
+      onPress={onPress}
       // onPressOut={}
     >
-      <ModalBottom visible={modalVisible} closeModal={onClose}>
+      <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
         {actions && (
           <View>
@@ -101,6 +111,13 @@ export const GroupMessageItem: React.FC<Props> = ({
           </View>
         )}
       </ModalBottom>
+
+      <ModalCenter visible={userModal} closeModal={onCloseUserModal}>
+        <Avatar base64={avatar} size={100} />
+        <TextField style={{ marginTop: 20 }} size="large" type="inverted">
+          {name}
+        </TextField>
+      </ModalCenter>
 
       <View style={styles.avatar}>
         <Avatar base64={avatar} size={24} />

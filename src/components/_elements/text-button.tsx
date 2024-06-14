@@ -31,13 +31,13 @@ export const TextButton: React.FC<Props> = ({
   const theme = useGlobalStore((state) => state.theme);
   const shadow = theme.boxShadow;
   const backgroundColors = {
-    error: theme.error,
+    error: theme.background,
     primary: theme.backgroundSecondary,
     secondary: theme.background,
   };
 
   const colors = {
-    error: theme.primary,
+    error: theme.error,
     primary: theme.inverted,
     secondary: theme.primary,
   };
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    // marginHorizontal: 4,
     marginVertical: 8,
     minHeight: 50,
     paddingHorizontal: 16,
@@ -96,7 +95,6 @@ const styles = StyleSheet.create({
     left: 18,
     position: 'absolute',
   },
-
   text: {
     fontFamily: 'Montserrat-SemiBold',
   },

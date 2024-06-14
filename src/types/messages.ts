@@ -10,6 +10,7 @@ export interface HuginUser {
 export interface Group {
   topic: string;
   name: string;
+  avatar: string;
 }
 
 export interface Message {

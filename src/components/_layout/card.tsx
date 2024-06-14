@@ -1,20 +1,25 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleProp, StyleSheet, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
 
 interface Props {
   children: React.ReactNode;
+  style?: StyleProp<any> | undefined;
 }
 
-export const Card: React.FC<Props> = ({ children }) => {
+export const Card: React.FC<Props> = ({ children, style }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.background;
   const borderColor = theme.borderSecondary;
   const { boxShadow } = theme;
 
   return (
-    <View style={[styles.card, { backgroundColor, borderColor, ...boxShadow }]}>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor, borderColor, ...boxShadow, ...style },
+      ]}>
       {children}
     </View>
   );

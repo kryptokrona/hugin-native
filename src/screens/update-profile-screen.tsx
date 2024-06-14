@@ -13,6 +13,7 @@ import {
   ScreenLayout,
   TextButton,
 } from '@/components';
+import { nameMaxLength } from '@/config';
 import { updateUser, useGlobalStore } from '@/services';
 import {
   SettingsScreens,
@@ -71,6 +72,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
             value={value}
             onChange={onNameInput}
             onSubmitEditing={onSave}
+            maxLength={nameMaxLength}
           />
         </View>
         <Container bottom>

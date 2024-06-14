@@ -2,7 +2,7 @@ import { Theme } from '@/types';
 
 const colors = {
   dark: '#18181B',
-  error: '#F2CB5F',
+  error: '#E53935',
   grey_100: '#F4F4F5',
   grey_200: '#E5E5E5',
   grey_300: '#828283',

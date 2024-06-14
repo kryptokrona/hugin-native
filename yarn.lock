@@ -11110,6 +11110,13 @@ react-native-device-info@^10.13.2:
   resolved "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-10.13.2.tgz"
   integrity sha512-5EAls7uvGdZkVfp1KWHsR5BfJJHp/ux64+ZPj1865IcaUyrNQIWYFmrTHwTH8L/NGJUTBrzv+y6WODnN17LSbw==
 
+react-native-document-picker@^9.3.0:
+  version "9.3.0"
+  resolved "https://registry.npmjs.org/react-native-document-picker/-/react-native-document-picker-9.3.0.tgz"
+  integrity sha512-X/j0xKn8cObckpHTNwE/hW9WzBiP6oKx820FYu1Nat43QnnHmmT6uozFgAUDcJfxmZGcEdLlbv0lNhnyRXJyyA==
+  dependencies:
+    invariant "^2.2.4"
+
 react-native-exit-app@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/react-native-exit-app/-/react-native-exit-app-2.0.0.tgz"
@@ -11284,7 +11291,7 @@ react-native-vector-icons@10.0.0:
     prop-types "^15.7.2"
     yargs "^16.1.1"
 
-"react-native-windows@^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0":
+react-native-windows@*, "react-native-windows@^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0":
   version "0.73.15"
   resolved "https://registry.npmjs.org/react-native-windows/-/react-native-windows-0.73.15.tgz"
   integrity sha512-kKBkjro9MN2ZcDEUG1lLL+2X99SzJ5qk78gJpqyWLHY505GnSjoldwdYh3l1LZsaLEvzNdndya0wYin//Nmj8g==
