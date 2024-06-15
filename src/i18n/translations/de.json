@@ -172,5 +172,11 @@
   "changeTheme": "Thema ändern",
   "changeLanguage": "Sprache ändern",
   "save": "Speichern",
-  "updateProfile": "Profil aktualisieren"
+  "updateProfile": "Profil aktualisieren",
+  "copyInvite": "Einladung kopieren",
+  "done": "Erledigt",
+  "blockUser": "Benutzer blockieren",
+  "copyText": "Text kopieren",
+  "reply": "Antworten",
+  "leaveGroup": "Gruppe verlassen"
 }

@@ -185,5 +185,11 @@
   "changeTheme": "Змінити тему",
   "changeLanguage": "Змінити мову",
   "save": "Зберегти",
-  "updateProfile": "Оновити профіль"
+  "updateProfile": "Оновити профіль",
+  "copyInvite": "Скопіювати запрошення",
+  "done": "Готово",
+  "blockUser": "Заблокувати користувача",
+  "copyText": "Скопіювати текст",
+  "reply": "Відповісти",
+  "leaveGroup": "Покинути групу"
 }

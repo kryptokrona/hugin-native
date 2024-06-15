@@ -40,7 +40,7 @@ export const GroupStackNavigator = () => {
               title={t('groups')}
               right={
                 <TouchableOpacity onPress={onAddGroupPress}>
-                  <CustomIcon type="IO" name="add-outline" />
+                  <CustomIcon type="IO" name="add-outline" size={30} />
                 </TouchableOpacity>
               }
             />

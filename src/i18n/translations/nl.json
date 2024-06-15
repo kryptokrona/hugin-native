@@ -186,5 +186,11 @@
   "changeTheme": "Thema wijzigen",
   "changeLanguage": "Taal wijzigen",
   "save": "Opslaan",
-  "updateProfile": "Profiel bijwerken"
+  "updateProfile": "Profiel bijwerken",
+  "copyInvite": "Kopieer uitnodiging",
+  "done": "Klaar",
+  "blockUser": " Blokkeer gebruiker",
+  "copyText": "Kopieer tekst",
+  "reply": "Antwoord",
+  "leaveGroup": "Verlaat groep"
 }

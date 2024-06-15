@@ -200,5 +200,11 @@
   "changeTheme": "更改主题",
   "changeLanguage": "更改语言",
   "save": "保存",
-  "updateProfile": "更新个人资料"
+  "updateProfile": "更新个人资料",
+  "copyInvite": " 复制邀请",
+  "done": "完成",
+  "blockUser": "屏蔽用户",
+  "copyText": "复制文本",
+  "reply": "回复",
+  "leaveGroup": "退出群聊"
 }

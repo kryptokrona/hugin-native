@@ -6,13 +6,12 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
+import { onCreateGroup, onRequestNewGroupKey } from '@/p2p';
 import {
   GroupsScreens,
   GroupStackNavigationType,
   type GroupStackParamList,
 } from '@/types';
-
-import { group_key, swarm } from '../../lib/native';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
@@ -26,14 +25,15 @@ export const AddGroupScreen: React.FC<Props> = () => {
 
   async function onCreatePress() {
     if (key && name) {
-      const topic: string = await swarm(key);
+      const topic: string = await onCreateGroup(name, key);
       navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
     }
   }
 
   async function onGeneratePress() {
     try {
-      const mKey = await group_key();
+      const mKey = await onRequestNewGroupKey();
+      console.log({ mKey });
       if (mKey) {
         setKey(mKey);
       }

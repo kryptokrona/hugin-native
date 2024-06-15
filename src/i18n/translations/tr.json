@@ -172,5 +172,11 @@
   "changeTheme": "Tema değiştir",
   "changeLanguage": "Dili değiştir",
   "save": "Kaydet",
-  "updateProfile": "Profili güncelle"
+  "updateProfile": "Profili güncelle",
+  "copyInvite": "Daveti kopyala",
+  "done": "Tamamlandı",
+  "blockUser": "Kullanıcıyı engelle",
+  "copyText": "Metni kopyala",
+  "reply": "Yanıtla",
+  "leaveGroup": "Grubu terk et"
 }

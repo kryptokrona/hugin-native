@@ -185,6 +185,12 @@
   "transactionHistory": "लेनदेन के इतिहास",
   "changeTheme": "थीम बदलीं",
   "changeLanguage": "भाषा बदलीं",
+  "updateProfile": "प्रोफाइल अपडेट करीं",
   "save": "सेव करीं",
-  "updateProfile": "प्रोफाइल अपडेट करीं"
+  "copyInvite": "आमंत्रण कॉपी करीं",
+  "done": "पूरा",
+  "blockUser": "ब्लॉक करीं",
+  "copyText": "पाठ कॉपी करीं",
+  "reply": "जवाब देवे",
+  "leaveGroup": "समूह छोड़ल जाला"
 }

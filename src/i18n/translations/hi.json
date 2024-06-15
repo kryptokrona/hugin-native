@@ -185,5 +185,11 @@
   "changeTheme": "थीम बदलें",
   "changeLanguage": "भाषा बदलें",
   "save": "सहेजें",
-  "updateProfile": "प्रोफ़ाइल अपडेट करें"
+  "updateProfile": "प्रोफ़ाइल अपडेट करें",
+  "copyInvite": "आमंत्रण कॉपी करें",
+  "done": "समाप्त",
+  "blockUser": "उपयोगकर्ता ब्लॉक करें",
+  "copyText": "पाठ कॉपी करें",
+  "reply": "जवाब दें",
+  "leaveGroup": "समूह छोड़ें"
 }

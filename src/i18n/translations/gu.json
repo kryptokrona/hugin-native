@@ -186,5 +186,11 @@
   "changeTheme": "થીમ બદલો",
   "changeLanguage": "ભાષા બદલો",
   "save": "સાચવો",
-  "updateProfile": "પ્રોફાઇલ અપડેટ કરો"
+  "updateProfile": "પ્રોફાઇલ અપડેટ કરો",
+  "copyInvite": "આમંત્રણ કોપી કરો",
+  "done": "પૂર્ણ",
+  "blockUser": "બ્લોક કરો",
+  "copyText": "ટેક્સ્ટ કૉપી કરો",
+  "reply": "જવાબ આપો",
+  "leaveGroup": "ગ્રુપ છોડો"
 }

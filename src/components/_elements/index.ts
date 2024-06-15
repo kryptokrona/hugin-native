@@ -1,6 +1,7 @@
 export * from './avatar';
 export * from './copy-button';
 export * from './custom-icon';
+export * from './file-selected';
 export * from './input-field';
 export * from './pincode';
 export * from './reactions';

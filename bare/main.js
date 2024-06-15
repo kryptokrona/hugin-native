@@ -3,7 +3,7 @@ const { group_key } = require('./utils');
 // const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
-const { Swarm } = require('./swarm');
+const { Swarm, share_file_with_message } = require('./swarm');
 const { Hugin } = require('./account');
 
 const rpc = new RPC(HelloBare.sendMessage);
@@ -13,27 +13,25 @@ console.log('Bare main init');
 rpc.register(0, {
   request: ce.string,
   response: ce.string,
-  onrequest: async (data) => {
+  onrequest: (data) => {
     const parsedData = JSON.parse(data);
     switch (parsedData.type) {
       case 'init_bare':
-        await initBareMain(parsedData.user, parsedData.documentDirectoryPath);
-        break;
+        initBareMain(parsedData.user, parsedData.documentDirectoryPath);
       case 'update_bare_user':
         updateBareUser(parsedData.user);
         break;
       case 'new_swarm':
-        await newSwarm(parsedData.key);
+        newSwarm(parsedData.key);
         break;
       case 'end_swarm':
-        await endSwarm(parsedData.topic);
+        endSwarm(parsedData.topic);
         break;
-      case 'send_room':
+      case 'send_room_msg':
         sendRoomMessage(parsedData.message, parsedData.topic);
         break;
       case 'group_random_key':
-        getRandomGroupKey();
-        break;
+        return getRandomGroupKey();
       case 'begin_send_file':
         beginStreamFile(parsedData.json_file_data);
         break;
@@ -85,7 +83,7 @@ const getRandomGroupKey = () => {
 const beginStreamFile = (json_file_data) => {
   const file_data = JSON.parse(json_file_data);
   console.log('Begin streaming file', file_data);
-  // Implement your file streaming logic here
+  share_file_with_message(file_data);
 };
 
 // Tell app we're ready

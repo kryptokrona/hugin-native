@@ -172,5 +172,11 @@
   "changeTheme": "Vaihda teemaa",
   "changeLanguage": "Vaihda kieltä",
   "save": "Tallenna",
-  "updateProfile": "Päivitä profiili"
+  "updateProfile": "Päivitä profiili",
+  "copyInvite": "Kopioi kutsu",
+  "done": "Valmis",
+  "blockUser": "Estä käyttäjä",
+  "copyText": "Kopioi teksti",
+  "reply": "Vastaa",
+  "leaveGroup": "Poistu ryhmästä"
 }

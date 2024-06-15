@@ -183,5 +183,11 @@
   "changeTheme": "Byt tema",
   "changeLanguage": "Byt språk",
   "save": "Spara",
-  "updateProfile": "Uppdatera profil"
+  "updateProfile": "Uppdatera profil",
+  "copyInvite": "Kopiera inbjudan",
+  "done": "Klar",
+  "blockUser": " Blockera användare",
+  "copyText": "Kopiera text",
+  "reply": "Svara",
+  "leaveGroup": "Lämna grupp"
 }

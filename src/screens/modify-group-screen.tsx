@@ -24,6 +24,7 @@ import {
   UserItem,
 } from '@/components';
 import { nameMaxLength } from '@/config';
+import { onDeleteGroup, onLeaveGroup } from '@/p2p';
 import { useGlobalStore } from '@/services';
 import {
   GroupsScreens,
@@ -44,6 +45,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [name, setName] = useState<string>('Some group name'); // route.params.name
   const tempAvatar = createAvatar();
+  const isAdmin = false; // TBD
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -71,7 +73,13 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   function onDelete() {
-    // TODO
+    onDeleteGroup('TBD topic string');
+    // navigation.navigate(GroupsScreens.GroupsScreen);
+  }
+
+  function onLeave() {
+    onLeaveGroup('TBD topic string');
+    navigation.navigate(GroupsScreens.GroupsScreen);
   }
 
   return (
@@ -113,9 +121,16 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           // onSubmitEditing={onSave}
         />
         <TextButton onPress={onSave}>{t('save')}</TextButton>
-        <TextButton onPress={onDelete} type="error">
-          {t('delete')}
-        </TextButton>
+        {isAdmin && (
+          <TextButton onPress={onDelete} type="error">
+            {t('delete')}
+          </TextButton>
+        )}
+        {!isAdmin && (
+          <TextButton onPress={onLeave} type="error">
+            {t('leaveGroup')}
+          </TextButton>
+        )}
       </ScrollView>
     </ScreenLayout>
   );

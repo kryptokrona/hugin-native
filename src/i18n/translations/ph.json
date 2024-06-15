@@ -186,5 +186,11 @@
   "changeTheme": "Baguhin ang tema",
   "changeLanguage": "Baguhin ang wika",
   "save": "I-save",
-  "updateProfile": "I-update ang profile"
+  "updateProfile": "I-update ang profile",
+  "copyInvite": "Kopyahin ang imbitasyon",
+  "done": "Tapos na",
+  "blockUser": "I-block ang user",
+  "copyText": "Kopyahin ang text",
+  "reply": "Tumugon",
+  "leaveGroup": "Umalis sa grupo"
 }

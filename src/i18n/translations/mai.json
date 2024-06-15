@@ -186,5 +186,11 @@
   "changeTheme": "थीम बदलू",
   "changeLanguage": "भाषा बदलू",
   "save": "सुरक्षित करू",
-  "updateProfile": "प्रोफाइल अद्यतन करू"
+  "updateProfile": "प्रोफाइल अद्यतन करू",
+  "copyInvite": "आमंत्रण प्रतिलिपि करू",
+  "done": "समाप्त",
+  "blockUser": "ब्लॉक उपयोगकर्ता",
+  "copyText": "पाठ प्रतिलिपि करू",
+  "reply": "उत्तर",
+  "leaveGroup": "समूह छोड़ें"
 }

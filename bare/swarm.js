@@ -465,7 +465,8 @@ const check_if_online = (topic) => {
   }
 };
 const localFiles = [];
-const share_file = (file) => {
+const share_file_with_message = (file) => {
+  // Note file includes property "message", regular text message
   // const active = get_active_topic(file.topic);
   const fileInfo = {
     address: Hugin.address,
@@ -476,6 +477,7 @@ const share_file = (file) => {
     time: file.time,
     topic: file.topic,
     type: 'file',
+    message: file.message,
   };
   const info = JSON.stringify(fileInfo);
   localFiles.push(file);
@@ -494,4 +496,4 @@ const error_message = (message) => {
   sender('error-message', { message });
 };
 
-module.exports = { Swarm, create_swarm };
+module.exports = { Swarm, create_swarm, share_file_with_message };

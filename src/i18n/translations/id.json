@@ -186,5 +186,11 @@
   "changeTheme": "Ubah tema",
   "changeLanguage": "Ubah bahasa",
   "save": "Simpan",
-  "updateProfile": "Perbarui profil"
+  "updateProfile": "Perbarui profil",
+  "copyInvite": "Salin undangan",
+  "done": "Selesai",
+  "blockUser": "Blokir pengguna",
+  "copyText": "Salin teks",
+  "reply": "Balas",
+  "leaveGroup": "Keluar dari grup"
 }

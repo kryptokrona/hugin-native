@@ -10,7 +10,7 @@ import { useGlobalStore } from '@/services';
 import { commonInputProps, Styles } from '@/styles';
 import type { SelectedFile } from '@/types';
 
-import { CustomIcon } from './_elements';
+import { CustomIcon, FileSelected } from './_elements';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
@@ -24,6 +24,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   const [displayActions, setDisplayActions] = useState(true);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const color = focus ? theme.primary : theme.secondary;
+  const backgroundColor = theme.background;
 
   function handleSend() {
     if (text.trim()) {
@@ -56,8 +57,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
         type: [types.allFiles],
       });
 
-      const { size, name, uri } = res;
-      console.log('sihadihsdihihih', { res });
+      const { size, name, uri, type } = res;
       if (!uri || !name || !size) {
         return;
       }
@@ -67,10 +67,10 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
         path: uri,
         size,
         time: new Date().getTime(),
+        type,
       };
 
       setSelectedFile(fileInfo);
-      onSend('', fileInfo);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled file picker');
@@ -98,13 +98,22 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
     setDisplayActions(true);
   }
 
+  function onRemoveFile() {
+    setSelectedFile(null);
+  }
+
   return (
     <View style={styles.container}>
+      {selectedFile && (
+        <View style={[styles.files, { backgroundColor }]}>
+          <FileSelected {...selectedFile} removeFile={onRemoveFile} />
+        </View>
+      )}
       <View
         style={[
           styles.inputContainer,
           {
-            backgroundColor: theme.background,
+            backgroundColor,
             borderColor: theme.border,
           },
         ]}>
@@ -118,7 +127,8 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
             />
           </TouchableOpacity>
         )}
-        {displayActions && Actions(onCameraPress, onFilePress, color, styles)}
+        {displayActions &&
+          Actions(onCameraPress, onFilePress, theme.primary, styles)}
         {/* // TODO display selected file together with input */}
         <TextInput
           style={[styles.inputField, { borderColor: color, color: color }]}
@@ -179,6 +189,11 @@ const styles = StyleSheet.create({
   },
   container: {
     width: '100%',
+  },
+  files: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 10,
   },
   inputContainer: {
     alignItems: 'center',

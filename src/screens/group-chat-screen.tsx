@@ -11,7 +11,7 @@ import {
   MessageInput,
   ScreenLayout,
 } from '@/components';
-import { onSendGroupMessageWithFile } from '@/p2p';
+import { onSendGroupMessage, onSendGroupMessageWithFile } from '@/p2p';
 import { useGlobalStore } from '@/services';
 import {
   GroupsScreens,
@@ -69,11 +69,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, []);
 
   function onSend(text: string, file: SelectedFile | null) {
-    // onSendGroupMessage(topic, text);
     if (file) {
       const hardTopic =
         'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965';
-      onSendGroupMessageWithFile(hardTopic, file);
+      onSendGroupMessageWithFile(hardTopic, file, text);
+    } else {
+      onSendGroupMessage(topic, text);
     }
   }
 

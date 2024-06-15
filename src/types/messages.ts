@@ -36,6 +36,7 @@ export interface SelectedFile {
   path: string;
   size: number;
   time: number;
+  type: string | null;
 }
 
 export interface FileInput extends SelectedFile {

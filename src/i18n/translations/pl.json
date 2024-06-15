@@ -184,5 +184,11 @@
   "changeTheme": "Zmień motyw",
   "changeLanguage": "Zmień język",
   "save": "Zapisz",
-  "updateProfile": "Aktualizuj profil"
+  "updateProfile": "Aktualizuj profil",
+  "copyInvite": "Skopiuj zaproszenie",
+  "done": "Gotowe",
+  "blockUser": "Zablokuj użytkownika",
+  "copyText": "Skopiuj tekst",
+  "reply": "Odpowiedz",
+  "leaveGroup": "Opuść grupę"
 }

@@ -172,5 +172,11 @@
   "changeTheme": "Endre tema",
   "changeLanguage": "Endre språk",
   "save": "Lagre",
-  "updateProfile": "Oppdater profil"
+  "updateProfile": "Oppdater profil",
+  "copyInvite": "Kopier invitasjon",
+  "done": "Ferdig",
+  "blockUser": "Blokker bruker",
+  "copyText": "Kopier tekst",
+  "reply": "Svar",
+  "leaveGroup": "Forlat gruppe"
 }
