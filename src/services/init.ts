@@ -1,5 +1,4 @@
 import i18n from 'i18next';
-import RNFS from 'react-native-fs';
 
 import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
 import {
@@ -20,7 +19,7 @@ export const init = async () => {
     await i18n.changeLanguage(preferences.language);
   }
 
-  const documentDirectoryPath = RNFS.DocumentDirectoryPath;
+  // const documentDirectoryPath = RNFS.DocumentDirectoryPath;
   setUser(user ?? defaultUser);
-  await bare(user ?? defaultUser, documentDirectoryPath);
+  await bare(user ?? defaultUser);
 };

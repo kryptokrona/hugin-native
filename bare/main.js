@@ -1,6 +1,6 @@
 require('./runtime');
 const { group_key } = require('./utils');
-const { hyperBee } = require('./hypercore');
+// const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const { Swarm } = require('./swarm');
@@ -13,78 +13,47 @@ console.log('Bare main init');
 rpc.register(0, {
   request: ce.string,
   response: ce.string,
-  onrequest: (data) => {
-    init_bare_main(data);
-    return 'init';
+  onrequest: async (data) => {
+    const parsedData = JSON.parse(data);
+    switch (parsedData.type) {
+      case 'init_bare':
+        await initBareMain(parsedData.user, parsedData.documentDirectoryPath);
+        break;
+      case 'update_bare_user':
+        updateBareUser(parsedData.user);
+        break;
+      case 'new_swarm':
+        await newSwarm(parsedData.key);
+        break;
+      case 'end_swarm':
+        await endSwarm(parsedData.topic);
+        break;
+      case 'send_room':
+        sendRoomMessage(parsedData.message, parsedData.topic);
+        break;
+      case 'group_random_key':
+        getRandomGroupKey();
+        break;
+      case 'begin_send_file':
+        beginStreamFile(parsedData.json_file_data);
+        break;
+      default:
+        console.log('Unknown RPC type:', parsedData.type);
+    }
+    return 'success';
   },
 });
 
-rpc.register(1, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: async (key) => {
-    return new_swarm(key);
-  },
-});
+// Function implementations
+const initBareMain = async (user) => {
+  Hugin.init(user);
+};
 
-rpc.register(3, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: async (key) => {
-    end_swarm(key);
-    return 'endswarm';
-  },
-});
+const updateBareUser = (user) => {
+  Hugin.update(user);
+};
 
-rpc.register(4, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: (data, topic) => {
-    send_room_message(data, topic);
-    return 'sendroommsg';
-  },
-});
-
-rpc.register(5, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: () => {
-    return get_random_group_key();
-  },
-});
-
-// rpc.register(6, {
-//   request: ce.string,
-//   response: ce.string,
-//   onrequest: (data) => {
-//     update_bare_main(data);
-//     return 'update';
-//   },
-// });
-
-rpc.register(6, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: (file_info) => {
-    console.log('HERE 0');
-    // begin_stream_file(file_info);
-    return 'send_file';
-  },
-});
-
-async function init_bare_main(data) {
-  const parsed = JSON.parse(data);
-  Hugin.init(parsed.user);
-  // await hyperBee(parsed.documentDirectoryPath); // Working 🎉
-}
-
-// async function update_bare_main(data) {
-//   Hugin.update(data);
-// }
-
-//SWARM
-
-const new_swarm = async (key) => {
+const newSwarm = async (key) => {
   const swarm = new Swarm(rpc);
   swarm.channel();
   if (!swarm) return;
@@ -93,38 +62,34 @@ const new_swarm = async (key) => {
   return topic;
 };
 
-const end_swarm = async (topic) => {
-  const swarm = get_room(topic);
+const endSwarm = async (topic) => {
+  const swarm = getRoom(topic);
   if (!swarm) return;
   await swarm.end(topic);
 };
 
-const send_room_message = (message, topic) => {
-  const swarm = get_room(topic);
+const sendRoomMessage = (message, topic) => {
+  const swarm = getRoom(topic);
   if (!swarm) return;
   swarm.send_message(message, topic);
 };
 
-const get_room = (topic) => {
+const getRoom = (topic) => {
   return Hugin.rooms.find((a) => a.topic === topic);
 };
 
-const get_random_group_key = () => {
+const getRandomGroupKey = () => {
   return group_key();
 };
 
-const begin_stream_file = (json_file_data) => {
+const beginStreamFile = (json_file_data) => {
   const file_data = JSON.parse(json_file_data);
-  console.log('HERE 1');
-  // const swarm = get_room(file_data.topic);
-  console.log('HERE 2');
-  // swarm.send_file(file_data);
+  console.log('Begin streaming file', file_data);
+  // Implement your file streaming logic here
 };
 
-//BEAM
-
-// tell app we're ready
+// Tell app we're ready
 HelloBare.onReady();
 
-// keep the event loop alive
+// Keep the event loop alive
 setInterval(() => {}, 2000);
