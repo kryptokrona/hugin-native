@@ -30,3 +30,14 @@ export interface GroupMessage extends Message {
   grp: string;
   channel?: string;
 }
+
+export interface SelectedFile {
+  fileName: string;
+  path: string;
+  size: number;
+  time: number;
+}
+
+export interface FileInput extends SelectedFile {
+  topic: string;
+}

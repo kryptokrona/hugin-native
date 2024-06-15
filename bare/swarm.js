@@ -1,22 +1,25 @@
+const ce = require('compact-encoding');
 const HyperSwarm = require('hyperswarm');
+
+const { Hugin } = require('./account');
 const {
   get_new_peer_keys,
   sanitize_group_message,
   sanitize_join_swarm_data,
   sanitize_voice_status_data,
 } = require('./utils');
-const ce = require('compact-encoding');
-const { Hugin } = require('./account');
 let RPC;
 let RPC_SENDER;
 const LOCAL_VOICE_STATUS_OFFLINE = [
-  JSON.stringify({ voice: false, video: false, topic: '' }),
+  JSON.stringify({ topic: '', video: false, voice: false }),
 ];
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 
 class Swarm {
   constructor(rpc) {
-    if (RPC) return;
+    if (RPC) {
+      return;
+    }
     this.rpc = rpc;
   }
   async start(key) {
@@ -28,16 +31,16 @@ class Swarm {
   }
 
   send_message(message, topic) {
-    let message_json = {
-      m: 'Message',
-      k: 'my_address',
-      s: 'signature',
+    const message_json = {
+      c: 'Room',
       g: 'group == key',
+      hash: 'hash',
+      k: 'my_address',
+      m: 'Message',
       n: Hugin.name,
       r: 'reply hash',
-      c: 'Room',
+      s: 'signature',
       t: Date.now(),
-      hash: 'hash',
     };
     //If reply change this to the hash of the message
     if (message.r) {
@@ -48,8 +51,16 @@ class Swarm {
     send_swarm_message(send, topic);
   }
 
+  send_file(file_data) {
+    // SEND SHIT
+    // const file = fs.create
+    console.log('WORKING !!!!!!!!!!!!!!!!', { file_data });
+  }
+
   channel() {
-    if (RPC) return;
+    if (RPC) {
+      return;
+    }
     //Set up stream rpc if we need to send files somewhere
     //I think this can go both ways
     //Use it for ipc messages for now
@@ -78,22 +89,22 @@ const create_swarm = async (key) => {
     error_message('Error starting swarm');
     return;
   }
-  let active = {
-    key,
-    topic: hash,
-    connections: [],
+  const active = {
     call: [],
-    time,
+    connections: [],
+    key,
     swarm,
+    time,
+    topic: hash,
   };
   active_swarms.push(active);
   sender('new-swarm', {
-    topic: hash,
-    key,
     channels: [],
-    voice_channel: [],
     connections: [],
+    key,
     time,
+    topic: hash,
+    voice_channel: [],
   });
 
   swarm.on('connection', (connection, information) => {
@@ -110,7 +121,7 @@ const create_swarm = async (key) => {
   });
 
   const topic = Buffer.alloc(32).fill(hash);
-  discovery = swarm.join(topic, { server: true, client: true });
+  discovery = swarm.join(topic, { client: true, server: true });
   active.discovery = discovery;
   check_if_online(hash);
   return hash;
@@ -118,7 +129,7 @@ const create_swarm = async (key) => {
 
 const new_connection = (connection, hash, key) => {
   console.log('New connection incoming');
-  let active = get_active_topic(hash);
+  const active = get_active_topic(hash);
 
   if (!active) {
     console.log('no longer active in topic');
@@ -128,12 +139,12 @@ const new_connection = (connection, hash, key) => {
 
   console.log('*********Got new Connection! ************');
   active.connections.push({
-    connection,
-    topic: hash,
-    voice: false,
-    name: '',
     address: '',
+    connection,
+    name: '',
+    topic: hash,
     video: false,
+    voice: false,
   });
   send_joined_message(hash);
   connection.on('data', async (data) => {
@@ -155,24 +166,28 @@ const send_joined_message = async (topic) => {
   //Use topic as signed message?
   const msg = topic;
   const active = get_active_topic(topic);
-  if (!active) return;
+  if (!active) {
+    return;
+  }
   const sig =
     'await signMessage(msg, keychain.getXKRKeypair().privateSpendKey)';
   let [voice, video] = get_local_voice_status(topic);
-  if (video) voice = true;
+  if (video) {
+    voice = true;
+  }
   //const channels = await get_my_channels(key)
   console.log('Video?', video);
   const data = JSON.stringify({
     address: Hugin.address,
-    signature: sig,
-    message: msg,
-    joined: true,
-    topic: topic,
-    name: Hugin.name,
-    voice: voice,
     channels: [],
-    video: video,
+    joined: true,
+    message: msg,
+    name: Hugin.name,
+    signature: sig,
     time: active.time,
+    topic: topic,
+    video: video,
+    voice: voice,
   });
 
   send_swarm_message(data, topic);
@@ -180,7 +195,9 @@ const send_joined_message = async (topic) => {
 
 const send_swarm_message = (message, topic) => {
   const active = get_active_topic(topic);
-  if (!active) return;
+  if (!active) {
+    return;
+  }
   active.connections.forEach((chat) => {
     try {
       console.log('Writing to channel');
@@ -196,14 +213,18 @@ const send_swarm_message = (message, topic) => {
 const incoming_message = async (data, topic, connection, key) => {
   const str = data.toString();
   console.log('Str!', str);
-  if (str === 'Ping') return;
+  if (str === 'Ping') {
+    return;
+  }
   // Check
   const check = await check_data_message(str, connection, topic);
   if (check === 'Error') {
     connection_closed(connection, topic);
     return;
   }
-  if (check) return;
+  if (check) {
+    return;
+  }
   const message = sanitize_group_message(JSON.parse(str));
   sender('swarm-message', { message, topic });
 };
@@ -217,11 +238,15 @@ const check_data_message = async (data, connection, topic) => {
 
   //Check if active in this topic
   const active = get_active_topic(topic);
-  if (!active) return 'Error';
+  if (!active) {
+    return 'Error';
+  }
 
   //Check if this connection is still in our list
-  let con = active.connections.find((a) => a.connection === connection);
-  if (!con) return 'Error';
+  const con = active.connections.find((a) => a.connection === connection);
+  if (!con) {
+    return 'Error';
+  }
 
   //If the connections send us disconnect message, return. **todo double check closed connection
   if ('type' in data) {
@@ -272,7 +297,9 @@ const check_data_message = async (data, connection, topic) => {
   if (typeof data === 'object') {
     if ('joined' in data) {
       const joined = sanitize_join_swarm_data(data);
-      if (!joined) return 'Error';
+      if (!joined) {
+        return 'Error';
+      }
 
       if (con.joined) {
         //Connection is already joined
@@ -301,7 +328,9 @@ const check_data_message = async (data, connection, topic) => {
     }
     if ('voice' in data) {
       const voice_status = check_peer_voice_status(data, con);
-      if (!voice_status) return 'Error';
+      if (!voice_status) {
+        return 'Error';
+      }
       return true;
     }
   }
@@ -312,7 +341,9 @@ const check_data_message = async (data, connection, topic) => {
 const connection_closed = (conn, topic) => {
   console.log('Closing connection...');
   const active = get_active_topic(topic);
-  if (!active) return;
+  if (!active) {
+    return;
+  }
   try {
     conn.end();
     conn.destroy();
@@ -320,7 +351,9 @@ const connection_closed = (conn, topic) => {
     console.log('failed close connection');
   }
   const user = active.connections.find((a) => a.connection === conn);
-  if (!user) return;
+  if (!user) {
+    return;
+  }
   // sender('close-voice-channel-with-peer', user.address);
   sender('peer-disconnected', { address: user.address, topic });
   const still_active = active.connections.filter((a) => a.connection !== conn);
@@ -331,7 +364,9 @@ const connection_closed = (conn, topic) => {
 
 const end_swarm = async (topic) => {
   const active = get_active_topic(topic);
-  if (!active) return;
+  if (!active) {
+    return;
+  }
   sender('end-swarm', { topic });
   update_local_voice_channel_status(LOCAL_VOICE_STATUS_OFFLINE);
 
@@ -356,17 +391,25 @@ const update_local_voice_channel_status = (data) => {
 
 const check_peer_voice_status = (data, con) => {
   const voice_data = sanitize_voice_status_data(data);
-  if (!voice_data) return false;
+  if (!voice_data) {
+    return false;
+  }
   const updated = update_voice_channel_status(voice_data, con);
-  if (!updated) return false;
+  if (!updated) {
+    return false;
+  }
   return true;
 };
 
 const update_voice_channel_status = (data, con) => {
   ////Already know this status
-  if (data.voice === con.voice) return true;
+  if (data.voice === con.voice) {
+    return true;
+  }
   //Just doublechecking the address
-  if (data.address !== con.address) return false;
+  if (data.address !== con.address) {
+    return false;
+  }
   //Set voice status
   con.voice = data.voice;
   con.video = data.video;
@@ -388,7 +431,9 @@ const get_local_voice_status = (topic) => {
   //This can change
   try {
     channel = JSON.parse(active_voice_channel[0]);
-    if (channel.topic !== topic) return [false, false];
+    if (channel.topic !== topic) {
+      return [false, false];
+    }
   } catch (e) {
     return [false];
   }
@@ -401,14 +446,16 @@ const get_local_voice_status = (topic) => {
 
 const get_active_topic = (topic) => {
   const active = active_swarms.find((a) => a.topic === topic);
-  if (!active) return false;
+  if (!active) {
+    return false;
+  }
   return active;
 };
 
 const check_if_online = (topic) => {
-  let interval = setInterval(ping, 10 * 1000);
+  const interval = setInterval(ping, 10 * 1000);
   function ping() {
-    let active = active_swarms.find((a) => a.topic === topic);
+    const active = active_swarms.find((a) => a.topic === topic);
     if (!active) {
       clearInterval(interval);
       return;
@@ -417,9 +464,27 @@ const check_if_online = (topic) => {
     }
   }
 };
+const localFiles = [];
+const share_file = (file) => {
+  // const active = get_active_topic(file.topic);
+  const fileInfo = {
+    address: Hugin.address,
+    fileName: file.fileName,
+    hash: file.hash,
+    info: 'file-shared',
+    size: file.size,
+    time: file.time,
+    topic: file.topic,
+    type: 'file',
+  };
+  const info = JSON.stringify(fileInfo);
+  localFiles.push(file);
+  //File shared, send info to peers
+  send_swarm_message(info, file.topic);
+};
 
 const sender = (channel, data) => {
-  let obj = data;
+  const obj = data;
   obj.rpc = channel;
   const send = JSON.stringify(obj);
   RPC_SENDER.write(send);
@@ -429,4 +494,4 @@ const error_message = (message) => {
   sender('error-message', { message });
 };
 
-module.exports = { create_swarm, Swarm };
+module.exports = { Swarm, create_swarm };

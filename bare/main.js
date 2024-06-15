@@ -53,12 +53,22 @@ rpc.register(5, {
   },
 });
 
+// rpc.register(6, {
+//   request: ce.string,
+//   response: ce.string,
+//   onrequest: (data) => {
+//     update_bare_main(data);
+//     return 'update';
+//   },
+// });
+
 rpc.register(6, {
   request: ce.string,
   response: ce.string,
-  onrequest: (data) => {
-    update_bare_main(data);
-    return 'update';
+  onrequest: (file_info) => {
+    console.log('HERE 0');
+    // begin_stream_file(file_info);
+    return 'send_file';
   },
 });
 
@@ -68,9 +78,9 @@ async function init_bare_main(data) {
   // await hyperBee(parsed.documentDirectoryPath); // Working 🎉
 }
 
-async function update_bare_main(data) {
-  Hugin.update(data);
-}
+// async function update_bare_main(data) {
+//   Hugin.update(data);
+// }
 
 //SWARM
 
@@ -101,6 +111,14 @@ const get_room = (topic) => {
 
 const get_random_group_key = () => {
   return group_key();
+};
+
+const begin_stream_file = (json_file_data) => {
+  const file_data = JSON.parse(json_file_data);
+  console.log('HERE 1');
+  // const swarm = get_room(file_data.topic);
+  console.log('HERE 2');
+  // swarm.send_file(file_data);
 };
 
 //BEAM

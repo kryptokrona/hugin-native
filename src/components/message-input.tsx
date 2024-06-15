@@ -8,11 +8,12 @@ import { CameraOptions, launchCamera } from 'react-native-image-picker';
 
 import { useGlobalStore } from '@/services';
 import { commonInputProps, Styles } from '@/styles';
+import type { SelectedFile } from '@/types';
 
 import { CustomIcon } from './_elements';
 
 interface Props {
-  onSend: (text: string) => void;
+  onSend: (text: string, file: SelectedFile | null) => void;
 }
 
 export const MessageInput: React.FC<Props> = ({ onSend }) => {
@@ -21,12 +22,12 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   const [text, setText] = useState('');
   const [focus, setFocus] = useState(false);
   const [displayActions, setDisplayActions] = useState(true);
-
+  const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const color = focus ? theme.primary : theme.secondary;
 
   function handleSend() {
     if (text.trim()) {
-      onSend(text);
+      onSend(text, selectedFile);
       setText('');
     }
   }
@@ -51,10 +52,25 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
 
   async function onFilePress() {
     try {
-      const res = await DocumentPicker.pick({
+      const res = await DocumentPicker.pickSingle({
         type: [types.allFiles],
       });
-      console.log(res); // TODO send file
+
+      const { size, name, uri } = res;
+      console.log('sihadihsdihihih', { res });
+      if (!uri || !name || !size) {
+        return;
+      }
+
+      const fileInfo: SelectedFile = {
+        fileName: name,
+        path: uri,
+        size,
+        time: new Date().getTime(),
+      };
+
+      setSelectedFile(fileInfo);
+      onSend('', fileInfo);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled file picker');
@@ -103,7 +119,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
           </TouchableOpacity>
         )}
         {displayActions && Actions(onCameraPress, onFilePress, color, styles)}
-
+        {/* // TODO display selected file together with input */}
         <TextInput
           style={[styles.inputField, { borderColor: color, color: color }]}
           value={text}

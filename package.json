@@ -44,6 +44,7 @@
     "expo": "^50.0.0",
     "fs": "^0.0.1-security",
     "https-browserify": "~0.0.0",
+    "hyperbeam": "^3.0.2",
     "hyperbee": "^2.19.6",
     "hypercore": "^10.37.7",
     "hyperdht": "^6.15.1",

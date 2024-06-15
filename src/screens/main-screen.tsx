@@ -6,7 +6,7 @@ import { Container, ScreenLayout, TextButton } from '@/components';
 
 import { swarm } from '../../lib/native.js';
 
-const key = '';
+const key = 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965';
 export const MainScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   // const onJoinSwarmPress = () => {
@@ -120,7 +120,7 @@ export const MainScreen: React.FC = () => {
             onPress={function (): void {
               swarm(key);
             }}>
-            Send
+            Join group
           </TextButton>
         </Container>
       </ScrollView>
