@@ -1,21 +1,20 @@
 // const path = require('bare-path');
-const RAM = require('random-access-memory');
-// const fs = require('bare-fs');
+// const RAM = require('random-access-memory');
 let beeList = [];
 
-const hyperBee = async () => {
+const hyperBee = async (documentDirectoryPath) => {
+  console.log({ documentDirectoryPath });
+  const fs = require('bare-fs');
   const Hyperbee = require('hyperbee');
-
   const Hypercore = require('hypercore');
   //   const storage = new RAM();
 
-  //   const hash = 'topichash';
-  //   const myPath = path.join(__dirname, `./topichash`);
-  //   console.log({ myPath });
-  //   if (!fs.existsSync(path)) {
-  //     fs.mkdirSync(path);
-  //   }
-  const core = new Hypercore(RAM);
+  const folder = 'topichash';
+  const path = `${documentDirectoryPath}/${folder}`;
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path);
+  }
+  const core = new Hypercore(path);
   const db = new Hyperbee(core, {
     keyEncoding: 'utf-8',
     valueEncoding: 'json',

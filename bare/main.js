@@ -63,8 +63,9 @@ rpc.register(6, {
 });
 
 async function init_bare_main(data) {
-  Hugin.init(data);
-  // hyperBee();
+  const parsed = JSON.parse(data);
+  Hugin.init(parsed.user);
+  // await hyperBee(parsed.documentDirectoryPath); // Working 🎉
 }
 
 async function update_bare_main(data) {
