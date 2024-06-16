@@ -42,11 +42,17 @@ export const TextButton: React.FC<Props> = ({
     secondary: theme.primary,
   };
 
+  const borderColors = {
+    error: theme.error,
+    primary: theme.backgroundSecondary,
+    secondary: theme.borderSecondary,
+  };
+
   const backgroundColor = type
     ? backgroundColors[type]
     : theme.backgroundSecondary;
 
-  const borderColor = type ? colors[type] : theme.inverted;
+  const borderColor = type ? borderColors[type] : theme.backgroundSecondary;
   const color = type ? colors[type] : theme.inverted;
   const smallButtonStyle = small
     ? {

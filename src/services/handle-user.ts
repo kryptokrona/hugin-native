@@ -1,6 +1,4 @@
-import { type ColorSchemeName } from 'react-native';
-
-import { User } from '@/types';
+import type { User } from '@/types';
 
 import {
   ASYNC_STORAGE_KEYS,
@@ -28,17 +26,4 @@ export const updateUser = async (value: Partial<User>) => {
     ...value,
   };
   useGlobalStore.setState({ user: newUser });
-};
-
-export const toggleTheme = async () => {
-  const { preferences } = useGlobalStore.getState();
-  if (!preferences) {
-    return;
-  }
-  const newTheme = (
-    preferences.themeMode === 'light' ? 'dark' : 'light'
-  ) as ColorSchemeName;
-  const newPref = { ...preferences, themeMode: newTheme };
-
-  useGlobalStore.setState({ preferences: newPref });
 };

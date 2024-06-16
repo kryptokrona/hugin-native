@@ -1,13 +1,21 @@
-import type { Preferences, User } from '@/types';
+import type { Group, Preferences, Theme, User } from '@/types';
 
 import { useGlobalStore } from './global-store';
 
-export const setPreferences = (preferences: Preferences) => {
+export const setStorePreferences = (preferences: Preferences) => {
   useGlobalStore.setState({ preferences });
 };
 
-export const setUser = (user: User) => {
+export const setStoreUser = (user: User) => {
   useGlobalStore.setState({ user });
+};
+
+export const setStoreGroups = (groups: Group[]) => {
+  useGlobalStore.setState({ groups });
+};
+
+export const setStoreTheme = (theme: Theme) => {
+  useGlobalStore.setState({ theme });
 };
 
 // Do never set individual preferences here, always set the whole preferences object

@@ -1,4 +1,4 @@
-import type { SelectedFile, FileInput } from '@/types';
+import type { SelectedFile, FileInput, User } from '@/types';
 import { mockGroups } from '@/utils';
 
 import {
@@ -8,9 +8,12 @@ import {
   send_swarm_msg,
   swarm,
 } from '../../../lib/native';
+import { setStoreGroups } from '../zustand';
 
-export const getUserGroups = (user: string) => {
-  return mockGroups;
+export const getUserGroups = (_user: User) => {
+  // TODO
+  //  const groups = await get_user_groups(user.address);
+  setStoreGroups(mockGroups);
 };
 
 export const onSendGroupMessage = (message: string, topic: string) => {
@@ -40,7 +43,7 @@ export const onRequestNewGroupKey = async () => {
   return await group_random_key();
 };
 
-export const onDeleteGroup = (topic: string) => {
+export const onDeleteGroup = (_topic: string) => {
   // TODO
 };
 

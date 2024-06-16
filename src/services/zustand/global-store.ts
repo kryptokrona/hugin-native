@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 // import { defaultPreferences } from '@/config';
-import { Themes } from '@/styles';
-import type { Preferences, Theme, User } from '@/types';
+import { defaultTheme } from '@/styles';
+import type { Group, Preferences, Theme, User } from '@/types';
 import { createAvatar } from '@/utils';
 
 import { update_bare_user } from '../../../lib/native';
@@ -13,10 +13,12 @@ type GlobalStore = {
   theme: Theme;
   user: User;
   preferences: Preferences;
+  groups: Group[];
 
   setTheme: (payload: Theme) => void;
   setUser: (payload: User) => void;
   setPreferences: (payload: Preferences) => void;
+  setGroups: (payload: Group[]) => void;
 };
 
 export const useGlobalStore = create<
@@ -24,18 +26,22 @@ export const useGlobalStore = create<
   [['zustand/subscribeWithSelector', never]]
 >(
   subscribeWithSelector((set) => ({
+    groups: [],
     preferences: defaultPreferences,
+    setGroups: (groups: Group[]) => {
+      set({ groups });
+    },
     setPreferences: (preferences: Preferences) => {
       set({ preferences });
     },
     setTheme: (theme: Theme) => {
       set({ theme });
     },
+
     setUser: (user: User) => {
       set({ user });
     },
-
-    theme: Themes.dark,
+    theme: defaultTheme,
     user: defaultUser,
   })),
 );
@@ -62,26 +68,25 @@ useGlobalStore.subscribe(
 );
 
 useGlobalStore.subscribe(
-  (state) => state.preferences?.themeMode,
-  (themeMode) => {
-    if (themeMode) {
-      useGlobalStore.getState().setTheme(Themes[themeMode]);
+  (state) => state.theme,
+  async (theme) => {
+    if (theme) {
+      await setStorageValue(ASYNC_STORAGE_KEYS.THEME, theme);
     }
   },
 );
 
 // HACK prevent cycling import, fix this
 export const defaultPreferences: Preferences = {
-  authConfirmation: false,
-  authenticationMethod: 'hardware-auth',
-  currency: 'usd',
+  // authConfirmation: false,
+  // authenticationMethod: 'hardware-auth',
+  // currency: 'usd',
   language: 'en',
-  limitData: false,
+  // limitData: false,
   nickname: 'Anon',
-  notificationsEnabled: true,
-  scanCoinbaseTransactions: false,
-  themeMode: 'dark',
-  websocketEnabled: true,
+  // notificationsEnabled: true,
+  // scanCoinbaseTransactions: false,
+  // websocketEnabled: true,
 };
 
 export const defaultUser = {

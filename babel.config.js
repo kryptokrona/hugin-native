@@ -14,7 +14,6 @@ module.exports = {
           '@/contexts': './src/contexts',
           '@/styles': './src/styles',
           '@/config': './src/config',
-          '@/p2p': './src/services/p2p',
         },
       },
     ],

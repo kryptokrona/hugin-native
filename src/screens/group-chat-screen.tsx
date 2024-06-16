@@ -11,8 +11,11 @@ import {
   MessageInput,
   ScreenLayout,
 } from '@/components';
-import { onSendGroupMessage, onSendGroupMessageWithFile } from '@/p2p';
-import { useGlobalStore } from '@/services';
+import {
+  onSendGroupMessage,
+  onSendGroupMessageWithFile,
+  useGlobalStore,
+} from '@/services';
 import {
   GroupsScreens,
   type SelectedFile,
@@ -30,6 +33,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const { name: userName } = useGlobalStore((state) => state.user);
   const { topic, name } = route.params;
+
+  // TODO: get messages from topic
 
   function onCustomizeGroupPress() {
     navigation.navigate(GroupsScreens.ModifyGroupScreen, {
@@ -69,12 +74,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, []);
 
   function onSend(text: string, file: SelectedFile | null) {
+    const hardTopic =
+      'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965';
     if (file) {
-      const hardTopic =
-        'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965';
       onSendGroupMessageWithFile(hardTopic, file, text);
     } else {
-      onSendGroupMessage(topic, text);
+      onSendGroupMessage(hardTopic, text);
     }
   }
 

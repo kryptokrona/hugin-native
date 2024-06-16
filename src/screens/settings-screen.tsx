@@ -3,7 +3,6 @@ import { FlatList } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import { toggleTheme } from '@/services';
 import {
   CustomIconProps,
   SettingsScreens,
@@ -20,8 +19,8 @@ interface Item {
 
 const items: Item[] = [
   {
-    function: toggleTheme,
     icon: { name: 'theme-light-dark', type: 'MCI' },
+    screen: SettingsScreens.ChangeThemeScreen,
     title: 'changeTheme',
   },
   {

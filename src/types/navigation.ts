@@ -1,6 +1,6 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import type { HuginUser, MessageUser } from './messages';
+import type { HuginUser, MessageUser } from './p2p';
 
 export const AuthScreens = {
   ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
@@ -31,8 +31,11 @@ export type MainStackParamList = {
 
 export const SettingsScreens = {
   ChangeLanguageScreen: 'ChangeLanguageScreen',
+
+  ChangeThemeScreen: 'ChangeThemeScreen',
   // ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
   DisableDozeScreen: 'DisableDozeScreen',
+
   ExportKeysScreen: 'ExportKeysScreen',
 
   FaqScreen: 'FaqScreen',
@@ -61,6 +64,7 @@ export type SettingsStackParamList = {
   [SettingsScreens.ChangeLanguageScreen]: undefined;
   [SettingsScreens.SwapNodeScreen]: undefined;
   [SettingsScreens.UpdateProfileScreen]: undefined;
+  [SettingsScreens.ChangeThemeScreen]: undefined;
 };
 
 export const GroupsScreens = {

@@ -1,25 +1,35 @@
-export interface Theme {
-  border: string;
-  borderSecondary: string;
-  backgroundSecondary: string;
-  backgroundTertiary: string;
-  background: string;
+export interface CommonThemeProperties {
   error: string;
-  mode: 'light' | 'dark';
-  primary: string; // Text
-  secondary: string; // Text
-  inverted: string; // Text
-  borderAccent: string;
   boxShadow: {
     elevation: number;
-    shadowColor: string;
     shadowOffset: {
       height: number;
       width: number;
     };
     shadowOpacity: number;
     shadowRadius: number;
+    shadowColor: string;
   };
+}
+
+export interface Theme extends CommonThemeProperties {
+  border: string;
+  borderSecondary: string;
+  backgroundSecondary: string;
+  backgroundTertiary: string;
+  background: string;
+  mode: ThemeMode;
+  primary: string; // Text
+  secondary: string; // Text
+  inverted: string; // Text
+  borderAccent: string;
+}
+
+export type ThemeMode = 'dark' | 'light';
+
+export interface ThemeColor {
+  colorCode: string;
+  name: string;
 }
 
 export type IconType =
@@ -31,6 +41,8 @@ export type IconType =
   | 'IO'
   | 'FI'
   | 'SLI';
+
+// export type ThemeMode = 'dark' | 'light';
 
 export interface CustomIconProps {
   name: string;

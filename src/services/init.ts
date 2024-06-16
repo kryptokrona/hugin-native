@@ -1,25 +1,35 @@
 import i18n from 'i18next';
 
+import { defaultTheme } from '@/styles';
+
 import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
+import { getUserGroups } from './bare';
 import {
   defaultPreferences,
   defaultUser,
-  setPreferences,
-  setUser,
+  setStorePreferences,
+  setStoreTheme,
+  setStoreUser,
 } from './zustand';
 
 import { bare } from '../../lib/native.js';
 
 export const init = async () => {
+  const theme = await getStorageValue(ASYNC_STORAGE_KEYS.THEME);
   const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
-  const user = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
-  setPreferences(preferences ?? defaultPreferences);
+  const mUser = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
+
+  const user = mUser ?? defaultUser;
+
+  setStoreTheme(theme ?? defaultTheme);
+  setStorePreferences(preferences ?? defaultPreferences);
+  setStoreUser(user);
+
+  getUserGroups(user);
 
   if (preferences) {
     await i18n.changeLanguage(preferences.language);
   }
 
-  // const documentDirectoryPath = RNFS.DocumentDirectoryPath;
-  setUser(user ?? defaultUser);
-  await bare(user ?? defaultUser);
+  await bare(user);
 };

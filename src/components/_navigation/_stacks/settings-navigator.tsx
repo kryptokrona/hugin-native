@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import {
   ChangeLanguageScreen,
+  ChangeThemeScreen,
   SettingsScreen,
   UpdateProfileScreen,
 } from '@/screens';
@@ -37,6 +38,14 @@ export const SettingsStackNavigator = () => {
           header: (_props) => <Header title={t('updateProfile')} backButton />,
         })}
       />
+      <Stack.Screen
+        name={SettingsScreens.ChangeThemeScreen}
+        component={ChangeThemeScreen}
+        options={() => ({
+          header: (_props) => <Header title={t('changeTheme')} backButton />,
+        })}
+      />
+
       {/* <Stack.Screen
         name={SettingsScreens.ExportKeysScreen}
         component={MainScreen}

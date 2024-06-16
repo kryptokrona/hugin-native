@@ -209,5 +209,7 @@
   "blockUser": "Block user",
   "copyText": "Copy text",
   "reply": "Reply",
-  "leaveGroup": "Leave group"
+  "leaveGroup": "Leave group",
+  "themeDark": "Dark", // EN only
+  "themeLight": "Light" // EN only
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { FlatList } from 'react-native';
 
@@ -6,9 +6,8 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
-import { getUserGroups } from '@/p2p';
+import { useGlobalStore } from '@/services';
 import {
-  Group,
   GroupsScreens,
   GroupStackNavigationType,
   GroupStackParamList,
@@ -21,14 +20,7 @@ interface Props {
 export const GroupsScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<GroupStackNavigationType>();
-  const [groups, setGroups] = useState<Group[]>([]);
-  const mockUser = {
-    someKey: '123',
-  };
-  useEffect(() => {
-    const groups = getUserGroups(mockUser.someKey);
-    setGroups(groups);
-  }, []);
+  const groups = useGlobalStore((state) => state.groups);
 
   function onPress(topic: string, name: string) {
     navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });

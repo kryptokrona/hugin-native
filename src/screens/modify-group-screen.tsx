@@ -24,8 +24,7 @@ import {
   UserItem,
 } from '@/components';
 import { nameMaxLength } from '@/config';
-import { onDeleteGroup, onLeaveGroup } from '@/p2p';
-import { useGlobalStore } from '@/services';
+import { onDeleteGroup, onLeaveGroup, useGlobalStore } from '@/services';
 import {
   GroupsScreens,
   GroupStackNavigationType,

@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
@@ -17,10 +17,12 @@ export const FileSelected: React.FC<Props> = ({
   type,
   size,
   removeFile,
+  path,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.backgroundTertiary;
   const sizeStr = formatFileSize(size);
+  const isImage = type?.startsWith('image');
 
   function onPress() {
     removeFile();
@@ -32,9 +34,16 @@ export const FileSelected: React.FC<Props> = ({
         <CustomIcon name="close-circle" type="IO" />
       </TouchableOpacity>
       <View style={[styles.container, { backgroundColor }]}>
-        <CustomIcon name="file-outline" type="MCI" size={40} />
+        {!isImage && <CustomIcon name="file-outline" type="MCI" size={40} />}
+        {isImage && (
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: path }} style={styles.image} />
+          </View>
+        )}
         <View style={styles.info}>
-          <TextField size="xsmall">{fileName}</TextField>
+          <TextField maxLength={40} size="xsmall">
+            {fileName}
+          </TextField>
           <View style={styles.spec}>
             <TextField style={{ marginRight: 10 }} size="xsmall">
               {sizeStr}
@@ -63,6 +72,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 6,
     paddingBottom: 4,
+  },
+  image: {
+    height: 40,
+    width: 40,
+  },
+  imageContainer: {
+    borderRadius: Styles.borderRadius.small,
+    height: 40,
+    overflow: 'hidden',
+    width: 40,
   },
   info: {
     marginLeft: 6,

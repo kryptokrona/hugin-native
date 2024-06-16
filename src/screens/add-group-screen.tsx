@@ -6,7 +6,7 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
-import { onCreateGroup, onRequestNewGroupKey } from '@/p2p';
+import { onCreateGroup, onRequestNewGroupKey } from '@/services';
 import {
   GroupsScreens,
   GroupStackNavigationType,

@@ -26,13 +26,6 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   const color = focus ? theme.primary : theme.secondary;
   const backgroundColor = theme.background;
 
-  function handleSend() {
-    if (text.trim()) {
-      onSend(text, selectedFile);
-      setText('');
-    }
-  }
-
   async function onCameraPress() {
     const options: CameraOptions = {
       mediaType: 'photo',
@@ -45,8 +38,21 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
       } else if (response.errorCode) {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else {
-        const uri = response?.assets?.[0].uri;
-        console.log(uri); // TODO: handle the image URI
+        const asset = response?.assets?.[0];
+        if (asset) {
+          const { fileSize, uri, fileName, type } = asset;
+          if (!uri || !fileName || !fileSize) {
+            return;
+          }
+          const fileInfo: SelectedFile = {
+            fileName: fileName,
+            path: uri,
+            size: fileSize,
+            time: new Date().getTime(),
+            type: type ?? 'image',
+          };
+          setSelectedFile(fileInfo);
+        }
       }
     });
   }
@@ -77,6 +83,14 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
       } else {
         console.log('DocumentPicker Error: ', err);
       }
+    }
+  }
+
+  function handleSend() {
+    if (text.trim()) {
+      onSend(text, selectedFile);
+      setText('');
+      setSelectedFile(null);
     }
   }
 
@@ -129,7 +143,6 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
         )}
         {displayActions &&
           Actions(onCameraPress, onFilePress, theme.primary, styles)}
-        {/* // TODO display selected file together with input */}
         <TextInput
           style={[styles.inputField, { borderColor: color, color: color }]}
           value={text}

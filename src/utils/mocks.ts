@@ -6,7 +6,7 @@ export const mockAvatar =
 export const mockMessages: Message[] = [
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYanL2qEQF2Hsj4u9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
     m: 'Hello, how are you?',
@@ -18,7 +18,7 @@ export const mockMessages: Message[] = [
   },
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYan1koEQF2Hsj4u9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgsj12',
     m: 'Im good! How are you?',
@@ -30,7 +30,7 @@ export const mockMessages: Message[] = [
   },
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYanL2qEQF2Hsj4u9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
     m: 'Also gooood',
@@ -42,7 +42,7 @@ export const mockMessages: Message[] = [
   },
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYan1koEQF2Hsj4u9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgsj12',
     m: 'Very goood',
@@ -54,7 +54,7 @@ export const mockMessages: Message[] = [
   },
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYanL2qEQF2Hsj4u9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
     m: 'Some rnadom long message to make some testing please copilot can u make this message a bit longer so we can test the UI. Longer... Copilot are you there? Guess not. ',
@@ -66,7 +66,7 @@ export const mockMessages: Message[] = [
   },
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYanL2qEQF2Hsj4u9wTpKBqak88TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5Psk3H36tF7DBEJdjUn5v8eaESN2T5DPgRdkY',
     m: 'Helloooo fellas whats up?',
@@ -78,7 +78,7 @@ export const mockMessages: Message[] = [
   },
   {
     c: 'Channel 1',
-    g: 'Hashthingy',
+    g: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
     hash: 'Hashthingy',
     k: 'SEKReYanL2qEQF2Hsj4u9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
     m: 'Just coding',
@@ -108,23 +108,6 @@ export const mockMessages: Message[] = [
       '😉',
       '😋',
       '😜',
-      '😝',
-      '😛',
-      '🤗',
-      '🤓',
-      '🤪',
-      '🙃',
-      '🙂',
-      '🤑',
-      '🤠',
-      '🤡',
-      '🤥',
-      '🤫',
-      '🤭',
-      '🤯',
-      '🤬',
-      '🤢',
-      '🤮',
     ],
     s: 'Hashthingy',
     t: new Date(),
@@ -135,32 +118,27 @@ export const mockGroups: Group[] = [
   {
     avatar: mockAvatar,
     name: 'Group 1',
-    topic:
-      'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
+    topic: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
   },
   {
     avatar: mockAvatar,
     name: 'Group 2',
-    topic:
-      'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
+    topic: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
   },
   {
     avatar: mockAvatar,
     name: 'Group 3',
-    topic:
-      'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
+    topic: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
   },
   {
     avatar: mockAvatar,
     name: 'Group 4',
-    topic:
-      'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
+    topic: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
   },
   {
     avatar: mockAvatar,
     name: 'Group 5',
-    topic:
-      'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY',
+    topic: 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965',
   },
 ];
 
