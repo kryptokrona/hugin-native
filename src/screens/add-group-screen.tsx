@@ -14,11 +14,14 @@ interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
 }
 
-export const AddGroupScreen: React.FC<Props> = () => {
+export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
+  const { name: initialName, topic: initialtopic } = route.params;
   const navigation = useNavigation<GroupStackNavigationType>();
-  const [name, setName] = useState<string | null>(null);
-  const [key, setKey] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(initialName ?? null);
+  const [key, setKey] = useState<string | null>(initialtopic ?? null);
+  const [isJoiningExisting, setIsJoiningExisting] = useState(false);
+  const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
 
   async function onCreatePress() {
     if (key && name) {
@@ -50,6 +53,18 @@ export const AddGroupScreen: React.FC<Props> = () => {
     setKey(value);
   }
 
+  useEffect(() => {
+    if (initialName && initialtopic) {
+      setIsJoiningExisting(true);
+    }
+  }, [initialName, initialtopic]);
+
+  useEffect(() => {
+    if (name !== initialName || key !== initialtopic) {
+      setIsJoiningExisting(false);
+    }
+  }, [name, key]);
+
   return (
     <ScreenLayout>
       <View>
@@ -59,15 +74,17 @@ export const AddGroupScreen: React.FC<Props> = () => {
           value={key}
           onChange={onKeyChange}
         />
-        <TextButton
-          small
-          type="secondary"
-          style={styles.generateButton}
-          onPress={onGeneratePress}>
-          {t('generate')}
-        </TextButton>
+        {!isJoiningExisting && (
+          <TextButton
+            small
+            type="secondary"
+            style={styles.generateButton}
+            onPress={onGeneratePress}>
+            {t('generate')}
+          </TextButton>
+        )}
         <TextButton disabled={!name && !key} onPress={onCreatePress}>
-          {t('continue')}
+          {continueText}
         </TextButton>
       </View>
     </ScreenLayout>

@@ -211,5 +211,7 @@
   "reply": "Reply",
   "leaveGroup": "Leave group",
   "themeDark": "Dark", // EN only
-  "themeLight": "Light" // EN only
+  "themeLight": "Light", // EN only
+  "joinGroup": "Join group", // EN only
+  "createGroup": "Create group" // EN only
 }

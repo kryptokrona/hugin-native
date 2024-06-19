@@ -2,6 +2,8 @@ import React from 'react';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
+import { AppStackParamList } from 'types/navigation';
+
 import { TabBar } from '@/config';
 
 import {
@@ -12,7 +14,7 @@ import {
 } from './_stacks';
 import { MyTabBar } from './tab-bar';
 
-const Tab = createBottomTabNavigator<any>();
+const Tab = createBottomTabNavigator<AppStackParamList>();
 
 export const AppNavigator = () => {
   return (

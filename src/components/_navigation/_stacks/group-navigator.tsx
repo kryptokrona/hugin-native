@@ -23,7 +23,7 @@ export const GroupStackNavigator = () => {
   const navigation = useNavigation<GroupStackNavigationType>();
 
   function onAddGroupPress() {
-    navigation.navigate(GroupsScreens.AddGroupScreen);
+    navigation.navigate(GroupsScreens.AddGroupScreen, {});
   }
 
   return (

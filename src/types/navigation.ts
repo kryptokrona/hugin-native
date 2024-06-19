@@ -1,12 +1,14 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import {
-  AppStack,
   AuthScreens,
   GroupsScreens,
   MainScreens,
   MessagesScreens,
   SettingsScreens,
+  Stacks,
+  TabBar,
 } from '@/config';
 
 import type { HuginUser, MessageUser } from './p2p';
@@ -36,12 +38,19 @@ export type GroupStackParamList = {
     name: string;
   };
   [GroupsScreens.ModifyGroupScreen]: { topic: string; name: string };
-  [GroupsScreens.AddGroupScreen]: undefined;
+  [GroupsScreens.AddGroupScreen]: { topic?: string; name?: string };
 };
 
 export type MessagesStackParamList = {
   [MessagesScreens.MessagesScreen]: { user: MessageUser };
   [MessagesScreens.MessageScreen]: { user: HuginUser };
+};
+
+export type AppStackParamList = {
+  [TabBar.MainTab.tabName]: NavigatorScreenParams<MainStackParamList>;
+  [TabBar.SettingsTab.tabName]: NavigatorScreenParams<SettingsStackParamList>;
+  [TabBar.GroupsTab.tabName]: NavigatorScreenParams<GroupStackParamList>;
+  [TabBar.MessagesTab.tabName]: NavigatorScreenParams<MessagesStackParamList>;
 };
 
 // export const RecipientsScreens = {
@@ -91,8 +100,8 @@ export type MessagesStackParamList = {
 // };
 
 export interface RootStackParamList {
-  AuthStack: { screen: keyof typeof AuthScreens; params?: any };
-  AppStack: { screen: keyof typeof AppStack; params?: any };
+  [Stacks.AuthStack]: NavigatorScreenParams<AuthStackParamList>;
+  [Stacks.AppStack]: NavigatorScreenParams<AppStackParamList>;
 }
 
 export type AuthStackParamList = {
