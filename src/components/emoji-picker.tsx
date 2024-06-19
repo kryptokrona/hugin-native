@@ -29,7 +29,7 @@ export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
   const theme = useGlobalStore((state) => state.theme);
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<string>('Smileys & Emotion');
-  const backgroundColor = theme.backgroundTertiary;
+  const backgroundColor = theme.background;
   const { width } = Dimensions.get('window');
   const columns = Math.floor(width / 36);
 

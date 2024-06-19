@@ -13,10 +13,9 @@ import {
   ScreenLayout,
   TextButton,
 } from '@/components';
-import { nameMaxLength } from '@/config';
+import { nameMaxLength, SettingsScreens } from '@/config';
 import { updateUser, useGlobalStore } from '@/services';
-import {
-  SettingsScreens,
+import type {
   SettingsStackNavigationType,
   SettingsStackParamList,
 } from '@/types';

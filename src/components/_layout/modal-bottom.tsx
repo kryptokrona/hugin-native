@@ -43,15 +43,12 @@ export const ModalBottom: React.FC<Props> = ({
               styles.inner,
               {
                 backgroundColor: theme.background,
-                borderColor: theme.borderAccent,
+                borderColor: theme.border,
               },
             ]}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
               <View
-                style={[
-                  styles.top,
-                  { backgroundColor: theme.backgroundTertiary },
-                ]}
+                style={[styles.top, { backgroundColor: theme.mutedForeground }]}
               />
             </TouchableOpacity>
             {children}

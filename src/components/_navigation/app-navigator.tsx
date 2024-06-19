@@ -2,7 +2,7 @@ import React from 'react';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-import { TabBar } from '@/types';
+import { TabBar } from '@/config';
 
 import {
   GroupStackNavigator,

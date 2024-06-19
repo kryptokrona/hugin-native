@@ -6,11 +6,8 @@ import { type RouteProp, useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 
 import { TextButton, Pincode, ScreenLayout } from '@/components';
-import {
-  type AuthStackParamList,
-  AuthScreens,
-  type AuthStackNavigationType,
-} from '@/types';
+import { AuthScreens } from '@/config';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.RequestPinScreen>;

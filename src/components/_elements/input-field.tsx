@@ -15,7 +15,7 @@ interface Props {
   onChange: (value: string) => void;
   error?: boolean;
   errorText?: string;
-  keyboardType?: 'default' | 'number-pad';
+  // keyboardType?: 'default' | 'number-pad';
   maxLength?: number;
   onSubmitEditing?: () => void;
 }
@@ -28,15 +28,18 @@ export const InputField: React.FC<Props> = ({
   errorText,
   maxLength,
   onSubmitEditing,
-  keyboardType = 'default',
+  // keyboardType = 'default',
 }) => {
-  // https://reactnative.dev/docs/inputaccessoryview
   const { t } = useTranslation();
   const [focus, setFocus] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.background;
-  const borderColor = focus ? theme.border : theme.borderSecondary;
-  const color = focus ? theme.primary : theme.secondary;
+  const backgroundColor = theme.secondary;
+  const borderColor = focus
+    ? theme.foreground
+    : error
+    ? theme.destructiveForeground
+    : theme.border;
+  const color = focus ? theme.foreground : theme.mutedForeground;
 
   function onFocus() {
     setFocus(true);
@@ -47,26 +50,26 @@ export const InputField: React.FC<Props> = ({
   }
 
   return (
-    <View style={[styles.container]}>
-      <TextField size="small" type={focus ? 'primary' : 'secondary'}>
+    <View style={styles.container}>
+      <TextField size="small" type={focus ? 'secondary' : 'muted'}>
         {label}
       </TextField>
       <TextInput
         returnKeyLabel={t('done')}
         returnKeyType={'done'}
         onSubmitEditing={onSubmitEditing}
-        placeholderTextColor={theme.inverted}
+        placeholderTextColor={color}
         style={[styles.input, { backgroundColor, borderColor, color }]}
         value={value?.toString()}
         onChangeText={(text) => onChange(text)}
-        keyboardType={keyboardType}
+        keyboardType={'default'}
         maxLength={maxLength}
         onFocus={onFocus}
         onBlur={onBlur}
         {...commonInputProps}
       />
       {errorText && error && (
-        <TextField size="small" type="error">
+        <TextField size="small" type="destructive">
           {errorText}
         </TextField>
       )}

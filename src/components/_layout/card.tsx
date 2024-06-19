@@ -11,15 +11,10 @@ interface Props {
 export const Card: React.FC<Props> = ({ children, style }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.background;
-  const borderColor = theme.borderSecondary;
-  const { boxShadow } = theme;
+  const borderColor = theme.border;
 
   return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor, borderColor, ...boxShadow, ...style },
-      ]}>
+    <View style={[styles.card, { backgroundColor, borderColor, ...style }]}>
       {children}
     </View>
   );

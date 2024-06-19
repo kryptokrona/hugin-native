@@ -7,11 +7,8 @@ import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics, { TouchID } from 'react-native-biometrics';
 
 import { TextButton, ScreenLayout, TextField, XKRLogo } from '@/components';
-import {
-  AuthStackParamList,
-  AuthScreens,
-  AuthStackNavigationType,
-} from '@/types';
+import { AuthScreens } from '@/config';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 const authErrorToHumanError = new Map([
   ['AuthenticationNotMatch', 'Fingerprint does not match stored fingerprint.'],

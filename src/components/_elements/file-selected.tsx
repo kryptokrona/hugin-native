@@ -2,7 +2,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
-import { SelectedFile } from '@/types';
+import type { SelectedFile } from '@/types';
 import { formatFileSize } from '@/utils';
 
 import { CustomIcon } from './custom-icon';
@@ -20,7 +20,8 @@ export const FileSelected: React.FC<Props> = ({
   path,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.backgroundTertiary;
+  const backgroundColor = theme.accent;
+  const color = theme.accentForeground;
   const sizeStr = formatFileSize(size);
   const isImage = type?.startsWith('image');
 
@@ -41,15 +42,15 @@ export const FileSelected: React.FC<Props> = ({
           </View>
         )}
         <View style={styles.info}>
-          <TextField maxLength={40} size="xsmall">
+          <TextField style={{ color }} maxLength={40} size="xsmall">
             {fileName}
           </TextField>
           <View style={styles.spec}>
-            <TextField style={{ marginRight: 10 }} size="xsmall">
+            <TextField type="muted" style={{ marginRight: 10 }} size="xsmall">
               {sizeStr}
             </TextField>
             {type && (
-              <TextField maxLength={20} size="xsmall">
+              <TextField type="muted" maxLength={20} size="xsmall">
                 {type}
               </TextField>
             )}

@@ -1,7 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import { MainScreens } from '@/config';
 import { MainScreen } from '@/screens';
-import { MainScreens, MainStackParamList } from '@/types';
+import type { MainStackParamList } from '@/types';
 
 import { Header } from '../header';
 

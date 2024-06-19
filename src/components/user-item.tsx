@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { nameMaxLength } from '@/config';
-import { User } from '@/types';
+import type { User } from '@/types';
 
 import { Avatar, TextField } from './_elements';
 

@@ -114,7 +114,7 @@ export const GroupMessageItem: React.FC<Props> = ({
 
       <ModalCenter visible={userModal} closeModal={onCloseUserModal}>
         <Avatar base64={avatar} size={100} />
-        <TextField style={{ marginTop: 20 }} size="large" type="inverted">
+        <TextField style={{ marginTop: 20 }} size="large">
           {name}
         </TextField>
       </ModalCenter>
@@ -124,10 +124,10 @@ export const GroupMessageItem: React.FC<Props> = ({
       </View>
       <View style={styles.left}>
         <View style={styles.info}>
-          <TextField bold size="small" style={{ color }}>
+          <TextField bold size="xsmall" style={{ color }}>
             {name}
           </TextField>
-          <TextField size="xsmall" style={styles.date}>
+          <TextField type="muted" size="xsmall" style={styles.date}>
             {dateString}
           </TextField>
         </View>

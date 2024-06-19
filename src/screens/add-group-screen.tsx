@@ -6,12 +6,9 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
+import { GroupsScreens } from '@/config';
 import { onCreateGroup, onRequestNewGroupKey } from '@/services';
-import {
-  GroupsScreens,
-  GroupStackNavigationType,
-  type GroupStackParamList,
-} from '@/types';
+import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
@@ -33,7 +30,6 @@ export const AddGroupScreen: React.FC<Props> = () => {
   async function onGeneratePress() {
     try {
       const mKey = await onRequestNewGroupKey();
-      console.log({ mKey });
       if (mKey) {
         setKey(mKey);
       }

@@ -1,14 +1,14 @@
 import { StyleSheet, Text } from 'react-native';
 
 import { useGlobalStore } from '@/services';
-import { Styles } from '@/styles';
+import { Styles, textType } from '@/styles';
+import type { ElementType } from '@/types';
 
-type TextType = 'primary' | 'secondary' | 'error' | 'inverted';
 type SizeType = 'xsmall' | 'small' | 'medium' | 'large';
 
 interface Props {
   children: string;
-  type?: TextType;
+  type?: ElementType;
   size?: SizeType;
   maxLength?: number | null;
   bold?: boolean;
@@ -17,14 +17,14 @@ interface Props {
 
 export const TextField: React.FC<Props> = ({
   children,
-  type = 'primary',
+  type = 'secondary',
   size = 'medium',
   maxLength,
   bold,
   style,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const color = theme?.[type];
+  const color = theme[textType[type]];
   const fontSize = Styles.fontSizes[size] ?? Styles.fontSizes.medium;
   const fontWeight = bold ? 'bold' : 'normal';
 

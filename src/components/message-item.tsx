@@ -6,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useGlobalStore } from '@/services';
 import { Styles } from '@/styles';
-import { type MessagesStackNavigationType } from '@/types';
+import type { MessagesStackNavigationType } from '@/types';
 import { prettyPrintDate } from '@/utils';
 
 import { Avatar, TextField } from './_elements';
@@ -47,9 +47,6 @@ export const MessageItem: React.FC<Props> = ({
       style={[
         styles.container,
         !inverted ? styles.container : styles.invertedContainer,
-        {
-          backgroundColor: isPressed ? theme.backgroundTertiary : 'transparent',
-        },
       ]}
       onLongPress={handleLongPress}
       onPressOut={() => setIsPressed(false)}>
@@ -63,11 +60,7 @@ export const MessageItem: React.FC<Props> = ({
             </TextField>
           </View>
           <View style={[styles.messageContainer]}>
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: theme.backgroundTertiary },
-              ]}>
+            <View style={[styles.card, { backgroundColor: theme.muted }]}>
               <TextField size="small">{message}</TextField>
             </View>
           </View>

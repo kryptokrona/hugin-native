@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SQLite from 'react-native-sqlite-storage';
 
 import { config, globals } from '@/config';
-import { Group, Payee, Preferences, UnreadMessages } from '@/types';
+import type { Group, Payee, Preferences, UnreadMessages } from '@/types';
 
 /* Use promise based API instead of callback based */
 SQLite.enablePromise(true);

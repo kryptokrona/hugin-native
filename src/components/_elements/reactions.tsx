@@ -38,13 +38,13 @@ export const Reactions: React.FC<Props> = ({ items }) => {
     }
 
     const byMe = Math.floor(Math.random() * 2) === 1;
-    const borderColor = byMe ? theme.primary : theme.backgroundTertiary;
+    const borderColor = byMe ? theme.border : theme.mutedForeground;
 
     return (
       <TouchableOpacity
         style={[
           styles.item,
-          { backgroundColor: theme.backgroundTertiary, borderColor },
+          { backgroundColor: theme.background, borderColor },
         ]}
         onPress={onPress}>
         <Text style={styles.emojiText}>{item.emoji}</Text>

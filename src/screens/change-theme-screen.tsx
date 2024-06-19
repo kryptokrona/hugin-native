@@ -1,25 +1,13 @@
 import React from 'react';
 
-import {
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Dimensions,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { RouteProp } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
 
-import { ScreenLayout, TextButton, Container, TextField } from '@/components';
-import { setStoreTheme, useGlobalStore } from '@/services';
-import { colorfulColors, createTheme, Styles } from '@/styles';
-import {
-  SettingsScreens,
-  ThemeColor,
-  type SettingsStackParamList,
-  type ThemeMode,
-} from '@/types';
+import { ScreenLayout, Container } from '@/components';
+import { SettingsScreens } from '@/config';
+import { Styles } from '@/styles';
+import type { SettingsStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<
@@ -29,53 +17,53 @@ interface Props {
 }
 const size = 26;
 export const ChangeThemeScreen: React.FC<Props> = () => {
-  const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
-  const currentColor = theme.backgroundSecondary;
-  const isDark = theme.mode === 'dark';
-  const border = theme.borderAccent;
+  // const { t } = useTranslation();
+  // const theme = useGlobalStore((state) => state.theme);
+  // const currentColor = theme.backgroundSecondary;
+  // const isDark = theme.mode === 'dark';
+  // const border = theme.borderAccent;
 
-  function setDarkTheme() {
-    handleThemeChange('dark', currentColor);
-  }
+  // function setDarkTheme() {
+  //   handleThemeChange('dark', currentColor);
+  // }
 
-  function setLightTheme() {
-    handleThemeChange('light', currentColor);
-  }
+  // function setLightTheme() {
+  //   handleThemeChange('light', currentColor);
+  // }
 
-  function handleThemeChange(mode: ThemeMode, color?: string) {
-    const newTheme = createTheme(mode, color);
-    setStoreTheme(newTheme);
-  }
+  // function handleThemeChange(mode: ThemeMode, color?: string) {
+  //   const newTheme = createTheme(mode, color);
+  //   setStoreTheme(newTheme);
+  // }
 
-  const { width } = Dimensions.get('window');
-  const itemWidth = (width - size * 2) / 3;
+  // const { width } = Dimensions.get('window');
+  // const itemWidth = (width - size * 2) / 3;
 
-  function ItemMapper({ item }: { item: ThemeColor }) {
-    const active = item.colorCode === currentColor;
-    const borderColor = active ? theme.primary : border;
+  // function ItemMapper({ item }: { item: ThemeColor }) {
+  //   const active = item.colorCode === currentColor;
+  //   const borderColor = active ? theme.primary : border;
 
-    function setColorTheme() {
-      handleThemeChange(theme.mode, item.colorCode);
-    }
+  //   function setColorTheme() {
+  //     handleThemeChange(theme.mode, item.colorCode);
+  //   }
 
-    return (
-      <TouchableOpacity
-        onPress={setColorTheme}
-        style={[styles.colorContainer, { borderColor, width: itemWidth }]}>
-        <View style={[styles.color, { backgroundColor: item.colorCode }]} />
-        <TextField style={{ textTransform: 'capitalize' }}>
-          {item.name}
-        </TextField>
-      </TouchableOpacity>
-    );
-  }
+  //   return (
+  //     <TouchableOpacity
+  //       onPress={setColorTheme}
+  //       style={[styles.colorContainer, { borderColor, width: itemWidth }]}>
+  //       <View style={[styles.color, { backgroundColor: item.colorCode }]} />
+  //       <TextField style={{ textTransform: 'capitalize' }}>
+  //         {item.name}
+  //       </TextField>
+  //     </TouchableOpacity>
+  //   );
+  // }
 
   return (
     <ScreenLayout>
       <View>
         <Container row>
-          <TextButton
+          {/* <TextButton
             style={{ flex: 1 }}
             type={isDark ? 'primary' : 'secondary'}
             onPress={setDarkTheme}>
@@ -86,15 +74,15 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
             type={isDark ? 'secondary' : 'primary'}
             onPress={setLightTheme}>
             {t('themeLight')}
-          </TextButton>
+          </TextButton> */}
         </Container>
-        <FlatList
+        {/* <FlatList
           data={colorfulColors}
           numColumns={3}
           keyExtractor={(item) => item.colorCode}
           renderItem={ItemMapper}
           contentContainerStyle={{ marginTop: 20 }}
-        />
+        /> */}
       </View>
     </ScreenLayout>
   );

@@ -5,12 +5,9 @@ import { StyleSheet, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
 import { TextButton, ScreenLayout } from '@/components';
+import { AuthScreens } from '@/config';
 import { getApproximateBlockHeight } from '@/services';
-import {
-  AuthStackParamList,
-  AuthScreens,
-  AuthStackNavigationType,
-} from '@/types';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<

@@ -3,11 +3,11 @@ import { FlatList } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import {
+import { SettingsScreens } from '@/config';
+import type {
   CustomIconProps,
-  SettingsScreens,
   SettingsStackNavigationType,
-  type SettingsStackParamList,
+  SettingsStackParamList,
 } from '@/types';
 
 interface Item {

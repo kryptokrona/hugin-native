@@ -1,19 +1,6 @@
 export type ImageType = 'logoWhiteText';
 
-export type TextColor =
-  | 'base'
-  | 'dark'
-  | 'disabled'
-  | 'grey'
-  | 'greyLight'
-  | 'greyDark'
-  | 'highlight'
-  | 'light'
-  | 'link'
-  | 'primary'
-  | 'warning';
-
-export type ElementType = 'primary' | 'secondary' | 'error';
+export type ElementType = 'primary' | 'secondary' | 'destructive' | 'muted';
 
 export interface Emoji {
   emoji: string;

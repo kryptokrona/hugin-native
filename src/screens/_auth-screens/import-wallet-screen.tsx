@@ -4,11 +4,8 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { TextButton, ScreenLayout, TextField } from '@/components';
-import {
-  type AuthStackParamList,
-  AuthScreens,
-  AuthStackNavigationType,
-} from '@/types';
+import { AuthScreens } from '@/config';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.ImportWalletScreen>;

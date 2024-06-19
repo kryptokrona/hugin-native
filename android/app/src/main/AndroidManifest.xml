@@ -13,6 +13,14 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+
+      <!-- Deep linking -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="hugin" />
+      </intent-filter>
     </activity>
 
     <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" android:exported="true" />

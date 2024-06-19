@@ -23,7 +23,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   const [focus, setFocus] = useState(false);
   const [displayActions, setDisplayActions] = useState(true);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
-  const color = focus ? theme.primary : theme.secondary;
+  const color = focus ? theme.secondaryForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
 
   async function onCameraPress() {
@@ -128,7 +128,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
           styles.inputContainer,
           {
             backgroundColor,
-            borderColor: theme.border,
+            borderColor: color,
           },
         ]}>
         {focus && !displayActions && (
@@ -137,20 +137,25 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
               name="arrow-forward-ios"
               type="MI"
               size={20}
-              color={focus ? theme.primary : theme.secondary}
+              color={theme.secondaryForeground}
             />
           </TouchableOpacity>
         )}
         {displayActions &&
-          Actions(onCameraPress, onFilePress, theme.primary, styles)}
+          Actions(
+            onCameraPress,
+            onFilePress,
+            theme.secondaryForeground,
+            styles,
+          )}
         <TextInput
-          style={[styles.inputField, { borderColor: color, color: color }]}
+          style={[styles.inputField, { borderColor: color, color }]}
           value={text}
           onChangeText={onChange}
           onBlur={onBlur}
           onFocus={onFocus}
           placeholder="  Aa..."
-          placeholderTextColor={theme.secondary}
+          placeholderTextColor={theme.mutedForeground}
           multiline
           autoCapitalize="sentences"
           autoCorrect
@@ -160,12 +165,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
         />
         {focus && (
           <TouchableOpacity onPress={handleSend} style={styles.btn}>
-            <CustomIcon
-              name="send"
-              type="IO"
-              size={24}
-              color={focus ? theme.primary : theme.secondary}
-            />
+            <CustomIcon name="send" type="IO" size={24} color={color} />
           </TouchableOpacity>
         )}
       </View>

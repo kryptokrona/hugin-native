@@ -8,13 +8,9 @@ import { useTranslation } from 'react-i18next';
 import MonthSelectorCalendar from 'react-native-month-selector';
 
 import { TextButton, ScreenLayout } from '@/components';
-import { config } from '@/config';
+import { AuthScreens, config } from '@/config';
 import { dateToScanHeight, useGlobalStore } from '@/services';
-import {
-  AuthStackParamList,
-  AuthScreens,
-  AuthStackNavigationType,
-} from '@/types';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.PickMonthScreen>;

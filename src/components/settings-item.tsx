@@ -17,17 +17,15 @@ interface Props {
 export const SettingsItem: React.FC<Props> = ({ title, icon, onPress }) => {
   const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.backgroundTertiary;
-  const shadow = theme.boxShadow;
+  const backgroundColor = theme.accent;
+  const color = theme.accentForeground;
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.settingsItem, { backgroundColor, ...shadow }]}>
+      style={[styles.settingsItem, { backgroundColor }]}>
       <CustomIcon name={icon.name} type={icon.type} size={24} />
-      <TextField style={{ color: theme.primary, marginLeft: 24 }}>
-        {t(title)}
-      </TextField>
+      <TextField style={{ color, marginLeft: 24 }}>{t(title)}</TextField>
     </TouchableOpacity>
   );
 };

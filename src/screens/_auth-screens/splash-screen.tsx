@@ -3,13 +3,8 @@ import { useEffect } from 'react';
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 
 import { ScreenLayout, XKRLogo } from '@/components';
-import {
-  AuthScreens,
-  AuthStackParamList,
-  MainScreens,
-  Stacks,
-  TabBar,
-} from '@/types';
+import { AuthScreens, MainScreens, Stacks, TabBar } from '@/config';
+import type { AuthStackParamList } from '@/types';
 
 // const fail = (msg: string) => {
 //   globals.logger.addLogMessage(msg);

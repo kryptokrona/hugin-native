@@ -5,13 +5,9 @@ import { View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
 import { Pincode, ScreenLayout } from '@/components';
-import { globals } from '@/config';
+import { AuthScreens, globals } from '@/config';
 import { savePreferencesToDatabase } from '@/services';
-import {
-  AuthStackNavigationType,
-  AuthStackParamList,
-  AuthScreens,
-} from '@/types';
+import type { AuthStackNavigationType, AuthStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.SetPinScreen>;

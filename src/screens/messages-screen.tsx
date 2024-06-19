@@ -6,11 +6,11 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
-import {
-  type Message,
-  MessagesScreens,
-  type MessagesStackNavigationType,
-  type MessagesStackParamList,
+import { MessagesScreens } from '@/config';
+import type {
+  Message,
+  MessagesStackNavigationType,
+  MessagesStackParamList,
 } from '@/types';
 import { mockMessages } from '@/utils';
 

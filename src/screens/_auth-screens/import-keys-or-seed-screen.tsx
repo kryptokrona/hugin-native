@@ -4,11 +4,8 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { TextButton, ScreenLayout } from '@/components';
-import {
-  AuthStackParamList,
-  AuthScreens,
-  AuthStackNavigationType,
-} from '@/types';
+import { AuthScreens } from '@/config';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<

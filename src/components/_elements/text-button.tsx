@@ -7,11 +7,12 @@ import {
 } from 'react-native';
 
 import { useGlobalStore } from '@/services';
-import { Styles } from '@/styles';
+import { backgroundType, Styles, textType } from '@/styles';
+import type { ElementType } from '@/types';
 
 interface Props {
   children: React.ReactNode;
-  type?: 'primary' | 'secondary' | 'error';
+  type?: ElementType;
   onPress: () => void;
   icon?: React.ReactNode;
   disabled?: boolean;
@@ -22,38 +23,18 @@ interface Props {
 export const TextButton: React.FC<Props> = ({
   children,
   onPress,
-  type,
+  type = 'primary',
   icon,
   disabled,
   style,
   small,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
-  const shadow = theme.boxShadow;
-  const backgroundColors = {
-    error: theme.background,
-    primary: theme.backgroundSecondary,
-    secondary: theme.background,
-  };
 
-  const colors = {
-    error: theme.error,
-    primary: theme.inverted,
-    secondary: theme.primary,
-  };
+  const backgroundColor = theme[backgroundType[type]];
+  const borderColor = theme[textType[type]];
+  const color = theme[textType[type]];
 
-  const borderColors = {
-    error: theme.error,
-    primary: theme.backgroundSecondary,
-    secondary: theme.borderSecondary,
-  };
-
-  const backgroundColor = type
-    ? backgroundColors[type]
-    : theme.backgroundSecondary;
-
-  const borderColor = type ? borderColors[type] : theme.backgroundSecondary;
-  const color = type ? colors[type] : theme.inverted;
   const smallButtonStyle = small
     ? {
         borderRadius: Styles.borderRadius.small,
@@ -63,6 +44,7 @@ export const TextButton: React.FC<Props> = ({
         paddingVertical: 8,
       }
     : {};
+
   const smallTextStyle = small
     ? { fontSize: Styles.fontSizes.small }
     : { fontSize: Styles.fontSizes.medium };
@@ -73,7 +55,7 @@ export const TextButton: React.FC<Props> = ({
       onPress={onPress}
       style={[
         styles.button,
-        { backgroundColor, borderColor, ...shadow, ...smallButtonStyle },
+        { backgroundColor, borderColor, ...smallButtonStyle },
         style,
       ]}>
       {icon && <View style={styles.icon}>{icon}</View>}

@@ -2,8 +2,9 @@ import React from 'react';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import { AuthScreens } from '@/config';
 import { SplashScreen } from '@/screens';
-import { AuthScreens, AuthStackParamList } from '@/types';
+import type { AuthStackParamList } from '@/types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 

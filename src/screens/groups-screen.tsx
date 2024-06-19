@@ -6,12 +6,9 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
+import { GroupsScreens } from '@/config';
 import { useGlobalStore } from '@/services';
-import {
-  GroupsScreens,
-  GroupStackNavigationType,
-  GroupStackParamList,
-} from '@/types';
+import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupsScreen>;

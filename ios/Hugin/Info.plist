@@ -83,7 +83,7 @@
 		<key>NSFaceIDUsageDescription</key>
 		<string>Authenticate user</string>
 		<key>NSCameraUsageDescription</key>
-		<string>Scan QR code</string>
+		<string>We need access to your camera to take photos.</string>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>remote-notification</string>
@@ -92,5 +92,24 @@
 		<string>We need access to your camera to take photos.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>We need access to your photo library to select photos.</string>
+
+		<!-- URL Types for Deep Linking -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.yourapp.bundleid</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>yourapp</string>
+				</array>
+			</dict>
+		</array>
+
+		<!-- Associated Domains for Universal Links -->
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>yourapp</string>
+		</array>
 	</dict>
 </plist>

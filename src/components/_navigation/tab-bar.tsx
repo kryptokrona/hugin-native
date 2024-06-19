@@ -4,8 +4,9 @@ import { TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native';
 
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
+import { TabBar } from '@/config';
 import { useGlobalStore } from '@/services';
-import { TabBar, type IconType } from '@/types';
+import type { IconType } from '@/types';
 
 import { CustomIcon } from '../_elements';
 

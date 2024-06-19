@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-// import { defaultPreferences } from '@/config';
 import { defaultTheme } from '@/styles';
 import type { Group, Preferences, Theme, User } from '@/types';
 import { createAvatar } from '@/utils';

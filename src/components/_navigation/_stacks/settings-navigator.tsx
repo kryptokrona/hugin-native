@@ -1,13 +1,14 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
+import { SettingsScreens } from '@/config';
 import {
   ChangeLanguageScreen,
   ChangeThemeScreen,
   SettingsScreen,
   UpdateProfileScreen,
 } from '@/screens';
-import { SettingsScreens, type SettingsStackParamList } from '@/types';
+import type { SettingsStackParamList } from '@/types';
 
 import { Header } from '../header';
 

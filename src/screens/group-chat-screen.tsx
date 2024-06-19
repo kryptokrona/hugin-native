@@ -11,16 +11,16 @@ import {
   MessageInput,
   ScreenLayout,
 } from '@/components';
+import { GroupsScreens } from '@/config';
 import {
   onSendGroupMessage,
   onSendGroupMessageWithFile,
   useGlobalStore,
 } from '@/services';
-import {
-  GroupsScreens,
-  type SelectedFile,
-  type GroupStackNavigationType,
-  type GroupStackParamList,
+import type {
+  SelectedFile,
+  GroupStackNavigationType,
+  GroupStackParamList,
 } from '@/types';
 import { mockAvatar, mockMessages } from '@/utils';
 

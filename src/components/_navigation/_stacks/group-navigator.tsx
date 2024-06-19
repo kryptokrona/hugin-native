@@ -5,17 +5,14 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
 import { CustomIcon } from '@/components';
+import { GroupsScreens } from '@/config';
 import {
   AddGroupScreen,
   GroupChatScreen,
   GroupsScreen,
   ModifyGroupScreen,
 } from '@/screens';
-import {
-  GroupsScreens,
-  GroupStackNavigationType,
-  GroupStackParamList,
-} from '@/types';
+import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 import { Header } from '../header';
 

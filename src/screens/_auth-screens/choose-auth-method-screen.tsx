@@ -7,13 +7,9 @@ import { useTranslation } from 'react-i18next';
 import * as Keychain from 'react-native-keychain';
 
 import { TextButton, ScreenLayout, TextField } from '@/components';
-import { globals } from '@/config';
+import { AuthScreens, globals } from '@/config';
 import { deletePinCode, savePreferencesToDatabase } from '@/services';
-import {
-  AuthScreens,
-  AuthStackNavigationType,
-  AuthStackParamList,
-} from '@/types';
+import type { AuthStackNavigationType, AuthStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<

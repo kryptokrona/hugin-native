@@ -6,12 +6,8 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 
 import { ScreenLayout, TextButton, TextField } from '@/components';
-import { globals } from '@/config';
-import {
-  AuthStackParamList,
-  AuthScreens,
-  AuthStackNavigationType,
-} from '@/types';
+import { AuthScreens, globals } from '@/config';
+import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.ForgotPinScreen>;

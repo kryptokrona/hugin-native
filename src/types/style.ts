@@ -1,29 +1,33 @@
-export interface CommonThemeProperties {
-  error: string;
-  boxShadow: {
-    elevation: number;
-    shadowOffset: {
-      height: number;
-      width: number;
-    };
-    shadowOpacity: number;
-    shadowRadius: number;
-    shadowColor: string;
-  };
-}
-
-export interface Theme extends CommonThemeProperties {
-  border: string;
-  borderSecondary: string;
-  backgroundSecondary: string;
-  backgroundTertiary: string;
+export type Theme = {
+  accent: string;
+  accentForeground: string;
   background: string;
+  border: string;
+  card: string;
+  cardForeground: string;
+  destructive: string;
+  destructiveForeground: string;
+  foreground: string;
+  input: string;
   mode: ThemeMode;
-  primary: string; // Text
-  secondary: string; // Text
-  inverted: string; // Text
-  borderAccent: string;
-}
+  muted: string;
+  mutedForeground: string;
+  popover: string;
+  popoverForeground: string;
+  primary: string;
+  primaryForeground: string;
+  radius?: string;
+  ring?: string;
+  secondary: string;
+  secondaryForeground: string;
+};
+
+export type ThemeBase = {
+  light: Theme;
+  dark: Theme;
+};
+
+export type ThemeName = 'aesir' | 'neutral' | 'stonks';
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -41,8 +45,6 @@ export type IconType =
   | 'IO'
   | 'FI'
   | 'SLI';
-
-// export type ThemeMode = 'dark' | 'light';
 
 export interface CustomIconProps {
   name: string;

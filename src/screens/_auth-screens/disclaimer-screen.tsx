@@ -6,12 +6,8 @@ import { type RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { ScreenLayout, TextButton, TextField } from '@/components';
-import { config } from '@/config';
-import {
-  AuthScreens,
-  AuthStackNavigationType,
-  AuthStackParamList,
-} from '@/types';
+import { AuthScreens, config } from '@/config';
+import type { AuthStackNavigationType, AuthStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.DisclaimerScreen>;

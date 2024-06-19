@@ -23,13 +23,12 @@ import {
   TextField,
   UserItem,
 } from '@/components';
-import { nameMaxLength } from '@/config';
+import { GroupsScreens, nameMaxLength } from '@/config';
 import { onDeleteGroup, onLeaveGroup, useGlobalStore } from '@/services';
-import {
-  GroupsScreens,
+import type {
   GroupStackNavigationType,
   User,
-  type GroupStackParamList,
+  GroupStackParamList,
 } from '@/types';
 import { createAvatar, onlineUsers, pickAvatar } from '@/utils';
 

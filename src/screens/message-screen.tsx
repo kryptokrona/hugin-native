@@ -5,9 +5,9 @@ import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
 import { Avatar, Header, MessageInput, ScreenLayout } from '@/components';
-import {
+import { MessagesScreens } from '@/config';
+import type {
   Message,
-  MessagesScreens,
   MessagesStackNavigationType,
   MessagesStackParamList,
 } from '@/types';
@@ -71,9 +71,9 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  flatListContent: {
-    paddingBottom: 80,
-  },
+  // flatListContent: {
+  //   paddingBottom: 80,
+  // },
   inputWrapper: {
     bottom: 0,
     left: 0,

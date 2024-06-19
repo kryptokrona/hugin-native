@@ -22,7 +22,7 @@ export const PreviewItem: React.FC<Props> = ({
   const [isPressed, setIsPressed] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
   const isNew = false; // dummy
-  const borderColor = isNew ? theme.primary : theme.borderSecondary;
+  const borderColor = isNew ? theme.foreground : theme.border;
 
   function handleLongPress() {
     setIsPressed(true);
@@ -39,7 +39,6 @@ export const PreviewItem: React.FC<Props> = ({
       style={[
         styles.container,
         {
-          backgroundColor: isPressed ? theme.backgroundTertiary : 'transparent',
           borderColor,
         },
       ]}

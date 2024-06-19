@@ -183,6 +183,7 @@ const send_joined_message = async (topic) => {
     joined: true,
     message: msg,
     name: Hugin.name,
+    avatar: Hugin.avatar,
     signature: sig,
     time: active.time,
     topic: topic,
