@@ -45,7 +45,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
         keyboardShow && styles.hideTabNavigation,
         {
           backgroundColor: theme.background,
-          borderColor: theme.borderAccent,
+          borderColor: theme.muted,
         },
       ]}>
       {state.routes.map((route, index) => {

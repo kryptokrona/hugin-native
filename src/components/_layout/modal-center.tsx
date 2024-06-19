@@ -42,8 +42,8 @@ export const ModalCenter: React.FC<Props> = ({
             style={[
               styles.inner,
               {
-                backgroundColor: theme.backgroundSecondary,
-                borderColor: theme.borderAccent,
+                backgroundColor: theme.popover,
+                borderColor: theme.popoverForeground,
               },
             ]}>
             {children}
@@ -57,7 +57,6 @@ export const ModalCenter: React.FC<Props> = ({
 const styles = StyleSheet.create({
   inner: {
     alignItems: 'center',
-    borderBottomWidth: 0,
     borderRadius: Styles.borderRadius.large,
     borderWidth: 1,
     justifyContent: 'center',

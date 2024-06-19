@@ -137,17 +137,12 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
               name="arrow-forward-ios"
               type="MI"
               size={20}
-              color={theme.secondaryForeground}
+              color={theme.accent}
             />
           </TouchableOpacity>
         )}
         {displayActions &&
-          Actions(
-            onCameraPress,
-            onFilePress,
-            theme.secondaryForeground,
-            styles,
-          )}
+          Actions(onCameraPress, onFilePress, theme.accent, styles)}
         <TextInput
           style={[styles.inputField, { borderColor: color, color }]}
           value={text}
@@ -165,7 +160,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
         />
         {focus && (
           <TouchableOpacity onPress={handleSend} style={styles.btn}>
-            <CustomIcon name="send" type="IO" size={24} color={color} />
+            <CustomIcon name="send" type="IO" size={24} color={theme.accent} />
           </TouchableOpacity>
         )}
       </View>

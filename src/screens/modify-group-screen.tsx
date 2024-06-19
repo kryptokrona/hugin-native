@@ -38,6 +38,7 @@ interface Props {
 
 export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
+  const { name: initialName, topic: initialTopic } = route.params;
   const navigation = useNavigation<GroupStackNavigationType>();
   const { theme } = useGlobalStore();
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -94,7 +95,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         </View>
         <Card>
           <TextField>
-            SekrHUGINADDRESSTIHIHHIHIHIHIHihihhihihi345i34ti4girg
+            {`hugin://join-group/${initialName}/${initialTopic}`}
           </TextField>
         </Card>
         <CopyButton text={t('copyInvite')} data={'TBD'} />
@@ -107,7 +108,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
               type="MI"
               name="mode-edit"
               size={20}
-              color={theme.primary}
+              color={theme.primaryForeground}
             />
           </View>
         </TouchableOpacity>
@@ -120,12 +121,12 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         />
         <TextButton onPress={onSave}>{t('save')}</TextButton>
         {isAdmin && (
-          <TextButton onPress={onDelete} type="error">
+          <TextButton onPress={onDelete} type="destructive">
             {t('delete')}
           </TextButton>
         )}
         {!isAdmin && (
-          <TextButton onPress={onLeave} type="error">
+          <TextButton onPress={onLeave} type="destructive">
             {t('leaveGroup')}
           </TextButton>
         )}

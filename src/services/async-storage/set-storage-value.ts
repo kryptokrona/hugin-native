@@ -8,12 +8,12 @@ export const setStorageValue = async (key: string, value: any) => {
   }
 };
 
-// const clearAsyncStorage = async () => {
-//   try {
-//     await AsyncStorage.clear();
-//     console.log('AsyncStorage cleared.');
-//   } catch (error) {
-//     console.error('Error clearing AsyncStorage', error);
-//   }
-// };
-// clearAsyncStorage();
+const clearAsyncStorage = async () => {
+  try {
+    await AsyncStorage.clear();
+    console.log('AsyncStorage cleared.');
+  } catch (error) {
+    console.error('Error clearing AsyncStorage', error);
+  }
+};
+clearAsyncStorage();

@@ -77,7 +77,7 @@
 //     <ScreenLayout>
 //       <TextField>{t('walletCreated')}</TextField>
 //       <TextField type="inverted">{t('walletCreatedSubtitle')}</TextField>
-//       <TextField type="error">{t('walletCreatedSubtitleSubtitle')}</TextField>
+//       <TextField type="destructive">{t('walletCreatedSubtitleSubtitle')}</TextField>
 
 //       <View>
 //         <SeedComponent seed={mSeed} />

@@ -53,8 +53,7 @@ export const ForgotPinScreen: React.FC<Props> = () => {
           However, you can delete your account if you wish to create a new one.
         </TextField>
       </View>
-
-      <TextButton onPress={onPress} type="error">
+      <TextButton onPress={onPress} type="destructive">
         Delete Account
       </TextButton>
     </ScreenLayout>

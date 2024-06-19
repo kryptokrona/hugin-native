@@ -24,7 +24,12 @@ export const SettingsItem: React.FC<Props> = ({ title, icon, onPress }) => {
     <TouchableOpacity
       onPress={onPress}
       style={[styles.settingsItem, { backgroundColor }]}>
-      <CustomIcon name={icon.name} type={icon.type} size={24} />
+      <CustomIcon
+        color={theme.accentForeground}
+        name={icon.name}
+        type={icon.type}
+        size={24}
+      />
       <TextField style={{ color, marginLeft: 24 }}>{t(title)}</TextField>
     </TouchableOpacity>
   );

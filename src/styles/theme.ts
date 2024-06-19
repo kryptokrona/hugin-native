@@ -92,25 +92,25 @@ const stonks: ThemeBase = {
 
 const aesir: ThemeBase = {
   dark: {
-    accent: 'rgba(255, 255, 255, 0.1)',
-    accentForeground: 'rgba(255, 255, 255, 0.8)',
-    background: '#121212',
-    border: 'rgba(255, 255, 255, 0.2)',
-    card: 'rgba(255, 255, 255, 0.1)',
-    cardForeground: 'rgba(255, 255, 255, 0.8)',
-    destructive: '#ed6580',
-    destructiveForeground: 'rgba(255, 255, 255, 0.8)',
+    accent: '#5A8BDB',
+    accentForeground: '#1A1C23',
+    background: '#1A1C23',
+    border: '#8F8F8F',
+    card: '#5A8BDB',
+    cardForeground: '#1A1C23',
+    destructive: '#1A1C23',
+    destructiveForeground: '#ED6580',
     foreground: 'rgba(255, 255, 255, 0.8)',
     input: 'rgba(0, 0, 0, 0.1)',
     mode: 'dark',
-    muted: 'rgba(255, 255, 255, 0.1)',
-    mutedForeground: 'rgba(255, 255, 255, 0.6)',
-    popover: 'rgba(255, 255, 255, 0.1)',
-    popoverForeground: 'rgba(255, 255, 255, 0.8)',
-    primary: '#0eff6b',
-    primaryForeground: 'rgba(255, 255, 255, 0.8)',
-    secondary: 'rgba(255, 255, 255, 0.1)',
-    secondaryForeground: 'rgba(255, 255, 255, 0.8)',
+    muted: '#343746',
+    mutedForeground: '#8F8F8F',
+    popover: '#1A1C23',
+    popoverForeground: '#F5F5F5',
+    primary: '#5A8BDB',
+    primaryForeground: '#1A1C23',
+    secondary: '#1A1C23',
+    secondaryForeground: '#F5F5F5',
   },
   light: {
     accent: 'rgba(255, 255, 255, 0.1)',
@@ -149,7 +149,7 @@ export const backgroundType = {
   secondary: 'background',
 } as const;
 
-export const defaultTheme = neutral.dark;
+export const defaultTheme = aesir.dark;
 
 export const themes: { [key in ThemeName]: ThemeBase } = {
   aesir,
