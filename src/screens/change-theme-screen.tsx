@@ -1,13 +1,21 @@
 import React from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import {
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { RouteProp } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
-import { ScreenLayout, Container } from '@/components';
+import { ScreenLayout, Container, TextField, TextButton } from '@/components';
 import { SettingsScreens } from '@/config';
-import { Styles } from '@/styles';
-import type { SettingsStackParamList } from '@/types';
+import { setStoreTheme, useGlobalStore } from '@/services';
+import { Styles, themes } from '@/styles';
+import type { SettingsStackParamList, Theme, ThemeBase } from '@/types';
 
 interface Props {
   route: RouteProp<
@@ -17,53 +25,65 @@ interface Props {
 }
 const size = 26;
 export const ChangeThemeScreen: React.FC<Props> = () => {
-  // const { t } = useTranslation();
-  // const theme = useGlobalStore((state) => state.theme);
-  // const currentColor = theme.backgroundSecondary;
-  // const isDark = theme.mode === 'dark';
-  // const border = theme.borderAccent;
+  const { t } = useTranslation();
+  const theme = useGlobalStore((state) => state.theme);
+  const isDark = theme.mode === 'dark';
+  const { width } = Dimensions.get('window');
+  const itemWidth = (width - size * 2) / 3;
 
-  // function setDarkTheme() {
-  //   handleThemeChange('dark', currentColor);
-  // }
+  function setDarkTheme() {
+    const darkTheme = themes[theme.name as keyof typeof themes].dark as Theme;
+    setStoreTheme(darkTheme);
+  }
 
-  // function setLightTheme() {
-  //   handleThemeChange('light', currentColor);
-  // }
+  function setLightTheme() {
+    const lightTheme = themes[theme.name as keyof typeof themes].light as Theme;
+    setStoreTheme(lightTheme);
+  }
 
-  // function handleThemeChange(mode: ThemeMode, color?: string) {
-  //   const newTheme = createTheme(mode, color);
-  //   setStoreTheme(newTheme);
-  // }
+  function ItemMapper({ item }: { item: string }) {
+    const mTheme = themes[item as keyof typeof themes] as ThemeBase;
+    const mainColors = {
+      card: mTheme.dark.card,
+      primary: mTheme.dark.primary,
+    };
+    const active = theme.name === item;
+    const borderColor = active ? theme.primary : theme.border;
 
-  // const { width } = Dimensions.get('window');
-  // const itemWidth = (width - size * 2) / 3;
+    function setColorTheme() {
+      const newTheme = themes[item as keyof typeof themes] as ThemeBase;
+      setStoreTheme(isDark ? newTheme.dark : newTheme.light);
+    }
 
-  // function ItemMapper({ item }: { item: ThemeColor }) {
-  //   const active = item.colorCode === currentColor;
-  //   const borderColor = active ? theme.primary : border;
-
-  //   function setColorTheme() {
-  //     handleThemeChange(theme.mode, item.colorCode);
-  //   }
-
-  //   return (
-  //     <TouchableOpacity
-  //       onPress={setColorTheme}
-  //       style={[styles.colorContainer, { borderColor, width: itemWidth }]}>
-  //       <View style={[styles.color, { backgroundColor: item.colorCode }]} />
-  //       <TextField style={{ textTransform: 'capitalize' }}>
-  //         {item.name}
-  //       </TextField>
-  //     </TouchableOpacity>
-  //   );
-  // }
+    return (
+      <TouchableOpacity
+        onPress={setColorTheme}
+        style={[styles.colorContainer, { borderColor, width: itemWidth }]}>
+        <View style={styles.colors}>
+          <View
+            style={[
+              styles.color,
+              { backgroundColor: mainColors.primary, borderColor },
+            ]}
+          />
+          <View />
+          <View
+            style={[
+              styles.color,
+              { backgroundColor: mainColors.card, borderColor },
+            ]}
+          />
+        </View>
+        <TextField style={{ textTransform: 'capitalize' }}>{item}</TextField>
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <ScreenLayout>
       <View>
         <Container row>
-          {/* <TextButton
+          <TextButton
             style={{ flex: 1 }}
             type={isDark ? 'primary' : 'secondary'}
             onPress={setDarkTheme}>
@@ -74,15 +94,15 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
             type={isDark ? 'secondary' : 'primary'}
             onPress={setLightTheme}>
             {t('themeLight')}
-          </TextButton> */}
+          </TextButton>
         </Container>
-        {/* <FlatList
-          data={colorfulColors}
+        <FlatList
+          data={Object.keys(themes)}
           numColumns={3}
-          keyExtractor={(item) => item.colorCode}
+          keyExtractor={(_item, i) => `Theme-${i}`}
           renderItem={ItemMapper}
           contentContainerStyle={{ marginTop: 20 }}
-        /> */}
+        />
       </View>
     </ScreenLayout>
   );
@@ -91,6 +111,7 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   color: {
     borderRadius: Styles.borderRadius.small,
+    borderWidth: 0.75,
     height: size,
     marginRight: 10,
     width: size,
@@ -99,8 +120,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: Styles.borderRadius.small,
     borderWidth: 1,
-    flexDirection: 'row',
+    // flexDirection: 'row',
     margin: 5,
     padding: 10,
+  },
+  colors: {
+    flexDirection: 'row',
+    marginBottom: 10,
   },
 });

@@ -38,7 +38,7 @@ export const Reactions: React.FC<Props> = ({ items }) => {
     }
 
     const byMe = Math.floor(Math.random() * 2) === 1;
-    const borderColor = byMe ? theme.border : theme.mutedForeground;
+    const borderColor = byMe ? theme.primary : theme.input;
 
     return (
       <TouchableOpacity

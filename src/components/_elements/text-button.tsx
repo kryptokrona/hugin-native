@@ -33,6 +33,7 @@ export const TextButton: React.FC<Props> = ({
 
   const backgroundColor = theme[backgroundType[type]];
   const borderColor = theme[textType[type]];
+  const borderWidth = theme.mode === 'dark' || type === 'secondary' ? 1 : 0;
   const color = theme[textType[type]];
 
   const smallButtonStyle = small
@@ -55,7 +56,7 @@ export const TextButton: React.FC<Props> = ({
       onPress={onPress}
       style={[
         styles.button,
-        { backgroundColor, borderColor, ...smallButtonStyle },
+        { backgroundColor, borderColor, borderWidth, ...smallButtonStyle },
         style,
       ]}>
       {icon && <View style={styles.icon}>{icon}</View>}
@@ -70,7 +71,6 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     borderRadius: Styles.borderRadius.small,
-    borderWidth: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     marginVertical: 8,

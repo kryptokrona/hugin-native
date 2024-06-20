@@ -23,7 +23,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   const [focus, setFocus] = useState(false);
   const [displayActions, setDisplayActions] = useState(true);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
-  const color = focus ? theme.secondaryForeground : theme.mutedForeground;
+  const color = focus ? theme.accentForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
 
   async function onCameraPress() {
@@ -137,14 +137,14 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
               name="arrow-forward-ios"
               type="MI"
               size={20}
-              color={theme.accent}
+              color={theme.primary}
             />
           </TouchableOpacity>
         )}
         {displayActions &&
-          Actions(onCameraPress, onFilePress, theme.accent, styles)}
+          Actions(onCameraPress, onFilePress, theme.primary, styles)}
         <TextInput
-          style={[styles.inputField, { borderColor: color, color }]}
+          style={[styles.inputField, { borderColor: theme.input, color }]}
           value={text}
           onChangeText={onChange}
           onBlur={onBlur}
@@ -160,7 +160,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
         />
         {focus && (
           <TouchableOpacity onPress={handleSend} style={styles.btn}>
-            <CustomIcon name="send" type="IO" size={24} color={theme.accent} />
+            <CustomIcon name="send" type="IO" size={24} color={theme.primary} />
           </TouchableOpacity>
         )}
       </View>

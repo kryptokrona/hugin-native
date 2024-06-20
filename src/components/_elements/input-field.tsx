@@ -33,12 +33,12 @@ export const InputField: React.FC<Props> = ({
   const { t } = useTranslation();
   const [focus, setFocus] = useState(false);
   const theme = useGlobalStore((state) => state.theme);
-  const backgroundColor = theme.secondary;
+  const backgroundColor = theme.background;
   const borderColor = focus
     ? theme.foreground
     : error
     ? theme.destructiveForeground
-    : theme.border;
+    : theme.input;
   const color = focus ? theme.foreground : theme.mutedForeground;
 
   function onFocus() {

@@ -25,7 +25,7 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   }, [navigation]);
 
   const backgroundColor = theme.background;
-  const borderColor = theme.borderAccent;
+  const borderColor = theme.muted;
 
   function onBackPress() {
     navigation.goBack();

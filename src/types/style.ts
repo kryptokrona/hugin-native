@@ -20,6 +20,7 @@ export type Theme = {
   ring?: string;
   secondary: string;
   secondaryForeground: string;
+  name: string;
 };
 
 export type ThemeBase = {
