@@ -33,8 +33,10 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   async function onGeneratePress() {
     try {
       const mKey = await onRequestNewGroupKey();
-      if (mKey) {
-        setKey(mKey);
+      const [key, seed] = JSON.parse(mKey);
+      console.log(key, seed);
+      if (key) {
+        setKey(key);
       }
     } catch (e) {
       console.error('Error create random group key', e);

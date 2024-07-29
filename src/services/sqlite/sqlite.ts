@@ -12,18 +12,26 @@ export const getDBConnection = async () => {
 export const initDB = async () => {
 
     console.log('Initializing database..2');
-
+    try {
     db = await getDBConnection();
-
-    const query = `CREATE TABLE IF NOT EXISTS rooms (
+    console.log('Got db connection');
+      const query = `CREATE TABLE IF NOT EXISTS rooms ( 
         name TEXT,
         key TEXT,
+        seed TEXT default null,
         latestmessage INT default 0,
         UNIQUE (key)
     )`;
-
+    console.log('quey quertinh');
     const result = await db.executeSql(query);
     console.log(result)
+    } catch (err) {
+      console.log(err);
+    }
+
+
+    
+   
     await saveRoomToDatabase(db, 'test', '1234567890');
     console.log('saved room')
     getRooms(db)

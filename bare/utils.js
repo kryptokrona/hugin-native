@@ -2,6 +2,7 @@ const DHT = require('hyperdht');
 const Keychain = require('keypear');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
+//const nacl = require('tweetnacl');
 
 function create_peer_base_keys(buf) {
   const keypair = DHT.keyPair(buf);
@@ -27,8 +28,22 @@ function randomKey() {
   return key;
 }
 
+function create_keys_from_seed(seed) {
+  const random_key = Buffer.alloc(32).fill(seed)
+  return create_peer_base_keys(random_key)
+}
+
+function create_room_invite() {
+  const seed = randomKey()
+  const rand = randomKey()
+  const admin = create_keys_from_seed(seed)
+  //[invite, admin seed]
+  return JSON.stringify([rand.toString('hex') + admin.get().publicKey.toString('hex'), seed.toString('hex')]);
+}
+
+
 function group_key() {
-  return randomKey().toString('hex');
+    return create_room_invite()
 }
 
 function sign(m) {

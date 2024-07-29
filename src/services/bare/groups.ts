@@ -1,6 +1,6 @@
 import type { SelectedFile, FileInput, User } from '@/types';
 import { mockGroups } from '@/utils';
-
+import { saveRoomToDatabase } from '@/services';
 import {
   begin_send_file,
   end_swarm,
@@ -9,6 +9,20 @@ import {
   swarm,
 } from '../../../lib/native';
 import { setStoreGroups } from '../zustand';
+import tweetnacl from 'tweetnacl';
+
+const hexToUint = (hexString) =>
+  new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)))
+
+function randomKey() {
+  return Buffer.from(tweetnacl.randomBytes(32)).toString('hex')
+}
+
+function naclHash(val) {
+  return tweetnacl.hash(hexToUint(val))
+}
+
+
 
 export const getUserGroups = (_user: User) => {
   // TODO
@@ -35,11 +49,14 @@ export const onSendGroupMessageWithFile = (
 };
 
 export const onCreateGroup = async (name: string, topic: string) => {
-  // TODO name?
+  
+  await saveRoomToDatabase(name, key);
   return await swarm(topic);
 };
 
 export const onRequestNewGroupKey = async () => {
+  console.log('wtfm8')
+  console.log(naclHash('fuckthepolice'))
   return await group_random_key();
 };
 
