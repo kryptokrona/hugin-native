@@ -1,5 +1,5 @@
 diff --git a/node_modules/hyperdht/index.js b/node_modules/hyperdht/index.js
-index b986340..3f102de 100644
+index b986340..1532338 100644
 --- a/node_modules/hyperdht/index.js
 +++ b/node_modules/hyperdht/index.js
 @@ -18,7 +18,7 @@ const { STREAM_NOT_CONNECTED } = require('./lib/errors')
@@ -24,9 +24,12 @@ index b986340..3f102de 100644
      this.listening = new Set()
      this.tracer = createTracer(this)
      this.connectionKeepAlive = opts.connectionKeepAlive || 0
-@@ -69,7 +73,7 @@ class HyperDHT extends DHT {
+@@ -67,9 +71,9 @@ class HyperDHT extends DHT {
+   }
+ 
    createServer (opts, onconnection) {
-     if (typeof opts === 'function') return this.createServer({}, opts)
+-    if (typeof opts === 'function') return this.createServer({}, opts)
++    if (typeof opts === 'function') return this.createServer(this.sig, {}, opts)
      if (opts && opts.onconnection) onconnection = opts.onconnection
 -    const s = new Server(this, opts)
 +    const s = new Server(this.sig, this, opts)
@@ -34,7 +37,7 @@ index b986340..3f102de 100644
      return s
    }
 diff --git a/node_modules/hyperdht/lib/connect.js b/node_modules/hyperdht/lib/connect.js
-index 0f140ef..587744d 100644
+index 0f140ef..cdee70a 100644
 --- a/node_modules/hyperdht/lib/connect.js
 +++ b/node_modules/hyperdht/lib/connect.js
 @@ -73,7 +73,7 @@ module.exports = function connect (dht, publicKey, opts = {}) {
@@ -54,15 +57,7 @@ index 0f140ef..587744d 100644
    if (route) {
      await retryRoute(c, route)
      if (isDone(c)) return
-@@ -226,7 +225,6 @@ async function holepunch (c, opts) {
-   // TODO: would be better to just try local addrs in the background whilst continuing with other strategies...
-   if (c.lan && relayed && clientAddress.host === serverAddress.host) {
-     const serverAddresses = payload.addresses4.filter(onlyPrivateHosts)
--
-     if (serverAddresses.length > 0) {
-       const myAddresses = Holepuncher.localAddresses(c.dht.io.serverSocket)
-       const addr = Holepuncher.matchAddress(myAddresses, serverAddresses) || serverAddresses[0]
-@@ -374,7 +372,8 @@ async function connectThroughNode (c, address, socket) {
+@@ -374,7 +373,8 @@ async function connectThroughNode (c, address, socket) {
        secretStream: {},
        relayThrough: c.relayThrough
          ? { publicKey: c.relayThrough, token: c.relayToken }
@@ -72,12 +67,13 @@ index 0f140ef..587744d 100644
      })
      if (isDone(c)) return
    }
-@@ -397,8 +396,21 @@ async function connectThroughNode (c, address, socket) {
-     maybeDestroyEncryptedSocket(c, SERVER_ERROR('Server did not send UDX data'))
+@@ -398,8 +398,25 @@ async function connectThroughNode (c, address, socket) {
      return
    }
--
+ 
++
    const hs = c.handshake.final()
+ 
 +  //firewall function does not send payload so we must check here for now
 +  //Checking if the remotePublickey is signed with our common privatekey
 +  let error = false
@@ -86,24 +82,18 @@ index 0f140ef..587744d 100644
 +  //Check if this id is already used by another active connection
 +  if (c.dht.checkedSigs.some(a => payload.mid === a)) error = true
 +  if (!checked) error = true
-+    
++
 +  c.dht.checkedSigs.push(payload.mid)
++  
 +  if (error || !checked) {
 +      maybeDestroyEncryptedSocket(c, SERVER_ERROR('Verification failed'))
 +      return
 +  }
- 
++
    c.handshake = null
    c.request = null
-@@ -415,7 +427,6 @@ async function connectThroughNode (c, address, socket) {
- 
-   c.onsocket = function (socket, port, host) {
-     if (c.rawStream === null) return // Already hole punched
--
-     if (c.rawStream.connected) {
-       const remoteChanging = c.rawStream.changeRemote(socket, c.connect.payload.udx.id, port, host)
- 
-@@ -461,7 +472,11 @@ async function connectThroughNode (c, address, socket) {
+   c.requesting = false
+@@ -461,7 +478,11 @@ async function connectThroughNode (c, address, socket) {
  
    c.session.destroy()
  }

@@ -1,6 +1,5 @@
 const ce = require('compact-encoding');
 const HyperSwarm = require('hyperswarm');
-
 const { Hugin } = require('./account');
 const {
   get_new_peer_keys,
@@ -57,7 +56,7 @@ class Swarm {
     console.log('WORKING !!!!!!!!!!!!!!!!', { file_data });
   }
 
-  channel() {
+  async channel() {
     if (RPC) {
       return;
     }
@@ -76,10 +75,13 @@ let active_swarms = [];
 
 const create_swarm = async (key) => {
   console.log('Creating swarm!');
-  const [base_keys, dht_keys, sig] = get_new_peer_keys(key);
+  const invite = Uint8Array.from(key.split(',').map((x) => parseInt(x, 10)));
+  const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
 
   //The topic is public so lets use the pubkey from the new base keypair
   const hash = base_keys.publicKey.toString('hex');
+
+  console.log('Joining topic: ', hash);
   const time = Date.now();
   let discovery;
   let swarm;
@@ -219,10 +221,11 @@ const incoming_message = async (data, topic, connection, key) => {
   }
   // Check
   const check = await check_data_message(str, connection, topic);
-  if (check === 'Error') {
-    connection_closed(connection, topic);
-    return;
-  }
+  console.log('check', check);
+  // if (check === 'Error') {
+  //   connection_closed(connection, topic);
+  //   return;
+  // }
   if (check) {
     return;
   }
@@ -298,9 +301,10 @@ const check_data_message = async (data, connection, topic) => {
   if (typeof data === 'object') {
     if ('joined' in data) {
       const joined = sanitize_join_swarm_data(data);
-      if (!joined) {
-        return 'Error';
-      }
+      console.log('joined check', joined);
+      // if (!joined) {
+      //   return 'Error';
+      // }
 
       if (con.joined) {
         //Connection is already joined
@@ -487,6 +491,7 @@ const share_file_with_message = (file) => {
 };
 
 const sender = (channel, data) => {
+  console.log('Send rpc data from swarm');
   const obj = data;
   obj.rpc = channel;
   const send = JSON.stringify(obj);

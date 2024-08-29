@@ -14,6 +14,7 @@ rpc.register(0, {
   request: ce.string,
   response: ce.string,
   onrequest: (data) => {
+    console.log('Got request data', data);
     const parsedData = JSON.parse(data);
     switch (parsedData.type) {
       case 'init_bare':
@@ -53,7 +54,7 @@ const updateBareUser = (user) => {
 
 const newSwarm = async (key) => {
   const swarm = new Swarm(rpc);
-  swarm.channel();
+  await swarm.channel();
   if (!swarm) return;
   const topic = await swarm.start(key);
   Hugin.rooms.push({ swarm, topic });

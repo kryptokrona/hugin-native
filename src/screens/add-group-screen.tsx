@@ -14,6 +14,8 @@ interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
 }
 
+let admin: string = '';
+
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name: initialName, topic: initialtopic } = route.params;
@@ -25,18 +27,21 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
   async function onCreatePress() {
     if (key && name) {
-      const topic: string = await onCreateGroup(name, key);
+      const topic: string = await onCreateGroup(name, key, admin);
       navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
     }
   }
 
   async function onGeneratePress() {
     try {
-      const mKey = await onRequestNewGroupKey();
-      const [key, seed] = JSON.parse(mKey);
-      console.log(key, seed);
+      const keys = await onRequestNewGroupKey();
+      const [key, seed] = JSON.parse(keys);
+      console.log('Invite key:', key);
+
+      console.log('Admin seed:', seed);
       if (key) {
         setKey(key);
+        admin = seed;
       }
     } catch (e) {
       console.error('Error create random group key', e);

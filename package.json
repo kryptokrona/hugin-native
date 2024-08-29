@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "rn-nodeify --install fs,dgram,process,path,console,crypto,buffer,stream,vm,http,https,url,zlib,net,assert,tls --hack --yarn; jetify; patch-package",
+    "postinstall": "rn-nodeify --install fs,dgram,process,path,console,crypto,buffer,stream,vm,http,https,url,zlib,net,assert,tls --hack --yarn; jetify && patch-package",
     "get-offline-lists": "wget https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/master/nodes.json -O src/nodes.json && wget https://raw.githubusercontent.com/kryptokrona/hugin-groups/main/groups.json -O src/groups.json"
   },
   "dependencies": {
@@ -48,7 +48,7 @@
     "hyperbee": "^2.19.6",
     "hypercore": "^10.37.7",
     "hyperdht": "^6.15.1",
-    "hyperswarm": "^4.7.14",
+    "hyperswarm": "4.7.14",
     "i18next": "^23.11.5",
     "identicon.js": "^2.3.3",
     "int-encoder": "^1.1.1",
