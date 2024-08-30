@@ -63,7 +63,7 @@ class Swarm {
     //Set up stream rpc if we need to send files somewhere
     //I think this can go both ways
     //Use it for ipc messages for now
-    RPC = this.rpc.register(2, {
+    RPC = this.rpc.register(1, {
       request: ce.string,
       response: ce.string,
     });
@@ -490,12 +490,10 @@ const share_file_with_message = (file) => {
   send_swarm_message(info, file.topic);
 };
 
-const sender = (channel, data) => {
+const sender = (type, data) => {
   console.log('Send rpc data from swarm');
-  const obj = data;
-  obj.rpc = channel;
-  const send = JSON.stringify(obj);
-  RPC_SENDER.write(send);
+  data.type = type;
+  RPC_SENDER.write(JSON.stringify(data));
 };
 
 const error_message = (message) => {

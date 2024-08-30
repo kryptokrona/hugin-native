@@ -24,6 +24,7 @@ rpc.register(1, {
   response: ce.string,
   onstream: (stream) => {
     stream.on('data', (a) => {
+      console.log('data:', a);
       rpc_message(a);
     });
   },

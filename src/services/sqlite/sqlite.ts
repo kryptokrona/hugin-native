@@ -13,16 +13,26 @@ export const initDB = async () => {
   try {
     db = await getDBConnection();
     console.log('Got db connection');
-    const query = `CREATE TABLE IF NOT EXISTS rooms ( 
+    let query = `CREATE TABLE IF NOT EXISTS rooms ( 
         name TEXT,
         key TEXT,
         seed TEXT default null,
         latestmessage INT default 0,
         UNIQUE (key)
     )`;
-    console.log('quey quertinh');
-    const result = await db.executeSql(query);
-    console.log(result);
+    let result = await db.executeSql(query);
+    query = `CREATE TABLE IF NOT EXISTS roomsmessages ( 
+      address TEXT,
+      message TEXT,
+      room TEXT,
+      reply TEXT,
+      timestamp INT,
+      nickname TEXT,
+      hash TEXT,
+      sent BOOLEAN,
+      UNIQUE (hash)
+  )`;
+  result = await db.executeSql(query);
   } catch (err) {
     console.log(err);
   }
@@ -42,7 +52,7 @@ export async function saveRoomToDatabase(
   try {
     const result = await db.executeSql(
       'REPLACE INTO rooms (name, key, seed, latestmessage) VALUES (?, ?, ?, ?)',
-      [name, key, seed, Date.now()],
+      [name, key, seed, Date.now()]
     );
     console.log(result);
   } catch (err) {
@@ -61,4 +71,29 @@ export async function getRooms(db: SQLiteDatabase) {
       //todoItems.push(result.rows.item(index));
     }
   });
+}
+
+export async function saveRoomsMessageToDatabase(
+  address: string,
+  message: string,
+  room: string,
+  reply: string,
+  timestamp: number,
+  nickname: string,
+  hash: string,
+  sent: boolean
+
+) {
+
+  console.log('Saving message: ', message);
+
+  try {
+    const result = await db.executeSql(
+      'INSERT INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0]
+    );
+    console.log(result);
+  } catch (err) {
+    console.log(err);
+  }
 }

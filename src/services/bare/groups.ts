@@ -10,7 +10,7 @@ import {
   group_random_key,
   send_swarm_msg,
   swarm,
-} from '../../../lib/native';
+} from '/lib/native';
 import { setStoreGroups } from '../zustand';
 
 const hexToUint = (hexString) =>

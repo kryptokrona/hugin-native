@@ -1,8 +1,11 @@
+const { saveRoomsMessageToDatabase } = require("@/services/sqlite");
+
+
 const rpc_message = (m) => {
   const json = parse(m);
   if (json) {
     console.log('Got rpc message', json);
-    switch (json.rpc) {
+    switch (json.type) {
       case 'new-swarm':
         console.log('new swarm!');
         break;
@@ -11,6 +14,7 @@ const rpc_message = (m) => {
         break;
       case 'swarm-message':
         console.log('swarm-message!');
+        saveRoomsMessageToDatabase(json.address, json.message, json.group, json.reply, json.t, json.nickname, json.hash, false);
         break;
       case 'peer-connected':
         console.log('peer-connected!');

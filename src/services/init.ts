@@ -13,7 +13,7 @@ import {
   setStoreUser,
 } from './zustand';
 
-import { bare } from '../../lib/native.js';
+import { bare } from '/lib/native.js'
 
 export const init = async () => {
   const theme = await getStorageValue(ASYNC_STORAGE_KEYS.THEME);

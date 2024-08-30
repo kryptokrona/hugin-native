@@ -5,7 +5,7 @@ import { defaultTheme } from '@/styles';
 import type { Group, Preferences, Theme, User } from '@/types';
 import { createAvatar } from '@/utils';
 
-import { update_bare_user } from '../../../lib/native';
+import { update_bare_user } from '/lib/native';
 import { ASYNC_STORAGE_KEYS, setStorageValue } from '../async-storage';
 
 type GlobalStore = {

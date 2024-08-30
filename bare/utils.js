@@ -105,15 +105,15 @@ const sanitize_group_message = (msg) => {
   let timestamp = sanitizeHtml(msg.t);
   if (timestamp.length > 20) return false;
   let group = sanitizeHtml(msg.g);
-  if (group.length > 64) return false;
+  if (group.length > 128) return false;
   let text = sanitizeHtml(msg.m);
   if (text.length > 777) return false;
   let addr = sanitizeHtml(msg.k);
   if (addr.length > 99) return false;
   let reply = sanitizeHtml(msg.r);
   if (reply.length > 64) return false;
-  let sig = sanitizeHtml(msg.s);
-  if (sig.length > 200) return false;
+  // let sig = sanitizeHtml(msg.s)
+  // if (sig.length > 200) return false;
   let nick = sanitizeHtml(msg.n);
   if (nick.length > 50) return false;
   let txHash = sanitizeHtml(msg.hash);
