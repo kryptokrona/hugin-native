@@ -230,6 +230,7 @@ const incoming_message = async (data, topic, connection, key) => {
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
+  console.log('Sanitized: ', message);
   sender('swarm-message', { message, topic });
 };
 
@@ -492,8 +493,9 @@ const share_file_with_message = (file) => {
 
 const sender = (type, data) => {
   console.log('Send rpc data from swarm');
-  data.type = type;
-  RPC_SENDER.write(JSON.stringify(data));
+  const send = data;
+  send.type = type;
+  RPC_SENDER.write(JSON.stringify(send));
 };
 
 const error_message = (message) => {
