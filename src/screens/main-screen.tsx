@@ -3,10 +3,10 @@ import React, { useCallback, useState } from 'react';
 import { ScrollView, RefreshControl } from 'react-native';
 
 import { Container, ScreenLayout, TextButton } from '@/components';
+import { getRooms } from '@/services';
 
-import { swarm } from '../../lib/native.js';
+import { swarm } from '/lib/native.js';
 
-const key = 'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965';
 export const MainScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   // const onJoinSwarmPress = () => {
@@ -29,6 +29,15 @@ export const MainScreen: React.FC = () => {
     // setCoinValue(Number(coinValue)); // Convert coinValue to a number before setting it in the state
     // setUnreads(unreads);
   }, []);
+
+  const joinRooms = async () => {
+    console.log('********* Joining rooms! ***********');
+    const rooms = await getRooms();
+    for (r of rooms) {
+      console.log('Joining?', r.name);
+      swarm(r.key);
+    }
+  };
 
   // useEffect(() => {
   //   updateBalance();
@@ -118,9 +127,9 @@ export const MainScreen: React.FC = () => {
         <Container bottom row>
           <TextButton
             onPress={function (): void {
-              swarm(key);
+              joinRooms();
             }}>
-            Join group
+            Join groups
           </TextButton>
         </Container>
       </ScrollView>
