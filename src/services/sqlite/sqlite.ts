@@ -1,8 +1,12 @@
-import { enablePromise, openDatabase } from 'react-native-sqlite-storage';
+import {
+  enablePromise,
+  openDatabase,
+  SQLiteDatabase,
+} from 'react-native-sqlite-storage';
 
 enablePromise(true);
 
-let db;
+let db: SQLiteDatabase;
 
 export const getDBConnection = async () => {
   return openDatabase({ location: 'default', name: 'hugin.db' });
@@ -32,14 +36,12 @@ export const initDB = async () => {
       sent BOOLEAN,
       UNIQUE (hash)
   )`;
-  result = await db.executeSql(query);
+    result = await db.executeSql(query);
   } catch (err) {
     console.log(err);
   }
 
-  await saveRoomToDatabase('test', '1234567890');
-  console.log('saved room');
-  getRooms(db);
+  getRooms();
 };
 
 export async function saveRoomToDatabase(
@@ -52,7 +54,7 @@ export async function saveRoomToDatabase(
   try {
     const result = await db.executeSql(
       'REPLACE INTO rooms (name, key, seed, latestmessage) VALUES (?, ?, ?, ?)',
-      [name, key, seed, Date.now()]
+      [name, key, seed, Date.now()],
     );
     console.log(result);
   } catch (err) {
@@ -60,17 +62,20 @@ export async function saveRoomToDatabase(
   }
 }
 
-export async function getRooms(db: SQLiteDatabase) {
+export async function getRooms() {
   const results = await db.executeSql('SELECT * FROM rooms');
-
+  const rooms = [];
   //const rooms: Room[] = [];
 
   results.forEach((result) => {
     for (let index = 0; index < result.rows.length; index++) {
-      console.log(result.rows.item(index));
+      console.log('Group name', result.rows.item(index).name);
       //todoItems.push(result.rows.item(index));
+      rooms.push(result.rows.item(index));
     }
   });
+
+  return rooms;
 }
 
 export async function saveRoomsMessageToDatabase(
@@ -81,16 +86,14 @@ export async function saveRoomsMessageToDatabase(
   timestamp: number,
   nickname: string,
   hash: string,
-  sent: boolean
-
+  sent: boolean,
 ) {
-
   console.log('Saving message: ', message);
 
   try {
     const result = await db.executeSql(
       'INSERT INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0]
+      [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
     );
     console.log(result);
   } catch (err) {
