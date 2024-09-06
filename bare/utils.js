@@ -13,14 +13,14 @@ function create_peer_base_keys(buf) {
 function get_new_peer_keys(key) {
   const secret = Buffer.alloc(32).fill(key);
   const base_keys = create_peer_base_keys(secret);
-  const random_key = randomKey();
-  const dht_keys = create_peer_base_keys(random_key);
+  const random = random_key();
+  const dht_keys = create_peer_base_keys(random);
   //Sign the dht public key with our base keys
   const signature = base_keys.get().sign(dht_keys.get().publicKey);
   return [base_keys, dht_keys, signature];
 }
 
-function randomKey() {
+function random_key() {
   let key = Buffer.alloc(32);
 
   sodium.randombytes_buf(key);
@@ -29,21 +29,23 @@ function randomKey() {
 }
 
 function create_keys_from_seed(seed) {
-  const random_key = Buffer.alloc(32).fill(seed)
-  return create_peer_base_keys(random_key)
+  const random = Buffer.alloc(32).fill(seed);
+  return create_peer_base_keys(random);
 }
 
 function create_room_invite() {
-  const seed = randomKey()
-  const rand = randomKey()
-  const admin = create_keys_from_seed(seed)
+  const seed = random_key();
+  const rand = random_key();
+  const admin = create_keys_from_seed(seed);
   //[invite, admin seed]
-  return JSON.stringify([rand.toString('hex') + admin.get().publicKey.toString('hex'), seed.toString('hex')]);
+  return JSON.stringify([
+    rand.toString('hex') + admin.get().publicKey.toString('hex'),
+    seed.toString('hex'),
+  ]);
 }
 
-
 function group_key() {
-    return create_room_invite()
+  return create_room_invite();
 }
 
 function sign(m) {
@@ -178,4 +180,5 @@ module.exports = {
   sanitize_group_message,
   sanitize_voice_status_data,
   group_key,
+  random_key,
 };
