@@ -6,6 +6,7 @@ const {
   sanitize_group_message,
   sanitize_join_swarm_data,
   sanitize_voice_status_data,
+  random_key,
 } = require('./utils');
 let RPC;
 let RPC_SENDER;
@@ -22,6 +23,7 @@ class Swarm {
     this.rpc = rpc;
   }
   async start(key) {
+    this.invite = key;
     return await create_swarm(key);
   }
 
@@ -30,24 +32,20 @@ class Swarm {
   }
 
   send_message(message, topic) {
+    console.log('Send this swarm message', message);
     const message_json = {
-      c: 'Room',
-      g: 'group == key',
-      hash: 'hash',
-      k: 'my_address',
-      m: 'Message',
+      c: 'channel in room?',
+      g: this.invite,
+      hash: random_key(),
+      k: Hugin.address,
+      m: message,
       n: Hugin.name,
       r: 'reply hash',
       s: 'signature',
       t: Date.now(),
     };
-    //If reply change this to the hash of the message
-    if (message.r) {
-      message_json.r = message.r;
-    }
 
-    const send = JSON.stringify(message_json);
-    send_swarm_message(send, topic);
+    send_swarm_message(JSON.stringify(message_json), topic);
   }
 
   send_file(file_data) {
