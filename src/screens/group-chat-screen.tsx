@@ -74,12 +74,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, []);
 
   function onSend(text: string, file: SelectedFile | null) {
-    const hardTopic =
-      'c36483f42ff391d0a1f006f5cc72058eb7c3d9080aeecd3a7b2c2138f62f4965';
+    console.log('Send message to room with topic: ', topic);
+    console.log('Room name:', name);
     if (file) {
-      onSendGroupMessageWithFile(hardTopic, file, text);
+      onSendGroupMessageWithFile(topic, file, text);
     } else {
-      onSendGroupMessage(hardTopic, text);
+      onSendGroupMessage(topic, text);
     }
   }
 

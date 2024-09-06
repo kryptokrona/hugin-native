@@ -35,12 +35,11 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   async function onGeneratePress() {
     try {
       const keys = await onRequestNewGroupKey();
-      const [key, seed] = JSON.parse(keys);
-      console.log('Invite key:', key);
-
+      const [invite, seed] = JSON.parse(keys);
+      console.log('Invite key:', invite);
       console.log('Admin seed:', seed);
-      if (key) {
-        setKey(key);
+      if (invite) {
+        setKey(invite);
         admin = seed;
       }
     } catch (e) {
