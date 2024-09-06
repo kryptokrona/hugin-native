@@ -23,8 +23,7 @@ rpc.register(0, {
         updateBareUser(parsedData.user);
         break;
       case 'new_swarm':
-        newSwarm(parsedData.key);
-        break;
+        return newSwarm(parsedData.key);
       case 'end_swarm':
         endSwarm(parsedData.topic);
         break;
@@ -57,7 +56,8 @@ const newSwarm = async (key) => {
   await swarm.channel();
   if (!swarm) return;
   const topic = await swarm.start(key);
-  Hugin.rooms.push({ swarm, topic });
+  Hugin.rooms.push({ key, topic });
+  console.log('Hugin rooms state active', Hugin.rooms);
   return topic;
 };
 
