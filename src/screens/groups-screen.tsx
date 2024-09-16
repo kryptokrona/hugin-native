@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
 import { GroupsScreens } from '@/config';
-import { getLatestRoomMessages, useGlobalStore } from '@/services';
+import { getLatestRoomMessages, setRoomMessages, useGlobalStore } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
@@ -22,8 +22,9 @@ export const GroupsScreen: React.FC<Props> = () => {
   //const rooms = await getLatestRoomMessages();
   //Use getLatestRoomMessages() from sqllite.ts to load a list of all rooms and the latest message.
   //Should also be used when removing a room
-  function onPress(topic: string, name: string) {
-    navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
+  function onPress(roomKey: string, name: string) {
+    setRoomMessages(roomKey);
+    navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
   }
 
   return (
@@ -35,7 +36,7 @@ export const GroupsScreen: React.FC<Props> = () => {
       )}
       <FlatList
         data={groups}
-        keyExtractor={(item, i) => `${item.topic}-${i}`}
+        keyExtractor={(item, i) => `${item.roomKey}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
     </ScreenLayout>

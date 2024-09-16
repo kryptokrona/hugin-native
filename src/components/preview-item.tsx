@@ -8,15 +8,15 @@ import { Avatar, TextField } from './_elements';
 
 interface Props {
   name: string;
-  key: string;
+  roomKey: string;
   message: string;
   timestamp: number;
-  onPress: (hash: string, name: string) => void;
+  onPress: (key: string, name: string) => void;
 }
 
 export const PreviewItem: React.FC<Props> = ({
   name,
-  key,
+  roomKey,
   message,
   timestamp,
   onPress,
@@ -32,7 +32,7 @@ export const PreviewItem: React.FC<Props> = ({
   }
 
   function handlePress() {
-    onPress(key, name);
+    onPress(roomKey, name);
   }
 
   return (

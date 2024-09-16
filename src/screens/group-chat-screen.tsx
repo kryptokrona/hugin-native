@@ -23,7 +23,7 @@ import type {
   GroupStackNavigationType,
   GroupStackParamList,
 } from '@/types';
-import { mockAvatar, mockMessages } from '@/utils';
+import { getAvatar, mockAvatar, mockMessages } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupChatScreen>;
@@ -33,10 +33,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<GroupStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const { name: userName } = useGlobalStore((state) => state.user);
-  const { key, name } = route.params;
+  const { roomKey, name } = route.params;
   let topic;
-  if (key) {
-    topic = naclHash(key);
+  if (roomKey) {
+    topic = naclHash(roomKey);
   }
   const messages = useGlobalStore((state) => state.roomMessages);
   
@@ -48,7 +48,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   function onCustomizeGroupPress() {
     navigation.navigate(GroupsScreens.ModifyGroupScreen, {
       name,
-      key,
+      roomKey,
     });
   }
 
@@ -98,16 +98,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     <ScreenLayout>
       <FlatList
         ref={flatListRef}
-        data={mockMessages}
+        data={messages}
         keyExtractor={(item, i) => `${item.k}${i}`}
         renderItem={({ item }) => (
           <GroupMessageItem
-            message={item.m}
-            date={item.t}
-            avatar={mockAvatar}
-            name={item.n}
-            userAddress={item.k}
-            reactions={item.reactions}
+            message={item.message}
+            date={item.timestamp}
+            avatar={getAvatar(item.address)}
+            name={item.nickname}
+            userAddress={item.address}
+            reactions={[]}
           />
         )}
         contentContainerStyle={styles.flatListContent}

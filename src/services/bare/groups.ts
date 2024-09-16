@@ -19,10 +19,10 @@ export const getUserGroups = async () => {
   setStoreGroups(groups);
 };
 
-export const setRoomMessages = async () => {
+export const setRoomMessages = async (room) => {
   // TODO
   // Filter messages according to current room
-  const messages = await getRoomMessages('asbdf', 0);
+  const messages = await getRoomMessages(room, 0);
   console.log('messages in disguise: ', messages);
   setStoreRoomMessages(messages);
 };

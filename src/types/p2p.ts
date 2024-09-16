@@ -8,7 +8,7 @@ export interface HuginUser {
 }
 
 export interface Group {
-  key: string;
+  roomKey: string;
   name: string;
   message: string;
   timestamp: number;

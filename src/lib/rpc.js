@@ -13,8 +13,8 @@ const rpc_message = (m) => {
         console.log('end-swarm!');
         break;
       case 'swarm-message':
-        console.log('swarm-message!');
-        saveRoomsMessageToDatabase(json.address, json.message, json.group, json.reply, json.t, json.nickname, json.hash, false);
+        console.log('swarm-message!', json);
+        saveRoomsMessageToDatabase(json.message.address, json.message.message, json.message.group, json.message.reply, json.message.t, json.message.nickname, json.message.hash, false);
         break;
       case 'peer-connected':
         console.log('peer-connected!');

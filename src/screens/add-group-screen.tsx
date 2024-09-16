@@ -18,10 +18,10 @@ let admin: string = '';
 
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const { name: initialName, topic: initialtopic } = route.params;
+  const { name: initialName, key: initialKey } = route.params;
   const navigation = useNavigation<GroupStackNavigationType>();
   const [name, setName] = useState<string | null>(initialName ?? null);
-  const [key, setKey] = useState<string | null>(initialtopic ?? null);
+  const [key, setKey] = useState<string | null>(initialKey ?? null);
   const [isJoiningExisting, setIsJoiningExisting] = useState(false);
   const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
 
@@ -29,7 +29,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     //TODO Add Create / Join option
     if (key && name) {
       const topic: string = await onCreateGroup(name, key, admin);
-      navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
+      navigation.navigate(GroupsScreens.GroupChatScreen, { name, key });
       getUserGroups();
     }
   }
@@ -62,13 +62,13 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   useEffect(() => {
-    if (initialName && initialtopic) {
+    if (initialName && initialKey) {
       setIsJoiningExisting(true);
     }
-  }, [initialName, initialtopic]);
+  }, [initialName, initialKey]);
 
   useEffect(() => {
-    if (name !== initialName || key !== initialtopic) {
+    if (name !== initialName || key !== initialKey) {
       setIsJoiningExisting(false);
     }
   }, [name, key]);

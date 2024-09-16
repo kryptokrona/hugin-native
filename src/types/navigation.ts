@@ -34,11 +34,11 @@ export type SettingsStackParamList = {
 export type GroupStackParamList = {
   [GroupsScreens.GroupsScreen]: undefined;
   [GroupsScreens.GroupChatScreen]: {
-    topic: string;
+    roomKey: string;
     name: string;
   };
-  [GroupsScreens.ModifyGroupScreen]: { topic: string; name: string };
-  [GroupsScreens.AddGroupScreen]: { topic?: string; name?: string };
+  [GroupsScreens.ModifyGroupScreen]: { roomKey: string; name: string };
+  [GroupsScreens.AddGroupScreen]: { roomKey?: string; name?: string };
 };
 
 export type MessagesStackParamList = {

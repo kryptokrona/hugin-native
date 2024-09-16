@@ -4,6 +4,7 @@ import {
   SQLiteDatabase,
 } from 'react-native-sqlite-storage';
 import { Message } from 'types/p2p';
+import { getUserGroups } from '..';
 
 enablePromise(true);
 
@@ -104,21 +105,24 @@ export async function getLatestRoomMessages() {
   console.log('Our shit is called on yo');
   const roomsList: Array<any> = [];
   const rooms = await getRooms();
+  console.log('Rooms:', rooms);
   for (const room of rooms) {
     //Loop through list and get one message from each room
+    console.log('Checking: ', room)
     const results = await db.executeSql(
       'SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT 1',
       [room.key],
     );
  
     let latestmessage = {message: "No messages yet!", timestamp: Date.now()};
-
+    console.log('Messages?');
     results.forEach((result) => {
       const latestmessagedb = result.rows.item(0);
+      console.log('Message!', latestmessagedb);
       if (latestmessagedb != undefined) {
         latestmessage = latestmessagedb;
       }
-      roomsList.push({name: room.name, key: room.key, message: latestmessage.message, timestamp: latestmessage.timestamp});
+      roomsList.push({name: room.name, roomKey: room.key, message: latestmessage.message, timestamp: latestmessage.timestamp});
 
       
     });
@@ -144,23 +148,25 @@ export async function getRoomMessages(room: string, page: number) {
       if (res === undefined) {
         return;
       }
-      res.replyto = await getRoomReplyMessage(res.reply);
-      res.replies = await getRoomRepliesToMessage(res.hash);
-      console.log('We reply to a message in the database:', res.replyto);
-      console.log('All replies to this message, sort by emojis?:', res.replies);
+      // res.replyto = await getRoomReplyMessage(res.reply);
+      // res.replies = await getRoomRepliesToMessage(res.hash);
+      // console.log('We reply to a message in the database:', res.replyto);
+      // console.log('All replies to this message, sort by emojis?:', res.replies);
       const message: Message = {
-        address: "123.456.789",    // replace with actual address value
-        message: "Hello, World!",  // replace with actual message value
-        room: "general",           // replace with actual room name
-        reply: "Thanks for the info!", // optional, could be an empty string
-        timestamp: Date.now(),     // current timestamp, you can use a specific timestamp as well
-        nickname: "user123",       // replace with actual nickname
-        hash: "abc123hash",        // replace with actual hash value
-        sent: true                 // boolean indicating whether the message was sent
+        address: res.address,    // replace with actual address value
+        message: res.message,  // replace with actual message value
+        room: res.room,           // replace with actual room name
+        reply: res.reply, // optional, could be an empty string
+        timestamp: res.timestamp,     // current timestamp, you can use a specific timestamp as well
+        nickname: res.nickname,       // replace with actual nickname
+        hash: res.hash,        // replace with actual hash value
+        sent: res.sent                 // boolean indicating whether the message was sent
       };
       messages.push(message);
     }
+    
   });
+  return messages;
 }
 
 export async function getRoomReplyMessage(hash: string) {
@@ -208,7 +214,8 @@ export async function saveRoomsMessageToDatabase(
       'INSERT INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
     );
-    console.log(result);
+    console.log('Epic win', result);
+    getUserGroups();
   } catch (err) {
     console.log(err);
   }
