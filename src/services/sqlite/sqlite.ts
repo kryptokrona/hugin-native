@@ -133,15 +133,17 @@ export async function getRoomMessages(room: string, page: number) {
     [room],
   );
   results.forEach(async (result) => {
-    const res = result.rows.item(0);
-    if (res === undefined) {
-      return;
+    for (let index = 0; index < result.rows.length; index++) {
+      const res = result.rows.item(index);
+      if (res === undefined) {
+        return;
+      }
+      res.replyto = await getRoomReplyMessage(res.reply);
+      res.replies = await getRoomRepliesToMessage(res.hash);
+      console.log('We reply to a message in the database:', res.replyto);
+      console.log('All replies to this message, sort by emojis?:', res.replies);
+      messages.push(res);
     }
-    res.replyto = await getRoomReplyMessage(res.reply);
-    res.replies = await getRoomRepliesToMessage(res.hash);
-    console.log('We reply to a message in the database:', res.replyto);
-    console.log('All replies to this message, sort by emojis?:', res.replies);
-    messages.push(res);
   });
 }
 
