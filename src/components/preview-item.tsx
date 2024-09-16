@@ -8,15 +8,17 @@ import { Avatar, TextField } from './_elements';
 
 interface Props {
   name: string;
-  topic: string;
-  avatar: string;
+  key: string;
+  message: string;
+  timestamp: number;
   onPress: (hash: string, name: string) => void;
 }
 
 export const PreviewItem: React.FC<Props> = ({
   name,
-  topic,
-  avatar,
+  key,
+  message,
+  timestamp,
   onPress,
 }) => {
   const [isPressed, setIsPressed] = useState(false);
@@ -30,7 +32,7 @@ export const PreviewItem: React.FC<Props> = ({
   }
 
   function handlePress() {
-    onPress(topic, name);
+    onPress(key, name);
   }
 
   return (
@@ -44,16 +46,15 @@ export const PreviewItem: React.FC<Props> = ({
       ]}
       onLongPress={handleLongPress}
       onPressOut={() => setIsPressed(false)}>
-      <Avatar size={50} base64={avatar} />
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">
           {name}
         </TextField>
-        {/* {lastMessage && (
-          <TextField bold={isNew} maxLength={65} size="small">
-            {lastMessage.text}
-          </TextField>
-        )} */}
+
+        <TextField bold={isNew} maxLength={65} size="small">
+          {message}
+        </TextField>
+
       </View>
     </TouchableOpacity>
   );
