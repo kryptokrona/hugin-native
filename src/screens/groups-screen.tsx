@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
 import { GroupsScreens } from '@/config';
-import { useGlobalStore } from '@/services';
+import { getLatestRoomMessages, useGlobalStore } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
@@ -19,6 +19,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<GroupStackNavigationType>();
   const groups = useGlobalStore((state) => state.groups);
+  //const rooms = await getLatestRoomMessages();
   //Use getLatestRoomMessages() from sqllite.ts to load a list of all rooms and the latest message.
   //Should also be used when removing a room
   function onPress(topic: string, name: string) {

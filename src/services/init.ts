@@ -20,7 +20,7 @@ export const init = async () => {
   const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
   const mUser = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
   console.log('Initializing database..');
-  initDB();
+  await initDB();
 
   const user = mUser ?? defaultUser;
 
@@ -28,7 +28,7 @@ export const init = async () => {
   setStorePreferences(preferences ?? defaultPreferences);
   setStoreUser(user);
 
-  getUserGroups(user);
+  getUserGroups();
 
   if (preferences) {
     await i18n.changeLanguage(preferences.language);

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { GroupsScreens } from '@/config';
-import { onCreateGroup, onRequestNewGroupKey } from '@/services';
+import { getUserGroups, onCreateGroup, onRequestNewGroupKey } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
@@ -30,6 +30,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     if (key && name) {
       const topic: string = await onCreateGroup(name, key, admin);
       navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
+      getUserGroups();
     }
   }
 

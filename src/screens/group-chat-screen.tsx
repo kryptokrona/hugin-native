@@ -13,6 +13,7 @@ import {
 } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
+  naclHash,
   onSendGroupMessage,
   onSendGroupMessageWithFile,
   useGlobalStore,
@@ -32,7 +33,13 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<GroupStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const { name: userName } = useGlobalStore((state) => state.user);
-  const { topic, name } = route.params;
+  const { key, name } = route.params;
+  let topic;
+  if (key) {
+    topic = naclHash(key);
+  }
+  const messages = useGlobalStore((state) => state.roomMessages);
+  
 
   // TODO: get messages from topic, rename Groups -> Rooms
   // Use getRoomMessages with a page index (0 is default) to load more messages
@@ -41,7 +48,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   function onCustomizeGroupPress() {
     navigation.navigate(GroupsScreens.ModifyGroupScreen, {
       name,
-      topic,
+      key,
     });
   }
 
