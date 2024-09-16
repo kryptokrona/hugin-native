@@ -26,6 +26,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
 
   async function onCreatePress() {
+    //TODO Add Create / Join option
     if (key && name) {
       const topic: string = await onCreateGroup(name, key, admin);
       navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });

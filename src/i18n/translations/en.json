@@ -1,6 +1,6 @@
 {
   "paymentAddress": "Payment address",
-  "messageKey": "Message key",
+  "messageKey": "Invite key",
   "generate": "Generate",
   "copy": "Copy",
   "copied": " copied",
@@ -159,7 +159,7 @@
   "notSyncingSubtitle": "You enabled data limits, and are on a limited connection. Not starting sync.",
   "ok": "OK",
   "boardsTitle": "Boards",
-  "subscribe": "Add board",
+  "subscribe": "Add room",
   "myBoards": "My Boards",
   "close": "Close",
   "edit": "Edit",
@@ -209,9 +209,9 @@
   "blockUser": "Block user",
   "copyText": "Copy text",
   "reply": "Reply",
-  "leaveGroup": "Leave group",
+  "leaveGroup": "Leave room",
   "themeDark": "Dark", // EN only
   "themeLight": "Light", // EN only
-  "joinGroup": "Join group", // EN only
-  "createGroup": "Create group" // EN only
+  "joinGroup": "Join room", // EN only
+  "createGroup": "Create room" // EN only
 }
