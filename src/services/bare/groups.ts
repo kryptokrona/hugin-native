@@ -1,6 +1,5 @@
-import tweetnacl from 'tweetnacl';
 
-import { saveRoomToDatabase } from '@/services';
+import { getLatestRoomMessages, saveRoomToDatabase, naclHash, getRoomMessages } from '@/services';
 import type { SelectedFile, FileInput, User } from '@/types';
 import { mockGroups } from '@/utils';
 
@@ -11,24 +10,21 @@ import {
   send_swarm_msg,
   swarm,
 } from '/lib/native';
-import { setStoreGroups } from '../zustand';
+import { setStoreGroups, setStoreRoomMessages } from '../zustand';
 
-const hexToUint = (hexString) =>
-  new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
-
-function randomKey() {
-  return Buffer.from(tweetnacl.randomBytes(32)).toString('hex');
-}
-
-function naclHash(val) {
-  const hash = tweetnacl.hash(hexToUint(val));
-  return hash.toString();
-}
-
-export const getUserGroups = (_user: User) => {
+export const getUserGroups = async () => {
   // TODO
-  //  const groups = await get_user_groups(user.address);
-  setStoreGroups(mockGroups);
+  const groups = await getLatestRoomMessages();
+  console.log('groups in disguise: ', groups);
+  setStoreGroups(groups);
+};
+
+export const setRoomMessages = async () => {
+  // TODO
+  // Filter messages according to current room
+  const messages = await getRoomMessages('asbdf', 0);
+  console.log('messages in disguise: ', messages);
+  setStoreRoomMessages(messages);
 };
 
 export const onSendGroupMessage = (message: string, topic: string) => {
