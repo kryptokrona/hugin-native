@@ -34,7 +34,7 @@ export const GroupStackNavigator = () => {
         options={() => ({
           header: (_props) => (
             <Header
-              title={t('groups')}
+              title={t('rooms')}
               right={
                 <TouchableOpacity onPress={onAddGroupPress}>
                   <CustomIcon type="IO" name="add-outline" size={30} />
