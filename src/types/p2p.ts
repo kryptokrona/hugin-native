@@ -8,22 +8,31 @@ export interface HuginUser {
 }
 
 export interface Group {
-  topic: string;
+  key: string;
   name: string;
-  avatar: string;
+  message: string;
+  timestamp: number;
 }
 
 export interface Message {
-  m: string;
-  k: string;
-  s: string;
-  g: string; // Group key
-  n: string;
-  r: string; // Can be empty string
-  c: string; // Channel
-  t: Date;
-  hash: string;
-  reactions: string[];
+  // m: string;
+  // k: string;
+  // s: string;
+  // g: string; // Group key
+  // n: string;
+  // r: string; // Can be empty string
+  // c: string; // Channel
+  // t: Date;
+  // hash: string;
+  // reactions: string[];
+  address: string,
+  message: string,
+  room: string,
+  reply: string,
+  timestamp: number,
+  nickname: string,
+  hash: string,
+  sent: boolean,
 }
 
 export interface GroupMessage extends Message {
