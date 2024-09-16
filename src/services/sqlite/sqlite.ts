@@ -3,6 +3,7 @@ import {
   openDatabase,
   SQLiteDatabase,
 } from 'react-native-sqlite-storage';
+import { Message } from 'types/p2p';
 
 enablePromise(true);
 
@@ -89,8 +90,8 @@ export async function getRooms() {
 
   results.forEach((result) => {
     for (let index = 0; index < result.rows.length; index++) {
-      console.log('Group:', result.rows.item(index).name);
-      console.log('key:', result.rows.item(index).key);
+      //console.log('Group:', result.rows.item(index).name);
+      //console.log('key:', result.rows.item(index).key);
       //todoItems.push(result.rows.item(index));
       rooms.push(result.rows.item(index));
     }
@@ -100,25 +101,30 @@ export async function getRooms() {
 }
 
 export async function getLatestRoomMessages() {
-  const messages: Array<any> = [];
-  const list = await getRooms();
-  for (const room of list) {
+  console.log('Our shit is called on yo');
+  const roomsList: Array<any> = [];
+  const rooms = await getRooms();
+  for (const room of rooms) {
     //Loop through list and get one message from each room
     const results = await db.executeSql(
       'SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT 1',
       [room.key],
     );
+ 
+    let latestmessage = {message: "No messages yet!", timestamp: Date.now()};
 
     results.forEach((result) => {
-      const res = result.rows.item(0);
-      if (res === undefined) {
-        return;
+      const latestmessagedb = result.rows.item(0);
+      if (latestmessagedb != undefined) {
+        latestmessage = latestmessagedb;
       }
-      messages.push(res);
+      roomsList.push({name: room.name, key: room.key, message: latestmessage.message, timestamp: latestmessage.timestamp});
+
+      
     });
   }
-  console.log('Return one message from each room', messages);
-  return messages;
+  console.log('Return one message from each room', roomsList);
+  return roomsList;
 }
 
 export async function getRoomMessages(room: string, page: number) {
@@ -127,7 +133,7 @@ export async function getRoomMessages(room: string, page: number) {
   if (page !== 0) {
     offset = page * limit;
   }
-  const messages = [];
+  const messages: Message[] = [];
   const results = await db.executeSql(
     `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
     [room],
@@ -142,7 +148,17 @@ export async function getRoomMessages(room: string, page: number) {
       res.replies = await getRoomRepliesToMessage(res.hash);
       console.log('We reply to a message in the database:', res.replyto);
       console.log('All replies to this message, sort by emojis?:', res.replies);
-      messages.push(res);
+      const message: Message = {
+        address: "123.456.789",    // replace with actual address value
+        message: "Hello, World!",  // replace with actual message value
+        room: "general",           // replace with actual room name
+        reply: "Thanks for the info!", // optional, could be an empty string
+        timestamp: Date.now(),     // current timestamp, you can use a specific timestamp as well
+        nickname: "user123",       // replace with actual nickname
+        hash: "abc123hash",        // replace with actual hash value
+        sent: true                 // boolean indicating whether the message was sent
+      };
+      messages.push(message);
     }
   });
 }

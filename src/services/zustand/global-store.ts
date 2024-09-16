@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 import { defaultTheme } from '@/styles';
-import type { Group, Preferences, Theme, User } from '@/types';
+import type { Message, Group, Preferences, Theme, User } from '@/types';
 import { createAvatar } from '@/utils';
 
 import { update_bare_user } from '/lib/native';
@@ -13,11 +13,13 @@ type GlobalStore = {
   user: User;
   preferences: Preferences;
   groups: Group[];
+  roomMessages: Message[];
 
   setTheme: (payload: Theme) => void;
   setUser: (payload: User) => void;
   setPreferences: (payload: Preferences) => void;
   setGroups: (payload: Group[]) => void;
+  setRoomMessages: (payload: Message[]) => void;
 };
 
 export const useGlobalStore = create<
@@ -26,9 +28,13 @@ export const useGlobalStore = create<
 >(
   subscribeWithSelector((set) => ({
     groups: [],
+    roomMessages: [],
     preferences: defaultPreferences,
     setGroups: (groups: Group[]) => {
       set({ groups });
+    },
+    setRoomMessages: (roomMessages: Message[]) => {
+      set({ roomMessages });
     },
     setPreferences: (preferences: Preferences) => {
       set({ preferences });
