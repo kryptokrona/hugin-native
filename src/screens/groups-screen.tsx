@@ -15,10 +15,12 @@ interface Props {
 }
 
 export const GroupsScreen: React.FC<Props> = () => {
+  //TODO** rename Groups -> Rooms
   const { t } = useTranslation();
   const navigation = useNavigation<GroupStackNavigationType>();
   const groups = useGlobalStore((state) => state.groups);
-
+  //Use getLatestRoomMessages() from sqllite.ts to load a list of all rooms and the latest message.
+  //Should also be used when removing a room
   function onPress(topic: string, name: string) {
     navigation.navigate(GroupsScreens.GroupChatScreen, { name, topic });
   }

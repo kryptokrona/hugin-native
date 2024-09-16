@@ -34,7 +34,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const { name: userName } = useGlobalStore((state) => state.user);
   const { topic, name } = route.params;
 
-  // TODO: get messages from topic
+  // TODO: get messages from topic, rename Groups -> Rooms
+  // Use getRoomMessages with a page index (0 is default) to load more messages
+  //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
   function onCustomizeGroupPress() {
     navigation.navigate(GroupsScreens.ModifyGroupScreen, {
@@ -76,6 +78,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   function onSend(text: string, file: SelectedFile | null) {
     console.log('Send message to room with topic: ', topic);
     console.log('Room name:', name);
+    //TODO** check if reply state is active
+    //add the hash of the message we are replying to as reply
     if (file) {
       onSendGroupMessageWithFile(topic, file, text);
     } else {
