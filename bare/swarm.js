@@ -23,7 +23,7 @@ class Swarm {
     this.rpc = rpc;
   }
   async start(key) {
-    this.invite = key;
+    this.key = key;
     return await create_swarm(key);
   }
 
@@ -35,7 +35,7 @@ class Swarm {
     console.log('Send this swarm message', message);
     const message_json = {
       c: 'channel in room?',
-      g: this.invite,
+      g: this.key,
       hash: random_key(),
       k: Hugin.address,
       m: message,
