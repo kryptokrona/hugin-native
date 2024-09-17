@@ -25,10 +25,10 @@ rpc.register(0, {
       case 'new_swarm':
         return newSwarm(parsedData.key);
       case 'end_swarm':
-        endSwarm(parsedData.topic);
+        endSwarm(parsedData.key);
         break;
       case 'send_room_msg':
-        sendRoomMessage(parsedData.message, parsedData.topic);
+        sendRoomMessage(parsedData.message, parsedData.key);
         break;
       case 'group_random_key':
         return getRandomGroupKey();
@@ -56,25 +56,25 @@ const newSwarm = async (key) => {
   await swarm.channel();
   if (!swarm) return;
   const topic = await swarm.start(key);
+  console.log('Started new swarm with hashed key:', key);
   Hugin.rooms.push({ key, topic });
-  console.log('Hugin rooms state active', Hugin.rooms);
   return topic;
 };
 
-const endSwarm = async (topic) => {
-  const swarm = getRoom(topic);
+const endSwarm = async (key) => {
+  const swarm = getRoom(key);
   if (!swarm) return;
-  await swarm.end(topic);
+  await swarm.end(swarm.topic);
 };
 
-const sendRoomMessage = (message, topic) => {
-  const swarm = getRoom(topic);
+const sendRoomMessage = (message, key) => {
+  const swarm = getRoom(key);
   if (!swarm) return;
-  swarm.send_message(message, topic);
+  swarm.send_message(message, swarm.topic);
 };
 
-const getRoom = (topic) => {
-  return Hugin.rooms.find((a) => a.topic === topic);
+const getRoom = (key) => {
+  return Hugin.rooms.find((a) => a.key === key);
 };
 
 const getRandomGroupKey = () => {
