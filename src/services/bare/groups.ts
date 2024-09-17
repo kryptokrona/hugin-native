@@ -1,7 +1,10 @@
-
-import { getLatestRoomMessages, saveRoomToDatabase, naclHash, getRoomMessages } from '@/services';
-import type { SelectedFile, FileInput, User } from '@/types';
-import { mockGroups } from '@/utils';
+import {
+  getLatestRoomMessages,
+  saveRoomToDatabase,
+  naclHash,
+  getRoomMessages,
+} from '@/services';
+import type { SelectedFile, FileInput } from '@/types';
 
 import {
   begin_send_file,
@@ -10,36 +13,34 @@ import {
   send_swarm_msg,
   swarm,
 } from '/lib/native';
+
 import { setStoreGroups, setStoreRoomMessages } from '../zustand';
 
 export const getUserGroups = async () => {
-  // TODO
   const groups = await getLatestRoomMessages();
-  console.log('groups in disguise: ', groups);
   setStoreGroups(groups);
 };
 
-export const setRoomMessages = async (room) => {
-  // TODO
-  // Filter messages according to current room
-  const messages = await getRoomMessages(room, 0);
-  console.log('messages in disguise: ', messages);
+export const setRoomMessages = async (room: string, page: number) => {
+  console.log('Load message page:', page);
+  const messages = await getRoomMessages(room, page);
+  console.log('Room messages: ', messages);
   setStoreRoomMessages(messages);
 };
 
-export const onSendGroupMessage = (message: string, topic: string) => {
-  send_swarm_msg(topic, message);
+export const onSendGroupMessage = (message: string, key: string) => {
+  send_swarm_msg(key, message);
 };
 
 export const onSendGroupMessageWithFile = (
-  topic: string,
+  key: string,
   file: SelectedFile,
   message: string,
 ) => {
   const fileData: FileInput & { message: string } = {
     ...file,
+    key,
     message,
-    topic,
   };
   const JSONfileData = JSON.stringify(fileData);
   begin_send_file(JSONfileData);
@@ -62,6 +63,6 @@ export const onDeleteGroup = (_topic: string) => {
   // TODO
 };
 
-export const onLeaveGroup = (topic: string) => {
-  end_swarm(topic);
+export const onLeaveGroup = (key: string) => {
+  end_swarm(naclHash(key));
 };
