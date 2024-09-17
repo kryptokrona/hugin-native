@@ -2,8 +2,9 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
+import { sleep } from '@/utils';
 import { Container, ScreenLayout, TextButton } from '@/components';
-import { getRooms } from '@/services';
+import { getRooms, naclHash } from '@/services';
 
 import { swarm } from '/lib/native.js';
 
@@ -30,14 +31,16 @@ export const MainScreen: React.FC = () => {
     // setUnreads(unreads);
   }, []);
 
-  const joinRooms = async () => {
+  async function joinRooms() {
     console.log('********* Joining rooms! ***********');
     const rooms = await getRooms();
     for (r of rooms) {
-      console.log('Joining?', r.name);
-      swarm(r.key);
+      await sleep(100);
+      console.log('Joining room -->');
+      console.log('With invite key:', r.key);
+      await swarm(naclHash(r.key));
     }
-  };
+  }
 
   // useEffect(() => {
   //   updateBalance();
