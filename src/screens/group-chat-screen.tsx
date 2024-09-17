@@ -23,7 +23,7 @@ import type {
   GroupStackNavigationType,
   GroupStackParamList,
 } from '@/types';
-import { getAvatar, mockAvatar, mockMessages } from '@/utils';
+import { getAvatar, mockMessages } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupChatScreen>;
@@ -34,12 +34,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const { name: userName } = useGlobalStore((state) => state.user);
   const { roomKey, name } = route.params;
-  let topic;
-  if (roomKey) {
-    topic = naclHash(roomKey);
-  }
   const messages = useGlobalStore((state) => state.roomMessages);
-  
 
   // TODO: get messages from topic, rename Groups -> Rooms
   // Use getRoomMessages with a page index (0 is default) to load more messages
@@ -68,7 +63,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         />
       ),
     });
-  }, [topic, name]);
+  }, [roomKey, name]);
 
   useLayoutEffect(() => {
     const timeout = setTimeout(() => {
@@ -83,14 +78,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, []);
 
   function onSend(text: string, file: SelectedFile | null) {
-    console.log('Send message to room with topic: ', topic);
+    console.log('Send message to room with invite key: ', roomKey);
     console.log('Room name:', name);
     //TODO** check if reply state is active
     //add the hash of the message we are replying to as reply
     if (file) {
-      onSendGroupMessageWithFile(topic, file, text);
+      onSendGroupMessageWithFile(naclHash(roomKey), file, text);
     } else {
-      onSendGroupMessage(topic, text);
+      onSendGroupMessage(naclHash(roomKey), text);
     }
   }
 

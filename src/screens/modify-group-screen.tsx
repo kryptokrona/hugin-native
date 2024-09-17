@@ -38,11 +38,11 @@ interface Props {
 
 export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const { name: initialName, topic: initialTopic } = route.params;
+  const { name, roomKey } = route.params;
   const navigation = useNavigation<GroupStackNavigationType>();
   const { theme } = useGlobalStore();
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [name, setName] = useState<string>('Some group name'); // route.params.name
+  const [groupName, setName] = useState<string>('Some group name'); // route.params.name
   const tempAvatar = createAvatar();
   const isAdmin = false; // TBD
 
@@ -77,7 +77,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   function onLeave() {
-    onLeaveGroup('TBD topic string');
+    onLeaveGroup(roomKey);
     navigation.navigate(GroupsScreens.GroupsScreen);
   }
 
@@ -94,9 +94,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           />
         </View>
         <Card>
-          <TextField>
-            {`hugin://join-group/${initialName}/${initialTopic}`}
-          </TextField>
+          <TextField>{`hugin://${name} + ${roomKey}`}</TextField>
         </Card>
         <CopyButton text={t('copyInvite')} data={'TBD'} />
         <TouchableOpacity
