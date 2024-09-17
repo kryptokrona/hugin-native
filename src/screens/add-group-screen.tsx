@@ -29,8 +29,10 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     //TODO Add Create / Join option
     if (key && name) {
       const topic: string = await onCreateGroup(name, key, admin);
-      navigation.navigate(GroupsScreens.GroupChatScreen, { name, key });
+      navigation.navigate(GroupsScreens.GroupChatScreen, { key, name });
       getUserGroups();
+      //Add this with local address and nickname
+      // saveRoomsMessageToDatabase('myAddressfromlocalstate', 'Joined room', key, '', Date.now(), randomKey(), 'myNamefromstate', true)
     }
   }
 
