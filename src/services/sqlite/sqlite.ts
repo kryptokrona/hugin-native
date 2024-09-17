@@ -3,8 +3,10 @@ import {
   openDatabase,
   SQLiteDatabase,
 } from 'react-native-sqlite-storage';
+
 import { Message } from 'types/p2p';
-import { getUserGroups } from '..';
+
+import { getUserGroups } from '@/services';
 
 enablePromise(true);
 
@@ -102,31 +104,33 @@ export async function getRooms() {
 }
 
 export async function getLatestRoomMessages() {
-  console.log('Our shit is called on yo');
   const roomsList: Array<any> = [];
   const rooms = await getRooms();
-  console.log('Rooms:', rooms);
   for (const room of rooms) {
     //Loop through list and get one message from each room
-    console.log('Checking: ', room)
     const results = await db.executeSql(
       'SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT 1',
       [room.key],
     );
- 
-    let latestmessage = {message: "No messages yet!", timestamp: Date.now()};
-    console.log('Messages?');
+
+    let latestmessage = {
+      message: 'No messages yet!',
+      timestamp: Date.now() - 100000,
+    };
     results.forEach((result) => {
       const latestmessagedb = result.rows.item(0);
-      console.log('Message!', latestmessagedb);
-      if (latestmessagedb != undefined) {
+      if (latestmessagedb !== undefined) {
         latestmessage = latestmessagedb;
       }
-      roomsList.push({name: room.name, roomKey: room.key, message: latestmessage.message, timestamp: latestmessage.timestamp});
-
-      
+      roomsList.push({
+        message: latestmessage.message,
+        name: room.name,
+        roomKey: room.key,
+        timestamp: latestmessage.timestamp,
+      });
     });
   }
+
   console.log('Return one message from each room', roomsList);
   return roomsList;
 }
@@ -139,7 +143,7 @@ export async function getRoomMessages(room: string, page: number) {
   }
   const messages: Message[] = [];
   const results = await db.executeSql(
-    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
+    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp ASC LIMIT ${offset}, ${limit}`,
     [room],
   );
   results.forEach(async (result) => {
@@ -148,23 +152,35 @@ export async function getRoomMessages(room: string, page: number) {
       if (res === undefined) {
         return;
       }
+      //TODO ** add replies and replyto, sort emojis?
       // res.replyto = await getRoomReplyMessage(res.reply);
       // res.replies = await getRoomRepliesToMessage(res.hash);
       // console.log('We reply to a message in the database:', res.replyto);
       // console.log('All replies to this message, sort by emojis?:', res.replies);
       const message: Message = {
-        address: res.address,    // replace with actual address value
-        message: res.message,  // replace with actual message value
-        room: res.room,           // replace with actual room name
-        reply: res.reply, // optional, could be an empty string
-        timestamp: res.timestamp,     // current timestamp, you can use a specific timestamp as well
-        nickname: res.nickname,       // replace with actual nickname
-        hash: res.hash,        // replace with actual hash value
-        sent: res.sent                 // boolean indicating whether the message was sent
+        address: res.address,
+        // replace with actual nickname
+        hash: res.hash,
+
+        // replace with actual address value
+        message: res.message,
+
+        // current timestamp, you can use a specific timestamp as well
+        nickname: res.nickname,
+
+        // replace with actual room name
+        reply: res.reply,
+
+        // replace with actual message value
+        room: res.room,
+
+        // replace with actual hash value
+        sent: res.sent,
+        // optional, could be an empty string
+        timestamp: res.timestamp, // boolean indicating whether the message was sent
       };
       messages.push(message);
     }
-    
   });
   return messages;
 }
