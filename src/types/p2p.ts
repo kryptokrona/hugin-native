@@ -25,14 +25,14 @@ export interface Message {
   // t: Date;
   // hash: string;
   // reactions: string[];
-  address: string,
-  message: string,
-  room: string,
-  reply: string,
-  timestamp: number,
-  nickname: string,
-  hash: string,
-  sent: boolean,
+  address: string;
+  message: string;
+  room: string;
+  reply: string;
+  timestamp: number;
+  nickname: string;
+  hash: string;
+  sent: boolean;
 }
 
 export interface GroupMessage extends Message {
@@ -50,4 +50,7 @@ export interface SelectedFile {
 
 export interface FileInput extends SelectedFile {
   topic: string;
+  invite: string;
+  key: string;
+  message: string;
 }

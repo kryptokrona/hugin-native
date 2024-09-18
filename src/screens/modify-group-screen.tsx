@@ -48,7 +48,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      header: () => <Header backButton title={'{groupname} details'} />,
+      header: () => <Header backButton title={name} />,
     });
   }, [name]);
 
@@ -94,7 +94,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           />
         </View>
         <Card>
-          <TextField>{`hugin://${name} + ${roomKey}`}</TextField>
+          <TextField>{`hugin://${name}${roomKey}`}</TextField>
         </Card>
         <CopyButton text={t('copyInvite')} data={'TBD'} />
         <TouchableOpacity

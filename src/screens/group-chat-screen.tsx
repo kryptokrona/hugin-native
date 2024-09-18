@@ -35,7 +35,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const { name: userName } = useGlobalStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
-
+  console.log('Messages', messages);
   // TODO: get messages from topic, rename Groups -> Rooms
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
@@ -82,10 +82,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     console.log('Room name:', name);
     //TODO** check if reply state is active
     //add the hash of the message we are replying to as reply
+    // const reply = state.reply.hash
+    const reply = '';
     if (file) {
-      onSendGroupMessageWithFile(naclHash(roomKey), file, text);
+      onSendGroupMessageWithFile(naclHash(roomKey), file, text, roomKey);
     } else {
-      onSendGroupMessage(naclHash(roomKey), text);
+      onSendGroupMessage(naclHash(roomKey), text, reply, roomKey);
     }
   }
 
