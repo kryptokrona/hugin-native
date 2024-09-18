@@ -23,29 +23,11 @@ class Swarm {
     this.rpc = rpc;
   }
   async start(key) {
-    this.key = key;
     return await create_swarm(key);
   }
 
   async end() {
     await end_swarm(topic);
-  }
-
-  send_message(message, topic) {
-    console.log('Send this swarm message', message);
-    const message_json = {
-      c: 'channel in room?',
-      g: this.key,
-      hash: random_key(),
-      k: Hugin.address,
-      m: message,
-      n: Hugin.name,
-      r: 'reply hash',
-      s: 'signature',
-      t: Date.now(),
-    };
-
-    send_swarm_message(JSON.stringify(message_json), topic);
   }
 
   send_file(file_data) {
@@ -71,9 +53,32 @@ class Swarm {
 
 let active_swarms = [];
 
+function send_message(message, topic, reply, invite) {
+  console.log('Send this swarm message', message);
+  const message_json = {
+    c: 'channel in room?',
+    g: invite,
+    hash: random_key().toString('hex'),
+    k: Hugin.address,
+    m: message,
+    n: Hugin.name,
+    r: reply,
+    s: 'signature',
+    t: Date.now(),
+  };
+
+  console.log('Send this to hugin desktop! :', message_json);
+
+  send_swarm_message(JSON.stringify(message_json), topic);
+}
+
+const toUintArray = (val) => {
+  return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
+};
+
 const create_swarm = async (key) => {
   console.log('Creating swarm!');
-  const invite = Uint8Array.from(key.split(',').map((x) => parseInt(x, 10)));
+  const invite = toUintArray(key);
   const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
 
   //The topic is public so lets use the pubkey from the new base keypair
@@ -500,4 +505,4 @@ const error_message = (message) => {
   sender('error-message', { message });
 };
 
-module.exports = { Swarm, create_swarm, share_file_with_message };
+module.exports = { Swarm, create_swarm, share_file_with_message, send_message };

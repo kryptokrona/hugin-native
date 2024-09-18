@@ -3,7 +3,7 @@ const { group_key } = require('./utils');
 // const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
-const { Swarm, share_file_with_message } = require('./swarm');
+const { Swarm, share_file_with_message, send_message } = require('./swarm');
 const { Hugin } = require('./account');
 
 const rpc = new RPC(HelloBare.sendMessage);
@@ -28,7 +28,12 @@ rpc.register(0, {
         endSwarm(parsedData.key);
         break;
       case 'send_room_msg':
-        sendRoomMessage(parsedData.message, parsedData.key);
+        sendRoomMessage(
+          parsedData.message,
+          parsedData.key,
+          parsedData.reply,
+          parsedData.invite,
+        );
         break;
       case 'group_random_key':
         return getRandomGroupKey();
@@ -67,10 +72,10 @@ const endSwarm = async (key) => {
   await swarm.end(swarm.topic);
 };
 
-const sendRoomMessage = (message, key) => {
+const sendRoomMessage = (message, key, reply, invite) => {
   const swarm = getRoom(key);
   if (!swarm) return;
-  swarm.send_message(message, swarm.topic);
+  send_message(message, swarm.topic, reply, invite);
 };
 
 const getRoom = (key) => {

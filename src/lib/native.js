@@ -53,8 +53,14 @@ export const end_swarm = (topic) => {
   return mainRPC.request(data);
 };
 
-export const send_swarm_msg = (message, key) => {
-  const data = JSON.stringify({ type: 'send_room_msg', message, key });
+export const send_swarm_msg = (key, message, reply, invite) => {
+  const data = JSON.stringify({
+    type: 'send_room_msg',
+    key,
+    message,
+    reply,
+    invite,
+  });
   return mainRPC.request(data);
 };
 

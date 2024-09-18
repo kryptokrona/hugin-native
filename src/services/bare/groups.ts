@@ -24,21 +24,27 @@ export const getUserGroups = async () => {
 export const setRoomMessages = async (room: string, page: number) => {
   console.log('Load message page:', page);
   const messages = await getRoomMessages(room, page);
-  console.log('Room messages: ', messages);
   setStoreRoomMessages(messages);
 };
 
-export const onSendGroupMessage = (message: string, key: string) => {
-  send_swarm_msg(key, message);
+export const onSendGroupMessage = (
+  key: string,
+  message: string,
+  reply: string,
+  invite: string,
+) => {
+  send_swarm_msg(key, message, reply, invite);
 };
 
 export const onSendGroupMessageWithFile = (
   key: string,
   file: SelectedFile,
   message: string,
+  invite: string,
 ) => {
   const fileData: FileInput & { message: string } = {
     ...file,
+    invite,
     key,
     message,
   };

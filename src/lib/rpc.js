@@ -19,7 +19,7 @@ const rpc_message = (m) => {
           json.message.group,
           json.message.reply,
           json.message.time,
-          json.message.nickname,
+          json.message.name,
           json.message.hash,
           false,
         );

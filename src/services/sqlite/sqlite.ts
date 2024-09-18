@@ -131,7 +131,6 @@ export async function getLatestRoomMessages() {
     });
   }
 
-  console.log('Return one message from each room', roomsList);
   return roomsList;
 }
 
