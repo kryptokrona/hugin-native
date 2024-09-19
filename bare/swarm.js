@@ -68,8 +68,9 @@ function send_message(message, topic, reply, invite) {
   };
 
   console.log('Send this to hugin desktop! :', message_json);
-
-  send_swarm_message(JSON.stringify(message_json), topic);
+  const send = JSON.stringify(message_json);
+  send_swarm_message(send, topic);
+  return send;
 }
 
 const toUintArray = (val) => {

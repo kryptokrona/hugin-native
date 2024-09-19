@@ -28,13 +28,12 @@ rpc.register(0, {
         endSwarm(parsedData.key);
         break;
       case 'send_room_msg':
-        sendRoomMessage(
+        return sendRoomMessage(
           parsedData.message,
           parsedData.key,
           parsedData.reply,
           parsedData.invite,
         );
-        break;
       case 'group_random_key':
         return getRandomGroupKey();
       case 'begin_send_file':
@@ -75,7 +74,7 @@ const endSwarm = async (key) => {
 const sendRoomMessage = (message, key, reply, invite) => {
   const swarm = getRoom(key);
   if (!swarm) return;
-  send_message(message, swarm.topic, reply, invite);
+  return send_message(message, swarm.topic, reply, invite);
 };
 
 const getRoom = (key) => {

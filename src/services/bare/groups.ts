@@ -27,13 +27,13 @@ export const setRoomMessages = async (room: string, page: number) => {
   setStoreRoomMessages(messages);
 };
 
-export const onSendGroupMessage = (
+export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string,
   invite: string,
 ) => {
-  send_swarm_msg(key, message, reply, invite);
+  return await send_swarm_msg(key, message, reply, invite);
 };
 
 export const onSendGroupMessageWithFile = (

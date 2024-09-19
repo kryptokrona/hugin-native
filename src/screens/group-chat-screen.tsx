@@ -16,12 +16,14 @@ import {
   naclHash,
   onSendGroupMessage,
   onSendGroupMessageWithFile,
+  saveRoomsMessageToDatabase,
   useGlobalStore,
 } from '@/services';
 import type {
   SelectedFile,
   GroupStackNavigationType,
   GroupStackParamList,
+  Message,
 } from '@/types';
 import { getAvatar, mockMessages } from '@/utils';
 
@@ -77,7 +79,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     };
   }, []);
 
-  function onSend(text: string, file: SelectedFile | null) {
+  async function onSend(text: string, file: SelectedFile | null) {
     console.log('Send message to room with invite key: ', roomKey);
     console.log('Room name:', name);
     //TODO** check if reply state is active
@@ -85,9 +87,43 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     // const reply = state.reply.hash
     const reply = '';
     if (file) {
-      onSendGroupMessageWithFile(naclHash(roomKey), file, text, roomKey);
+      const sentFile = onSendGroupMessageWithFile(
+        naclHash(roomKey),
+        file,
+        text,
+        roomKey,
+      );
+      //If we need to return something... or print something locally
+      console.log('sent file!', sentFile);
     } else {
-      onSendGroupMessage(naclHash(roomKey), text, reply, roomKey);
+      const sent = await onSendGroupMessage(
+        naclHash(roomKey),
+        text,
+        reply,
+        roomKey,
+      );
+      const parse = JSON.parse(sent);
+      const print: Message = {
+        address: parse.k,
+        hash: parse.hash,
+        message: parse.m,
+        nickname: parse.n,
+        reply: parse.r,
+        room: parse.g,
+        sent: true,
+        timestamp: parse.t,
+      };
+      messages.push(print);
+      saveRoomsMessageToDatabase(
+        print.address,
+        print.message,
+        print.room,
+        print.reply,
+        print.timestamp,
+        print.nickname,
+        print.hash,
+        true,
+      );
     }
   }
 

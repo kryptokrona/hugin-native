@@ -106,8 +106,8 @@ const sanitize_join_swarm_data = (data) => {
 const sanitize_group_message = (msg) => {
   let timestamp = sanitizeHtml(msg.t);
   if (timestamp.length > 20) return false;
-  let group = sanitizeHtml(msg.g);
-  if (group.length > 128) return false;
+  let room = sanitizeHtml(msg.g);
+  if (room.length > 128) return false;
   let text = sanitizeHtml(msg.m);
   if (text.length > 777) return false;
   let addr = sanitizeHtml(msg.k);
@@ -125,8 +125,8 @@ const sanitize_group_message = (msg) => {
     message: text,
     address: addr,
     signature: '',
-    group: group,
-    time: timestamp,
+    room: room,
+    timestamp: timestamp,
     name: nick,
     reply: reply,
     hash: txHash,

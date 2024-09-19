@@ -13,12 +13,15 @@ const rpc_message = (m) => {
         break;
       case 'swarm-message':
         console.log('swarm-message!', json);
+        //Check if we want to print it in live conversation
+        //If state.route.room === json.message.room
+        //--> print
         saveRoomsMessageToDatabase(
           json.message.address,
           json.message.message,
-          json.message.group,
+          json.message.room,
           json.message.reply,
-          json.message.time,
+          json.message.timestamp,
           json.message.name,
           json.message.hash,
           false,
