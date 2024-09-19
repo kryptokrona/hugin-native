@@ -6,7 +6,7 @@ import {
 
 import { Message } from 'types/p2p';
 
-import { getUserGroups } from '@/services';
+import { getUserGroups, setStoreRoomMessages, updateMessages, useGlobalStore } from '@/services';
 
 enablePromise(true);
 
@@ -231,6 +231,21 @@ export async function saveRoomsMessageToDatabase(
     );
     console.log('Epic win', result);
     getUserGroups();
+
+    const newMessage: Message = {
+      address: address,
+      message: message,
+      room: room,
+      reply: reply,
+      timestamp: timestamp,
+      nickname: nickname,
+      hash: hash,
+      sent: sent,
+    };
+
+    updateMessages(newMessage);
+    
+
   } catch (err) {
     console.log(err);
   }

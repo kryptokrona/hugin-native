@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 
@@ -129,22 +129,24 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item, i) => `${item.k}${i}`}
-        renderItem={({ item }) => (
-          <GroupMessageItem
-            message={item.message}
-            date={item.timestamp}
-            avatar={getAvatar(item.address)}
-            name={item.nickname}
-            userAddress={item.address}
-            reactions={[]}
+
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item, i) => `${item.k}${i}`}
+            renderItem={({ item }) => (
+              <GroupMessageItem
+                message={item.message}
+                date={item.timestamp}
+                avatar={getAvatar(item.address)}
+                name={item.nickname}
+                userAddress={item.address}
+                reactions={[]}
+              />
+            )}
+            contentContainerStyle={styles.flatListContent}
           />
-        )}
-        contentContainerStyle={styles.flatListContent}
-      />
+
       <View style={styles.inputWrapper}>
         <MessageInput onSend={onSend} />
       </View>

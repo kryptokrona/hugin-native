@@ -4,7 +4,7 @@ import {
   naclHash,
   getRoomMessages,
 } from '@/services';
-import type { SelectedFile, FileInput } from '@/types';
+import type { SelectedFile, FileInput, Message } from '@/types';
 
 import {
   begin_send_file,
@@ -14,11 +14,27 @@ import {
   swarm,
 } from '/lib/native';
 
-import { setStoreGroups, setStoreRoomMessages } from '../zustand';
+import {getRoomsMessages, getCurrentGroupKey, setStoreGroups, setStoreRoomMessages } from '../zustand';
 
 export const getUserGroups = async () => {
   const groups = await getLatestRoomMessages();
   setStoreGroups(groups);
+};
+
+export const updateMessages = async (message: Message) => {
+
+  // const theme = useGlobalStore((state) => state.theme);
+  const currentGroupKey = getCurrentGroupKey();
+  console.log(currentGroupKey);
+  
+  if (currentGroupKey == message.room) {
+    const messages = getRoomsMessages();
+    messages.push(message);
+    setStoreRoomMessages(messages);
+  }
+
+  
+
 };
 
 export const setRoomMessages = async (room: string, page: number) => {

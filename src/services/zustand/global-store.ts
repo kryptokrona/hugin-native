@@ -14,12 +14,14 @@ type GlobalStore = {
   preferences: Preferences;
   groups: Group[];
   roomMessages: Message[];
+  currentGroupKey: string;
 
   setTheme: (payload: Theme) => void;
   setUser: (payload: User) => void;
   setPreferences: (payload: Preferences) => void;
   setGroups: (payload: Group[]) => void;
   setRoomMessages: (payload: Message[]) => void;
+  setCurrentGroupKey: (payload: string) => void;
 };
 
 export const useGlobalStore = create<
@@ -28,10 +30,14 @@ export const useGlobalStore = create<
 >(
   subscribeWithSelector((set) => ({
     groups: [],
+    currentGroupKey: "",
     roomMessages: [],
     preferences: defaultPreferences,
     setGroups: (groups: Group[]) => {
       set({ groups });
+    },
+    setCurrentGroupKey: (currentGroupKey: string) => {
+      set({ currentGroupKey });
     },
     setRoomMessages: (roomMessages: Message[]) => {
       set({ roomMessages });

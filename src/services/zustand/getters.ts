@@ -8,6 +8,18 @@ export const getStoreTheme = () => {
   return storeTheme;
 };
 
+export const getCurrentGroupKey = () => {
+  const roomKey = useGlobalStore.getState().currentGroupKey;
+
+  return roomKey;
+};
+
+export const getRoomsMessages = () => {
+  const messages = useGlobalStore.getState().roomMessages;
+
+  return messages;
+};
+
 export const getPreferences = () => {
   const storePreferences = useGlobalStore.getState().preferences;
 

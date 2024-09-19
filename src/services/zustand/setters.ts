@@ -14,6 +14,10 @@ export const setStoreGroups = (groups: Group[]) => {
   useGlobalStore.setState({ groups });
 };
 
+export const setStoreCurrentGroupKey = (currentGroupKey: string) => {
+  useGlobalStore.setState({ currentGroupKey });
+};
+
 export const setStoreRoomMessages = (roomMessages: Message[]) => {
   useGlobalStore.setState({ roomMessages });
 };

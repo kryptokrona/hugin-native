@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
 import { GroupsScreens } from '@/config';
-import { setRoomMessages, useGlobalStore } from '@/services';
+import { setRoomMessages, setStoreCurrentGroupKey, useGlobalStore } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
@@ -19,8 +19,9 @@ export const GroupsScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<GroupStackNavigationType>();
   const groups = useGlobalStore((state) => state.groups);
-  function onPress(roomKey: string, name: string) {
+  async function onPress(roomKey: string, name: string) {
     setRoomMessages(roomKey, 0);
+    setStoreCurrentGroupKey(roomKey);
     navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
   }
 
