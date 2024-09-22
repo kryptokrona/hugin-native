@@ -3,7 +3,12 @@ const { group_key } = require('./utils');
 // const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
-const { Swarm, share_file_with_message, send_message } = require('./swarm');
+const {
+  Swarm,
+  share_file_with_message,
+  send_message,
+  send_message_history,
+} = require('./swarm');
 const { Hugin } = require('./account');
 
 const rpc = new RPC(HelloBare.sendMessage);
@@ -34,6 +39,10 @@ rpc.register(0, {
           parsedData.reply,
           parsedData.invite,
         );
+
+      case 'send_history':
+        send_message_history(parsedData.history, parsedData.room);
+        break;
       case 'group_random_key':
         return getRandomGroupKey();
       case 'begin_send_file':

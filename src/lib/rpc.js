@@ -1,12 +1,19 @@
 const { saveRoomsMessageToDatabase } = require('@/services/sqlite');
+const { send_message_history } = require('./native');
 
-const rpc_message = (m) => {
+const rpc_message = async (m) => {
   const json = parse(m);
   if (json) {
     console.log('Got rpc message', json);
     switch (json.type) {
       case 'new-swarm':
         console.log('new swarm!');
+        break;
+      case 'get-history':
+        //Get history from db
+        //await db response here then send it back to bare
+        console.log('GET MESSAGE HISTORY ---->');
+        send_message_history('Got history hehe', 'roomkey');
         break;
       case 'end-swarm':
         console.log('end-swarm!');

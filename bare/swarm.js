@@ -51,6 +51,10 @@ class Swarm {
   }
 }
 
+RPC_SENDER.on('data', (data) => {
+  console.log('RPC sender in swarm got data from frontend', data);
+});
+
 let active_swarms = [];
 
 function send_message(message, topic, reply, invite) {
@@ -81,7 +85,6 @@ const create_swarm = async (key) => {
   console.log('Creating swarm!');
   const invite = toUintArray(key);
   const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
-
   //The topic is public so lets use the pubkey from the new base keypair
   const hash = base_keys.publicKey.toString('hex');
 
@@ -325,6 +328,10 @@ const check_data_message = async (data, connection, topic) => {
       con.voice = joined.voice;
 
       const time = parseInt(joined.time);
+      if (parseInt(active.time) < time) {
+        //Request new messages from peer
+        request_message_history(con, joined);
+      }
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
       //     const [in_voice, video] = get_local_voice_status(topic)
       //     if (con.voice && in_voice && (parseInt(active.time) > time)  ) {
@@ -343,9 +350,49 @@ const check_data_message = async (data, connection, topic) => {
       }
       return true;
     }
+
+    if (data.type === 'request-history' && con.joined) {
+      sender('get-history', 'invitekeytoroom and also address to the receiver');
+    }
+    if (data.type === 'sync-history' && con.joined && con?.request) {
+      ///Sync history
+      //request state may be needed to keep track if we are in requesting mode atm
+      sync_message_history();
+    }
   }
 
   return false;
+};
+
+const request_message_history = (con, joined) => {
+  //Request last 100~messages from connection
+  const message = {
+    message: 'more plx',
+    type: 'request-history',
+    amount: 100,
+  };
+  send_peer_message(message, con);
+};
+
+const send_message_history = async (history, room) => {
+  //Send last 100 messages to connection
+  //Need invite key or maybe topic to get messages from the correct room'
+  //We also need to keep track of who to send this history to later.
+  const invite = '';
+  console.log('SEND MESSAGE HISTORY!!! ---->');
+  //send_peer_message(message, con);
+};
+
+const sync_message_history = (history) => {
+  //Got a message containing some message history -> save/print them
+  //sender('sync-history', messages)
+  console.log('Got messages from peer, Sync message history');
+};
+
+const send_peer_message = (message, con) => {
+  //Send individual peer message
+  console.log('Send peer message to connection!');
+  con.write(JSON.stringify(message));
 };
 
 const connection_closed = (conn, topic) => {
@@ -380,10 +427,7 @@ const end_swarm = async (topic) => {
   sender('end-swarm', { topic });
   update_local_voice_channel_status(LOCAL_VOICE_STATUS_OFFLINE);
 
-  active.connections.forEach((chat) => {
-    console.log('Disconnecting from:', chat.address);
-    chat.connection.write(JSON.stringify({ type: 'disconnected' }));
-  });
+  send_swarm_message(JSON.stringify({ type: 'disconnected' }), topic);
 
   await active.swarm.leave(Buffer.from(topic));
   await active.discovery.destroy();
@@ -506,4 +550,10 @@ const error_message = (message) => {
   sender('error-message', { message });
 };
 
-module.exports = { Swarm, create_swarm, share_file_with_message, send_message };
+module.exports = {
+  Swarm,
+  create_swarm,
+  share_file_with_message,
+  send_message,
+  send_message_history,
+};
