@@ -29,8 +29,8 @@ export const updateMessages = async (message: Message) => {
   
   if (currentGroupKey == message.room) {
     const messages = getRoomsMessages();
-    messages.push(message);
-    setStoreRoomMessages(messages);
+    const updatedMessages = [...messages, message];
+    setStoreRoomMessages(updatedMessages);
   }
 
   

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 
-import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 
@@ -37,8 +37,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const { name: userName } = useGlobalStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
-  console.log('Messages', messages);
-  // TODO: get messages from topic, rename Groups -> Rooms
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
@@ -113,7 +111,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         sent: true,
         timestamp: parse.t,
       };
-      messages.push(print);
+      
       saveRoomsMessageToDatabase(
         print.address,
         print.message,
@@ -131,6 +129,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     <ScreenLayout>
 
           <FlatList
+            inverted
             ref={flatListRef}
             data={messages}
             keyExtractor={(item, i) => `${item.k}${i}`}
@@ -156,7 +155,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
 const styles = StyleSheet.create({
   flatListContent: {
-    paddingBottom: 60,
+    flexDirection: 'column-reverse',
+    paddingTop: 60
   },
   inputWrapper: {
     bottom: 0,
