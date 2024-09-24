@@ -29,9 +29,9 @@ rpc.register(1, {
   },
 });
 
-export const send_message_history = (history, room) => {
+export const send_message_history = (history, room, address) => {
   console.log('Send stream data', history);
-  const data = JSON.stringify({ type: 'send_history', history, room });
+  const data = JSON.stringify({ type: 'send_history', history, room, adress });
   mainRPC.request(data);
 };
 

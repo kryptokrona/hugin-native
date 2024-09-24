@@ -328,7 +328,7 @@ const check_data_message = async (data, connection, topic) => {
       con.voice = joined.voice;
 
       const time = parseInt(joined.time);
-      if (parseInt(active.time) < time) {
+      if (parseInt(active.time) > time) {
         //Request new messages from peer
         request_message_history(con, joined);
       }
@@ -374,11 +374,15 @@ const request_message_history = (con, joined) => {
   send_peer_message(message, con);
 };
 
-const send_message_history = async (history, room) => {
+const send_message_history = async (history, room, address) => {
   //Send last 100 messages to connection
   //Need invite key or maybe topic to get messages from the correct room'
   //We also need to keep track of who to send this history to later.
   const invite = '';
+  const message = {
+    type: 'sync-history',
+    data: history,
+  };
   console.log('SEND MESSAGE HISTORY!!! ---->');
   //send_peer_message(message, con);
 };
