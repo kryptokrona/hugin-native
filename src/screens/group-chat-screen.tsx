@@ -23,7 +23,6 @@ import type {
   SelectedFile,
   GroupStackNavigationType,
   GroupStackParamList,
-  Message,
 } from '@/types';
 import { getAvatar, mockMessages } from '@/utils';
 
@@ -100,26 +99,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         reply,
         roomKey,
       );
-      const parse = JSON.parse(sent);
-      const print: Message = {
-        address: parse.k,
-        hash: parse.hash,
-        message: parse.m,
-        nickname: parse.n,
-        reply: parse.r,
-        room: parse.g,
-        sent: true,
-        timestamp: parse.t,
-      };
-      
+      const save = JSON.parse(sent);
+
       saveRoomsMessageToDatabase(
-        print.address,
-        print.message,
-        print.room,
-        print.reply,
-        print.timestamp,
-        print.nickname,
-        print.hash,
+        save.k,
+        save.m,
+        save.g,
+        save.r,
+        save.t,
+        save.n,
+        save.hash,
         true,
       );
     }
@@ -127,24 +116,23 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-
-          <FlatList
-            inverted
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item, i) => `${item.k}${i}`}
-            renderItem={({ item }) => (
-              <GroupMessageItem
-                message={item.message}
-                date={item.timestamp}
-                avatar={getAvatar(item.address)}
-                name={item.nickname}
-                userAddress={item.address}
-                reactions={[]}
-              />
-            )}
-            contentContainerStyle={styles.flatListContent}
+      <FlatList
+        inverted
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(item, i) => `${item.k}${i}`}
+        renderItem={({ item }) => (
+          <GroupMessageItem
+            message={item.message}
+            date={item.timestamp}
+            avatar={getAvatar(item.address)}
+            name={item.nickname}
+            userAddress={item.address}
+            reactions={[]}
           />
+        )}
+        contentContainerStyle={styles.flatListContent}
+      />
 
       <View style={styles.inputWrapper}>
         <MessageInput onSend={onSend} />
@@ -156,7 +144,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   flatListContent: {
     flexDirection: 'column-reverse',
-    paddingTop: 60
+    paddingTop: 60,
   },
   inputWrapper: {
     bottom: 0,
