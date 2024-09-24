@@ -7,7 +7,14 @@ import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { GroupsScreens } from '@/config';
-import { getUserGroups, onCreateGroup, onRequestNewGroupKey } from '@/services';
+import {
+  getUserGroups,
+  onCreateGroup,
+  onRequestNewGroupKey,
+  randomKey,
+  saveRoomsMessageToDatabase,
+  useGlobalStore,
+} from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
@@ -23,6 +30,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const [name, setName] = useState<string | null>(initialName ?? null);
   const [key, setKey] = useState<string | null>(initialKey ?? null);
   const [isJoiningExisting, setIsJoiningExisting] = useState(false);
+  const { name: userName, address } = useGlobalStore((state) => state.user);
   const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
 
   async function onCreatePress() {
@@ -32,7 +40,16 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
       navigation.navigate(GroupsScreens.GroupChatScreen, { key, name });
       getUserGroups();
       //Add this with local address and nickname
-      // saveRoomsMessageToDatabase('myAddressfromlocalstate', 'Joined room', key, '', Date.now(), randomKey(), 'myNamefromstate', true)
+      saveRoomsMessageToDatabase(
+        address,
+        'Joined room',
+        key,
+        '',
+        Date.now(),
+        randomKey(),
+        userName,
+        true,
+      );
     }
   }
 
