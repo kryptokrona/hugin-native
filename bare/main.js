@@ -41,7 +41,11 @@ rpc.register(0, {
         );
 
       case 'send_history':
-        send_message_history(parsedData.history, parsedData.room);
+        send_message_history(
+          parsedData.history,
+          parsedData.room,
+          parsedData.address,
+        );
         break;
       case 'group_random_key':
         return getRandomGroupKey();

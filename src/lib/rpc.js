@@ -13,7 +13,7 @@ const rpc_message = async (m) => {
         //Get history from db
         //await db response here then send it back to bare
         console.log('GET MESSAGE HISTORY ---->');
-        send_message_history('Got history hehe', 'roomkey');
+        send_message_history('Got history hehe', 'roomkey', 'tooadreess');
         break;
       case 'end-swarm':
         console.log('end-swarm!');
