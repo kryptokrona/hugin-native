@@ -37,6 +37,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const { name: userName } = useGlobalStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
+  console.log(messages);
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
@@ -111,7 +112,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         sent: true,
         timestamp: parse.t,
       };
-      
+
       saveRoomsMessageToDatabase(
         print.address,
         print.message,
@@ -144,6 +145,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               />
             )}
             contentContainerStyle={styles.flatListContent}
+            initialNumToRender={messages.length}
+            maxToRenderPerBatch={messages.length}
           />
 
       <View style={styles.inputWrapper}>
