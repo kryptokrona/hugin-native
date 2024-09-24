@@ -6,7 +6,7 @@ import {
 
 import { Message } from 'types/p2p';
 
-import { getUserGroups, setStoreRoomMessages, updateMessages, useGlobalStore } from '@/services';
+import { getUserGroups, updateMessages } from '@/services';
 
 enablePromise(true);
 
@@ -113,20 +113,16 @@ export async function getLatestRoomMessages() {
       [room.key],
     );
 
-    let latestmessage = {
-      message: 'No messages yet!',
-      timestamp: Date.now() - 100000,
-    };
     results.forEach((result) => {
       const latestmessagedb = result.rows.item(0);
-      if (latestmessagedb !== undefined) {
-        latestmessage = latestmessagedb;
+      if (latestmessagedb === undefined) {
+        return;
       }
       roomsList.push({
-        message: latestmessage.message,
+        message: latestmessagedb.message,
         name: room.name,
         roomKey: room.key,
-        timestamp: latestmessage.timestamp,
+        timestamp: latestmessagedb.timestamp,
       });
     });
   }
@@ -234,18 +230,16 @@ export async function saveRoomsMessageToDatabase(
 
     const newMessage: Message = {
       address: address,
-      message: message,
-      room: room,
-      reply: reply,
-      timestamp: timestamp,
-      nickname: nickname,
       hash: hash,
+      message: message,
+      nickname: nickname,
+      reply: reply,
+      room: room,
       sent: sent,
+      timestamp: timestamp,
     };
 
     updateMessages(newMessage);
-    
-
   } catch (err) {
     console.log(err);
   }
