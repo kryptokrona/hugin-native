@@ -48,12 +48,11 @@ class Swarm {
       response: ce.string,
     });
     RPC_SENDER = RPC.createRequestStream();
+    RPC_SENDER.on('data', (data) => {
+      console.log('RPC sender in swarm got data from frontend', data);
+    });
   }
 }
-
-RPC_SENDER.on('data', (data) => {
-  console.log('RPC sender in swarm got data from frontend', data);
-});
 
 let active_swarms = [];
 
