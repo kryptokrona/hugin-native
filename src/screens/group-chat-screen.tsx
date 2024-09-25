@@ -88,7 +88,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       //If we need to return something... or print something locally
       console.log('sent file!', sentFile);
     } else {
-      const sent = await onSendGroupMessage(text, reply, roomKey);
+      const sent = await onSendGroupMessage(roomKey, text, reply);
       const save = JSON.parse(sent);
 
       saveRoomsMessageToDatabase(
