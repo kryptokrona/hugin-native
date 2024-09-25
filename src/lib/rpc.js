@@ -1,6 +1,6 @@
 const { saveRoomsMessageToDatabase } = require('@/services/sqlite');
 const { send_message_history } = require('./native');
-const { peerConnected, peerDisconncted } = require('services/bare');
+const { peerConnected, peerDisconncted } = require('@/services/bare');
 
 const rpc_message = async (m) => {
   const json = parse(m);

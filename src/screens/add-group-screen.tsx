@@ -46,8 +46,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
         key,
         '',
         Date.now(),
-        randomKey(),
         userName,
+        randomKey(),
         true,
       );
     }
