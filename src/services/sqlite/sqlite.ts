@@ -83,6 +83,8 @@ export async function removeRoomFromDatabase(key: string) {
     console.log('Error removing room', err);
     return false;
   }
+  //Update active room list
+  getUserGroups();
   return true;
 }
 

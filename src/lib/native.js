@@ -49,13 +49,13 @@ export const update_bare_user = async (user) => {
   return mainRPC.request(data);
 };
 
-export const swarm = async (key) => {
-  const data = JSON.stringify({ type: 'new_swarm', key });
+export const swarm = async (hashkey, key) => {
+  const data = JSON.stringify({ type: 'new_swarm', key, hashkey });
   return mainRPC.request(data);
 };
 
-export const end_swarm = (topic) => {
-  const data = JSON.stringify({ type: 'end_swarm', topic });
+export const end_swarm = (key) => {
+  const data = JSON.stringify({ type: 'end_swarm', key });
   return mainRPC.request(data);
 };
 
