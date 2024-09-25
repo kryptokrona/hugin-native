@@ -33,12 +33,7 @@ rpc.register(0, {
         endSwarm(parsed.key);
         break;
       case 'send_room_msg':
-        return sendRoomMessage(
-          parsed.message,
-          parsed.key,
-          parsed.reply,
-          parsed.invite,
-        );
+        return sendRoomMessage(parsed.message, parsed.key, parsed.reply);
 
       case 'send_history':
         send_message_history(parsed.history, parsed.room, parsed.address);
@@ -79,10 +74,10 @@ const endSwarm = async (key) => {
   await swarm.end(swarm.topic);
 };
 
-const sendRoomMessage = (message, key, reply, invite) => {
+const sendRoomMessage = (message, key, reply) => {
   const swarm = getRoom(key);
   if (!swarm) return;
-  return send_message(message, swarm.topic, reply, invite);
+  return send_message(message, swarm.topic, reply, key);
 };
 
 const getRoom = (key) => {

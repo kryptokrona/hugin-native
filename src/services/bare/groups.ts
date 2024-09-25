@@ -67,20 +67,17 @@ export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string,
-  invite: string,
 ) => {
-  return await send_swarm_msg(key, message, reply, invite);
+  return await send_swarm_msg(key, message, reply);
 };
 
 export const onSendGroupMessageWithFile = (
   key: string,
   file: SelectedFile,
   message: string,
-  invite: string,
 ) => {
   const fileData: FileInput & { message: string } = {
     ...file,
-    invite,
     key,
     message,
   };

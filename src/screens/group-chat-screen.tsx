@@ -13,7 +13,6 @@ import {
 } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
-  naclHash,
   onSendGroupMessage,
   onSendGroupMessageWithFile,
   saveRoomsMessageToDatabase,
@@ -85,21 +84,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     // const reply = state.reply.hash
     const reply = '';
     if (file) {
-      const sentFile = onSendGroupMessageWithFile(
-        naclHash(roomKey),
-        file,
-        text,
-        roomKey,
-      );
+      const sentFile = onSendGroupMessageWithFile(roomKey, file, text);
       //If we need to return something... or print something locally
       console.log('sent file!', sentFile);
     } else {
-      const sent = await onSendGroupMessage(
-        naclHash(roomKey),
-        text,
-        reply,
-        roomKey,
-      );
+      const sent = await onSendGroupMessage(text, reply, roomKey);
       const save = JSON.parse(sent);
 
       saveRoomsMessageToDatabase(
