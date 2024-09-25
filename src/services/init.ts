@@ -19,10 +19,10 @@ export const init = async () => {
   const theme = await getStorageValue(ASYNC_STORAGE_KEYS.THEME);
   const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
   const mUser = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
+  const user = mUser ?? defaultUser;
   console.log('Initializing database..');
   await initDB();
-
-  const user = mUser ?? defaultUser;
+  await bare(user);
   await joinRooms();
   setStoreTheme(theme ?? defaultTheme);
   setStorePreferences(preferences ?? defaultPreferences);
@@ -33,6 +33,4 @@ export const init = async () => {
   if (preferences) {
     await i18n.changeLanguage(preferences.language);
   }
-
-  await bare(user);
 };
