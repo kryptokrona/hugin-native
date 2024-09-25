@@ -22,11 +22,11 @@ class Swarm {
     }
     this.rpc = rpc;
   }
-  async start(key) {
-    return await create_swarm(key);
+  async start(hashkey, key) {
+    return await create_swarm(hashkey, key);
   }
 
-  async end() {
+  async end(topic) {
     await end_swarm(topic);
   }
 
@@ -80,11 +80,13 @@ const toUintArray = (val) => {
   return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
 };
 
-const create_swarm = async (key) => {
+const create_swarm = async (hashkey, key) => {
   console.log('Creating swarm!');
-  const invite = toUintArray(key);
+  //Create a new common keypair for this room from hashed invitelink as seed.
+  //The public key of this keypair is used as topic.
+  //Connections auth is checked by a signature from the privatekey.
+  const invite = toUintArray(hashkey);
   const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
-  //The topic is public so lets use the pubkey from the new base keypair
   const hash = base_keys.publicKey.toString('hex');
 
   console.log('Joining topic: ', hash);
@@ -338,8 +340,9 @@ const check_data_message = async (data, connection, topic) => {
       //     }
 
       con.video = joined.video;
+      joined.key = active.key;
+      sender('peer-connected', { joined });
       console.log('Connection updated: Joined:', con.joined);
-      sender('peer-connected', joined);
       return true;
     }
     if ('voice' in data) {
@@ -395,7 +398,7 @@ const sync_message_history = (history) => {
 const send_peer_message = (message, con) => {
   //Send individual peer message
   console.log('Send peer message to connection!');
-  con.write(JSON.stringify(message));
+  //con.write(JSON.stringify(message));
 };
 
 const connection_closed = (conn, topic) => {
@@ -414,8 +417,9 @@ const connection_closed = (conn, topic) => {
   if (!user) {
     return;
   }
+  const disconnected = { address: user.address, key: active.key };
   // sender('close-voice-channel-with-peer', user.address);
-  sender('peer-disconnected', { address: user.address, topic });
+  sender('peer-disconnected', { disconnected });
   const still_active = active.connections.filter((a) => a.connection !== conn);
   console.log('Connection closed');
   console.log('Still active:', still_active);

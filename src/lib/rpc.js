@@ -1,8 +1,13 @@
 const { saveRoomsMessageToDatabase } = require('@/services/sqlite');
 const { send_message_history } = require('./native');
+const { peerConnected, peerDisconncted } = require('services/bare');
 
 const rpc_message = async (m) => {
   const json = parse(m);
+  if (!json) {
+    console.log('** RPC ERROR, lib/rpc.js **');
+    return;
+  }
   if (json) {
     console.log('Got rpc message', json);
     switch (json.type) {
@@ -35,10 +40,12 @@ const rpc_message = async (m) => {
         );
         break;
       case 'peer-connected':
-        console.log('peer-connected!');
+        console.log('peer-connected!', json);
+        peerConnected(json.joined);
         break;
       case 'peer-disconnected':
-        console.log('peer-disconnected!');
+        console.log('peer-disconnected!', json);
+        peerDisconncted(json.disconnected);
         break;
       case 'voice-channel-status':
         console.log('Voice channel status');

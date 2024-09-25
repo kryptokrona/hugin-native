@@ -3,6 +3,7 @@ import {
   saveRoomToDatabase,
   naclHash,
   getRoomMessages,
+  removeRoomFromDatabase,
 } from '@/services';
 import type { SelectedFile, FileInput, Message } from '@/types';
 
@@ -14,27 +15,46 @@ import {
   swarm,
 } from '/lib/native';
 
-import {getRoomsMessages, getCurrentGroupKey, setStoreGroups, setStoreRoomMessages } from '../zustand';
+import {
+  getRoomsMessages,
+  getCurrentGroupKey,
+  setStoreGroups,
+  setStoreRoomMessages,
+} from '../zustand';
 
 export const getUserGroups = async () => {
   const groups = await getLatestRoomMessages();
   setStoreGroups(groups);
 };
 
-export const updateMessages = async (message: Message) => {
+export const peerConnected = (user) => {
+  console.log('Peer connected, add:', user);
+  //Update state
+  //Here we also get status if the user is connected to a voice channel
+  //updateVoiceChannelStatus(user)
+};
 
+export const peerDisconncted = (user) => {
+  console.log('Peer disconnected, remove:', user);
+  //user.key is the room where user.address should be removed from.
+  //remove from voice channel
+  //updateVoiceChannelStatus(user)
+};
+
+export const updateVoiceChannelStatus = (status) => {
+  //Update the user voice status
+};
+
+export const updateMessages = async (message: Message) => {
   // const theme = useGlobalStore((state) => state.theme);
   const currentGroupKey = getCurrentGroupKey();
   console.log(currentGroupKey);
-  
-  if (currentGroupKey == message.room) {
+
+  if (currentGroupKey === message.room) {
     const messages = getRoomsMessages();
     const updatedMessages = [...messages, message];
     setStoreRoomMessages(updatedMessages);
   }
-
-  
-
 };
 
 export const setRoomMessages = async (room: string, page: number) => {
@@ -74,17 +94,18 @@ export const onCreateGroup = async (
   seed: string,
 ) => {
   await saveRoomToDatabase(name, key, seed);
-  return await swarm(naclHash(key));
+  return await swarm(naclHash(key), key);
 };
 
 export const onRequestNewGroupKey = async () => {
   return await group_random_key();
 };
 
-export const onDeleteGroup = (_topic: string) => {
-  // TODO
+export const onDeleteGroup = async (key: string) => {
+  await removeRoomFromDatabase(key);
+  onLeaveGroup(key);
 };
 
 export const onLeaveGroup = (key: string) => {
-  end_swarm(naclHash(key));
+  end_swarm(key);
 };

@@ -20,40 +20,36 @@ rpc.register(0, {
   response: ce.string,
   onrequest: (data) => {
     console.log('Got request data', data);
-    const parsedData = JSON.parse(data);
-    switch (parsedData.type) {
+    const parsed = JSON.parse(data);
+    switch (parsed.type) {
       case 'init_bare':
-        initBareMain(parsedData.user, parsedData.documentDirectoryPath);
+        initBareMain(parsed.user, parsed.documentDirectoryPath);
       case 'update_bare_user':
-        updateBareUser(parsedData.user);
+        updateBareUser(parsed.user);
         break;
       case 'new_swarm':
-        return newSwarm(parsedData.key);
+        return newSwarm(parsed.hashkey, parsed.key);
       case 'end_swarm':
-        endSwarm(parsedData.key);
+        endSwarm(parsed.key);
         break;
       case 'send_room_msg':
         return sendRoomMessage(
-          parsedData.message,
-          parsedData.key,
-          parsedData.reply,
-          parsedData.invite,
+          parsed.message,
+          parsed.key,
+          parsed.reply,
+          parsed.invite,
         );
 
       case 'send_history':
-        send_message_history(
-          parsedData.history,
-          parsedData.room,
-          parsedData.address,
-        );
+        send_message_history(parsed.history, parsed.room, parsed.address);
         break;
       case 'group_random_key':
         return getRandomGroupKey();
       case 'begin_send_file':
-        beginStreamFile(parsedData.json_file_data);
+        beginStreamFile(parsed.json_file_data);
         break;
       default:
-        console.log('Unknown RPC type:', parsedData.type);
+        console.log('Unknown RPC type:', parsed.type);
     }
     return 'success';
   },
@@ -68,12 +64,11 @@ const updateBareUser = (user) => {
   Hugin.update(user);
 };
 
-const newSwarm = async (key) => {
+const newSwarm = async (hashkey, key) => {
   const swarm = new Swarm(rpc);
   await swarm.channel();
   if (!swarm) return;
-  const topic = await swarm.start(key);
-  console.log('Started new swarm with hashed key:', key);
+  const topic = await swarm.start(hashkey, key);
   Hugin.rooms.push({ key, topic });
   return topic;
 };
