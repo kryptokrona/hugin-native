@@ -38,7 +38,7 @@ export const MainScreen: React.FC = () => {
       await sleep(100);
       console.log('Joining room -->');
       console.log('With invite key:', r.key);
-      await swarm(naclHash(r.key));
+      await swarm(naclHash(r.key), r.key);
     }
   }
 
