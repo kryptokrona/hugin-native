@@ -96,7 +96,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         <Card>
           <TextField>{`hugin://${name}${roomKey}`}</TextField>
         </Card>
-        <CopyButton text={t('copyInvite')} data={'TBD'} />
+        <CopyButton text={t('copyInvite')} data={`hugin://${name}${roomKey}`} />
         <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
