@@ -4,8 +4,10 @@ import {
   naclHash,
   getRoomMessages,
   removeRoomFromDatabase,
+  getRooms,
 } from '@/services';
 import type { SelectedFile, FileInput, Message } from '@/types';
+import { sleep } from '@/utils';
 
 import {
   begin_send_file,
@@ -105,4 +107,15 @@ export const onDeleteGroup = async (key: string) => {
 
 export const onLeaveGroup = (key: string) => {
   end_swarm(key);
+};
+
+export const joinRooms = async () => {
+  console.log('********* Joining rooms! ***********');
+  const rooms = await getRooms();
+  for (r of rooms) {
+    await sleep(100);
+    console.log('Joining room -->');
+    console.log('With invite key:', r.key);
+    await swarm(naclHash(r.key), r.key);
+  }
 };

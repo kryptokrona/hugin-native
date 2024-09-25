@@ -2,11 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import { ScrollView, RefreshControl } from 'react-native';
 
-import { sleep } from '@/utils';
-import { Container, ScreenLayout, TextButton } from '@/components';
-import { getRooms, naclHash } from '@/services';
-
-import { swarm } from '/lib/native.js';
+import { ScreenLayout } from '@/components';
 
 export const MainScreen: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -30,17 +26,6 @@ export const MainScreen: React.FC = () => {
     // setCoinValue(Number(coinValue)); // Convert coinValue to a number before setting it in the state
     // setUnreads(unreads);
   }, []);
-
-  async function joinRooms() {
-    console.log('********* Joining rooms! ***********');
-    const rooms = await getRooms();
-    for (r of rooms) {
-      await sleep(100);
-      console.log('Joining room -->');
-      console.log('With invite key:', r.key);
-      await swarm(naclHash(r.key), r.key);
-    }
-  }
 
   // useEffect(() => {
   //   updateBalance();
@@ -126,16 +111,8 @@ export const MainScreen: React.FC = () => {
             onRefresh={refresh}
             title="Updating coin price..."
           />
-        }>
-        <Container bottom row>
-          <TextButton
-            onPress={function (): void {
-              joinRooms();
-            }}>
-            Join groups
-          </TextButton>
-        </Container>
-      </ScrollView>
+        }
+      />
     </ScreenLayout>
   );
 };

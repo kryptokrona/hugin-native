@@ -4,7 +4,7 @@ import { defaultTheme } from '@/styles';
 
 import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
 import { initDB } from './sqlite';
-import { getUserGroups } from './bare';
+import { getUserGroups, joinRooms } from './bare';
 import {
   defaultPreferences,
   defaultUser,
@@ -13,7 +13,7 @@ import {
   setStoreUser,
 } from './zustand';
 
-import { bare } from '/lib/native.js'
+import { bare } from '/lib/native.js';
 
 export const init = async () => {
   const theme = await getStorageValue(ASYNC_STORAGE_KEYS.THEME);
@@ -23,7 +23,7 @@ export const init = async () => {
   await initDB();
 
   const user = mUser ?? defaultUser;
-
+  await joinRooms();
   setStoreTheme(theme ?? defaultTheme);
   setStorePreferences(preferences ?? defaultPreferences);
   setStoreUser(user);
