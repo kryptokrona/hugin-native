@@ -120,7 +120,7 @@ export async function getLatestRoomMessages() {
       if (latestmessagedb === undefined) {
         return;
       }
-      roomsList.push({
+      roomsList.unshift({
         message: latestmessagedb.message,
         name: room.name,
         roomKey: room.key,
