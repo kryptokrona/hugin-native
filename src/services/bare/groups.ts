@@ -1,6 +1,5 @@
 import {
   getLatestRoomMessages,
-  saveRoomToDatabase,
   naclHash,
   getRoomMessages,
   removeRoomFromDatabase,
@@ -85,15 +84,6 @@ export const onSendGroupMessageWithFile = (
   };
   const JSONfileData = JSON.stringify(fileData);
   begin_send_file(JSONfileData);
-};
-
-export const onCreateGroup = async (
-  name: string,
-  key: string,
-  seed: string,
-) => {
-  await saveRoomToDatabase(name, key, seed);
-  return await swarm(naclHash(key), key);
 };
 
 export const onRequestNewGroupKey = async () => {
