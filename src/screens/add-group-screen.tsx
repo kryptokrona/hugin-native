@@ -5,14 +5,18 @@ import { StyleSheet, View } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
+import { swarm } from 'lib/native';
+
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
   getUserGroups,
+  naclHash,
   onCreateGroup,
   onRequestNewGroupKey,
   randomKey,
   saveRoomsMessageToDatabase,
+  setStoreCurrentGroupKey,
   useGlobalStore,
 } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
@@ -38,6 +42,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     if (roomKey && name) {
       const topic: string = await onCreateGroup(name, roomKey, admin);
       navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
+      setStoreCurrentGroupKey(roomKey);
       getUserGroups();
       //Add this with local address and nickname
       saveRoomsMessageToDatabase(
@@ -50,6 +55,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
         randomKey(),
         true,
       );
+
+      swarm(naclHash(roomKey), roomKey);
     }
   }
 
