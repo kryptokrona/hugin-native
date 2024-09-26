@@ -59,7 +59,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
       setStoreCurrentGroupKey(roomKey);
       setRoomMessages(roomKey, 0);
       getUserGroups();
-      await swarm(naclHash(roomKey), roomKey);
+      swarm(naclHash(roomKey), roomKey);
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
