@@ -25,25 +25,25 @@ let admin: string = '';
 
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const { name: initialName, key: initialKey } = route.params;
+  const { name: initialName, roomKey: initialKey } = route.params;
   const navigation = useNavigation<GroupStackNavigationType>();
   const [name, setName] = useState<string | null>(initialName ?? null);
-  const [key, setKey] = useState<string | null>(initialKey ?? null);
+  const [roomKey, setKey] = useState<string | null>(initialKey ?? null);
   const [isJoiningExisting, setIsJoiningExisting] = useState(false);
   const { name: userName, address } = useGlobalStore((state) => state.user);
   const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
 
   async function onCreatePress() {
     //TODO Add Create / Join option
-    if (key && name) {
-      const topic: string = await onCreateGroup(name, key, admin);
-      navigation.navigate(GroupsScreens.GroupChatScreen, { key, name });
+    if (roomKey && name) {
+      const topic: string = await onCreateGroup(name, roomKey, admin);
+      navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
       getUserGroups();
       //Add this with local address and nickname
       saveRoomsMessageToDatabase(
         address,
         'Joined room',
-        key,
+        roomKey,
         '',
         Date.now(),
         userName,
@@ -69,8 +69,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   useEffect(() => {
-    console.log({ key });
-  }, [key]);
+    console.log({ roomKey });
+  }, [roomKey]);
 
   function onNameChange(value: string) {
     setName(value);
@@ -87,10 +87,10 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   }, [initialName, initialKey]);
 
   useEffect(() => {
-    if (name !== initialName || key !== initialKey) {
+    if (name !== initialName || roomKey !== initialKey) {
       setIsJoiningExisting(false);
     }
-  }, [name, key]);
+  }, [name, roomKey]);
 
   return (
     <ScreenLayout>
@@ -98,7 +98,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
         <InputField label={t('name')} value={name} onChange={onNameChange} />
         <InputField
           label={t('messageKey')}
-          value={key}
+          value={roomKey}
           onChange={onKeyChange}
         />
         {!isJoiningExisting && (
@@ -110,7 +110,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
             {t('generate')}
           </TextButton>
         )}
-        <TextButton disabled={!name && !key} onPress={onCreatePress}>
+        <TextButton disabled={!name && !roomKey} onPress={onCreatePress}>
           {continueText}
         </TextButton>
       </View>
