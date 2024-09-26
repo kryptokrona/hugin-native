@@ -12,10 +12,11 @@ import { GroupsScreens } from '@/config';
 import {
   getUserGroups,
   naclHash,
-  onCreateGroup,
   onRequestNewGroupKey,
   randomKey,
   saveRoomsMessageToDatabase,
+  saveRoomToDatabase,
+  setRoomMessages,
   setStoreCurrentGroupKey,
   useGlobalStore,
 } from '@/services';
@@ -40,12 +41,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   async function onCreatePress() {
     //TODO Add Create / Join option
     if (roomKey && name) {
-      const topic: string = await onCreateGroup(name, roomKey, admin);
-      navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
-      setStoreCurrentGroupKey(roomKey);
-      getUserGroups();
-      //Add this with local address and nickname
-      saveRoomsMessageToDatabase(
+      await saveRoomToDatabase(name, roomKey, admin);
+      await saveRoomsMessageToDatabase(
         address,
         'Joined room',
         roomKey,
@@ -55,8 +52,11 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
         randomKey(),
         true,
       );
-
-      swarm(naclHash(roomKey), roomKey);
+      setStoreCurrentGroupKey(roomKey);
+      setRoomMessages(roomKey, 0);
+      getUserGroups();
+      navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
+      await swarm(naclHash(roomKey), roomKey);
     }
   }
 
