@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
-import { useNavigation, type RouteProp } from '@react-navigation/native';
+import {
+  CommonActions,
+  useNavigation,
+  type RouteProp,
+} from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { swarm } from 'lib/native';
@@ -55,8 +59,16 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
       setStoreCurrentGroupKey(roomKey);
       setRoomMessages(roomKey, 0);
       getUserGroups();
-      navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
-      swarm(naclHash(roomKey), roomKey);
+      await swarm(naclHash(roomKey), roomKey);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            { name: GroupsScreens.GroupsScreen },
+            { name: GroupsScreens.GroupChatScreen, params: { name, roomKey } },
+          ],
+        }),
+      );
     }
   }
 
