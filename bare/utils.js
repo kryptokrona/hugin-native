@@ -70,7 +70,7 @@ const sanitize_join_swarm_data = (data) => {
   const video = data.video;
   if (typeof video !== 'boolean') return false;
   const time = sanitizeHtml(data.time);
-  if (typeof time !== 'string') return false;
+  // if (typeof time !== 'string') return false;
   if (time.length > 50) return false;
 
   const channels = [];

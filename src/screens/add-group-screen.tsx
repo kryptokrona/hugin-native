@@ -56,7 +56,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
       setRoomMessages(roomKey, 0);
       getUserGroups();
       navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
-      await swarm(naclHash(roomKey), roomKey);
+      swarm(naclHash(roomKey), roomKey);
     }
   }
 
