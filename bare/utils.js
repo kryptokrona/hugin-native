@@ -173,6 +173,10 @@ const sanitizeHtml = (data) => {
   return data;
 };
 
+const toUintArray = (val) => {
+  return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
+};
+
 module.exports = {
   get_new_peer_keys,
   sign,
@@ -181,4 +185,5 @@ module.exports = {
   sanitize_voice_status_data,
   group_key,
   random_key,
+  toUintArray,
 };

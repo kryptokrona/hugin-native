@@ -1,13 +1,16 @@
 require('./runtime');
 const { group_key } = require('./utils');
+
 // const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const {
-  Swarm,
   share_file_with_message,
   send_message,
   send_message_history,
+  create_swarm,
+  end_swarm,
+  ipc,
 } = require('./swarm');
 const { Hugin } = require('./account');
 
@@ -18,7 +21,7 @@ console.log('Bare main init');
 rpc.register(0, {
   request: ce.string,
   response: ce.string,
-  onrequest: (data) => {
+  onrequest: async (data) => {
     console.log('Got request data', data);
     const parsed = JSON.parse(data);
     switch (parsed.type) {
@@ -28,13 +31,13 @@ rpc.register(0, {
         updateBareUser(parsed.user);
         break;
       case 'new_swarm':
-        return newSwarm(parsed.hashkey, parsed.key);
+        await newSwarm(parsed.hashkey, parsed.key);
+        break;
       case 'end_swarm':
         endSwarm(parsed.key);
         break;
       case 'send_room_msg':
         return sendRoomMessage(parsed.message, parsed.key, parsed.reply);
-
       case 'send_history':
         send_message_history(parsed.history, parsed.room, parsed.address);
         break;
@@ -52,6 +55,8 @@ rpc.register(0, {
 
 // Function implementations
 const initBareMain = async (user) => {
+  const sender = new ipc();
+  sender.new(rpc);
   Hugin.init(user);
 };
 
@@ -60,18 +65,14 @@ const updateBareUser = (user) => {
 };
 
 const newSwarm = async (hashkey, key) => {
-  const swarm = new Swarm(rpc);
-  await swarm.channel();
-  if (!swarm) return;
-  const topic = await swarm.start(hashkey, key);
+  const topic = await create_swarm(hashkey, key);
   Hugin.rooms.push({ key, topic });
-  return topic;
 };
 
 const endSwarm = async (key) => {
   const swarm = getRoom(key);
   if (!swarm) return;
-  await swarm.end(swarm.topic);
+  await end_swarm(swarm.topic);
 };
 
 const sendRoomMessage = (message, key, reply) => {

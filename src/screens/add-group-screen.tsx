@@ -9,19 +9,11 @@ import {
 } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { swarm } from 'lib/native';
-
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
-  getUserGroups,
-  naclHash,
+  onJoinAndSaveRoom,
   onRequestNewGroupKey,
-  randomKey,
-  saveRoomsMessageToDatabase,
-  saveRoomToDatabase,
-  setRoomMessages,
-  setStoreCurrentGroupKey,
   useGlobalStore,
 } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
@@ -31,7 +23,6 @@ interface Props {
 }
 
 let admin: string = '';
-
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name: initialName, roomKey: initialKey } = route.params;
@@ -41,31 +32,19 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const [isJoiningExisting, setIsJoiningExisting] = useState(false);
   const { name: userName, address } = useGlobalStore((state) => state.user);
   const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
-
-  async function onCreatePress() {
+  function onCreatePress() {
     //TODO Add Create / Join option
     if (roomKey && name) {
-      await saveRoomToDatabase(name, roomKey, admin);
-      await saveRoomsMessageToDatabase(
-        address,
-        'Joined room',
-        roomKey,
-        '',
-        Date.now(),
-        userName,
-        randomKey(),
-        true,
-      );
-      setStoreCurrentGroupKey(roomKey);
-      setRoomMessages(roomKey, 0);
-      getUserGroups();
-      swarm(naclHash(roomKey), roomKey);
+      onJoinAndSaveRoom(roomKey, name, admin, address, userName);
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
           routes: [
             { name: GroupsScreens.GroupsScreen },
-            { name: GroupsScreens.GroupChatScreen, params: { name, roomKey } },
+            {
+              name: GroupsScreens.GroupChatScreen,
+              params: { name, roomKey },
+            },
           ],
         }),
       );

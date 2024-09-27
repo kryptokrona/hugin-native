@@ -1,10 +1,12 @@
 import i18n from 'i18next';
 
+import { bare } from 'lib/native';
+
 import { defaultTheme } from '@/styles';
 
 import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
-import { initDB } from './sqlite';
 import { getUserGroups, joinRooms } from './bare';
+import { initDB } from './sqlite';
 import {
   defaultPreferences,
   defaultUser,
@@ -12,8 +14,6 @@ import {
   setStoreTheme,
   setStoreUser,
 } from './zustand';
-
-import { bare } from '/lib/native.js';
 
 export const init = async () => {
   const theme = await getStorageValue(ASYNC_STORAGE_KEYS.THEME);
@@ -27,9 +27,7 @@ export const init = async () => {
   setStoreTheme(theme ?? defaultTheme);
   setStorePreferences(preferences ?? defaultPreferences);
   setStoreUser(user);
-
   getUserGroups();
-
   if (preferences) {
     await i18n.changeLanguage(preferences.language);
   }

@@ -7,54 +7,117 @@ const {
   sanitize_join_swarm_data,
   sanitize_voice_status_data,
   random_key,
+  toUintArray,
 } = require('./utils');
-let RPC;
-let RPC_SENDER;
+
 const LOCAL_VOICE_STATUS_OFFLINE = [
   JSON.stringify({ topic: '', video: false, voice: false }),
 ];
+let RPC_SENDER;
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
+let active_swarms = [];
 
-class Swarm {
-  constructor(rpc) {
-    if (RPC) {
+class Room {
+  constructor(key) {
+    this.swarm = {};
+    this.key = key;
+    this.time = Date.now();
+    this.topic = null;
+  }
+
+  async join(hashkey) {
+    //Create a new common keypair for this room from hashed invitelink as seed.
+    //The public key of this keypair is used as topic.
+    //Connections auth is checked by a signature from the privatekey.
+    const invite = toUintArray(hashkey);
+    const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
+    const topic = base_keys.publicKey.toString('hex');
+    const hash = Buffer.alloc(32).fill(topic);
+    console.log('Joining topic: ', topic);
+    try {
+      this.swarm = new HyperSwarm({}, sig, dht_keys, base_keys);
+    } catch (e) {
+      error_message('Error starting swarm');
       return;
     }
-    this.rpc = rpc;
-  }
-  async start(hashkey, key) {
-    return await create_swarm(hashkey, key);
-  }
-
-  async end(topic) {
-    await end_swarm(topic);
-  }
-
-  send_file(file_data) {
-    // SEND SHIT
-    // const file = fs.create
-    console.log('WORKING !!!!!!!!!!!!!!!!', { file_data });
-  }
-
-  async channel() {
-    if (RPC) {
-      return;
-    }
-    //Set up stream rpc if we need to send files somewhere
-    //I think this can go both ways
-    //Use it for ipc messages for now
-    RPC = this.rpc.register(1, {
-      request: ce.string,
-      response: ce.string,
+    this.swarm.on('connection', (connection, information) => {
+      console.log('New connection ', information);
+      new_connection(connection, topic, this.key);
     });
-    RPC_SENDER = RPC.createRequestStream();
-    RPC_SENDER.on('data', (data) => {
-      console.log('RPC sender in swarm got data from frontend', data);
-    });
+
+    this.discovery = this.swarm.join(hash, { client: true, server: true });
+    this.topic = topic;
+    return true;
   }
 }
 
-let active_swarms = [];
+const create_swarm = async (hashkey, key) => {
+  console.log('Creating swarm!');
+  const room = new Room();
+  const connected = await room.join(hashkey);
+  if (!connected) return;
+
+  const active = {
+    call: [],
+    connections: [],
+    channels: [],
+    voice_channel: [],
+    key: room.key,
+    swarm: room.swarm,
+    time: room.time,
+    topic: room.topic,
+    discovery: room.discovery,
+  };
+
+  active_swarms.push(active);
+  sender('new-swarm', { connected, key });
+  check_if_online(room.topic);
+
+  process.once('SIGINT', function () {
+    room.swarm.on('close', function () {
+      process.exit();
+    });
+    room.swarm.destroy();
+    setTimeout(() => process.exit(), 2000);
+  });
+
+  return room.topic;
+};
+
+const new_connection = (connection, topic, key) => {
+  console.log('New connection incoming');
+  const active = get_active_topic(topic);
+
+  if (!active) {
+    console.log('no longer active in topic');
+    connection_closed(connection, topic);
+    return;
+  }
+
+  console.log('*********Got new Connection! ************');
+  active.connections.push({
+    address: '',
+    connection,
+    name: '',
+    topic,
+    video: false,
+    voice: false,
+  });
+  send_joined_message(topic);
+  connection.on('data', async (data) => {
+    incoming_message(data, topic, connection, key);
+  });
+
+  connection.on('close', () => {
+    console.log('Got close signal');
+    connection_closed(connection, topic);
+  });
+
+  connection.on('error', () => {
+    console.log('Got error connection signal');
+    connection_closed(connection, topic);
+  });
+};
 
 function send_message(message, topic, reply, invite) {
   console.log('Send this swarm message', message);
@@ -75,102 +138,6 @@ function send_message(message, topic, reply, invite) {
   send_swarm_message(send, topic);
   return send;
 }
-
-const toUintArray = (val) => {
-  return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
-};
-
-const create_swarm = async (hashkey, key) => {
-  console.log('Creating swarm!');
-  //Create a new common keypair for this room from hashed invitelink as seed.
-  //The public key of this keypair is used as topic.
-  //Connections auth is checked by a signature from the privatekey.
-  const invite = toUintArray(hashkey);
-  const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
-  const hash = base_keys.publicKey.toString('hex');
-
-  console.log('Joining topic: ', hash);
-  const time = Date.now();
-  let discovery;
-  let swarm;
-  try {
-    swarm = new HyperSwarm({}, sig, dht_keys, base_keys);
-  } catch (e) {
-    error_message('Error starting swarm');
-    return;
-  }
-  const active = {
-    call: [],
-    connections: [],
-    key,
-    swarm,
-    time,
-    topic: hash,
-  };
-  active_swarms.push(active);
-  sender('new-swarm', {
-    channels: [],
-    connections: [],
-    key,
-    time,
-    topic: hash,
-    voice_channel: [],
-  });
-
-  swarm.on('connection', (connection, information) => {
-    console.log('New connection ', information);
-    new_connection(connection, hash, key);
-  });
-
-  process.once('SIGINT', function () {
-    swarm.on('close', function () {
-      process.exit();
-    });
-    swarm.destroy();
-    setTimeout(() => process.exit(), 2000);
-  });
-
-  const topic = Buffer.alloc(32).fill(hash);
-  discovery = swarm.join(topic, { client: true, server: true });
-  active.discovery = discovery;
-  check_if_online(hash);
-  return hash;
-};
-
-const new_connection = (connection, hash, key) => {
-  console.log('New connection incoming');
-  const active = get_active_topic(hash);
-
-  if (!active) {
-    console.log('no longer active in topic');
-    connection_closed(connection, hash);
-    return;
-  }
-
-  console.log('*********Got new Connection! ************');
-  active.connections.push({
-    address: '',
-    connection,
-    name: '',
-    topic: hash,
-    video: false,
-    voice: false,
-  });
-  send_joined_message(hash);
-  connection.on('data', async (data) => {
-    incoming_message(data, hash, connection, key);
-  });
-
-  connection.on('close', () => {
-    console.log('Got close signal');
-    connection_closed(connection, hash);
-  });
-
-  connection.on('error', () => {
-    console.log('Got error connection signal');
-    connection_closed(connection, hash);
-  });
-};
 
 const send_joined_message = async (topic) => {
   //Use topic as signed message?
@@ -557,10 +524,28 @@ const error_message = (message) => {
   sender('error-message', { message });
 };
 
+class ipc {
+  constructor() {}
+  new(rpc) {
+    if (RPC_SENDER) return;
+    let RPC;
+    RPC = rpc.register(1, {
+      request: ce.string,
+      response: ce.string,
+    });
+    RPC_SENDER = RPC.createRequestStream();
+    RPC_SENDER.on('data', (data) => {
+      console.log('RPC sender in swarm got data from frontend', data);
+    });
+    return true;
+  }
+}
+
 module.exports = {
-  Swarm,
   create_swarm,
+  end_swarm,
   share_file_with_message,
   send_message,
   send_message_history,
+  ipc,
 };

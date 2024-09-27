@@ -4,6 +4,9 @@ import {
   getRoomMessages,
   removeRoomFromDatabase,
   getRooms,
+  saveRoomToDatabase,
+  saveRoomsMessageToDatabase,
+  randomKey,
 } from '@/services';
 import type { SelectedFile, FileInput, Message } from '@/types';
 import { sleep } from '@/utils';
@@ -21,6 +24,7 @@ import {
   getCurrentGroupKey,
   setStoreGroups,
   setStoreRoomMessages,
+  setStoreCurrentGroupKey,
 } from '../zustand';
 
 export const getUserGroups = async () => {
@@ -102,10 +106,39 @@ export const onLeaveGroup = (key: string) => {
 export const joinRooms = async () => {
   console.log('********* Joining rooms! ***********');
   const rooms = await getRooms();
+  // for (r of rooms) {
+  //   await sleep(100);
+  //   await onDeleteGroup(r.key);
+  // }
   for (r of rooms) {
     await sleep(100);
     console.log('Joining room -->');
     console.log('With invite key:', r.key);
     await swarm(naclHash(r.key), r.key);
   }
+};
+
+export const onJoinAndSaveRoom = async (
+  key: string,
+  name: string,
+  admin: string,
+  address: string,
+  userName: string,
+) => {
+  await swarm(naclHash(key), key);
+  console.log('Swarm launched');
+  await saveRoomToDatabase(name, key, admin);
+  await saveRoomsMessageToDatabase(
+    address,
+    'Joined room',
+    key,
+    '',
+    Date.now(),
+    userName,
+    randomKey(),
+    true,
+  );
+  setRoomMessages(key, 0);
+  setStoreCurrentGroupKey(key);
+  getUserGroups();
 };

@@ -47,7 +47,7 @@
     "hyperbeam": "^3.0.2",
     "hyperbee": "^2.19.6",
     "hypercore": "^10.37.7",
-    "hyperdht": "^6.15.1",
+    "hyperdht": "6.15.1",
     "hyperswarm": "4.7.14",
     "i18next": "^23.11.5",
     "identicon.js": "^2.3.3",
