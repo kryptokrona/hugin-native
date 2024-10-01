@@ -5,6 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useGlobalStore } from '@/services';
 
 import { Avatar, TextField } from './_elements';
+import { getAvatar } from '@/utils';
 
 interface Props {
   name: string;
@@ -46,6 +47,7 @@ export const PreviewItem: React.FC<Props> = ({
       ]}
       onLongPress={handleLongPress}
       onPressOut={() => setIsPressed(false)}>
+      <Avatar size={50} base64={getAvatar(roomKey)} />
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">
           {name}
