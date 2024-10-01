@@ -31,7 +31,7 @@ import {
 
 export const getRoomUsers = async () => {
   const rooms = await getLatestRoomMessages();
-  setStoreRooms(rooms);
+  setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
 };
 
 export const peerConnected = (user) => {
