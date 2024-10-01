@@ -2,26 +2,28 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 import { defaultTheme } from '@/styles';
-import type { Message, Group, Preferences, Theme, User } from '@/types';
+import type { Message, Preferences, Room, Theme, User } from '@/types';
 import { createAvatar } from '@/utils';
 
 import { update_bare_user } from '/lib/native';
+
 import { ASYNC_STORAGE_KEYS, setStorageValue } from '../async-storage';
 
 type GlobalStore = {
   theme: Theme;
   user: User;
   preferences: Preferences;
-  groups: Group[];
+  rooms: Room[];
+  thisRoom: string;
   roomMessages: Message[];
-  currentGroupKey: string;
-
+  roomUsers: User[];
   setTheme: (payload: Theme) => void;
   setUser: (payload: User) => void;
   setPreferences: (payload: Preferences) => void;
-  setGroups: (payload: Group[]) => void;
+  setRooms: (payload: Room[]) => void;
   setRoomMessages: (payload: Message[]) => void;
-  setCurrentGroupKey: (payload: string) => void;
+  setCurrentRoom: (payload: string) => void;
+  setRoomUserList: (payload: User[]) => void;
 };
 
 export const useGlobalStore = create<
@@ -29,30 +31,34 @@ export const useGlobalStore = create<
   [['zustand/subscribeWithSelector', never]]
 >(
   subscribeWithSelector((set) => ({
-    groups: [],
-    currentGroupKey: "",
-    roomMessages: [],
     preferences: defaultPreferences,
-    setGroups: (groups: Group[]) => {
-      set({ groups });
-    },
-    setCurrentGroupKey: (currentGroupKey: string) => {
-      set({ currentGroupKey });
-    },
-    setRoomMessages: (roomMessages: Message[]) => {
-      set({ roomMessages });
+    roomMessages: [],
+    roomUsers: [],
+    rooms: [],
+    setCurrentRoom: (thisRoom: string) => {
+      set({ thisRoom });
     },
     setPreferences: (preferences: Preferences) => {
       set({ preferences });
     },
+    setRoomMessages: (roomMessages: Message[]) => {
+      set({ roomMessages });
+    },
+    setRoomUserList: (roomUsers: User[]) => {
+      set({ roomUsers });
+    },
+    setRooms: (rooms: Room[]) => {
+      set({ rooms });
+    },
     setTheme: (theme: Theme) => {
       set({ theme });
     },
-
     setUser: (user: User) => {
       set({ user });
     },
     theme: defaultTheme,
+
+    thisRoom: '',
     user: defaultUser,
   })),
 );
