@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
-  onJoinAndSaveRoom,
+  joinAndSaveRoom,
   onRequestNewGroupKey,
   useGlobalStore,
 } from '@/services';
@@ -35,7 +35,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   function onCreatePress() {
     //TODO Add Create / Join option
     if (roomKey && name) {
-      onJoinAndSaveRoom(roomKey, name, admin, address, userName);
+      joinAndSaveRoom(roomKey, name, admin, address, userName);
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
