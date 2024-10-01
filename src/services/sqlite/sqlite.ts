@@ -6,7 +6,7 @@ import {
 
 import { Message } from 'types/p2p';
 
-import { getUserGroups, updateMessages } from '@/services';
+import { getRoomUsers, updateMessages } from '@/services';
 
 enablePromise(true);
 
@@ -84,7 +84,7 @@ export async function removeRoomFromDatabase(key: string) {
     return false;
   }
   //Update active room list
-  getUserGroups();
+  getRoomUsers();
   return true;
 }
 
@@ -228,7 +228,7 @@ export async function saveRoomsMessageToDatabase(
       [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
     );
     console.log('Epic win', result);
-    getUserGroups();
+    getRoomUsers();
 
     const newMessage: Message = {
       address: address,

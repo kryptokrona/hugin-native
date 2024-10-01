@@ -177,6 +177,11 @@ const toUintArray = (val) => {
   return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
 };
 
+const verify_admins = (remotePub, signature, invite) => {
+  if (signature.length !== 64) return false;
+  return Keychain.verify(remotePub, signature, invite);
+};
+
 module.exports = {
   get_new_peer_keys,
   sign,
@@ -186,4 +191,5 @@ module.exports = {
   group_key,
   random_key,
   toUintArray,
+  verify_admins,
 };

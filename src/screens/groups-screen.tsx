@@ -7,7 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
 import { GroupsScreens } from '@/config';
-import { setRoomMessages, setStoreCurrentGroupKey, useGlobalStore } from '@/services';
+import {
+  setRoomMessages,
+  setStoreCurrentRoom,
+  useGlobalStore,
+} from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
 interface Props {
@@ -18,22 +22,22 @@ export const GroupsScreen: React.FC<Props> = () => {
   //TODO** rename Groups -> Rooms
   const { t } = useTranslation();
   const navigation = useNavigation<GroupStackNavigationType>();
-  const groups = useGlobalStore((state) => state.groups);
+  const rooms = useGlobalStore((state) => state.rooms);
   async function onPress(roomKey: string, name: string) {
     setRoomMessages(roomKey, 0);
-    setStoreCurrentGroupKey(roomKey);
+    setStoreCurrentRoom(roomKey);
     navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
   }
 
   return (
     <ScreenLayout>
-      {groups.length === 0 && (
+      {rooms.length === 0 && (
         <Container>
           <TextField size="large">{t('emptyAddressBook')}</TextField>
         </Container>
       )}
       <FlatList
-        data={groups}
+        data={rooms}
         keyExtractor={(item, i) => `${item.roomKey}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />

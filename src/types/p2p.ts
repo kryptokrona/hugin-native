@@ -7,7 +7,7 @@ export interface HuginUser {
   name: string;
 }
 
-export interface Group {
+export interface Room {
   roomKey: string;
   name: string;
   message: string;
@@ -33,6 +33,7 @@ export interface Message {
   nickname: string;
   hash: string;
   sent: boolean;
+  joined?: boolean;
 }
 
 export interface GroupMessage extends Message {

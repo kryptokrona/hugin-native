@@ -39,6 +39,7 @@ export interface TransactionDetail {
 
 export interface User {
   address: string;
-  avatar: string;
+  avatar?: string;
   name: string;
+  room: string;
 }
