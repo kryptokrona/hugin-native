@@ -3,9 +3,10 @@ import i18n from 'i18next';
 import { bare } from 'lib/native';
 
 import { defaultTheme } from '@/styles';
+import { sleep } from '@/utils';
 
 import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
-import { getUserGroups, joinRooms } from './bare';
+import { getRoomUsers, joinRooms } from './bare';
 import { initDB } from './sqlite';
 import {
   defaultPreferences,
@@ -20,14 +21,15 @@ export const init = async () => {
   const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
   const mUser = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
   const user = mUser ?? defaultUser;
+  await bare(user);
   console.log('Initializing database..');
   await initDB();
-  await bare(user);
+  await sleep(100);
   await joinRooms();
   setStoreTheme(theme ?? defaultTheme);
   setStorePreferences(preferences ?? defaultPreferences);
   setStoreUser(user);
-  getUserGroups();
+  getRoomUsers();
   if (preferences) {
     await i18n.changeLanguage(preferences.language);
   }
