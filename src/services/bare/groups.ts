@@ -38,7 +38,7 @@ export const peerConnected = (user) => {
   console.log('Peer connected, add:', user);
   const connected: User = {
     address: user.address,
-    name: user.nickname,
+    name: user.name,
     room: user.key,
   };
   const users = getActiveRoomUsers();
