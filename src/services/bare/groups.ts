@@ -8,7 +8,7 @@ import {
   saveRoomsMessageToDatabase,
   randomKey,
 } from '@/services';
-import type { SelectedFile, FileInput, Message } from '@/types';
+import type { SelectedFile, FileInput, Message, User } from '@/types';
 import { sleep } from '@/utils';
 
 import {
@@ -20,29 +20,45 @@ import {
 } from '/lib/native';
 
 import {
+  getActiveRoomUsers,
+  getCurrentRoom,
   getRoomsMessages,
-  getCurrentGroupKey,
-  setStoreGroups,
+  setStoreActiveRoomUsers,
+  setStoreCurrentRoom,
   setStoreRoomMessages,
-  setStoreCurrentGroupKey,
+  setStoreRooms,
 } from '../zustand';
 
-export const getUserGroups = async () => {
-  const groups = await getLatestRoomMessages();
-  setStoreGroups(groups);
+export const getRoomUsers = async () => {
+  const rooms = await getLatestRoomMessages();
+  setStoreRooms(rooms);
 };
 
 export const peerConnected = (user) => {
   console.log('Peer connected, add:', user);
-  //Update state
+  const connected: User = {
+    address: user.address,
+    name: user.nickname,
+    room: user.key,
+  };
+  const users = getActiveRoomUsers();
+  console.log('online users in all groups', users.length);
+  const updateList = [...users, connected];
+  console.log('Updated:', updateList.length);
+  setStoreActiveRoomUsers(updateList);
   //Here we also get status if the user is connected to a voice channel
   //updateVoiceChannelStatus(user)
 };
 
 export const peerDisconncted = (user) => {
   console.log('Peer disconnected, remove:', user);
-  //user.key is the room where user.address should be removed from.
-  //remove from voice channel
+  const users = getActiveRoomUsers();
+  console.log('Users active', users.length);
+  const updateList = users.filter(
+    (a: User) => a.address !== user.address && a.room !== user.key,
+  );
+  console.log('Updated list', updateList.length);
+  setStoreActiveRoomUsers(updateList);
   //updateVoiceChannelStatus(user)
 };
 
@@ -52,10 +68,10 @@ export const updateVoiceChannelStatus = (status) => {
 
 export const updateMessages = async (message: Message) => {
   // const theme = useGlobalStore((state) => state.theme);
-  const currentGroupKey = getCurrentGroupKey();
-  console.log(currentGroupKey);
+  const thisRoom = getCurrentRoom();
+  console.log(thisRoom);
 
-  if (currentGroupKey === message.room) {
+  if (thisRoom === message.room) {
     const messages = getRoomsMessages();
     const updatedMessages = [...messages, message];
     setStoreRoomMessages(updatedMessages);
@@ -118,7 +134,7 @@ export const joinRooms = async () => {
   }
 };
 
-export const onJoinAndSaveRoom = async (
+export const joinAndSaveRoom = async (
   key: string,
   name: string,
   admin: string,
@@ -139,6 +155,6 @@ export const onJoinAndSaveRoom = async (
     true,
   );
   setRoomMessages(key, 0);
-  setStoreCurrentGroupKey(key);
-  getUserGroups();
+  setStoreCurrentRoom(key);
+  getRoomUsers();
 };
