@@ -197,11 +197,11 @@ const incoming_message = async (data, topic, connection, key) => {
   }
   // Check
   const check = await check_data_message(str, connection, topic);
-  console.log('check', check);
-  // if (check === 'Error') {
-  //   connection_closed(connection, topic);
-  //   return;
-  // }
+  if (check === undefined) return;
+  if (check === 'Error') {
+    connection_closed(connection, topic);
+    return;
+  }
   if (check) {
     return;
   }
@@ -279,13 +279,13 @@ const check_data_message = async (data, connection, topic) => {
     if ('joined' in data) {
       const joined = sanitize_join_swarm_data(data);
       console.log('joined check', joined);
-      // if (!joined) {
-      //   return 'Error';
-      // }
+      if (!joined) {
+        return 'Error';
+      }
 
       if (con.joined) {
         //Connection is already joined
-        return;
+        return true;
       }
 
       const admin = verify_admins(
