@@ -8,6 +8,7 @@ const {
   sanitize_voice_status_data,
   random_key,
   toUintArray,
+  verify_admins,
 } = require('./utils');
 
 const LOCAL_VOICE_STATUS_OFFLINE = [
@@ -20,9 +21,9 @@ let active_swarms = [];
 class Room {
   constructor(key) {
     this.swarm = {};
-    this.key = key;
     this.time = Date.now();
     this.topic = null;
+    this.discovery = null;
   }
 
   async join(hashkey) {
@@ -62,7 +63,7 @@ const create_swarm = async (hashkey, key) => {
     connections: [],
     channels: [],
     voice_channel: [],
-    key: room.key,
+    key,
     swarm: room.swarm,
     time: room.time,
     topic: room.topic,
@@ -287,6 +288,13 @@ const check_data_message = async (data, connection, topic) => {
         return;
       }
 
+      const admin = verify_admins(
+        connection.remotePublicKey,
+        Buffer.from(data.signature, 'hex'),
+        Buffer.from(active.key.slice(-64), 'hex'),
+      );
+
+      console.log('Admin?', admin);
       //Check signature
       // const verified = await verifySignature(joined.message, joined.address, joined.signature)
       // if(!verified) return "Error"
@@ -399,7 +407,10 @@ const end_swarm = async (topic) => {
     return;
   }
   sender('end-swarm', { topic });
-  update_local_voice_channel_status(LOCAL_VOICE_STATUS_OFFLINE);
+  const [in_voice] = get_local_voice_status(topic);
+  if (in_voice) {
+    update_local_voice_channel_status(LOCAL_VOICE_STATUS_OFFLINE);
+  }
 
   send_swarm_message(JSON.stringify({ type: 'disconnected' }), topic);
 
