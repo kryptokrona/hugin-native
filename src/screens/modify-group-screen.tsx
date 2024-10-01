@@ -30,7 +30,7 @@ import type {
   User,
   GroupStackParamList,
 } from '@/types';
-import { createAvatar, onlineUsers, pickAvatar } from '@/utils';
+import { createAvatar, getAvatar, onlineUsers, pickAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
@@ -45,6 +45,8 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const [groupName, setName] = useState<string>('Some group name'); // route.params.name
   const tempAvatar = createAvatar();
   const isAdmin = false; // TBD
+  const roomUsers = useGlobalStore((state) => state.roomUsers).filter(a => a.room == roomKey);
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -88,7 +90,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           <FlatList
             nestedScrollEnabled
             numColumns={2}
-            data={onlineUsers}
+            data={roomUsers}
             renderItem={OnlineUserMapper}
             keyExtractor={(item, i) => `${item.name}-${i}`}
           />
@@ -100,7 +102,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
-          <Avatar base64={tempAvatar} />
+          <Avatar base64={getAvatar(roomKey)} />
           <View style={styles.avatarButton}>
             <CustomIcon
               type="MI"
