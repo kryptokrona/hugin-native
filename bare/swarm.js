@@ -105,7 +105,7 @@ const new_connection = (connection, topic, key, dht_keys) => {
     video: false,
     voice: false,
   });
-  send_joined_message(topic.dht_keys);
+  send_joined_message(topic, dht_keys);
   connection.on('data', async (data) => {
     incoming_message(data, topic, connection, key);
   });
@@ -153,17 +153,12 @@ const send_joined_message = async (topic, dht_keys) => {
     return;
   }
   const room = is_admin(active.key);
-  console.log('Am i admin in this room?', admin);
+  console.log('Am i admin in this room?', room);
   let sig = '';
   if (admin) {
     sig = sign_admin_message(dht_keys, room.admin);
-    console.log('New keypair from admin.seed');
     console.log('We are admin in this room ----->>>!');
-    console.log('Sign admin message');
   }
-
-  // const sig =
-  //   'await signMessage(msg, keychain.getXKRKeypair().privateSpendKey)';
   let [voice, video] = get_local_voice_status(topic);
   if (video) {
     voice = true;

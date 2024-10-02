@@ -130,7 +130,6 @@ export const joinRooms = async () => {
   for (const r of rooms) {
     const key = adminkeys.find((a) => a.key === r.key && a.seed);
     const admin = key?.seed;
-    console.log('Admin joining?', admin);
     await sleep(100);
     console.log('Joining room -->');
     await swarm(naclHash(r.key), r.key, admin);
@@ -140,9 +139,7 @@ export const joinRooms = async () => {
 export const loadAdminKeys = async () => {
   const rooms = await getRooms();
   const keys = [];
-  console.log('Rooms admin?', rooms);
   for (const r of rooms) {
-    console.log('admin seed', r.seed);
     if (r.seed) {
       const admin = { key: r.key, seed: r.seed };
       keys.push(admin);
