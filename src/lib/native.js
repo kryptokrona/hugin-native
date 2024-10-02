@@ -49,8 +49,8 @@ export const update_bare_user = async (user) => {
   return mainRPC.request(data);
 };
 
-export const swarm = async (hashkey, key) => {
-  const data = JSON.stringify({ type: 'new_swarm', key, hashkey });
+export const swarm = async (hashkey, key, admin) => {
+  const data = JSON.stringify({ type: 'new_swarm', key, hashkey, admin });
   mainRPC.request(data);
 };
 

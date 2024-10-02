@@ -126,12 +126,29 @@ export const joinRooms = async () => {
   //   await sleep(100);
   //   await onDeleteGroup(r.key);
   // }
-  for (r of rooms) {
+  const adminkeys = await loadAdminKeys();
+  for (const r of rooms) {
+    const key = adminkeys.find((a) => a.key === r.key && a.seed);
+    const admin = key?.seed;
+    console.log('Admin joining?', admin);
     await sleep(100);
     console.log('Joining room -->');
-    console.log('With invite key:', r.key);
-    await swarm(naclHash(r.key), r.key);
+    await swarm(naclHash(r.key), r.key, admin);
   }
+};
+
+export const loadAdminKeys = async () => {
+  const rooms = await getRooms();
+  const keys = [];
+  console.log('Rooms admin?', rooms);
+  for (const r of rooms) {
+    console.log('admin seed', r.seed);
+    if (r.seed) {
+      const admin = { key: r.key, seed: r.seed };
+      keys.push(admin);
+    }
+  }
+  return keys;
 };
 
 export const joinAndSaveRoom = async (
@@ -141,7 +158,7 @@ export const joinAndSaveRoom = async (
   address: string,
   userName: string,
 ) => {
-  await swarm(naclHash(key), key);
+  await swarm(naclHash(key), key, admin);
   console.log('Swarm launched');
   await saveRoomToDatabase(name, key, admin);
   await saveRoomsMessageToDatabase(
