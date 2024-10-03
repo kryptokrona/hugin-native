@@ -73,13 +73,8 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     return <UserItem {...item} />;
   }
 
-  function onDelete() {
-    onDeleteGroup('TBD topic string');
-    // navigation.navigate(GroupsScreens.GroupsScreen);
-  }
-
   function onLeave() {
-    onLeaveGroup(roomKey);
+    onDeleteGroup(roomKey);
     navigation.navigate(GroupsScreens.GroupsScreen);
   }
 
@@ -120,16 +115,9 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           // onSubmitEditing={onSave}
         />
         <TextButton onPress={onSave}>{t('save')}</TextButton>
-        {isAdmin && (
-          <TextButton onPress={onDelete} type="destructive">
-            {t('delete')}
-          </TextButton>
-        )}
-        {!isAdmin && (
           <TextButton onPress={onLeave} type="destructive">
             {t('leaveGroup')}
           </TextButton>
-        )}
       </ScrollView>
     </ScreenLayout>
   );
