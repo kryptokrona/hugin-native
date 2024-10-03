@@ -23,21 +23,21 @@ export const AppNavigator = () => {
         tabBarHideOnKeyboard: true,
       }}
       tabBar={(props) => <MyTabBar {...props} />}>
-      <Tab.Screen
+      {/* <Tab.Screen
         name={TabBar.MainTab.tabName}
         component={MainStackNavigator}
         options={{ headerShown: false }}
-      />
+      /> */}
       <Tab.Screen
         name={TabBar.GroupsTab.tabName}
         component={GroupStackNavigator}
         options={{ headerShown: false }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name={TabBar.MessagesTab.tabName}
         component={MessagesStackNavigator}
         options={{ headerShown: false }}
-      />
+      /> */}
       <Tab.Screen
         name={TabBar.SettingsTab.tabName}
         component={SettingsStackNavigator}
