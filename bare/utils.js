@@ -182,6 +182,11 @@ const verify_admins = (remotePub, signature, invite) => {
   return Keychain.verify(remotePub, signature, invite);
 };
 
+const sign_admin_message = (dht_keys, admin) => {
+  const keys = create_keys_from_seed(admin);
+  return keys.get().sign(dht_keys.get().publicKey);
+};
+
 module.exports = {
   get_new_peer_keys,
   sign,
@@ -192,4 +197,5 @@ module.exports = {
   random_key,
   toUintArray,
   verify_admins,
+  sign_admin_message,
 };

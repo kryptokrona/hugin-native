@@ -9,6 +9,7 @@ const {
   random_key,
   toUintArray,
   verify_admins,
+  sign_admin_message,
 } = require('./utils');
 
 const LOCAL_VOICE_STATUS_OFFLINE = [
@@ -43,7 +44,7 @@ class Room {
     }
     this.swarm.on('connection', (connection, information) => {
       console.log('New connection ', information);
-      new_connection(connection, topic, this.key);
+      new_connection(connection, topic, this.key, dht_keys);
     });
 
     this.discovery = this.swarm.join(hash, { client: true, server: true });
@@ -85,7 +86,7 @@ const create_swarm = async (hashkey, key) => {
   return room.topic;
 };
 
-const new_connection = (connection, topic, key) => {
+const new_connection = (connection, topic, key, dht_keys) => {
   console.log('New connection incoming');
   const active = get_active_topic(topic);
 
@@ -104,7 +105,7 @@ const new_connection = (connection, topic, key) => {
     video: false,
     voice: false,
   });
-  send_joined_message(topic);
+  send_joined_message(topic, dht_keys);
   connection.on('data', async (data) => {
     incoming_message(data, topic, connection, key);
   });
@@ -140,15 +141,24 @@ function send_message(message, topic, reply, invite) {
   return send;
 }
 
-const send_joined_message = async (topic) => {
+const is_admin = (key) => {
+  return Hugin.rooms.find((a) => a.key === key && a.admin);
+};
+
+const send_joined_message = async (topic, dht_keys) => {
   //Use topic as signed message?
   const msg = topic;
   const active = get_active_topic(topic);
   if (!active) {
     return;
   }
-  const sig =
-    'await signMessage(msg, keychain.getXKRKeypair().privateSpendKey)';
+  const room = is_admin(active.key);
+  console.log('Am i admin in this room?', room);
+  let sig = '';
+  if (admin) {
+    sig = sign_admin_message(dht_keys, room.admin);
+    console.log('We are admin in this room ----->>>!');
+  }
   let [voice, video] = get_local_voice_status(topic);
   if (video) {
     voice = true;
@@ -197,11 +207,11 @@ const incoming_message = async (data, topic, connection, key) => {
   }
   // Check
   const check = await check_data_message(str, connection, topic);
-  console.log('check', check);
-  // if (check === 'Error') {
-  //   connection_closed(connection, topic);
-  //   return;
-  // }
+  if (check === undefined) return;
+  if (check === 'Error') {
+    connection_closed(connection, topic);
+    return;
+  }
   if (check) {
     return;
   }
@@ -279,13 +289,13 @@ const check_data_message = async (data, connection, topic) => {
     if ('joined' in data) {
       const joined = sanitize_join_swarm_data(data);
       console.log('joined check', joined);
-      // if (!joined) {
-      //   return 'Error';
-      // }
+      if (!joined) {
+        return 'Error';
+      }
 
       if (con.joined) {
         //Connection is already joined
-        return;
+        return true;
       }
 
       const admin = verify_admins(

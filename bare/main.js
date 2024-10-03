@@ -31,7 +31,7 @@ rpc.register(0, {
         updateBareUser(parsed.user);
         break;
       case 'new_swarm':
-        await newSwarm(parsed.hashkey, parsed.key);
+        await newSwarm(parsed.hashkey, parsed.key, parsed.admin);
         break;
       case 'end_swarm':
         endSwarm(parsed.key);
@@ -64,9 +64,9 @@ const updateBareUser = (user) => {
   Hugin.update(user);
 };
 
-const newSwarm = async (hashkey, key) => {
+const newSwarm = async (hashkey, key, admin) => {
   const topic = await create_swarm(hashkey, key);
-  Hugin.rooms.push({ key, topic });
+  Hugin.rooms.push({ key, topic, admin });
 };
 
 const endSwarm = async (key) => {
