@@ -24,12 +24,12 @@ export const init = async () => {
   await bare(user);
   console.log('Initializing database..');
   await initDB();
-  await sleep(100);
-  await joinRooms();
-  setStoreTheme(theme ?? defaultTheme);
-  setStorePreferences(preferences ?? defaultPreferences);
   setStoreUser(user);
   getRoomUsers();
+  setStoreTheme(theme ?? defaultTheme);
+  setStorePreferences(preferences ?? defaultPreferences);
+  await sleep(100);
+  await joinRooms();
   if (preferences) {
     await i18n.changeLanguage(preferences.language);
   }
