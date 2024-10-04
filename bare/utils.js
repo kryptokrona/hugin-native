@@ -187,6 +187,10 @@ const sign_admin_message = (dht_keys, admin) => {
   return keys.get().sign(dht_keys.get().publicKey);
 };
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 module.exports = {
   get_new_peer_keys,
   sign,
@@ -198,4 +202,5 @@ module.exports = {
   toUintArray,
   verify_admins,
   sign_admin_message,
+  sleep,
 };
