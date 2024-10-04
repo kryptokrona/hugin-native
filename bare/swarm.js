@@ -11,7 +11,6 @@ const {
   verify_admins,
   sign_admin_message,
 } = require('./utils');
-
 const LOCAL_VOICE_STATUS_OFFLINE = [
   JSON.stringify({ topic: '', video: false, voice: false }),
 ];
@@ -142,7 +141,7 @@ function send_message(message, topic, reply, invite) {
 }
 
 const is_admin = (key) => {
-  return Hugin.rooms.find((a) => a.key === key && a.admin);
+  return Hugin.rooms.find((a) => a.key === key && a.admin).admin;
 };
 
 const send_joined_message = async (topic, dht_keys) => {
@@ -152,11 +151,11 @@ const send_joined_message = async (topic, dht_keys) => {
   if (!active) {
     return;
   }
-  const room = is_admin(active.key);
-  console.log('Am i admin in this room?', room);
+  const admin = is_admin(active.key);
+  console.log('Am i admin in this room?', admin);
   let sig = '';
   if (admin) {
-    sig = sign_admin_message(dht_keys, room.admin);
+    sig = sign_admin_message(dht_keys, admin);
     console.log('We are admin in this room ----->>>!');
   }
   let [voice, video] = get_local_voice_status(topic);
@@ -514,7 +513,7 @@ const check_if_online = (topic) => {
   }
 };
 const localFiles = [];
-const share_file_with_message = (file) => {
+const share_file_with_message = async (file) => {
   // Note file includes property "message", regular text message
   // const active = get_active_topic(file.topic);
   const fileInfo = {
@@ -569,4 +568,5 @@ module.exports = {
   send_message,
   send_message_history,
   ipc,
+  sender,
 };
