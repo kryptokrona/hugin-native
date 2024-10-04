@@ -58,6 +58,7 @@
     "patch-package": "^8.0.0",
     "path-browserify": "0.0.0",
     "process": "^0.11.0",
+    "progress-stream": "^2.0.0",
     "querystring": "^0.2.1",
     "random-access-memory": "^6.2.1",
     "react": "18.2.0",
