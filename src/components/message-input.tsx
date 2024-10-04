@@ -60,17 +60,19 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   async function onFilePress() {
     try {
       const res = await DocumentPicker.pickSingle({
+        copyTo: 'documentDirectory',
         type: [types.allFiles],
       });
 
-      const { size, name, uri, type } = res;
+      console.log('Res', res);
+      const { size, name, uri, type, fileCopyUri } = res;
       if (!uri || !name || !size) {
         return;
       }
 
       const fileInfo: SelectedFile = {
         fileName: name,
-        path: uri,
+        path: fileCopyUri?.slice(0, 7)[1],
         size,
         time: new Date().getTime(),
         type,
