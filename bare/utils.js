@@ -167,6 +167,58 @@ const sanitize_voice_status_data = (data) => {
   return clean_object;
 };
 
+const sanitize_file_message = (data) => {
+  console.log('sanitize', data);
+  //Check standard message
+  const fileName = sanitizeHtml(data?.fileName);
+  if (typeof data?.fileName !== 'string' || fileName.length > 100) return false;
+
+  const address = sanitizeHtml(data?.address);
+  if (typeof data?.address !== 'string' || address.length > 99) return false;
+
+  const topic = sanitizeHtml(data?.topic);
+  if (typeof data?.topic !== 'string' || topic.length > 64) return false;
+
+  const type = sanitizeHtml(data?.type);
+  if (typeof data?.type !== 'string' || type.length > 25) return false;
+
+  const info = sanitizeHtml(data?.info);
+  if (typeof data?.info !== 'string' || info.length > 25) return false;
+
+  const size = sanitizeHtml(data?.size);
+  if (size.length > 20) return false;
+
+  const time = sanitizeHtml(data?.time);
+  if (time.length > 25) return false;
+
+  //Check optional
+  const key = sanitizeHtml(data?.key);
+  if (data?.key !== undefined) {
+    if (typeof data?.key !== 'string' || key.length > 128) return false;
+  }
+  const hash = sanitizeHtml(data?.hash);
+  if (data?.hash !== undefined) {
+    console.log('Hash not undefined', hash, data.hash);
+    if (typeof hash !== 'string' || hash.length > 64) return false;
+  }
+
+  if (typeof data?.file === 'boolean') return false;
+
+  const object = {
+    fileName,
+    address,
+    topic,
+    info,
+    type,
+    size,
+    time,
+    hash,
+    key: key,
+  };
+
+  return object;
+};
+
 const sanitizeHtml = (data) => {
   //Bare js seems not to be working with sanitize-html package.
   //Sanitze input later and only check relevant types and length for now
@@ -197,6 +249,7 @@ module.exports = {
   sanitize_join_swarm_data,
   sanitize_group_message,
   sanitize_voice_status_data,
+  sanitize_file_message,
   group_key,
   random_key,
   toUintArray,
