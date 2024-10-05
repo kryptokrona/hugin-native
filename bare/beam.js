@@ -1,9 +1,8 @@
 const fs = require('bare-fs');
 const Hyperbeam = require('hyperbeam');
-const progress = require('progress-stream');
 
 const { sender } = require('./swarm');
-const { sleep } = require('./utils');
+const { sleep, random_key } = require('./utils');
 let active_beams = [];
 let localFiles = [];
 let remoteFiles = [];
@@ -25,10 +24,11 @@ const start_beam = async (
   size,
 ) => {
   let beam;
-  //Create new or join existing beam and start beamEvent()
+  //Create new or join existing beam
   try {
     if (key === 'new') {
-      beam = new Hyperbeam();
+      const random = random_key();
+      beam = new Hyperbeam({ random });
       beam.write('Start');
       if (file) {
         file_beam(beam, chat, beam.key, false, group, filename, size);
@@ -210,6 +210,7 @@ const check_if_online = (addr) => {
 };
 
 const send_file = async (fileName, size, chat, key, group) => {
+  console.log('Sending file!');
   const active = active_beams.find((a) => a.chat === chat && a.key === key);
   const file = localFiles.find(
     (a) => a.fileName === fileName && a.chat === chat && a.key === key,
@@ -226,31 +227,35 @@ const send_file = async (fileName, size, chat, key, group) => {
     return;
   }
   try {
+    console.log('Upload starting....');
     const filePath = file.path;
     const stream = fs.createReadStream(filePath);
-    const progressStream = progress({ length: size, time: 100 });
+    // const progressStream = progress({ length: size, time: 100 });
 
-    progressStream.on('progress', async (progress) => {
-      sender('upload-file-progress', {
-        chat,
-        fileName,
-        progress: progress.percentage,
-        time: file.time,
-      });
-
-      if (progress.percentage === 100) {
-        console.log('File uploaded');
-        console.log('Done!');
-        let message = `Uploaded ${fileName}`;
-        console.log('------>', message);
-        // if (!group) {
-        //   saveMsg(message, chat, true, file.time);
-        // }
-        return;
-      }
+    // progressStream.on('progress', async (progress) => {
+    sender('upload-file-progress', {
+      chat,
+      fileName,
+      progress: 'Started',
+      time: file.time,
     });
 
-    stream.pipe(progressStream).pipe(active.beam);
+    // if (progress.percentage === 100) {
+    // if (!group) {
+    //   saveMsg(message, chat, true, file.time);
+    // }
+
+    //   }
+    // });
+
+    stream.pipe(active.beam);
+    stream.on('done', (a) => {
+      console.log('stream done', a);
+      console.log('File uploaded');
+      console.log('Done!');
+      let message = `Uploaded ${fileName}`;
+      console.log('------>', message);
+    });
   } catch (err) {
     errorMessage('Something went wrong uploading the file');
   }
@@ -274,23 +279,25 @@ const download_file = async (fileName, size, chat, key, group = false) => {
     sender('downloading', { chat, fileName, group, size });
     const downloadPath = downloadDirectory + '/' + fileName;
     const stream = fs.createWriteStream(downloadPath);
-    const progressStream = progress({ length: size, time: 100 });
-    progressStream.on('progress', (progress) => {
-      sender('download-file-progress', {
-        chat,
-        fileName,
-        path: downloadPath,
-        progress: progress.percentage,
-      });
-      console.log('Downloading', progress.percentage);
-      if (progress.percentage === 100) {
-        let message = `Downloaded ${fileName}`;
-        console.log('--------->', message);
-        // if (!group) saveMsg(message, chat, false, file.time);
-      }
-
-      active.beam.pipe(progressStream).pipe(stream);
+    // const progressStream = progress({ length: size, time: 100 });
+    // progressStream.on('progress', (progress) => {
+    sender('download-file-progress', {
+      chat,
+      fileName,
+      path: downloadPath,
+      progress: 'Started',
     });
+    console.log('Downloading  file...');
+    // if (progress.percentage === 100) {
+    // if (!group) saveMsg(message, chat, false, file.time);
+
+    active.beam.pipe(stream);
+    stream.on('done', (a) => {
+      let message = `Downloaded ${fileName}`;
+      console.log('--------->', message);
+      console.log('stream done ');
+    });
+    // });
   } catch (err) {
     errorMessage('Something went wrong downloading the file');
   }
@@ -409,12 +416,12 @@ const add_group_file = async (
   room = true,
   name,
 ) => {
-  sender('group-remote-file-added', { chat, group, remoteFiles });
+  sender('room-remote-file-added', { chat, room: group, remoteFiles });
   const message = {
     address: chat,
     channel: 'Room',
     file: true,
-    group: group,
+    room: group,
     hash: hash,
     message: fileName,
     name: name,
@@ -422,7 +429,7 @@ const add_group_file = async (
     sent: false,
     time: time,
   };
-  sender('roomMsg', message);
+  sender('new-message', message);
   return time;
 };
 
@@ -533,7 +540,7 @@ const check_data_message = (data, chat) => {
 };
 
 const errorMessage = (message) => {
-  sender('error-message', message);
+  sender('error-message', { message });
 };
 
 module.exports = {

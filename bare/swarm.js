@@ -10,14 +10,21 @@ const {
   toUintArray,
   verify_admins,
   sign_admin_message,
+  sanitize_file_message,
 } = require('./utils');
+const {
+  send_file,
+  start_download,
+  add_remote_file,
+  add_local_file,
+} = require('./beam');
 const LOCAL_VOICE_STATUS_OFFLINE = [
   JSON.stringify({ topic: '', video: false, voice: false }),
 ];
 let RPC_SENDER;
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
-
+let localFiles = [];
 class Room {
   constructor(key) {
     this.swarm = {};
@@ -246,12 +253,13 @@ const check_data_message = async (data, connection, topic) => {
     }
   }
 
-  // if ('info' in data) {
-  //     const fileData = sanitize_file_message(data)
-  //     if (!fileData) return "Error"
-  //     check_file_message(fileData, topic, con.address)
-  //     return true
-  // }
+  if ('info' in data) {
+    const fileData = sanitize_file_message(data);
+    console.log('Got file data incoming', fileData);
+    if (!fileData) return 'Error';
+    check_file_message(fileData, topic, con.address);
+    return true;
+  }
 
   // //Double check if connection is joined voice?
   // if ('offer' in data) {
@@ -348,6 +356,141 @@ const check_data_message = async (data, connection, topic) => {
   }
 
   return false;
+};
+
+const check_file_message = async (data, topic, address, con) => {
+  if (data.info === 'file-shared') {
+    const added = await add_remote_file(
+      data.fileName,
+      address,
+      data.size,
+      topic,
+      true,
+      data.hash,
+      true,
+      con.name,
+    );
+    save_file_info(data, topic, con.address, added, false, con.name);
+  }
+
+  const save_file_info = (data, topic, address, time, sent, name) => {
+    const active = get_active_topic(topic);
+    const message = {
+      message: data.fileName,
+      address: address,
+      name: name,
+      time: time,
+      group: active.key,
+      hash: data.hash,
+      reply: '',
+      sent: sent,
+    };
+    sender('save-file-info', { message });
+  };
+
+  if (data.type === 'download-request') {
+    console.log('Download request incoming:', data);
+    const key = await start_upload(data, topic);
+    send_file(data.fileName, data.size, address, key, true);
+  }
+
+  if (data.type === 'upload-ready') {
+    if (data.info === 'file') {
+      console.log('Upload ready! -------->');
+      await add_remote_file(data.fileName, address, data.size, data.key, true);
+      console.log('Starting to download ----------->');
+      start_download(Hugin.downloadDir, data.fileName, address, data.key);
+      return;
+    }
+  }
+
+  if (data.type === 'file-removed') console.log("'file removed", data); //TODO REMOVE FROM remoteFiles
+};
+
+const share_file_info = async (file, topic) => {
+  // Note file includes property "message", regular text message
+  // const active = get_active_topic(file.topic);
+  const fileInfo = {
+    address: Hugin.address,
+    fileName: file.fileName,
+    hash: file.hash,
+    info: 'file-shared',
+    size: file.size,
+    time: file.time,
+    topic: file.topic,
+    type: 'file',
+  };
+  const info = JSON.stringify(fileInfo);
+  localFiles.push(file);
+  //File shared, send info to peers
+  send_swarm_message(info, topic);
+};
+
+const request_download = (download) => {
+  const active = get_active_topic(download.key);
+  const address = download.chat;
+  const topic = active.topic;
+  const info = {
+    fileName: download.fileName,
+    address: Hugin.address,
+    topic: topic,
+    info: 'file',
+    type: 'download-request',
+    size: download.size,
+    time: download.time,
+    key: download.key,
+  };
+  send_file_info(address, topic, info);
+};
+
+const start_upload = async (file, topic) => {
+  const sendFile = localFiles.find(
+    (a) => a.fileName === file.fileName && file.topic === topic,
+  );
+  console.log('Start uploading this file:', sendFile);
+  if (!sendFile) {
+    errorMessage('File not found');
+    return;
+  }
+  return await upload_ready(sendFile, topic, file.address);
+};
+
+const upload_ready = async (file, topic, address) => {
+  const beam_key = await add_local_file(
+    file.fileName,
+    file.path,
+    address,
+    file.size,
+    file.time,
+    true,
+  );
+  const info = {
+    fileName: file.fileName,
+    address,
+    topic,
+    info: 'file',
+    type: 'upload-ready',
+    size: file.size,
+    time: file.time,
+    key: beam_key,
+  };
+  send_file_info(address, topic, info);
+  return beam_key;
+};
+
+const send_file_info = (address, topic, file) => {
+  console.log('send file info', file);
+  const active = active_swarms.find((a) => a.topic === topic);
+  if (!active) {
+    errorMessage('Swarm is not active');
+    return;
+  }
+  const con = active.connections.find((a) => a.address === address);
+  if (!con) {
+    errorMessage('Connection is closed');
+    return;
+  }
+  con.connection.write(JSON.stringify(file));
 };
 
 const request_message_history = (con, joined) => {
@@ -512,26 +655,6 @@ const check_if_online = (topic) => {
     }
   }
 };
-const localFiles = [];
-const share_file_with_message = async (file) => {
-  // Note file includes property "message", regular text message
-  // const active = get_active_topic(file.topic);
-  const fileInfo = {
-    address: Hugin.address,
-    fileName: file.fileName,
-    hash: file.hash,
-    info: 'file-shared',
-    size: file.size,
-    time: file.time,
-    topic: file.topic,
-    type: 'file',
-    message: file.message,
-  };
-  const info = JSON.stringify(fileInfo);
-  localFiles.push(file);
-  //File shared, send info to peers
-  send_swarm_message(info, file.topic);
-};
 
 const sender = (type, data) => {
   console.log('Send rpc data from swarm');
@@ -561,12 +684,16 @@ class ipc {
   }
 }
 
+const errorMessage = (message) => {
+  sender('error-message', { message });
+};
+
 module.exports = {
   create_swarm,
   end_swarm,
-  share_file_with_message,
   send_message,
   send_message_history,
+  share_file_info,
   ipc,
   sender,
 };

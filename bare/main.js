@@ -1,16 +1,18 @@
 require('./runtime');
-const { group_key } = require('./utils');
 
+// Tell app we're ready
+HelloBare.onReady();
+const { group_key } = require('./utils');
 // const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const {
-  share_file_with_message,
   send_message,
   send_message_history,
   create_swarm,
   end_swarm,
   ipc,
+  share_file_info,
 } = require('./swarm');
 const { Hugin } = require('./account');
 
@@ -44,7 +46,7 @@ rpc.register(0, {
       case 'group_random_key':
         return getRandomGroupKey();
       case 'begin_send_file':
-        beginStreamFile(parsed.json_file_data);
+        sendFileInfo(parsed.json_file_data);
         break;
       default:
         console.log('Unknown RPC type:', parsed.type);
@@ -89,14 +91,16 @@ const getRandomGroupKey = () => {
   return group_key();
 };
 
-const beginStreamFile = (json_file_data) => {
+const sendFileInfo = (json_file_data) => {
   const file_data = JSON.parse(json_file_data);
+  const room = getRoom(file_data.key);
+  if (!room) {
+    console.log('');
+    return;
+  }
   console.log('Begin streaming file', file_data);
-  share_file_with_message(file_data);
+  share_file_info(file_data, room.topic);
 };
-
-// Tell app we're ready
-HelloBare.onReady();
 
 // Keep the event loop alive
 setInterval(() => {}, 2000);
