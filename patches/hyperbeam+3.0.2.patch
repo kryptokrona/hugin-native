@@ -1,0 +1,29 @@
+diff --git a/node_modules/hyperbeam/index.js b/node_modules/hyperbeam/index.js
+index 65e18d2..29aaa6b 100644
+--- a/node_modules/hyperbeam/index.js
++++ b/node_modules/hyperbeam/index.js
+@@ -1,5 +1,4 @@
+ const { Duplex } = require('streamx')
+-const sodium = require('sodium-universal')
+ const b4a = require('b4a')
+ const queueTick = require('queue-tick')
+ const b32 = require('hi-base32')
+@@ -23,7 +22,7 @@ module.exports = class Hyperbeam extends Duplex {
+     let announce = !!options.announce
+ 
+     if (!key) {
+-      key = toBase32(randomBytes(32))
++      key = toBase32(options.random)
+       announce = true
+     }
+ 
+@@ -184,9 +183,3 @@ function toBase32 (buf) {
+ function fromBase32 (str) {
+   return b4a.from(b32.decode.asBytes(str.toUpperCase()))
+ }
+-
+-function randomBytes (length) {
+-  const buffer = b4a.alloc(length)
+-  sodium.randombytes_buf(buffer)
+-  return buffer
+-}
