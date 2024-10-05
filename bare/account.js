@@ -6,6 +6,7 @@ class Account {
       'SEKReTXy5NuZNf9259RRXDR3PsM5r1iKe2sgkDV5QU743f4FspoVAnY4TfRPLBMpCA1HQgZVnmZafQTraoYsS9K41iePDjPZbme';
     this.avatar = '';
     this.rooms = [];
+    this.downloadDir = '';
   }
 
   init(data) {
