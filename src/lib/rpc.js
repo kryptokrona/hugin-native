@@ -50,8 +50,20 @@ const rpc_message = async (m) => {
       case 'voice-channel-status':
         console.log('Voice channel status');
       case 'error-message':
-        console.log('ERROR', json);
+        console.log('ERROR', json.message);
         break;
+      case 'save-file-info':
+        console.log('Save file info:', json.message);
+        break;
+      case 'room-remote-file-added':
+        console.log('Remote file added --> ', json.remoteFiles);
+        console.log('From:', json.chat);
+        break;
+      case 'local-files':
+        console.log('local files:', json.localFiles);
+      case 'upload-file-progress':
+        console.log('Uploading progress ipc message:', json.progress);
+        console.log('File:', json);
       default:
         console.log('Other channel', json.rpc);
     }
