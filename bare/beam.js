@@ -72,7 +72,7 @@ const file_beam = (
 
   beam.on('data', (data) => {
     if (!start && download) {
-      const str = new TextDecoder().decode(data);
+      const str = data.toString();
 
       if (group && str === 'Start') {
         download_file(filename, size, chat, key, true);
@@ -123,7 +123,7 @@ const beam_event = (beam, chat, key) => {
 
   //Incoming message
   beam.on('data', (data) => {
-    const str = new TextDecoder().decode(data);
+    const str = data.toString();
     if (str === 'Start') {
       return;
     }
