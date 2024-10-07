@@ -42,4 +42,5 @@ export interface User {
   avatar?: string;
   name: string;
   room: string;
+  downloadDir?: string;
 }
