@@ -6,7 +6,6 @@ const { Hugin } = require('./account');
 let active_beams = [];
 let localFiles = [];
 let remoteFiles = [];
-let downloadDirectory;
 //STATUS
 
 const new_beam = async (key, chat, send = false) => {
@@ -277,7 +276,7 @@ const download_file = async (fileName, size, chat, key, group = false) => {
   }
   try {
     Hugin.send('downloading', { chat, fileName, group, size });
-    const downloadPath = downloadDirectory + '/' + fileName;
+    const downloadPath = Hugin.downloadDir + '/' + fileName;
     const stream = fs.createWriteStream(downloadPath);
     // const progressStream = progress({ length: size, time: 100 });
     // progressStream.on('progress', (progress) => {
@@ -379,7 +378,7 @@ const add_remote_file = async (
   const update = remoteFiles.some(
     (a) => group && a.fileName === fileName && a.chat === chat,
   );
-  let file = { chat, fileName, group, key, room, size, time };
+  let file = { chat, fileName, room: group, key, size, time, hash };
   if (update) {
     let updateFile = remoteFiles.find((a) => a.fileName === fileName);
     updateFile.key = key;
@@ -429,7 +428,7 @@ const add_group_file = async (
     sent: false,
     time: time,
   };
-  Hugin.send('new-message', message);
+  Hugin.send('swarm-message', { message });
   return time;
 };
 
@@ -440,8 +439,7 @@ const remote_remote_file = (fileName, chat) => {
   Hugin.send('remote-files', { chat, remoteFiles });
 };
 
-const start_download = async (downloadDir, file, chat, k) => {
-  downloadDirectory = downloadDir;
+const start_download = async (file, chat, k) => {
   let download = remoteFiles.find(
     (a) => a.fileName === file && a.chat === chat,
   );

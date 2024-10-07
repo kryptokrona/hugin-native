@@ -256,7 +256,7 @@ const check_data_message = async (data, connection, topic) => {
     const fileData = sanitize_file_message(data);
     console.log('Got file data incoming', fileData);
     if (!fileData) return 'Error';
-    check_file_message(fileData, topic, con.address);
+    check_file_message(fileData, topic, con.address, con.name);
     return true;
   }
 
@@ -360,7 +360,7 @@ const check_data_message = async (data, connection, topic) => {
   return false;
 };
 
-const check_file_message = async (data, topic, address, con) => {
+const check_file_message = async (data, topic, address, name) => {
   if (data.info === 'file-shared') {
     const added = await add_remote_file(
       data.fileName,
@@ -370,9 +370,20 @@ const check_file_message = async (data, topic, address, con) => {
       true,
       data.hash,
       true,
-      con.name,
+      name,
     );
-    save_file_info(data, topic, con.address, added, false, con.name);
+
+    //Enable this for debug auto downloading locally
+    // const file = {
+    //   chat: address,
+    //   fileName: data.fileName,
+    //   hash: data.hash,
+    //   size: data.size,
+    //   key: topic,
+    // };
+    console.log('REQUESTING DOWNLOAD -------->');
+    //request_download(file);
+    //save_file_info(data, topic, address, added, false, name);
   }
 
   const save_file_info = (data, topic, address, time, sent, name) => {
@@ -382,12 +393,12 @@ const check_file_message = async (data, topic, address, con) => {
       address: address,
       name: name,
       time: time,
-      group: active.key,
+      room: active.key,
       hash: data.hash,
       reply: '',
       sent: sent,
     };
-    Hugin.send('save-file-info', { message });
+    Hugin.send('swarm-message', { message });
   };
 
   if (data.type === 'download-request') {
@@ -401,7 +412,7 @@ const check_file_message = async (data, topic, address, con) => {
       console.log('Upload ready! -------->');
       await add_remote_file(data.fileName, address, data.size, data.key, true);
       console.log('Starting to download ----------->');
-      start_download(Hugin.downloadDir, data.fileName, address, data.key);
+      start_download(data.fileName, address, data.key);
       return;
     }
   }
@@ -672,4 +683,5 @@ module.exports = {
   send_message,
   send_message_history,
   share_file_info,
+  request_download,
 };

@@ -58,6 +58,9 @@ rpc.register(0, {
       case 'begin_send_file':
         sendFileInfo(parsed.json_file_data);
         break;
+      case 'request_download':
+        request_download(parsed.file);
+        break;
       default:
         console.log('Unknown RPC type:', parsed.type);
     }

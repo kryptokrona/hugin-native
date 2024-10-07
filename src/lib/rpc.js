@@ -58,6 +58,11 @@ const rpc_message = async (m) => {
       case 'room-remote-file-added':
         console.log('Remote file added --> ', json.remoteFiles);
         console.log('From:', json.chat);
+        console.log('In room:', json.room);
+        //Maybe add a global state for remote files?
+        //Update remote file list. We need to replace the message in the chat-window with a download button.
+        //That message is a normal swarm-message with the correct Message format.
+        //Both have the same hash as identifier.
         break;
       case 'local-files':
         console.log('local files:', json.localFiles);
