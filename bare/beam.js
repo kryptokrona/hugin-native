@@ -1,8 +1,8 @@
 const fs = require('bare-fs');
 const Hyperbeam = require('hyperbeam');
-
-const { sender } = require('./swarm');
 const { sleep, random_key } = require('./utils');
+const { Hugin } = require('./account');
+
 let active_beams = [];
 let localFiles = [];
 let remoteFiles = [];
@@ -54,7 +54,7 @@ const start_beam = async (
   } catch (e) {
     console.log('Beam DHT error', e);
     errorMessage('Failed to start beam');
-    sender('stop-beam', chat);
+    Hugin.send('stop-beam', chat);
     return 'Error';
   }
 };
@@ -104,7 +104,7 @@ const file_beam = (
 const beam_event = (beam, chat, key) => {
   const addr = chat.substring(0, 99);
   active_beams.push({ beam, chat: addr, key });
-  sender('new-beam', { chat: addr, key });
+  Hugin.send('new-beam', { chat: addr, key });
   beam.on('remote-address', function ({ host, port }) {
     if (!host) {
       console.log('Could not find the host');
@@ -119,7 +119,7 @@ const beam_event = (beam, chat, key) => {
   beam.on('connected', function () {
     console.log('Beam connected to peer');
     check_if_online(addr);
-    sender('beam-connected', [addr, beam.key]);
+    Hugin.send('beam-connected', [addr, beam.key]);
   });
 
   //Incoming message
@@ -187,7 +187,7 @@ const end_beam = async (chat) => {
   if (!active) {
     return;
   }
-  sender('stop-beam', chat);
+  Hugin.send('stop-beam', chat);
   active.beam.end();
   await sleep(2000);
   active.beam.destroy();
@@ -233,7 +233,7 @@ const send_file = async (fileName, size, chat, key, group) => {
     // const progressStream = progress({ length: size, time: 100 });
 
     // progressStream.on('progress', async (progress) => {
-    sender('upload-file-progress', {
+    Hugin.send('upload-file-progress', {
       chat,
       fileName,
       progress: 'Started',
@@ -276,12 +276,12 @@ const download_file = async (fileName, size, chat, key, group = false) => {
     return;
   }
   try {
-    sender('downloading', { chat, fileName, group, size });
+    Hugin.send('downloading', { chat, fileName, group, size });
     const downloadPath = downloadDirectory + '/' + fileName;
     const stream = fs.createWriteStream(downloadPath);
     // const progressStream = progress({ length: size, time: 100 });
     // progressStream.on('progress', (progress) => {
-    sender('download-file-progress', {
+    Hugin.send('download-file-progress', {
       chat,
       fileName,
       path: downloadPath,
@@ -332,8 +332,8 @@ const add_local_file = async (
     type: 'upload-ready',
   };
   localFiles.unshift(file);
-  sender('local-files', { chat, localFiles });
-  sender('uploading', { chat, fileName, size, time });
+  Hugin.send('local-files', { chat, localFiles });
+  Hugin.send('uploading', { chat, fileName, size, time });
   await sleep(1000);
   if (group) {
     return fileBeam.key;
@@ -356,7 +356,7 @@ const remove_local_file = (fileName, chat, time) => {
   localFiles = localFiles.filter(
     (x) => x.fileName !== fileName && x.time !== time,
   );
-  sender('local-files', { chat, localFiles });
+  Hugin.send('local-files', { chat, localFiles });
   if (!active) {
     errorMessage('Beam not active');
   }
@@ -402,7 +402,7 @@ const add_remote_file = async (
       name,
     );
   } else {
-    sender('remote-file-added', { chat, remoteFiles });
+    Hugin.send('remote-file-added', { chat, remoteFiles });
   }
 };
 
@@ -416,7 +416,7 @@ const add_group_file = async (
   room = true,
   name,
 ) => {
-  sender('room-remote-file-added', { chat, room: group, remoteFiles });
+  Hugin.send('room-remote-file-added', { chat, room: group, remoteFiles });
   const message = {
     address: chat,
     channel: 'Room',
@@ -429,7 +429,7 @@ const add_group_file = async (
     sent: false,
     time: time,
   };
-  sender('new-message', message);
+  Hugin.send('new-message', message);
   return time;
 };
 
@@ -437,7 +437,7 @@ const remote_remote_file = (fileName, chat) => {
   remoteFiles = remoteFiles.filter(
     (x) => x.fileName !== fileName && x.chat === chat,
   );
-  sender('remote-files', { chat, remoteFiles });
+  Hugin.send('remote-files', { chat, remoteFiles });
 };
 
 const start_download = async (downloadDir, file, chat, k) => {
@@ -522,7 +522,7 @@ const check_data_message = (data, chat) => {
     if (!file) {
       return true;
     }
-    sender('download-request', fileName);
+    Hugin.send('download-request', fileName);
     console.log('Download request');
     size = file.size;
     upload_ready(fileName, size, chat, key);
@@ -540,7 +540,7 @@ const check_data_message = (data, chat) => {
 };
 
 const errorMessage = (message) => {
-  sender('error-message', { message });
+  Hugin.send('error-message', { message });
 };
 
 module.exports = {
