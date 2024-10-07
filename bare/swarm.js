@@ -21,7 +21,6 @@ const {
 const LOCAL_VOICE_STATUS_OFFLINE = [
   JSON.stringify({ topic: '', video: false, voice: false }),
 ];
-let RPC_SENDER;
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
@@ -78,7 +77,7 @@ const create_swarm = async (hashkey, key) => {
   };
 
   active_swarms.push(active);
-  sender('new-swarm', { connected, key });
+  Hugin.send('new-swarm', { connected, key });
   check_if_online(room.topic);
 
   process.once('SIGINT', function () {
@@ -148,7 +147,7 @@ function send_message(message, topic, reply, invite) {
 }
 
 const is_admin = (key) => {
-  return Hugin.rooms.find((a) => a.key === key && a.admin).admin;
+  return Hugin.rooms.find((a) => a.key === key && a.admin)?.admin;
 };
 
 const send_joined_message = async (topic, dht_keys) => {
@@ -178,7 +177,7 @@ const send_joined_message = async (topic, dht_keys) => {
     message: msg,
     name: Hugin.name,
     avatar: Hugin.avatar,
-    signature: sig,
+    signature: sig.toString('hex'),
     time: active.time,
     topic: topic,
     video: video,
@@ -223,7 +222,7 @@ const incoming_message = async (data, topic, connection, key) => {
   }
   const message = sanitize_group_message(JSON.parse(str));
   console.log('Sanitized: ', message);
-  sender('swarm-message', { message, topic });
+  Hugin.send('swarm-message', { message, topic });
 };
 
 const check_data_message = async (data, connection, topic) => {
@@ -280,7 +279,7 @@ const check_data_message = async (data, connection, topic) => {
   //         if (data.offer === true) {
   //             if ('retry' in data) {
   //                 if (data.retry === true) {
-  //                     sender('got-expanded-voice-channel', [data.data, data.address])
+  //                     Hugin.send('got-expanded-voice-channel', [data.data, data.address])
   //                     return
   //                 }
   //             }
@@ -333,7 +332,7 @@ const check_data_message = async (data, connection, topic) => {
 
       con.video = joined.video;
       joined.key = active.key;
-      sender('peer-connected', { joined });
+      Hugin.send('peer-connected', { joined });
       console.log('Connection updated: Joined:', con.joined);
       return true;
     }
@@ -346,7 +345,10 @@ const check_data_message = async (data, connection, topic) => {
     }
 
     if (data.type === 'request-history' && con.joined) {
-      sender('get-history', 'invitekeytoroom and also address to the receiver');
+      Hugin.send(
+        'get-history',
+        'invitekeytoroom and also address to the receiver',
+      );
     }
     if (data.type === 'sync-history' && con.joined && con?.request) {
       ///Sync history
@@ -385,7 +387,7 @@ const check_file_message = async (data, topic, address, con) => {
       reply: '',
       sent: sent,
     };
-    sender('save-file-info', { message });
+    Hugin.send('save-file-info', { message });
   };
 
   if (data.type === 'download-request') {
@@ -417,7 +419,7 @@ const share_file_info = async (file, topic) => {
     info: 'file-shared',
     size: file.size,
     time: file.time,
-    topic: file.topic,
+    topic: topic,
     type: 'file',
   };
   const info = JSON.stringify(fileInfo);
@@ -518,7 +520,7 @@ const send_message_history = async (history, room, address) => {
 
 const sync_message_history = (history) => {
   //Got a message containing some message history -> save/print them
-  //sender('sync-history', messages)
+  //Hugin.send('sync-history', messages)
   console.log('Got messages from peer, Sync message history');
 };
 
@@ -545,8 +547,8 @@ const connection_closed = (conn, topic) => {
     return;
   }
   const disconnected = { address: user.address, key: active.key };
-  // sender('close-voice-channel-with-peer', user.address);
-  sender('peer-disconnected', { disconnected });
+  // Hugin.send('close-voice-channel-with-peer', user.address);
+  Hugin.send('peer-disconnected', { disconnected });
   const still_active = active.connections.filter((a) => a.connection !== conn);
   console.log('Connection closed');
   console.log('Still active:', still_active);
@@ -558,7 +560,7 @@ const end_swarm = async (topic) => {
   if (!active) {
     return;
   }
-  sender('end-swarm', { topic });
+  Hugin.send('end-swarm', { topic });
   const [in_voice] = get_local_voice_status(topic);
   if (in_voice) {
     update_local_voice_channel_status(LOCAL_VOICE_STATUS_OFFLINE);
@@ -610,7 +612,7 @@ const update_voice_channel_status = (data, con) => {
     con.video,
   );
   //Send status to front-end
-  sender('voice-channel-status', { data });
+  Hugin.send('voice-channel-status', { data });
   return true;
 };
 
@@ -656,36 +658,12 @@ const check_if_online = (topic) => {
   }
 };
 
-const sender = (type, data) => {
-  console.log('Send rpc data from swarm');
-  const send = data;
-  send.type = type;
-  RPC_SENDER.write(JSON.stringify(send));
-};
-
 const error_message = (message) => {
-  sender('error-message', { message });
+  Hugin.send('error-message', { message });
 };
-
-class ipc {
-  constructor() {}
-  new(rpc) {
-    if (RPC_SENDER) return;
-    let RPC;
-    RPC = rpc.register(1, {
-      request: ce.string,
-      response: ce.string,
-    });
-    RPC_SENDER = RPC.createRequestStream();
-    RPC_SENDER.on('data', (data) => {
-      console.log('RPC sender in swarm got data from frontend', data);
-    });
-    return true;
-  }
-}
 
 const errorMessage = (message) => {
-  sender('error-message', { message });
+  Hugin.send('error-message', { message });
 };
 
 module.exports = {
@@ -694,6 +672,4 @@ module.exports = {
   send_message,
   send_message_history,
   share_file_info,
-  ipc,
-  sender,
 };
