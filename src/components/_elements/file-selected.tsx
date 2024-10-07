@@ -18,6 +18,7 @@ export const FileSelected: React.FC<Props> = ({
   size,
   removeFile,
   path,
+  uri,
 }) => {
   const theme = useGlobalStore((state) => state.theme);
   const backgroundColor = theme.accent;
@@ -38,7 +39,7 @@ export const FileSelected: React.FC<Props> = ({
         {!isImage && <CustomIcon name="file-outline" type="MCI" size={40} />}
         {isImage && (
           <View style={styles.imageContainer}>
-            <Image source={{ uri: path }} style={styles.image} />
+            <Image source={{ uri }} style={styles.image} />
           </View>
         )}
         <View style={styles.info}>
