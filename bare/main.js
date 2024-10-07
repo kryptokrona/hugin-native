@@ -20,6 +20,16 @@ const rpc = new RPC(HelloBare.sendMessage);
 HelloBare.onMessage = rpc.recv.bind(rpc);
 console.log('Bare main init');
 
+//Send
+
+const stream = rpc.register(1, {
+  request: ce.string,
+  response: ce.string,
+});
+const sender = stream.createRequestStream();
+
+//Recv
+
 rpc.register(0, {
   request: ce.string,
   response: ce.string,
@@ -57,9 +67,7 @@ rpc.register(0, {
 
 // Function implementations
 const initBareMain = async (user) => {
-  const sender = new ipc();
-  sender.new(rpc);
-  Hugin.init(user);
+  Hugin.init(user, sender);
 };
 
 const updateBareUser = (user) => {
