@@ -43,6 +43,7 @@ export interface GroupMessage extends Message {
 
 export interface SelectedFile {
   fileName: string;
+  uri: string;
   path: string | null | undefined;
   size: number;
   time: number;

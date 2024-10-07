@@ -72,10 +72,11 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
 
       const fileInfo: SelectedFile = {
         fileName: name,
-        path: fileCopyUri?.slice(0, 7)[1],
+        path: fileCopyUri?.slice(7, fileCopyUri.length),
         size,
         time: new Date().getTime(),
         type,
+        uri: uri,
       };
 
       setSelectedFile(fileInfo);
