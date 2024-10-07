@@ -1,4 +1,5 @@
 import i18n from 'i18next';
+import RNFS from 'react-native-fs';
 
 import { bare } from 'lib/native';
 
@@ -21,6 +22,7 @@ export const init = async () => {
   const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
   const mUser = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
   const user = mUser ?? defaultUser;
+  user.downloadDir = RNFS.DocumentDirectoryPath;
   await bare(user);
   console.log('Initializing database..');
   await initDB();
