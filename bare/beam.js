@@ -412,6 +412,7 @@ const add_remote_file = async (
       time,
       hash,
       name,
+      size,
     );
   } else {
     Hugin.send('remote-file-added', { chat, remoteFiles });
@@ -426,6 +427,7 @@ const add_group_file = async (
   time,
   hash,
   name,
+  size,
 ) => {
   Hugin.send('room-remote-file-added', { chat, room, remoteFiles });
 
