@@ -225,6 +225,32 @@ const sanitizeHtml = (data) => {
   return data;
 };
 
+//Check if it is an image or video with allowed type
+function check_if_image_or_video(path, size) {
+  if (path === undefined) return false;
+  if (size >= 50000000) return false;
+  const types = [
+    '.png',
+    '.jpg',
+    '.gif',
+    '.jpeg',
+    '.mp4',
+    '.webm',
+    '.avi',
+    '.webp',
+    '.mov',
+    '.wmv',
+    '.mkv',
+    '.mpeg',
+  ];
+  for (a in types) {
+    if (path.toLowerCase().endsWith(types[a])) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const toUintArray = (val) => {
   return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
 };
@@ -256,4 +282,5 @@ module.exports = {
   verify_admins,
   sign_admin_message,
   sleep,
+  check_if_image_or_video,
 };
