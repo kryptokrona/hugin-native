@@ -22,7 +22,7 @@ export const init = async () => {
   const preferences = await getStorageValue(ASYNC_STORAGE_KEYS.PREFERENCES);
   const mUser = await getStorageValue(ASYNC_STORAGE_KEYS.USER);
   const user = mUser ?? defaultUser;
-  user.downloadDir = RNFS.DocumentDirectoryPath;
+  user.downloadDir = RNFS.DownloadDirectoryPath;
   await bare(user);
   console.log('Initializing database..');
   await initDB();
