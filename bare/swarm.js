@@ -373,17 +373,20 @@ const check_file_message = async (data, topic, address, name) => {
       name,
     );
 
-    //Enable this for debug auto downloading locally
-    // const file = {
-    //   chat: address,
-    //   fileName: data.fileName,
-    //   hash: data.hash,
-    //   size: data.size,
-    //   key: topic,
-    // };
-    console.log('REQUESTING DOWNLOAD -------->');
-    //request_download(file);
+    //Enable / disable auto downloading of image video audio here
+    if (check_if_image_or_video(data.fileName, data.size)) {
+      const file = {
+        chat: address,
+        fileName: data.fileName,
+        hash: data.hash,
+        size: data.size,
+        key: topic,
+      };
+      request_download(file);
+    }
+
     //save_file_info(data, topic, address, added, false, name);
+    //Here we need to save file info for other types of files
   }
 
   const save_file_info = (data, topic, address, time, sent, name) => {
@@ -410,7 +413,13 @@ const check_file_message = async (data, topic, address, name) => {
   if (data.type === 'upload-ready') {
     if (data.info === 'file') {
       console.log('Upload ready! -------->');
-      await add_remote_file(data.fileName, address, data.size, data.key, true);
+      await add_remote_file(
+        data.fileName,
+        address,
+        data.size,
+        data.key,
+        active.key,
+      );
       console.log('Starting to download ----------->');
       start_download(data.fileName, address, data.key);
       return;

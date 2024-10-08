@@ -1,6 +1,6 @@
 const fs = require('bare-fs');
 const Hyperbeam = require('hyperbeam');
-const { sleep, random_key } = require('./utils');
+const { sleep, random_key, check_if_image_or_video } = require('./utils');
 const { Hugin } = require('./account');
 
 let active_beams = [];
@@ -291,10 +291,25 @@ const download_file = async (fileName, size, chat, key, group = false) => {
     // if (!group) saveMsg(message, chat, false, file.time);
 
     active.beam.pipe(stream);
-    stream.on('done', (a) => {
-      let message = `Downloaded ${fileName}`;
-      console.log('--------->', message);
-      console.log('stream done ');
+    active.beam.on('done', (a) => {
+      if (check_if_image_or_video(fileName, size)) {
+        //Only images etc here
+        const message = {
+          address: chat,
+          channel: 'Room',
+          room,
+          hash: hash,
+          message: JSON.stringify({ fileName, path: Hugin.downloadDir }),
+          name: name,
+          reply: false,
+          sent: false,
+          timestamp: time,
+        };
+        Hugin.send('swarm-message', { message });
+      } else {
+        //Some random file here.
+        Hugin.send('download-complete', { fileName, room, hash, size, time });
+      }
     });
     // });
   } catch (err) {
@@ -369,16 +384,15 @@ const add_remote_file = async (
   chat,
   size,
   key,
-  group = false,
-  hash,
   room = false,
+  hash,
   name,
 ) => {
   const time = Date.now();
   const update = remoteFiles.some(
-    (a) => group && a.fileName === fileName && a.chat === chat,
+    (a) => room && a.fileName === fileName && a.chat === chat,
   );
-  let file = { chat, fileName, room: group, key, size, time, hash };
+  let file = { chat, fileName, room, key, size, time, hash };
   if (update) {
     let updateFile = remoteFiles.find((a) => a.fileName === fileName);
     updateFile.key = key;
@@ -389,15 +403,14 @@ const add_remote_file = async (
   if (update) {
     return;
   }
-  if (group) {
+  if (room) {
     return await add_group_file(
       fileName,
       remoteFiles,
       chat,
-      group,
+      room,
       time,
       hash,
-      room,
       name,
     );
   } else {
@@ -409,26 +422,29 @@ const add_group_file = async (
   fileName,
   remoteFiles,
   chat,
-  group,
+  room,
   time,
   hash,
-  room = true,
   name,
 ) => {
-  Hugin.send('room-remote-file-added', { chat, room: group, remoteFiles });
-  const message = {
-    address: chat,
-    channel: 'Room',
-    file: true,
-    room: group,
-    hash: hash,
-    message: fileName,
-    name: name,
-    reply: false,
-    sent: false,
-    time: time,
-  };
-  Hugin.send('swarm-message', { message });
+  Hugin.send('room-remote-file-added', { chat, room, remoteFiles });
+
+  //If its not a image/video type or size out of bounds, return some message info about file.
+  if (!check_if_image_or_video(fileName, size)) {
+    const message = {
+      address: chat,
+      channel: 'Room',
+      file: true,
+      room,
+      hash: hash,
+      message: fileName,
+      name: name,
+      reply: false,
+      sent: false,
+      timestamp: time,
+    };
+    Hugin.send('swarm-message', { message });
+  }
   return time;
 };
 
