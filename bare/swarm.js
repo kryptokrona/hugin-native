@@ -361,6 +361,21 @@ const check_data_message = async (data, connection, topic) => {
   return false;
 };
 
+const save_file_info = (data, topic, address, time, sent, name) => {
+  const active = get_active_topic(topic);
+  const message = {
+    message: data.fileName,
+    address: address,
+    name: name,
+    time: time,
+    room: active.key,
+    hash: data.hash,
+    reply: '',
+    sent: sent,
+  };
+  Hugin.send('swarm-message', { message });
+};
+
 const check_file_message = async (data, topic, address, name) => {
   if (data.info === 'file-shared') {
     const added = await add_remote_file(
@@ -389,21 +404,6 @@ const check_file_message = async (data, topic, address, name) => {
     //save_file_info(data, topic, address, added, false, name);
     //Here we need to save file info for other types of files
   }
-
-  const save_file_info = (data, topic, address, time, sent, name) => {
-    const active = get_active_topic(topic);
-    const message = {
-      message: data.fileName,
-      address: address,
-      name: name,
-      time: time,
-      room: active.key,
-      hash: data.hash,
-      reply: '',
-      sent: sent,
-    };
-    Hugin.send('swarm-message', { message });
-  };
 
   if (data.type === 'download-request') {
     console.log('Download request incoming:', data);
