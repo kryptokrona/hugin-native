@@ -25,6 +25,15 @@ const rpc_message = async (m) => {
         break;
       case 'swarm-message':
         console.log('swarm-message!', json);
+        console.log('SWARMM MESSAGE ------------------>');
+
+        console.log('SWARMM MESSAGE ------------------>');
+
+        console.log('SWARMM MESSAGE ------------------>');
+
+        console.log('SWARMM MESSAGE ------------------>');
+
+        console.log('SWARMM MESSAGE ------------------>');
         //Check if we want to print it in live conversation
         //If state.route.room === json.message.room
         //--> print
@@ -64,6 +73,10 @@ const rpc_message = async (m) => {
         //That message is a normal swarm-message with the correct Message format.
         //Both have the same hash as identifier.
         break;
+      case 'download-complete':
+        console.log('Download completed!', json.fileName);
+      //path, chat, hash, filename
+
       case 'local-files':
         console.log('local files:', json.localFiles);
       case 'upload-file-progress':
