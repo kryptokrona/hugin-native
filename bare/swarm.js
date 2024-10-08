@@ -11,6 +11,7 @@ const {
   verify_admins,
   sign_admin_message,
   sanitize_file_message,
+  check_if_image_or_video,
 } = require('./utils');
 const {
   send_file,
