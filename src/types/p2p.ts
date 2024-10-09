@@ -33,7 +33,18 @@ export interface Message {
   nickname: string;
   hash: string;
   sent: boolean;
+  reactions: string[];
   joined?: boolean;
+  file?: File | boolean;
+}
+
+export interface File {
+  fileName: string;
+  hash: string;
+  size: number;
+  room: string;
+  time: number;
+  path?: string;
 }
 
 export interface GroupMessage extends Message {
