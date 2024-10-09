@@ -67,6 +67,7 @@ const file_beam = (
   group = false,
   filename,
   size,
+  room,
 ) => {
   let start = false;
   active_beams.push({ beam, chat, group, key });
