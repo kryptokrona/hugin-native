@@ -377,6 +377,7 @@ const save_file_info = (data, topic, address, time, sent, name) => {
 };
 
 const check_file_message = async (data, topic, address, name) => {
+  const active = get_active_topic(topic);
   if (data.info === 'file-shared') {
     const added = await add_remote_file(
       data.fileName,
@@ -422,7 +423,7 @@ const check_file_message = async (data, topic, address, name) => {
         active.key,
       );
       console.log('Starting to download ----------->');
-      start_download(data.fileName, address, data.key);
+      start_download(data.fileName, address, data.key, active.key);
       return;
     }
   }

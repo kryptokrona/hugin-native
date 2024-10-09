@@ -21,6 +21,7 @@ const start_beam = async (
   group,
   filename,
   size,
+  room,
 ) => {
   let beam;
   //Create new or join existing beam
@@ -30,7 +31,7 @@ const start_beam = async (
       beam = new Hyperbeam({ random });
       beam.write('Start');
       if (file) {
-        file_beam(beam, chat, beam.key, false, group, filename, size);
+        file_beam(beam, chat, beam.key, false, group, filename, size, room);
         return { chat, key: beam.key };
       }
       beam_event(beam, chat, beam.key);
@@ -75,7 +76,7 @@ const file_beam = (
       const str = data.toString();
 
       if (group && str === 'Start') {
-        download_file(filename, size, chat, key, true);
+        download_file(filename, size, chat, key, room);
         start = true;
         return;
       }
@@ -260,7 +261,7 @@ const send_file = async (fileName, size, chat, key, group) => {
   }
 };
 
-const download_file = async (fileName, size, chat, key, group = false) => {
+const download_file = async (fileName, size, chat, key, room = false) => {
   const file = remoteFiles.find(
     (a) => a.fileName === fileName && a.chat === chat && a.key === key,
   );
@@ -291,7 +292,7 @@ const download_file = async (fileName, size, chat, key, group = false) => {
     // if (!group) saveMsg(message, chat, false, file.time);
 
     active.beam.pipe(stream);
-    active.beam.on('done', (a) => {
+    active.beam.on('end', (a) => {
       if (check_if_image_or_video(fileName, size)) {
         //Only images etc here
         const message = {
@@ -457,7 +458,7 @@ const remote_remote_file = (fileName, chat) => {
   Hugin.send('remote-files', { chat, remoteFiles });
 };
 
-const start_download = async (file, chat, k) => {
+const start_download = async (file, chat, k, room) => {
   let download = remoteFiles.find(
     (a) => a.fileName === file && a.chat === chat,
   );
@@ -474,6 +475,7 @@ const start_download = async (file, chat, k) => {
     group,
     file,
     download.size,
+    room,
   );
   if (downloadBeam === 'Error') {
     errorMessage('Error creating download beam');
