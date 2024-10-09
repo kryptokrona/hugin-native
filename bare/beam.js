@@ -24,9 +24,9 @@ const start_beam = async (
   room,
 ) => {
   let beam;
-  console.log('start_beam', room);
-  //Create new or join existing beam
+  //Create new or join beam
   try {
+    //START A NEW BEAM
     if (key === 'new') {
       const random = random_key();
       beam = new Hyperbeam({ random });
@@ -37,10 +37,13 @@ const start_beam = async (
       }
       beam_event(beam, chat, beam.key);
       if (send) {
+        //Send a request to start sharing files.
         return { chat: chat, msg: 'BEAMFILE://' + beam.key };
       }
+      //Send a request to start a p2p session.
       return { chat: chat, msg: 'BEAM://' + beam.key };
     } else {
+      //JOIN
       if (key.length !== 52) {
         return false;
       }
@@ -251,10 +254,7 @@ const send_file = async (fileName, size, chat, key, group) => {
     // });
 
     stream.pipe(active.beam);
-    stream.on('done', (a) => {
-      console.log('stream done', a);
-      console.log('File uploaded');
-      console.log('Done!');
+    stream.on('end', (a) => {
       let message = `Uploaded ${fileName}`;
       console.log('------>', message);
     });
@@ -391,7 +391,6 @@ const add_remote_file = async (
   hash,
   name,
 ) => {
-  console.log('add_remote_file: ', room)
   const time = Date.now();
   const update = remoteFiles.some(
     (a) => room && a.fileName === fileName && a.chat === chat,
