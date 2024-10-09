@@ -235,6 +235,7 @@ export async function saveRoomsMessageToDatabase(
       hash: hash,
       message: message,
       nickname: nickname,
+      reactions: [],
       reply: reply,
       room: room,
       sent: sent,
