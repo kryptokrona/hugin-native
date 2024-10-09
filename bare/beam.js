@@ -277,7 +277,7 @@ const download_file = async (fileName, size, chat, key, room = false) => {
     return;
   }
   try {
-    Hugin.send('downloading', { chat, fileName, group, size });
+    Hugin.send('downloading', { chat, fileName, room, size });
     const downloadPath = Hugin.downloadDir + '/' + fileName;
     const stream = fs.createWriteStream(downloadPath);
     // const progressStream = progress({ length: size, time: 100 });
@@ -300,7 +300,7 @@ const download_file = async (fileName, size, chat, key, room = false) => {
           address: chat,
           channel: 'Room',
           room,
-          hash: hash,
+          hash: file.hash,
           message: JSON.stringify({ fileName, path: Hugin.downloadDir }),
           name: name,
           reply: false,
