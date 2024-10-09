@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -77,6 +77,20 @@ export const GroupMessageItem: React.FC<Props> = ({
     };
   }, []);
 
+  // Parse the message to see if it's JSON with a "path" property
+  let isImageMessage = false;
+  let imagePath = '';
+
+  try {
+    const parsedMessage = JSON.parse(message);
+    if (parsedMessage?.path) {
+      isImageMessage = true;
+      imagePath = "file://" + parsedMessage.path;
+    }
+  } catch (e) {
+    // If JSON parsing fails, it's just a normal text message
+  }
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -131,9 +145,17 @@ export const GroupMessageItem: React.FC<Props> = ({
             {dateString}
           </TextField>
         </View>
-        <TextField size="small" style={styles.message}>
-          {message}
-        </TextField>
+        {isImageMessage ? (
+          <Image
+            style={styles.image}
+            source={{ uri: imagePath }}
+            resizeMode="cover"
+          />
+        ) : (
+          <TextField size="small" style={styles.message}>
+            {message}
+          </TextField>
+        )}
         <Reactions items={reactions} />
       </View>
     </TouchableOpacity>
@@ -159,5 +181,11 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     marginBottom: 8,
     paddingRight: 10,
+  },
+  image: {
+    width: 200,
+    height: 200, // Adjust image size as needed
+    borderRadius: 10,
+    marginBottom: 8,
   },
 });
