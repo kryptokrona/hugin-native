@@ -301,11 +301,11 @@ const download_file = async (fileName, size, chat, key, room = false) => {
           channel: 'Room',
           room,
           hash: file.hash,
-          message: JSON.stringify({ fileName, path: Hugin.downloadDir }),
-          name: name,
+          message: JSON.stringify({ fileName, path: downloadPath }),
+          name: 'File shared',
           reply: false,
           sent: false,
-          timestamp: time,
+          timestamp: file.time,
         };
         Hugin.send('swarm-message', { message });
       } else {
