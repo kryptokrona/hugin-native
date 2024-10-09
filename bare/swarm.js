@@ -378,15 +378,16 @@ const save_file_info = (data, topic, address, time, sent, name) => {
 
 const check_file_message = async (data, topic, address, name) => {
   const active = get_active_topic(topic);
+  console.log('Check this MOFOOO:', active)
+  console.log('Check this MOFOOO2:', topic)
   if (data.info === 'file-shared') {
     const added = await add_remote_file(
       data.fileName,
       address,
       data.size,
       topic,
-      true,
+      active.key,
       data.hash,
-      true,
       name,
     );
 

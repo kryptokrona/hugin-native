@@ -24,6 +24,7 @@ const start_beam = async (
   room,
 ) => {
   let beam;
+  console.log('start_beam', room);
   //Create new or join existing beam
   try {
     if (key === 'new') {
@@ -45,7 +46,7 @@ const start_beam = async (
       }
       beam = new Hyperbeam(key);
       if (file) {
-        file_beam(beam, chat, key, true, group, filename, size);
+        file_beam(beam, chat, key, true, group, filename, size, room);
         return true;
       }
       beam_event(beam, chat, key);
@@ -390,6 +391,7 @@ const add_remote_file = async (
   hash,
   name,
 ) => {
+  console.log('add_remote_file: ', room)
   const time = Date.now();
   const update = remoteFiles.some(
     (a) => room && a.fileName === fileName && a.chat === chat,
@@ -432,7 +434,7 @@ const add_group_file = async (
   size,
 ) => {
   Hugin.send('room-remote-file-added', { chat, room, remoteFiles });
-
+  console.log('add_group_file', room);
   //If its not a image/video type or size out of bounds, return some message info about file.
   if (!check_if_image_or_video(fileName, size)) {
     const message = {
@@ -460,6 +462,7 @@ const remote_remote_file = (fileName, chat) => {
 };
 
 const start_download = async (file, chat, k, room) => {
+  console.log('start_download', room);
   let download = remoteFiles.find(
     (a) => a.fileName === file && a.chat === chat,
   );
