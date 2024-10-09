@@ -367,19 +367,18 @@ const save_file_info = (data, topic, address, time, sent, name) => {
     message: data.fileName,
     address: address,
     name: name,
-    time: time,
+    timestamp: time,
     room: active.key,
     hash: data.hash,
     reply: '',
     sent: sent,
+    file: true,
   };
   Hugin.send('swarm-message', { message });
 };
 
 const check_file_message = async (data, topic, address, name) => {
   const active = get_active_topic(topic);
-  console.log('Check this MOFOOO:', active)
-  console.log('Check this MOFOOO2:', topic)
   if (data.info === 'file-shared') {
     const added = await add_remote_file(
       data.fileName,
@@ -401,10 +400,10 @@ const check_file_message = async (data, topic, address, name) => {
         key: topic,
       };
       request_download(file);
+    } else {
+      //Here we need to save file info for other types of files that we might want to download later.
+      save_file_info(data, topic, address, added, false, name);
     }
-
-    //save_file_info(data, topic, address, added, false, name);
-    //Here we need to save file info for other types of files
   }
 
   if (data.type === 'download-request') {
@@ -434,18 +433,37 @@ const check_file_message = async (data, topic, address, name) => {
 
 const share_file_info = async (file, topic) => {
   // Note file includes property "message", regular text message
-  // const active = get_active_topic(file.topic);
+  const active = get_active_topic(topic);
   const fileInfo = {
     address: Hugin.address,
     fileName: file.fileName,
-    hash: file.hash,
+    hash: random_key().toString('hex'),
     info: 'file-shared',
     size: file.size,
     time: file.time,
     topic: topic,
     type: 'file',
   };
+
+  const image = check_if_image_or_video(file.fileName, file.size);
+
+  const message = {
+    address: Hugin.address,
+    name: Hugin.name,
+    message: image
+      ? JSON.stringify({ path: file.path, fileName: file.fileName })
+      : file.fileName,
+    hash: fileInfo.hash,
+    timestamp: file.time,
+    room: active.key,
+    reply: '',
+    sent: true,
+  };
+
+  //Send our file info to front end as message
+  Hugin.send('swarm-message', { message });
   const info = JSON.stringify(fileInfo);
+  file.topic = topic;
   localFiles.push(file);
   //File shared, send info to peers
   send_swarm_message(info, topic);
