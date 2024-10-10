@@ -287,12 +287,33 @@ const download_file = async (fileName, size, chat, key, room = false) => {
       chat,
       fileName,
       path: downloadPath,
-      progress: 'Started',
+      progress: 0,
     });
     console.log('Downloading  file...');
-    // if (progress.percentage === 100) {
-    // if (!group) saveMsg(message, chat, false, file.time);
+    let progress = 0;
+    let downloaded = 0;
 
+    active.beam.on('data', (data) => {
+      downloaded += data.length;
+      console.log('Size:', file.size);
+      console.log('Downloaded:', downloaded);
+      if (downloaded > file.size) {
+        stream.destroy();
+        end_file_beam(chat, key);
+        errorMessage('Download exceeded file size... Closing connection');
+        return;
+      }
+
+      progress = (downloaded / file.size) * 100;
+      console.log('downloaded percetnts', progress);
+      Hugin.send('download-file-progress', {
+        chat,
+        fileName,
+        progress,
+        hash: file.hash,
+        room,
+      });
+    });
     active.beam.pipe(stream);
     active.beam.on('end', (a) => {
       if (check_if_image_or_video(fileName, size)) {
