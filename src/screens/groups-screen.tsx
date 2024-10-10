@@ -24,7 +24,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<GroupStackNavigationType>();
   const rooms = useGlobalStore((state) => state.rooms);
   async function onPress(roomKey: string, name: string) {
-    setRoomMessages(roomKey, 0);
+    await setRoomMessages(roomKey, 0);
     setStoreCurrentRoom(roomKey);
     navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
   }
