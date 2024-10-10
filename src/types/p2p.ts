@@ -15,16 +15,6 @@ export interface Room {
 }
 
 export interface Message {
-  // m: string;
-  // k: string;
-  // s: string;
-  // g: string; // Group key
-  // n: string;
-  // r: string; // Can be empty string
-  // c: string; // Channel
-  // t: Date;
-  // hash: string;
-  // reactions: string[];
   address: string;
   message: string;
   room: string;
@@ -33,9 +23,11 @@ export interface Message {
   nickname: string;
   hash: string;
   sent: boolean;
-  reactions: string[];
+  reactions?: string[];
   joined?: boolean;
   file?: File | boolean;
+  replyto?: Message[] | undefined;
+  replies?: Message[] | undefined;
 }
 
 export interface File {
