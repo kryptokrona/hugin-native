@@ -5,7 +5,7 @@ import {
   SQLiteDatabase,
 } from 'react-native-sqlite-storage';
 
-import { Message, Reply } from 'types/p2p';
+import { Message } from 'types/p2p';
 
 import { getRoomUsers, updateMessages } from '@/services';
 
@@ -186,7 +186,7 @@ export async function getRoomReplyMessage(hash: string) {
 }
 
 export async function getRoomRepliesToMessage(hash: string) {
-  const replies: Reply[] = [];
+  const replies: Message[] = [];
   const results = await db.executeSql(
     'SELECT * FROM roomsmessages WHERE reply = ? ORDER BY timestamp ASC',
     [hash],
@@ -243,7 +243,7 @@ export async function saveRoomsMessageToDatabase(
 }
 
 const toMessage = (res: any) => {
-  const message: Reply = {
+  const message: Message = {
     address: res.address,
     //Hash identifier of the message
     hash: res.hash,
