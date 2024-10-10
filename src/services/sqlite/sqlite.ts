@@ -1,10 +1,11 @@
 import {
   enablePromise,
   openDatabase,
+  ResultSet,
   SQLiteDatabase,
 } from 'react-native-sqlite-storage';
 
-import { Message } from 'types/p2p';
+import { Message, Reply } from 'types/p2p';
 
 import { getRoomUsers, updateMessages } from '@/services';
 
@@ -138,73 +139,66 @@ export async function getRoomMessages(room: string, page: number) {
   if (page !== 0) {
     offset = page * limit;
   }
-  const messages: Message[] = [];
-  const results = await db.executeSql(
+  const results: [ResultSet] = await db.executeSql(
     `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp ASC LIMIT ${offset}, ${limit}`,
     [room],
   );
-  results.forEach(async (result) => {
+
+  return await setReplies(results);
+}
+
+async function setReplies(results: [ResultSet]) {
+  const messages: Message[] = [];
+  for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const res = result.rows.item(index);
       if (res === undefined) {
-        return;
+        continue;
       }
-      //TODO ** add replies and replyto, sort emojis?
-      // res.replyto = await getRoomReplyMessage(res.reply);
-      // res.replies = await getRoomRepliesToMessage(res.hash);
-      // console.log('We reply to a message in the database:', res.replyto);
-      // console.log('All replies to this message, sort by emojis?:', res.replies);
-      const message: Message = {
-        address: res.address,
-        // replace with actual nickname
-        hash: res.hash,
-
-        // replace with actual address value
-        message: res.message,
-
-        // current timestamp, you can use a specific timestamp as well
-        nickname: res.nickname,
-
-        // replace with actual room name
-        reply: res.reply,
-
-        // replace with actual message value
-        room: res.room,
-
-        // replace with actual hash value
-        sent: res.sent,
-        // optional, could be an empty string
-        timestamp: res.timestamp, // boolean indicating whether the message was sent
-      };
-      messages.push(message);
+      // TODO ** add replies and replyto, sort emojis?
+      //The original message this one is replying to
+      res.replyto = await getRoomReplyMessage(res.reply);
+      //await getRoomRepliesToMessage(res.hash);
+      //If we want all replies to one message
+      res.replies = [];
+      const r: Message = toMessage(res);
+      messages.push(r);
     }
-  });
+  }
   return messages;
 }
 
 export async function getRoomReplyMessage(hash: string) {
-  const reply: Array<any> = [];
+  const reply: Message[] = [];
   const results = await db.executeSql(
-    'SELECT * FROM roomsmessages WHERE hash = ? ORDER BY time ASC',
+    'SELECT * FROM roomsmessages WHERE hash = ? ORDER BY timestamp ASC',
     [hash],
   );
   results.forEach((result) => {
     const r = result.rows.item(0);
-    reply.push(r);
+    if (r === undefined) {
+      return;
+    }
+    const res: Message = toMessage(r);
+    reply.push(res);
   });
   return reply;
 }
 
 export async function getRoomRepliesToMessage(hash: string) {
-  const replies: Array<any> = [];
+  const replies: Reply[] = [];
   const results = await db.executeSql(
-    'SELECT * FROM roomsmessages WHERE reply = ? ORDER BY time ASC',
+    'SELECT * FROM roomsmessages WHERE reply = ? ORDER BY timestamp ASC',
     [hash],
   );
   results.forEach((result) => {
     for (let index = 0; index < result.rows.length; index++) {
       const r = result.rows.item(index);
-      replies.push(r);
+      if (r === undefined) {
+        continue;
+      }
+      const res: Message = toMessage(r);
+      replies.push(res);
     }
   });
   return replies;
@@ -247,3 +241,29 @@ export async function saveRoomsMessageToDatabase(
     console.log(err);
   }
 }
+
+const toMessage = (res: any) => {
+  const message: Reply = {
+    address: res.address,
+    //Hash identifier of the message
+    hash: res.hash,
+    //Message
+    message: res.message,
+    //Nickname
+    nickname: res.nickname,
+    //All the replies to this message
+    replies: res?.replies,
+    //The reply hash of the message
+    reply: res.reply,
+    //The original message this is a reply to
+    replyto: res?.replyto,
+    //The room the message is in
+    room: res.room,
+    //If sent or not
+    sent: res.sent,
+    //Timestmap
+    timestamp: res.timestamp,
+  };
+
+  return message;
+};
