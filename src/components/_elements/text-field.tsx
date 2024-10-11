@@ -12,7 +12,7 @@ interface Props {
   size?: SizeType;
   maxLength?: number | null;
   bold?: boolean;
-  style?: object | false;
+  style?: any;
 }
 
 export const TextField: React.FC<Props> = ({

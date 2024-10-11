@@ -139,18 +139,18 @@ async function action() {
     // if (iosSim) {
     //   commands.push(() => bareConfigure(optionsIosSimulator));
     // }
-    // if (androidArm64) {
-    //   commands.push(() => bareConfigure(optionsAndroidArm64));
-    // }
-    // if (androidArm) {
-    //   commands.push(() => bareConfigure(optionsAndroidArm));
-    // }
+    if (androidArm64) {
+      commands.push(() => bareConfigure(optionsAndroidArm64));
+    }
+    if (androidArm) {
+      commands.push(() => bareConfigure(optionsAndroidArm));
+    }
     if (androidX64) {
       commands.push(() => bareConfigure(optionsAndroidX64));
     }
-    // if (androidIA32) {
-    //   commands.push(() => bareConfigure(optionsAndroidIa32));
-    // }
+    if (androidIA32) {
+      commands.push(() => bareConfigure(optionsAndroidIa32));
+    }
   }
 
   // build
@@ -161,18 +161,18 @@ async function action() {
   // if (iosSim) {
   //   commands.push(() => bareBuild(optionsIosSimulator));
   // }
-  // if (androidArm64) {
-  //   commands.push(() => bareBuild(optionsAndroidArm64));
-  // }
-  // if (androidArm) {
-  //   commands.push(() => bareBuild(optionsAndroidArm));
-  // }
+  if (androidArm64) {
+    commands.push(() => bareBuild(optionsAndroidArm64));
+  }
+  if (androidArm) {
+    commands.push(() => bareBuild(optionsAndroidArm));
+  }
   if (androidX64) {
     commands.push(() => bareBuild(optionsAndroidX64));
   }
-  // if (androidIA32) {
-  //   commands.push(() => bareBuild(optionsAndroidIa32));
-  // }
+  if (androidIA32) {
+    commands.push(() => bareBuild(optionsAndroidIa32));
+  }
 
   // package
 
@@ -182,18 +182,18 @@ async function action() {
   // if (iosSim) {
   //   commands.push(() => cmakeInstall(buildOptionsIosSimulator));
   // }
-  // if (androidArm64) {
-  //   commands.push(() => cmakeInstall(buildOptionsAndroidArm64));
-  // }
-  // if (androidArm) {
-  //   commands.push(() => cmakeInstall(buildOptionsAndroidArm));
-  // }
+  if (androidArm64) {
+    commands.push(() => cmakeInstall(buildOptionsAndroidArm64));
+  }
+  if (androidArm) {
+    commands.push(() => cmakeInstall(buildOptionsAndroidArm));
+  }
   if (androidX64) {
     commands.push(() => cmakeInstall(buildOptionsAndroidX64));
   }
-  // if (androidIA32) {
-  //   commands.push(() => cmakeInstall(buildOptionsAndroidIa32));
-  // }
+  if (androidIA32) {
+    commands.push(() => cmakeInstall(buildOptionsAndroidIa32));
+  }
 
   // run
 

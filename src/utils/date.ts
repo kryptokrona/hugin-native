@@ -16,7 +16,7 @@ export const prettyPrintMomentDate = (date?: moment.Moment) => {
   return currentDate.format('D MMM, YYYY HH:mm');
 };
 
-export const prettyPrintDate = (date: Date) => {
+export const prettyPrintDate = (date: number) => {
   const currentDate = moment(date);
   return prettyPrintMomentDate(currentDate);
 };

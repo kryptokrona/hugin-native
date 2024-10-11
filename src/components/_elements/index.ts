@@ -5,6 +5,7 @@ export * from './file-selected';
 export * from './input-field';
 export * from './pincode';
 export * from './reactions';
+export * from './reply-indicator';
 export * from './text-button';
 export * from './text-field';
 export * from './xkr-logo';

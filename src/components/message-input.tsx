@@ -7,16 +7,22 @@ import DocumentPicker, { types } from 'react-native-document-picker';
 import { CameraOptions, launchCamera } from 'react-native-image-picker';
 
 import { useGlobalStore } from '@/services';
-import { commonInputProps, Styles } from '@/styles';
+import { Styles, commonInputProps } from '@/styles';
 import type { SelectedFile } from '@/types';
 
-import { CustomIcon, FileSelected } from './_elements';
+import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
+  replyToName: string | null;
+  onCloseReplyPress: () => void;
 }
 
-export const MessageInput: React.FC<Props> = ({ onSend }) => {
+export const MessageInput: React.FC<Props> = ({
+  onSend,
+  replyToName,
+  onCloseReplyPress,
+}) => {
   const { t } = useTranslation();
   const theme = useGlobalStore((state) => state.theme);
   const [text, setText] = useState('');
@@ -92,6 +98,7 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
   function handleSend() {
     if (text.trim()) {
       onSend(text, selectedFile);
+
       setText('');
       setSelectedFile(null);
     }
@@ -119,11 +126,20 @@ export const MessageInput: React.FC<Props> = ({ onSend }) => {
     setSelectedFile(null);
   }
 
+  function onCloseReply() {
+    onCloseReplyPress();
+  }
+
   return (
     <View style={styles.container}>
       {selectedFile && (
-        <View style={[styles.files, { backgroundColor }]}>
+        <View style={[styles.indicator, { backgroundColor }]}>
           <FileSelected {...selectedFile} removeFile={onRemoveFile} />
+        </View>
+      )}
+      {replyToName && (
+        <View style={[styles.indicator, { backgroundColor }]}>
+          <ReplyIndicator toName={replyToName} onCloseReply={onCloseReply} />
         </View>
       )}
       <View
@@ -201,10 +217,11 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
   },
-  files: {
+  indicator: {
     flex: 1,
     flexDirection: 'row',
     padding: 10,
+    paddingBottom: 0,
   },
   inputContainer: {
     alignItems: 'center',

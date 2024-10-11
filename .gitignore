@@ -84,3 +84,8 @@ bin/hello-pear.js
 vendor/bare
 vendor/concurrentqueue
 
+
+# Expo
+.expo
+dist/
+web-build/
