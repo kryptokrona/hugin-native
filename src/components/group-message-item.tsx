@@ -72,12 +72,10 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isImageMessage: boolean = false;
       let imagePath = '';
 
-      if (replyto?.[0]?.nickname) {
-        const parsedMessage = JSON.parse(replyto[0].message ?? '');
-        if (parsedMessage?.path) {
-          isImageMessage = true;
-          imagePath = 'file://' + parsedMessage.path;
-        }
+      const parsedMessage = JSON.parse(replyto?.[0].message ?? '');
+      if (parsedMessage?.path) {
+        isImageMessage = true;
+        imagePath = 'file://' + parsedMessage.path;
       }
 
       return { imagePath, isImageMessage };
@@ -244,7 +242,7 @@ const styles = StyleSheet.create({
   image: {
     borderRadius: 10,
     height: 200,
-    marginBottom: 8,
+    marginVertical: 8,
     width: 200,
   },
   info: {
