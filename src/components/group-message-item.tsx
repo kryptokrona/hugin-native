@@ -174,10 +174,13 @@ export const GroupMessageItem: React.FC<Props> = ({
               <CustomIcon
                 type="FI"
                 name="corner-left-down"
-                color={theme.secondary}
+                color={theme.mutedForeground}
                 size={16}
               />
             </View>
+            <TextField style={{ marginRight: 10 }} size="xsmall" type="muted">
+              {replyto[0].nickname}
+            </TextField>
             {replyImageDetails?.isImageMessage ? (
               <Image
                 style={styles.replyImage}
@@ -185,15 +188,10 @@ export const GroupMessageItem: React.FC<Props> = ({
                 resizeMode="cover"
               />
             ) : (
-              <TextField size="small" style={styles.message}>
-                {message ?? ''}
+              <TextField size="xsmall" style={styles.replyMessage}>
+                {replyto?.[0]?.message ?? ''}
               </TextField>
             )}
-            <TextField
-              style={{ color: theme.secondary, marginRight: 10 }}
-              size="xsmall">
-              {replyto[0].nickname}
-            </TextField>
           </View>
         )}
 
@@ -276,5 +274,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginRight: 10,
     width: 30,
+  },
+  replyMessage: {
+    flexShrink: 1,
+    paddingRight: 10,
   },
 });
