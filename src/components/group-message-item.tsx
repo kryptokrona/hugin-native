@@ -51,21 +51,40 @@ export const GroupMessageItem: React.FC<Props> = ({
 
   // Parse the message to see if it's JSON with a "path" property
   const imageDetails = useMemo(() => {
-    let isImageMessage = false;
-    let imagePath = '';
-
     try {
+      let isImageMessage: boolean = false;
+      let imagePath = '';
+
       const parsedMessage = JSON.parse(message ?? '');
       if (parsedMessage?.path) {
         isImageMessage = true;
         imagePath = 'file://' + parsedMessage.path;
       }
-    } catch (e) {
-      // If JSON parsing fails, it's just a normal text message
-    }
 
-    return { imagePath, isImageMessage };
+      return { imagePath, isImageMessage };
+    } catch (e) {
+      console.log('Error parsing message', e);
+    }
   }, [message]);
+
+  const replyImageDetails = useMemo(() => {
+    try {
+      let isImageMessage: boolean = false;
+      let imagePath = '';
+
+      if (replyto?.[0]?.nickname) {
+        const parsedMessage = JSON.parse(replyto[0].message ?? '');
+        if (parsedMessage?.path) {
+          isImageMessage = true;
+          imagePath = 'file://' + parsedMessage.path;
+        }
+      }
+
+      return { imagePath, isImageMessage };
+    } catch (e) {
+      console.log('Error parsing message', e);
+    }
+  }, [replyto]);
 
   function handleLongPress() {
     setActionsModal(true);
@@ -159,12 +178,22 @@ export const GroupMessageItem: React.FC<Props> = ({
                 size={16}
               />
             </View>
+            {replyImageDetails?.isImageMessage ? (
+              <Image
+                style={styles.replyImage}
+                source={{ uri: replyImageDetails?.imagePath }}
+                resizeMode="cover"
+              />
+            ) : (
+              <TextField size="small" style={styles.message}>
+                {message ?? ''}
+              </TextField>
+            )}
             <TextField
               style={{ color: theme.secondary, marginRight: 10 }}
               size="xsmall">
               {replyto[0].nickname}
             </TextField>
-            <TextField size="xsmall">{replyto[0].message}</TextField>
           </View>
         )}
 
@@ -172,7 +201,7 @@ export const GroupMessageItem: React.FC<Props> = ({
           <View style={styles.avatar}>
             <Avatar base64={avatar} size={24} />
           </View>
-          <View style={styles.left}>
+          <View>
             <View style={styles.info}>
               <TextField bold size="xsmall" style={{ color }}>
                 {name}
@@ -215,9 +244,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   image: {
-    // Adjust image size as needed
     borderRadius: 10,
-
     height: 200,
     marginBottom: 8,
     width: 200,
@@ -226,7 +253,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
-  left: {},
   message: {
     flexShrink: 1,
     marginBottom: 8,
@@ -243,5 +269,12 @@ const styles = StyleSheet.create({
   replyIcon: {
     marginHorizontal: 5,
     paddingTop: 10,
+  },
+  replyImage: {
+    borderRadius: 10,
+    height: 30,
+    marginBottom: 8,
+    marginRight: 10,
+    width: 30,
   },
 });
