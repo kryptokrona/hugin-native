@@ -25,18 +25,6 @@ const rpc_message = async (m) => {
         break;
       case 'swarm-message':
         console.log('swarm-message!', json);
-        console.log('SWARMM MESSAGE ------------------>');
-
-        console.log('SWARMM MESSAGE ------------------>');
-
-        console.log('SWARMM MESSAGE ------------------>');
-
-        console.log('SWARMM MESSAGE ------------------>');
-
-        console.log('SWARMM MESSAGE ------------------>');
-        //Check if we want to print it in live conversation
-        //If state.route.room === json.message.room
-        //--> print
         saveRoomsMessageToDatabase(
           json.message.address,
           json.message.message,
@@ -76,12 +64,13 @@ const rpc_message = async (m) => {
       case 'download-complete':
         console.log('Download completed!', json.fileName);
       //path, chat, hash, filename
-
       case 'local-files':
         console.log('local files:', json.localFiles);
       case 'upload-file-progress':
         console.log('Uploading progress ipc message:', json.progress);
         console.log('File:', json);
+      case 'download-file-progress':
+        console.log('Downloading progress ipc message:', json.progress);
       default:
         console.log('Other channel', json.rpc);
     }
