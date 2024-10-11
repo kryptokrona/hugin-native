@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
@@ -22,6 +22,7 @@ import type {
   SelectedFile,
   GroupStackNavigationType,
   GroupStackParamList,
+  Message,
 } from '@/types';
 import { getAvatar, mockMessages } from '@/utils';
 
@@ -32,12 +33,24 @@ interface Props {
 export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<GroupStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
+  const [replyToMessageHash, setReplyToMessageHash] = useState<string | null>(
+    null,
+  );
   const { name: userName } = useGlobalStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
   console.log(messages);
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
+
+  const replyToName = useMemo(() => {
+    if (!replyToMessageHash) {
+      return '';
+    }
+
+    const message = messages.find((m) => m.hash === replyToMessageHash);
+    return message ? message.nickname : '';
+  }, [replyToMessageHash, messages]);
 
   function onCustomizeGroupPress() {
     navigation.navigate(GroupsScreens.ModifyGroupScreen, {
@@ -82,13 +95,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     //TODO** check if reply state is active
     //add the hash of the message we are replying to as reply
     // const reply = state.reply.hash
-    const reply = '';
     if (file) {
       const sentFile = onSendGroupMessageWithFile(roomKey, file, text);
       //If we need to return something... or print something locally
       console.log('sent file!', sentFile);
     } else {
-      const sent = await onSendGroupMessage(roomKey, text, reply);
+      const sent = await onSendGroupMessage(roomKey, text, replyToMessageHash);
       const save = JSON.parse(sent);
 
       saveRoomsMessageToDatabase(
@@ -101,7 +113,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         save.hash,
         true,
       );
+      setReplyToMessageHash(null);
     }
+  }
+
+  function onReplyToMessagePress(hash: string) {
+    setReplyToMessageHash(hash);
+  }
+
+  function onCloseReplyPress() {
+    setReplyToMessageHash(null);
   }
 
   return (
@@ -110,24 +131,37 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         inverted
         ref={flatListRef}
         data={messages}
-        keyExtractor={(item, i) => `${item.k}${i}`}
-        renderItem={({ item }) => (
-          <GroupMessageItem
-            message={item.message}
-            date={item.timestamp}
-            avatar={getAvatar(item.address)}
-            name={item.nickname}
-            userAddress={item.address}
-            reactions={[]}
-          />
-        )}
+        keyExtractor={(item: Message, i) => `${item.address}-${i}`}
+        renderItem={({ item }) => {
+          // if (item.replyto) {
+          //   return <GroupMessageReplyItem />;
+          // } else {
+          return (
+            <GroupMessageItem
+              message={item.message}
+              timestamp={item.timestamp}
+              avatar={getAvatar(item.address)} // TODO fix avatar
+              nickname={item.nickname}
+              userAddress={item.address}
+              onReplyToMessagePress={onReplyToMessagePress}
+              replyHash={item.hash}
+              reactions={[]}
+              replyto={item.replyto}
+            />
+          );
+          // }
+        }}
         contentContainerStyle={styles.flatListContent}
         initialNumToRender={messages.length}
         maxToRenderPerBatch={messages.length}
       />
 
       <View style={styles.inputWrapper}>
-        <MessageInput onSend={onSend} />
+        <MessageInput
+          onSend={onSend}
+          replyToName={replyToName}
+          onCloseReplyPress={onCloseReplyPress}
+        />
       </View>
     </ScreenLayout>
   );

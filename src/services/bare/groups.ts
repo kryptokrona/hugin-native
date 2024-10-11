@@ -1,15 +1,14 @@
 import {
   getLatestRoomMessages,
-  naclHash,
   getRoomMessages,
-  removeRoomFromDatabase,
   getRooms,
+  naclHash,
+  randomKey,
+  removeRoomFromDatabase,
   saveRoomToDatabase,
   saveRoomsMessageToDatabase,
-  randomKey,
 } from '@/services';
-import type { SelectedFile, FileInput, Message, User } from '@/types';
-import { sleep } from '@/utils';
+import type { FileInput, Message, SelectedFile, User } from '@/types';
 
 import {
   begin_send_file,
@@ -18,6 +17,8 @@ import {
   send_swarm_msg,
   swarm,
 } from '/lib/native';
+
+import { sleep } from '@/utils';
 
 import {
   getActiveRoomUsers,
@@ -87,7 +88,7 @@ export const setRoomMessages = async (room: string, page: number) => {
 export const onSendGroupMessage = async (
   key: string,
   message: string,
-  reply: string,
+  reply: string | null,
 ) => {
   return await send_swarm_msg(key, message, reply);
 };

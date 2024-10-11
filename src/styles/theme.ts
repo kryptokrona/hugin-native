@@ -20,7 +20,7 @@ const neutral: ThemeBase = {
     popoverForeground: '#fafafa',
     primary: '#fafafa',
     primaryForeground: '#171717',
-    secondary: '#262626',
+    secondary: '#474747',
     secondaryForeground: '#fafafa',
   },
   light: {

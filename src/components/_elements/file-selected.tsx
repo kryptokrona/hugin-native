@@ -17,7 +17,7 @@ export const FileSelected: React.FC<Props> = ({
   type,
   size,
   removeFile,
-  path,
+  // path,
   uri,
 }) => {
   const theme = useGlobalStore((state) => state.theme);

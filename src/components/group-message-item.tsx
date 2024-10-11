@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
+import { Message } from 'types/p2p';
+
+import { useGlobalStore } from '@/services';
 import { getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
@@ -17,30 +20,52 @@ import {
 import { ModalBottom, ModalCenter } from './_layout';
 import { EmojiPicker } from './emoji-picker';
 
-interface Props {
-  message: string;
+interface Props extends Partial<Message> {
   avatar: string;
-  date: Date;
-  name: string;
   userAddress: string;
   reactions: string[];
+  replyHash?: string;
+  onReplyToMessagePress: (val: string) => void;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
   message,
   avatar,
-  date,
-  name,
+  timestamp,
+  nickname,
   userAddress,
   reactions,
+  replyHash,
+  onReplyToMessagePress,
+  replyto,
 }) => {
   const { t } = useTranslation();
+  const theme = useGlobalStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
   const [userModal, setUserVisible] = useState(false);
   const [actions, setActions] = useState(true);
 
-  const dateString = prettyPrintDate(date);
+  const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
+  const name = nickname ?? 'Anon';
+
+  // Parse the message to see if it's JSON with a "path" property
+  const imageDetails = useMemo(() => {
+    let isImageMessage = false;
+    let imagePath = '';
+
+    try {
+      const parsedMessage = JSON.parse(message ?? '');
+      if (parsedMessage?.path) {
+        isImageMessage = true;
+        imagePath = 'file://' + parsedMessage.path;
+      }
+    } catch (e) {
+      // If JSON parsing fails, it's just a normal text message
+    }
+
+    return { imagePath, isImageMessage };
+  }, [message]);
 
   function handleLongPress() {
     setActionsModal(true);
@@ -70,26 +95,17 @@ export const GroupMessageItem: React.FC<Props> = ({
     setUserVisible(false);
   }
 
+  function onReplyPess() {
+    onReplyToMessagePress(replyHash!);
+    setActionsModal(false);
+  }
+
   useEffect(() => {
     // Set actions visible onClose
     return () => {
       setActions(true);
     };
   }, []);
-
-  // Parse the message to see if it's JSON with a "path" property
-  let isImageMessage = false;
-  let imagePath = '';
-
-  try {
-    const parsedMessage = JSON.parse(message);
-    if (parsedMessage?.path) {
-      isImageMessage = true;
-      imagePath = "file://" + parsedMessage.path;
-    }
-  } catch (e) {
-    // If JSON parsing fails, it's just a normal text message
-  }
 
   return (
     <TouchableOpacity
@@ -105,14 +121,14 @@ export const GroupMessageItem: React.FC<Props> = ({
             <TextButton
               small
               type="secondary"
-              onPress={onBlockUser}
+              onPress={onReplyPess}
               icon={<CustomIcon name="reply" type="FA5" size={16} />}>
               {t('reply')}
             </TextButton>
             <CopyButton
               small
               type="secondary"
-              data={message}
+              data={message ?? ''}
               text={t('copyText')}
             />
             <TextButton
@@ -132,31 +148,53 @@ export const GroupMessageItem: React.FC<Props> = ({
           {name}
         </TextField>
       </ModalCenter>
-
-      <View style={styles.avatar}>
-        <Avatar base64={avatar} size={24} />
-      </View>
-      <View style={styles.left}>
-        <View style={styles.info}>
-          <TextField bold size="xsmall" style={{ color }}>
-            {name}
-          </TextField>
-          <TextField type="muted" size="xsmall" style={styles.date}>
-            {dateString}
-          </TextField>
-        </View>
-        {isImageMessage ? (
-          <Image
-            style={styles.image}
-            source={{ uri: imagePath }}
-            resizeMode="cover"
-          />
-        ) : (
-          <TextField size="small" style={styles.message}>
-            {message}
-          </TextField>
+      <View style={styles.content}>
+        {replyto?.[0]?.nickname && (
+          <View style={styles.replyContainer}>
+            <View style={styles.replyIcon}>
+              <CustomIcon
+                type="FI"
+                name="corner-left-down"
+                color={theme.secondary}
+                size={16}
+              />
+            </View>
+            <TextField
+              style={{ color: theme.secondary, marginRight: 10 }}
+              size="xsmall">
+              {replyto[0].nickname}
+            </TextField>
+            <TextField size="xsmall">{replyto[0].message}</TextField>
+          </View>
         )}
-        <Reactions items={reactions} />
+
+        <View style={styles.messageContainer}>
+          <View style={styles.avatar}>
+            <Avatar base64={avatar} size={24} />
+          </View>
+          <View style={styles.left}>
+            <View style={styles.info}>
+              <TextField bold size="xsmall" style={{ color }}>
+                {name}
+              </TextField>
+              <TextField type="muted" size="xsmall" style={styles.date}>
+                {dateString}
+              </TextField>
+            </View>
+            {imageDetails?.isImageMessage ? (
+              <Image
+                style={styles.image}
+                source={{ uri: imageDetails?.imagePath }}
+                resizeMode="cover"
+              />
+            ) : (
+              <TextField size="small" style={styles.message}>
+                {message ?? ''}
+              </TextField>
+            )}
+            <Reactions items={reactions} />
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -169,8 +207,20 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginVertical: 8,
   },
+  content: {
+    flex: 1,
+    flexDirection: 'column',
+  },
   date: {
     marginLeft: 10,
+  },
+  image: {
+    // Adjust image size as needed
+    borderRadius: 10,
+
+    height: 200,
+    marginBottom: 8,
+    width: 200,
   },
   info: {
     alignItems: 'center',
@@ -182,10 +232,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     paddingRight: 10,
   },
-  image: {
-    width: 200,
-    height: 200, // Adjust image size as needed
-    borderRadius: 10,
-    marginBottom: 8,
+  messageContainer: {
+    flexDirection: 'row',
+  },
+
+  replyContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  replyIcon: {
+    marginHorizontal: 5,
+    paddingTop: 10,
   },
 });
