@@ -26,6 +26,7 @@ interface Props extends Partial<Message> {
   reactions: string[];
   replyHash?: string;
   onReplyToMessagePress: (val: string) => void;
+  onEmojiReactionPress: (val: string, val2: string) => void;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -37,6 +38,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   reactions,
   replyHash,
   onReplyToMessagePress,
+  onEmojiReactionPress,
   replyto,
 }) => {
   const { t } = useTranslation();
@@ -62,9 +64,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       }
 
       return { imagePath, isImageMessage };
-    } catch (e) {
-      console.log('Error parsing message', e);
-    }
+    } catch (e) {}
   }, [message]);
 
   const replyImageDetails = useMemo(() => {
@@ -79,9 +79,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       }
 
       return { imagePath, isImageMessage };
-    } catch (e) {
-      console.log('Error parsing message', e);
-    }
+    } catch (e) {}
   }, [replyto]);
 
   function handleLongPress() {
@@ -101,7 +99,13 @@ export const GroupMessageItem: React.FC<Props> = ({
   }
 
   function onReaction(emoji: string) {
-    console.log('onReaction press', emoji);
+    onEmojiReactionPress(emoji, replyHash!);
+    setActionsModal(false);
+  }
+
+  function onReplyPess() {
+    onReplyToMessagePress(replyHash!);
+    setActionsModal(false);
   }
 
   function onPress() {
@@ -110,11 +114,6 @@ export const GroupMessageItem: React.FC<Props> = ({
 
   function onCloseUserModal() {
     setUserVisible(false);
-  }
-
-  function onReplyPess() {
-    onReplyToMessagePress(replyHash!);
-    setActionsModal(false);
   }
 
   useEffect(() => {

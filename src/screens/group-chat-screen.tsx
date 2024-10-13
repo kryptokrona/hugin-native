@@ -89,18 +89,23 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     };
   }, []);
 
-  async function onSend(text: string, file: SelectedFile | null) {
+  async function onSend(
+    text: string,
+    file: SelectedFile | null,
+    reply: string | false = false,
+  ) {
     console.log('Send message to room with invite key: ', roomKey);
     console.log('Room name:', name);
-    //TODO** check if reply state is active
-    //add the hash of the message we are replying to as reply
-    // const reply = state.reply.hash
     if (file) {
       const sentFile = onSendGroupMessageWithFile(roomKey, file, text);
       //If we need to return something... or print something locally
       console.log('sent file!', sentFile);
     } else {
-      const sent = await onSendGroupMessage(roomKey, text, replyToMessageHash);
+      const sent = await onSendGroupMessage(
+        roomKey,
+        text,
+        reply ? reply : replyToMessageHash,
+      );
       const save = JSON.parse(sent);
 
       saveRoomsMessageToDatabase(
@@ -119,6 +124,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   function onReplyToMessagePress(hash: string) {
     setReplyToMessageHash(hash);
+  }
+
+  async function onEmojiReactionPress(emoji: string, hash: string) {
+    //Send hash because of race condition with onCloseReplyPress
+    onSend(emoji, null, hash);
   }
 
   function onCloseReplyPress() {
@@ -144,6 +154,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               nickname={item.nickname}
               userAddress={item.address}
               onReplyToMessagePress={onReplyToMessagePress}
+              onEmojiReactionPress={onEmojiReactionPress}
               replyHash={item.hash}
               reactions={[]}
               replyto={item.replyto}
