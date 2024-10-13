@@ -18,7 +18,7 @@ import {
   swarm,
 } from '/lib/native';
 
-import { sleep } from '@/utils';
+import { containsOnlyEmojis, sleep } from '@/utils';
 
 import {
   getActiveRoomUsers,
@@ -86,6 +86,27 @@ export const updateMessages = async (message: Message) => {
 
   if (thisRoom === message.room) {
     const messages = getRoomsMessages();
+
+    //Update reply
+    if (message.reply?.length === 64) {
+      //Update reactions
+      if (containsOnlyEmojis(message.message) && message.message.length < 9) {
+        const update = messages.find((a) => a.hash === message.reply);
+        console.log('React to this!', update);
+        if (update !== undefined) {
+          //TODO ** FIX React sucks, this is not reactive?
+          update.reactions?.push(message.message);
+          setStoreRoomMessages(messages);
+          return;
+        }
+      }
+      //Add original message to this reply
+      const reply = messages.find((a) => a.hash === message.reply);
+      if (reply !== undefined) {
+        message.replyto = [reply];
+        return;
+      }
+    }
     const updatedMessages = [...messages, message];
     setStoreRoomMessages(updatedMessages);
   }
