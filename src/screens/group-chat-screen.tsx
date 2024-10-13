@@ -156,7 +156,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               onReplyToMessagePress={onReplyToMessagePress}
               onEmojiReactionPress={onEmojiReactionPress}
               replyHash={item.hash}
-              reactions={[]}
+              reactions={item.reactions!}
               replyto={item.replyto}
             />
           );

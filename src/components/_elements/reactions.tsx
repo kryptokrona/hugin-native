@@ -9,13 +9,14 @@ import { TextField } from './text-field';
 
 interface Props {
   items: string[];
+  onReact: (val: string) => void;
 }
 
 interface Item {
   emoji: string;
   count: number;
 }
-export const Reactions: React.FC<Props> = ({ items }) => {
+export const Reactions: React.FC<Props> = ({ items, onReact }) => {
   const theme = useGlobalStore((state) => state.theme);
   const sortedItems: Item[] = useMemo(() => {
     const emojiCountMap: { [key: string]: number } = items.reduce(
@@ -34,7 +35,7 @@ export const Reactions: React.FC<Props> = ({ items }) => {
 
   function ItemMapper({ item }: { item: Item }) {
     function onPress() {
-      console.log('onPress', item);
+      onReact(item.emoji);
     }
 
     const byMe = Math.floor(Math.random() * 2) === 1;

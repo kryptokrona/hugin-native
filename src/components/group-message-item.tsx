@@ -108,6 +108,11 @@ export const GroupMessageItem: React.FC<Props> = ({
     setActionsModal(false);
   }
 
+  function onPressReaction(emoji: string) {
+    console.log('Pressed reaction!');
+    onReaction(emoji!);
+  }
+
   function onPress() {
     setUserVisible(true);
   }
@@ -216,7 +221,7 @@ export const GroupMessageItem: React.FC<Props> = ({
                 {message ?? ''}
               </TextField>
             )}
-            <Reactions items={reactions} />
+            <Reactions items={reactions} onReact={onPressReaction} />
           </View>
         </View>
       </View>
