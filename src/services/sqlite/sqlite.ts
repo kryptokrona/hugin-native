@@ -8,6 +8,7 @@ import {
 import { Message } from 'types/p2p';
 
 import { getRoomUsers, updateMessages } from '@/services';
+import { containsOnlyEmojis } from '@/utils';
 
 enablePromise(true);
 
@@ -159,13 +160,26 @@ async function setReplies(results: [ResultSet]) {
       //The original message this one is replying to
       res.replyto = await getRoomReplyMessage(res.reply);
       //await getRoomRepliesToMessage(res.hash);
+      const replies = await getRoomRepliesToMessage(res.hash);
       //If we want all replies to one message
+      const reactions = addEmoji(replies);
       res.replies = [];
+      res.reactions = reactions;
       const r: Message = toMessage(res);
       messages.push(r);
     }
   }
   return messages;
+}
+
+function addEmoji(replies: Message[]) {
+  const reactions = [];
+  for (const m of replies) {
+    if (containsOnlyEmojis(m.message) && m.message.length < 9) {
+      reactions.push(m.message);
+    }
+  }
+  return reactions;
 }
 
 export async function getRoomReplyMessage(hash: string) {
@@ -251,16 +265,24 @@ const toMessage = (res: any) => {
     message: res.message,
     //Nickname
     nickname: res.nickname,
+
+    reactions: res.reactions ? res.reactions : [],
+
     //All the replies to this message
     replies: res?.replies,
+
     //The reply hash of the message
     reply: res.reply,
+
     //The original message this is a reply to
     replyto: res?.replyto,
+
     //The room the message is in
     room: res.room,
+
     //If sent or not
     sent: res.sent,
+
     //Timestmap
     timestamp: res.timestamp,
   };
