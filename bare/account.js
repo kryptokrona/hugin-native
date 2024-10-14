@@ -9,13 +9,15 @@ class Account {
     this.rooms = [];
     this.downloadDir = '';
     this.sender = null;
+    this.req = null;
   }
 
-  init(data, sender) {
+  init(data, sender, req) {
     this.name = data.name;
     this.address = data.address;
     this.avatar = data.avatar;
     this.sender = sender;
+    this.req = req;
     this.downloadDir = data.downloadDir;
   }
 
@@ -30,6 +32,13 @@ class Account {
     const send = data;
     send.type = type;
     this.sender.write(JSON.stringify(send));
+  }
+
+  async request(data) {
+    await this.req.request(JSON.stringify(data));
+    console.log('got req', r);
+    const parse = JSON.parse(r);
+    return parse;
   }
 }
 
