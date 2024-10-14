@@ -58,4 +58,5 @@ export interface FileInput extends SelectedFile {
   invite: string;
   key: string;
   message: string;
+  sig: string;
 }
