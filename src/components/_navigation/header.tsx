@@ -5,6 +5,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useThemeStore, useUserStore } from '@/services';
+import { getAvatar } from '@/utils';
 
 import HuginSvg from '../../assets/hugin.svg';
 import { Avatar, CustomIcon, TextField } from '../_elements';
@@ -19,6 +20,7 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const navigation = useNavigation();
   const theme = useThemeStore((state) => state.theme);
   const avatar = useUserStore((state) => state.user?.avatar);
+  const address = useUserStore((state) => state.user?.address);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
@@ -42,8 +44,8 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
         )}
         {!backButton && (
           <>
-            {avatar && <Avatar base64={avatar} size={30} />}
-            {!avatar && <HuginSvg style={styles.logo} />}
+            {address && <Avatar base64={getAvatar(address)} size={30} />}
+            {!address && <HuginSvg style={styles.logo} />}
           </>
         )}
       </View>
