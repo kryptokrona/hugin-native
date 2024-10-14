@@ -48,29 +48,23 @@ export const getRoomUsers = async () => {
 };
 
 export const peerConnected = (user) => {
-  console.log('Peer connected, add:', user);
   const connected: User = {
     address: user.address,
     name: user.name,
     room: user.key,
   };
   const users = getActiveRoomUsers();
-  console.log('online users in all groups', users.length);
   const updateList = [...users, connected];
-  console.log('Updated:', updateList.length);
   setStoreActiveRoomUsers(updateList);
   //Here we also get status if the user is connected to a voice channel
   //updateVoiceChannelStatus(user)
 };
 
 export const peerDisconncted = (user) => {
-  console.log('Peer disconnected, remove:', user);
   const users = getActiveRoomUsers();
-  console.log('Users active', users.length);
   const updateList = users.filter(
     (a: User) => a.address !== user.address && a.room !== user.key,
   );
-  console.log('Updated list', updateList.length);
   setStoreActiveRoomUsers(updateList);
   //updateVoiceChannelStatus(user)
 };
@@ -89,22 +83,23 @@ export const updateMessages = async (message: Message) => {
 
     //Update reply
     if (message.reply?.length === 64) {
-      //Update reactions
       if (containsOnlyEmojis(message.message) && message.message.length < 9) {
-        const update = messages.find((a) => a.hash === message.reply);
-        console.log('React to this!', update);
-        if (update !== undefined) {
-          //TODO ** FIX React sucks, this is not reactive?
-          update.reactions?.push(message.message);
-          setStoreRoomMessages(messages);
-          return;
-        }
+        const updatedMessage = messages.map((msg) => {
+          if (msg.hash === message.reply) {
+            return {
+              ...msg,
+              reactions: [...(msg.reactions || []), message.message],
+            };
+          }
+          return msg;
+        });
+        setStoreRoomMessages(updatedMessage);
+        return;
       }
       //Add original message to this reply
       const reply = messages.find((a) => a.hash === message.reply);
       if (reply !== undefined) {
         message.replyto = [reply];
-        return;
       }
     }
     const updatedMessages = [...messages, message];
@@ -122,19 +117,22 @@ export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string | null,
+  sig: string,
 ) => {
-  return await send_swarm_msg(key, message, reply);
+  return await send_swarm_msg(key, message, reply, sig);
 };
 
 export const onSendGroupMessageWithFile = (
   key: string,
   file: SelectedFile,
   message: string,
+  sig: string,
 ) => {
   const fileData: FileInput & { message: string } = {
     ...file,
     key,
     message,
+    sig,
   };
   const JSONfileData = JSON.stringify(fileData);
   begin_send_file(JSONfileData);
