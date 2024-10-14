@@ -120,7 +120,7 @@ export const usePreferencesStore = create<PreferencesStore>()(
       setPreferences: (preferences) => set({ preferences }),
     }),
     {
-      name: ASYNC_STORAGE_KEYS.THEME,
+      name: ASYNC_STORAGE_KEYS.PREFERENCES,
       onRehydrateStorage: () => () => {
         useAppStoreState.getState().setHasHydrated('preferences');
       },
