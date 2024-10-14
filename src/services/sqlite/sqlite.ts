@@ -162,7 +162,7 @@ export async function getRoomMessages(room: string, page: number) {
     offset = page * limit;
   }
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp ASC LIMIT ${offset}, ${limit}`,
+    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
     [room],
   );
 
@@ -200,7 +200,7 @@ async function setReplies(results: [ResultSet]) {
       messages.push(r);
     }
   }
-  return messages;
+  return messages.reverse();
 }
 
 function addEmoji(replies: Message[]) {
