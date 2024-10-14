@@ -46,16 +46,17 @@ export const MessageInput: React.FC<Props> = ({
       } else {
         const asset = response?.assets?.[0];
         if (asset) {
-          const { fileSize, uri, fileName, type } = asset;
+          const { fileSize, uri, fileName, type, originalPath } = asset;
           if (!uri || !fileName || !fileSize) {
             return;
           }
           const fileInfo: SelectedFile = {
             fileName: fileName,
-            path: uri,
+            path: originalPath?.slice(7, originalPath.length),
             size: fileSize,
             time: new Date().getTime(),
             type: type ?? 'image',
+            uri: uri,
           };
           setSelectedFile(fileInfo);
         }
