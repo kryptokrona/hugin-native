@@ -16,6 +16,7 @@ import {
   onSendGroupMessage,
   onSendGroupMessageWithFile,
   saveRoomsMessageToDatabase,
+  signMessage,
   useGlobalStore,
 } from '@/services';
 import type {
@@ -39,7 +40,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const { name: userName } = useGlobalStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
-  console.log(messages);
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
@@ -94,10 +94,18 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     file: SelectedFile | null,
     reply: string | false = false,
   ) {
-    console.log('Send message to room with invite key: ', roomKey);
-    console.log('Room name:', name);
     if (file) {
-      const sentFile = onSendGroupMessageWithFile(roomKey, file, text);
+      text = file.fileName;
+    }
+    const signature = await signMessage(text);
+    console.log('Sending to room:', name);
+    if (file) {
+      const sentFile = onSendGroupMessageWithFile(
+        roomKey,
+        file,
+        text,
+        signature,
+      );
       //If we need to return something... or print something locally
       console.log('sent file!', sentFile);
     } else {
@@ -105,6 +113,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         roomKey,
         text,
         reply ? reply : replyToMessageHash,
+        signature,
       );
       const save = JSON.parse(sent);
 

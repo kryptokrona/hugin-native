@@ -8,7 +8,8 @@ import { sleep } from '@/utils';
 
 import { ASYNC_STORAGE_KEYS, getStorageValue } from './async-storage';
 import { getRoomUsers, joinRooms } from './bare';
-import { initDB } from './sqlite';
+import { newKeyPair } from './crypto';
+import { initDB, loadAccount, saveAccount } from './sqlite';
 import {
   defaultPreferences,
   defaultUser,
@@ -31,6 +32,14 @@ export const init = async () => {
   setStoreTheme(theme ?? defaultTheme);
   setStorePreferences(preferences ?? defaultPreferences);
   await sleep(100);
+  const acc = await loadAccount();
+  console.log('Account', acc);
+  if (!acc) {
+    console.log('No account, create new one');
+    const keys = newKeyPair();
+    console.log('Got new keys');
+    await saveAccount(keys.publicKey, keys.secretKey);
+  }
   await joinRooms();
   if (preferences) {
     await i18n.changeLanguage(preferences.language);

@@ -47,6 +47,12 @@ export const initDB = async () => {
       UNIQUE (hash)
   )`;
     await db.executeSql(query);
+
+    const acc = `CREATE TABLE IF NOT EXISTS account ( 
+    publicKey TEXT,
+    secretKey TEXT
+  )`;
+    await db.executeSql(acc);
   } catch (err) {
     console.log(err);
   }
@@ -54,6 +60,24 @@ export const initDB = async () => {
   //Add some init test funcs during dev here:
   getRooms(); //Lists all our room in the console.
 };
+
+export async function saveAccount(pk: string, sk: string) {
+  console.log('Saving Account ', pk);
+  try {
+    const result = await db.executeSql(
+      'REPLACE INTO account (publicKey, secretKey) VALUES (?, ?)',
+      [pk, sk],
+    );
+    console.log(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function loadAccount() {
+  const results = await db.executeSql('SELECT * FROM account');
+  return results[0].rows.item(0);
+}
 
 export async function saveRoomToDatabase(
   name: string,
@@ -97,9 +121,6 @@ export async function getRooms() {
 
   results.forEach((result) => {
     for (let index = 0; index < result.rows.length; index++) {
-      //console.log('Group:', result.rows.item(index).name);
-      //console.log('key:', result.rows.item(index).key);
-      //todoItems.push(result.rows.item(index));
       rooms.push(result.rows.item(index));
     }
   });
@@ -160,6 +181,16 @@ async function setReplies(results: [ResultSet]) {
       //The original message this one is replying to
       res.replyto = await getRoomReplyMessage(res.reply);
       //await getRoomRepliesToMessage(res.hash);
+
+      //This message is already displayed as a reaction on someone elses message
+      if (
+        res.replyto.length &&
+        containsOnlyEmojis(res.message) &&
+        res.message.length < 9
+      ) {
+        continue;
+      }
+
       const replies = await getRoomRepliesToMessage(res.hash);
       //If we want all replies to one message
       const reactions = addEmoji(replies);
