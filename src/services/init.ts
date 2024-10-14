@@ -6,11 +6,13 @@ import { sleep } from '@/utils';
 
 import { getRoomUsers, joinRooms } from './bare';
 import { newKeyPair } from './crypto';
+import { updateLanguage } from './handle-user';
 import { initDB, loadAccount, saveAccount } from './sqlite';
 import { usePreferencesStore, useUserStore } from './zustand';
 
 export const init = async () => {
   const { user } = useUserStore.getState();
+  updateLanguage('en');
   const { preferences } = usePreferencesStore.getState();
   await i18n.changeLanguage(preferences.language);
   await bare(user);
