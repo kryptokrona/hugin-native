@@ -11,7 +11,6 @@ const {
   send_message_history,
   create_swarm,
   end_swarm,
-  ipc,
   share_file_info,
 } = require('./swarm');
 const { Hugin } = require('./account');
@@ -19,6 +18,11 @@ const { Hugin } = require('./account');
 const rpc = new RPC(HelloBare.sendMessage);
 HelloBare.onMessage = rpc.recv.bind(rpc);
 console.log('Bare main init');
+
+const reqest = rpc.register(2, {
+  request: ce.string,
+  response: ce.string,
+});
 
 //Send
 
@@ -35,34 +39,34 @@ rpc.register(0, {
   response: ce.string,
   onrequest: async (data) => {
     console.log('Got request data', data);
-    const parsed = JSON.parse(data);
-    switch (parsed.type) {
+    const p = JSON.parse(data);
+    switch (p.type) {
       case 'init_bare':
-        initBareMain(parsed.user, parsed.documentDirectoryPath);
+        initBareMain(p.user, p.documentDirectoryPath);
       case 'update_bare_user':
-        updateBareUser(parsed.user);
+        updateBareUser(p.user);
         break;
       case 'new_swarm':
-        await newSwarm(parsed.hashkey, parsed.key, parsed.admin);
+        await newSwarm(p.hashkey, p.key, p.admin);
         break;
       case 'end_swarm':
-        endSwarm(parsed.key);
+        endSwarm(p.key);
         break;
       case 'send_room_msg':
-        return sendRoomMessage(parsed.message, parsed.key, parsed.reply);
+        return sendRoomMessage(p.message, p.key, p.reply, p.sig);
       case 'send_history':
-        send_message_history(parsed.history, parsed.room, parsed.address);
+        send_message_history(p.history, p.room, p.address);
         break;
       case 'group_random_key':
         return getRandomGroupKey();
       case 'begin_send_file':
-        sendFileInfo(parsed.json_file_data);
+        sendFileInfo(p.json_file_data);
         break;
       case 'request_download':
-        request_download(parsed.file);
+        request_download(p.file);
         break;
       default:
-        console.log('Unknown RPC type:', parsed.type);
+        console.log('Unknown RPC type:', p.type);
     }
     return 'success';
   },
@@ -70,7 +74,7 @@ rpc.register(0, {
 
 // Function implementations
 const initBareMain = async (user) => {
-  Hugin.init(user, sender);
+  Hugin.init(user, sender, reqest);
 };
 
 const updateBareUser = (user) => {
@@ -88,10 +92,10 @@ const endSwarm = async (key) => {
   await end_swarm(swarm.topic);
 };
 
-const sendRoomMessage = (message, key, reply) => {
+const sendRoomMessage = (message, key, reply, sig) => {
   const swarm = getRoom(key);
-  if (!swarm) return;
-  return send_message(message, swarm.topic, reply, key);
+  if (!swarm) return { type: 'Error' };
+  return send_message(message, swarm.topic, reply, key, sig);
 };
 
 const getRoom = (key) => {

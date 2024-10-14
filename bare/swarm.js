@@ -127,7 +127,7 @@ const new_connection = (connection, topic, key, dht_keys) => {
   });
 };
 
-function send_message(message, topic, reply, invite) {
+function send_message(message, topic, reply, invite, sig) {
   console.log('Send this swarm message', message);
   const message_json = {
     c: 'channel in room?',
@@ -137,7 +137,7 @@ function send_message(message, topic, reply, invite) {
     m: message,
     n: Hugin.name,
     r: reply,
-    s: 'signature',
+    s: sig,
     t: Date.now(),
   };
 
@@ -222,6 +222,13 @@ const incoming_message = async (data, topic, connection, key) => {
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
+  const verify = Hugin.request({
+    type: 'verify',
+    sig: message.signature,
+    m: message.message,
+    pub: message.address,
+  });
+  console.log('Verify', verify);
   console.log('Sanitized: ', message);
   Hugin.send('swarm-message', { message, topic });
 };
@@ -443,6 +450,7 @@ const share_file_info = async (file, topic) => {
     time: file.time,
     topic: topic,
     type: 'file',
+    sig: file.sig,
   };
 
   const image = check_if_image_or_video(file.fileName, file.size);
