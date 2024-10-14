@@ -17,6 +17,20 @@ const mainRPC = rpc.register(0, {
   response: ce.string,
 });
 
+rpc.register(2, {
+  request: ce.string,
+  response: ce.string,
+  onrequest: async (data) => {
+    console.log('Got bare request', data);
+    switch (data.type) {
+      case 'verify':
+        console.log('Verify signature', data);
+        return 'lol';
+        return await verifySignature(data.message, data.address);
+    }
+  },
+});
+
 // Right now we use a stream to send IPC messages.
 // This may need to be bidirectional if we send files etc.
 rpc.register(1, {
@@ -59,12 +73,13 @@ export const end_swarm = (key) => {
   return mainRPC.request(data);
 };
 
-export const send_swarm_msg = async (key, message, reply) => {
+export const send_swarm_msg = async (key, message, reply, sig) => {
   const data = JSON.stringify({
     type: 'send_room_msg',
     key,
     message,
     reply,
+    sig,
   });
   return await mainRPC.request(data);
 };
