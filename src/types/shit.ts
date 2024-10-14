@@ -14,7 +14,7 @@ export interface Preferences {
   // currency: string;
   language: string;
   // limitData: boolean;
-  nickname: string;
+  // nickname: string;
   // node: string;
   // notificationsEnabled: boolean;
   // scanCoinbaseTransactions: boolean;
@@ -25,17 +25,17 @@ export interface Payee {
   nickname: string | (string | null)[];
   address?: string;
   paymentID?: string | (string | null)[];
-}
+} // Used?
 
 export interface FromPayee {
   name?: string;
   address?: string;
   paymentID?: string;
-}
+} // Used?
 
 export interface TransactionDetail {
   hash: string;
-}
+} // Used?
 
 export interface User {
   address: string;

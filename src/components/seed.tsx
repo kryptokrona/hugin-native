@@ -1,13 +1,12 @@
 import React from 'react';
 
-import { View, Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 
 import { CopyButton } from './_elements';
-
 import { Card } from './_layout';
 
 interface SeedComponentProps {
@@ -16,7 +15,7 @@ interface SeedComponentProps {
 
 export const SeedComponent: React.FC<SeedComponentProps> = ({ seed }) => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
 
   return (
     seed && (

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ScreenLayout, TextField } from '@/components';
 import { SettingsScreens } from '@/config';
-import { updateLanguage, useGlobalStore } from '@/services';
+import { updateLanguage, useThemeStore } from '@/services';
 import type { SettingsStackParamList } from '@/types';
 
 import { languages } from '../i18n';
@@ -20,7 +20,7 @@ interface Props {
 export const ChangeLanguageScreen: React.FC<Props> = () => {
   const { i18n } = useTranslation();
   const navigation = useNavigation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const borderColor = theme.muted;
   const currentLanguage = i18n.language;
   const sortedLanguages = [...languages].sort((a, b) => {

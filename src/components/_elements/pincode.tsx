@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-import { View, TextInput, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 
 interface PINInputProps {
   onFinish: (pin: string) => void;
@@ -10,7 +10,7 @@ interface PINInputProps {
 }
 
 export const Pincode: React.FC<PINInputProps> = ({ onFinish, length = 6 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const [pin, setPin] = useState('');
 
   const handleChange = (text: string) => {

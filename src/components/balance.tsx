@@ -31,7 +31,7 @@
 //   address,
 // }) => {
 //   const [expandedBalance, setExpandedBalance] = useState(false);
-//   const theme = useGlobalStore((state) => state.theme);
+//   const theme = useThemeStore((state) => state.theme);
 //   const { t } = useTranslation();
 //   const hasBalance = unlockedBalance + lockedBalance > 0 ? true : false;
 

@@ -13,8 +13,8 @@ import {
   ScreenLayout,
   TextButton,
 } from '@/components';
-import { nameMaxLength, SettingsScreens } from '@/config';
-import { updateUser, useGlobalStore } from '@/services';
+import { SettingsScreens, nameMaxLength } from '@/config';
+import { updateUser, useThemeStore, useUserStore } from '@/services';
 import type {
   SettingsStackNavigationType,
   SettingsStackParamList,
@@ -30,9 +30,9 @@ interface Props {
 
 export const UpdateProfileScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const navigation = useNavigation<SettingsStackNavigationType>();
-  const { name, avatar } = useGlobalStore((state) => state.user);
+  const { name, avatar } = useUserStore((state) => state.user);
   const [value, setValue] = useState<string>(name);
 
   const onNameInput = (value: string) => {

@@ -24,13 +24,13 @@ import {
   UserItem,
 } from '@/components';
 import { GroupsScreens, nameMaxLength } from '@/config';
-import { onDeleteGroup, onLeaveGroup, useGlobalStore } from '@/services';
+import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
 import type {
   GroupStackNavigationType,
   User,
   GroupStackParamList,
 } from '@/types';
-import { createAvatar, getAvatar, onlineUsers, pickAvatar } from '@/utils';
+import { createAvatar, getAvatar, pickAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
@@ -40,13 +40,14 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
   const navigation = useNavigation<GroupStackNavigationType>();
-  const { theme } = useGlobalStore();
+  const theme = useThemeStore((state) => state.theme);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [groupName, setName] = useState<string>('Some group name'); // route.params.name
   const tempAvatar = createAvatar();
   const isAdmin = false; // TBD
-  const roomUsers = useGlobalStore((state) => state.roomUsers).filter(a => a.room == roomKey);
-
+  const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
+    (a) => a.room == roomKey,
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -115,9 +116,9 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           // onSubmitEditing={onSave}
         />
         <TextButton onPress={onSave}>{t('save')}</TextButton>
-          <TextButton onPress={onLeave} type="destructive">
-            {t('leaveGroup')}
-          </TextButton>
+        <TextButton onPress={onLeave} type="destructive">
+          {t('leaveGroup')}
+        </TextButton>
       </ScrollView>
     </ScreenLayout>
   );

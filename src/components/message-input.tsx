@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import DocumentPicker, { types } from 'react-native-document-picker';
 import { CameraOptions, launchCamera } from 'react-native-image-picker';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
 import type { SelectedFile } from '@/types';
 
@@ -24,7 +24,7 @@ export const MessageInput: React.FC<Props> = ({
   onCloseReplyPress,
 }) => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const [text, setText] = useState('');
   const [focus, setFocus] = useState(false);
   const [displayActions, setDisplayActions] = useState(true);

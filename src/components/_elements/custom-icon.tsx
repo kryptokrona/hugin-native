@@ -7,7 +7,7 @@ import MCI from 'react-native-vector-icons/MaterialCommunityIcons';
 import MI from 'react-native-vector-icons/MaterialIcons';
 import SLI from 'react-native-vector-icons/SimpleLineIcons';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import type { CustomIconProps } from '@/types';
 
 // Search from here
@@ -19,7 +19,7 @@ export const CustomIcon: React.FC<CustomIconProps> = ({
   color,
   size = 24,
 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const mColor = color ?? theme.foreground;
   switch (type) {
     case 'MI':

@@ -6,13 +6,13 @@ import {
   View,
 } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 
 interface Props {
   visible: boolean;
   closeModal: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const ModalBottom: React.FC<Props> = ({
@@ -20,7 +20,7 @@ export const ModalBottom: React.FC<Props> = ({
   closeModal,
   children,
 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   function onClose() {
     closeModal();
   }

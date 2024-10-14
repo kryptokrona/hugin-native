@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Message } from 'types/p2p';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
@@ -42,7 +42,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   replyto,
 }) => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
   const [userModal, setUserVisible] = useState(false);
   const [actions, setActions] = useState(true);

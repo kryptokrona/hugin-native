@@ -74,7 +74,7 @@ export const updateVoiceChannelStatus = (status) => {
 };
 
 export const updateMessages = async (message: Message) => {
-  // const theme = useGlobalStore((state) => state.theme);
+  // const theme = useThemeStore((state) => state.theme);
   const thisRoom = getCurrentRoom();
   console.log(thisRoom);
 

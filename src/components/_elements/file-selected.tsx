@@ -1,6 +1,6 @@
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 import type { SelectedFile } from '@/types';
 import { formatFileSize } from '@/utils';
@@ -20,7 +20,7 @@ export const FileSelected: React.FC<Props> = ({
   // path,
   uri,
 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.accent;
   const color = theme.accentForeground;
   const sizeStr = formatFileSize(size);

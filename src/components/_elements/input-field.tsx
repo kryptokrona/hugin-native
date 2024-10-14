@@ -4,8 +4,8 @@ import { StyleSheet, TextInput, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
-import { useGlobalStore } from '@/services';
-import { commonInputProps, Styles } from '@/styles';
+import { useThemeStore } from '@/services';
+import { Styles, commonInputProps } from '@/styles';
 
 import { TextField } from './text-field';
 
@@ -32,7 +32,7 @@ export const InputField: React.FC<Props> = ({
 }) => {
   const { t } = useTranslation();
   const [focus, setFocus] = useState(false);
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.background;
   const borderColor = focus
     ? theme.foreground

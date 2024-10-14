@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 
 import { CustomIcon } from './custom-icon';
 import { TextField } from './text-field';
@@ -11,7 +11,7 @@ interface Props {
 }
 
 export const ReplyIndicator: React.FC<Props> = ({ toName, onCloseReply }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const color = theme.accentForeground;
 
   return (

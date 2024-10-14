@@ -7,10 +7,10 @@ import moment from 'moment';
 import { useTranslation } from 'react-i18next';
 import MonthSelectorCalendar from 'react-native-month-selector';
 
-import { TextButton, ScreenLayout } from '@/components';
+import { ScreenLayout, TextButton } from '@/components';
 import { AuthScreens, config } from '@/config';
-import { dateToScanHeight, useGlobalStore } from '@/services';
-import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
+import { dateToScanHeight, useThemeStore } from '@/services';
+import type { AuthStackNavigationType, AuthStackParamList } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.PickMonthScreen>;
@@ -18,7 +18,7 @@ interface Props {
 
 export const PickMonthScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const [month, setMonth] = useState(moment().startOf('month'));
   const navigation = useNavigation<AuthStackNavigationType>();
 
@@ -36,7 +36,7 @@ export const PickMonthScreen: React.FC<Props> = () => {
           minDate={moment(config.chainLaunchTimestamp)}
           selectedBackgroundColor={theme.primary}
           monthTextStyle={{ color: theme.primary }}
-          monthDisabledStyle={{ color: theme.inverted }}
+          monthDisabledStyle={{ color: theme.muted }}
           currentMonthTextStyle={{ color: theme.primary }}
           seperatorColor={theme.primary}
           nextIcon={

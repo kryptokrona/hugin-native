@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import type { ElementType } from '@/types';
 
 import { CustomIcon } from './custom-icon';
@@ -21,7 +21,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
 }) => {
   // const { t } = useTranslation();
   // const toast = useToast();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const iconColor =
     type === 'primary' ? theme.primaryForeground : theme.secondaryForeground;
 

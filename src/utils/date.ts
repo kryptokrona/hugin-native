@@ -1,9 +1,9 @@
 import moment from 'moment';
 
-import { getPreferences } from '@/services';
+import { usePreferencesStore } from '@/services';
 
 export const prettyPrintDateFromLocale = (timestamp: number) => {
-  const preferences = getPreferences();
+  const { preferences } = usePreferencesStore.getState();
   const date = new Date(timestamp * 1000);
   return date.toLocaleString(preferences.language);
 };

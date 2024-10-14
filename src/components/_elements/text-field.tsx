@@ -1,6 +1,6 @@
 import { StyleSheet, Text } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles, textType } from '@/styles';
 import type { ElementType } from '@/types';
 
@@ -23,7 +23,7 @@ export const TextField: React.FC<Props> = ({
   bold,
   style,
 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const color = theme[textType[type]];
   const fontSize = Styles.fontSizes[size] ?? Styles.fontSizes.medium;
   const fontWeight = bold ? 'bold' : 'normal';

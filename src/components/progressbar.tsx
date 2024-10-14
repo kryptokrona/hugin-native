@@ -4,12 +4,12 @@
 
 import React, { useEffect, useRef } from 'react';
 
-import { Animated, StyleSheet, View, Easing } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 
 export const ProgressBar: React.FC<any> = (props) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const progress = useRef(
     new Animated.Value(props.initialProgress || 0),
   ).current;
@@ -46,13 +46,13 @@ export const ProgressBar: React.FC<any> = (props) => {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.backgroundInverted },
+        { backgroundColor: theme.background },
         props.style,
       ]}>
       <Animated.View
         style={[
           styles.fill,
-          { backgroundColor: theme.inverted, width: fillWidth },
+          { backgroundColor: theme.cardForeground, width: fillWidth },
         ]}
       />
     </View>

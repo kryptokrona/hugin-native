@@ -1,50 +1,46 @@
-import { CommonActions } from '@react-navigation/native';
+// export async function Authenticate(
+//   navigation: any,
+//   subtitle: string,
+//   finishFunction: any,
+//   disableBack = false,
+// ) {
+//   // No auth, just go straight to the finish function
+//   if (globals.preferences.authenticationMethod === 'none') {
+//     finishFunction(navigation);
+//     return;
+//   }
 
-import { globals } from '@/config';
+//   let route = 'RequestPin';
 
-export async function Authenticate(
-  navigation: any,
-  subtitle: string,
-  finishFunction: any,
-  disableBack = false,
-) {
-  // No auth, just go straight to the finish function
-  if (globals.preferences.authenticationMethod === 'none') {
-    finishFunction(navigation);
-    return;
-  }
+//   try {
+//     // const sensorType = await FingerprintScanner.isSensorAvailable();
 
-  let route = 'RequestPin';
+//     // User wants to use hardware authentication, and we have it available
+//     if (globals.preferences.authenticationMethod === 'hardware-auth') {
+//       route = 'RequestHardwareAuth';
+//     }
+//   } catch (err) {
+//     // No fingerprint sensor
+//   }
 
-  try {
-    // const sensorType = await FingerprintScanner.isSensorAvailable();
+//   if (disableBack) {
+//     navigation.dispatch(
+//       CommonActions.reset({
+//         index: 0,
+//         routes: [{ name: route, params: { finishFunction, subtitle } }],
+//       }),
+//     );
 
-    // User wants to use hardware authentication, and we have it available
-    if (globals.preferences.authenticationMethod === 'hardware-auth') {
-      route = 'RequestHardwareAuth';
-    }
-  } catch (err) {
-    // No fingerprint sensor
-  }
-
-  if (disableBack) {
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: route, params: { finishFunction, subtitle } }],
-      }),
-    );
-
-    // navigation.dispatch(
-    //   navigateWithDisabledBack(route, {
-    //     finishFunction,
-    //     subtitle,
-    //   }),
-    // );
-  } else {
-    navigation.navigate(route, {
-      finishFunction,
-      subtitle,
-    });
-  }
-}
+//     // navigation.dispatch(
+//     //   navigateWithDisabledBack(route, {
+//     //     finishFunction,
+//     //     subtitle,
+//     //   }),
+//     // );
+//   } else {
+//     navigation.navigate(route, {
+//       finishFunction,
+//       subtitle,
+//     });
+//   }
+// }

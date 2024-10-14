@@ -11,7 +11,7 @@ import {
 
 import { useHeaderHeight } from '@react-navigation/elements';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 
 interface Props {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ export const ScreenLayout: React.FC<Props> = ({
   const mHeight = useHeaderHeight();
   const height = mHeight + 20;
   const behavior = Platform.OS === 'ios' ? 'padding' : 'height';
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.background;
 
   if (!touchableWithoutFeedback) {

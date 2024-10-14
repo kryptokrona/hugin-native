@@ -1,18 +1,18 @@
 import { useMemo, useState } from 'react';
 
 import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
   Dimensions,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 import emojiDataByGroup from 'unicode-emoji-json/data-by-group.json'; // Importing the grouped emoji data
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 import { Emoji, EmojiCategory } from '@/types';
 
@@ -26,7 +26,7 @@ interface Props {
 const commonEmojis = ['👍', '❤️', '😂', '😭', '🙏', '🔥', '💩'];
 
 export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<string>('Smileys & Emotion');
   const backgroundColor = theme.background;

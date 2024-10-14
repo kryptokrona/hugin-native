@@ -6,8 +6,8 @@ import {
   View,
 } from 'react-native';
 
-import { useGlobalStore } from '@/services';
-import { backgroundType, Styles, textType } from '@/styles';
+import { useThemeStore } from '@/services';
+import { Styles, backgroundType, textType } from '@/styles';
 import type { ElementType } from '@/types';
 
 interface Props {
@@ -29,7 +29,7 @@ export const TextButton: React.FC<Props> = ({
   style,
   small,
 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
 
   const backgroundColor = theme[backgroundType[type]];
   const borderColor = theme[textType[type]];

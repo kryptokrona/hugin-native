@@ -18,6 +18,7 @@ import {
   saveRoomsMessageToDatabase,
   signMessage,
   useGlobalStore,
+  useUserStore,
 } from '@/services';
 import type {
   SelectedFile,
@@ -37,7 +38,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [replyToMessageHash, setReplyToMessageHash] = useState<string | null>(
     null,
   );
-  const { name: userName } = useGlobalStore((state) => state.user);
+  const { name: userName } = useUserStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
   // Use getRoomMessages with a page index (0 is default) to load more messages

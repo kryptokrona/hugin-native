@@ -5,7 +5,7 @@ import { TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native';
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { TabBar } from '@/config';
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import type { IconType } from '@/types';
 
 import { CustomIcon } from '../_elements';
@@ -15,7 +15,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   descriptors,
   navigation,
 }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const [keyboardShow, setKeyboardShow] = useState(false);
 
   useEffect(() => {

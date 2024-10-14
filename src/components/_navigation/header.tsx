@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore, useUserStore } from '@/services';
 
 import HuginSvg from '../../assets/hugin.svg';
 import { Avatar, CustomIcon, TextField } from '../_elements';
@@ -17,8 +17,9 @@ interface Props {
 
 export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const navigation = useNavigation();
-  const theme = useGlobalStore((state) => state.theme);
-  const avatar = useGlobalStore((state) => state.user?.avatar);
+  const theme = useThemeStore((state) => state.theme);
+  const avatar = useUserStore((state) => state.user?.avatar);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
     return unsubscribe;

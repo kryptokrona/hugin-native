@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 
 import { TextField } from './text-field';
@@ -17,7 +17,7 @@ interface Item {
   count: number;
 }
 export const Reactions: React.FC<Props> = ({ items, onReact }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const sortedItems: Item[] = useMemo(() => {
     const emojiCountMap: { [key: string]: number } = items.reduce(
       (acc: { [key: string]: number }, emoji: string) => {

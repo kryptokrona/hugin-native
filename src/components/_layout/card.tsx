@@ -1,6 +1,6 @@
 import { StyleProp, StyleSheet, View } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const Card: React.FC<Props> = ({ children, style }) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.background;
   const borderColor = theme.border;
 

@@ -11,9 +11,9 @@ import {
 import { RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { ScreenLayout, Container, TextField, TextButton } from '@/components';
+import { Container, ScreenLayout, TextButton, TextField } from '@/components';
 import { SettingsScreens } from '@/config';
-import { setStoreTheme, useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles, themes } from '@/styles';
 import type { SettingsStackParamList, Theme, ThemeBase } from '@/types';
 
@@ -26,19 +26,19 @@ interface Props {
 const size = 26;
 export const ChangeThemeScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const isDark = theme.mode === 'dark';
   const { width } = Dimensions.get('window');
   const itemWidth = (width - size * 2) / 3;
 
   function setDarkTheme() {
     const darkTheme = themes[theme.name as keyof typeof themes].dark as Theme;
-    setStoreTheme(darkTheme);
+    useThemeStore.setState({ theme: darkTheme });
   }
 
   function setLightTheme() {
     const lightTheme = themes[theme.name as keyof typeof themes].light as Theme;
-    setStoreTheme(lightTheme);
+    useThemeStore.setState({ theme: lightTheme });
   }
 
   function ItemMapper({ item }: { item: string }) {
@@ -52,7 +52,7 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
 
     function setColorTheme() {
       const newTheme = themes[item as keyof typeof themes] as ThemeBase;
-      setStoreTheme(isDark ? newTheme.dark : newTheme.light);
+      useThemeStore.setState({ theme: newTheme.dark });
     }
 
     return (

@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 import type { MessagesStackNavigationType } from '@/types';
 import { prettyPrintDate } from '@/utils';
@@ -30,7 +30,7 @@ export const MessageItem: React.FC<Props> = ({
   const navigation = useNavigation<MessagesStackNavigationType>();
   const [isPressed, setIsPressed] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const dateString = prettyPrintDate(date);
 
   function handleLongPress() {
@@ -72,11 +72,7 @@ export const MessageItem: React.FC<Props> = ({
             {dateString}
           </TextField>
           <View style={styles.invertedCard}>
-            <View
-              style={[
-                styles.card,
-                { backgroundColor: theme.backgroundTertiary },
-              ]}>
+            <View style={[styles.card, { backgroundColor: theme.background }]}>
               <TextField size="small">{message}</TextField>
             </View>
           </View>

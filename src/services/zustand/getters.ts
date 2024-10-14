@@ -2,12 +2,6 @@
 
 import { useGlobalStore } from './global-store';
 
-export const getStoreTheme = () => {
-  const storeTheme = useGlobalStore.getState().theme;
-
-  return storeTheme;
-};
-
 export const getCurrentRoom = () => {
   const roomKey = useGlobalStore.getState().thisRoom;
 
@@ -22,10 +16,4 @@ export const getRoomsMessages = () => {
 
 export const getActiveRoomUsers = () => {
   return useGlobalStore.getState().roomUsers;
-};
-
-export const getPreferences = () => {
-  const storePreferences = useGlobalStore.getState().preferences;
-
-  return storePreferences;
 };

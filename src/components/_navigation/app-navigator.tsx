@@ -6,12 +6,7 @@ import { AppStackParamList } from 'types/navigation';
 
 import { TabBar } from '@/config';
 
-import {
-  GroupStackNavigator,
-  MainStackNavigator,
-  MessagesStackNavigator,
-  SettingsStackNavigator,
-} from './_stacks';
+import { GroupStackNavigator, SettingsStackNavigator } from './_stacks';
 import { MyTabBar } from './tab-bar';
 
 const Tab = createBottomTabNavigator<AppStackParamList>();

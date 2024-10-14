@@ -2,7 +2,7 @@ import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 import type { CustomIconProps } from '@/types';
 
@@ -16,7 +16,7 @@ interface Props {
 
 export const SettingsItem: React.FC<Props> = ({ title, icon, onPress }) => {
   const { t } = useTranslation();
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.primary;
   const color = theme.primaryForeground;
   // const borderColor = theme.border;

@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import * as Animatable from 'react-native-animatable';
 
 import { globals } from '@/config';
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
 
 import { ProgressBar } from './progressbar';
 
 export const SyncComponent: React.FC<any> = (props) => {
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
 
   const [syncStatus, setSyncStatus] = useState({
     localHeight: 0,
@@ -81,7 +81,7 @@ export const SyncComponent: React.FC<any> = (props) => {
     <View style={styles.container}>
       <Animatable.Text
         ref={syncRef}
-        style={[styles.text, { color: theme.inverted }]}>
+        style={[styles.text, { color: theme.primary }]}>
         {syncStatus.walletHeight} / {syncStatus.networkHeight} -{' '}
         {syncStatus.percent}%
       </Animatable.Text>

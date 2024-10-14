@@ -46,6 +46,8 @@ interface Props {
 export const SplashScreen: React.FC<Props> = () => {
   //   const navigation = useNavigation<AuthStackNavigationType>();
   const navigation = useNavigation<any>();
+  // const isHydrated = useAppStoreState((state) => state._hasHydrated);
+  // const isReady = isHydrated.preferences && isHydrated.user && isHydrated.theme;
 
   useEffect(() => {
     setTimeout(() => {
@@ -60,12 +62,14 @@ export const SplashScreen: React.FC<Props> = () => {
       //     ],
       //   }),
       // );
+      // if (isReady) {
       navigation.navigate(Stacks.AppStack, {
         params: {
           screen: MainScreens.MainScreen,
         },
         screen: TabBar.MainTab.tabName,
       });
+      // }
     }, 3000);
   }, []);
 

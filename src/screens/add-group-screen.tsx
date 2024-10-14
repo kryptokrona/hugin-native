@@ -14,7 +14,7 @@ import { GroupsScreens } from '@/config';
 import {
   joinAndSaveRoom,
   onRequestNewGroupKey,
-  useGlobalStore,
+  useUserStore,
 } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
 
@@ -30,7 +30,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const [name, setName] = useState<string | null>(initialName ?? null);
   const [roomKey, setKey] = useState<string | null>(initialKey ?? null);
   const [isJoiningExisting, setIsJoiningExisting] = useState(false);
-  const { name: userName, address } = useGlobalStore((state) => state.user);
+  const { name: userName, address } = useUserStore((state) => state.user);
   const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
   function onCreatePress() {
     //TODO Add Create / Join option

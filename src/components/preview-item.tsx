@@ -2,10 +2,10 @@ import { useState } from 'react';
 
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useGlobalStore } from '@/services';
+import { useThemeStore } from '@/services';
+import { getAvatar } from '@/utils';
 
 import { Avatar, TextField } from './_elements';
-import { getAvatar } from '@/utils';
 
 interface Props {
   name: string;
@@ -23,7 +23,7 @@ export const PreviewItem: React.FC<Props> = ({
   onPress,
 }) => {
   const [isPressed, setIsPressed] = useState(false);
-  const theme = useGlobalStore((state) => state.theme);
+  const theme = useThemeStore((state) => state.theme);
   const isNew = false; // dummy
   const borderColor = isNew ? theme.foreground : theme.border;
 
@@ -56,7 +56,6 @@ export const PreviewItem: React.FC<Props> = ({
         <TextField bold={isNew} maxLength={65} size="small">
           {message}
         </TextField>
-
       </View>
     </TouchableOpacity>
   );
