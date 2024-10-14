@@ -114,8 +114,8 @@ const sanitize_group_message = (msg) => {
   if (addr.length > 99) return false;
   let reply = sanitizeHtml(msg.r);
   if (reply.length > 64) return false;
-  // let sig = sanitizeHtml(msg.s)
-  // if (sig.length > 200) return false;
+  let sig = sanitizeHtml(msg.s);
+  if (sig.length > 200) return false;
   let nick = sanitizeHtml(msg.n);
   if (nick.length > 50) return false;
   let txHash = sanitizeHtml(msg.hash);
@@ -124,7 +124,7 @@ const sanitize_group_message = (msg) => {
   const clean_object = {
     message: text,
     address: addr,
-    signature: '',
+    signature: sig,
     room: room,
     timestamp: timestamp,
     name: nick,
@@ -191,6 +191,9 @@ const sanitize_file_message = (data) => {
   const time = sanitizeHtml(data?.time);
   if (time.length > 25) return false;
 
+  const sig = sanitizeHtml(data?.sig);
+  if (size.length > 128) return false;
+
   //Check optional
   const key = sanitizeHtml(data?.key);
   if (data?.key !== undefined) {
@@ -214,6 +217,7 @@ const sanitize_file_message = (data) => {
     time,
     hash,
     key: key,
+    sig,
   };
 
   return object;
