@@ -1,4 +1,4 @@
-import i18n from 'i18next';
+import { changeLanguage } from 'i18next';
 
 import { bare } from 'lib/native';
 
@@ -12,7 +12,7 @@ import { usePreferencesStore, useUserStore } from './zustand';
 export const init = async () => {
   const { user } = useUserStore.getState();
   const { preferences } = usePreferencesStore.getState();
-  await i18n.changeLanguage(preferences.language);
+  await changeLanguage(preferences.language);
   await bare(user);
   console.log('Initializing database..');
   await initDB();
