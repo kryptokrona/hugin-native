@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 
 import {
   FlatList,
@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import { useNavigation, type RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -25,12 +25,8 @@ import {
 } from '@/components';
 import { GroupsScreens, nameMaxLength } from '@/config';
 import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
-import type {
-  GroupStackNavigationType,
-  User,
-  GroupStackParamList,
-} from '@/types';
-import { createAvatar, getAvatar, pickAvatar } from '@/utils';
+import { GroupStackNavigationType, GroupStackParamList, User } from '@/types';
+import { createAvatar, pickAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
@@ -42,7 +38,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<GroupStackNavigationType>();
   const theme = useThemeStore((state) => state.theme);
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [groupName, setName] = useState<string>('Some group name'); // route.params.name
+  const [groupName, setGroupName] = useState<string>(name); // route.params.name
   const tempAvatar = createAvatar();
   const isAdmin = false; // TBD
   const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
@@ -56,7 +52,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }, [name]);
 
   function onNameInput(value: string) {
-    setName(value);
+    setGroupName(value);
   }
 
   async function onUploadAvatar() {
@@ -79,26 +75,34 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     navigation.navigate(GroupsScreens.GroupsScreen);
   }
 
+  const inviteText = useMemo(() => {
+    const linkName = name.replace(/ /g, '-');
+    return `hugin://join-group/${linkName}/${roomKey}/true`;
+  }, [name, roomKey]);
+
   return (
     <ScreenLayout>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
         <View style={styles.flatListContainer}>
           <FlatList
-            nestedScrollEnabled
+            nestedScrollEnabled={true}
             numColumns={2}
             data={roomUsers}
             renderItem={OnlineUserMapper}
             keyExtractor={(item, i) => `${item.name}-${i}`}
           />
         </View>
+
         <Card>
-          <TextField>{`hugin://${name}${roomKey}`}</TextField>
+          <TextField>{inviteText}</TextField>
         </Card>
-        <CopyButton text={t('copyInvite')} data={`hugin://${name}${roomKey}`} />
+        <CopyButton text={t('copyInvite')} data={inviteText} />
+
+        {/* Avatar Upload */}
         <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
-          <Avatar base64={getAvatar(roomKey)} />
+          <Avatar base64={avatar ?? undefined} address={roomKey} />
           <View style={styles.avatarButton}>
             <CustomIcon
               type="MI"
@@ -108,12 +112,12 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
             />
           </View>
         </TouchableOpacity>
+
         <InputField
           label={t('name')}
-          value={name}
+          value={groupName}
           onChange={onNameInput}
           maxLength={nameMaxLength}
-          // onSubmitEditing={onSave}
         />
         <TextButton onPress={onSave}>{t('save')}</TextButton>
         <TextButton onPress={onLeave} type="destructive">
@@ -140,5 +144,6 @@ const styles = StyleSheet.create({
   },
   scrollViewContainer: {
     flexGrow: 1,
+    paddingBottom: 20,
   },
 });

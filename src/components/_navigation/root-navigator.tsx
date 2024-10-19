@@ -20,7 +20,8 @@ const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           [TabBar.GroupsTab.tabName]: {
             screens: {
-              [GroupsScreens.AddGroupScreen]: 'join-group/:name/:topic',
+              [GroupsScreens.AddGroupScreen]:
+                'join-group/:name/:roomKey/:joining',
             },
           },
         },
@@ -33,7 +34,7 @@ const linking: LinkingOptions<RootStackParamList> = {
 export const RootNavigator = () => {
   useEffect(() => {
     const handleDeepLink = (e: { url: string }) => {
-      console.log('Linking', e.url);
+      // console.log('Linking', e.url); // TODO
     };
 
     Linking.addEventListener('url', handleDeepLink);

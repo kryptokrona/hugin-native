@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import {
   CommonActions,
@@ -25,15 +25,16 @@ interface Props {
 let admin: string = '';
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const { name: initialName, roomKey: initialKey } = route.params;
+  const { name: initialName, roomKey: initialKey, joining } = route.params;
+  const formattedName = initialName ? initialName.replace(/-/g, ' ') : null;
   const navigation = useNavigation<GroupStackNavigationType>();
-  const [name, setName] = useState<string | null>(initialName ?? null);
-  const [roomKey, setKey] = useState<string | null>(initialKey ?? null);
-  const [isJoiningExisting, setIsJoiningExisting] = useState(false);
+  const [name, setName] = useState<string | null>(formattedName);
+  const [keyInput, setKeyInput] = useState<string | null>(initialKey ?? null);
   const { name: userName, address } = useUserStore((state) => state.user);
-  const continueText = isJoiningExisting ? t('joinGroup') : t('createGroup');
-  function onCreatePress() {
-    //TODO Add Create / Join option
+  const continueText = joining ? t('joinRoom') : t('createRoom');
+
+  async function onCreatePress() {
+    const roomKey = keyInput ?? (await generateKey());
     if (roomKey && name) {
       joinAndSaveRoom(roomKey, name, admin, address, userName);
       navigation.dispatch(
@@ -51,55 +52,61 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     }
   }
 
-  async function onGeneratePress() {
+  async function generateKey() {
     try {
       const keys = await onRequestNewGroupKey();
       const [invite, seed] = JSON.parse(keys);
       console.log('Invite key:', invite);
       console.log('Admin seed:', seed);
       if (invite) {
-        setKey(invite);
+        // setKey(invite);
         admin = seed;
+        return invite;
       }
     } catch (e) {
       console.error('Error create random group key', e);
     }
   }
 
-  useEffect(() => {
-    console.log({ roomKey });
-  }, [roomKey]);
-
   function onNameChange(value: string) {
     setName(value);
   }
 
   function onKeyChange(value: string) {
-    setKey(value);
+    setKeyInput(value);
   }
 
   useEffect(() => {
-    if (initialName && initialKey) {
-      setIsJoiningExisting(true);
+    if (!joining) {
+      generateKey();
     }
-  }, [initialName, initialKey]);
+  }, [joining]);
+
+  // useEffect(() => {
+  //   if (name !== initialName || roomKey !== initialKey) {
+  //     setIsJoiningExisting(false);
+  //   }
+  // }, [name, roomKey]);
 
   useEffect(() => {
-    if (name !== initialName || roomKey !== initialKey) {
-      setIsJoiningExisting(false);
-    }
-  }, [name, roomKey]);
+    return () => {
+      setName(null);
+      setKeyInput(null);
+    };
+  }, []);
 
   return (
     <ScreenLayout>
       <View>
         <InputField label={t('name')} value={name} onChange={onNameChange} />
-        <InputField
-          label={t('messageKey')}
-          value={roomKey}
-          onChange={onKeyChange}
-        />
-        {!isJoiningExisting && (
+        {joining && (
+          <InputField
+            label={t('messageKey')}
+            value={keyInput}
+            onChange={onKeyChange}
+          />
+        )}
+        {/* {!isJoiningExisting && (
           <TextButton
             small
             type="secondary"
@@ -107,8 +114,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
             onPress={onGeneratePress}>
             {t('generate')}
           </TextButton>
-        )}
-        <TextButton disabled={!name && !roomKey} onPress={onCreatePress}>
+        )} */}
+        <TextButton disabled={!name} onPress={onCreatePress}>
           {continueText}
         </TextButton>
       </View>
@@ -116,8 +123,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  generateButton: {
-    alignSelf: 'flex-start',
-  },
-});
+// const styles = StyleSheet.create({
+//   generateButton: {
+//     alignSelf: 'flex-start',
+//   },
+// });

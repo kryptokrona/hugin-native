@@ -36,6 +36,7 @@ export const TextButton: React.FC<Props> = ({
   const borderWidth = theme.mode === 'dark' || type === 'secondary' ? 1 : 0;
   const color = theme[textType[type]];
 
+  // TODO Fix disabled color
   const smallButtonStyle = small
     ? {
         borderRadius: Styles.borderRadius.small,

@@ -16,8 +16,9 @@ interface Props {
   inverted: boolean;
   message: string;
   avatar: string;
-  date: Date;
+  date: number;
   name: string;
+  address: string;
 }
 
 export const MessageItem: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const MessageItem: React.FC<Props> = ({
   message,
   avatar,
   date,
+  address,
   name,
 }) => {
   const navigation = useNavigation<MessagesStackNavigationType>();
@@ -54,7 +56,7 @@ export const MessageItem: React.FC<Props> = ({
       {!inverted && (
         <>
           <View style={styles.user}>
-            <Avatar base64={avatar} size={30} />
+            <Avatar base64={avatar} address={address} size={30} />
             <TextField size="small" style={styles.date}>
               {dateString}
             </TextField>

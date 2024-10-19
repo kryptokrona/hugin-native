@@ -6,11 +6,10 @@ import { nameMaxLength } from '@/config';
 import type { User } from '@/types';
 
 import { Avatar, TextField } from './_elements';
-import { getAvatar } from '@/utils/avatar';
 
 type Props = User;
 
-export const UserItem: React.FC<Props> = ({ name, address }) => {
+export const UserItem: React.FC<Props> = ({ name, address, avatar }) => {
   const [pressed, setPressed] = useState(false);
   const w = Dimensions.get('window').width;
   const width = w / 2;
@@ -21,7 +20,7 @@ export const UserItem: React.FC<Props> = ({ name, address }) => {
 
   return (
     <TouchableOpacity style={[styles.onlineUser, { width }]} onPress={onPress}>
-      <Avatar size={28} base64={getAvatar(address)} />
+      <Avatar size={28} base64={avatar} address={address} />
       <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
         {name}
       </TextField>

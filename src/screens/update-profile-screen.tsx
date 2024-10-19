@@ -32,7 +32,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const navigation = useNavigation<SettingsStackNavigationType>();
-  const { name, avatar } = useUserStore((state) => state.user);
+  const { name, avatar, address } = useUserStore((state) => state.user);
   const [value, setValue] = useState<string>(name);
 
   const onNameInput = (value: string) => {
@@ -51,12 +51,14 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     }
   }
 
+  console.log({ avatar });
+
   return (
     <ScreenLayout>
       <View style={styles.container}>
         <View style={styles.top}>
           <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
-            <Avatar base64={avatar} size={70} />
+            <Avatar base64={avatar} address={address} size={70} />
             <View style={styles.avatarButton}>
               <CustomIcon
                 type="MI"

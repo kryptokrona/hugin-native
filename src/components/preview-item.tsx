@@ -29,7 +29,6 @@ export const PreviewItem: React.FC<Props> = ({
 
   function handleLongPress() {
     setIsPressed(true);
-    // Do something like a popup?
   }
 
   function handlePress() {
@@ -52,7 +51,6 @@ export const PreviewItem: React.FC<Props> = ({
         <TextField bold={isNew} maxLength={22} size="large">
           {name}
         </TextField>
-
         <TextField bold={isNew} maxLength={65} size="small">
           {message}
         </TextField>

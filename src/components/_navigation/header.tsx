@@ -5,7 +5,6 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useThemeStore, useUserStore } from '@/services';
-import { getAvatar } from '@/utils';
 
 import HuginSvg from '../../assets/hugin.svg';
 import { Avatar, CustomIcon, TextField } from '../_elements';
@@ -44,7 +43,7 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
         )}
         {!backButton && (
           <>
-            {address && <Avatar base64={getAvatar(address)} size={30} />}
+            {address && <Avatar base64={avatar} address={address} size={30} />}
             {!address && <HuginSvg style={styles.logo} />}
           </>
         )}

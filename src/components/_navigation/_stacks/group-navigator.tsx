@@ -1,10 +1,6 @@
-import { TouchableOpacity } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 
-import { CustomIcon } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
   AddGroupScreen,
@@ -12,7 +8,7 @@ import {
   GroupsScreen,
   ModifyGroupScreen,
 } from '@/screens';
-import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
+import type { GroupStackParamList } from '@/types';
 
 import { Header } from '../header';
 
@@ -20,11 +16,7 @@ const Stack = createNativeStackNavigator<GroupStackParamList>();
 
 export const GroupStackNavigator = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation<GroupStackNavigationType>();
-
-  function onAddGroupPress() {
-    navigation.navigate(GroupsScreens.AddGroupScreen, {});
-  }
+  // const navigation = useNavigation<GroupStackNavigationType>();
 
   return (
     <Stack.Navigator>
@@ -32,16 +24,7 @@ export const GroupStackNavigator = () => {
         name={GroupsScreens.GroupsScreen}
         component={GroupsScreen}
         options={() => ({
-          header: (_props) => (
-            <Header
-              title={t('rooms')}
-              right={
-                <TouchableOpacity onPress={onAddGroupPress}>
-                  <CustomIcon type="IO" name="add-outline" size={30} />
-                </TouchableOpacity>
-              }
-            />
-          ),
+          header: (_props) => <Header title={t('rooms')} />, // More actions handled in screen
         })}
       />
       <Stack.Screen

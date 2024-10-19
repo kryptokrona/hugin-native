@@ -212,6 +212,8 @@
   "leaveGroup": "Leave room",
   "themeDark": "Dark", // EN only
   "themeLight": "Light", // EN only
-  "joinGroup": "Join room", // EN only
-  "createGroup": "Create room" // EN only
+  "joinRoom": "Join room", // EN only
+  "createRoom": "Create room", // EN only
+  "createRoomDescr": "Create a new room", // EN only
+  "joinRoomDescr": "Join your friends room" // EN only
 }

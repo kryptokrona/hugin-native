@@ -38,7 +38,11 @@ export type GroupStackParamList = {
     name: string;
   };
   [GroupsScreens.ModifyGroupScreen]: { roomKey: string; name: string };
-  [GroupsScreens.AddGroupScreen]: { roomKey?: string; name?: string };
+  [GroupsScreens.AddGroupScreen]: {
+    roomKey?: string;
+    name?: string;
+    joining: boolean;
+  };
 };
 
 export type MessagesStackParamList = {

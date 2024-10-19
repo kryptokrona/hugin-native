@@ -706,7 +706,7 @@
 //   });
 // }
 
-// export async function createGroup() {
+// export async function createRoom() {
 //   return await Buffer.from(nacl.randomBytes(32)).toString('hex');
 // }
 
