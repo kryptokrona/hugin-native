@@ -51,8 +51,6 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     }
   }
 
-  console.log({ avatar });
-
   return (
     <ScreenLayout>
       <View style={styles.container}>
