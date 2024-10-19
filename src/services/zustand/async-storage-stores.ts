@@ -120,6 +120,14 @@ export const usePreferencesStore = create<PreferencesStore>()(
       setPreferences: (preferences) => set({ preferences }),
     }),
     {
+      merge: (persistedState: unknown, currentState: PreferencesStore) => {
+        const typedPersistedState = persistedState as
+          | Partial<PreferencesStore>
+          | undefined;
+        const preferences =
+          typedPersistedState?.preferences ?? defaultPreferences;
+        return { ...currentState, preferences };
+      },
       name: ASYNC_STORAGE_KEYS.PREFERENCES,
       onRehydrateStorage: () => () => {
         useAppStoreState.getState().setHasHydrated('preferences');
