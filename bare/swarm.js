@@ -50,7 +50,6 @@ class Room {
       return;
     }
     this.swarm.on('connection', (connection, information) => {
-      console.log('New connection ', information);
       new_connection(connection, topic, this.key, dht_keys);
     });
 
@@ -129,7 +128,6 @@ const new_connection = (connection, topic, key, dht_keys) => {
 };
 
 function send_message(message, topic, reply, invite) {
-  console.log('Send this swarm message', message);
   const message_json = {
     c: 'channel in room?',
     g: invite,
@@ -142,7 +140,6 @@ function send_message(message, topic, reply, invite) {
     t: Date.now(),
   };
 
-  console.log('Send this to hugin desktop! :', message_json);
   const send = JSON.stringify(message_json);
   send_swarm_message(send, topic);
   return send;
@@ -208,7 +205,6 @@ const send_swarm_message = (message, topic) => {
 
 const incoming_message = async (data, topic, connection, key) => {
   const str = data.toString();
-  console.log('Str!', str);
   if (str === 'Ping') {
     return;
   }
@@ -317,6 +313,8 @@ const check_data_message = async (data, connection, topic) => {
         Buffer.from(data.idSig, 'hex'),
         Buffer.from(data.idPub, 'hex'),
       );
+
+      if (!verified) return 'Error';
 
       //Check XKR signature ** TODO when we add wallet functionality.
       // const verified = await verifySignature(joined.message, joined.address, joined.signature)
