@@ -1,7 +1,6 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
-
 project.ext.react = [
     enableHermes: false,  // clean and rebuild if changing 
 ]
@@ -19,8 +18,8 @@ react {
 
     // Use Expo CLI to bundle the app, this ensures the Metro config
     // works correctly with Expo projects.
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
-    bundleCommand = "export:embed"
+    // cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    // bundleCommand = "export:embed"
 
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '..'
@@ -83,8 +82,6 @@ def hermesEnabled = true
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-
-
     namespace 'com.hugin'
     defaultConfig {
         buildToolsVersion '34'
@@ -95,7 +92,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
 
          ndk {
@@ -171,7 +167,6 @@ dependencies {
     implementation project(':react-native-fs')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-document-picker')
-
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
