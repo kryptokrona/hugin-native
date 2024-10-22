@@ -8,10 +8,11 @@ const {
   sanitize_voice_status_data,
   random_key,
   toUintArray,
-  verify_admins,
+  verify_signature,
   sign_admin_message,
   sanitize_file_message,
   check_if_image_or_video,
+  sign_joined_message,
 } = require('./utils');
 const {
   send_file,
@@ -127,7 +128,7 @@ const new_connection = (connection, topic, key, dht_keys) => {
   });
 };
 
-function send_message(message, topic, reply, invite, sig) {
+function send_message(message, topic, reply, invite) {
   console.log('Send this swarm message', message);
   const message_json = {
     c: 'channel in room?',
@@ -137,7 +138,7 @@ function send_message(message, topic, reply, invite, sig) {
     m: message,
     n: Hugin.name,
     r: reply,
-    s: sig,
+    s: 'sig',
     t: Date.now(),
   };
 
@@ -158,19 +159,17 @@ const send_joined_message = async (topic, dht_keys) => {
   if (!active) {
     return;
   }
+  const [idSig, idPub] = await sign_joined_message(dht_keys);
   const admin = is_admin(active.key);
-  console.log('Am i admin in this room?', admin);
   let sig = '';
   if (admin) {
     sig = sign_admin_message(dht_keys, admin);
-    console.log('We are admin in this room ----->>>!');
   }
   let [voice, video] = get_local_voice_status(topic);
   if (video) {
     voice = true;
   }
-  //const channels = await get_my_channels(key)
-  console.log('Video?', video);
+
   const data = JSON.stringify({
     address: Hugin.address,
     channels: [],
@@ -183,6 +182,8 @@ const send_joined_message = async (topic, dht_keys) => {
     topic: topic,
     video: video,
     voice: voice,
+    idPub,
+    idSig,
   });
 
   send_swarm_message(data, topic);
@@ -222,13 +223,6 @@ const incoming_message = async (data, topic, connection, key) => {
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
-  const verify = Hugin.request({
-    type: 'verify',
-    sig: message.signature,
-    m: message.message,
-    pub: message.address,
-  });
-  console.log('Verify', verify);
   console.log('Sanitized: ', message);
   Hugin.send('swarm-message', { message, topic });
 };
@@ -312,34 +306,42 @@ const check_data_message = async (data, connection, topic) => {
         return true;
       }
 
-      const admin = verify_admins(
+      const admin = verify_signature(
         connection.remotePublicKey,
         Buffer.from(data.signature, 'hex'),
         Buffer.from(active.key.slice(-64), 'hex'),
       );
 
-      console.log('Admin?', admin);
-      //Check signature
+      const verified = verify_signature(
+        connection.remotePublicKey,
+        Buffer.from(data.idSig, 'hex'),
+        Buffer.from(data.idPub, 'hex'),
+      );
+
+      //Check XKR signature ** TODO when we add wallet functionality.
       // const verified = await verifySignature(joined.message, joined.address, joined.signature)
       // if(!verified) return "Error"
+
       con.joined = true;
       con.address = joined.address;
       con.name = joined.name;
       con.voice = joined.voice;
+      con.admin = admin;
+      con.video = joined.video;
+      joined.key = active.key;
 
       const time = parseInt(joined.time);
       if (parseInt(active.time) > time) {
         //Request new messages from peer
         request_message_history(con, joined);
       }
+
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
       //     const [in_voice, video] = get_local_voice_status(topic)
       //     if (con.voice && in_voice && (parseInt(active.time) > time)  ) {
       //         join_voice_channel(active.key, topic, joined.address)
       //     }
 
-      con.video = joined.video;
-      joined.key = active.key;
       Hugin.send('peer-connected', { joined });
       console.log('Connection updated: Joined:', con.joined);
       return true;

@@ -29,3 +29,9 @@ export async function signMessage(message: string) {
   const sig = tweetnacl.sign.detached(hexToUint(message), secret);
   return Buffer.from(sig).toString('hex');
 }
+
+export async function getPrivKey() {
+  const keys = await loadAccount();
+  console.log('Got keys', keys);
+  return keys.secretKey;
+}

@@ -117,22 +117,19 @@ export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string | null,
-  sig: string,
 ) => {
-  return await send_swarm_msg(key, message, reply, sig);
+  return await send_swarm_msg(key, message, reply);
 };
 
 export const onSendGroupMessageWithFile = (
   key: string,
   file: SelectedFile,
   message: string,
-  sig: string,
 ) => {
   const fileData: FileInput & { message: string } = {
     ...file,
     key,
     message,
-    sig,
   };
   const JSONfileData = JSON.stringify(fileData);
   begin_send_file(JSONfileData);

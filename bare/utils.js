@@ -2,6 +2,7 @@ const DHT = require('hyperdht');
 const Keychain = require('keypear');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
+const { Hugin } = require('./account');
 //const nacl = require('tweetnacl');
 
 function create_peer_base_keys(buf) {
@@ -73,6 +74,11 @@ const sanitize_join_swarm_data = (data) => {
   // if (typeof time !== 'string') return false;
   if (time.length > 50) return false;
 
+  const idPub = data.idPub;
+  if (typeof idPub !== 'string' || idPub.length > 64) return false;
+  const idSig = data.idSig;
+  if (typeof idSig !== 'string' || idSig.length > 128) return false;
+
   const channels = [];
 
   // if (data.channels.length) {
@@ -90,7 +96,7 @@ const sanitize_join_swarm_data = (data) => {
   const clean_object = {
     address: address,
     message: message,
-    signature: '',
+    signature: signature,
     topic: topic,
     name: name,
     voice: voice,
@@ -98,6 +104,8 @@ const sanitize_join_swarm_data = (data) => {
     channels: channels,
     video: video,
     time: time,
+    idSig,
+    idPub,
   };
 
   return clean_object;
@@ -259,15 +267,26 @@ const toUintArray = (val) => {
   return Uint8Array.from(val.split(',').map((x) => parseInt(x, 10)));
 };
 
-const verify_admins = (remotePub, signature, invite) => {
+const verify_signature = (message, signature, invite) => {
   if (signature.length !== 64) return false;
-  return Keychain.verify(remotePub, signature, invite);
+  return Keychain.verify(message, signature, invite);
 };
 
 const sign_admin_message = (dht_keys, admin) => {
   const keys = create_keys_from_seed(admin);
   return keys.get().sign(dht_keys.get().publicKey);
 };
+
+async function sign_joined_message(dht_keys) {
+  const key = await Hugin.request({
+    type: 'get-priv',
+  });
+  const keys = create_keys_from_seed(key);
+  return [
+    keys.get().sign(dht_keys.get().publicKey).toString('hex'),
+    keys.publicKey.toString('hex'),
+  ];
+}
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -283,8 +302,9 @@ module.exports = {
   group_key,
   random_key,
   toUintArray,
-  verify_admins,
+  verify_signature,
   sign_admin_message,
   sleep,
   check_if_image_or_video,
+  sign_joined_message,
 };

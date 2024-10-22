@@ -3,6 +3,7 @@ import { requireNativeModule } from 'expo-modules-core';
 // import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import RPC from 'tiny-buffer-rpc';
 import { rpc_message } from './rpc';
+import { getPrivKey } from '@/services';
 requireNativeModule('HelloBare').install();
 
 // forward bare's logs to console
@@ -21,12 +22,12 @@ rpc.register(2, {
   request: ce.string,
   response: ce.string,
   onrequest: async (data) => {
+    const request = JSON.parse(data);
     console.log('Got bare request', data);
-    switch (data.type) {
-      case 'verify':
-        console.log('Verify signature', data);
-        return 'lol';
-        return await verifySignature(data.message, data.address);
+    switch (request.type) {
+      case 'get-priv':
+        const key = await getPrivKey();
+        return JSON.stringify(key);
     }
   },
 });
@@ -73,13 +74,12 @@ export const end_swarm = (key) => {
   return mainRPC.request(data);
 };
 
-export const send_swarm_msg = async (key, message, reply, sig) => {
+export const send_swarm_msg = async (key, message, reply) => {
   const data = JSON.stringify({
     type: 'send_room_msg',
     key,
     message,
     reply,
-    sig,
   });
   return await mainRPC.request(data);
 };
