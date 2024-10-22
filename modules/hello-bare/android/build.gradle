@@ -64,7 +64,7 @@ android {
     }
   }
 
-    namespace "com.hugin"
+    namespace "com.bare"
 
   defaultConfig {
     
