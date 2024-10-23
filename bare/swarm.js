@@ -210,7 +210,10 @@ const incoming_message = async (data, topic, connection, key) => {
   }
   // Check
   const check = await check_data_message(str, connection, topic);
-  if (check === undefined) return;
+  if (check === 'Ban') {
+    ban_connection(connection, topic);
+    return;
+  }
   if (check === 'Error') {
     connection_closed(connection, topic);
     return;
@@ -227,7 +230,7 @@ const check_data_message = async (data, connection, topic) => {
   try {
     data = JSON.parse(data);
   } catch (e) {
-    return 'Error';
+    return 'Ban';
   }
 
   //Check if active in this topic
@@ -253,7 +256,7 @@ const check_data_message = async (data, connection, topic) => {
   if ('info' in data) {
     const fileData = sanitize_file_message(data);
     console.log('Got file data incoming', fileData);
-    if (!fileData) return 'Error';
+    if (!fileData) return 'Ban';
     check_file_message(fileData, topic, con.address, con.name);
     return true;
   }
@@ -294,7 +297,7 @@ const check_data_message = async (data, connection, topic) => {
       const joined = sanitize_join_swarm_data(data);
       console.log('joined check', joined);
       if (!joined) {
-        return 'Error';
+        return 'Ban';
       }
 
       if (con.joined) {
@@ -314,7 +317,7 @@ const check_data_message = async (data, connection, topic) => {
         Buffer.from(data.idPub, 'hex'),
       );
 
-      if (!verified) return 'Error';
+      if (!verified) return 'Ban';
 
       //Check XKR signature ** TODO when we add wallet functionality.
       // const verified = await verifySignature(joined.message, joined.address, joined.signature)
@@ -347,7 +350,7 @@ const check_data_message = async (data, connection, topic) => {
     if ('voice' in data) {
       const voice_status = check_peer_voice_status(data, con);
       if (!voice_status) {
-        return 'Error';
+        return 'Ban';
       }
       return true;
     }
@@ -577,6 +580,11 @@ const send_peer_message = (message, con) => {
   //Send individual peer message
   console.log('Send peer message to connection!');
   //con.write(JSON.stringify(message));
+};
+
+const ban_connection = (conn, topic) => {
+  conn.ban(true);
+  connection_closed(conn, topic);
 };
 
 const connection_closed = (conn, topic) => {
