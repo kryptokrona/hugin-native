@@ -54,25 +54,27 @@ function sign(m) {
 }
 
 const sanitize_join_swarm_data = (data) => {
+  if (data?.address.length > 99 || data.address === undefined) return false;
   const address = sanitizeHtml(data.address);
-  if (address.length > 99) return false;
+  if (data?.message.length > 128 || data.message === undefined) return false;
   const message = sanitizeHtml(data.message);
-  if (message.length > 128) return false;
+  if (data?.signature.length > 128 || data.signature === undefined)
+    return false;
   const signature = sanitizeHtml(data.signature);
-  if (data.signature.length > 128) return false;
+  if (data?.topic.length !== 64 || data.topic === undefined) return false;
   const topic = sanitizeHtml(data.topic);
-  if (topic.length !== 64) return false;
+  if (data?.name.length > 50 || data.name === undefined) return false;
   const name = sanitizeHtml(data.name);
-  if (name.length > 50) return false;
-  let voice = data.voice;
-  if (typeof voice !== 'boolean') return false;
-  const joined = data.joined;
-  if (typeof joined !== 'boolean') return false;
-  const video = data.video;
-  if (typeof video !== 'boolean') return false;
+  if (data?.time.length > 50 || data.time === undefined) return false;
   const time = sanitizeHtml(data.time);
-  // if (typeof time !== 'string') return false;
-  if (time.length > 50) return false;
+
+  if (data.voice === undefined) return false;
+  if (typeof data.voice !== 'boolean') return false;
+  const voice = data.voice;
+  if (typeof data.joined !== 'boolean') return false;
+  const joined = data.joined;
+  if (typeof data.video !== 'boolean') return false;
+  const video = data.video;
 
   const idPub = data.idPub;
   if (typeof idPub !== 'string' || idPub.length > 64) return false;
@@ -80,18 +82,6 @@ const sanitize_join_swarm_data = (data) => {
   if (typeof idSig !== 'string' || idSig.length > 128) return false;
 
   const channels = [];
-
-  // if (data.channels.length) {
-  //   //Disable channels
-
-  //   // if (data.channels.length > 100) return false
-  //   // for (const a of data.channels) {
-  //   //     let channel = sanitizeHtml(a)
-  //   //     if (channel.length > 50) return false
-  //   //     channels.push(channel)
-  //   // }
-  //   return false;
-  // }
 
   const clean_object = {
     address: address,
@@ -111,23 +101,23 @@ const sanitize_join_swarm_data = (data) => {
   return clean_object;
 };
 
-const sanitize_group_message = (msg) => {
-  let timestamp = sanitizeHtml(msg.t);
-  if (timestamp.length > 20) return false;
-  let room = sanitizeHtml(msg.g);
-  if (room.length > 128) return false;
-  let text = sanitizeHtml(msg.m);
-  if (text.length > 777) return false;
-  let addr = sanitizeHtml(msg.k);
-  if (addr.length > 99) return false;
-  let reply = sanitizeHtml(msg.r);
-  if (reply.length > 64) return false;
-  let sig = sanitizeHtml(msg.s);
-  if (sig.length > 200) return false;
-  let nick = sanitizeHtml(msg.n);
-  if (nick.length > 50) return false;
-  let txHash = sanitizeHtml(msg.hash);
-  if (txHash.length > 64) return false;
+const sanitize_group_message = (data) => {
+  let timestamp = sanitizeHtml(data.t);
+  if (timestamp?.length > 20 || data.t === undefined) return false;
+  let room = sanitizeHtml(data.g);
+  if (room?.length > 128 || data.g === undefined) return false;
+  let text = sanitizeHtml(data.m);
+  if (text?.length > 777 || data.m === undefined) return false;
+  let addr = sanitizeHtml(data.k);
+  if (addr?.length > 99 || data.k === undefined) return false;
+  let reply = sanitizeHtml(data.r);
+  if (reply?.length > 64 || data.r === undefined) return false;
+  let sig = sanitizeHtml(data.s);
+  if (sig?.length > 200) return false;
+  let nick = sanitizeHtml(data.n);
+  if (nick?.length > 50 || data.n === undefined) return false;
+  let txHash = sanitizeHtml(data.hash);
+  if (txHash?.length > 64 || data.hash === undefined) return false;
 
   const clean_object = {
     message: text,
@@ -138,7 +128,7 @@ const sanitize_group_message = (msg) => {
     name: nick,
     reply: reply,
     hash: txHash,
-    sent: msg.sent,
+    sent: false,
     channel: 'channel',
     hash: txHash,
   };
@@ -148,15 +138,15 @@ const sanitize_group_message = (msg) => {
 
 const sanitize_voice_status_data = (data) => {
   const address = sanitizeHtml(data.address);
-  if (address.length > 99) return false;
+  if (address?.length > 99 || data.address === undefined) return false;
   const message = sanitizeHtml(data.message);
-  if (message.length > 64) return false;
+  if (message?.length > 64 || data.message === undefined) return false;
   const signature = sanitizeHtml(data.signature);
-  if (signature.length > 128) return false;
+  if (signature?.length > 128 || data.signature === undefined) return false;
   const topic = sanitizeHtml(data.topic);
-  if (topic.length !== 64) return false;
+  if (topic?.length !== 64 || data.topic === undefined) return false;
   const name = sanitizeHtml(data.name);
-  if (name.length > 50) return false;
+  if (name?.length > 50 || data.name === undefined) return false;
   const voice = data.voice;
   if (typeof voice !== 'boolean') return false;
   const video = data.video;
@@ -176,7 +166,6 @@ const sanitize_voice_status_data = (data) => {
 };
 
 const sanitize_file_message = (data) => {
-  console.log('sanitize', data);
   //Check standard message
   const fileName = sanitizeHtml(data?.fileName);
   if (typeof data?.fileName !== 'string' || fileName.length > 100) return false;
@@ -194,13 +183,13 @@ const sanitize_file_message = (data) => {
   if (typeof data?.info !== 'string' || info.length > 25) return false;
 
   const size = sanitizeHtml(data?.size);
-  if (size.length > 20) return false;
+  if (size?.length > 20) return false;
 
   const time = sanitizeHtml(data?.time);
-  if (time.length > 25) return false;
+  if (time?.length > 25) return false;
 
   const sig = sanitizeHtml(data?.sig);
-  if (size.length > 128) return false;
+  if (size?.length > 128) return false;
 
   //Check optional
   const key = sanitizeHtml(data?.key);
@@ -209,7 +198,6 @@ const sanitize_file_message = (data) => {
   }
   const hash = sanitizeHtml(data?.hash);
   if (data?.hash !== undefined) {
-    console.log('Hash not undefined', hash, data.hash);
     if (typeof hash !== 'string' || hash.length > 64) return false;
   }
 
@@ -245,6 +233,7 @@ function check_if_image_or_video(path, size) {
     '.png',
     '.jpg',
     '.gif',
+    '.jfif',
     '.jpeg',
     '.mp4',
     '.webm',
