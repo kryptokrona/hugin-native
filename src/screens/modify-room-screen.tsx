@@ -1,21 +1,13 @@
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import {
-  Avatar,
   Card,
   CopyButton,
-  CustomIcon,
   Header,
   InputField,
   ScreenLayout,
@@ -23,24 +15,23 @@ import {
   TextField,
   UserItem,
 } from '@/components';
-import { GroupsScreens, nameMaxLength } from '@/config';
-import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
-import { GroupStackNavigationType, GroupStackParamList, User } from '@/types';
-import { createAvatar, pickAvatar } from '@/utils';
+import { RoomsScreens, nameMaxLength } from '@/config';
+import { onDeleteGroup, useGlobalStore } from '@/services';
+import { RoomStackNavigationType, RoomStackParamList, User } from '@/types';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
+  route: RouteProp<RoomStackParamList, typeof RoomsScreens.ModifyRoomScreen>;
 }
 
-export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
+export const ModifyRoomScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
-  const navigation = useNavigation<GroupStackNavigationType>();
-  const theme = useThemeStore((state) => state.theme);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const navigation = useNavigation<RoomStackNavigationType>();
+  // const theme = useThemeStore((state) => state.theme);
+  // const [avatar, setAvatar] = useState<string | null>(null);
   const [groupName, setGroupName] = useState<string>(name); // route.params.name
-  const tempAvatar = createAvatar();
-  const isAdmin = false; // TBD
+  // const tempAvatar = createAvatar();
+  // const isAdmin = false; // TODO
   const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room == roomKey,
   );
@@ -55,12 +46,12 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     setGroupName(value);
   }
 
-  async function onUploadAvatar() {
-    const base64 = await pickAvatar();
-    if (base64) {
-      // TODO
-    }
-  }
+  // async function onUploadAvatar() {
+  //   const base64 = await pickAvatar();
+  //   if (base64) {
+  //  TODO avatar
+  //   }
+  // }
 
   async function onSave() {
     // TODO
@@ -72,12 +63,12 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   function onLeave() {
     onDeleteGroup(roomKey);
-    navigation.navigate(GroupsScreens.GroupsScreen);
+    navigation.navigate(RoomsScreens.RoomScreens);
   }
 
   const inviteText = useMemo(() => {
     const linkName = name.replace(/ /g, '-');
-    return `hugin://join-group/${linkName}/${roomKey}/true`;
+    return `hugin://${linkName}/${roomKey}`;
   }, [name, roomKey]);
 
   return (
@@ -99,7 +90,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         <CopyButton text={t('copyInvite')} data={inviteText} />
 
         {/* Avatar Upload */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
           <Avatar base64={avatar ?? undefined} address={roomKey} />
@@ -111,7 +102,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
               color={theme.primaryForeground}
             />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <InputField
           label={t('name')}
@@ -129,15 +120,15 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  avatarButton: {
-    bottom: 12,
-    position: 'absolute',
-    right: 10,
-  },
-  avatarContainer: {
-    alignSelf: 'flex-start',
-    position: 'relative',
-  },
+  // avatarButton: {
+  //   bottom: 12,
+  //   position: 'absolute',
+  //   right: 10,
+  // },
+  // avatarContainer: {
+  //   alignSelf: 'flex-start',
+  //   position: 'relative',
+  // },
   flatListContainer: {
     height: 200,
     marginBottom: 12,

@@ -5,7 +5,7 @@ import { Linking } from 'react-native';
 import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { GroupsScreens, Stacks, TabBar } from '@/config';
+import { RoomsScreens, Stacks, TabBar } from '@/config';
 import { RootStackParamList } from '@/types';
 
 import { AuthNavigator } from './_stacks';
@@ -18,10 +18,9 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       [Stacks.AppStack]: {
         screens: {
-          [TabBar.GroupsTab.tabName]: {
+          [TabBar.RoomsTab.tabName]: {
             screens: {
-              [GroupsScreens.AddGroupScreen]:
-                'join-group/:name/:roomKey/:joining',
+              [RoomsScreens.AddRoomScreen]: ':name/:roomKey',
             },
           },
         },
@@ -33,7 +32,7 @@ const linking: LinkingOptions<RootStackParamList> = {
 
 export const RootNavigator = () => {
   useEffect(() => {
-    const handleDeepLink = (e: { url: string }) => {
+    const handleDeepLink = (_e: { url: string }) => {
       // console.log('Linking', e.url); // TODO
     };
 

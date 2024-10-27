@@ -2,9 +2,8 @@ const ce = require('compact-encoding');
 class Account {
   constructor() {
     //Random test data
-    this.name = 'nils';
-    this.address =
-      'SEKReTXy5NuZNf9259RRXDR3PsM5r1iKe2sgkDV5QU743f4FspoVAnY4TfRPLBMpCA1HQgZVnmZafQTraoYsS9K41iePDjPZbme';
+    this.name = 'anon';
+    this.address = null;
     this.avatar = '';
     this.rooms = [];
     this.downloadDir = '';

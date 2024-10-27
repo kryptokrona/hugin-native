@@ -13,6 +13,7 @@ export interface Preferences {
   // cacheEnabled: boolean;
   // currency: string;
   language: string;
+  pinCode: string | null;
   // limitData: boolean;
   // nickname: string;
   // node: string;

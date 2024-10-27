@@ -142,6 +142,7 @@ export const defaultPreferences: Preferences = {
   // authenticationMethod: 'hardware-auth',
   // currency: 'usd',
   language: 'en',
+  pinCode: null,
   // limitData: false,
   // nickname: 'Anon',
   // notificationsEnabled: true,

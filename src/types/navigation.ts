@@ -1,11 +1,12 @@
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import {
   AuthScreens,
-  GroupsScreens,
   MainScreens,
   MessagesScreens,
+  RoomsScreens,
   SettingsScreens,
   Stacks,
   TabBar,
@@ -31,17 +32,17 @@ export type SettingsStackParamList = {
   [SettingsScreens.ChangeThemeScreen]: undefined;
 };
 
-export type GroupStackParamList = {
-  [GroupsScreens.GroupsScreen]: undefined;
-  [GroupsScreens.GroupChatScreen]: {
+export type RoomStackParamList = {
+  [RoomsScreens.RoomScreens]: undefined;
+  [RoomsScreens.RoomChatScreen]: {
     roomKey: string;
     name: string;
   };
-  [GroupsScreens.ModifyGroupScreen]: { roomKey: string; name: string };
-  [GroupsScreens.AddGroupScreen]: {
-    roomKey?: string;
+  [RoomsScreens.ModifyRoomScreen]: { roomKey: string; name: string };
+  [RoomsScreens.AddRoomScreen]: {
+    key?: string;
     name?: string;
-    joining: boolean;
+    joining?: boolean;
   };
 };
 
@@ -53,9 +54,11 @@ export type MessagesStackParamList = {
 export type AppStackParamList = {
   [TabBar.MainTab.tabName]: NavigatorScreenParams<MainStackParamList>;
   [TabBar.SettingsTab.tabName]: NavigatorScreenParams<SettingsStackParamList>;
-  [TabBar.GroupsTab.tabName]: NavigatorScreenParams<GroupStackParamList>;
+  [TabBar.RoomsTab.tabName]: NavigatorScreenParams<RoomStackParamList>;
   [TabBar.MessagesTab.tabName]: NavigatorScreenParams<MessagesStackParamList>;
 };
+
+export type AppStackNavigationType = BottomTabNavigationProp<AppStackParamList>;
 
 // export const RecipientsScreens = {
 //   CallScreen: 'CallScreen',
@@ -109,35 +112,40 @@ export interface RootStackParamList {
 }
 
 export type AuthStackParamList = {
-  [AuthScreens.ChooseAuthMethodScreen]: { nextRoute?: string } | undefined;
-  [AuthScreens.CreateWalletScreen]: undefined;
-  [AuthScreens.DisclaimerScreen]: { nextRoute?: string } | undefined;
+  // [AuthScreens.ChooseAuthMethodScreen]: { nextRoute?: string } | undefined;
+  // [AuthScreens.CreateWalletScreen]: undefined;
+  // [AuthScreens.DisclaimerScreen]: { nextRoute?: string } | undefined;
   [AuthScreens.ForgotPinScreen]: undefined;
-  [AuthScreens.ImportKeysScreen]: { scanHeight?: number } | undefined;
-  [AuthScreens.ImportKeysOrSeedScreen]: { scanHeight?: number } | undefined;
-  [AuthScreens.ImportSeedScreen]: { scanHeight?: number } | undefined;
-  [AuthScreens.ImportWalletScreen]: undefined;
-  [AuthScreens.PickBlockHeightScreen]: undefined;
-  [AuthScreens.PickExactBlockHeightScreen]: undefined;
-  [AuthScreens.PickMonthScreen]: undefined;
-  [AuthScreens.RequestHardwareAuthScreen]:
-    | { subtitle?: string; finishFunction?: any }
-    | undefined;
-  [AuthScreens.RequestPinScreen]:
-    | { subtitle?: string; finishFunction?: any }
-    | undefined;
-  [AuthScreens.SetPinScreen]: { nextRoute?: string } | undefined;
+  // [AuthScreens.ImportKeysScreen]: { scanHeight?: number } | undefined;
+  // [AuthScreens.ImportKeysOrSeedScreen]: { scanHeight?: number } | undefined;
+  // [AuthScreens.ImportSeedScreen]: { scanHeight?: number } | undefined;
+  // [AuthScreens.ImportWalletScreen]: undefined;
+  // [AuthScreens.PickBlockHeightScreen]: undefined;
+  // [AuthScreens.PickExactBlockHeightScreen]: undefined;
+  // [AuthScreens.PickMonthScreen]: undefined;
+  // [AuthScreens.RequestHardwareAuthScreen]:
+  //   | { subtitle?: string; finishFunction?: any }
+  //   | undefined;
+  // [AuthScreens.RequestPinScreen]:
+  //   | { subtitle?: string; finishFunction?: any }
+  //   | undefined;
+  // [AuthScreens.SetPinScreen]: { nextRoute?: string } | undefined;
+  [AuthScreens.CreateProfileScreen]: undefined;
   [AuthScreens.SplashScreen]: undefined;
-  [AuthScreens.WalletOptionScreen]: undefined;
+  // [AuthScreens.WalletOptionScreen]: undefined;
 };
 
 export type AuthStackNavigationType =
   NativeStackNavigationProp<AuthStackParamList>;
+
 export type MainStackNavigationType =
   NativeStackNavigationProp<MainStackParamList>;
+
 export type SettingsStackNavigationType =
   NativeStackNavigationProp<SettingsStackParamList>;
-export type GroupStackNavigationType =
-  NativeStackNavigationProp<GroupStackParamList>;
+
+export type RoomStackNavigationType =
+  NativeStackNavigationProp<RoomStackParamList>;
+
 export type MessagesStackNavigationType =
   NativeStackNavigationProp<MessagesStackParamList>;

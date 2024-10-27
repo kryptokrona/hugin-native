@@ -1,61 +1,57 @@
-export const AuthScreens = {
-  ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
-  CreateWalletScreen: 'CreateWalletScreen',
-  DisclaimerScreen: 'DisclaimerScreen',
-  ForgotPinScreen: 'ForgotPinScreen',
-  ImportKeysOrSeedScreen: 'ImportKeysOrSeedScreen',
-  ImportKeysScreen: 'ImportKeysScreen',
-  ImportSeedScreen: 'ImportSeedScreen',
-  ImportWalletScreen: 'ImportWalletScreen',
-  PickBlockHeightScreen: 'PickBlockHeightScreen',
-  PickExactBlockHeightScreen: 'PickExactBlockHeightScreen',
-  PickMonthScreen: 'PickMonthScreen',
-  RequestHardwareAuthScreen: 'RequestHardwareAuthScreen',
-  RequestPinScreen: 'RequestPinScreen',
-  SetPinScreen: 'SetPinScreen',
-  SplashScreen: 'SplashScreen',
-  WalletOptionScreen: 'WalletOptionScreen',
-} as const;
-
-export const MainScreens = {
-  MainScreen: 'MainScreen',
-} as const;
-
-export const SettingsScreens = {
-  ChangeLanguageScreen: 'ChangeLanguageScreen',
-
-  ChangeThemeScreen: 'ChangeThemeScreen',
+export enum AuthScreens {
   // ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
-  DisableDozeScreen: 'DisableDozeScreen',
+  // CreateWalletScreen: 'CreateWalletScreen',
+  // DisclaimerScreen: 'DisclaimerScreen',
+  ForgotPinScreen = 'ForgotPinScreen',
+  // ImportKeysOrSeedScreen: 'ImportKeysOrSeedScreen',
+  // ImportKeysScreen: 'ImportKeysScreen',
+  // ImportSeedScreen: 'ImportSeedScreen',
+  // ImportWalletScreen: 'ImportWalletScreen',
+  // PickBlockHeightScreen: 'PickBlockHeightScreen',
+  // PickExactBlockHeightScreen: 'PickExactBlockHeightScreen',
+  // PickMonthScreen: 'PickMonthScreen',
+  // RequestHardwareAuthScreen: 'RequestHardwareAuthScreen',
+  // RequestPinScreen: 'RequestPinScreen',
+  SetPinScreen = 'SetPinScreen',
+  SplashScreen = 'SplashScreen',
+  CreateProfileScreen = 'CreateProfileScreen',
+  // WalletOptionScreen: 'WalletOptionScreen',
+}
 
-  ExportKeysScreen: 'ExportKeysScreen',
+export enum MainScreens {
+  MainScreen = 'MainScreen',
+}
 
-  FaqScreen: 'FaqScreen',
+export enum SettingsScreens {
+  ChangeLanguageScreen = 'ChangeLanguageScreen',
+
+  ChangeThemeScreen = 'ChangeThemeScreen',
+  // ChooseAuthMethodScreen: 'ChooseAuthMethodScreen',
+  DisableDozeScreen = 'DisableDozeScreen',
+
+  ExportKeysScreen = 'ExportKeysScreen',
+
+  FaqScreen = 'FaqScreen',
 
   // ForgotPinScreen: 'ForgotPinScreen',
   // LoggingScreen: 'LoggingScreen',
-  OptimizeScreen: 'OptimizeScreen',
+  OptimizeScreen = 'OptimizeScreen',
   // RequestHardwareAuthScreen: 'RequestHardwareAuthScreen',
   // RequestPinScreen: 'RequestPinScreen',
   // SetPinScreen: 'SetPinScreen',
-  SettingsScreen: 'SettingsScreen',
-  SwapAPIScreen: 'SwapAPIScreen',
-  SwapCurrencyScreen: 'SwapCurrencyScreen',
-  SwapNodeScreen: 'SwapNodeScreen',
-  UpdateProfileScreen: 'UpdateProfileScreen',
-} as const;
+  SettingsScreen = 'SettingsScreen',
+  SwapAPIScreen = 'SwapAPIScreen',
+  SwapCurrencyScreen = 'SwapCurrencyScreen',
+  SwapNodeScreen = 'SwapNodeScreen',
+  UpdateProfileScreen = 'UpdateProfileScreen',
+}
 
-export const MessagesScreens = {
-  MessageScreen: 'MessageScreen',
-  MessagesScreen: 'MessagesScreen',
-} as const;
+export enum MessagesScreens {
+  MessageScreen = 'MessageScreen',
+  MessagesScreen = 'MessagesScreen',
+}
 
 export const TabBar = {
-  GroupsTab: {
-    iconName: 'comment-text-multiple-outline',
-    iconType: 'MCI',
-    tabName: 'GroupsTab',
-  },
   MainTab: {
     iconName: 'view-dashboard-outline',
     iconType: 'MCI',
@@ -66,6 +62,11 @@ export const TabBar = {
     iconType: 'MCI',
     tabName: 'MessagesTab',
   },
+  RoomsTab: {
+    iconName: 'comment-text-multiple-outline',
+    iconType: 'MCI',
+    tabName: 'RoomsTab',
+  },
   SettingsTab: {
     iconName: 'sliders',
     iconType: 'FA',
@@ -73,21 +74,21 @@ export const TabBar = {
   },
 } as const;
 
-export const Stacks = {
-  AppStack: 'AppStack',
-  AuthStack: 'AuthStack',
-} as const;
+export enum Stacks {
+  AppStack = 'AppStack',
+  AuthStack = 'AuthStack',
+}
 
-export const AppStack = {
-  GroupsStack: 'GroupsStack',
-  MainStack: 'MainStack',
-  SettingsStack: 'SettingsStack',
-  TransferStack: 'TransferStack',
-} as const;
+export enum AppStack {
+  RoomsStack = 'RoomsStack',
+  MainStack = 'MainStack',
+  SettingsStack = 'SettingsStack',
+  TransferStack = 'TransferStack',
+}
 
-export const GroupsScreens = {
-  AddGroupScreen: 'AddGroupScreen',
-  GroupChatScreen: 'GroupChatScreen',
-  GroupsScreen: 'GroupsScreen',
-  ModifyGroupScreen: 'ModifyGroupScreen',
-} as const;
+export enum RoomsScreens {
+  AddRoomScreen = 'AddRoomScreen',
+  RoomChatScreen = 'RoomChatScreen',
+  RoomScreens = 'RoomScreens',
+  ModifyRoomScreen = 'ModifyRoomScreen',
+}

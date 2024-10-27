@@ -11,7 +11,7 @@ import {
   MessageInput,
   ScreenLayout,
 } from '@/components';
-import { GroupsScreens } from '@/config';
+import { RoomsScreens } from '@/config';
 import {
   onSendGroupMessage,
   onSendGroupMessageWithFile,
@@ -21,18 +21,18 @@ import {
 } from '@/services';
 import type {
   SelectedFile,
-  GroupStackNavigationType,
-  GroupStackParamList,
+  RoomStackNavigationType,
+  RoomStackParamList,
   Message,
 } from '@/types';
-import { getAvatar, mockMessages } from '@/utils';
+import { getAvatar } from '@/utils';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupChatScreen>;
+  route: RouteProp<RoomStackParamList, typeof RoomsScreens.RoomChatScreen>;
 }
 
-export const GroupChatScreen: React.FC<Props> = ({ route }) => {
-  const navigation = useNavigation<GroupStackNavigationType>();
+export const RoomChatScreen: React.FC<Props> = ({ route }) => {
+  const navigation = useNavigation<RoomStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string | null>(
     null,
@@ -53,7 +53,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, [replyToMessageHash, messages]);
 
   function onCustomizeGroupPress() {
-    navigation.navigate(GroupsScreens.ModifyGroupScreen, {
+    navigation.navigate(RoomsScreens.ModifyRoomScreen, {
       name,
       roomKey,
     });
@@ -79,7 +79,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   useLayoutEffect(() => {
     const timeout = setTimeout(() => {
-      if (flatListRef.current && mockMessages && mockMessages.length > 0) {
+      if (flatListRef.current && messages?.length > 0) {
         flatListRef.current.scrollToEnd({ animated: true });
       }
     }, 1000);

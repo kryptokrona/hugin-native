@@ -204,6 +204,8 @@
   "changeLanguage": "Change language",
   "save": "Save",
   "updateProfile": "Update profile",
+  "createProfile": "Create profile",
+  "chooseNickname": "Choose a nickname", // EN only
   "copyInvite": "Copy invite link",
   "done": "Done",
   "blockUser": "Block user",
@@ -215,5 +217,6 @@
   "joinRoom": "Join room", // EN only
   "createRoom": "Create room", // EN only
   "createRoomDescr": "Create a new room", // EN only
-  "joinRoomDescr": "Join your friends room" // EN only
+  "joinRoomDescr": "Join your friends room", // EN only
+  "enterYourPin": "Enter your PIN" // EN only
 }

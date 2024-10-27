@@ -1,77 +1,36 @@
 import { useEffect } from 'react';
 
-import { type RouteProp, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
 import { ScreenLayout, XKRLogo } from '@/components';
-import { AuthScreens, MainScreens, Stacks, TabBar } from '@/config';
-import type { AuthStackParamList } from '@/types';
+import { AuthScreens, MainScreens } from '@/config';
+import { init, useAppStoreState, useUserStore } from '@/services';
+import type { AuthStackNavigationType, MainStackNavigationType } from '@/types';
 
-// const fail = (msg: string) => {
-//   globals.logger.addLogMessage(msg);
-
-//   Alert.alert('Failed to open wallet', msg, [{ text: 'OK' }]);
-// };
-
-// const tryLoadWallet = async (mainNavigation: any) => {
-//   if (globals.wallet !== undefined) {
-//     mainNavigation.navigate(MainScreens.MainScreen);
-//     return;
-//   }
-
-//   const [walletData, dbError] = await loadWallet();
-
-//   if (dbError) {
-//     fail(dbError as any);
-//     return;
-//   }
-
-//   const [wallet, walletError] = await WalletBackend.loadWalletFromJSON(
-//     globals.getDaemon(),
-//     walletData as string,
-//     config,
-//   );
-
-//   if (walletError) {
-//     await fail('Error loading wallet: ' + walletError);
-//   } else {
-//     globals.wallet = wallet;
-//     mainNavigation.navigate(MainScreens.MainScreen);
-//   }
-// };
-
-interface Props {
-  route: RouteProp<AuthStackParamList, typeof AuthScreens.SplashScreen>;
-}
-
-export const SplashScreen: React.FC<Props> = () => {
+export const SplashScreen: React.FC = () => {
   //   const navigation = useNavigation<AuthStackNavigationType>();
-  const navigation = useNavigation<any>();
-  // const isHydrated = useAppStoreState((state) => state._hasHydrated);
-  // const isReady = isHydrated.preferences && isHydrated.user && isHydrated.theme;
+  const authNavigation = useNavigation<AuthStackNavigationType>();
+  const appNavigation = useNavigation<MainStackNavigationType>();
+  const isHydrated = useAppStoreState((state) => state._hasHydrated);
+  const user = useUserStore((state) => state.user);
+
+  async function _init() {
+    await init();
+  }
 
   useEffect(() => {
-    setTimeout(() => {
-      // navigation.dispatch(
-      //   CommonActions.reset({
-      //     index: 0,
-      //     routes: [
-      //       {
-      //         name: Stacks.AppStack,
-      //         params: { screen: MainScreens.MainScreen },
-      //       },
-      //     ],
-      //   }),
-      // );
-      // if (isReady) {
-      navigation.navigate(Stacks.AppStack, {
-        params: {
-          screen: MainScreens.MainScreen,
-        },
-        screen: TabBar.MainTab.tabName,
-      });
-      // }
-    }, 3000);
-  }, []);
+    if (isHydrated.preferences && isHydrated.user && isHydrated.theme) {
+      // Async storage ninitialized, proceed to screens
+      if (user?.address) {
+        _init();
+        // If current user we can skip create user
+        appNavigation.navigate(MainScreens.MainScreen);
+      } else {
+        // User should navigate to create screen to generate adress, nickname and such and then intialize bare
+        authNavigation.navigate(AuthScreens.CreateProfileScreen);
+      }
+    }
+  }, [isHydrated]);
 
   //   useEffect(() => {
   //     const init = async () => {

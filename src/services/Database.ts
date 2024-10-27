@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SQLite from 'react-native-sqlite-storage';
 
 import { config, globals } from '@/config';
-import type { Group, Payee, Preferences, UnreadMessages } from '@/types';
+import type { Payee, Preferences, UnreadMessages } from '@/types';
 
 /* Use promise based API instead of callback based */
 SQLite.enablePromise(true);
@@ -1012,7 +1012,7 @@ export async function removePayeeFromDatabase(
   }
 }
 
-export async function saveGroupToDatabase(group: Group) {
+export async function saveGroupToDatabase(group: any) {
   await database.transaction(
     (tx: { executeSql: (arg0: string, arg1: any[]) => void }) => {
       tx.executeSql(

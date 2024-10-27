@@ -43,6 +43,7 @@ rpc.register(0, {
     switch (p.type) {
       case 'init_bare':
         initBareMain(p.user, p.documentDirectoryPath);
+        break;
       case 'update_bare_user':
         updateBareUser(p.user);
         break;
@@ -73,7 +74,8 @@ rpc.register(0, {
 });
 
 // Function implementations
-const initBareMain = async (user) => {
+const initBareMain = async (user, documentDirectoryPath) => {
+  // TODO Do something with documentDirectoryPath
   Hugin.init(user, sender, reqest);
 };
 

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useThemeStore } from '@/services';
@@ -36,7 +35,7 @@ export const Pincode: React.FC<PINInputProps> = ({ onFinish, length = 6 }) => {
         ]}
       />
       <Text style={[styles.subtitle, { color: theme.primary }]}>
-        Enter your PIN
+        {t('enterYourPin')}
       </Text>
     </View>
   );

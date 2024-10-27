@@ -3,7 +3,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { AuthScreens } from '@/config';
-import { SplashScreen } from '@/screens';
+import { CreateProfileScreen, SplashScreen } from '@/screens';
 import type { AuthStackParamList } from '@/types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -14,6 +14,13 @@ export const AuthNavigator = () => {
       <Stack.Screen
         name={AuthScreens.SplashScreen}
         component={SplashScreen}
+        options={() => ({
+          header: () => null,
+        })}
+      />
+      <Stack.Screen
+        name={AuthScreens.CreateProfileScreen}
+        component={CreateProfileScreen}
         options={() => ({
           header: () => null,
         })}

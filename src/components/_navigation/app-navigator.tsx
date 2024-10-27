@@ -1,13 +1,10 @@
-import React from 'react';
-
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { RoomStackNavigator, SettingsStackNavigator } from './_stacks';
 
 import { AppStackParamList } from 'types/navigation';
-
-import { TabBar } from '@/config';
-
-import { GroupStackNavigator, SettingsStackNavigator } from './_stacks';
 import { MyTabBar } from './tab-bar';
+import React from 'react';
+import { TabBar } from '@/config';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
 
@@ -24,8 +21,8 @@ export const AppNavigator = () => {
         options={{ headerShown: false }}
       /> */}
       <Tab.Screen
-        name={TabBar.GroupsTab.tabName}
-        component={GroupStackNavigator}
+        name={TabBar.RoomsTab.tabName}
+        component={RoomStackNavigator}
         options={{ headerShown: false }}
       />
       {/* <Tab.Screen

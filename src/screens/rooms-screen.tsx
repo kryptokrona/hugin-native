@@ -15,22 +15,21 @@ import {
   TextButton,
   TextField,
 } from '@/components';
-import { GroupsScreens } from '@/config';
+import { RoomsScreens } from '@/config';
 import {
   setRoomMessages,
   setStoreCurrentRoom,
   useGlobalStore,
 } from '@/services';
-import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
+import type { RoomStackNavigationType, RoomStackParamList } from '@/types';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupsScreen>;
+  route: RouteProp<RoomStackParamList, typeof RoomsScreens.RoomScreens>;
 }
 
-export const GroupsScreen: React.FC<Props> = () => {
-  //TODO** rename Groups -> Rooms
+export const RoomScreens: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<RoomStackNavigationType>();
   const rooms = useGlobalStore((state) => state.rooms);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -41,7 +40,7 @@ export const GroupsScreen: React.FC<Props> = () => {
           backButton
           title={t('rooms')}
           right={
-            <TouchableOpacity onPress={onAddGroupPress}>
+            <TouchableOpacity onPress={onAddRoomPress}>
               <CustomIcon type="IO" name="add-outline" size={30} />
             </TouchableOpacity>
           }
@@ -50,14 +49,14 @@ export const GroupsScreen: React.FC<Props> = () => {
     });
   }, [navigation]);
 
-  function onAddGroupPress() {
+  function onAddRoomPress() {
     setModalVisible(true);
   }
 
   async function onPress(roomKey: string, name: string) {
     await setRoomMessages(roomKey, 0);
     setStoreCurrentRoom(roomKey);
-    navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
+    navigation.navigate(RoomsScreens.RoomChatScreen, { name, roomKey });
   }
 
   function onCloseModal() {
@@ -66,14 +65,14 @@ export const GroupsScreen: React.FC<Props> = () => {
 
   function onJoinRoom() {
     setModalVisible(false);
-    navigation.navigate(GroupsScreens.AddGroupScreen, {
+    navigation.navigate(RoomsScreens.AddRoomScreen, {
       joining: true,
     });
   }
 
   function onCreateRoom() {
     setModalVisible(false);
-    navigation.navigate(GroupsScreens.AddGroupScreen, {
+    navigation.navigate(RoomsScreens.AddRoomScreen, {
       joining: false,
     });
   }
