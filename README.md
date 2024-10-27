@@ -7,7 +7,7 @@ Make sure you have installed on your system:
 - `CMake` >= 3.25.
 - For Android, installing Android Studio is recommended (you can follow [React Native docs](https://reactnative.dev/docs/0.72/environment-setup?platform=android)), also make sure Android NDK version `25.1.8937393` is installed and set the `ANDROID_HOME` environment variable (see `Configure the ANDROID_HOME environment variable` section on React Native docs).
 
-# Install Bare
+## Install Bare
 
 Clone this repo follow these steps:
 
@@ -16,19 +16,24 @@ git submodule update --init --recursive
 ```
 
 > [!NOTE]
-> From now on, you should run `npx bare-dev vendor sync` after updating `bare` git submodule.
 
-Install node modules:
+<!-- > From now on, you should run `npx bare-dev vendor sync` after updating `bare` git submodule. -->
 
 ```sh
-npm install
+npm i -g bare-make
+```
+
+## Install node modules:
+
+```sh
+yarn install
 ```
 
 ```sh
-npm link
+yarn link
 ```
 
-Enable Expo plugin:
+## Enable Expo plugin:
 
 ```sh
 npx install-expo-modules@latest
@@ -41,10 +46,10 @@ npx install-expo-modules@latest
 > npx hello-pear --configure
 > ```
 
-Patch node modules:
+## Patch node modules:
 
 ```sh
-npm run patch
+yarn run patch
 ```
 
 ### Good to know
@@ -89,10 +94,6 @@ Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _roo
 ### For Android
 
 ```bash
-# using npm
-npm run android
-
-# OR using Yarn
 yarn android
 ```
 
@@ -101,10 +102,6 @@ yarn android
 Strongly suggest running through xcode
 
 ```bash
-# using npm
-npm run ios
-
-# OR using Yarn
 yarn ios
 ```
 
@@ -121,28 +118,9 @@ Now that you have successfully run the app, let's modify it.
 
    For **iOS**: Hit <kbd>Cmd ⌘</kbd> + <kbd>R</kbd> in your iOS Simulator to reload the app and see your changes!
 
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [Introduction to React Native](https://reactnative.dev/docs/getting-started).
-
 # Troubleshooting
 
 If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 
 ## Resolved problems iOS
 
@@ -150,3 +128,9 @@ Changing react-native-vector-icons to v 10.0.0. Carefully update this package in
 Duplicate symbols fix: pod 'Flipper-DoubleConversion', :podspec => '<https://github.com/facebook/flipper.git>' (?)
 Duplicate symbols fix: gem "cocoapods-fix-react-native" (?)
 **Duplicate symbols fix: Remove link to GDASYNC in pods -> TcpSockets -> Build phases -> Compile sources (Need to be done every time you run pod install) Awaiting permanent fix.**
+
+Your Princess is in Another Castle!
+
+Please consider installing 'jetifier' package before running 'jetify' command!
+
+Fix by adding npx jetifier in postinstall
