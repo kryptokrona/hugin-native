@@ -12,7 +12,7 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (12.8.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.11.14):
+  - ExpoModulesCore (1.11.13):
     - glog
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
@@ -908,7 +908,9 @@ PODS:
     - React-debug
   - react-native-biometrics (3.0.1):
     - React-Core
-  - react-native-document-picker (9.3.0):
+  - react-native-document-picker (9.3.1):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - react-native-image-picker (7.1.2):
     - glog
@@ -1094,9 +1096,9 @@ PODS:
     - React-perflogger (= 0.73.6)
   - RNCAsyncStorage (1.21.0):
     - React-Core
-  - RNCClipboard (1.14.1):
+  - RNCClipboard (1.14.3):
     - React-Core
-  - RNDeviceInfo (10.13.2):
+  - RNDeviceInfo (10.14.0):
     - React-Core
   - RNExitApp (2.0.0):
     - React-Core
@@ -1355,7 +1357,7 @@ SPEC CHECKSUMS:
   Expo: 7b9976a9b2be116a701b233d6655b229a3c9316e
   ExpoFileSystem: 74cc0fae916f9f044248433971dcfc8c3befd057
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
-  ExpoModulesCore: 421e9c6bcb63baf153a5ec22b2b4319addfe331c
+  ExpoModulesCore: 4a8928a228569301ac4fc4a1e846713e05754d05
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
   FBReactNativeSpec: 9f2b8b243131565335437dba74923a8d3015e780
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
@@ -1385,7 +1387,7 @@ SPEC CHECKSUMS:
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: 84ea43c6c6232049135b1550b8c60b2faac19fab
   react-native-biometrics: 352e5a794bfffc46a0c86725ea7dc62deb085bdc
-  react-native-document-picker: 5b97e24a7f1a1e4a50a72c540a043f32d29a70a2
+  react-native-document-picker: 23b6a82e09199f4f109376e73d88892a8931eeea
   react-native-image-picker: d3db110a3ded6e48c93aef7e8e51afdde8b16ed0
   react-native-netinfo: 3aa5637c18834966e0c932de8ae1ae56fea20a97
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
@@ -1413,8 +1415,8 @@ SPEC CHECKSUMS:
   React-utils: d16c1d2251c088ad817996621947d0ac8167b46c
   ReactCommon: 2aa35648354bd4c4665b9a5084a7d37097b89c10
   RNCAsyncStorage: 618d03a5f52fbccb3d7010076bc54712844c18ef
-  RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
-  RNDeviceInfo: 42aadf1282ffa0a88dc38a504a7be145eb010dfa
+  RNCClipboard: 2821ac938ef46f736a8de0c8814845dde2dcbdfb
+  RNDeviceInfo: 59344c19152c4b2b32283005f9737c5c64b42fba
   RNExitApp: 00036cabe7bacbb413d276d5520bf74ba39afa6a
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNKeychain: bfe3d12bf4620fe488771c414530bf16e88f3678
@@ -1424,6 +1426,6 @@ SPEC CHECKSUMS:
   TcpSockets: 4ef55305239923b343ed0a378b1fac188b1373b0
   Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
-PODFILE CHECKSUM: e191e7421b868a04882be31d782e98400bcb2d27
+PODFILE CHECKSUM: 534e510f2d69685699d44d630b7461f3da736500
 
 COCOAPODS: 1.15.2
