@@ -5,8 +5,6 @@ import { StyleSheet, Switch, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { usePreferencesStore } from 'services/zustand';
-
 import {
   Card,
   Header,
@@ -18,6 +16,8 @@ import {
 } from '@/components';
 import { nameMaxLength } from '@/config';
 import { AuthStackNavigationType } from '@/types';
+
+import { usePreferencesStore } from '@/services/zustand';
 
 export const CreateProfileScreen: React.FC = () => {
   const { t } = useTranslation();
