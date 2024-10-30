@@ -1,5 +1,5 @@
 const ce = require('compact-encoding');
-const HyperSwarm = require('hyperswarm');
+const HyperSwarm = require('hyperswarm-hugin');
 const { Hugin } = require('./account');
 const {
   get_new_peer_keys,
