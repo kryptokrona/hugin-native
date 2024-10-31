@@ -1,0 +1,13 @@
+diff --git a/node_modules/hyperbeam/index.js b/node_modules/hyperbeam/index.js
+index 65e18d2..7dd1110 100644
+--- a/node_modules/hyperbeam/index.js
++++ b/node_modules/hyperbeam/index.js
+@@ -23,7 +23,7 @@ module.exports = class Hyperbeam extends Duplex {
+     let announce = !!options.announce
+ 
+     if (!key) {
+-      key = toBase32(randomBytes(32))
++      key = toBase32(options.random)
+       announce = true
+     }
+ 
