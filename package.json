@@ -179,5 +179,8 @@
     "stream": "stream-browserify",
     "vm": "vm-browserify",
     "tls": false
+  },
+  "resolutions": {
+    "expo-modules-core": "1.11.13"
   }
 }
