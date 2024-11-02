@@ -1,16 +1,15 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useTranslation } from 'react-i18next';
-
-import { SettingsScreens } from '@/config';
 import {
   ChangeLanguageScreen,
   ChangeThemeScreen,
   SettingsScreen,
   UpdateProfileScreen,
 } from '@/screens';
-import type { SettingsStackParamList } from '@/types';
 
 import { Header } from '../header';
+import { SettingsScreens } from '@/config';
+import type { SettingsStackParamList } from '@/types';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
@@ -46,32 +45,6 @@ export const SettingsStackNavigator = () => {
           header: (_props) => <Header title={t('changeTheme')} backButton />,
         })}
       />
-
-      {/* <Stack.Screen
-        name={SettingsScreens.ExportKeysScreen}
-        component={MainScreen}
-      /> */}
-      {/* <Stack.Screen name={SettingsScreens.FaqScreen} component={MainScreen} /> */}
-      {/* <Stack.Screen
-        name={SettingsScreens.OptimizeScreen}
-        component={MainScreen}
-      /> */}
-      {/* <Stack.Screen
-        name={SettingsScreens.SwapAPIScreen}
-        component={MainScreen}
-      /> */}
-      {/* <Stack.Screen
-        name={SettingsScreens.SwapCurrencyScreen}
-        component={MainScreen}
-      /> */}
-      {/* <Stack.Screen
-        name={SettingsScreens.SwapLanguageScreen}
-        component={MainScreen}
-      /> */}
-      {/* <Stack.Screen
-        name={SettingsScreens.SwapNodeScreen}
-        component={MainScreen}
-      /> */}
     </Stack.Navigator>
   );
 };

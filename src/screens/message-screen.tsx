@@ -1,16 +1,15 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-
+import { Avatar, MessageInput, ScreenLayout } from '@/components';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-
-import { RouteProp, useNavigation } from '@react-navigation/native';
-
-import { Avatar, Header, MessageInput, ScreenLayout } from '@/components';
-import { MessagesScreens } from '@/config';
 import type {
   Message,
   MessagesStackNavigationType,
   MessagesStackParamList,
 } from '@/types';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+
+import { Header } from '../components/_navigation/header';
+import { MessagesScreens } from '@/config';
 import { mockMessages } from '@/utils';
 
 interface Props {

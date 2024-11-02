@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Container,
   CustomIcon,
-  Header,
   ModalCenter,
   PreviewItem,
   ScreenLayout,
@@ -22,6 +21,7 @@ import {
   useGlobalStore,
 } from '@/services';
 import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
+import { Header } from '../components/_navigation/header';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupsScreen>;

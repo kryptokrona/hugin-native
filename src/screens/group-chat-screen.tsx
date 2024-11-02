@@ -7,17 +7,16 @@ import { type RouteProp, useNavigation } from '@react-navigation/native';
 import {
   CustomIcon,
   GroupMessageItem,
-  Header,
   MessageInput,
   ScreenLayout,
 } from '@/components';
 import { GroupsScreens } from '@/config';
 import {
-  onSendGroupMessage,
-  onSendGroupMessageWithFile,
-  saveRoomsMessageToDatabase,
   useGlobalStore,
   useUserStore,
+  onSendGroupMessageWithFile,
+  saveRoomsMessageToDatabaseAndUpdateStore,
+  onSendGroupMessage,
 } from '@/services';
 import type {
   SelectedFile,
@@ -26,6 +25,7 @@ import type {
   Message,
 } from '@/types';
 import { getAvatar, mockMessages } from '@/utils';
+import { Header } from '../components/_navigation/header';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupChatScreen>;
@@ -111,7 +111,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       );
       const save = JSON.parse(sent);
 
-      saveRoomsMessageToDatabase(
+      await saveRoomsMessageToDatabaseAndUpdateStore(
         save.k,
         save.m,
         save.g,

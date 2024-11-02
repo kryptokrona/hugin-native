@@ -1,13 +1,10 @@
+import { AppStackParamList } from '@/types';
+import { GroupStackNavigator } from './group-navigator';
+import { MyTabBar } from '../tab-bar';
 import React from 'react';
-
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-import { AppStackParamList } from 'types/navigation';
-
+import { SettingsStackNavigator } from './settings-navigator';
 import { TabBar } from '@/config';
-
-import { GroupStackNavigator, SettingsStackNavigator } from './_stacks';
-import { MyTabBar } from './tab-bar';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
 
@@ -18,11 +15,6 @@ export const AppNavigator = () => {
         tabBarHideOnKeyboard: true,
       }}
       tabBar={(props) => <MyTabBar {...props} />}>
-      {/* <Tab.Screen
-        name={TabBar.MainTab.tabName}
-        component={MainStackNavigator}
-        options={{ headerShown: false }}
-      /> */}
       <Tab.Screen
         name={TabBar.GroupsTab.tabName}
         component={GroupStackNavigator}

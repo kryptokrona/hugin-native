@@ -1,9 +1,8 @@
+// import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
+
+import RPC from 'tiny-buffer-rpc';
 import ce from 'compact-encoding';
 import { requireNativeModule } from 'expo-modules-core';
-// import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
-import RPC from 'tiny-buffer-rpc';
-import { rpc_message } from './rpc';
-import { getPrivKey } from '@/services';
 requireNativeModule('HelloBare').install();
 
 // forward bare's logs to console
@@ -102,4 +101,8 @@ const wallet = async () => {
   // console.log('Wallet!', wallet);
 };
 
-// IPC SWARM
+export async function getPrivKey() {
+  const keys = await loadAccount();
+  console.log('Got keys', keys);
+  return keys.secretKey;
+}

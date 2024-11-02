@@ -1,18 +1,16 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNFS from 'react-native-fs';
-import { create } from 'zustand';
+import { Preferences, Theme, User } from '@/types';
 import {
   createJSONStorage,
   persist,
   subscribeWithSelector,
 } from 'zustand/middleware';
 
-import { update_bare_user } from 'lib/native';
-
+import { ASYNC_STORAGE_KEYS } from './async-storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNFS from 'react-native-fs';
+import { create } from 'zustand';
 import { defaultTheme } from '@/styles';
-
-import { Preferences, Theme, User } from '../../types';
-import { ASYNC_STORAGE_KEYS } from '../async-storage/async-storage-keys';
+import { update_bare_user } from 'lib/native';
 
 interface UserStore {
   user: User;
@@ -140,13 +138,8 @@ export const usePreferencesStore = create<PreferencesStore>()(
 export const defaultPreferences: Preferences = {
   // authConfirmation: false,
   // authenticationMethod: 'hardware-auth',
-  // currency: 'usd',
   language: 'en',
-  // limitData: false,
-  // nickname: 'Anon',
-  // notificationsEnabled: true,
-  // scanCoinbaseTransactions: false,
-  // websocketEnabled: true,
+  nickname: 'Anon',
 };
 
 export const defaultUser: User = {

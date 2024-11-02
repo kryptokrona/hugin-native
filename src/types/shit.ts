@@ -7,18 +7,13 @@ export interface UnreadMessages {
 export interface Preferences {
   // authConfirmation: boolean;
   // authenticationMethod: 'none' | 'pincode' | 'hardware-auth';
-  // autoOptimize: boolean;
-  // autoPickCache: string;
   // cache: string;
   // cacheEnabled: boolean;
   // currency: string;
   language: string;
   // limitData: boolean;
-  // nickname: string;
-  // node: string;
-  // notificationsEnabled: boolean;
-  // scanCoinbaseTransactions: boolean;
-  // websocketEnabled: boolean;
+  nickname: string;
+
 }
 
 export interface Payee {
@@ -27,15 +22,8 @@ export interface Payee {
   paymentID?: string | (string | null)[];
 } // Used?
 
-export interface FromPayee {
-  name?: string;
-  address?: string;
-  paymentID?: string;
-} // Used?
 
-export interface TransactionDetail {
-  hash: string;
-} // Used?
+
 
 export interface User {
   address: string;
@@ -43,4 +31,11 @@ export interface User {
   name: string;
   room: string;
   downloadDir?: string;
+}
+
+export interface PeerUser {
+  address: string;
+  name: string;
+  room: string;
+  key: string;
 }

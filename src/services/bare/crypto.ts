@@ -1,9 +1,10 @@
+import { loadAccount } from './sqlite';
 import tweetnacl from 'tweetnacl';
 
-import { loadAccount } from '@/services';
-
 const hexToUint = (hexString: string) =>
-  new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+  new Uint8Array(
+    hexString.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
+  );
 
 export function naclHash(val: string) {
   const hash = tweetnacl.hash(hexToUint(val));
@@ -30,8 +31,8 @@ export async function signMessage(message: string) {
   return Buffer.from(sig).toString('hex');
 }
 
-export async function getPrivKey() {
-  const keys = await loadAccount();
-  console.log('Got keys', keys);
-  return keys.secretKey;
-}
+// export async function getPrivKey() {
+//   const keys = await loadAccount();
+//   console.log('Got keys', keys);
+//   return keys.secretKey;
+// }

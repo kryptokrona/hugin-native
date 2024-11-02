@@ -1,14 +1,3 @@
-import { useEffect, useMemo, useState } from 'react';
-
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useTranslation } from 'react-i18next';
-
-import { Message } from 'types/p2p';
-
-import { useThemeStore } from '@/services';
-import { getColorFromHash, prettyPrintDate } from '@/utils';
-
 import {
   Avatar,
   CopyButton,
@@ -17,8 +6,15 @@ import {
   TextButton,
   TextField,
 } from './_elements';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { ModalBottom, ModalCenter } from './_layout';
+import { getColorFromHash, prettyPrintDate } from '@/utils';
+import { useEffect, useMemo, useState } from 'react';
+
 import { EmojiPicker } from './emoji-picker';
+import { Message } from '@/types';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props extends Partial<Message> {
   avatar: string;

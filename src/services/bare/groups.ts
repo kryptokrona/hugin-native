@@ -1,34 +1,28 @@
+import type { FileInput, Message, SelectedFile } from '@/types';
 import {
-  getLatestRoomMessages,
-  getRoomMessages,
-  getRooms,
-  naclHash,
-  randomKey,
-  removeRoomFromDatabase,
-  saveRoomToDatabase,
-  saveRoomsMessageToDatabase,
-} from '@/services';
-import type { FileInput, Message, SelectedFile, User } from '@/types';
-
-import {
-  begin_send_file,
-  end_swarm,
-  group_random_key,
-  send_swarm_msg,
-  swarm,
-} from '/lib/native';
-
+  beginSendFile,
+  endSwarm,
+  groupRandomKey,
+  initSwarm,
+  sendSwarmMsg,
+} from './lib-native-get-bus';
 import { containsOnlyEmojis, sleep } from '@/utils';
-
 import {
-  getActiveRoomUsers,
   getCurrentRoom,
   getRoomsMessages,
-  setStoreActiveRoomUsers,
   setStoreCurrentRoom,
   setStoreRoomMessages,
   setStoreRooms,
 } from '../zustand';
+import {
+  getLatestRoomMessages,
+  getRoomMessages,
+  getRooms,
+  removeRoomFromDatabase,
+  saveRoomToDatabase,
+  saveRoomsMessageToDatabaseSql,
+} from './sqlite';
+import { naclHash, randomKey } from './crypto';
 
 export const getRoomUsers = async () => {
   const rooms = await getLatestRoomMessages();
@@ -45,32 +39,6 @@ export const getRoomUsers = async () => {
     }
   }
   setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
-};
-
-export const peerConnected = (user) => {
-  const connected: User = {
-    address: user.address,
-    name: user.name,
-    room: user.key,
-  };
-  const users = getActiveRoomUsers();
-  const updateList = [...users, connected];
-  setStoreActiveRoomUsers(updateList);
-  //Here we also get status if the user is connected to a voice channel
-  //updateVoiceChannelStatus(user)
-};
-
-export const peerDisconncted = (user) => {
-  const users = getActiveRoomUsers();
-  const updateList = users.filter(
-    (a: User) => a.address !== user.address && a.room !== user.key,
-  );
-  setStoreActiveRoomUsers(updateList);
-  //updateVoiceChannelStatus(user)
-};
-
-export const updateVoiceChannelStatus = (status) => {
-  //Update the user voice status
 };
 
 export const updateMessages = async (message: Message) => {
@@ -107,6 +75,10 @@ export const updateMessages = async (message: Message) => {
   }
 };
 
+export const updateVoiceChannelStatus = (status: any) => {
+  //Update the user voice status
+};
+
 export const setRoomMessages = async (room: string, page: number) => {
   console.log('Load message page:', page);
   const messages = await getRoomMessages(room, page);
@@ -118,7 +90,7 @@ export const onSendGroupMessage = async (
   message: string,
   reply: string | null,
 ) => {
-  return await send_swarm_msg(key, message, reply);
+  return await sendSwarmMsg(key, message, reply);
 };
 
 export const onSendGroupMessageWithFile = (
@@ -126,26 +98,27 @@ export const onSendGroupMessageWithFile = (
   file: SelectedFile,
   message: string,
 ) => {
-  const fileData: FileInput & { message: string } = {
+  const fileData: FileInput = {
     ...file,
     key,
     message,
   };
   const JSONfileData = JSON.stringify(fileData);
-  begin_send_file(JSONfileData);
+  beginSendFile(JSONfileData);
 };
 
 export const onRequestNewGroupKey = async () => {
-  return await group_random_key();
+  return await groupRandomKey();
 };
 
 export const onDeleteGroup = async (key: string) => {
   await removeRoomFromDatabase(key);
+  await getRoomUsers();
   onLeaveGroup(key);
 };
 
 export const onLeaveGroup = (key: string) => {
-  end_swarm(key);
+  endSwarm(key);
 };
 
 export const joinRooms = async () => {
@@ -158,10 +131,10 @@ export const joinRooms = async () => {
   const adminkeys = await loadAdminKeys();
   for (const r of rooms) {
     const key = adminkeys.find((a) => a.key === r.key && a.seed);
-    const admin = key?.seed;
+    const admin: string = key?.seed;
     await sleep(100);
     console.log('Joining room -->');
-    await swarm(naclHash(r.key), r.key, admin);
+    await initSwarm(naclHash(r.key), r.key, admin);
   }
 };
 
@@ -184,10 +157,10 @@ export const joinAndSaveRoom = async (
   address: string,
   userName: string,
 ) => {
-  await swarm(naclHash(key), key, admin);
+  await initSwarm(naclHash(key), key, admin);
   console.log('Swarm launched');
   await saveRoomToDatabase(name, key, admin);
-  await saveRoomsMessageToDatabase(
+  await saveRoomsMessageToDatabaseSql(
     address,
     'Joined room',
     key,
@@ -200,4 +173,30 @@ export const joinAndSaveRoom = async (
   setRoomMessages(key, 0);
   setStoreCurrentRoom(key);
   getRoomUsers();
+};
+
+export const saveRoomsMessageToDatabaseAndUpdateStore = async (
+  address: string,
+  message: string,
+  room: string,
+  reply: string,
+  timestamp: number,
+  nickname: string,
+  hash: string,
+  sent: boolean,
+) => {
+  const newMessage = await saveRoomsMessageToDatabaseSql(
+    address,
+    message,
+    room,
+    reply,
+    timestamp,
+    nickname,
+    hash,
+    sent,
+  );
+
+  if (newMessage) {
+    updateMessages(newMessage);
+  }
 };

@@ -1,15 +1,11 @@
+import { AppNavigator, AuthNavigator } from './_stacks';
+import { GroupsScreens, Stacks, TabBar } from '@/config';
+import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
 import React, { useEffect } from 'react';
 
 import { Linking } from 'react-native';
-
-import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import { GroupsScreens, Stacks, TabBar } from '@/config';
 import { RootStackParamList } from '@/types';
-
-import { AuthNavigator } from './_stacks';
-import { AppNavigator } from './app-navigator';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 

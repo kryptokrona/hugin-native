@@ -1,5 +1,14 @@
-import { useLayoutEffect, useMemo, useState } from 'react';
-
+import {
+  Avatar,
+  Card,
+  CopyButton,
+  CustomIcon,
+  InputField,
+  ScreenLayout,
+  TextButton,
+  TextField,
+  UserItem,
+} from '@/components';
 import {
   FlatList,
   ScrollView,
@@ -7,26 +16,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
-import {
-  Avatar,
-  Card,
-  CopyButton,
-  CustomIcon,
-  Header,
-  InputField,
-  ScreenLayout,
-  TextButton,
-  TextField,
-  UserItem,
-} from '@/components';
-import { GroupsScreens, nameMaxLength } from '@/config';
-import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
 import { GroupStackNavigationType, GroupStackParamList, User } from '@/types';
+import { GroupsScreens, nameMaxLength } from '@/config';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { createAvatar, pickAvatar } from '@/utils';
+import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
+import { useLayoutEffect, useMemo, useState } from 'react';
+
+import { Header } from '../components/_navigation/header';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;

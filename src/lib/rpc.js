@@ -1,6 +1,13 @@
-const { saveRoomsMessageToDatabase } = require('@/services/sqlite');
 const { send_message_history } = require('./native');
-const { peerConnected, peerDisconncted } = require('@/services/bare');
+
+const {
+  saveRoomsMessageToDatabaseAndUpdateStore,
+} = require('../services/bare/groups.ts');
+
+const {
+  peerConnected,
+  peerDisconncted,
+} = require('../services/bare/lib-native-req-bus.ts');
 
 const rpc_message = async (m) => {
   const json = parse(m);
@@ -25,7 +32,7 @@ const rpc_message = async (m) => {
         break;
       case 'swarm-message':
         console.log('swarm-message!', json);
-        saveRoomsMessageToDatabase(
+        saveRoomsMessageToDatabaseAndUpdateStore(
           json.message.address,
           json.message.message,
           json.message.room,

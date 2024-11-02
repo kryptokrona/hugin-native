@@ -46,7 +46,9 @@ export const MessagesScreen: React.FC<Props> = () => {
       <FlatList
         data={chats}
         keyExtractor={(item, i) => `${item.hash}-${i}`}
-        renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
+        renderItem={({ item }) => (
+          <PreviewItem name={''} roomKey={''} {...item} onPress={onPress} />
+        )}
       />
     </ScreenLayout>
   );
