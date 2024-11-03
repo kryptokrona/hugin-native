@@ -2,7 +2,7 @@
 
 // export const defaultPreferences: Preferences = {
 //   authConfirmation: false,
-//   authenticationMethod: 'hardware-auth',
+//   authMethod: 'hardware-auth',
 //   //   autoOptimize: false,
 //   //   autoPickCache: 'true',
 //   // cache: Config.defaultCache,

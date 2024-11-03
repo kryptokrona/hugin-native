@@ -1,10 +1,6 @@
-import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 
-import { type RouteProp, useNavigation } from '@react-navigation/native';
-
-import { ScreenLayout, XKRLogo } from '@/components';
-import { AuthScreens, MainScreens, Stacks, TabBar } from '@/config';
-import type { AuthStackParamList } from '@/types';
+import { XKRLogo } from '@/components';
 
 // const fail = (msg: string) => {
 //   globals.logger.addLogMessage(msg);
@@ -39,71 +35,27 @@ import type { AuthStackParamList } from '@/types';
 //   }
 // };
 
-interface Props {
-  route: RouteProp<AuthStackParamList, typeof AuthScreens.SplashScreen>;
-}
-
-export const SplashScreen: React.FC<Props> = () => {
-  //   const navigation = useNavigation<AuthStackNavigationType>();
-  const navigation = useNavigation<any>();
-  // const isHydrated = useAppStoreState((state) => state._hasHydrated);
-  // const isReady = isHydrated.preferences && isHydrated.user && isHydrated.theme;
-
-  useEffect(() => {
-    setTimeout(() => {
-      // navigation.dispatch(
-      //   CommonActions.reset({
-      //     index: 0,
-      //     routes: [
-      //       {
-      //         name: Stacks.AppStack,
-      //         params: { screen: MainScreens.MainScreen },
-      //       },
-      //     ],
-      //   }),
-      // );
-      // if (isReady) {
-      navigation.navigate(Stacks.AppStack, {
-        params: {
-          screen: MainScreens.MainScreen,
-        },
-        screen: TabBar.MainTab.tabName,
-      });
-      // }
-    }, 3000);
-  }, []);
-
-  //   useEffect(() => {
-  //     const init = async () => {
-  //       const hasWallet = await haveWallet();
-
-  //       await delay(2000);
-
-  //       if (hasWallet) {
-  //         Authenticate(
-  //           navigation,
-  //           'to unlock your account',
-  //           tryLoadWallet(mainNavigation),
-  //           true,
-  //         );
-  //       } else {
-  //         navigation.navigate(AuthScreens.WalletOptionScreen);
-  //         navigation.reset({
-  //           index: 0,
-  //           routes: [{ name: AuthScreens.WalletOptionScreen }],
-  //         });
-  //         // navigation.dispatch(
-  //         //   navigateWithDisabledBack(AuthScreens.WalletOptionScreen),
-  //         // );
-  //       }
-  //     };
-
-  //     init();
-  //   }, [navigation]);
-
+export const SplashScreen: React.FC = () => {
   return (
-    <ScreenLayout>
+    <View style={[styles.screen, { backgroundColor: 'black' }]}>
       <XKRLogo />
-    </ScreenLayout>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  innerView: {
+    flexGrow: 1,
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingTop: 20,
+    paddingVertical: 4,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  screen: {
+    flex: 1,
+    flexGrow: 1,
+  },
+});

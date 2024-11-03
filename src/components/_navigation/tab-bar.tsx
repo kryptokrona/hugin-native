@@ -4,11 +4,13 @@ import { TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native';
 
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
-import { TabBar } from '@/config';
+import { MainScreens, TabBar } from '@/config';
 import { useThemeStore } from '@/services';
 import type { IconType } from '@/types';
 
 import { CustomIcon } from '../_elements';
+
+const tabbarButtons = [MainScreens.GroupsScreen, MainScreens.SettingsScreen];
 
 export const MyTabBar: React.FC<BottomTabBarProps> = ({
   state,
@@ -52,6 +54,10 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
         const icon = TabBar[route.name as keyof typeof TabBar];
         const { options } = descriptors[route.key];
 
+        if (!tabbarButtons.includes(route.name as MainScreens)) {
+          return null;
+        }
+
         const isFocused = state.index === index;
         const onPress = () => {
           const event = navigation.emit({
@@ -81,7 +87,10 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             onPress={onPress}
             onLongPress={onLongPress}
             style={[styles.tab]}>
-            <CustomIcon name={icon.iconName} type={icon.iconType as IconType} />
+            <CustomIcon
+              name={icon?.iconName}
+              type={icon.iconType as IconType}
+            />
           </TouchableOpacity>
         );
       })}

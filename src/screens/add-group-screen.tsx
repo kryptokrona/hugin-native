@@ -10,16 +10,16 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
-import { GroupsScreens } from '@/config';
+import { MainScreens } from '@/config';
 import {
   joinAndSaveRoom,
   onRequestNewGroupKey,
   useUserStore,
 } from '@/services';
-import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
+import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.AddGroupScreen>;
 }
 
 let admin: string = '';
@@ -27,7 +27,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name: initialName, roomKey: initialKey, joining } = route.params;
   const formattedName = initialName ? initialName.replace(/-/g, ' ') : null;
-  const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const [name, setName] = useState<string | null>(formattedName);
   const [keyInput, setKeyInput] = useState<string | null>(initialKey ?? null);
   const { name: userName, address } = useUserStore((state) => state.user);
@@ -41,9 +41,9 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
         CommonActions.reset({
           index: 1,
           routes: [
-            { name: GroupsScreens.GroupsScreen },
+            { name: MainScreens.GroupsScreen },
             {
-              name: GroupsScreens.GroupChatScreen,
+              name: MainScreens.GroupChatScreen,
               params: { name, roomKey },
             },
           ],

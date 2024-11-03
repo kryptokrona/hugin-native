@@ -10,7 +10,6 @@ import {
   MessageInput,
   ScreenLayout,
 } from '@/components';
-import { GroupsScreens } from '@/config';
 import {
   useGlobalStore,
   useUserStore,
@@ -20,19 +19,20 @@ import {
 } from '@/services';
 import type {
   SelectedFile,
-  GroupStackNavigationType,
-  GroupStackParamList,
+  MainStackNavigationType,
+  MainNavigationParamList,
   Message,
 } from '@/types';
-import { getAvatar, mockMessages } from '@/utils';
+import { getAvatar } from '@/utils';
 import { Header } from '../components/_navigation/header';
+import { MainScreens } from '@/config';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupChatScreen>;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
 }
 
 export const GroupChatScreen: React.FC<Props> = ({ route }) => {
-  const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string | null>(
     null,
@@ -53,7 +53,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, [replyToMessageHash, messages]);
 
   function onCustomizeGroupPress() {
-    navigation.navigate(GroupsScreens.ModifyGroupScreen, {
+    navigation.navigate(MainScreens.ModifyGroupScreen, {
       name,
       roomKey,
     });
@@ -77,17 +77,17 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     });
   }, [roomKey, name]);
 
-  useLayoutEffect(() => {
-    const timeout = setTimeout(() => {
-      if (flatListRef.current && mockMessages && mockMessages.length > 0) {
-        flatListRef.current.scrollToEnd({ animated: true });
-      }
-    }, 1000);
+  // useLayoutEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     if (flatListRef.current && mockMessages && mockMessages.length > 0) {
+  //       flatListRef.current.scrollToEnd({ animated: true });
+  //     }
+  //   }, 1000);
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, []);
+  //   return () => {
+  //     clearTimeout(timeout);
+  //   };
+  // }, []);
 
   async function onSend(
     text: string,

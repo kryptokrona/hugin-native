@@ -1,10 +1,3 @@
-import { useState } from 'react';
-
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
 import {
   Avatar,
   Container,
@@ -13,25 +6,27 @@ import {
   ScreenLayout,
   TextButton,
 } from '@/components';
-import { SettingsScreens, nameMaxLength } from '@/config';
+import type { MainNavigationParamList, MainStackNavigationType } from '@/types';
+import { MainScreens, nameMaxLength } from '@/config';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { updateUser, useThemeStore, useUserStore } from '@/services';
-import type {
-  SettingsStackNavigationType,
-  SettingsStackParamList,
-} from '@/types';
+
 import { pickAvatar } from '@/utils';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<
-    SettingsStackParamList,
-    typeof SettingsScreens.UpdateProfileScreen
+    MainNavigationParamList,
+    typeof MainScreens.UpdateProfileScreen
   >;
 }
 
 export const UpdateProfileScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
-  const navigation = useNavigation<SettingsStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const { name, avatar, address } = useUserStore((state) => state.user);
   const [value, setValue] = useState<string>(name);
 

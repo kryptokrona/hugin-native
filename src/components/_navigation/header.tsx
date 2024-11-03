@@ -1,21 +1,24 @@
+import { Avatar, CustomIcon, TextField } from '../_elements';
 import React, { useEffect } from 'react';
-
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
-
 import { useThemeStore, useUserStore } from '@/services';
 
 import HuginSvg from '../../assets/hugin.svg';
-import { Avatar, CustomIcon, TextField } from '../_elements';
+import { useNavigation } from '@react-navigation/native';
 
 interface Props {
   title?: string;
   backButton?: boolean;
   right?: React.ReactNode;
+  onBackPress?: () => void;
 }
 
-export const Header: React.FC<Props> = ({ title, backButton, right }) => {
+export const Header: React.FC<Props> = ({
+  title,
+  backButton,
+  right,
+  onBackPress,
+}) => {
   const navigation = useNavigation();
   const theme = useThemeStore((state) => state.theme);
   const avatar = useUserStore((state) => state.user?.avatar);
@@ -29,15 +32,19 @@ export const Header: React.FC<Props> = ({ title, backButton, right }) => {
   const backgroundColor = theme.background;
   const borderColor = theme.muted;
 
-  function onBackPress() {
-    navigation.goBack();
+  function onPress() {
+    if (onBackPress) {
+      onBackPress();
+    } else {
+      navigation.goBack();
+    }
   }
 
   return (
     <View style={[styles.container, { backgroundColor, borderColor }]}>
       <View style={styles.side}>
         {backButton && (
-          <TouchableOpacity onPress={onBackPress}>
+          <TouchableOpacity onPress={onPress}>
             <CustomIcon name={'arrow-back-ios'} type={'MI'} />
           </TouchableOpacity>
         )}

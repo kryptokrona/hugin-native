@@ -4,16 +4,16 @@ import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { ScreenLayout, TextField } from '@/components';
-import { SettingsScreens } from '@/config';
+import { MainScreens } from '@/config';
 import { updateLanguage, useThemeStore } from '@/services';
-import type { SettingsStackParamList } from '@/types';
+import type { MainNavigationParamList } from '@/types';
 
 import { languages } from '../i18n';
 
 interface Props {
   route: RouteProp<
-    SettingsStackParamList,
-    typeof SettingsScreens.ChangeLanguageScreen
+    MainNavigationParamList,
+    typeof MainScreens.ChangeLanguageScreen
   >;
 }
 

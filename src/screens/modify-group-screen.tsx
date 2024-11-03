@@ -16,8 +16,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { GroupStackNavigationType, GroupStackParamList, User } from '@/types';
-import { GroupsScreens, nameMaxLength } from '@/config';
+import {
+  MainNavigationParamList,
+  MainStackNavigationType,
+  User,
+} from '@/types';
+import { MainScreens, nameMaxLength } from '@/config';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { createAvatar, pickAvatar } from '@/utils';
 import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
@@ -27,13 +31,16 @@ import { Header } from '../components/_navigation/header';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
+  route: RouteProp<
+    MainNavigationParamList,
+    typeof MainScreens.ModifyGroupScreen
+  >;
 }
 
 export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
-  const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const theme = useThemeStore((state) => state.theme);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [groupName, setGroupName] = useState<string>(name); // route.params.name
@@ -70,7 +77,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   function onLeave() {
     onDeleteGroup(roomKey);
-    navigation.navigate(GroupsScreens.GroupsScreen);
+    navigation.navigate(MainScreens.GroupsScreen);
   }
 
   const inviteText = useMemo(() => {

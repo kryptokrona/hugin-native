@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import { useThemeStore } from '@/services';
 import { Styles, backgroundType, textType } from '@/styles';
+
 import type { ElementType } from '@/types';
+import { useThemeStore } from '@/services';
 
 interface Props {
   children: React.ReactNode;
@@ -23,14 +23,14 @@ interface Props {
 export const TextButton: React.FC<Props> = ({
   children,
   onPress,
-  type = 'primary',
+  type: mType = 'primary',
   icon,
   disabled,
   style,
   small,
 }) => {
   const theme = useThemeStore((state) => state.theme);
-
+  const type = disabled ? 'muted' : mType;
   const backgroundColor = theme[backgroundType[type]];
   const borderColor = theme[textType[type]];
   const borderWidth = theme.mode === 'dark' || type === 'secondary' ? 1 : 0;

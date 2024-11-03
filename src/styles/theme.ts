@@ -8,8 +8,8 @@ const neutral: ThemeBase = {
     border: '#262626',
     card: '#0a0a0a',
     cardForeground: '#fafafa',
-    destructive: '#7f1d1d',
-    destructiveForeground: '#fafafa',
+    destructive: '#fafafa',
+    destructiveForeground: '#7f1d1d',
     foreground: '#fafafa',
     input: '#262626',
     mode: 'dark',
@@ -155,10 +155,11 @@ export const backgroundType = {
   secondary: 'background',
 } as const;
 
-export const defaultTheme = neutral.dark;
-
 export const themes: { [key in ThemeName]: ThemeBase } = {
   aesir,
   neutral,
   stonks,
 };
+
+export const defaultTheme = neutral.dark;
+export const defaultThemeName: ThemeName = 'neutral';

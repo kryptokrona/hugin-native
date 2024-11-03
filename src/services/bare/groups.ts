@@ -19,10 +19,11 @@ import {
   getRoomMessages,
   getRooms,
   removeRoomFromDatabase,
+  saveAccount,
   saveRoomToDatabase,
   saveRoomsMessageToDatabaseSql,
 } from './sqlite';
-import { naclHash, randomKey } from './crypto';
+import { naclHash, newKeyPair, randomKey } from './crypto';
 
 export const getRoomUsers = async () => {
   const rooms = await getLatestRoomMessages();
@@ -199,4 +200,11 @@ export const saveRoomsMessageToDatabaseAndUpdateStore = async (
   if (newMessage) {
     updateMessages(newMessage);
   }
+};
+
+export const createUserAddress = async () => {
+  const keys = newKeyPair();
+  await saveAccount(keys.publicKey, keys.secretKey);
+
+  return keys.publicKey;
 };

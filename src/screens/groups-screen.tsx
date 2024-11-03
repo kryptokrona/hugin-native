@@ -14,23 +14,23 @@ import {
   TextButton,
   TextField,
 } from '@/components';
-import { GroupsScreens } from '@/config';
+import { MainScreens } from '@/config';
 import {
   setRoomMessages,
   setStoreCurrentRoom,
   useGlobalStore,
 } from '@/services';
-import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
+import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 import { Header } from '../components/_navigation/header';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.GroupsScreen>;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
 }
 
 export const GroupsScreen: React.FC<Props> = () => {
   //TODO** rename Groups -> Rooms
   const { t } = useTranslation();
-  const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const rooms = useGlobalStore((state) => state.rooms);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -57,7 +57,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   async function onPress(roomKey: string, name: string) {
     await setRoomMessages(roomKey, 0);
     setStoreCurrentRoom(roomKey);
-    navigation.navigate(GroupsScreens.GroupChatScreen, { name, roomKey });
+    navigation.navigate(MainScreens.GroupChatScreen, { name, roomKey });
   }
 
   function onCloseModal() {
@@ -66,14 +66,14 @@ export const GroupsScreen: React.FC<Props> = () => {
 
   function onJoinRoom() {
     setModalVisible(false);
-    navigation.navigate(GroupsScreens.AddGroupScreen, {
+    navigation.navigate(MainScreens.AddGroupScreen, {
       joining: true,
     });
   }
 
   function onCreateRoom() {
     setModalVisible(false);
-    navigation.navigate(GroupsScreens.AddGroupScreen, {
+    navigation.navigate(MainScreens.AddGroupScreen, {
       joining: false,
     });
   }

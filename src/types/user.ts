@@ -4,29 +4,32 @@ export interface UnreadMessages {
   pms: number;
 }
 
+export enum AuthMethods {
+  reckless = 'reckless',
+  pincode = 'pincode',
+  hardewarePin = 'hardewarePin',
+  bioMetric = 'bioMetric',
+}
+
 export interface Preferences {
-  // authConfirmation: boolean;
-  // authenticationMethod: 'none' | 'pincode' | 'hardware-auth';
+  authMethod: AuthMethods | null;
+  pincode: string | null;
   // cache: string;
   // cacheEnabled: boolean;
   // currency: string;
   language: string;
   // limitData: boolean;
   nickname: string;
-
 }
 
 export interface Payee {
   nickname: string | (string | null)[];
   address?: string;
   paymentID?: string | (string | null)[];
-} // Used?
-
-
-
+}
 
 export interface User {
-  address: string;
+  address: string | null;
   avatar?: string;
   name: string;
   room: string;

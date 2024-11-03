@@ -1,5 +1,7 @@
 // Only add getters that cannot be used in components directly
 
+import { usePreferencesStore, useUserStore } from './async-storage-stores';
+
 import { useGlobalStore } from './global-store';
 
 export const getCurrentRoom = () => {
@@ -16,4 +18,12 @@ export const getRoomsMessages = () => {
 
 export const getActiveRoomUsers = () => {
   return useGlobalStore.getState().roomUsers;
+};
+
+export const getUser = () => {
+  return useUserStore.getState().user;
+};
+
+export const getAuthMethod = () => {
+  return usePreferencesStore.getState().preferences?.authMethod;
 };

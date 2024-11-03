@@ -1,16 +1,13 @@
+import { Avatar, TextField } from './_elements';
 import React, { useState } from 'react';
-
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
-
-import { useThemeStore } from '@/services';
-import { Styles } from '@/styles';
-import type { MessagesStackNavigationType } from '@/types';
-import { prettyPrintDate } from '@/utils';
-
-import { Avatar, TextField } from './_elements';
+import type { MainStackNavigationType } from '@/types';
 import { ModalBottom } from './_layout';
+import { Styles } from '@/styles';
+import { prettyPrintDate } from '@/utils';
+import { useNavigation } from '@react-navigation/native';
+import { useThemeStore } from '@/services';
 
 interface Props {
   inverted: boolean;
@@ -29,7 +26,7 @@ export const MessageItem: React.FC<Props> = ({
   address,
   name,
 }) => {
-  const navigation = useNavigation<MessagesStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const [isPressed, setIsPressed] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const theme = useThemeStore((state) => state.theme);
