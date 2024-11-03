@@ -50,8 +50,8 @@ export const Header: React.FC<Props> = ({
         )}
         {!backButton && (
           <>
-            {address && <Avatar base64={avatar} address={address} size={30} />}
-            {!address && <HuginSvg style={styles.logo} />}
+            {/* {address && <Avatar base64={avatar} address={address} size={30} />} */}
+            <HuginSvg style={styles.logo} />
           </>
         )}
       </View>

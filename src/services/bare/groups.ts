@@ -12,7 +12,6 @@ import {
   getRoomsMessages,
   setStoreCurrentRoom,
   setStoreRoomMessages,
-  setStoreRooms,
 } from '../zustand';
 import {
   getLatestRoomMessages,
@@ -39,7 +38,8 @@ export const getRoomUsers = async () => {
       fixed.push(room);
     }
   }
-  setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
+
+  return rooms.sort((a, b) => b.timestamp - a.timestamp);
 };
 
 export const updateMessages = async (message: Message) => {
@@ -109,7 +109,8 @@ export const onSendGroupMessageWithFile = (
 };
 
 export const onRequestNewGroupKey = async () => {
-  return await groupRandomKey();
+  const key = await groupRandomKey();
+  return key;
 };
 
 export const onDeleteGroup = async (key: string) => {

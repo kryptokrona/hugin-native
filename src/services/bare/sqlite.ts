@@ -299,16 +299,29 @@ export async function saveRoomsMessageToDatabaseSql(
   }
 }
 
+const deleteAllData = async () => {
+  try {
+    const results = await db.executeSql('DELETE FROM rooms');
+    console.log(results);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const toMessage = (res: any) => {
   const message: Message = {
     address: res.address,
+
     //Hash identifier of the message
     hash: res.hash,
+
     //Message
     message: res.message,
+
     //Nickname
     nickname: res.nickname,
 
+    // Emoji's on this message
     reactions: res.reactions ? res.reactions : [],
 
     //All the replies to this message

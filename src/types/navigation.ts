@@ -35,7 +35,7 @@ export interface RootStackParamList {
 }
 
 export type AuthStackParamList = {
-  [AuthScreens.ChooseAuthMethodScreen]: undefined;
+  // [AuthScreens.ChooseAuthMethodScreen]: undefined;
   [AuthScreens.ForgotPinScreen]: undefined;
   [AuthScreens.RequestFingerPrintScreen]:
     | { finishFunction?: (nav?: MainStackNavigationType) => void }

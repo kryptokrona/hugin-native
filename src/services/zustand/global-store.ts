@@ -1,11 +1,6 @@
 import type { Message, Room, User } from '@/types';
-import { getRoomUsers, joinRooms } from '../bare';
-import { initDB, loadAccount } from '../bare/sqlite';
 
-import { bare } from 'lib/native';
 import { create } from 'zustand';
-import { getUser } from './getters';
-import { sleep } from '@/utils';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 type GlobalStore = {
@@ -19,6 +14,7 @@ type GlobalStore = {
   setCurrentRoom: (payload: string) => void;
   setRoomUserList: (payload: User[]) => void;
   setAuthenticated: (payload: boolean) => void;
+  setStoreRooms: (payload: Room[]) => void;
 };
 
 export const useGlobalStore = create<
@@ -48,24 +44,22 @@ export const useGlobalStore = create<
     setAuthenticated: (authenticated: boolean) => {
       set({ authenticated });
     },
+    setStoreRooms: async (rooms: Room[]) => {
+      set({ rooms });
+    },
   })),
 );
 
-useGlobalStore.subscribe(
-  (state) => state.authenticated,
-  async (authenticated) => {
-    if (authenticated) {
-      console.log('User is authenticated');
-      const user = getUser();
-      await bare(user);
-      console.log('Initializing database..');
-      await initDB();
-      getRoomUsers();
-      await sleep(100);
-      const acc = await loadAccount();
-      console.log('Account', acc);
+// useGlobalStore.subscribe(
+//   (state) => state.authenticated,
+//   async (authenticated) => {
+//     if (authenticated) {
+//       const user = useUserStore.getState().user;
+//       await onAuthenticated(user);
+//     }
+//   },
+// );
 
-      await joinRooms();
-    }
-  },
-);
+export const setAuthenticated = (authenticated: boolean) => {
+  useGlobalStore.setState({ authenticated });
+};

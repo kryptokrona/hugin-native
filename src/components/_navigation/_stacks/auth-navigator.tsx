@@ -14,13 +14,11 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { usePreferencesStore, useUserStore } from '@/services';
 import { Header } from '../header';
-import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthNavigator = () => {
-  const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
   const user = useUserStore((state) => state.user);
   const authMethod = usePreferencesStore(
@@ -36,22 +34,21 @@ export const AuthNavigator = () => {
   let initialRouteName = AuthScreens.CreateAccountScreen;
 
   if (!user?.address) {
-    initialRouteName = AuthScreens.RequestPinScreen;
+    initialRouteName = AuthScreens.CreateAccountScreen;
   } else {
     if (authMethod === AuthMethods.pincode) {
-      initialRouteName = AuthScreens.SetPinScreen;
+      initialRouteName = AuthScreens.RequestPinScreen;
     }
     if (authMethod === AuthMethods.bioMetric) {
       initialRouteName = AuthScreens.RequestFingerPrintScreen;
     }
+    // if(authMethod === AuthMethods.reckless){
+    //   initialRouteName = AuthScreens.CreateAccountScreen;
+    // }
   }
 
   return (
     <Stack.Navigator initialRouteName={initialRouteName}>
-      <Stack.Screen
-        name={AuthScreens.CreateAccountScreen}
-        component={CreateAccScreen}
-      />
       <Stack.Screen
         name={AuthScreens.RequestPinScreen}
         component={RequestPinScreen}
@@ -69,6 +66,10 @@ export const AuthNavigator = () => {
             <Header backButton onBackPress={onRequestPinBackPress} />
           ),
         })}
+      />
+      <Stack.Screen
+        name={AuthScreens.CreateAccountScreen}
+        component={CreateAccScreen}
       />
     </Stack.Navigator>
   );

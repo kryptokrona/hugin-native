@@ -38,6 +38,3 @@ export const updateUser = async (value: Partial<User>) => {
     },
   }));
 };
-export const setAuthenticated = (authenticated: boolean) => {
-  useGlobalStore.setState({ authenticated });
-};

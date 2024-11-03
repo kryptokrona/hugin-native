@@ -11,8 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import RNFS from 'react-native-fs';
 import { create } from 'zustand';
-import { getAuthMethod } from './getters';
-import { setAuthenticated } from './setters';
+import { setAuthenticated } from './global-store';
 import { update_bare_user } from 'lib/native';
 
 interface UserStore {
@@ -172,4 +171,12 @@ export const defaultUser: User = {
       : RNFS.DocumentDirectoryPath, // TODO test this properly
   name: 'Anon',
   room: 'lobby',
+};
+
+export const getAuthMethod = () => {
+  return usePreferencesStore.getState().preferences?.authMethod;
+};
+
+export const getUser = () => {
+  return useUserStore.getState().user;
 };

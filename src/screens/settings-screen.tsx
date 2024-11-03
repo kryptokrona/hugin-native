@@ -1,15 +1,17 @@
-import { FlatList } from 'react-native';
+import { Alert, FlatList } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import { MainScreens } from '@/config';
+import { MainScreens, Stacks } from '@/config';
 import type {
   CustomIconProps,
   MainStackNavigationType,
   MainNavigationParamList,
+  AuthStackNavigationType,
 } from '@/types';
 import { useTranslation } from 'react-i18next';
+import { useGlobalStore } from '@/services';
 
 interface Item {
   title: string;
@@ -35,18 +37,40 @@ const items: Item[] = [
     title: 'updateProfile',
   },
   {
-    icon: { name: 'delete', type: 'MCI' },
+    icon: { name: 'trash-2', type: 'FI' },
     // screen: MainScreens.UpdateProfileScreen,
     title: 'deleteUser',
-    // function
+    function: async () => {
+      Alert.alert(
+        'Delete User',
+        'Are you sure you want to delete your account?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                // await  // TODO delete sql stuff, delete user and preferences in stores
+                console.log('User deleted successfully');
+              } catch (error) {
+                console.error('Failed to delete user:', error);
+              }
+            },
+          },
+        ],
+      );
+    },
   },
 ];
+
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.SettingsScreen>;
 }
 export const SettingsScreen: React.FC<Props> = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const navigation = useNavigation<MainStackNavigationType>();
+  const authNavigation = useNavigation<any>();
 
   const itemMapper = (item: Item) => {
     async function onPress() {
@@ -63,11 +87,8 @@ export const SettingsScreen: React.FC<Props> = () => {
   };
 
   async function onLogoutPress() {
-    // TODO
-  }
-
-  async function onDeleteUser() {
-    // TODO
+    useGlobalStore.setState({ authenticated: false });
+    authNavigation.navigate(Stacks.AuthStack);
   }
 
   return (
@@ -77,11 +98,11 @@ export const SettingsScreen: React.FC<Props> = () => {
         keyExtractor={(item, i) => `${item.title}-${i}`}
         renderItem={({ item }) => itemMapper(item)}
       />
-      <SettingsItem
+      {/* <SettingsItem
         title={t('logout')}
         icon={{ name: 'exit-run', type: 'MCI' }}
         onPress={onLogoutPress}
-      />
+      /> */}
     </ScreenLayout>
   );
 };

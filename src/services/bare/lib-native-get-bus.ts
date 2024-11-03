@@ -15,7 +15,8 @@ export const endSwarm = (key: string) => {
 };
 
 export const groupRandomKey = async () => {
-  return await group_random_key();
+  const key = await group_random_key();
+  return key;
 };
 
 export const sendSwarmMsg = async (

@@ -34,8 +34,11 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const continueText = joining ? t('joinRoom') : t('createRoom');
 
   async function onCreatePress() {
+    console.log('here 1');
     const roomKey = keyInput ?? (await generateKey());
-    if (roomKey && name) {
+    console.log('here 2', roomKey);
+    if (roomKey && name && address) {
+      console.log({ roomKey, name, admin, address, userName });
       joinAndSaveRoom(roomKey, name, admin, address, userName);
       navigation.dispatch(
         CommonActions.reset({
@@ -54,6 +57,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
   async function generateKey() {
     try {
+      console.log('running here');
       const keys = await onRequestNewGroupKey();
       const [invite, seed] = JSON.parse(keys);
       console.log('Invite key:', invite);
@@ -98,12 +102,18 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   return (
     <ScreenLayout>
       <View>
-        <InputField label={t('name')} value={name} onChange={onNameChange} />
+        <InputField
+          label={t('name')}
+          value={name}
+          onChange={onNameChange}
+          onSubmitEditing={onCreatePress}
+        />
         {joining && (
           <InputField
             label={t('messageKey')}
             value={keyInput}
             onChange={onKeyChange}
+            onSubmitEditing={onCreatePress}
           />
         )}
         {/* {!isJoiningExisting && (

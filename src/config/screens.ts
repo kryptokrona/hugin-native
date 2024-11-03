@@ -10,7 +10,7 @@ export enum AuthScreens {
   // PickMonthScreen ='PickMonthScreen',
   // WalletOptionScreen = 'WalletOptionScreen',
   ForgotPinScreen = 'ForgotPinScreen',
-  ChooseAuthMethodScreen = 'ChooseAuthMethodScreen',
+  // ChooseAuthMethodScreen = 'ChooseAuthMethodScreen',
   RequestFingerPrintScreen = 'RequestFingerPrintScreen',
   RequestPinScreen = 'RequestPinScreen',
   SetPinScreen = 'SetPinScreen',

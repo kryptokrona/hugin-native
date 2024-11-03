@@ -38,7 +38,6 @@ export const GroupsScreen: React.FC<Props> = () => {
     navigation.setOptions({
       header: () => (
         <Header
-          backButton
           title={t('rooms')}
           right={
             <TouchableOpacity onPress={onAddGroupPress}>
