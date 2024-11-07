@@ -7,7 +7,7 @@ import {
   TextField,
 } from './_elements';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { getColorFromHash, prettyPrintDate } from '@/utils';
+import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 import { useEffect, useMemo, useState } from 'react';
 
 import { EmojiPicker } from './emoji-picker';
@@ -17,7 +17,6 @@ import { useThemeStore } from '@/services';
 import { useTranslation } from 'react-i18next';
 
 interface Props extends Partial<Message> {
-  avatar: string;
   userAddress: string;
   reactions: string[];
   replyHash?: string;
@@ -27,7 +26,6 @@ interface Props extends Partial<Message> {
 
 export const GroupMessageItem: React.FC<Props> = ({
   message,
-  avatar,
   timestamp,
   nickname,
   userAddress,
@@ -172,7 +170,7 @@ export const GroupMessageItem: React.FC<Props> = ({
 
         <View style={styles.messageContainer}>
           <View style={styles.avatar}>
-            <Avatar base64={avatar} address={userAddress} size={24} />
+            <Avatar base64={getAvatar(userAddress)} size={24} />
           </View>
           <View>
             <View style={styles.info}>

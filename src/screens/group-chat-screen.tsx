@@ -100,9 +100,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
     console.log('Sending to room:', name);
     if (file) {
-      const sentFile = onSendGroupMessageWithFile(roomKey, file, text);
+      onSendGroupMessageWithFile(roomKey, file, text);
       //If we need to return something... or print something locally
-      console.log('sent file!', sentFile);
+      // console.log('sent file!', sentFile);
     } else {
       const sent = await onSendGroupMessage(
         roomKey,
@@ -150,7 +150,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             <GroupMessageItem
               message={item.message}
               timestamp={item.timestamp}
-              avatar={getAvatar(item.address)} // TODO fix avatar
               nickname={item.nickname}
               userAddress={item.address}
               onReplyToMessagePress={onReplyToMessagePress}

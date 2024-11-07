@@ -39,7 +39,7 @@ export const MessageInput: React.FC<Props> = ({
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
-        console.log('ImagePicker Error: ', response.errorMessage);
+        console.error('ImagePicker Error: ', response.errorMessage);
       } else {
         const asset = response?.assets?.[0];
         if (asset) {
@@ -68,7 +68,6 @@ export const MessageInput: React.FC<Props> = ({
         type: [types.allFiles],
       });
 
-      console.log('Res', res);
       const { size, name, uri, type, fileCopyUri } = res;
       if (!uri || !name || !size) {
         return;
@@ -88,14 +87,15 @@ export const MessageInput: React.FC<Props> = ({
       if (DocumentPicker.isCancel(err)) {
         console.log('User cancelled file picker');
       } else {
-        console.log('DocumentPicker Error: ', err);
+        console.error('DocumentPicker Error: ', err);
       }
     }
   }
 
   function handleSend() {
-    if (text.trim()) {
-      onSend(text, selectedFile);
+    if (text.trim() || selectedFile) {
+      const trimmedText = text.trim() || '';
+      onSend(trimmedText, selectedFile);
 
       setText('');
       setSelectedFile(null);

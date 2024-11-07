@@ -1,9 +1,6 @@
 import {
-  Avatar,
   Card,
   CopyButton,
-  CustomIcon,
-  InputField,
   ScreenLayout,
   TextButton,
   TextField,
@@ -11,9 +8,8 @@ import {
 } from '@/components';
 import {
   FlatList,
-  ScrollView,
   StyleSheet,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import {
@@ -21,13 +17,13 @@ import {
   MainStackNavigationType,
   User,
 } from '@/types';
-import { MainScreens, nameMaxLength } from '@/config';
 import { RouteProp, useNavigation } from '@react-navigation/native';
-import { createAvatar, getAvatar, pickAvatar } from '@/utils';
 import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-import { Header } from '../components/_navigation/header';
+import { Header } from 'react-native/Libraries/NewAppScreen';
+import { MainScreens } from '@/config';
+import { createAvatar } from '@/utils';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
@@ -46,6 +42,11 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const [groupName, setGroupName] = useState<string>(name); // route.params.name
   const tempAvatar = createAvatar();
   const isAdmin = false; // TBD
+  // const theme = useThemeStore((state) => state.theme);
+  // const [avatar, setAvatar] = useState<string | null>(null);
+  // const [groupName, setGroupName] = useState<string>(name); // route.params.name
+  // const tempAvatar = createAvatar();
+  // const isAdmin = false; // TBD
   const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room == roomKey,
   );
@@ -56,20 +57,20 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     });
   }, [name]);
 
-  function onNameInput(value: string) {
-    setGroupName(value);
-  }
+  // function onNameInput(value: string) {
+  //   setGroupName(value);
+  // }
 
-  async function onUploadAvatar() {
-    const base64 = await pickAvatar();
-    if (base64) {
-      // TODO
-    }
-  }
+  // async function onUploadAvatar() {
+  //   const base64 = await pickAvatar();
+  //   if (base64) {
+  //     // TODO
+  //   }
+  // }
 
-  async function onSave() {
-    // TODO
-  }
+  // async function onSave() {
+  //   // TODO
+  // }
 
   function OnlineUserMapper({ item }: { item: User }) {
     console.log(item);
@@ -90,7 +91,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
+      <View style={styles.scrollViewContainer}>
         <View style={styles.flatListContainer}>
           <FlatList
             nestedScrollEnabled={true}
@@ -100,14 +101,15 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
             keyExtractor={(item, i) => `${item.name}-${i}`}
           />
         </View>
+        <TouchableWithoutFeedback>
+          <Card>
+            <TextField size="xsmall">{inviteText}</TextField>
+          </Card>
+        </TouchableWithoutFeedback>
 
-        <Card>
-          <TextField>{inviteText}</TextField>
-        </Card>
         <CopyButton text={t('copyInvite')} data={inviteText} />
 
-        {/* Avatar Upload */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
           <Avatar base64={avatar ?? getAvatar(roomKey)} />
@@ -119,19 +121,21 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
               color={theme.accentForeground}
             />
           </View>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <InputField
+        {/* <InputField
           label={t('name')}
           value={groupName}
           onChange={onNameInput}
           maxLength={nameMaxLength}
-        />
-        <TextButton onPress={onSave}>{t('save')}</TextButton>
-        <TextButton onPress={onLeave} type="destructive">
-          {t('leaveGroup')}
-        </TextButton>
-      </ScrollView>
+        /> */}
+        {/* <TextButton onPress={onSave}>{t('save')}</TextButton> */}
+        <View style={styles.leaveContainer}>
+          <TextButton onPress={onLeave} type="destructive">
+            {t('leaveGroup')}
+          </TextButton>
+        </View>
+      </View>
     </ScreenLayout>
   );
 };
@@ -147,11 +151,15 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   flatListContainer: {
-    height: 200,
+    // height: 200,
     marginBottom: 12,
   },
   scrollViewContainer: {
     flexGrow: 1,
     paddingBottom: 20,
+  },
+  leaveContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
   },
 });

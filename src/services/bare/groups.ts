@@ -45,7 +45,7 @@ export const getRoomUsers = async () => {
 export const updateMessages = async (message: Message) => {
   // const theme = useThemeStore((state) => state.theme);
   const thisRoom = getCurrentRoom();
-  console.log(thisRoom);
+  console.log('-------------- updating messages', thisRoom);
 
   if (thisRoom === message.room) {
     const messages = getRoomsMessages();
@@ -99,6 +99,7 @@ export const onSendGroupMessageWithFile = (
   file: SelectedFile,
   message: string,
 ) => {
+  console.log('here 1', { key });
   const fileData: FileInput = {
     ...file,
     key,
