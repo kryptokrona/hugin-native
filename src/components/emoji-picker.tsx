@@ -1,5 +1,3 @@
-import { useMemo, useState } from 'react';
-
 import {
   Dimensions,
   FlatList,
@@ -9,14 +7,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import emojiDataByGroup from 'unicode-emoji-json/data-by-group.json'; // Importing the grouped emoji data
-
-import { useThemeStore } from '@/services';
-import { Styles } from '@/styles';
 import { Emoji, EmojiCategory } from '@/types';
+import { useMemo, useState } from 'react';
 
 import { CustomIcon } from './_elements/custom-icon';
+import { Styles } from '@/styles';
+import emojiDataByGroup from 'unicode-emoji-json/data-by-group.json'; // Importing the grouped emoji data
+import { useThemeStore } from '@/services';
 
 interface Props {
   hideActions: () => void;
@@ -46,14 +43,10 @@ export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
     );
   }, [category, filteredEmojis]);
 
-  function onEmojiPress() {
-    setOpen(true);
-  }
-
   function InitialEmojiMapper({ item }: { item: string }) {
     return (
       <TouchableOpacity
-        onPress={onEmojiPress}
+        onPress={() => emojiPressed(item)}
         style={[styles.initialEmojiItem, { backgroundColor }]}>
         <Text style={[styles.emojiText, { fontSize: 20 }]}>{item}</Text>
       </TouchableOpacity>
@@ -111,11 +104,10 @@ export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
   }
 
   function EmojiMapper({ item }: { item: Emoji }) {
-    function onEmojiPress() {
-      emojiPressed(item.emoji);
-    }
     return (
-      <TouchableOpacity onPress={onEmojiPress} style={[styles.emojiItem]}>
+      <TouchableOpacity
+        onPress={() => emojiPressed(item.emoji)}
+        style={[styles.emojiItem]}>
         <Text style={styles.emojiText}>{item.emoji}</Text>
       </TouchableOpacity>
     );

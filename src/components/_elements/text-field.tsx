@@ -1,8 +1,8 @@
 import { StyleSheet, Text } from 'react-native';
-
-import { useThemeStore } from '@/services';
 import { Styles, textType } from '@/styles';
+
 import type { ElementType } from '@/types';
+import { useThemeStore } from '@/services';
 
 type SizeType = 'xsmall' | 'small' | 'medium' | 'large';
 

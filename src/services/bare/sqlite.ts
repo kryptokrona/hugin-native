@@ -1,14 +1,13 @@
 import {
-  enablePromise,
-  openDatabase,
   ResultSet,
   SQLiteDatabase,
+  enablePromise,
+  openDatabase,
 } from 'react-native-sqlite-storage';
 
-import { Message } from 'types/p2p';
-
-import { getRoomUsers, updateMessages } from '@/services';
+import { Message } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
+import { setStoreRooms } from '../zustand';
 
 enablePromise(true);
 
@@ -82,7 +81,7 @@ export async function loadAccount() {
 export async function saveRoomToDatabase(
   name: string,
   key: string,
-  seed: string,
+  seed?: string,
 ) {
   console.log('Saving room ', name);
 
@@ -110,7 +109,6 @@ export async function removeRoomFromDatabase(key: string) {
     return false;
   }
   //Update active room list
-  getRoomUsers();
   return true;
 }
 
@@ -249,7 +247,7 @@ export async function getRoomRepliesToMessage(hash: string) {
   return replies;
 }
 
-export async function saveRoomsMessageToDatabase(
+export async function saveRoomsMessageToDatabaseSql(
   address: string,
   message: string,
   room: string,
@@ -267,7 +265,21 @@ export async function saveRoomsMessageToDatabase(
       [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
     );
     console.log('Epic win', result);
-    getRoomUsers();
+
+    const rooms = await getLatestRoomMessages();
+    const fixed = [];
+    for (const room of rooms) {
+      try {
+        const m = JSON.parse(room.message);
+        if (m?.fileName) {
+          room.message = m.fileName;
+        }
+        fixed.push(room);
+      } catch (e) {
+        fixed.push(room);
+      }
+    }
+    setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
 
     const newMessage: Message = {
       address: address,
@@ -281,22 +293,35 @@ export async function saveRoomsMessageToDatabase(
       timestamp: timestamp,
     };
 
-    updateMessages(newMessage);
+    return newMessage;
   } catch (err) {
     console.log(err);
   }
 }
 
+const deleteAllData = async () => {
+  try {
+    const results = await db.executeSql('DELETE FROM rooms');
+    console.log(results);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const toMessage = (res: any) => {
   const message: Message = {
     address: res.address,
+
     //Hash identifier of the message
     hash: res.hash,
+
     //Message
     message: res.message,
+
     //Nickname
     nickname: res.nickname,
 
+    // Emoji's on this message
     reactions: res.reactions ? res.reactions : [],
 
     //All the replies to this message

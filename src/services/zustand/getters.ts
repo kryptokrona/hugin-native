@@ -1,5 +1,3 @@
-// Only add getters that cannot be used in components directly
-
 import { useGlobalStore } from './global-store';
 
 export const getCurrentRoom = () => {

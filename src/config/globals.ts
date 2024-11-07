@@ -46,7 +46,7 @@
 
 // class Globals {
 //   wallet: any;
-//   pinCode: any;
+//   pincode: any;
 //   backgroundSaveTimer: any;
 //   coinPrice: number;
 //   syncingMessages: boolean;
@@ -108,7 +108,7 @@
 
 //   constructor() {
 //     this.wallet = undefined;
-//     this.pinCode = undefined;
+//     this.pincode = undefined;
 //     this.backgroundSaveTimer = undefined;
 //     this.coinPrice = 0;
 //     this.syncingMessages = false;
@@ -177,7 +177,7 @@
 
 //   async reset() {
 //     this.wallet = undefined;
-//     this.pinCode = undefined;
+//     this.pincode = undefined;
 //     this.backgroundSaveTimer = undefined;
 //     this.logger = new Logger();
 //     this.payees = [];

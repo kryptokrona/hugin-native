@@ -1,9 +1,10 @@
+import type { Message, Room, User } from '@/types';
+
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { Message, Room, User } from '@/types';
-
 type GlobalStore = {
+  authenticated: boolean;
   rooms: Room[];
   thisRoom: string;
   roomMessages: Message[];
@@ -12,6 +13,8 @@ type GlobalStore = {
   setRoomMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
   setRoomUserList: (payload: User[]) => void;
+  setAuthenticated: (payload: boolean) => void;
+  setStoreRooms: (payload: Room[]) => void;
 };
 
 export const useGlobalStore = create<
@@ -19,9 +22,12 @@ export const useGlobalStore = create<
   [['zustand/subscribeWithSelector', never]]
 >(
   subscribeWithSelector((set) => ({
+    authenticated: false,
+    rooms: [],
+    thisRoom: '',
     roomMessages: [],
     roomUsers: [],
-    rooms: [],
+
     setCurrentRoom: (thisRoom: string) => {
       set({ thisRoom });
     },
@@ -35,7 +41,25 @@ export const useGlobalStore = create<
     setRooms: (rooms: Room[]) => {
       set({ rooms });
     },
-
-    thisRoom: '',
+    setAuthenticated: (authenticated: boolean) => {
+      set({ authenticated });
+    },
+    setStoreRooms: async (rooms: Room[]) => {
+      set({ rooms });
+    },
   })),
 );
+
+// useGlobalStore.subscribe(
+//   (state) => state.authenticated,
+//   async (authenticated) => {
+//     if (authenticated) {
+//       const user = useUserStore.getState().user;
+//       await onAuthenticated(user);
+//     }
+//   },
+// );
+
+export const setAuthenticated = (authenticated: boolean) => {
+  useGlobalStore.setState({ authenticated });
+};

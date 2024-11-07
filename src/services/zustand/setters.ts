@@ -1,4 +1,5 @@
 import type { Message, Room, User } from '@/types';
+import { usePreferencesStore, useUserStore } from './async-storage-stores';
 
 import { useGlobalStore } from './global-store';
 
@@ -16,4 +17,24 @@ export const setStoreRoomMessages = (roomMessages: Message[]) => {
 
 export const setStoreActiveRoomUsers = (roomUsers: User[]) => {
   useGlobalStore.setState({ roomUsers });
+};
+
+export const updateLanguage = async (language: string) => {
+  usePreferencesStore.setState((state) => ({
+    ...state,
+    preferences: {
+      ...state.preferences,
+      language,
+    },
+  }));
+};
+
+export const updateUser = async (value: Partial<User>) => {
+  useUserStore.setState((state) => ({
+    ...state,
+    user: {
+      ...state.user,
+      ...value,
+    },
+  }));
 };

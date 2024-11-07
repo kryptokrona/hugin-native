@@ -1,5 +1,4 @@
-import React from 'react';
-
+import { Container, ScreenLayout, TextButton, TextField } from '@/components';
 import {
   Dimensions,
   FlatList,
@@ -7,20 +6,19 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-import { RouteProp } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
-import { Container, ScreenLayout, TextButton, TextField } from '@/components';
-import { SettingsScreens } from '@/config';
-import { useThemeStore } from '@/services';
+import type { MainNavigationParamList, Theme, ThemeBase } from '@/types';
 import { Styles, themes } from '@/styles';
-import type { SettingsStackParamList, Theme, ThemeBase } from '@/types';
+
+import { MainScreens } from '@/config';
+import React from 'react';
+import { RouteProp } from '@react-navigation/native';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<
-    SettingsStackParamList,
-    typeof SettingsScreens.ChangeThemeScreen
+    MainNavigationParamList,
+    typeof MainScreens.ChangeThemeScreen
   >;
 }
 const size = 26;

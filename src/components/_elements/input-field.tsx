@@ -1,13 +1,10 @@
-import { useState } from 'react';
-
 import { StyleSheet, TextInput, View } from 'react-native';
-
-import { useTranslation } from 'react-i18next';
-
-import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
 
 import { TextField } from './text-field';
+import { useState } from 'react';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   label: string;
@@ -15,9 +12,10 @@ interface Props {
   onChange: (value: string) => void;
   error?: boolean;
   errorText?: string;
-  // keyboardType?: 'default' | 'number-pad';
+  keyboardType?: 'default' | 'number-pad';
   maxLength?: number;
   onSubmitEditing?: () => void;
+  secure?: boolean;
 }
 
 export const InputField: React.FC<Props> = ({
@@ -28,7 +26,8 @@ export const InputField: React.FC<Props> = ({
   errorText,
   maxLength,
   onSubmitEditing,
-  // keyboardType = 'default',
+  keyboardType = 'default',
+  secure = false,
 }) => {
   const { t } = useTranslation();
   const [focus, setFocus] = useState(false);
@@ -55,6 +54,7 @@ export const InputField: React.FC<Props> = ({
         {label}
       </TextField>
       <TextInput
+        secureTextEntry={secure}
         returnKeyLabel={t('done')}
         returnKeyType={'done'}
         onSubmitEditing={onSubmitEditing}
@@ -62,14 +62,14 @@ export const InputField: React.FC<Props> = ({
         style={[styles.input, { backgroundColor, borderColor, color }]}
         value={value?.toString()}
         onChangeText={(text) => onChange(text)}
-        keyboardType={'default'}
+        keyboardType={keyboardType}
         maxLength={maxLength}
         onFocus={onFocus}
         onBlur={onBlur}
         {...commonInputProps}
       />
       {errorText && error && (
-        <TextField size="small" type="destructive">
+        <TextField size="xsmall" type="destructive">
           {errorText}
         </TextField>
       )}

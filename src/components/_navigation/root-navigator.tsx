@@ -1,29 +1,26 @@
+import { AuthNavigator, MainNavigator } from './_stacks';
+import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
+import { MainScreens, Stacks } from '@/config';
 import React, { useEffect } from 'react';
+import {
+  useAppStoreState,
+  useGlobalStore,
+  usePreferencesStore,
+} from '@/services';
 
 import { Linking } from 'react-native';
-
-import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import { GroupsScreens, Stacks, TabBar } from '@/config';
 import { RootStackParamList } from '@/types';
-
-import { AuthNavigator } from './_stacks';
-import { AppNavigator } from './app-navigator';
+import { SplashScreen } from '@/screens';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Stack = createNativeStackNavigator();
 
 const linking: LinkingOptions<RootStackParamList> = {
   config: {
     screens: {
-      [Stacks.AppStack]: {
+      [Stacks.MainStack]: {
         screens: {
-          [TabBar.GroupsTab.tabName]: {
-            screens: {
-              [GroupsScreens.AddGroupScreen]:
-                'join-group/:name/:roomKey/:joining',
-            },
-          },
+          [MainScreens.AddGroupScreen]: ':name/:roomKey',
         },
       },
     },
@@ -32,6 +29,11 @@ const linking: LinkingOptions<RootStackParamList> = {
 };
 
 export const RootNavigator = () => {
+  const hydrated = useAppStoreState((state) => state._hasHydrated);
+  const authenticated = useGlobalStore((state) => state.authenticated);
+  const authMethod = usePreferencesStore(
+    (state) => state.preferences?.authMethod,
+  );
   useEffect(() => {
     const handleDeepLink = (e: { url: string }) => {
       // console.log('Linking', e.url); // TODO
@@ -40,17 +42,34 @@ export const RootNavigator = () => {
     Linking.addEventListener('url', handleDeepLink);
   }, []);
 
+  if (!hydrated.preferences || !hydrated.user || !hydrated.theme) {
+    return (
+      <NavigationContainer>
+        <SplashScreen />
+      </NavigationContainer>
+    );
+  }
+
+  let initialRouteName = Stacks.AuthStack;
+  if (authenticated && authMethod) {
+    initialRouteName = Stacks.MainStack;
+  } else {
+    initialRouteName = Stacks.AuthStack;
+  }
+
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName={initialRouteName}
+        screenOptions={{ headerShown: false }}>
         <Stack.Screen
           name={Stacks.AuthStack}
           component={AuthNavigator}
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name={Stacks.AppStack}
-          component={AppNavigator}
+          name={Stacks.MainStack}
+          component={MainNavigator}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

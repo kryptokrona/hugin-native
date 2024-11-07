@@ -1,5 +1,14 @@
-import { useLayoutEffect, useMemo, useState } from 'react';
-
+import {
+  Avatar,
+  Card,
+  CopyButton,
+  CustomIcon,
+  InputField,
+  ScreenLayout,
+  TextButton,
+  TextField,
+  UserItem,
+} from '@/components';
 import {
   FlatList,
   ScrollView,
@@ -7,35 +16,31 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
+import {
+  MainNavigationParamList,
+  MainStackNavigationType,
+  User,
+} from '@/types';
+import { MainScreens, nameMaxLength } from '@/config';
 import { RouteProp, useNavigation } from '@react-navigation/native';
+import { createAvatar, getAvatar, pickAvatar } from '@/utils';
+import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
+import { useLayoutEffect, useMemo, useState } from 'react';
+
+import { Header } from '../components/_navigation/header';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Avatar,
-  Card,
-  CopyButton,
-  CustomIcon,
-  Header,
-  InputField,
-  ScreenLayout,
-  TextButton,
-  TextField,
-  UserItem,
-} from '@/components';
-import { GroupsScreens, nameMaxLength } from '@/config';
-import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
-import { GroupStackNavigationType, GroupStackParamList, User } from '@/types';
-import { createAvatar, pickAvatar } from '@/utils';
-
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.ModifyGroupScreen>;
+  route: RouteProp<
+    MainNavigationParamList,
+    typeof MainScreens.ModifyGroupScreen
+  >;
 }
 
 export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
-  const navigation = useNavigation<GroupStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const theme = useThemeStore((state) => state.theme);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [groupName, setGroupName] = useState<string>(name); // route.params.name
@@ -67,18 +72,21 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   function OnlineUserMapper({ item }: { item: User }) {
+    console.log(item);
     return <UserItem {...item} />;
   }
 
   function onLeave() {
     onDeleteGroup(roomKey);
-    navigation.navigate(GroupsScreens.GroupsScreen);
+    navigation.navigate(MainScreens.GroupsScreen);
   }
 
   const inviteText = useMemo(() => {
     const linkName = name.replace(/ /g, '-');
-    return `hugin://join-group/${linkName}/${roomKey}/true`;
+    return `hugin://${linkName}/${roomKey}`;
   }, [name, roomKey]);
+
+  console.log({ roomUsers });
 
   return (
     <ScreenLayout>
@@ -102,13 +110,13 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
-          <Avatar base64={avatar ?? undefined} address={roomKey} />
+          <Avatar base64={avatar ?? getAvatar(roomKey)} />
           <View style={styles.avatarButton}>
             <CustomIcon
               type="MI"
               name="mode-edit"
               size={20}
-              color={theme.primaryForeground}
+              color={theme.accentForeground}
             />
           </View>
         </TouchableOpacity>

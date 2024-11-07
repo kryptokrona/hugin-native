@@ -205,6 +205,7 @@
   "save": "Save",
   "updateProfile": "Update profile",
   "copyInvite": "Copy invite link",
+  "inviteLink": "Invite link", // EN only
   "done": "Done",
   "blockUser": "Block user",
   "copyText": "Copy text",
@@ -215,5 +216,13 @@
   "joinRoom": "Join room", // EN only
   "createRoom": "Create room", // EN only
   "createRoomDescr": "Create a new room", // EN only
-  "joinRoomDescr": "Join your friends room" // EN only
+  "joinRoomDescr": "Join your friends room", // EN only
+  "recklessMode": "Reckless mode", // EN only,
+  "pincode": "PIN code", // EN only
+  "bioMetric": "Biometric", // EN only
+  "createProfile": "Create profile", // EN only
+  "chooseNickname": "Choose a nickname", // EN only
+  "enterPin": "Enter your PIN",
+  "logout": "Log out", // EN only
+  "deleteUser": "Delete user" // EN only
 }

@@ -42,7 +42,7 @@ rpc.register(0, {
     const p = JSON.parse(data);
     switch (p.type) {
       case 'init_bare':
-        initBareMain(p.user, p.documentDirectoryPath);
+        initBareMain(p.user);
       case 'update_bare_user':
         updateBareUser(p.user);
         break;

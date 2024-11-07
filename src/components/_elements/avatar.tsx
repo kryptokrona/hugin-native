@@ -1,13 +1,12 @@
-import { useMemo } from 'react';
-
 import { Image, StyleSheet, View } from 'react-native';
 
 import { Styles } from '@/styles';
 import { getAvatar } from '@/utils';
+import { useMemo } from 'react';
 
 interface Props {
   base64?: string;
-  address?: string;
+  address?: string | null;
   size?: number;
 }
 

@@ -1,14 +1,3 @@
-import { useEffect, useMemo, useState } from 'react';
-
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useTranslation } from 'react-i18next';
-
-import { Message } from 'types/p2p';
-
-import { useThemeStore } from '@/services';
-import { getColorFromHash, prettyPrintDate } from '@/utils';
-
 import {
   Avatar,
   CopyButton,
@@ -17,8 +6,15 @@ import {
   TextButton,
   TextField,
 } from './_elements';
-import { ModalBottom, ModalCenter } from './_layout';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { getColorFromHash, prettyPrintDate } from '@/utils';
+import { useEffect, useMemo, useState } from 'react';
+
 import { EmojiPicker } from './emoji-picker';
+import { Message } from '@/types';
+import { ModalBottom } from './_layout';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props extends Partial<Message> {
   avatar: string;
@@ -44,7 +40,6 @@ export const GroupMessageItem: React.FC<Props> = ({
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
-  const [userModal, setUserVisible] = useState(false);
   const [actions, setActions] = useState(true);
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
@@ -109,32 +104,17 @@ export const GroupMessageItem: React.FC<Props> = ({
   }
 
   function onPressReaction(emoji: string) {
-    console.log('Pressed reaction!');
     onReaction(emoji!);
   }
 
-  function onPress() {
-    setUserVisible(true);
-  }
-
-  function onCloseUserModal() {
-    setUserVisible(false);
-  }
-
   useEffect(() => {
-    // Set actions visible onClose
     return () => {
       setActions(true);
     };
   }, []);
 
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onLongPress={handleLongPress}
-      onPress={onPress}
-      // onPressOut={}
-    >
+    <TouchableOpacity style={styles.container} onLongPress={handleLongPress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
         {actions && (
@@ -162,13 +142,6 @@ export const GroupMessageItem: React.FC<Props> = ({
           </View>
         )}
       </ModalBottom>
-
-      <ModalCenter visible={userModal} closeModal={onCloseUserModal}>
-        <Avatar base64={avatar} address={userAddress} size={100} />
-        <TextField style={{ marginTop: 20 }} size="large">
-          {name}
-        </TextField>
-      </ModalCenter>
       <View style={styles.content}>
         {replyto?.[0]?.nickname && (
           <View style={styles.replyContainer}>

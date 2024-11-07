@@ -10,41 +10,38 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
-import { GroupsScreens } from '@/config';
+import { MainScreens } from '@/config';
 import {
   joinAndSaveRoom,
   onRequestNewGroupKey,
   useUserStore,
 } from '@/services';
-import type { GroupStackNavigationType, GroupStackParamList } from '@/types';
+import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 interface Props {
-  route: RouteProp<GroupStackParamList, typeof GroupsScreens.AddGroupScreen>;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.AddGroupScreen>;
 }
 
-let admin: string = '';
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const { name: initialName, roomKey: initialKey, joining } = route.params;
-  const formattedName = initialName ? initialName.replace(/-/g, ' ') : null;
-  const navigation = useNavigation<GroupStackNavigationType>();
-  const [name, setName] = useState<string | null>(formattedName);
-  const [keyInput, setKeyInput] = useState<string | null>(initialKey ?? null);
+  const navigation = useNavigation<MainStackNavigationType>();
+  const [name, setName] = useState<string | null>(null);
   const { name: userName, address } = useUserStore((state) => state.user);
-  const continueText = joining ? t('joinRoom') : t('createRoom');
 
   async function onCreatePress() {
-    const roomKey = keyInput ?? (await generateKey());
-    if (roomKey && name) {
-      joinAndSaveRoom(roomKey, name, admin, address, userName);
+    const generated = await generateKey();
+    const admin = generated?.admin;
+
+    if (generated?.invite && name && address && admin) {
+      joinAndSaveRoom(generated.invite, name, address, userName, admin);
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
           routes: [
-            { name: GroupsScreens.GroupsScreen },
+            { name: MainScreens.GroupsScreen },
             {
-              name: GroupsScreens.GroupChatScreen,
-              params: { name, roomKey },
+              name: MainScreens.GroupChatScreen,
+              params: { name, roomKey: generated.invite },
             },
           ],
         }),
@@ -56,12 +53,9 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     try {
       const keys = await onRequestNewGroupKey();
       const [invite, seed] = JSON.parse(keys);
-      console.log('Invite key:', invite);
-      console.log('Admin seed:', seed);
+
       if (invite) {
-        // setKey(invite);
-        admin = seed;
-        return invite;
+        return { invite, admin: seed };
       }
     } catch (e) {
       console.error('Error create random group key', e);
@@ -72,59 +66,25 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     setName(value);
   }
 
-  function onKeyChange(value: string) {
-    setKeyInput(value);
-  }
-
-  useEffect(() => {
-    if (!joining) {
-      generateKey();
-    }
-  }, [joining]);
-
-  // useEffect(() => {
-  //   if (name !== initialName || roomKey !== initialKey) {
-  //     setIsJoiningExisting(false);
-  //   }
-  // }, [name, roomKey]);
-
   useEffect(() => {
     return () => {
       setName(null);
-      setKeyInput(null);
     };
   }, []);
 
   return (
     <ScreenLayout>
       <View>
-        <InputField label={t('name')} value={name} onChange={onNameChange} />
-        {joining && (
-          <InputField
-            label={t('messageKey')}
-            value={keyInput}
-            onChange={onKeyChange}
-          />
-        )}
-        {/* {!isJoiningExisting && (
-          <TextButton
-            small
-            type="secondary"
-            style={styles.generateButton}
-            onPress={onGeneratePress}>
-            {t('generate')}
-          </TextButton>
-        )} */}
+        <InputField
+          label={t('name')}
+          value={name}
+          onChange={onNameChange}
+          onSubmitEditing={onCreatePress}
+        />
         <TextButton disabled={!name} onPress={onCreatePress}>
-          {continueText}
+          {t('createRoom')}
         </TextButton>
       </View>
     </ScreenLayout>
   );
 };
-
-// const styles = StyleSheet.create({
-//   generateButton: {
-//     alignSelf: 'flex-start',
-//   },
-// });

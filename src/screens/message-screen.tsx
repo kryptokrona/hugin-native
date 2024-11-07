@@ -1,27 +1,26 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-
+import { Avatar, MessageInput, ScreenLayout } from '@/components';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-
+import type {
+  MainNavigationParamList,
+  MainStackNavigationType,
+  Message,
+} from '@/types';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
-import { Avatar, Header, MessageInput, ScreenLayout } from '@/components';
+import { Header } from '../components/_navigation/header';
 import { MessagesScreens } from '@/config';
-import type {
-  Message,
-  MessagesStackNavigationType,
-  MessagesStackParamList,
-} from '@/types';
 import { mockMessages } from '@/utils';
 
 interface Props {
   route: RouteProp<
-    MessagesStackParamList,
+    MainNavigationParamList,
     typeof MessagesScreens.MessageScreen
   >;
 }
 
 export const MessageScreen: React.FC<Props> = ({ route }) => {
-  const navigation = useNavigation<MessagesStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const { user } = route.params;
   const [messages, setMessages] = useState<Message[]>([]);
 

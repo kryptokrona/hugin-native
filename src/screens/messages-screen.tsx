@@ -9,21 +9,21 @@ import { Container, PreviewItem, ScreenLayout, TextField } from '@/components';
 import { MessagesScreens } from '@/config';
 import type {
   Message,
-  MessagesStackNavigationType,
-  MessagesStackParamList,
+  MainStackNavigationType,
+  MainNavigationParamList,
 } from '@/types';
 import { mockMessages } from '@/utils';
 
 interface Props {
   route: RouteProp<
-    MessagesStackParamList,
+    MainNavigationParamList,
     typeof MessagesScreens.MessagesScreen
   >;
 }
 
 export const MessagesScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const navigation = useNavigation<MessagesStackNavigationType>();
+  const navigation = useNavigation<MainStackNavigationType>();
   const [chats, setChats] = useState<Message[]>([]);
 
   useEffect(() => {
@@ -46,7 +46,9 @@ export const MessagesScreen: React.FC<Props> = () => {
       <FlatList
         data={chats}
         keyExtractor={(item, i) => `${item.hash}-${i}`}
-        renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
+        renderItem={({ item }) => (
+          <PreviewItem name={''} roomKey={''} {...item} onPress={onPress} />
+        )}
       />
     </ScreenLayout>
   );

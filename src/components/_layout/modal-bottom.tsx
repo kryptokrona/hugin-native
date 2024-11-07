@@ -6,8 +6,8 @@ import {
   View,
 } from 'react-native';
 
-import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
+import { useThemeStore } from '@/services';
 
 interface Props {
   visible: boolean;
@@ -42,8 +42,8 @@ export const ModalBottom: React.FC<Props> = ({
             style={[
               styles.inner,
               {
-                backgroundColor: theme.background,
-                borderColor: theme.border,
+                backgroundColor: theme.popover,
+                borderColor: theme.mutedForeground,
               },
             ]}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>

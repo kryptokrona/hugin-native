@@ -1,54 +1,83 @@
-import { FlatList } from 'react-native';
+import { Alert, FlatList } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import { SettingsScreens } from '@/config';
+import { MainScreens, Stacks } from '@/config';
 import type {
   CustomIconProps,
-  SettingsStackNavigationType,
-  SettingsStackParamList,
+  MainStackNavigationType,
+  MainNavigationParamList,
+  AuthStackNavigationType,
 } from '@/types';
+import { useTranslation } from 'react-i18next';
+import { useGlobalStore } from '@/services';
 
 interface Item {
   title: string;
   icon: CustomIconProps;
-  screen?: keyof typeof SettingsScreens;
+  screen?: MainScreens;
   function?: () => Promise<void>;
 }
 
 const items: Item[] = [
   {
     icon: { name: 'theme-light-dark', type: 'MCI' },
-    screen: SettingsScreens.ChangeThemeScreen,
+    screen: MainScreens.ChangeThemeScreen,
     title: 'changeTheme',
   },
   {
     icon: { name: 'globe', type: 'SLI' },
-    screen: SettingsScreens.ChangeLanguageScreen,
+    screen: MainScreens.ChangeLanguageScreen,
     title: 'changeLanguage',
   },
   {
     icon: { name: 'user-circle', type: 'FA6' },
-    screen: SettingsScreens.UpdateProfileScreen,
+    screen: MainScreens.UpdateProfileScreen,
     title: 'updateProfile',
   },
+  {
+    icon: { name: 'trash-2', type: 'FI' },
+    // screen: MainScreens.UpdateProfileScreen,
+    title: 'deleteUser',
+    function: async () => {
+      Alert.alert(
+        'Delete User',
+        'Are you sure you want to delete your account?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                // await  // TODO delete sql stuff, delete user and preferences in stores
+                console.log('User deleted successfully');
+              } catch (error) {
+                console.error('Failed to delete user:', error);
+              }
+            },
+          },
+        ],
+      );
+    },
+  },
 ];
+
 interface Props {
-  route: RouteProp<
-    SettingsStackParamList,
-    typeof SettingsScreens.SettingsScreen
-  >;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.SettingsScreen>;
 }
 export const SettingsScreen: React.FC<Props> = () => {
-  const navigation = useNavigation<SettingsStackNavigationType>();
+  // const { t } = useTranslation();
+  const navigation = useNavigation<MainStackNavigationType>();
+  const authNavigation = useNavigation<any>();
 
   const itemMapper = (item: Item) => {
     async function onPress() {
       if (item.function) {
         await item.function();
       } else if (item.screen) {
-        navigation.navigate(item.screen);
+        navigation.navigate(item.screen); // TODO
       }
     }
 
@@ -57,6 +86,11 @@ export const SettingsScreen: React.FC<Props> = () => {
     );
   };
 
+  async function onLogoutPress() {
+    useGlobalStore.setState({ authenticated: false });
+    authNavigation.navigate(Stacks.AuthStack);
+  }
+
   return (
     <ScreenLayout>
       <FlatList
@@ -64,6 +98,11 @@ export const SettingsScreen: React.FC<Props> = () => {
         keyExtractor={(item, i) => `${item.title}-${i}`}
         renderItem={({ item }) => itemMapper(item)}
       />
+      {/* <SettingsItem
+        title={t('logout')}
+        icon={{ name: 'exit-run', type: 'MCI' }}
+        onPress={onLogoutPress}
+      /> */}
     </ScreenLayout>
   );
 };
