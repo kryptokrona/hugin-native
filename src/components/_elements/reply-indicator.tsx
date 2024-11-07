@@ -1,9 +1,8 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useThemeStore } from '@/services';
-
 import { CustomIcon } from './custom-icon';
 import { TextField } from './text-field';
+import { useThemeStore } from '@/services';
 
 interface Props {
   toName: string;
@@ -26,7 +25,7 @@ export const ReplyIndicator: React.FC<Props> = ({ toName, onCloseReply }) => {
       </View>
 
       <TouchableOpacity onPress={onCloseReply} style={{ padding: 5 }}>
-        <CustomIcon name="close" type="FA" size={20} color={color} />
+        <CustomIcon name="close" type="IO" size={24} color={color} />
       </TouchableOpacity>
     </View>
   );
@@ -35,12 +34,11 @@ export const ReplyIndicator: React.FC<Props> = ({ toName, onCloseReply }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    borderRadius: 10,
-    borderWidth: 1,
+    borderTopWidth: 1,
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 8,
+    paddingHorizontal: 8,
   },
   textContainer: {
     alignItems: 'center',

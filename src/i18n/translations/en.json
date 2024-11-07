@@ -205,6 +205,7 @@
   "save": "Save",
   "updateProfile": "Update profile",
   "copyInvite": "Copy invite link",
+  "inviteLink": "Invite link", // EN only
   "done": "Done",
   "blockUser": "Block user",
   "copyText": "Copy text",

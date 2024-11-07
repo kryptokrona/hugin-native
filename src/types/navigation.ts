@@ -19,11 +19,12 @@ export type MainNavigationParamList = {
     name: string;
   };
   [MainScreens.ModifyGroupScreen]: { roomKey: string; name: string };
-  [MainScreens.AddGroupScreen]: {
-    roomKey?: string;
-    name?: string;
-    joining: boolean;
-  };
+  [MainScreens.AddGroupScreen]:
+    | {
+        roomKey?: string;
+        name?: string;
+      }
+    | undefined;
 };
 
 export type MainStackNavigationType =

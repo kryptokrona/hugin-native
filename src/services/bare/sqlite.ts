@@ -81,7 +81,7 @@ export async function loadAccount() {
 export async function saveRoomToDatabase(
   name: string,
   key: string,
-  seed: string,
+  seed?: string,
 ) {
   console.log('Saving room ', name);
 

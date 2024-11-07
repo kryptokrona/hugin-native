@@ -6,18 +6,20 @@ import {
   View,
 } from 'react-native';
 
-import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
+import { useThemeStore } from '@/services';
 
 interface Props {
   visible: boolean;
   closeModal: () => void;
   children: React.ReactNode;
+  style?: any;
 }
 
 export const ModalCenter: React.FC<Props> = ({
   visible,
   closeModal,
+  style,
   children,
 }) => {
   const theme = useThemeStore((state) => state.theme);
@@ -43,7 +45,8 @@ export const ModalCenter: React.FC<Props> = ({
               styles.inner,
               {
                 backgroundColor: theme.popover,
-                borderColor: theme.popoverForeground,
+                borderColor: theme.mutedForeground,
+                ...style,
               },
             ]}>
             {children}
@@ -56,7 +59,7 @@ export const ModalCenter: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   inner: {
-    alignItems: 'center',
+    // alignItems: 'center',
     borderRadius: Styles.borderRadius.large,
     borderWidth: 1,
     justifyContent: 'center',

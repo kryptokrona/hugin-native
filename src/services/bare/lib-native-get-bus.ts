@@ -27,6 +27,6 @@ export const sendSwarmMsg = async (
   return await send_swarm_msg(key, message, reply);
 };
 
-export const initSwarm = (hashKey: string, key: string, admin: string) => {
+export const initSwarm = (hashKey: string, key: string, admin?: string) => {
   return swarm(hashKey, key, admin);
 };

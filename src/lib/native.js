@@ -3,6 +3,7 @@
 import RPC from 'tiny-buffer-rpc';
 import ce from 'compact-encoding';
 import { requireNativeModule } from 'expo-modules-core';
+import { rpc_message } from './rpc';
 requireNativeModule('HelloBare').install();
 
 // forward bare's logs to console

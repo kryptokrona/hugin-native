@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
-
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-
-import { useTranslation } from 'react-i18next';
-import DocumentPicker, { types } from 'react-native-document-picker';
 import { CameraOptions, launchCamera } from 'react-native-image-picker';
-
-import { useThemeStore } from '@/services';
-import { Styles, commonInputProps } from '@/styles';
-import type { SelectedFile } from '@/types';
-
 import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
+import DocumentPicker, { types } from 'react-native-document-picker';
+import React, { useState } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { Styles, commonInputProps } from '@/styles';
+
+import type { SelectedFile } from '@/types';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;

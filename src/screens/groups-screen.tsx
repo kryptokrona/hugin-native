@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState } from 'react';
 
-import { FlatList, TouchableOpacity, View } from 'react-native';
+import { FlatList, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Container,
   CustomIcon,
+  InputField,
   ModalCenter,
   PreviewItem,
   ScreenLayout,
@@ -16,9 +17,12 @@ import {
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
+  joinAndSaveRoom,
+  onRequestNewGroupKey,
   setRoomMessages,
   setStoreCurrentRoom,
   useGlobalStore,
+  useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 import { Header } from '../components/_navigation/header';
@@ -30,9 +34,12 @@ interface Props {
 export const GroupsScreen: React.FC<Props> = () => {
   //TODO** rename Groups -> Rooms
   const { t } = useTranslation();
+  const user = useUserStore((state) => state.user);
   const navigation = useNavigation<MainStackNavigationType>();
   const rooms = useGlobalStore((state) => state.rooms);
   const [modalVisible, setModalVisible] = useState(false);
+  const [joining, setJoinVisible] = useState(false);
+  const [link, setLink] = useState('');
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -61,32 +68,63 @@ export const GroupsScreen: React.FC<Props> = () => {
 
   function onCloseModal() {
     setModalVisible(false);
+    setJoinVisible(false);
   }
 
-  function onJoinRoom() {
-    setModalVisible(false);
-    navigation.navigate(MainScreens.AddGroupScreen, {
-      joining: true,
-    });
+  function onJoinPress() {
+    setJoinVisible(true);
   }
 
   function onCreateRoom() {
     setModalVisible(false);
-    navigation.navigate(MainScreens.AddGroupScreen, {
-      joining: false,
-    });
+    navigation.navigate(MainScreens.AddGroupScreen);
+  }
+
+  function onInputChange(text: string) {
+    setLink(text);
+  }
+
+  function onJoinpress() {
+    const inviteKey = link.slice(-128);
+    const parse = link.split('hugin://')[1];
+    const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
+
+    if (inviteKey && roomName && user?.address) {
+      joinAndSaveRoom(inviteKey, roomName, user.address, user?.name);
+
+      setModalVisible(false);
+
+      navigation.navigate(MainScreens.GroupChatScreen, {
+        roomKey: inviteKey,
+        name: roomName,
+      });
+    }
   }
 
   return (
     <ScreenLayout>
       <ModalCenter visible={modalVisible} closeModal={onCloseModal}>
-        <View>
-          <TextField size="small">{t('createRoomDescr')}</TextField>
-          <TextButton onPress={onCreateRoom}>{t('createRoom')}</TextButton>
-          <View style={styles.divider} />
-          <TextField size="small">{t('joinRoomDescr')}</TextField>
-          <TextButton onPress={onJoinRoom}>{t('joinRoom')}</TextButton>
-        </View>
+        {joining && (
+          <View style={styles.inviteContainer}>
+            <InputField
+              label={t('inviteLink')}
+              value={link}
+              onChange={onInputChange}
+              onSubmitEditing={onJoinpress}
+            />
+            <TextButton onPress={onJoinpress}>{t('joinRoom')}</TextButton>
+          </View>
+        )}
+
+        {!joining && (
+          <View>
+            <TextField size="small">{t('createRoomDescr')}</TextField>
+            <TextButton onPress={onCreateRoom}>{t('createRoom')}</TextButton>
+            <View style={styles.divider} />
+            <TextField size="small">{t('joinRoomDescr')}</TextField>
+            <TextButton onPress={onJoinPress}>{t('joinRoom')}</TextButton>
+          </View>
+        )}
       </ModalCenter>
       {rooms.length === 0 && (
         <Container>
@@ -105,5 +143,8 @@ export const GroupsScreen: React.FC<Props> = () => {
 const styles = {
   divider: {
     marginVertical: 10,
+  },
+  inviteContainer: {
+    // backgroundColor: 'red',
   },
 };

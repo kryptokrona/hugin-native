@@ -20,7 +20,7 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       [Stacks.MainStack]: {
         screens: {
-          [MainScreens.AddGroupScreen]: 'join-group/:name/:roomKey/:joining',
+          [MainScreens.AddGroupScreen]: ':name/:roomKey',
         },
       },
     },

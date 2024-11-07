@@ -155,9 +155,9 @@ export const loadAdminKeys = async () => {
 export const joinAndSaveRoom = async (
   key: string,
   name: string,
-  admin: string,
   address: string,
   userName: string,
+  admin?: string,
 ) => {
   await initSwarm(naclHash(key), key, admin);
   console.log('Swarm launched');

@@ -23,7 +23,7 @@ import {
 } from '@/types';
 import { MainScreens, nameMaxLength } from '@/config';
 import { RouteProp, useNavigation } from '@react-navigation/native';
-import { createAvatar, pickAvatar } from '@/utils';
+import { createAvatar, getAvatar, pickAvatar } from '@/utils';
 import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
 import { useLayoutEffect, useMemo, useState } from 'react';
 
@@ -72,6 +72,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   function OnlineUserMapper({ item }: { item: User }) {
+    console.log(item);
     return <UserItem {...item} />;
   }
 
@@ -82,8 +83,10 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   const inviteText = useMemo(() => {
     const linkName = name.replace(/ /g, '-');
-    return `hugin://join-group/${linkName}/${roomKey}/true`;
+    return `hugin://${linkName}/${roomKey}`;
   }, [name, roomKey]);
+
+  console.log({ roomUsers });
 
   return (
     <ScreenLayout>
@@ -107,13 +110,13 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         <TouchableOpacity
           onPress={onUploadAvatar}
           style={styles.avatarContainer}>
-          <Avatar base64={avatar ?? undefined} address={roomKey} />
+          <Avatar base64={avatar ?? getAvatar(roomKey)} />
           <View style={styles.avatarButton}>
             <CustomIcon
               type="MI"
               name="mode-edit"
               size={20}
-              color={theme.primaryForeground}
+              color={theme.accentForeground}
             />
           </View>
         </TouchableOpacity>

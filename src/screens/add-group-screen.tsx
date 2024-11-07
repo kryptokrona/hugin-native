@@ -22,24 +22,18 @@ interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.AddGroupScreen>;
 }
 
-let admin: string = '';
 export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const { name: initialName, roomKey: initialKey, joining } = route.params;
-  const formattedName = initialName ? initialName.replace(/-/g, ' ') : null;
   const navigation = useNavigation<MainStackNavigationType>();
-  const [name, setName] = useState<string | null>(formattedName);
-  const [keyInput, setKeyInput] = useState<string | null>(initialKey ?? null);
+  const [name, setName] = useState<string | null>(null);
   const { name: userName, address } = useUserStore((state) => state.user);
-  const continueText = joining ? t('joinRoom') : t('createRoom');
 
   async function onCreatePress() {
-    console.log('here 1');
-    const roomKey = keyInput ?? (await generateKey());
-    console.log('here 2', roomKey);
-    if (roomKey && name && address) {
-      console.log({ roomKey, name, admin, address, userName });
-      joinAndSaveRoom(roomKey, name, admin, address, userName);
+    const generated = await generateKey();
+    const admin = generated?.admin;
+
+    if (generated?.invite && name && address && admin) {
+      joinAndSaveRoom(generated.invite, name, address, userName, admin);
       navigation.dispatch(
         CommonActions.reset({
           index: 1,
@@ -47,7 +41,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
             { name: MainScreens.GroupsScreen },
             {
               name: MainScreens.GroupChatScreen,
-              params: { name, roomKey },
+              params: { name, roomKey: generated.invite },
             },
           ],
         }),
@@ -57,15 +51,11 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
   async function generateKey() {
     try {
-      console.log('running here');
       const keys = await onRequestNewGroupKey();
       const [invite, seed] = JSON.parse(keys);
-      console.log('Invite key:', invite);
-      console.log('Admin seed:', seed);
+
       if (invite) {
-        // setKey(invite);
-        admin = seed;
-        return invite;
+        return { invite, admin: seed };
       }
     } catch (e) {
       console.error('Error create random group key', e);
@@ -76,26 +66,9 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
     setName(value);
   }
 
-  function onKeyChange(value: string) {
-    setKeyInput(value);
-  }
-
-  useEffect(() => {
-    if (!joining) {
-      generateKey();
-    }
-  }, [joining]);
-
-  // useEffect(() => {
-  //   if (name !== initialName || roomKey !== initialKey) {
-  //     setIsJoiningExisting(false);
-  //   }
-  // }, [name, roomKey]);
-
   useEffect(() => {
     return () => {
       setName(null);
-      setKeyInput(null);
     };
   }, []);
 
@@ -108,33 +81,10 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
           onChange={onNameChange}
           onSubmitEditing={onCreatePress}
         />
-        {joining && (
-          <InputField
-            label={t('messageKey')}
-            value={keyInput}
-            onChange={onKeyChange}
-            onSubmitEditing={onCreatePress}
-          />
-        )}
-        {/* {!isJoiningExisting && (
-          <TextButton
-            small
-            type="secondary"
-            style={styles.generateButton}
-            onPress={onGeneratePress}>
-            {t('generate')}
-          </TextButton>
-        )} */}
         <TextButton disabled={!name} onPress={onCreatePress}>
-          {continueText}
+          {t('createRoom')}
         </TextButton>
       </View>
     </ScreenLayout>
   );
 };
-
-// const styles = StyleSheet.create({
-//   generateButton: {
-//     alignSelf: 'flex-start',
-//   },
-// });

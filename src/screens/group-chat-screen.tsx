@@ -146,9 +146,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         data={messages}
         keyExtractor={(item: Message, i) => `${item.address}-${i}`}
         renderItem={({ item }) => {
-          // if (item.replyto) {
-          //   return <GroupMessageReplyItem />;
-          // } else {
           return (
             <GroupMessageItem
               message={item.message}
@@ -163,7 +160,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               replyto={item.replyto}
             />
           );
-          // }
         }}
         contentContainerStyle={styles.flatListContent}
         initialNumToRender={messages.length}

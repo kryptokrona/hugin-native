@@ -9,7 +9,7 @@ const neutral: ThemeBase = {
     card: '#0a0a0a',
     cardForeground: '#fafafa',
     destructive: '#fafafa',
-    destructiveForeground: '#7f1d1d',
+    destructiveForeground: '#dc2626',
     foreground: '#fafafa',
     input: '#262626',
     mode: 'dark',
