@@ -206,5 +206,11 @@
   "blockUser": "屏蔽用户",
   "copyText": "复制文本",
   "reply": "回复",
-  "leaveGroup": "退出群聊"
+  "leaveGroup": "退出群聊",
+  "themeDark": "黑色主题", 
+  "themeLight": "浅色主题", 
+  "joinRoom": "加入聊天室", 
+  "createRoom": "创建聊天室", 
+  "createRoomDescr": "创建一个新的聊天室", 
+  "joinRoomDescr": "加入已有的聊天室" 
 }
