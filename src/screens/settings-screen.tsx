@@ -36,32 +36,32 @@ const items: Item[] = [
     screen: MainScreens.UpdateProfileScreen,
     title: 'updateProfile',
   },
-  {
-    icon: { name: 'trash-2', type: 'FI' },
-    // screen: MainScreens.UpdateProfileScreen,
-    title: 'deleteUser',
-    function: async () => {
-      Alert.alert(
-        'Delete User',
-        'Are you sure you want to delete your account?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                // await  // TODO delete sql stuff, delete user and preferences in stores
-                console.log('User deleted successfully');
-              } catch (error) {
-                console.error('Failed to delete user:', error);
-              }
-            },
-          },
-        ],
-      );
-    },
-  },
+  // {
+  //   icon: { name: 'trash-2', type: 'FI' },
+  //   // screen: MainScreens.UpdateProfileScreen,
+  //   title: 'deleteUser',
+  //   function: async () => {
+  //     Alert.alert(
+  //       'Delete User',
+  //       'Are you sure you want to delete your account?',
+  //       [
+  //         { text: 'Cancel', style: 'cancel' },
+  //         {
+  //           text: 'Delete',
+  //           style: 'destructive',
+  //           onPress: async () => {
+  //             try {
+  //               // await  // TODO delete sql stuff, delete user and preferences in stores
+  //               console.log('User deleted successfully');
+  //             } catch (error) {
+  //               console.error('Failed to delete user:', error);
+  //             }
+  //           },
+  //         },
+  //       ],
+  //     );
+  //   },
+  // }, // TODO delete user in the future
 ];
 
 interface Props {
