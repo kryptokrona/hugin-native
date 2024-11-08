@@ -1,18 +1,15 @@
+import {
+  begin_send_file,
+  end_swarm,
+  group_random_key,
+  send_swarm_msg,
+  swarm,
+} from 'lib/native';
+
 import type { FileInput, Message, SelectedFile } from '@/types';
-import {
-  beginSendFile,
-  endSwarm,
-  groupRandomKey,
-  initSwarm,
-  sendSwarmMsg,
-} from './lib-native-get-bus';
 import { containsOnlyEmojis, sleep } from '@/utils';
-import {
-  getCurrentRoom,
-  getRoomsMessages,
-  setStoreCurrentRoom,
-  setStoreRoomMessages,
-} from '../zustand';
+
+import { naclHash, newKeyPair, randomKey } from './crypto';
 import {
   getLatestRoomMessages,
   getRoomMessages,
@@ -20,11 +17,18 @@ import {
   removeRoomFromDatabase,
   saveAccount,
   saveRoomToDatabase,
-  saveRoomsMessageToDatabaseSql,
+  saveRoomMessage,
 } from './sqlite';
-import { naclHash, newKeyPair, randomKey } from './crypto';
 
-export const getRoomUsers = async () => {
+import {
+  getCurrentRoom,
+  getRoomsMessages,
+  setStoreCurrentRoom,
+  setStoreRoomMessages,
+  setStoreRooms,
+} from '../zustand';
+
+export const setLatestRoomMessages = async () => {
   const rooms = await getLatestRoomMessages();
   const fixed = [];
   for (const room of rooms) {
@@ -39,13 +43,11 @@ export const getRoomUsers = async () => {
     }
   }
 
-  return rooms.sort((a, b) => b.timestamp - a.timestamp);
+  setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
 };
 
 export const updateMessages = async (message: Message) => {
-  // const theme = useThemeStore((state) => state.theme);
   const thisRoom = getCurrentRoom();
-  console.log('-------------- updating messages', thisRoom);
 
   if (thisRoom === message.room) {
     const messages = getRoomsMessages();
@@ -91,7 +93,7 @@ export const onSendGroupMessage = async (
   message: string,
   reply: string | null,
 ) => {
-  return await sendSwarmMsg(key, message, reply);
+  return await send_swarm_msg(key, message, reply);
 };
 
 export const onSendGroupMessageWithFile = (
@@ -106,22 +108,22 @@ export const onSendGroupMessageWithFile = (
     message,
   };
   const JSONfileData = JSON.stringify(fileData);
-  beginSendFile(JSONfileData);
+  begin_send_file(JSONfileData);
 };
 
 export const onRequestNewGroupKey = async () => {
-  const key = await groupRandomKey();
+  const key = await group_random_key();
   return key;
 };
 
 export const onDeleteGroup = async (key: string) => {
   await removeRoomFromDatabase(key);
-  await getRoomUsers();
+  await setLatestRoomMessages();
   onLeaveGroup(key);
 };
 
 export const onLeaveGroup = (key: string) => {
-  endSwarm(key);
+  end_swarm(key);
 };
 
 export const joinRooms = async () => {
@@ -137,7 +139,7 @@ export const joinRooms = async () => {
     const admin: string = key?.seed;
     await sleep(100);
     console.log('Joining room -->');
-    await initSwarm(naclHash(r.key), r.key, admin);
+    await swarm(naclHash(r.key), r.key, admin);
   }
 };
 
@@ -160,10 +162,10 @@ export const joinAndSaveRoom = async (
   userName: string,
   admin?: string,
 ) => {
-  await initSwarm(naclHash(key), key, admin);
+  await swarm(naclHash(key), key, admin);
   console.log('Swarm launched');
   await saveRoomToDatabase(name, key, admin);
-  await saveRoomsMessageToDatabaseSql(
+  await saveRoomMessageAndUpdate(
     address,
     'Joined room',
     key,
@@ -175,10 +177,9 @@ export const joinAndSaveRoom = async (
   );
   setRoomMessages(key, 0);
   setStoreCurrentRoom(key);
-  getRoomUsers();
 };
 
-export const saveRoomsMessageToDatabaseAndUpdateStore = async (
+export const saveRoomMessageAndUpdate = async (
   address: string,
   message: string,
   room: string,
@@ -188,7 +189,7 @@ export const saveRoomsMessageToDatabaseAndUpdateStore = async (
   hash: string,
   sent: boolean,
 ) => {
-  const newMessage = await saveRoomsMessageToDatabaseSql(
+  const newMessage = await saveRoomMessage(
     address,
     message,
     room,
@@ -202,6 +203,8 @@ export const saveRoomsMessageToDatabaseAndUpdateStore = async (
   if (newMessage) {
     updateMessages(newMessage);
   }
+
+  setLatestRoomMessages();
 };
 
 export const createUserAddress = async () => {

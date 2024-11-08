@@ -1,4 +1,5 @@
 import { PeerUser, User } from '@/types';
+
 import { getActiveRoomUsers, setStoreActiveRoomUsers } from '../zustand';
 
 export const peerConnected = (user: PeerUser) => {

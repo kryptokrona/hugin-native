@@ -34,6 +34,7 @@ export interface User {
   name: string;
   room: string;
   downloadDir?: string;
+  keys: object;
 }
 
 export interface PeerUser {

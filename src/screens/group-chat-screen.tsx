@@ -10,11 +10,12 @@ import {
   MessageInput,
   ScreenLayout,
 } from '@/components';
+import { MainScreens } from '@/config';
 import {
   useGlobalStore,
   useUserStore,
+  saveRoomMessageAndUpdate,
   onSendGroupMessageWithFile,
-  saveRoomsMessageToDatabaseAndUpdateStore,
   onSendGroupMessage,
 } from '@/services';
 import type {
@@ -23,9 +24,8 @@ import type {
   MainNavigationParamList,
   Message,
 } from '@/types';
-import { getAvatar } from '@/utils';
+
 import { Header } from '../components/_navigation/header';
-import { MainScreens } from '@/config';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -111,7 +111,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       );
       const save = JSON.parse(sent);
 
-      await saveRoomsMessageToDatabaseAndUpdateStore(
+      await saveRoomMessageAndUpdate(
         save.k,
         save.m,
         save.g,

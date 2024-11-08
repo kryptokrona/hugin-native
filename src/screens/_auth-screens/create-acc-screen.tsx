@@ -1,9 +1,10 @@
-import {
-  AuthMethods,
-  AuthStackNavigationType,
-  MainStackNavigationType,
-} from '@/types';
-import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
+import { useLayoutEffect, useState } from 'react';
+
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
 import {
   Card,
   Container,
@@ -13,7 +14,7 @@ import {
   TextButton,
   TextField,
 } from '@/components';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
   createUserAddress,
   useGlobalStore,
@@ -21,11 +22,10 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { useLayoutEffect, useState } from 'react';
+import { AuthMethods, AuthStackNavigationType } from '@/types';
 
 import { Header } from '../../components/_navigation/header';
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import { initDB } from '../../services/bare/sqlite';
 
 export const CreateAccScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -58,7 +58,7 @@ export const CreateAccScreen: React.FC = () => {
   async function onCreateProfile() {
     setLoading(true);
     // Save selected authentication method and pincode if applicable
-
+    await initDB();
     const address = await createUserAddress();
 
     useUserStore.setState((state) => ({
@@ -73,8 +73,8 @@ export const CreateAccScreen: React.FC = () => {
       ...state,
       preferences: {
         ...state.preferences,
-        pincode: authMethod === 'pincode' ? pincode : null,
         authMethod,
+        pincode: authMethod === 'pincode' ? pincode : null,
       },
     }));
 
@@ -102,7 +102,9 @@ export const CreateAccScreen: React.FC = () => {
     }
 
     if (authMethod === AuthMethods.reckless) {
-      mainNavigation.navigate(MainScreens.GroupsScreen);
+      mainNavigation.navigate(Stacks.MainStack, {
+        screen: MainScreens.GroupsScreen,
+      });
     }
   }
 
@@ -189,31 +191,31 @@ export const CreateAccScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  radioGroup: {
-    flexDirection: 'column',
-    marginVertical: 10,
-  },
+  pinContainer: {},
   radioButton: {
     flexDirection: 'row',
     // alignItems: 'center',
     marginBottom: 10,
   },
-  radioUnselected: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#999',
-    marginRight: 10,
+  radioGroup: {
+    flexDirection: 'column',
+    marginVertical: 10,
   },
   radioSelected: {
-    width: 20,
-    height: 20,
     borderRadius: 10,
+    height: 20,
     marginRight: 10,
+    width: 20,
   },
   radioText: {
     fontSize: 16,
   },
-  pinContainer: {},
+  radioUnselected: {
+    borderColor: '#999',
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 20,
+    marginRight: 10,
+    width: 20,
+  },
 });

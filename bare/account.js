@@ -10,6 +10,7 @@ class Account {
     this.downloadDir = '';
     this.sender = null;
     this.req = null;
+    this.keys = {};
   }
 
   init(data, sender, req) {
@@ -19,6 +20,7 @@ class Account {
     this.sender = sender;
     this.req = req;
     this.downloadDir = data.downloadDir;
+    this.keys = data.keys;
   }
 
   update(data) {

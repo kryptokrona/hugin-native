@@ -1,13 +1,5 @@
-const { send_message_history } = require('./native');
-
-const {
-  saveRoomsMessageToDatabaseAndUpdateStore,
-} = require('../services/bare/groups.ts');
-
-const {
-  peerConnected,
-  peerDisconncted,
-} = require('../services/bare/lib-native-req-bus.ts');
+import { peerConnected, peerDisconncted } from '@/services/bare/connections.ts';
+import { Account } from 'services/bare/globals';
 
 const rpc_message = async (m) => {
   const json = parse(m);
@@ -25,14 +17,14 @@ const rpc_message = async (m) => {
         //Get history from db
         //await db response here then send it back to bare
         console.log('GET MESSAGE HISTORY ---->');
-        send_message_history('Got history hehe', 'roomkey', 'tooadreess');
+        // send_message_history('Got history hehe', 'roomkey', 'tooadreess');
         break;
       case 'end-swarm':
         console.log('end-swarm!');
         break;
       case 'swarm-message':
         console.log('swarm-message!', json);
-        saveRoomsMessageToDatabaseAndUpdateStore(
+        saveRoomMessageAndUpdate(
           json.message.address,
           json.message.message,
           json.message.room,

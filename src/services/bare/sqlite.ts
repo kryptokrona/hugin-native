@@ -7,7 +7,6 @@ import {
 
 import { Message } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
-import { setStoreRooms } from '../zustand';
 
 enablePromise(true);
 
@@ -247,7 +246,7 @@ export async function getRoomRepliesToMessage(hash: string) {
   return replies;
 }
 
-export async function saveRoomsMessageToDatabaseSql(
+export async function saveRoomMessage(
   address: string,
   message: string,
   room: string,
@@ -266,21 +265,6 @@ export async function saveRoomsMessageToDatabaseSql(
     );
     console.log('Epic win', result);
 
-    const rooms = await getLatestRoomMessages();
-    const fixed = [];
-    for (const room of rooms) {
-      try {
-        const m = JSON.parse(room.message);
-        if (m?.fileName) {
-          room.message = m.fileName;
-        }
-        fixed.push(room);
-      } catch (e) {
-        fixed.push(room);
-      }
-    }
-    setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
-
     const newMessage: Message = {
       address: address,
       hash: hash,
@@ -292,7 +276,6 @@ export async function saveRoomsMessageToDatabaseSql(
       sent: sent,
       timestamp: timestamp,
     };
-
     return newMessage;
   } catch (err) {
     console.log(err);

@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState } from 'react';
 
-import { FlatList, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -18,13 +18,13 @@ import {
 import { MainScreens } from '@/config';
 import {
   joinAndSaveRoom,
-  onRequestNewGroupKey,
   setRoomMessages,
   setStoreCurrentRoom,
   useGlobalStore,
   useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
+
 import { Header } from '../components/_navigation/header';
 
 interface Props {
@@ -95,8 +95,8 @@ export const GroupsScreen: React.FC<Props> = () => {
       setModalVisible(false);
 
       navigation.navigate(MainScreens.GroupChatScreen, {
-        roomKey: inviteKey,
         name: roomName,
+        roomKey: inviteKey,
       });
     }
   }

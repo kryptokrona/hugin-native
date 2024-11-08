@@ -1,11 +1,14 @@
-import { getRoomUsers, joinRooms } from '../services/bare';
-import { useGlobalStore, useUserStore } from '@/services';
+import { useEffect } from 'react';
 
 import { SafeAreaView } from 'react-native';
+
 import { bare } from 'lib/native';
-import { initDB } from '../services/bare/sqlite';
+
+import { useGlobalStore, useUserStore } from '@/services';
 import { sleep } from '@/utils';
-import { useEffect } from 'react';
+
+import { setLatestRoomMessages, joinRooms } from '../services/bare';
+import { initDB, loadAccount } from '../services/bare/sqlite';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -13,16 +16,15 @@ interface AppProviderProps {
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authenticated = useGlobalStore((state) => state.authenticated);
-  const setStoreRooms = useGlobalStore((state) => state.setStoreRooms);
   const user = useUserStore((state) => state.user);
 
   async function init() {
-    await bare(user);
     await initDB();
+    const keys = await loadAccount();
+    user.keys = keys;
+    await bare(user);
+    await setLatestRoomMessages();
     await sleep(100);
-    const rooms = await getRoomUsers();
-    setStoreRooms(rooms);
-    // const acc = await loadAccount();
     await joinRooms();
   }
 

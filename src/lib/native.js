@@ -18,20 +18,6 @@ const mainRPC = rpc.register(0, {
   response: ce.string,
 });
 
-rpc.register(2, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: async (data) => {
-    const request = JSON.parse(data);
-    console.log('Got bare request', data);
-    switch (request.type) {
-      case 'get-priv':
-        const key = await getPrivKey();
-        return JSON.stringify(key);
-    }
-  },
-});
-
 // Right now we use a stream to send IPC messages.
 // This may need to be bidirectional if we send files etc.
 rpc.register(1, {
@@ -41,6 +27,17 @@ rpc.register(1, {
     stream.on('data', (a) => {
       rpc_message(a);
     });
+  },
+});
+
+rpc.register(2, {
+  request: ce.string,
+  response: ce.string,
+  onrequest: async (data) => {
+    const request = JSON.parse(data);
+    console.log('Got bare request', data);
+    switch (request.type) {
+    }
   },
 });
 
@@ -101,9 +98,3 @@ const wallet = async () => {
   // const wallet = await WalletBackend.createWallet(daemon, config);
   // console.log('Wallet!', wallet);
 };
-
-export async function getPrivKey() {
-  const keys = await loadAccount();
-  console.log('Got keys', keys);
-  return keys.secretKey;
-}

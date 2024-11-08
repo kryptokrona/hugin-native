@@ -267,10 +267,8 @@ const sign_admin_message = (dht_keys, admin) => {
 };
 
 async function sign_joined_message(dht_keys) {
-  const key = await Hugin.request({
-    type: 'get-priv',
-  });
-  const keys = create_keys_from_seed(key);
+  const key = Hugin.keys;
+  const keys = create_keys_from_seed(key.secretKey);
   return [
     keys.get().sign(dht_keys.get().publicKey).toString('hex'),
     keys.publicKey.toString('hex'),
