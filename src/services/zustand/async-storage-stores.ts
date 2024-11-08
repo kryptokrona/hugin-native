@@ -80,10 +80,6 @@ export const useUserStore = create<UserStore>()(
 useUserStore.subscribe(
   (state) => state.user,
   async (user) => {
-    if (!user) {
-      return;
-    }
-
     await update_bare_user(user);
   },
 );
@@ -171,6 +167,7 @@ export const defaultUser: User = {
       : RNFS.DocumentDirectoryPath, // TODO test this properly
   name: 'Anon',
   room: 'lobby',
+  keys: {},
 };
 
 export const getAuthMethod = () => {
