@@ -34,9 +34,7 @@ interface Props {
 export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
-  const [replyToMessageHash, setReplyToMessageHash] = useState<string | null>(
-    null,
-  );
+  const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { name: userName } = useUserStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
@@ -92,7 +90,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   async function onSend(
     text: string,
     file: SelectedFile | null,
-    reply: string | false = false,
+    reply: string,
   ) {
     if (file) {
       text = file.fileName;
@@ -121,7 +119,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         save.hash,
         true,
       );
-      setReplyToMessageHash(null);
+      setReplyToMessageHash('');
     }
   }
 
@@ -135,7 +133,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   function onCloseReplyPress() {
-    setReplyToMessageHash(null);
+    setReplyToMessageHash('');
   }
 
   return (
