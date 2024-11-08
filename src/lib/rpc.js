@@ -1,5 +1,5 @@
 import { peerConnected, peerDisconncted } from '@/services/bare/connections.ts';
-import { Account } from 'services/bare/globals';
+import { saveRoomMessageAndUpdate } from '@/services/bare';
 
 const rpc_message = async (m) => {
   const json = parse(m);
