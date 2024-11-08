@@ -268,7 +268,6 @@ const download_file = async (fileName, size, chat, key, room = false) => {
     (a) => a.fileName === fileName && a.chat === chat && a.key === key,
   );
   const active = active_beams.find((a) => a.key === key);
-  console.log('active file?', file);
   if (!active) {
     errorMessage("Can't download file, beam no longer active");
     return;
@@ -403,31 +402,28 @@ const remove_local_file = (fileName, chat, time) => {
   );
 };
 
+const update_remote_file = (fileName, chat, size, key, time) => {
+  const update = remoteFiles.find(
+    (a) => a.fileName === fileName && a.chat === chat && a.time === time,
+  );
+  if (update) {
+    update.key = key;
+  }
+};
+
 const add_remote_file = async (
   fileName,
   chat,
   size,
   key,
-  room = false,
+  room,
   hash,
   name,
+  time,
 ) => {
-  const time = Date.now();
-  const update = remoteFiles.some(
-    (a) => room && a.fileName === fileName && a.chat === chat,
-  );
-  let file = { chat, fileName, room, key, size, time, hash };
-  if (update) {
-    let updateFile = remoteFiles.find((a) => a.fileName === fileName);
-    updateFile.key = key;
-  } else {
-    remoteFiles.unshift(file);
-  }
-  console.log('Updated remte', remoteFiles);
-  if (update) {
-    return;
-  }
-  if (room) {
+  file = { fileName, chat, size, time, key, room, hash };
+  remoteFiles.unshift(file);
+  if (room)
     return await add_group_file(
       fileName,
       remoteFiles,
@@ -438,9 +434,7 @@ const add_remote_file = async (
       name,
       size,
     );
-  } else {
-    Hugin.send('remote-file-added', { chat, remoteFiles });
-  }
+  else Hugin.send('remote-file-added', { remoteFiles, chat });
 };
 
 const add_group_file = async (
@@ -454,7 +448,6 @@ const add_group_file = async (
   size,
 ) => {
   Hugin.send('room-remote-file-added', { chat, room, remoteFiles });
-  console.log('add_group_file', room);
   //If its not a image/video type or size out of bounds, return some message info about file.
   if (!check_if_image_or_video(fileName, size)) {
     const message = {
@@ -482,7 +475,6 @@ const remote_remote_file = (fileName, chat) => {
 };
 
 const start_download = async (file, chat, k, room) => {
-  console.log('start_download', room);
   let download = remoteFiles.find(
     (a) => a.fileName === file && a.chat === chat,
   );
@@ -588,6 +580,7 @@ const errorMessage = (message) => {
 module.exports = {
   add_local_file,
   add_remote_file,
+  update_remote_file,
   download_file,
   end_beam,
   new_beam,

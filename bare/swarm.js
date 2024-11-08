@@ -19,6 +19,7 @@ const {
   start_download,
   add_remote_file,
   add_local_file,
+  update_remote_file,
 } = require('./beam');
 const LOCAL_VOICE_STATUS_OFFLINE = [
   JSON.stringify({ topic: '', video: false, voice: false }),
@@ -222,7 +223,6 @@ const incoming_message = async (data, topic, connection, key) => {
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
-  console.log('Sanitized: ', message);
   Hugin.send('swarm-message', { message, topic });
 };
 
@@ -368,6 +368,8 @@ const check_data_message = async (data, connection, topic) => {
     }
   }
 
+  if (!con.joined) return 'Error';
+
   return false;
 };
 
@@ -398,6 +400,7 @@ const check_file_message = async (data, topic, address, name) => {
       active.key,
       data.hash,
       name,
+      data.time,
     );
 
     //Enable / disable auto downloading of image video audio here
@@ -408,6 +411,7 @@ const check_file_message = async (data, topic, address, name) => {
         hash: data.hash,
         size: data.size,
         key: topic,
+        time: data.time,
       };
       request_download(file);
     } else {
@@ -417,20 +421,18 @@ const check_file_message = async (data, topic, address, name) => {
   }
 
   if (data.type === 'download-request') {
-    console.log('Download request incoming:', data);
     const key = await start_upload(data, topic);
     send_file(data.fileName, data.size, address, key, true);
   }
 
   if (data.type === 'upload-ready') {
     if (data.info === 'file') {
-      console.log('Upload ready! -------->');
-      await add_remote_file(
+      update_remote_file(
         data.fileName,
         address,
         data.size,
         data.key,
-        active.key,
+        data.time,
       );
       console.log('Starting to download ----------->');
       start_download(data.fileName, address, data.key, active.key);

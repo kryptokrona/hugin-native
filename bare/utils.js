@@ -228,7 +228,7 @@ const sanitizeHtml = (data) => {
 //Check if it is an image or video with allowed type
 function check_if_image_or_video(path, size) {
   if (path === undefined) return false;
-  if (size >= 50000000) return false;
+  if (size >= 10000000) return false;
   const types = [
     '.png',
     '.jpg',
