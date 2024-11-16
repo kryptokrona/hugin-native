@@ -11,6 +11,8 @@ class Account {
     this.sender = null;
     this.req = null;
     this.keys = {};
+    this.bannedList = [];
+    this.block_list = [];
   }
 
   init(data, sender, req) {
@@ -27,6 +29,23 @@ class Account {
     this.name = data.name;
     this.address = data.address;
     this.avatar = data.avatar;
+  }
+
+  ban(address, topic) {
+    if (this.banned(address, topic)) return;
+    const ban = { address, topic };
+    this.bannedList.push(ban);
+    this.send('ban-user', ban);
+  }
+
+  banned(address, topic) {
+    return this.bannedList.some(
+      (a) => a.address === address && a.topic === topic,
+    );
+  }
+
+  blocked(address) {
+    return Hugin.block_list.some((a) => a.address === address);
   }
 
   send(type, data) {

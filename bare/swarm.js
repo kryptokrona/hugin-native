@@ -51,7 +51,7 @@ class Room {
       return;
     }
     this.swarm.on('connection', (connection, information) => {
-      new_connection(connection, topic, this.key, dht_keys);
+      new_connection(connection, topic, this.key, dht_keys, information);
     });
 
     this.discovery = this.swarm.join(hash, { client: true, server: true });
@@ -66,6 +66,8 @@ const create_swarm = async (hashkey, key) => {
   const connected = await room.join(hashkey);
   if (!connected) return;
 
+  const admin = is_admin(key);
+
   const active = {
     call: [],
     connections: [],
@@ -76,10 +78,11 @@ const create_swarm = async (hashkey, key) => {
     time: room.time,
     topic: room.topic,
     discovery: room.discovery,
+    admin: admin ? true : false,
   };
 
   active_swarms.push(active);
-  Hugin.send('new-swarm', { connected, key });
+  Hugin.send('new-swarm', { connected, key, admin });
   check_if_online(room.topic);
 
   process.once('SIGINT', function () {
@@ -93,7 +96,7 @@ const create_swarm = async (hashkey, key) => {
   return room.topic;
 };
 
-const new_connection = (connection, topic, key, dht_keys) => {
+const new_connection = (connection, topic, key, dht_keys, peer) => {
   console.log('New connection incoming');
   const active = get_active_topic(topic);
 
@@ -114,7 +117,7 @@ const new_connection = (connection, topic, key, dht_keys) => {
   });
   send_joined_message(topic, dht_keys);
   connection.on('data', async (data) => {
-    incoming_message(data, topic, connection, key);
+    incoming_message(data, topic, connection, peer);
   });
 
   connection.on('close', () => {
@@ -204,7 +207,7 @@ const send_swarm_message = (message, topic) => {
   console.log('Swarm msg sent!');
 };
 
-const incoming_message = async (data, topic, connection, key) => {
+const incoming_message = async (data, topic, connection, peer) => {
   const str = data.toString();
   if (str === 'Ping') {
     return;
@@ -212,7 +215,9 @@ const incoming_message = async (data, topic, connection, key) => {
   // Check
   const check = await check_data_message(str, connection, topic);
   if (check === 'Ban') {
-    ban_connection(connection, topic);
+    console.log('Banned connection');
+    peer.ban(true);
+    connection_closed(connection, topic);
     return;
   }
   if (check === 'Error') {
@@ -305,6 +310,13 @@ const check_data_message = async (data, connection, topic) => {
         return true;
       }
 
+      if (active.key !== joined.message) return 'Ban';
+
+      if (Hugin.banned(data.address, topic)) {
+        if (active.admin) admin_ban_user(data.address, active.key);
+        else ban_user(data.address, topic);
+      }
+
       const admin = verify_signature(
         connection.remotePublicKey,
         Buffer.from(data.signature, 'hex'),
@@ -369,6 +381,23 @@ const check_data_message = async (data, connection, topic) => {
   }
 
   if (!con.joined) return 'Error';
+
+  if ('type' in data) {
+    if (data.type === 'ban') {
+      if (data.address === Hugin.address && con.admin) {
+        Hugin.send('banned', active.key);
+        Hugin.send('remove-room', active.key);
+        await sleep(777);
+        end_swarm(topic);
+        return;
+      }
+      if (con.admin) ban_user(data.address, topic);
+      else return 'Error';
+      return true;
+    }
+  }
+  //Dont display messages from blocked users
+  if (Hugin.blocked(address)) return;
 
   return false;
 };
@@ -715,6 +744,27 @@ const check_if_online = (topic) => {
       active.connections.forEach((a) => a.connection.write('Ping'));
     }
   }
+};
+
+const admin_ban_user = async (address, key) => {
+  const active = get_active(key);
+  if (!active) return;
+  active.connections.forEach((chat) => {
+    chat.connection.write(JSON.stringify({ type: 'ban', address }));
+  });
+  await sleep(200);
+  ban_user(address, active.topic);
+};
+
+const ban_user = async (address, topic) => {
+  const active = get_active_topic(topic);
+  if (!active) return;
+  Hugin.ban(address, topic);
+  const conn = active.connections.find((a) => a.address === address);
+  if (conn) return;
+  conn.peer.ban(true);
+  await sleep(200);
+  connection_closed(conn.connection, topic);
 };
 
 const error_message = (message) => {

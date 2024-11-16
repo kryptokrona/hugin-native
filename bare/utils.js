@@ -80,6 +80,12 @@ const sanitize_join_swarm_data = (data) => {
   if (typeof idPub !== 'string' || idPub.length > 64) return false;
   const idSig = data.idSig;
   if (typeof idSig !== 'string' || idSig.length > 128) return false;
+  const audioMute = data?.audioMute;
+  if (typeof audioMute !== 'boolean') return false;
+  const videoMute = data?.videoMute;
+  if (typeof videoMute !== 'boolean') return false;
+  const screenshare = data?.screenshare;
+  if (typeof screenshare !== 'boolean') return false;
 
   const channels = [];
 
@@ -96,6 +102,9 @@ const sanitize_join_swarm_data = (data) => {
     time: time,
     idSig,
     idPub,
+    audioMute,
+    videoMute,
+    screenshare,
   };
 
   return clean_object;
@@ -151,6 +160,12 @@ const sanitize_voice_status_data = (data) => {
   if (typeof voice !== 'boolean') return false;
   const video = data.video;
   if (typeof video !== 'boolean') return false;
+  const audioMute = data?.audioMute;
+  if (typeof audioMute !== 'boolean') return false;
+  const videoMute = data?.videoMute;
+  if (typeof videoMute !== 'boolean') return false;
+  const screenshare = data?.screenshare;
+  if (typeof screenshare !== 'boolean') return false;
 
   const clean_object = {
     address: address,
@@ -160,6 +175,9 @@ const sanitize_voice_status_data = (data) => {
     name: name,
     voice: voice,
     video: video,
+    audioMute,
+    videoMute,
+    screenshare,
   };
 
   return clean_object;
