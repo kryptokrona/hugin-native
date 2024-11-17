@@ -1,10 +1,8 @@
 const ce = require('compact-encoding');
 class Account {
   constructor() {
-    //Random test data
-    this.name = 'nils';
-    this.address =
-      'SEKReTXy5NuZNf9259RRXDR3PsM5r1iKe2sgkDV5QU743f4FspoVAnY4TfRPLBMpCA1HQgZVnmZafQTraoYsS9K41iePDjPZbme';
+    this.name = '';
+    this.address = '';
     this.avatar = '';
     this.rooms = [];
     this.downloadDir = '';
@@ -12,7 +10,7 @@ class Account {
     this.req = null;
     this.keys = {};
     this.bannedList = [];
-    this.block_list = [];
+    this.blockList = [];
   }
 
   init(data, sender, req) {
@@ -44,8 +42,13 @@ class Account {
     );
   }
 
+  block(address) {
+    if (this.blocked(address)) return;
+    this.blockList.push(address);
+  }
+
   blocked(address) {
-    return Hugin.block_list.some((a) => a.address === address);
+    return this.blockList.some((a) => a.address === address);
   }
 
   send(type, data) {
