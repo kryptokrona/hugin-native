@@ -21,9 +21,14 @@ const {
   add_local_file,
   update_remote_file,
 } = require('./beam');
-const LOCAL_VOICE_STATUS_OFFLINE = [
-  JSON.stringify({ topic: '', video: false, voice: false }),
-];
+const LOCAL_VOICE_STATUS_OFFLINE = {
+  voice: false,
+  video: false,
+  topic: '',
+  videoMute: false,
+  audioMute: false,
+  screenshare: false,
+};
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
@@ -166,7 +171,8 @@ const send_joined_message = async (topic, dht_keys) => {
   if (admin) {
     sig = sign_admin_message(dht_keys, admin);
   }
-  let [voice, video] = get_local_voice_status(topic);
+  let [voice, video, audioMute, videoMute, screenshare] =
+    get_local_voice_status(topic);
   if (video) {
     voice = true;
   }
@@ -185,6 +191,9 @@ const send_joined_message = async (topic, dht_keys) => {
     voice: voice,
     idPub,
     idSig,
+    audioMute,
+    videoMute,
+    screenshare,
   });
 
   send_swarm_message(data, topic);
@@ -666,7 +675,7 @@ const end_swarm = async (topic) => {
 
 const update_local_voice_channel_status = (data) => {
   const updated = data;
-  active_voice_channel = [updated];
+  active_voice_channel = updated;
   return true;
 };
 
@@ -705,24 +714,9 @@ const update_voice_channel_status = (data, con) => {
 };
 
 const get_local_voice_status = (topic) => {
-  let voice = false;
-  let video = false;
-  let channel;
-  //We do this bc stringified data is set locally from the status messages.
-  //This can change
-  try {
-    channel = JSON.parse(active_voice_channel[0]);
-    if (channel.topic !== topic) {
-      return [false, false];
-    }
-  } catch (e) {
-    return [false];
-  }
-
-  voice = channel.voice;
-  video = channel.video;
-
-  return [voice, video, topic];
+  const c = active_voice_channel;
+  if (c.topic !== topic) return [false, false, false, false, false];
+  return [c.voice, c.video, c.audioMute, c.videoMute, c.screenshare];
 };
 
 const get_active_topic = (topic) => {
