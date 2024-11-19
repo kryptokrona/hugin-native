@@ -75,7 +75,6 @@ find_library(android-log log)
 
 # linking
 
-message("Linking.... --------->")
 target_link_libraries(
   ${PACKAGE_NAME}
   # react-native
