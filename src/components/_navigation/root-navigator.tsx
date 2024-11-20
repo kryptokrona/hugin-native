@@ -1,17 +1,21 @@
-import { AuthNavigator, MainNavigator } from './_stacks';
-import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
-import { MainScreens, Stacks } from '@/config';
 import React, { useEffect } from 'react';
+
+import { Linking } from 'react-native';
+
+import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import { MainScreens, Stacks } from '@/config';
+import { SplashScreen } from '@/screens';
 import {
   useAppStoreState,
   useGlobalStore,
   usePreferencesStore,
+  useUserStore,
 } from '@/services';
-
-import { Linking } from 'react-native';
 import { RootStackParamList } from '@/types';
-import { SplashScreen } from '@/screens';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import { AuthNavigator, MainNavigator } from './_stacks';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +35,7 @@ const linking: LinkingOptions<RootStackParamList> = {
 export const RootNavigator = () => {
   const hydrated = useAppStoreState((state) => state._hasHydrated);
   const authenticated = useGlobalStore((state) => state.authenticated);
+  const user = useUserStore((state) => state.user);
   const authMethod = usePreferencesStore(
     (state) => state.preferences?.authMethod,
   );
@@ -51,7 +56,7 @@ export const RootNavigator = () => {
   }
 
   let initialRouteName = Stacks.AuthStack;
-  if (authenticated && authMethod) {
+  if (authenticated && authMethod && user?.address.length >= 64) {
     initialRouteName = Stacks.MainStack;
   } else {
     initialRouteName = Stacks.AuthStack;
