@@ -25,7 +25,7 @@ interface Props {
 
 export const UpdateProfileScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  const theme = useThemeStore((state) => state.theme);
+  // const theme = useThemeStore((state) => state.theme);
   const navigation = useNavigation<MainStackNavigationType>();
   const { name, avatar, address } = useUserStore((state) => state.user);
   const [value, setValue] = useState<string>(name);
@@ -39,18 +39,18 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     navigation.goBack();
   };
 
-  async function onUpdateAvatar() {
-    const base64 = await pickAvatar();
-    if (base64) {
-      await updateUser({ avatar: base64 });
-    }
-  }
+  // async function onUpdateAvatar() {
+  //   const base64 = await pickAvatar();
+  //   if (base64) {
+  //     await updateUser({ avatar: base64 });
+  //   }
+  // }
 
   return (
     <ScreenLayout>
       <View style={styles.container}>
         <View style={styles.top}>
-          <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
+          {/* <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
             <Avatar base64={avatar} address={address} size={70} />
             <View style={styles.avatarButton}>
               <CustomIcon
@@ -60,7 +60,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
                 color={theme.primary}
               />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <InputField
             label={t('name')}
             value={value}

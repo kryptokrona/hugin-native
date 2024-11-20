@@ -2,8 +2,12 @@ import React, { useLayoutEffect } from 'react';
 import { View, Alert } from 'react-native';
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import { TextButton, Pincode, ScreenLayout } from '@/components';
-import { AuthScreens } from '@/config';
-import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
+import { AuthScreens, MainScreens, Stacks } from '@/config';
+import type {
+  AuthStackParamList,
+  AuthStackNavigationType,
+  MainStackNavigationType,
+} from '@/types';
 import { usePreferencesStore } from '@/services';
 
 interface Props {
@@ -12,6 +16,7 @@ interface Props {
 
 export const RequestPinScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<AuthStackNavigationType>();
+  const mainNavigation = useNavigation<MainStackNavigationType>();
   const pincode = usePreferencesStore((state) => state.preferences?.pincode);
 
   useLayoutEffect(() => {
@@ -19,7 +24,11 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
   }, [navigation]);
 
   const finishProcess = () => {
-    route.params?.finishFunction?.();
+    if (route.params?.finishFunction) {
+      route.params.finishFunction();
+    } else {
+      mainNavigation.navigate(Stacks.MainStack); // TODO fix type
+    }
   };
 
   const handleForgotPin = () => {

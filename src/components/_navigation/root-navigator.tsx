@@ -60,8 +60,6 @@ export const RootNavigator = () => {
     user.address.length >= 64
   ) {
     initialRouteName = Stacks.MainStack;
-  } else {
-    initialRouteName = Stacks.AuthStack;
   }
 
   return (
