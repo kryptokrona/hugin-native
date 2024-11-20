@@ -57,7 +57,7 @@ export const CreateAccScreen: React.FC = () => {
 
   async function onCreateProfile() {
     setLoading(true);
-    await initDB(true);
+    await initDB();
     const address = await createUserAddress();
 
     useUserStore.setState((state) => ({

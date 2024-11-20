@@ -17,7 +17,7 @@ export const getDBConnection = async () => {
 
 let create = false;
 
-export const initDB = async (init = false) => {
+export const initDB = async () => {
   console.log('Initializing database..2');
   try {
     if (create) {
