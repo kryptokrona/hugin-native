@@ -8,7 +8,7 @@ import type {
   AuthStackNavigationType,
   MainStackNavigationType,
 } from '@/types';
-import { usePreferencesStore } from '@/services';
+import { setAuthenticated, usePreferencesStore } from '@/services';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.RequestPinScreen>;
@@ -18,12 +18,12 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<MainStackNavigationType>();
   const pincode = usePreferencesStore((state) => state.preferences?.pincode);
-
   useLayoutEffect(() => {
     navigation.setOptions({ title: '' });
   }, [navigation]);
 
   const finishProcess = () => {
+    setAuthenticated(true);
     if (route.params?.finishFunction) {
       route.params.finishFunction();
     } else {

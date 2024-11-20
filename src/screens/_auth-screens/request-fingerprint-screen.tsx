@@ -5,12 +5,13 @@ import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
 import { TextButton, ScreenLayout } from '@/components';
-import { AuthScreens, MainScreens, Stacks } from '@/config';
+import { AuthScreens, Stacks } from '@/config';
 import type {
   AuthStackParamList,
   AuthStackNavigationType,
   MainStackNavigationType,
 } from '@/types';
+import { setAuthenticated } from '@/services';
 
 interface Props {
   route: RouteProp<
@@ -24,6 +25,7 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   const mainNavigation = useNavigation<MainStackNavigationType>();
 
   const finishProcess = () => {
+    setAuthenticated(true);
     if (route.params?.finishFunction) {
       route.params.finishFunction();
     } else {

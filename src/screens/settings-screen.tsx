@@ -36,6 +36,7 @@ const items: Item[] = [
     screen: MainScreens.UpdateProfileScreen,
     title: 'updateProfile',
   },
+
   // {
   //   icon: { name: 'trash-2', type: 'FI' },
   //   // screen: MainScreens.UpdateProfileScreen,

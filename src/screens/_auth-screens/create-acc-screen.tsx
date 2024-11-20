@@ -54,7 +54,6 @@ export const CreateAccScreen: React.FC = () => {
 
   async function onCreateProfile() {
     setLoading(true);
-    // Save selected authentication method and pincode if applicable
     await initDB();
     const address = await createUserAddress();
 
@@ -75,7 +74,6 @@ export const CreateAccScreen: React.FC = () => {
       },
     }));
 
-    console.log({ authMethod });
     useGlobalStore.getState().setAuthenticated(true);
 
     if (authMethod === AuthMethods.pincode) {
@@ -123,7 +121,8 @@ export const CreateAccScreen: React.FC = () => {
       </View>
 
       <Card>
-        <TextField size="small">{t('enablePin')}</TextField>
+        {/* // TODO translation */}
+        <TextField size="small">{'Auth method'}</TextField>
         <View style={styles.radioGroup}>
           <TouchableOpacity
             style={styles.radioButton}
@@ -172,7 +171,7 @@ export const CreateAccScreen: React.FC = () => {
         </View>
 
         {authMethod === 'pincode' && (
-          <View style={styles.pinContainer}>
+          <View>
             <Pincode onFinish={onEnterPin} />
           </View>
         )}
@@ -188,7 +187,6 @@ export const CreateAccScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  pinContainer: {},
   radioButton: {
     flexDirection: 'row',
     // alignItems: 'center',

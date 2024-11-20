@@ -1,14 +1,11 @@
-import { useEffect } from 'react';
+import { initDB, loadAccount } from '../services/bare/sqlite';
+import { joinRooms, setLatestRoomMessages } from '../services/bare';
+import { useGlobalStore, useUserStore } from '@/services';
 
 import { SafeAreaView } from 'react-native';
-
 import { bare } from 'lib/native';
-
-import { useGlobalStore, useUserStore } from '@/services';
 import { sleep } from '@/utils';
-
-import { setLatestRoomMessages, joinRooms } from '../services/bare';
-import { initDB, loadAccount } from '../services/bare/sqlite';
+import { useEffect } from 'react';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -29,10 +26,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   useEffect(() => {
-    if (authenticated) {
+    if (authenticated && user?.address) {
+      console.log('running authenticated');
       init();
     }
-  }, [authenticated, user]);
+  }, [authenticated, user?.address]);
 
   return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>;
 };
