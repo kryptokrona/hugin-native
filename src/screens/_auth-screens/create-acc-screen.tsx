@@ -40,10 +40,13 @@ export const CreateAccScreen: React.FC = () => {
   const [authMethod, setAuthMethod] = useState<AuthMethods>(
     AuthMethods.reckless,
   );
-  const [pincode, setPincode] = useState<string | null>(null);
+  const [pincode, setPincode] = useState<string>('');
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const nameError = !name || name.length === 0;
+
+  const pinError = (authMethod === 'pincode' && pincode.length < 6);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -56,9 +59,6 @@ export const CreateAccScreen: React.FC = () => {
   }
 
   async function onCreateProfile() {
-    if (authMethod === 'pincode' && pincode && pincode.length !== 6) {
-      return;
-    }
     setLoading(true);
     await initDB();
     const address = await createUserAddress();
@@ -147,7 +147,10 @@ export const CreateAccScreen: React.FC = () => {
 
           <TouchableOpacity
             style={styles.radioButton}
-            onPress={() => setAuthMethod(AuthMethods.pincode)}>
+            onPress={() => {
+              setAuthMethod(AuthMethods.pincode);
+               setPincode('');
+               }}>
             <View
               style={
                 authMethod === AuthMethods.pincode
@@ -182,9 +185,10 @@ export const CreateAccScreen: React.FC = () => {
           </View>
         )}
       </Card>
-
+      
       <Container bottom>
-        <TextButton onPress={onCreateProfile} disabled={loading || nameError}>
+        
+        <TextButton onPress={onCreateProfile} disabled={loading || nameError || pinError }>
           {t('createProfile')}
         </TextButton>
       </Container>
