@@ -5,7 +5,7 @@ import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
 import { TextButton, ScreenLayout } from '@/components';
-import { AuthScreens, MainScreens } from '@/config';
+import { AuthScreens, MainScreens, Stacks } from '@/config';
 import type {
   AuthStackParamList,
   AuthStackNavigationType,
@@ -21,13 +21,13 @@ interface Props {
 
 export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<AuthStackNavigationType>();
-  const mainNavigator = useNavigation<MainStackNavigationType>();
+  const mainNavigation = useNavigation<MainStackNavigationType>();
 
   const finishProcess = () => {
     if (route.params?.finishFunction) {
       route.params.finishFunction();
     } else {
-      mainNavigator.navigate(MainScreens.GroupsScreen);
+      mainNavigation.navigate(Stacks.MainStack); // TODO fix type
     }
   };
 
