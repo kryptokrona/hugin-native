@@ -88,9 +88,9 @@ export const GroupsScreen: React.FC<Props> = () => {
     const inviteKey = link.slice(-128);
     const parse = link.split('hugin://')[1];
     const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
-
-    if (inviteKey && roomName && user?.address) {
-      joinAndSaveRoom(inviteKey, roomName, user.address, user?.name);
+    const originalName = roomName.replace(/-/g, ' ');
+    if (inviteKey && originalName && user?.address) {
+      joinAndSaveRoom(inviteKey, originalName, user.address, user?.name);
 
       setModalVisible(false);
 
