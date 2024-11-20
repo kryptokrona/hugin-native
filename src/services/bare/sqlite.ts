@@ -11,18 +11,18 @@ import { containsOnlyEmojis } from '@/utils';
 enablePromise(true);
 
 let db: SQLiteDatabase;
-
-//Todo**
-//fix some Array<any> types
-//set result types?
-
 export const getDBConnection = async () => {
   return openDatabase({ location: 'default', name: 'hugin.db' });
 };
 
-export const initDB = async () => {
+let create = false;
+
+export const initDB = async (init = false) => {
   console.log('Initializing database..2');
   try {
+    if (create) {
+      return;
+    }
     db = await getDBConnection();
     console.log('Got db connection');
     let query = `CREATE TABLE IF NOT EXISTS rooms ( 
@@ -51,6 +51,7 @@ export const initDB = async () => {
     secretKey TEXT
   )`;
     await db.executeSql(acc);
+    create = true;
   } catch (err) {
     console.log(err);
   }

@@ -1,5 +1,10 @@
-import { AuthMethods, AuthStackNavigationType } from '@/types';
-import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
+import { useLayoutEffect, useState } from 'react';
+
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
 import {
   Card,
   Container,
@@ -10,7 +15,7 @@ import {
   TextButton,
   TextField,
 } from '@/components';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
   createUserAddress,
   useGlobalStore,
@@ -18,11 +23,9 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { useLayoutEffect, useState } from 'react';
+import { AuthMethods, AuthStackNavigationType } from '@/types';
 
 import { initDB } from '../../services/bare/sqlite';
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
 
 export const CreateAccScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -54,7 +57,7 @@ export const CreateAccScreen: React.FC = () => {
 
   async function onCreateProfile() {
     setLoading(true);
-    await initDB();
+    await initDB(true);
     const address = await createUserAddress();
 
     useUserStore.setState((state) => ({
