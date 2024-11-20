@@ -56,6 +56,9 @@ export const CreateAccScreen: React.FC = () => {
   }
 
   async function onCreateProfile() {
+    if (authMethod === 'pincode' && pincode && pincode.length !== 6) {
+      return;
+    }
     setLoading(true);
     await initDB();
     const address = await createUserAddress();
