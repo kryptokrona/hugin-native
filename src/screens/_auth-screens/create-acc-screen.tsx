@@ -1,20 +1,16 @@
-import { useLayoutEffect, useState } from 'react';
-
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
+import { AuthMethods, AuthStackNavigationType } from '@/types';
+import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
   Card,
   Container,
+  Header,
   InputField,
   Pincode,
   ScreenLayout,
   TextButton,
   TextField,
 } from '@/components';
-import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   createUserAddress,
   useGlobalStore,
@@ -22,10 +18,11 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { AuthMethods, AuthStackNavigationType } from '@/types';
+import { useLayoutEffect, useState } from 'react';
 
-import { Header } from '../../components/_navigation/header';
 import { initDB } from '../../services/bare/sqlite';
+import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 export const CreateAccScreen: React.FC = () => {
   const { t } = useTranslation();

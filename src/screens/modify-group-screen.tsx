@@ -1,6 +1,7 @@
 import {
   Card,
   CopyButton,
+  Header,
   ScreenLayout,
   TextButton,
   TextField,
@@ -21,7 +22,6 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
 import { useLayoutEffect, useMemo, useState } from 'react';
 
-import { Header } from 'react-native/Libraries/NewAppScreen';
 import { MainScreens } from '@/config';
 import { createAvatar } from '@/utils';
 import { useTranslation } from 'react-i18next';

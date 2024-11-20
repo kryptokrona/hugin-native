@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -9,8 +7,8 @@ import {
   View,
 } from 'react-native';
 
+import React from 'react';
 import { useHeaderHeight } from '@react-navigation/elements';
-
 import { useThemeStore } from '@/services';
 
 interface Props {

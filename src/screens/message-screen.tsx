@@ -1,4 +1,4 @@
-import { Avatar, MessageInput, ScreenLayout } from '@/components';
+import { Avatar, Header, MessageInput, ScreenLayout } from '@/components';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import type {
   MainNavigationParamList,
@@ -8,7 +8,6 @@ import type {
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 
-import { Header } from '../components/_navigation/header';
 import { MessagesScreens } from '@/config';
 import { mockMessages } from '@/utils';
 

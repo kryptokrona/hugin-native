@@ -44,7 +44,6 @@ export type AuthStackParamList = {
   [AuthScreens.RequestPinScreen]:
     | { finishFunction?: (nav?: MainStackNavigationType) => void }
     | undefined;
-  [AuthScreens.SetPinScreen]: { nextRoute?: string } | undefined;
   [AuthScreens.SplashScreen]: undefined;
   [AuthScreens.CreateAccountScreen]: undefined;
 };

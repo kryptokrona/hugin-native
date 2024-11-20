@@ -2,7 +2,6 @@ export enum AuthScreens {
   ForgotPinScreen = 'ForgotPinScreen',
   RequestFingerPrintScreen = 'RequestFingerPrintScreen',
   RequestPinScreen = 'RequestPinScreen',
-  SetPinScreen = 'SetPinScreen',
   SplashScreen = 'SplashScreen',
   CreateAccountScreen = 'CreateAccountScreen',
 }

@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Container,
   CustomIcon,
+  Header,
   InputField,
   ModalCenter,
   PreviewItem,
@@ -24,8 +25,6 @@ import {
   useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
-
-import { Header } from '../components/_navigation/header';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;

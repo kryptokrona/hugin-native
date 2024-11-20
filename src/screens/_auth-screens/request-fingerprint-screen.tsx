@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 import { View, Alert } from 'react-native';
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
