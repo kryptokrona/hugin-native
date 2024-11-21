@@ -1,10 +1,13 @@
-import { Avatar, CustomIcon, TextField } from '../_elements';
 import React, { useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useThemeStore, useUserStore } from '@/services';
 
-import HuginSvg from '../../assets/hugin.svg';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
+
+import { useThemeStore, useUserStore } from '@/services';
+import { getAvatar } from '@/utils';
+
+import { Avatar, CustomIcon, TextField } from '../_elements';
 
 interface Props {
   title?: string;
@@ -50,8 +53,10 @@ export const Header: React.FC<Props> = ({
         )}
         {!backButton && (
           <>
-            {/* {address && <Avatar base64={avatar} address={address} size={30} />} */}
-            <HuginSvg style={styles.logo} />
+            {address && (
+              <Avatar base64={getAvatar(address)} address={address} size={30} />
+            )}
+            {/* <HuginSvg style={styles.logo} /> */}
           </>
         )}
       </View>
