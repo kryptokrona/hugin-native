@@ -68,6 +68,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   function onCloseModal() {
     setModalVisible(false);
     setJoinVisible(false);
+    setLink('');
   }
 
   function onJoinPress() {
@@ -97,6 +98,7 @@ export const GroupsScreen: React.FC<Props> = () => {
         name: roomName,
         roomKey: inviteKey,
       });
+      setLink('');
     }
   }
 
