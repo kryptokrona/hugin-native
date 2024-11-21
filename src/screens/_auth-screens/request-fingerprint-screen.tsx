@@ -1,17 +1,19 @@
 import React from 'react';
+
 import { View, Alert } from 'react-native';
+
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
-import { TextButton, ScreenLayout } from '@/components';
+import { ScreenLayout } from '@/components';
 import { AuthScreens, Stacks } from '@/config';
+import { setAuthenticated } from '@/services';
 import type {
   AuthStackParamList,
   AuthStackNavigationType,
   MainStackNavigationType,
 } from '@/types';
-import { setAuthenticated } from '@/services';
 
 interface Props {
   route: RouteProp<
@@ -42,8 +44,8 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
 
     try {
       const { success } = await rnBiometrics.simplePrompt({
-        promptMessage: 'Authenticate with Fingerprint',
         cancelButtonText: 'Cancel',
+        promptMessage: 'Authenticate with Fingerprint',
       });
 
       if (success) {
@@ -74,15 +76,15 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
           source={require('../../assets/img/fingerprint.png')}
           style={{
             height: 80,
-            width: 80,
-            resizeMode: 'contain',
             marginTop: 40,
+            resizeMode: 'contain',
+            width: 80,
           }}
           animation="pulse"
           easing="ease-out"
           iterationCount="infinite"
         />
-        <TextButton onPress={handleForgotPin}>Forgot PIN?</TextButton>
+        {/* <TextButton onPress={handleForgotPin}>Forgot PIN?</TextButton> */}
       </View>
     </ScreenLayout>
   );

@@ -1,12 +1,12 @@
+import { useMemo, useState } from 'react';
+
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
 import {
-  AuthMethods,
-  MainNavigationParamList,
-  MainStackNavigationType,
-} from '@/types';
-import {
-  Avatar,
   Container,
-  CustomIcon,
   InputField,
   Pincode,
   ScreenLayout,
@@ -14,18 +14,17 @@ import {
   TextField,
 } from '@/components';
 import { MainScreens, nameMaxLength } from '@/config';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   updateUser,
   usePreferencesStore,
   useThemeStore,
   useUserStore,
 } from '@/services';
-
-import { pickAvatar } from '@/utils';
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {
+  AuthMethods,
+  MainNavigationParamList,
+  MainStackNavigationType,
+} from '@/types';
 
 interface Props {
   route: RouteProp<
@@ -44,11 +43,15 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
   const [authMethod, setAuthMethod] = useState<AuthMethods | null>(
     preferences.authMethod,
   );
-  const [pincode, setPincode] = useState<string | null>(null);
-  const [displayPincode, setDisplayPincode] = useState(false);
+  const [pincode, setPincode] = useState<string>('');
+  // const [displayPincode, setDisplayPincode] = useState(false);
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.accentForeground;
   const borderColor = theme.border;
+  const pinError = useMemo(
+    () => authMethod === AuthMethods.pincode && pincode.length < 6,
+    [authMethod, pincode],
+  );
 
   const onNameInput = (value: string) => {
     setValue(value);
@@ -70,7 +73,6 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     }));
     navigation.goBack();
   };
-
   // async function onUpdateAvatar() {
   //   const base64 = await pickAvatar();
   //   if (base64) {
@@ -86,7 +88,6 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 
       case AuthMethods.pincode:
         setAuthMethod(AuthMethods.pincode);
-        setDisplayPincode(true);
         break;
 
       case AuthMethods.bioMetric:
@@ -95,6 +96,11 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
   }
 
   function onEnterPin(pin: string) {
+    setPincode(pin);
+  }
+
+  function pinChange(pin: string) {
+    console.log('pin changed', pin);
     setPincode(pin);
   }
 
@@ -171,14 +177,16 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
               </TextField>
             </TouchableOpacity>
           </View>
-          {displayPincode && (
+          {authMethod === 'pincode' && (
             <View>
-              <Pincode onFinish={onEnterPin} />
+              <Pincode onFinish={onEnterPin} onPartPin={pinChange} />
             </View>
           )}
         </Container>
         <Container bottom>
-          <TextButton onPress={onSave}>{t('save')}</TextButton>
+          <TextButton onPress={onSave} disabled={pinError}>
+            {t('save')}
+          </TextButton>
         </Container>
       </View>
     </ScreenLayout>
@@ -186,23 +194,6 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 };
 
 const styles = StyleSheet.create({
-  avatarButton: {
-    position: 'absolute',
-    right: -6,
-    top: -6,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  header: {
-    alignSelf: 'flex-start',
-    marginBottom: 12,
-    position: 'relative',
-  },
-  top: {
-    flex: 1,
-  },
   radioButton: {
     flexDirection: 'row',
     // alignItems: 'center',

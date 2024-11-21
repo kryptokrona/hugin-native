@@ -46,7 +46,7 @@ export const CreateAccScreen: React.FC = () => {
 
   const nameError = !name || name.length === 0;
 
-  const pinError = (authMethod === 'pincode' && pincode.length < 6);
+  const pinError = authMethod === 'pincode' && pincode.length < 6;
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -149,8 +149,8 @@ export const CreateAccScreen: React.FC = () => {
             style={styles.radioButton}
             onPress={() => {
               setAuthMethod(AuthMethods.pincode);
-               setPincode('');
-               }}>
+              setPincode('');
+            }}>
             <View
               style={
                 authMethod === AuthMethods.pincode
@@ -181,14 +181,15 @@ export const CreateAccScreen: React.FC = () => {
 
         {authMethod === 'pincode' && (
           <View>
-            <Pincode onFinish={onEnterPin} />
+            <Pincode onFinish={onEnterPin} onPartPin={() => ''} />
           </View>
         )}
       </Card>
-      
+
       <Container bottom>
-        
-        <TextButton onPress={onCreateProfile} disabled={loading || nameError || pinError }>
+        <TextButton
+          onPress={onCreateProfile}
+          disabled={loading || nameError || pinError}>
           {t('createProfile')}
         </TextButton>
       </Container>

@@ -1,14 +1,17 @@
 import React, { useLayoutEffect } from 'react';
+
 import { View, Alert } from 'react-native';
+
 import { type RouteProp, useNavigation } from '@react-navigation/native';
+
 import { TextButton, Pincode, ScreenLayout } from '@/components';
-import { AuthScreens, MainScreens, Stacks } from '@/config';
+import { AuthScreens, Stacks } from '@/config';
+import { setAuthenticated, usePreferencesStore } from '@/services';
 import type {
   AuthStackParamList,
   AuthStackNavigationType,
   MainStackNavigationType,
 } from '@/types';
-import { setAuthenticated, usePreferencesStore } from '@/services';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.RequestPinScreen>;
@@ -37,7 +40,7 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
 
   const verifyPin = (inputPin: string) => {
     if (pincode === inputPin) {
-      console.log({ pincode, inputPin });
+      console.log({ inputPin, pincode });
       finishProcess();
     } else {
       Alert.alert('Invalid PIN', 'The PIN you entered is incorrect.');
@@ -52,9 +55,9 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
           Authenticate
         </TextButton>
 
-        <TextButton type="secondary" onPress={handleForgotPin}>
+        {/* <TextButton type="secondary" onPress={handleForgotPin}>
           Forgot PIN?
-        </TextButton>
+        </TextButton> */}
       </View>
     </ScreenLayout>
   );

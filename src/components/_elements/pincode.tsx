@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
+
 import { StyleSheet, TextInput, View } from 'react-native';
 
-import { Styles } from '@/styles';
-import { TextField } from './text-field';
-import { useThemeStore } from '@/services';
 import { useTranslation } from 'react-i18next';
+
+import { useThemeStore } from '@/services';
+import { Styles } from '@/styles';
+
+import { TextField } from './text-field';
 
 interface PINInputProps {
   onFinish: (pin: string) => void;
+  onPartPin?: (pin: string) => void;
 }
 
-export const Pincode: React.FC<PINInputProps> = ({ onFinish }) => {
+export const Pincode: React.FC<PINInputProps> = ({ onFinish, onPartPin }) => {
   const { t } = useTranslation();
 
   const [focus, setFocus] = useState(false);
@@ -30,13 +34,14 @@ export const Pincode: React.FC<PINInputProps> = ({ onFinish }) => {
   }
 
   const onChange = (text: string) => {
-    console.log({ text, length });
-    console.log('here 1');
+    console.log({ length, text });
+    if (onPartPin) {
+      onPartPin(text);
+    }
+    setPin(text);
     if (text.length <= length) {
-      console.log('here 2');
       setPin(text);
       if (text.length === length) {
-        console.log('here 3');
         onFinish(text);
       }
     }
@@ -77,20 +82,20 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
   },
+  input: {
+    borderRadius: Styles.borderRadius.small,
+    borderWidth: 1,
+    fontFamily: 'Montserrat-Medium',
+    fontSize: 30,
+    marginTop: 4,
+    padding: 8,
+    paddingHorizontal: 10,
+  },
   inputContainer: {
     // flexDirection: 'row',
     // alignItems: 'center',
     justifyContent: 'space-between',
     marginVertical: 16,
     width: 100,
-  },
-  input: {
-    borderRadius: Styles.borderRadius.small,
-    borderWidth: 1,
-    fontFamily: 'Montserrat-Medium',
-    marginTop: 4,
-    padding: 8,
-    paddingHorizontal: 10,
-    fontSize: 30,
   },
 });
