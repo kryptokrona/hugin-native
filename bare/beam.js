@@ -1,5 +1,5 @@
 const fs = require('bare-fs');
-const Hyperbeam = require('hyperbeam');
+const Huginbeam = require('huginbeam');
 const { sleep, random_key, check_if_image_or_video } = require('./utils');
 const { Hugin } = require('./account');
 
@@ -8,16 +8,16 @@ let localFiles = [];
 let remoteFiles = [];
 //STATUS
 
-const new_beam = async (key, chat, send = false) => {
+const new_beam = async (key, chat, upload = false) => {
   //The beam is already encrypted. We add Hugin encryption inside.
-  return await start_beam(key, chat, false, send);
+  return await start_beam(key, chat, false, upload);
 };
 
 const start_beam = async (
   key,
   chat,
   file = false,
-  send,
+  upload,
   group,
   filename,
   size,
@@ -25,18 +25,20 @@ const start_beam = async (
 ) => {
   let beam;
   //Create new or join beam
+  const beamKey = key === 'new' ? random_key().toString('hex') : key;
+  const [base_keys, dht_keys, sig] = get_new_peer_keys(beamKey);
+  const options = { upload, dht_keys, base_keys, sig };
   try {
     //START A NEW BEAM
     if (key === 'new') {
-      const random = random_key();
-      beam = new Hyperbeam({ random });
+      beam = new Huginbeam(beamKey, options);
       beam.write('Start');
       if (file) {
         file_beam(beam, chat, beam.key, false, group, filename, size, room);
         return { chat, key: beam.key };
       }
       beam_event(beam, chat, beam.key);
-      if (send) {
+      if (upload) {
         //Send a request to start sharing files.
         return { chat: chat, msg: 'BEAMFILE://' + beam.key };
       }
@@ -44,10 +46,10 @@ const start_beam = async (
       return { chat: chat, msg: 'BEAM://' + beam.key };
     } else {
       //JOIN
-      if (key.length !== 52) {
+      if (key.length > 64) {
         return false;
       }
-      beam = new Hyperbeam(key);
+      beam = new Huginbeam(beamKey, options);
       if (file) {
         file_beam(beam, chat, key, true, group, filename, size, room);
         return true;
