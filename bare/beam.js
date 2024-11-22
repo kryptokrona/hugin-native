@@ -1,6 +1,11 @@
 const fs = require('bare-fs');
 const Huginbeam = require('huginbeam');
-const { sleep, random_key, check_if_image_or_video } = require('./utils');
+const {
+  sleep,
+  random_key,
+  check_if_image_or_video,
+  get_new_peer_keys,
+} = require('./utils');
 const { Hugin } = require('./account');
 
 let active_beams = [];
