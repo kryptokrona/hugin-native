@@ -1,67 +1,69 @@
 #include "crypto.h"
 #include "TurtleCoin.h"
 
-jclass      WALLET_BLOCK_INFO;
-jmethodID   WALLET_BLOCK_INFO_CONST;
-jfieldID    WALLET_BLOCK_INFO_COINBASE_TRANSACTION;
-jfieldID    WALLET_BLOCK_INFO_TRANSACTIONS;
+jclass WALLET_BLOCK_INFO;
+jmethodID WALLET_BLOCK_INFO_CONST;
+jfieldID WALLET_BLOCK_INFO_COINBASE_TRANSACTION;
+jfieldID WALLET_BLOCK_INFO_TRANSACTIONS;
 
-jclass      RAW_TRANSACTION;
-jmethodID   RAW_TRANSACTION_CONST;
-jfieldID    RAW_TRANSACTION_KEY_OUTPUTS;
-jfieldID    RAW_TRANSACTION_HASH;
-jfieldID    RAW_TRANSACTION_TRANSACTION_PUBLIC_KEY;
+jclass RAW_TRANSACTION;
+jmethodID RAW_TRANSACTION_CONST;
+jfieldID RAW_TRANSACTION_KEY_OUTPUTS;
+jfieldID RAW_TRANSACTION_HASH;
+jfieldID RAW_TRANSACTION_TRANSACTION_PUBLIC_KEY;
 
-jclass      KEY_OUTPUT;
-jmethodID   KEY_OUTPUT_CONST;
-jfieldID    KEY_OUTPUT_KEY;
-jfieldID    KEY_OUTPUT_AMOUNT;
-jfieldID    KEY_OUTPUT_GLOBAL_INDEX;
+jclass KEY_OUTPUT;
+jmethodID KEY_OUTPUT_CONST;
+jfieldID KEY_OUTPUT_KEY;
+jfieldID KEY_OUTPUT_AMOUNT;
+jfieldID KEY_OUTPUT_GLOBAL_INDEX;
 
-jclass      INPUT_MAP;
-jmethodID   INPUT_MAP_CONST;
-jfieldID    INPUT_MAP_PUBLIC_SPEND_KEY;
-jfieldID    INPUT_MAP_TRANSACTION_INPUT;
+jclass INPUT_MAP;
+jmethodID INPUT_MAP_CONST;
+jfieldID INPUT_MAP_PUBLIC_SPEND_KEY;
+jfieldID INPUT_MAP_TRANSACTION_INPUT;
 
-jclass      TRANSACTION_INPUT;
-jmethodID   TRANSACTION_INPUT_CONST;
-jfieldID    TRANSACTION_INPUT_KEY_IMAGE;
-jfieldID    TRANSACTION_INPUT_AMOUNT;
-jfieldID    TRANSACTION_INPUT_TRANSACTION_INDEX;
-jfieldID    TRANSACTION_INPUT_GLOBAL_OUTPUT_INDEX;
-jfieldID    TRANSACTION_INPUT_KEY;
+jclass TRANSACTION_INPUT;
+jmethodID TRANSACTION_INPUT_CONST;
+jfieldID TRANSACTION_INPUT_KEY_IMAGE;
+jfieldID TRANSACTION_INPUT_AMOUNT;
+jfieldID TRANSACTION_INPUT_TRANSACTION_INDEX;
+jfieldID TRANSACTION_INPUT_GLOBAL_OUTPUT_INDEX;
+jfieldID TRANSACTION_INPUT_KEY;
 
-jclass      SPEND_KEY;
-jmethodID   SPEND_KEY_CONST;
-jfieldID    SPEND_KEY_PUBLIC_KEY;
-jfieldID    SPEND_KEY_PRIVATE_KEY;
+jclass SPEND_KEY;
+jmethodID SPEND_KEY_CONST;
+jfieldID SPEND_KEY_PUBLIC_KEY;
+jfieldID SPEND_KEY_PRIVATE_KEY;
 
-jclass      JAVA_STRING;
+jclass JAVA_STRING;
 
-extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
     JNIEnv *env;
-    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK)
+    {
         return -1;
     }
 
-    KEY_OUTPUT = (jclass) env->NewGlobalRef(env->FindClass("com/hugin/KeyOutput"));
+    KEY_OUTPUT = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/KeyOutput"));
     KEY_OUTPUT_CONST = env->GetMethodID(KEY_OUTPUT, "<init>", "(Ljava/lang/String;JJ)V");
     KEY_OUTPUT_KEY = env->GetFieldID(KEY_OUTPUT, "key", "Ljava/lang/String;");
     KEY_OUTPUT_AMOUNT = env->GetFieldID(KEY_OUTPUT, "amount", "J");
     KEY_OUTPUT_GLOBAL_INDEX = env->GetFieldID(KEY_OUTPUT, "globalIndex", "J");
 
-    RAW_TRANSACTION = (jclass) env->NewGlobalRef(env->FindClass("com/hugin/RawTransaction"));
-    RAW_TRANSACTION_CONST = env->GetMethodID(RAW_TRANSACTION, "<init>", "([Lcom/hugin/KeyOutput;Ljava/lang/String;Ljava/lang/String;)V");
-    RAW_TRANSACTION_KEY_OUTPUTS = env->GetFieldID(RAW_TRANSACTION, "keyOutputs", "[Lcom/hugin/KeyOutput;");
+    RAW_TRANSACTION = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/RawTransaction"));
+    RAW_TRANSACTION_CONST = env->GetMethodID(RAW_TRANSACTION, "<init>", "([Lcom/huginmessenger/KeyOutput;Ljava/lang/String;Ljava/lang/String;)V");
+    RAW_TRANSACTION_KEY_OUTPUTS = env->GetFieldID(RAW_TRANSACTION, "keyOutputs", "[Lcom/huginmessenger/KeyOutput;");
     RAW_TRANSACTION_HASH = env->GetFieldID(RAW_TRANSACTION, "hash", "Ljava/lang/String;");
     RAW_TRANSACTION_TRANSACTION_PUBLIC_KEY = env->GetFieldID(RAW_TRANSACTION, "transactionPublicKey", "Ljava/lang/String;");
 
-    WALLET_BLOCK_INFO = (jclass) env->NewGlobalRef(env->FindClass("com/hugin/WalletBlockInfo"));
-    WALLET_BLOCK_INFO_CONST = env->GetMethodID(WALLET_BLOCK_INFO, "<init>", "(Lcom/hugin/RawTransaction;[Lcom/hugin/RawTransaction;)V");
-    WALLET_BLOCK_INFO_COINBASE_TRANSACTION = env->GetFieldID(WALLET_BLOCK_INFO, "coinbaseTransaction", "Lcom/hugin/RawTransaction;");
-    WALLET_BLOCK_INFO_TRANSACTIONS = env->GetFieldID(WALLET_BLOCK_INFO, "transactions", "[Lcom/hugin/RawTransaction;");
+    WALLET_BLOCK_INFO = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/WalletBlockInfo"));
+    WALLET_BLOCK_INFO_CONST = env->GetMethodID(WALLET_BLOCK_INFO, "<init>", "(Lcom/huginmessenger/RawTransaction;[Lcom/huginmessenger/RawTransaction;)V");
+    WALLET_BLOCK_INFO_COINBASE_TRANSACTION = env->GetFieldID(WALLET_BLOCK_INFO, "coinbaseTransaction", "Lcom/huginmessenger/RawTransaction;");
+    WALLET_BLOCK_INFO_TRANSACTIONS = env->GetFieldID(WALLET_BLOCK_INFO, "transactions", "[Lcom/huginmessenger/RawTransaction;");
 
-    TRANSACTION_INPUT = (jclass) env->NewGlobalRef(env->FindClass("com/hugin/TransactionInput"));
+    TRANSACTION_INPUT = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/TransactionInput"));
     TRANSACTION_INPUT_CONST = env->GetMethodID(TRANSACTION_INPUT, "<init>", "(Ljava/lang/String;JJJLjava/lang/String;Ljava/lang/String;)V");
     TRANSACTION_INPUT_KEY_IMAGE = env->GetFieldID(TRANSACTION_INPUT, "keyImage", "Ljava/lang/String;");
     TRANSACTION_INPUT_AMOUNT = env->GetFieldID(TRANSACTION_INPUT, "amount", "J");
@@ -69,23 +71,23 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     TRANSACTION_INPUT_GLOBAL_OUTPUT_INDEX = env->GetFieldID(TRANSACTION_INPUT, "globalOutputIndex", "J");
     TRANSACTION_INPUT_KEY = env->GetFieldID(TRANSACTION_INPUT, "key", "Ljava/lang/String;");
 
-    SPEND_KEY = (jclass) env->NewGlobalRef(env->FindClass("com/hugin/SpendKey"));
+    SPEND_KEY = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/SpendKey"));
     SPEND_KEY_CONST = env->GetMethodID(SPEND_KEY, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
     SPEND_KEY_PUBLIC_KEY = env->GetFieldID(SPEND_KEY, "publicKey", "Ljava/lang/String;");
     SPEND_KEY_PRIVATE_KEY = env->GetFieldID(SPEND_KEY, "privateKey", "Ljava/lang/String;");
 
-    INPUT_MAP = (jclass) env->NewGlobalRef(env->FindClass("com/hugin/InputMap"));
-    INPUT_MAP_CONST = env->GetMethodID(INPUT_MAP, "<init>", "(Ljava/lang/String;Lcom/hugin/TransactionInput;)V");
+    INPUT_MAP = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/InputMap"));
+    INPUT_MAP_CONST = env->GetMethodID(INPUT_MAP, "<init>", "(Ljava/lang/String;Lcom/huginmessenger/TransactionInput;)V");
     INPUT_MAP_PUBLIC_SPEND_KEY = env->GetFieldID(INPUT_MAP, "publicSpendKey", "Ljava/lang/String;");
-    INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/hugin/TransactionInput;");
+    INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/huginmessenger/TransactionInput;");
 
-    JAVA_STRING = (jclass) env->NewGlobalRef(env->FindClass("java/lang/String"));
+    JAVA_STRING = (jclass)env->NewGlobalRef(env->FindClass("java/lang/String"));
 
     return JNI_VERSION_1_6;
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_hugin_TurtleCoinModule_processBlockOutputsJNI(
+Java_com_huginmessenger_TurtleCoinModule_processBlockOutputsJNI(
     JNIEnv *env,
     jobject instance,
     jobject jWalletBlockInfo,
@@ -100,14 +102,13 @@ Java_com_hugin_TurtleCoinModule_processBlockOutputsJNI(
 
     const auto inputs = processBlockOutputs(
         walletBlockInfo, privateViewKey, spendKeys, isViewWallet,
-        processCoinbaseTransactions
-    );
+        processCoinbaseTransactions);
 
     return makeJNIInputs(env, inputs);
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_hugin_TurtleCoinModule_generateRingSignaturesJNI(
+Java_com_huginmessenger_TurtleCoinModule_generateRingSignaturesJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,
@@ -122,14 +123,13 @@ Java_com_hugin_TurtleCoinModule_generateRingSignaturesJNI(
     const Crypto::SecretKey transactionSecretKey = makeNative32ByteKey<Crypto::SecretKey>(env, jTransactionSecretKey);
 
     const auto [success, signatures] = Crypto::generateRingSignatures(
-        prefixHash, keyImage, publicKeys, transactionSecretKey, realOutput
-    );
+        prefixHash, keyImage, publicKeys, transactionSecretKey, realOutput);
 
     return makeJNISignatures(env, signatures);
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_hugin_TurtleCoinModule_checkRingSignatureJNI(
+Java_com_huginmessenger_TurtleCoinModule_checkRingSignatureJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,
@@ -143,14 +143,13 @@ Java_com_hugin_TurtleCoinModule_checkRingSignatureJNI(
     const std::vector<Crypto::Signature> signatures = makeNativeSignatures(env, jSignatures);
 
     const auto success = Crypto::checkRingSignature(
-        prefixHash, keyImage, publicKeys, signatures
-    );
+        prefixHash, keyImage, publicKeys, signatures);
 
     return static_cast<jboolean>(success);
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hugin_TurtleCoinModule_generateKeyDerivationJNI(
+Java_com_huginmessenger_TurtleCoinModule_generateKeyDerivationJNI(
     JNIEnv *env,
     jobject instance,
     jstring jTransactionPublicKey,
@@ -167,7 +166,7 @@ Java_com_hugin_TurtleCoinModule_generateKeyDerivationJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hugin_TurtleCoinModule_generateKeyImageJNI(
+Java_com_huginmessenger_TurtleCoinModule_generateKeyImageJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPublicEphemeral,
@@ -184,7 +183,7 @@ Java_com_hugin_TurtleCoinModule_generateKeyImageJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hugin_TurtleCoinModule_deriveSecretKeyJNI(
+Java_com_huginmessenger_TurtleCoinModule_deriveSecretKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
@@ -202,7 +201,7 @@ Java_com_hugin_TurtleCoinModule_deriveSecretKeyJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_hugin_TurtleCoinModule_derivePublicKeyJNI(
+Java_com_huginmessenger_TurtleCoinModule_derivePublicKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
@@ -375,8 +374,7 @@ std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> makeNativeSpendKeys(JNI
 jobjectArray makeJNISignatures(JNIEnv *env, const std::vector<Crypto::Signature> &signatures)
 {
     jobjectArray jniSignatures = env->NewObjectArray(
-        signatures.size(), JAVA_STRING, nullptr
-    );
+        signatures.size(), JAVA_STRING, nullptr);
 
     int i = 0;
 
@@ -392,17 +390,13 @@ jobjectArray makeJNISignatures(JNIEnv *env, const std::vector<Crypto::Signature>
 jobjectArray makeJNIInputs(JNIEnv *env, const std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> &inputs)
 {
     jobjectArray jniInputs = env->NewObjectArray(
-        inputs.size(), INPUT_MAP, nullptr
-    );
+        inputs.size(), INPUT_MAP, nullptr);
 
     int i = 0;
 
     for (const auto &[publicKey, input] : inputs)
     {
-        env->SetObjectArrayElement(jniInputs, i, env->NewObject(
-            INPUT_MAP, INPUT_MAP_CONST, makeJNI32ByteKey(env, publicKey),
-            makeJNIInput(env, input)
-        ));
+        env->SetObjectArrayElement(jniInputs, i, env->NewObject(INPUT_MAP, INPUT_MAP_CONST, makeJNI32ByteKey(env, publicKey), makeJNIInput(env, input)));
 
         i++;
     }
@@ -416,8 +410,7 @@ jobject makeJNIInput(JNIEnv *env, const TransactionInput &input)
         TRANSACTION_INPUT, TRANSACTION_INPUT_CONST, makeJNI32ByteKey(env, input.keyImage),
         input.amount, input.transactionIndex, input.globalOutputIndex,
         makeJNI32ByteKey(env, input.key),
-        env->NewStringUTF(input.parentTransactionHash.c_str())
-    );
+        env->NewStringUTF(input.parentTransactionHash.c_str()));
 }
 
 /* input should be size of input len. output should be double that. */
@@ -425,8 +418,7 @@ void byteArrayToHexString(const uint8_t *input, char *output, size_t inputLen)
 {
     char hexval[16] = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-        'a', 'b', 'c', 'd', 'e', 'f'
-    };
+        'a', 'b', 'c', 'd', 'e', 'f'};
 
     for (int i = 0; i < inputLen; i++)
     {
@@ -456,12 +448,12 @@ int char2int(char input)
 }
 
 /* input should be double size of output len. */
-void hexStringToByteArray(const char* input, uint8_t* output, size_t outputLen)
+void hexStringToByteArray(const char *input, uint8_t *output, size_t outputLen)
 {
     for (int i = 0; i < outputLen; i++)
     {
-        output[i] = char2int(input[i*2]) * 16 +
-                    char2int(input[(i*2) + 1]);
+        output[i] = char2int(input[i * 2]) * 16 +
+                    char2int(input[(i * 2) + 1]);
     }
 }
 
@@ -479,16 +471,14 @@ std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs
     if (processCoinbaseTransactions && block.coinbaseTransaction)
     {
         processTransactionOutputs(
-            *block.coinbaseTransaction, privateViewKey, spendKeys, isViewWallet, inputs
-        );
+            *block.coinbaseTransaction, privateViewKey, spendKeys, isViewWallet, inputs);
     }
 
     /* Process the normal txs */
     for (const auto &tx : block.transactions)
     {
         processTransactionOutputs(
-            tx, privateViewKey, spendKeys, isViewWallet, inputs
-        );
+            tx, privateViewKey, spendKeys, isViewWallet, inputs);
     }
 
     return inputs;
@@ -506,8 +496,7 @@ void processTransactionOutputs(
     /* Generate the key derivation from the random tx public key, and our private
        view key */
     Crypto::generate_key_derivation(
-        tx.transactionPublicKey, privateViewKey, derivation
-    );
+        tx.transactionPublicKey, privateViewKey, derivation);
 
     uint32_t outputIndex = 0;
 
@@ -518,8 +507,7 @@ void processTransactionOutputs(
         /* Derive the public spend key from the transaction, using the previous
            derivation */
         Crypto::underive_public_key(
-            derivation, outputIndex, output.key, derivedSpendKey
-        );
+            derivation, outputIndex, output.key, derivedSpendKey);
 
         /* See if the derived spend key matches any of our spend keys */
         const auto ourPrivateSpendKey = spendKeys.find(derivedSpendKey);
@@ -544,19 +532,16 @@ void processTransactionOutputs(
                 /* Get the tmp public key from the derivation, the index,
                    and our public spend key */
                 Crypto::derive_public_key(
-                    derivation, outputIndex, derivedSpendKey, tmpPublicKey
-                );
+                    derivation, outputIndex, derivedSpendKey, tmpPublicKey);
 
                 /* Get the tmp private key from the derivation, the index,
                    and our private spend key */
                 Crypto::derive_secret_key(
-                    derivation, outputIndex, ourPrivateSpendKey->second, tmpSecretKey
-                );
+                    derivation, outputIndex, ourPrivateSpendKey->second, tmpSecretKey);
 
                 /* Get the key image from the tmp public and private key */
                 Crypto::generate_key_image(
-                    tmpPublicKey, tmpSecretKey, input.keyImage
-                );
+                    tmpPublicKey, tmpSecretKey, input.keyImage);
             }
 
             inputs.emplace_back(derivedSpendKey, input);
