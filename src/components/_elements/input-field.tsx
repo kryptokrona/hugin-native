@@ -1,10 +1,13 @@
+import { useState } from 'react';
+
 import { StyleSheet, TextInput, View } from 'react-native';
+
+import { useTranslation } from 'react-i18next';
+
+import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
 
 import { TextField } from './text-field';
-import { useState } from 'react';
-import { useThemeStore } from '@/services';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   label: string;

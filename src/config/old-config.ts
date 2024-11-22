@@ -130,7 +130,7 @@
 //       'https://explorer.kryptokrona.se/transaction.html?hash=';
 //     this.appStoreLink = '';
 //     this.googlePlayLink =
-//       'https://play.google.com/store/apps/details?id=com.hugin';
+//       'https://play.google.com/store/apps/details?id=com.huginmessenger';
 //     this.nodeListURL =
 //       'https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/master/nodes.json';
 //     this.nodeListURLs = [

@@ -1,4 +1,4 @@
-package com.hugin;
+package com.huginmessenger;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,7 +6,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.hugin.BuildConfig;
+import com.huginmessenger.BuildConfig;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;

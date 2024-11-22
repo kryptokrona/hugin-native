@@ -87,12 +87,12 @@ def hermesEnabled = true
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    namespace 'com.hugin'
+    namespace 'com.huginmessenger'
     defaultConfig {
         buildToolsVersion '34'
         targetSdkVersion '33'
         compileSdk 34
-        applicationId 'com.hugin'
+        applicationId 'com.huginmessenger'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

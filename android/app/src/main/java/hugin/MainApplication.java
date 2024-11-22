@@ -1,9 +1,9 @@
-package com.hugin;
+package com.huginmessenger;
 import android.content.res.Configuration;
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
 
-import com.hugin.BuildConfig;
+import com.huginmessenger.BuildConfig;
 
 import android.app.Application;
 import android.content.Intent;

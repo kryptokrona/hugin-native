@@ -1,6 +1,6 @@
 import type { Message, Room, User } from '@/types';
-import { usePreferencesStore, useUserStore } from './async-storage-stores';
 
+import { usePreferencesStore, useUserStore } from './async-storage-stores';
 import { useGlobalStore } from './global-store';
 
 export const setStoreRooms = (rooms: Room[]) => {
