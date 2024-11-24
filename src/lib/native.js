@@ -91,6 +91,11 @@ export const begin_send_file = (json_file_data) => {
   return mainRPC.request(data);
 };
 
+export const keep_alive = (json_file_data) => {
+  const data = JSON.stringify({ type: 'keep_alive' });
+  return mainRPC.request(data);
+};
+
 // Function to test wallet support for different JS engines
 const wallet = async () => {
   // const daemon = new Daemon('privacymine.net', 11898);

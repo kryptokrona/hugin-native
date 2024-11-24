@@ -25,6 +25,7 @@
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
+    "@supersami/rn-foreground-service": "^2.2.1",
     "@tradle/react-native-http": "^2.0.0",
     "assert": "^1.1.1",
     "asyncstorage-down": "^4.2.0",
