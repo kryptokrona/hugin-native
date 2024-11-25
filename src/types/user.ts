@@ -32,14 +32,13 @@ export interface User {
   address: string | null;
   avatar?: string;
   name: string;
-  room: string;
+  room?: string;
   downloadDir?: string;
-  keys: object;
+  keys?: object;
 }
 
 export interface PeerUser {
   address: string;
   name: string;
-  room: string;
-  key: string;
+  key?: string;
 }
