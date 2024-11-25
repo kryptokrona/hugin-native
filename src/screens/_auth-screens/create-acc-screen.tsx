@@ -68,6 +68,7 @@ export const CreateAccScreen: React.FC = () => {
       user: {
         ...state.user,
         address,
+        name,
       },
     }));
 
