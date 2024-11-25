@@ -349,11 +349,11 @@ const check_data_message = async (data, connection, topic) => {
       con.admin = admin;
       con.video = joined.video;
       joined.key = active.key;
-
+      con.request = true
       const time = parseInt(joined.time);
+      //Request message history from peer connected before us.
       if (parseInt(active.time) > time) {
-        //Request new messages from peer
-        request_message_history(con, joined);
+          request_history(joined.address, topic)
       }
 
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
@@ -374,19 +374,6 @@ const check_data_message = async (data, connection, topic) => {
       return true;
     }
 
-    if (data.type === 'request-history' && con.joined) {
-      Hugin.send(
-        'get-history',
-        'invitekeytoroom and also address to the receiver',
-      );
-    }
-    if (data.type === 'sync-history' && con.joined && con?.request) {
-      ///Sync history
-      //request state may be needed to keep track if we are in requesting mode atm
-      sync_message_history();
-    }
-  }
-
   if (!con.joined) return 'Error';
 
   if ('type' in data) {
@@ -401,6 +388,12 @@ const check_data_message = async (data, connection, topic) => {
       if (con.admin) ban_user(data.address, topic);
       else return 'Error';
       return true;
+    } else if (data.type === 'request-history' && con.request) {
+        send_history(con.address, topic, active.key)
+    con.request = false
+    } else if (data.type === 'send-history' && con.request) {
+        process_request(data.messages, active.key)
+        con.request = false
     }
   }
   //Dont display messages from blocked users
@@ -408,6 +401,55 @@ const check_data_message = async (data, connection, topic) => {
 
   return false;
 };
+
+
+const request_history = (address, topic) => {
+  console.log("Reqeust history from another peer")
+  const message = {
+      type: 'request-history'
+  }
+  send_peer_message(address, topic, message)
+}
+
+const send_history = async (address, topic, key) => {
+  const messages = [] //get messages from backend here
+  console.log("Sending:", messages.length, "messages")
+  const history = {
+      type: 'send-history',
+      messages
+  }
+  send_peer_message(address, topic, history)
+}
+
+
+const process_request = async (messages, key) => {
+  //some code
+      try {
+          for (const m of messages) {
+              if (m?.address === Hugin.address) continue
+              if (m?.hash.length !== 64) continue
+              const inc = {
+                  m: m?.message,
+                  k: m?.address,
+                  s: m?.signature,
+                  t: m?.time ? m?.time : m?.timestamp,
+                  g: m?.grp ? m?.grp : m?.room,
+                  r: m?.reply,
+                  n: m?.name ? m?.name : m?.nickname,
+                  hash: m?.hash
+              }
+              //Check if message exist here?
+              const message = sanitize_group_message(inc, false)
+              if (!message) continue
+              //Save room message in background mode ??
+              //save room message()
+          }
+          //Trigger update when all messages are synced? here.
+          Hugin.send('history-update', {key})
+      } catch (e) {
+          console.log("error processing history", e)
+      }
+  }
 
 const save_file_info = (data, topic, address, time, sent, name) => {
   const active = get_active_topic(topic);
@@ -532,7 +574,7 @@ const request_download = (download) => {
     time: download.time,
     key: download.key,
   };
-  send_file_info(address, topic, info);
+  send_peer_message(address, topic, info);
 };
 
 const start_upload = async (file, topic) => {
@@ -566,13 +608,13 @@ const upload_ready = async (file, topic, address) => {
     time: file.time,
     key: beam_key,
   };
-  send_file_info(address, topic, info);
+  send_peer_message(address, topic, info);
   return beam_key;
 };
 
-const send_file_info = (address, topic, file) => {
-  console.log('send file info', file);
-  const active = active_swarms.find((a) => a.topic === topic);
+const send_peer_message = (address, topic, message) => {
+  console.log('Send peer message', message);
+  const active = get_active_topic(topic);
   if (!active) {
     errorMessage('Swarm is not active');
     return;
@@ -582,42 +624,7 @@ const send_file_info = (address, topic, file) => {
     errorMessage('Connection is closed');
     return;
   }
-  con.connection.write(JSON.stringify(file));
-};
-
-const request_message_history = (con, joined) => {
-  //Request last 100~messages from connection
-  const message = {
-    message: 'more plx',
-    type: 'request-history',
-    amount: 100,
-  };
-  send_peer_message(message, con);
-};
-
-const send_message_history = async (history, room, address) => {
-  //Send last 100 messages to connection
-  //Need invite key or maybe topic to get messages from the correct room'
-  //We also need to keep track of who to send this history to later.
-  const invite = '';
-  const message = {
-    type: 'sync-history',
-    data: history,
-  };
-  console.log('SEND MESSAGE HISTORY!!! ---->');
-  //send_peer_message(message, con);
-};
-
-const sync_message_history = (history) => {
-  //Got a message containing some message history -> save/print them
-  //Hugin.send('sync-history', messages)
-  console.log('Got messages from peer, Sync message history');
-};
-
-const send_peer_message = (message, con) => {
-  //Send individual peer message
-  console.log('Send peer message to connection!');
-  //con.write(JSON.stringify(message));
+  con.connection.write(JSON.stringify(message));
 };
 
 const ban_connection = (conn, topic) => {
