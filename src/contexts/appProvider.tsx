@@ -27,7 +27,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           console.error('Error starting task', e);
         },
         onLoop: true,
-        taskId: 'taskid',
+        taskId: 'hugin',
       });
     }
 
@@ -49,6 +49,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       message: 'Running in background',
       setOnlyAlertOnce: 'true',
       title: 'Hugin',
+      visibility: 'public',
     });
     return error;
   };
