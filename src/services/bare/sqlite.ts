@@ -153,7 +153,11 @@ export async function getLatestRoomMessages() {
   return roomsList;
 }
 
-export async function getRoomMessages(room: string, page: number) {
+export async function getRoomMessages(
+  room: string,
+  page: number,
+  history = false,
+) {
   const limit: number = 50;
   let offset: number = 0;
   if (page !== 0) {
@@ -163,6 +167,19 @@ export async function getRoomMessages(room: string, page: number) {
     `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
     [room],
   );
+
+  if (history) {
+    const messages = [];
+    for (const result of results) {
+      for (let index = 0; index < result.rows.length; index++) {
+        const res = result.rows.item(index);
+        const r: Message = toMessage(res);
+        messages.push(r);
+      }
+    }
+
+    return messages;
+  }
 
   return await setReplies(results);
 }
@@ -247,6 +264,19 @@ export async function getRoomRepliesToMessage(hash: string) {
   return replies;
 }
 
+async function roomMessageExists(hash: string) {
+  const groupMessageExists = `SELECT *
+  FROM roomsmessages
+  WHERE hash = '${hash}'
+  `;
+
+  const results: [ResultSet] = await db.executeSql(groupMessageExists);
+  const res = results[0].rows.item(0);
+  if (res === undefined) {
+    return false;
+  }
+  return true;
+}
 export async function saveRoomMessage(
   address: string,
   message: string,
@@ -258,13 +288,17 @@ export async function saveRoomMessage(
   sent: boolean,
 ) {
   console.log('Saving message: ', message);
-
+  if (!message || message?.length === 0) {
+    return false;
+  }
+  if (await roomMessageExists(hash)) {
+    return false;
+  }
   try {
-    const result = await db.executeSql(
+    await db.executeSql(
       'INSERT INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
     );
-    console.log('Epic win', result);
 
     const newMessage: Message = {
       address: address,
@@ -279,7 +313,7 @@ export async function saveRoomMessage(
     };
     return newMessage;
   } catch (err) {
-    console.log(err);
+    return false;
   }
 }
 

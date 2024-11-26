@@ -4,6 +4,7 @@ import RPC from 'tiny-buffer-rpc';
 import ce from 'compact-encoding';
 import { requireNativeModule } from 'expo-modules-core';
 import { rpc_message } from './rpc';
+import { getRoomMessages } from '@/services/bare/sqlite';
 requireNativeModule('HelloBare').install();
 
 // forward bare's logs to console
@@ -37,6 +38,9 @@ rpc.register(2, {
     const request = JSON.parse(data);
     console.log('Got bare request', data);
     switch (request.type) {
+      case 'history':
+        const messages = await getRoomMessages(request.key, 0, true);
+        return JSON.stringify(messages);
     }
   },
 });

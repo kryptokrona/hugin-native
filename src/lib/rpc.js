@@ -1,5 +1,7 @@
 import { peerConnected, peerDisconncted } from '@/services/bare/connections.ts';
-import { saveRoomMessageAndUpdate } from '@/services/bare';
+import { saveRoomMessageAndUpdate, setRoomMessages } from '@/services/bare';
+import { getCurrentRoom } from '@/services/zustand';
+import { sleep } from '@/utils';
 
 const rpc_message = async (m) => {
   const json = parse(m);
@@ -23,17 +25,23 @@ const rpc_message = async (m) => {
         console.log('end-swarm!');
         break;
       case 'swarm-message':
-        console.log('swarm-message!', json);
         saveRoomMessageAndUpdate(
           json.message.address,
           json.message.message,
           json.message.room,
           json.message.reply,
-          json.message.timestamp,
+          parseInt(json.message.timestamp),
           json.message.name,
           json.message.hash,
           false,
+          json.message.history,
         );
+        break;
+      case 'history-update':
+        await sleep(500);
+        if (getCurrentRoom() === json.key) {
+          setRoomMessages(json.key, 0);
+        }
         break;
       case 'peer-connected':
         console.log('peer-connected!', json);

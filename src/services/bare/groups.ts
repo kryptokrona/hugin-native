@@ -20,6 +20,7 @@ import {
   saveRoomMessage,
 } from './sqlite';
 
+import { notify } from '../utils';
 import {
   getCurrentRoom,
   getRoomsMessages,
@@ -46,7 +47,7 @@ export const setLatestRoomMessages = async () => {
   setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
 };
 
-export const updateMessages = async (message: Message) => {
+export const updateMessages = async (message: Message, history = false) => {
   const thisRoom = getCurrentRoom();
 
   if (thisRoom === message.room) {
@@ -75,6 +76,8 @@ export const updateMessages = async (message: Message) => {
     }
     const updatedMessages = [...messages, message];
     setStoreRoomMessages(updatedMessages);
+  } else if (!history) {
+    notify({ name: message.nickname, text: message.message }, 'New message');
   }
 };
 
@@ -188,6 +191,7 @@ export const saveRoomMessageAndUpdate = async (
   nickname: string,
   hash: string,
   sent: boolean,
+  history: boolean | undefined = false,
 ) => {
   const newMessage = await saveRoomMessage(
     address,
@@ -200,7 +204,7 @@ export const saveRoomMessageAndUpdate = async (
     sent,
   );
 
-  if (newMessage) {
+  if (newMessage && !history) {
     updateMessages(newMessage);
   }
 

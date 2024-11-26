@@ -349,11 +349,11 @@ const check_data_message = async (data, connection, topic) => {
       con.admin = admin;
       con.video = joined.video;
       joined.key = active.key;
-      con.request = true
+      con.request = true;
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
       if (parseInt(active.time) > time) {
-          request_history(joined.address, topic)
+        request_history(joined.address, topic);
       }
 
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
@@ -374,82 +374,80 @@ const check_data_message = async (data, connection, topic) => {
       return true;
     }
 
-  if (!con.joined) return 'Error';
+    if (!con.joined) return 'Error';
 
-  if ('type' in data) {
-    if (data.type === 'ban') {
-      if (data.address === Hugin.address && con.admin) {
-        Hugin.send('banned', active.key);
-        Hugin.send('remove-room', active.key);
-        await sleep(777);
-        end_swarm(topic);
-        return;
+    if ('type' in data) {
+      if (data.type === 'ban') {
+        if (data.address === Hugin.address && con.admin) {
+          Hugin.send('banned', active.key);
+          Hugin.send('remove-room', active.key);
+          await sleep(777);
+          end_swarm(topic);
+          return;
+        }
+        if (con.admin) ban_user(data.address, topic);
+        else return 'Error';
+      } else if (data.type === 'request-history' && con.request) {
+        send_history(con.address, topic, active.key);
+        con.request = false;
+      } else if (data.type === 'send-history' && con.request) {
+        process_request(data.messages, active.key);
+        con.request = false;
       }
-      if (con.admin) ban_user(data.address, topic);
-      else return 'Error';
-      return true;
-    } else if (data.type === 'request-history' && con.request) {
-        send_history(con.address, topic, active.key)
-    con.request = false
-    } else if (data.type === 'send-history' && con.request) {
-        process_request(data.messages, active.key)
-        con.request = false
     }
-  }
-  //Dont display messages from blocked users
-  if (Hugin.blocked(con.address)) return;
+    //Dont display messages from blocked users
+    if (Hugin.blocked(con.address)) return;
 
-  return false;
+    return false;
+  }
 };
 
-
 const request_history = (address, topic) => {
-  console.log("Reqeust history from another peer")
+  console.log('Reqeust history from another peer');
   const message = {
-      type: 'request-history'
-  }
-  send_peer_message(address, topic, message)
-}
+    type: 'request-history',
+  };
+  send_peer_message(address, topic, message);
+};
 
 const send_history = async (address, topic, key) => {
-  const messages = [] //get messages from backend here
-  console.log("Sending:", messages.length, "messages")
+  const messages = await Hugin.request({ type: 'history', key });
+  console.log('Sending:', messages.length, 'messages');
   const history = {
-      type: 'send-history',
-      messages
-  }
-  send_peer_message(address, topic, history)
-}
-
+    type: 'send-history',
+    messages,
+  };
+  send_peer_message(address, topic, history);
+};
 
 const process_request = async (messages, key) => {
-  //some code
-      try {
-          for (const m of messages) {
-              if (m?.address === Hugin.address) continue
-              if (m?.hash.length !== 64) continue
-              const inc = {
-                  m: m?.message,
-                  k: m?.address,
-                  s: m?.signature,
-                  t: m?.time ? m?.time : m?.timestamp,
-                  g: m?.grp ? m?.grp : m?.room,
-                  r: m?.reply,
-                  n: m?.name ? m?.name : m?.nickname,
-                  hash: m?.hash
-              }
-              //Check if message exist here?
-              const message = sanitize_group_message(inc, false)
-              if (!message) continue
-              //Save room message in background mode ??
-              //save room message()
-          }
-          //Trigger update when all messages are synced? here.
-          Hugin.send('history-update', {key})
-      } catch (e) {
-          console.log("error processing history", e)
-      }
+  try {
+    for (const m of messages) {
+      if (m?.address === Hugin.address) continue;
+      if (m?.hash.length !== 64) continue;
+      const inc = {
+        m: m?.message,
+        k: m?.address,
+        s: m?.signature,
+        t: m?.time ? m?.time : m?.timestamp,
+        g: m?.grp ? m?.grp : m?.room,
+        r: m?.reply,
+        n: m?.name ? m?.name : m?.nickname,
+        hash: m?.hash,
+      };
+      //Check if message exist here?
+      const message = sanitize_group_message(inc);
+      if (!message) continue;
+      //Save room message in background mode ??
+      message.history = true;
+      Hugin.send('swarm-message', { message });
+    }
+    //Trigger update when all messages are synced? here.
+    Hugin.send('history-update', { key });
+  } catch (e) {
+    console.log('error processing history', e);
   }
+};
 
 const save_file_info = (data, topic, address, time, sent, name) => {
   const active = get_active_topic(topic);
@@ -778,7 +776,6 @@ module.exports = {
   create_swarm,
   end_swarm,
   send_message,
-  send_message_history,
   share_file_info,
   request_download,
 };

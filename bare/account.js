@@ -60,7 +60,6 @@ class Account {
 
   async request(data) {
     const r = await this.req.request(JSON.stringify(data));
-    console.log('got req', r);
     const parse = JSON.parse(r);
     return parse;
   }
