@@ -8,7 +8,6 @@ const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const {
   send_message,
-  send_message_history,
   create_swarm,
   end_swarm,
   share_file_info,
@@ -54,9 +53,6 @@ rpc.register(0, {
         break;
       case 'send_room_msg':
         return sendRoomMessage(p.message, p.key, p.reply);
-      case 'send_history':
-        send_message_history(p.history, p.room, p.address);
-        break;
       case 'group_random_key':
         return getRandomGroupKey();
       case 'begin_send_file':
