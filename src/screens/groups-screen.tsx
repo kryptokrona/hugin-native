@@ -61,7 +61,6 @@ export const GroupsScreen: React.FC<Props> = () => {
 
   async function onPress(roomKey: string, name: string) {
     await setRoomMessages(roomKey, 0);
-    setStoreCurrentRoom(roomKey);
     navigation.navigate(MainScreens.GroupChatScreen, { name, roomKey });
   }
 

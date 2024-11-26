@@ -1,8 +1,8 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { type RouteProp, useNavigation } from '@react-navigation/native';
+import { type RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import {
   CustomIcon,
@@ -17,6 +17,7 @@ import {
   saveRoomMessageAndUpdate,
   onSendGroupMessageWithFile,
   onSendGroupMessage,
+  setStoreCurrentRoom,
 } from '@/services';
 import type {
   SelectedFile,
@@ -26,6 +27,7 @@ import type {
 } from '@/types';
 
 import { Header } from '../components/_navigation/header';
+import React from 'react';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -57,6 +59,18 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     });
   }
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // This effect runs when the screen is focused
+      setStoreCurrentRoom(roomKey);
+  
+      return () => {
+        // This cleanup runs when the screen is unfocused
+        setStoreCurrentRoom("null");
+      };
+    }, [roomKey])
+  );
+  
   useLayoutEffect(() => {
     const isAdmin = true; // TODO
     const icon = isAdmin ? 'users-cog' : 'users';

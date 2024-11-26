@@ -18,13 +18,14 @@ import {
   MainStackNavigationType,
   User,
 } from '@/types';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { onDeleteGroup, useGlobalStore, useThemeStore } from '@/services';
+import { RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
+import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore, useThemeStore } from '@/services';
 import { useLayoutEffect, useMemo, useState } from 'react';
 
 import { MainScreens } from '@/config';
 import { createAvatar } from '@/utils';
 import { useTranslation } from 'react-i18next';
+import React from 'react';
 
 interface Props {
   route: RouteProp<
@@ -53,9 +54,21 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      header: () => <Header backButton title={name} />,
+      header: () => <Header backButton title={name} onBackPress={() => navigation.navigate(MainScreens.GroupChatScreen, { roomKey, name })} />,
     });
   }, [name]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // This effect runs when the screen is focused
+      setStoreCurrentRoom(roomKey);
+  
+      return () => {
+
+      };
+    }, [roomKey])
+  );
+  
 
   // function onNameInput(value: string) {
   //   setGroupName(value);
