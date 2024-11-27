@@ -1,3 +1,5 @@
+import { AppState } from 'react-native';
+
 import {
   begin_send_file,
   end_swarm,
@@ -29,6 +31,23 @@ import {
   setStoreRooms,
 } from '../zustand';
 
+AppState.addEventListener('change', onAppStateChange);
+
+let current = '';
+async function onAppStateChange(state: string) {
+  if (state === 'inactive') {
+    console.log('Inactive state');
+    //I think this is for iPhone only
+  } else if (state === 'background') {
+    current = getCurrentRoom();
+    setStoreCurrentRoom('');
+    //Start background timer to shut off foreground task?
+  } else if (state === 'active') {
+    setStoreCurrentRoom(current);
+    //Reset timer?
+  }
+}
+
 export const setLatestRoomMessages = async () => {
   const rooms = await getLatestRoomMessages();
   const fixed = [];
@@ -49,7 +68,6 @@ export const setLatestRoomMessages = async () => {
 
 export const updateMessages = async (message: Message, history = false) => {
   const thisRoom = getCurrentRoom();
-
   if (thisRoom === message.room) {
     const messages = getRoomsMessages();
 
@@ -208,7 +226,9 @@ export const saveRoomMessageAndUpdate = async (
     updateMessages(newMessage);
   }
 
-  setLatestRoomMessages();
+  if (!history) {
+    setLatestRoomMessages();
+  }
 };
 
 export const createUserAddress = async () => {

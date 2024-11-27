@@ -1,8 +1,12 @@
+import { Platform } from 'react-native';
+
 import notifee from '@notifee/react-native';
 
 export async function notify({ text, name }, type: string) {
   // Request permissions (required for iOS)
-  await notifee.requestPermission();
+  if (Platform.OS === 'ios') {
+    await notifee.requestPermission();
+  }
   // Create a channel (required for Android)
   const channelId = await notifee.createChannel({
     id: 'hugin_notifiy',

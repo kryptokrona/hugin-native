@@ -44,7 +44,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       buttonOnPress: 'cray',
       buttonText: 'Close',
       color: '#000000',
-      icon: 'ic_launcher', //Hugin logo here**
+      icon: 'ic_launcher',
       id: 1244,
       message: 'Running in background',
       setOnlyAlertOnce: 'true',
@@ -84,21 +84,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       // do something when the app closed
       console.log('App not in focus.');
     });
-  }
-
-  AppState.addEventListener('change', onAppStateChange);
-
-  async function onAppStateChange(state: string) {
-    if (state === 'inactive') {
-      console.log('Inactive state');
-      //I think this is for iPhone only
-    } else if (state === 'background') {
-      console.log('background state');
-      //Start background timer to shut off foreground task?
-    } else if (state === 'active') {
-      console.log('active state');
-      //Reset timer?
-    }
   }
 
   const stopTasks = () => {
