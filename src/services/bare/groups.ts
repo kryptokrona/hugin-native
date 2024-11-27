@@ -44,6 +44,7 @@ async function onAppStateChange(state: string) {
     //Start background timer to shut off foreground task?
   } else if (state === 'active') {
     setStoreCurrentRoom(current);
+    current = '';
     //Reset timer?
   }
 }
@@ -68,7 +69,8 @@ export const setLatestRoomMessages = async () => {
 
 export const updateMessages = async (message: Message, history = false) => {
   const thisRoom = getCurrentRoom();
-  if (thisRoom === message.room) {
+  const inRoom = thisRoom === message.room;
+  if (inRoom || current) {
     const messages = getRoomsMessages();
 
     //Update reply
@@ -94,7 +96,9 @@ export const updateMessages = async (message: Message, history = false) => {
     }
     const updatedMessages = [...messages, message];
     setStoreRoomMessages(updatedMessages);
-  } else if (!history) {
+  }
+
+  if (!history && !inRoom) {
     notify({ name: message.nickname, text: message.message }, 'New message');
   }
 };
