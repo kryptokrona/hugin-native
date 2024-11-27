@@ -20,7 +20,7 @@ import { MainScreens } from '@/config';
 import {
   joinAndSaveRoom,
   setRoomMessages,
-  setStoreCurrentRoom,
+  setStoreRoomMessages,
   useGlobalStore,
   useUserStore,
 } from '@/services';
@@ -75,6 +75,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   }
 
   function onCreateRoom() {
+    setStoreRoomMessages([]);
     setModalVisible(false);
     navigation.navigate(MainScreens.AddGroupScreen);
   }
@@ -84,6 +85,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   }
 
   function onJoinpress() {
+    setStoreRoomMessages([]);
     const inviteKey = link.slice(-128);
     const parse = link.split('hugin://')[1];
     const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
