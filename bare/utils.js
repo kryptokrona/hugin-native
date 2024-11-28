@@ -53,6 +53,11 @@ function sign(m) {
   return;
 }
 
+function check_hash(hash) {
+  if (typeof hash !== 'string' || hash.length !== 64) return false;
+  return true;
+}
+
 const sanitize_join_swarm_data = (data) => {
   if (data?.address.length > 99 || data.address === undefined) return false;
   const address = sanitizeHtml(data.address);
@@ -297,9 +302,14 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function room_message_exists(hash) {
+  return await Hugin.request({ type: 'room-message-exists', hash });
+}
+
 module.exports = {
   get_new_peer_keys,
   sign,
+  room_message_exists,
   sanitize_join_swarm_data,
   sanitize_group_message,
   sanitize_voice_status_data,
@@ -312,4 +322,5 @@ module.exports = {
   sleep,
   check_if_image_or_video,
   sign_joined_message,
+  check_hash,
 };

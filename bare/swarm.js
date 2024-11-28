@@ -13,6 +13,8 @@ const {
   sanitize_file_message,
   check_if_image_or_video,
   sign_joined_message,
+  check_hash,
+  room_message_exists,
 } = require('./utils');
 const {
   send_file,
@@ -21,6 +23,7 @@ const {
   add_local_file,
   update_remote_file,
 } = require('./beam');
+
 const LOCAL_VOICE_STATUS_OFFLINE = {
   voice: false,
   video: false,
@@ -29,6 +32,13 @@ const LOCAL_VOICE_STATUS_OFFLINE = {
   audioMute: false,
   screenshare: false,
 };
+
+const MISSING_MESSAGES = 'missing-messages';
+const REQUEST_MESSAGES = 'request-messages';
+const REQUEST_HISTORY = 'request-history';
+const SEND_HISTORY = 'send-history';
+const PING_SYNC = 'Ping';
+
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
@@ -84,6 +94,7 @@ const create_swarm = async (hashkey, key) => {
     topic: room.topic,
     discovery: room.discovery,
     admin: admin ? true : false,
+    search: false,
   };
 
   active_swarms.push(active);
@@ -119,6 +130,8 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
     topic,
     video: false,
     voice: false,
+    knownHashes: [],
+    request: true,
   });
   send_joined_message(topic, dht_keys);
   connection.on('data', async (data) => {
@@ -387,12 +400,62 @@ const check_data_message = async (data, connection, topic) => {
         }
         if (con.admin) ban_user(data.address, topic);
         else return 'Error';
-      } else if (data.type === 'request-history' && con.request) {
-        send_history(con.address, topic, active.key);
-        con.request = false;
-      } else if (data.type === 'send-history' && con.request) {
-        process_request(data.messages, active.key);
-        con.request = false;
+        return true;
+      } else {
+        //Dont handle requests from blocked users
+        if (Hugin.blocked(con.address)) return true;
+        // History requests
+
+        //Start-up history sync
+        if (data.type === REQUEST_HISTORY && con.request) {
+          send_history(con.address, topic, active.key);
+          con.request = false;
+          return true;
+        } else if (data.type === SEND_HISTORY && con.request) {
+          process_request(data.messages, active.key);
+          con.request = false;
+          return true;
+        }
+
+        //Live syncing from other peers who might have connections to others not established yet by us.
+
+        const INC_HASHES = data.hashes?.length !== undefined;
+        const INC_MESSAGES = data.messages?.length !== undefined;
+        //Check if payload is too big
+        if (INC_HASHES) {
+          if (data.hashes?.length > 25) return 'Ban';
+        }
+
+        if (data.type === PING_SYNC && active.search && INC_HASHES) {
+          if (con.knownHashes.toString() === data.hashes.toString()) {
+            //Already know all the latest messages
+            con.request = false;
+            return true;
+          }
+          const missing = await check_missed_messages(
+            data.hashes,
+            con.address,
+            topic,
+          );
+          con.knownHashes = data.hashes;
+          if (!missing) return true;
+          con.request = true;
+          active.search = false;
+          request_missed_messages(missing, con.address, topic);
+          //Updated knownHashes from this connection
+        } else if (data.type === REQUEST_MESSAGES && INC_HASHES) {
+          send_missing_messages(data.hashes, con.address, topic);
+        } else if (
+          data.type === MISSING_MESSAGES &&
+          INC_MESSAGES &&
+          active.search &&
+          con.request
+        ) {
+          active.search = false;
+          con.request = false;
+          process_request(data.messages, active.key);
+        }
+        return true;
       }
     }
     //Dont display messages from blocked users
@@ -402,19 +465,60 @@ const check_data_message = async (data, connection, topic) => {
   }
 };
 
+const check_missed_messages = async (hashes) => {
+  console.log('Checking for missing messages');
+  const missing = [];
+  for (const hash of hashes) {
+    if (!check_hash(hash)) continue;
+    if (await room_message_exists(hash)) continue;
+    missing.push(hash);
+  }
+
+  if (missing.length > 0) {
+    console.log('Requesting:', missing.length, ' missed messages');
+    return missing;
+  }
+  console.log('Current state synced.');
+  return false;
+};
+
+const request_missed_messages = (hashes, address, topic) => {
+  const message = {
+    type: REQUEST_MESSAGES,
+    hashes,
+  };
+  send_peer_message(address, topic, hashes);
+};
+
+const send_missing_messages = async (hashes, address, topic) => {
+  const messages = [];
+  for (const hash of hashes) {
+    if (!check_hash(hash)) continue;
+    const found = await Hugin.request({ type: 'get-room-message', hash });
+    if (found) messages.push(found);
+  }
+  if (messages.length > 0) {
+    const message = {
+      type: MISSING_MESSAGES,
+      messages,
+    };
+    send_peer_message(address, topic, message);
+  }
+};
+
 const request_history = (address, topic) => {
   console.log('Reqeust history from another peer');
   const message = {
-    type: 'request-history',
+    type: REQUEST_HISTORY,
   };
   send_peer_message(address, topic, message);
 };
 
 const send_history = async (address, topic, key) => {
-  const messages = await Hugin.request({ type: 'history', key });
+  const messages = await Hugin.request({ type: 'get-room-history', key });
   console.log('Sending:', messages.length, 'messages');
   const history = {
-    type: 'send-history',
+    type: SEND_HISTORY,
     messages,
   };
   send_peer_message(address, topic, history);
@@ -435,7 +539,7 @@ const process_request = async (messages, key) => {
         n: m?.name ? m?.name : m?.nickname,
         hash: m?.hash,
       };
-      //Check if message exist here?
+      if (await room_message_exists(inc.hash)) continue;
       const message = sanitize_group_message(inc);
       if (!message) continue;
       //Save room message in background mode ??
@@ -730,15 +834,28 @@ const get_active_topic = (topic) => {
   return active;
 };
 
-const check_if_online = (topic) => {
+const check_if_online = async (topic) => {
   const interval = setInterval(ping, 10 * 1000);
-  function ping() {
-    const active = active_swarms.find((a) => a.topic === topic);
+  async function ping() {
+    const active = get_active_topic(topic);
+    const hashes = await Hugin.request({
+      type: 'get-latest-room-hashes',
+      key: active.key,
+    });
+    console.log('Hahses from backend', hashes.length);
     if (!active) {
       clearInterval(interval);
       return;
     } else {
-      active.connections.forEach((a) => a.connection.write('Ping'));
+      active.search = true;
+      let i = 0;
+      const data = { type: 'Ping' };
+      active.connections.forEach(async (a) => {
+        //Send hash state to half of online users to find missing messages.
+        if (i % 2 === 0) data.hashes = hashes;
+        a.connection.write(JSON.stringify(data));
+        i++;
+      });
     }
   }
 };
