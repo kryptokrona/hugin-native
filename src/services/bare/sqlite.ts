@@ -158,7 +158,7 @@ export async function getRoomMessages(
   page: number,
   history = false,
 ) {
-  const limit: number = 50;
+  const limit: number = 150;
   let offset: number = 0;
   if (page !== 0) {
     offset = page * limit;
@@ -237,12 +237,32 @@ export async function getRoomReplyMessage(hash: string) {
   results.forEach((result) => {
     const r = result.rows.item(0);
     if (r === undefined) {
-      return;
+      return false;
     }
     const res: Message = toMessage(r);
     reply.push(res);
   });
   return reply;
+}
+
+export async function getLatestRoomHashes(room: string) {
+  const hashes: Array<string> = [];
+  const results = await db.executeSql(
+    'SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT 0, 25',
+    [room],
+  );
+
+  results.forEach((result) => {
+    for (let index = 0; index < result.rows.length; index++) {
+      const r = result.rows.item(index);
+      if (r === undefined) {
+        continue;
+      }
+      hashes.push(r.hash);
+    }
+  });
+
+  return hashes;
 }
 
 export async function getRoomRepliesToMessage(hash: string) {
@@ -264,7 +284,7 @@ export async function getRoomRepliesToMessage(hash: string) {
   return replies;
 }
 
-async function roomMessageExists(hash: string) {
+export async function roomMessageExists(hash: string) {
   const groupMessageExists = `SELECT *
   FROM roomsmessages
   WHERE hash = '${hash}'
