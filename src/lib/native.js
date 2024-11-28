@@ -4,7 +4,12 @@ import RPC from 'tiny-buffer-rpc';
 import ce from 'compact-encoding';
 import { requireNativeModule } from 'expo-modules-core';
 import { rpc_message } from './rpc';
-import { getRoomMessages } from '@/services/bare/sqlite';
+import {
+  getRoomMessages,
+  roomMessageExists,
+  getRoomReplyMessage,
+  getLatestRoomHashes,
+} from '@/services/bare/sqlite';
 requireNativeModule('HelloBare').install();
 
 // forward bare's logs to console
@@ -38,18 +43,21 @@ rpc.register(2, {
     const request = JSON.parse(data);
     console.log('Got bare request', data);
     switch (request.type) {
-      case 'history':
+      case 'get-room-history':
         const messages = await getRoomMessages(request.key, 0, true);
         return JSON.stringify(messages);
+      case 'get-latest-room-hashes':
+        const hashes = await getLatestRoomHashes(request.key);
+        return JSON.stringify(hashes);
+      case 'room-message-exists':
+        const exists = await roomMessageExists(request.hash);
+        return JSON.stringify(exists);
+      case 'get-room-message':
+        const message = await getRoomReplyMessage(request.hash);
+        return JSON.stringify(message);
     }
   },
 });
-
-export const send_message_history = (history, room, address) => {
-  console.log('Send stream data', history);
-  const data = JSON.stringify({ type: 'send_history', history, room, adress });
-  mainRPC.request(data);
-};
 
 // Exported functions to client
 export const bare = async (user) => {
