@@ -217,14 +217,14 @@ const send_swarm_message = (message, topic) => {
   if (!active) {
     return;
   }
-  active.connections.forEach((chat) => {
+  for (const chat of active.connections) {
     try {
       console.log('Writing to channel');
       chat.connection.write(message);
     } catch (e) {
-      error_message('Connection offline');
+      continue
     }
-  });
+  };
 
   console.log('Swarm msg sent!');
 };
@@ -365,8 +365,9 @@ const check_data_message = async (data, connection, topic) => {
       con.request = true;
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
-      if (parseInt(active.time) > time) {
+      if (parseInt(active.time) > time && active.requests < 3) {
         request_history(joined.address, topic);
+        active.requests++
       }
 
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
@@ -419,8 +420,8 @@ const check_data_message = async (data, connection, topic) => {
 
         //Live syncing from other peers who might have connections to others not established yet by us.
 
-        const INC_HASHES = data.hashes?.length !== undefined;
-        const INC_MESSAGES = data.messages?.length !== undefined;
+        const INC_HASHES = data.hashes?.length !== undefined || 0
+        const INC_MESSAGES = data.messages?.length !== undefined || 0
         //Check if payload is too big
         if (INC_HASHES) {
           if (data.hashes?.length > 25) return 'Ban';
@@ -448,7 +449,6 @@ const check_data_message = async (data, connection, topic) => {
         } else if (
           data.type === MISSING_MESSAGES &&
           INC_MESSAGES &&
-          active.search &&
           con.request
         ) {
           active.search = false;
@@ -487,7 +487,7 @@ const request_missed_messages = (hashes, address, topic) => {
     type: REQUEST_MESSAGES,
     hashes,
   };
-  send_peer_message(address, topic, hashes);
+  send_peer_message(address, topic, message);
 };
 
 const send_missing_messages = async (hashes, address, topic) => {
@@ -842,7 +842,6 @@ const check_if_online = async (topic) => {
       type: 'get-latest-room-hashes',
       key: active.key,
     });
-    console.log('Hahses from backend', hashes.length);
     if (!active) {
       clearInterval(interval);
       return;
@@ -850,12 +849,13 @@ const check_if_online = async (topic) => {
       active.search = true;
       let i = 0;
       const data = { type: 'Ping' };
-      active.connections.forEach(async (a) => {
-        //Send hash state to half of online users to find missing messages.
-        if (i % 2 === 0) data.hashes = hashes;
-        a.connection.write(JSON.stringify(data));
-        i++;
-      });
+      for (const conn of active.connections) {
+        data.hashes = hashes
+        if (i > 4) {
+            if (i % 2 === 0) data.hashes = []
+        }
+        conn.connection.write(JSON.stringify(data))
+        i++
     }
   }
 };
