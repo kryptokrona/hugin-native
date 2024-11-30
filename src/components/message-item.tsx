@@ -1,13 +1,13 @@
-import { Avatar, TextField } from './_elements';
 import React, { useState } from 'react';
+
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import type { MainStackNavigationType } from '@/types';
-import { ModalBottom } from './_layout';
+import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 import { prettyPrintDate } from '@/utils';
-import { useNavigation } from '@react-navigation/native';
-import { useThemeStore } from '@/services';
+
+import { Avatar, TextField } from './_elements';
+import { ModalBottom } from './_layout';
 
 interface Props {
   inverted: boolean;
@@ -21,13 +21,13 @@ interface Props {
 export const MessageItem: React.FC<Props> = ({
   inverted,
   message,
-  avatar,
+  // avatar,
   date,
   address,
-  name,
+  // name,
 }) => {
-  const navigation = useNavigation<MainStackNavigationType>();
-  const [isPressed, setIsPressed] = useState(false);
+  // const navigation = useNavigation<MainStackNavigationType>();
+  const [_isPressed, setIsPressed] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const theme = useThemeStore((state) => state.theme);
   const dateString = prettyPrintDate(date);
@@ -53,7 +53,7 @@ export const MessageItem: React.FC<Props> = ({
       {!inverted && (
         <>
           <View style={styles.user}>
-            <Avatar base64={avatar} address={address} size={30} />
+            <Avatar base64={address} size={30} />
             <TextField size="small" style={styles.date}>
               {dateString}
             </TextField>

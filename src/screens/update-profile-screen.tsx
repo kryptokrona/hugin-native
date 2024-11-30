@@ -106,8 +106,8 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
-      <View style={styles.container}>
-        <View style={styles.top}>
+      <View>
+        <View>
           {/* <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
             <Avatar base64={avatar} address={address} size={70} />
             <View style={styles.avatarButton}>
@@ -209,9 +209,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
     width: 20,
   },
-  radioText: {
-    fontSize: 16,
-  },
+  // radioText: {
+  //   fontSize: 16,
+  // },
   radioUnselected: {
     borderColor: '#999',
     borderRadius: 10,

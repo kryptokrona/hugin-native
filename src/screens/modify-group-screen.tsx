@@ -1,3 +1,19 @@
+import React, { useLayoutEffect, useMemo } from 'react';
+
+import {
+  FlatList,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
 import {
   Card,
   CopyButton,
@@ -7,25 +23,13 @@ import {
   TextField,
   UserItem,
 } from '@/components';
-import {
-  FlatList,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { MainScreens } from '@/config';
+import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore } from '@/services';
 import {
   MainNavigationParamList,
   MainStackNavigationType,
   User,
 } from '@/types';
-import { RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
-import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore, useThemeStore } from '@/services';
-import { useLayoutEffect, useMemo, useState } from 'react';
-
-import { MainScreens } from '@/config';
-import { createAvatar } from '@/utils';
-import { useTranslation } from 'react-i18next';
-import React from 'react';
 
 interface Props {
   route: RouteProp<
@@ -38,11 +42,11 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
   const navigation = useNavigation<MainStackNavigationType>();
-  const theme = useThemeStore((state) => state.theme);
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const [groupName, setGroupName] = useState<string>(name); // route.params.name
-  const tempAvatar = createAvatar();
-  const isAdmin = false; // TBD
+  // const theme = useThemeStore((state) => state.theme);
+  // const [avatar, setAvatar] = useState<string | null>(null);
+  // const [groupName, setGroupName] = useState<string>(name); // route.params.name
+  // const tempAvatar = createAvatar();
+  // const isAdmin = false; // TBD
   // const theme = useThemeStore((state) => state.theme);
   // const [avatar, setAvatar] = useState<string | null>(null);
   // const [groupName, setGroupName] = useState<string>(name); // route.params.name
@@ -54,7 +58,15 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      header: () => <Header backButton title={name} onBackPress={() => navigation.navigate(MainScreens.GroupChatScreen, { roomKey, name })} />,
+      header: () => (
+        <Header
+          backButton
+          title={name}
+          onBackPress={() =>
+            navigation.navigate(MainScreens.GroupChatScreen, { name, roomKey })
+          }
+        />
+      ),
     });
   }, [name]);
 
@@ -62,13 +74,10 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     React.useCallback(() => {
       // This effect runs when the screen is focused
       setStoreCurrentRoom(roomKey);
-  
-      return () => {
 
-      };
-    }, [roomKey])
+      return () => {};
+    }, [roomKey]),
   );
-  
 
   // function onNameInput(value: string) {
   //   setGroupName(value);
@@ -154,25 +163,24 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  avatarButton: {
-    bottom: 12,
-    position: 'absolute',
-    right: 10,
-  },
-  avatarContainer: {
-    alignSelf: 'flex-start',
-    position: 'relative',
-  },
+  // avatarButton: {
+  //   bottom: 12,
+  //   position: 'absolute',
+  //   right: 10,
+  // },
+  // avatarContainer: {
+  //   alignSelf: 'flex-start',
+  //   position: 'relative',
+  // },
   flatListContainer: {
-    // height: 200,
     marginBottom: 12,
-  },
-  scrollViewContainer: {
-    flexGrow: 1,
-    paddingBottom: 20,
   },
   leaveContainer: {
     flex: 1,
     justifyContent: 'flex-end',
+  },
+  scrollViewContainer: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
 });
