@@ -222,9 +222,9 @@ const send_swarm_message = (message, topic) => {
       console.log('Writing to channel');
       chat.connection.write(message);
     } catch (e) {
-      continue
+      continue;
     }
-  };
+  }
 
   console.log('Swarm msg sent!');
 };
@@ -367,7 +367,7 @@ const check_data_message = async (data, connection, topic) => {
       //Request message history from peer connected before us.
       if (parseInt(active.time) > time && active.requests < 3) {
         request_history(joined.address, topic);
-        active.requests++
+        active.requests++;
       }
 
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
@@ -380,89 +380,89 @@ const check_data_message = async (data, connection, topic) => {
       console.log('Connection updated: Joined:', con.joined);
       return true;
     }
-    if ('voice' in data) {
-      const voice_status = check_peer_voice_status(data, con);
-      if (!voice_status) {
-        return 'Ban';
+  }
+  if ('voice' in data) {
+    const voice_status = check_peer_voice_status(data, con);
+    if (!voice_status) {
+      return 'Ban';
+    }
+    return true;
+  }
+
+  if (!con.joined) return 'Error';
+
+  if ('type' in data) {
+    if (data.type === 'ban') {
+      if (data.address === Hugin.address && con.admin) {
+        Hugin.send('banned', active.key);
+        Hugin.send('remove-room', active.key);
+        await sleep(777);
+        end_swarm(topic);
+        return;
+      }
+      if (con.admin) ban_user(data.address, topic);
+      else return 'Error';
+      return true;
+    } else {
+      //Dont handle requests from blocked users
+      if (Hugin.blocked(con.address)) return true;
+      // History requests
+
+      //Start-up history sync
+      if (data.type === REQUEST_HISTORY && con.request) {
+        send_history(con.address, topic, active.key);
+        con.request = false;
+        return true;
+      } else if (data.type === SEND_HISTORY && con.request) {
+        process_request(data.messages, active.key);
+        con.request = false;
+        return true;
+      }
+
+      //Live syncing from other peers who might have connections to others not established yet by us.
+
+      const INC_HASHES = data.hashes?.length !== undefined || 0;
+      const INC_MESSAGES = data.messages?.length !== undefined || 0;
+      //Check if payload is too big
+      if (INC_HASHES) {
+        if (data.hashes?.length > 25) return 'Ban';
+      }
+
+      if (data.type === PING_SYNC && active.search && INC_HASHES) {
+        if (con.knownHashes.toString() === data.hashes.toString()) {
+          //Already know all the latest messages
+          con.request = false;
+          return true;
+        }
+        const missing = await check_missed_messages(
+          data.hashes,
+          con.address,
+          topic,
+        );
+        con.knownHashes = data.hashes;
+        if (!missing) return true;
+        con.request = true;
+        active.search = false;
+        request_missed_messages(missing, con.address, topic);
+        //Updated knownHashes from this connection
+      } else if (data.type === REQUEST_MESSAGES && INC_HASHES) {
+        send_missing_messages(data.hashes, con.address, topic);
+      } else if (
+        data.type === MISSING_MESSAGES &&
+        INC_MESSAGES &&
+        con.request
+      ) {
+        active.search = false;
+        con.request = false;
+        process_request(data.messages, active.key);
       }
       return true;
     }
-
-    if (!con.joined) return 'Error';
-
-    if ('type' in data) {
-      if (data.type === 'ban') {
-        if (data.address === Hugin.address && con.admin) {
-          Hugin.send('banned', active.key);
-          Hugin.send('remove-room', active.key);
-          await sleep(777);
-          end_swarm(topic);
-          return;
-        }
-        if (con.admin) ban_user(data.address, topic);
-        else return 'Error';
-        return true;
-      } else {
-        //Dont handle requests from blocked users
-        if (Hugin.blocked(con.address)) return true;
-        // History requests
-
-        //Start-up history sync
-        if (data.type === REQUEST_HISTORY && con.request) {
-          send_history(con.address, topic, active.key);
-          con.request = false;
-          return true;
-        } else if (data.type === SEND_HISTORY && con.request) {
-          process_request(data.messages, active.key);
-          con.request = false;
-          return true;
-        }
-
-        //Live syncing from other peers who might have connections to others not established yet by us.
-
-        const INC_HASHES = data.hashes?.length !== undefined || 0
-        const INC_MESSAGES = data.messages?.length !== undefined || 0
-        //Check if payload is too big
-        if (INC_HASHES) {
-          if (data.hashes?.length > 25) return 'Ban';
-        }
-
-        if (data.type === PING_SYNC && active.search && INC_HASHES) {
-          if (con.knownHashes.toString() === data.hashes.toString()) {
-            //Already know all the latest messages
-            con.request = false;
-            return true;
-          }
-          const missing = await check_missed_messages(
-            data.hashes,
-            con.address,
-            topic,
-          );
-          con.knownHashes = data.hashes;
-          if (!missing) return true;
-          con.request = true;
-          active.search = false;
-          request_missed_messages(missing, con.address, topic);
-          //Updated knownHashes from this connection
-        } else if (data.type === REQUEST_MESSAGES && INC_HASHES) {
-          send_missing_messages(data.hashes, con.address, topic);
-        } else if (
-          data.type === MISSING_MESSAGES &&
-          INC_MESSAGES &&
-          con.request
-        ) {
-          active.search = false;
-          con.request = false;
-          process_request(data.messages, active.key);
-        }
-        return true;
-      }
-    }
-    //Dont display messages from blocked users
-    if (Hugin.blocked(con.address)) return;
-
-    return false;
   }
+  //Dont display messages from blocked users
+  if (Hugin.blocked(con.address)) return;
+
+  return false;
 };
 
 const check_missed_messages = async (hashes) => {
@@ -850,12 +850,13 @@ const check_if_online = async (topic) => {
       let i = 0;
       const data = { type: 'Ping' };
       for (const conn of active.connections) {
-        data.hashes = hashes
+        data.hashes = hashes;
         if (i > 4) {
-            if (i % 2 === 0) data.hashes = []
+          if (i % 2 === 0) data.hashes = [];
         }
-        conn.connection.write(JSON.stringify(data))
-        i++
+        conn.connection.write(JSON.stringify(data));
+        i++;
+      }
     }
   }
 };
