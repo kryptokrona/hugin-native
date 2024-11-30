@@ -41,7 +41,6 @@ rpc.register(2, {
   response: ce.string,
   onrequest: async (data) => {
     const request = JSON.parse(data);
-    console.log('Got bare request', data);
     switch (request.type) {
       case 'get-room-history':
         const messages = await getRoomMessages(request.key, 0, true);
