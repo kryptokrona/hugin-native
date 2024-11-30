@@ -24,7 +24,7 @@ export const Header: React.FC<Props> = ({
 }) => {
   const navigation = useNavigation();
   const theme = useThemeStore((state) => state.theme);
-  const avatar = useUserStore((state) => state.user?.avatar);
+  // const avatar = useUserStore((state) => state.user?.avatar);
   const address = useUserStore((state) => state.user?.address);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export const Header: React.FC<Props> = ({
         )}
       </View>
       <View style={styles.center}>
-        {title && <TextField>{title}</TextField>}
+        {title && <TextField maxLength={24}>{title}</TextField>}
       </View>
       <View style={styles.side}>{right}</View>
     </View>

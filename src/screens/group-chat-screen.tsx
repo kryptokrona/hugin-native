@@ -1,8 +1,17 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 
-import { type RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  type RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 
 import {
   CustomIcon,
@@ -27,7 +36,6 @@ import type {
 } from '@/types';
 
 import { Header } from '../components/_navigation/header';
-import React from 'react';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -63,14 +71,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     React.useCallback(() => {
       // This effect runs when the screen is focused
       setStoreCurrentRoom(roomKey);
-  
+
       return () => {
         // This cleanup runs when the screen is unfocused
-        setStoreCurrentRoom("null");
+        setStoreCurrentRoom('null');
       };
-    }, [roomKey])
+    }, [roomKey]),
   );
-  
+
   useLayoutEffect(() => {
     const isAdmin = true; // TODO
     const icon = isAdmin ? 'users-cog' : 'users';
@@ -177,13 +185,13 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         maxToRenderPerBatch={messages.length}
       />
 
-      <View style={styles.inputWrapper}>
+      <KeyboardAvoidingView style={styles.inputWrapper}>
         <MessageInput
           onSend={onSend}
           replyToName={replyToName}
           onCloseReplyPress={onCloseReplyPress}
         />
-      </View>
+      </KeyboardAvoidingView>
     </ScreenLayout>
   );
 };
@@ -196,6 +204,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     bottom: 0,
     left: 0,
+    paddingBottom: 10,
     position: 'absolute',
     right: 0,
   },

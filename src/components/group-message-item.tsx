@@ -1,3 +1,13 @@
+import { useEffect, useMemo, useState } from 'react';
+
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { useTranslation } from 'react-i18next';
+
+import { useThemeStore } from '@/services';
+import { Message } from '@/types';
+import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
+
 import {
   Avatar,
   CopyButton,
@@ -6,15 +16,8 @@ import {
   TextButton,
   TextField,
 } from './_elements';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
-import { useEffect, useMemo, useState } from 'react';
-
-import { EmojiPicker } from './emoji-picker';
-import { Message } from '@/types';
 import { ModalBottom } from './_layout';
-import { useThemeStore } from '@/services';
-import { useTranslation } from 'react-i18next';
+import { EmojiPicker } from './emoji-picker';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -140,6 +143,7 @@ export const GroupMessageItem: React.FC<Props> = ({
           </View>
         )}
       </ModalBottom>
+      {/* REPLY STUFF */}
       <View style={styles.content}>
         {replyto?.[0]?.nickname && (
           <View style={styles.replyContainer}>
@@ -210,6 +214,8 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     flexDirection: 'column',
+    overflow: 'visible',
+    width: '100%',
   },
   date: {
     marginLeft: 10,
@@ -227,10 +233,12 @@ const styles = StyleSheet.create({
   message: {
     flexShrink: 1,
     marginBottom: 8,
-    paddingRight: 10,
+    marginRight: 8,
+    paddingRight: 20,
   },
   messageContainer: {
     flexDirection: 'row',
+    overflow: 'visible',
   },
 
   replyContainer: {
