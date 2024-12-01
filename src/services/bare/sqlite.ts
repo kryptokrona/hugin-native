@@ -117,11 +117,11 @@ export async function getRooms() {
   const rooms: Array<any> = [];
   //const rooms: Room[] = [];
 
-  results.forEach((result) => {
+  for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       rooms.push(result.rows.item(index));
     }
-  });
+  }
 
   return rooms;
 }
@@ -136,7 +136,7 @@ export async function getLatestRoomMessages() {
       [room.key],
     );
 
-    results.forEach((result) => {
+    for (const result of results) {
       const latestmessagedb = result.rows.item(0);
       if (latestmessagedb === undefined) {
         return;
@@ -147,7 +147,7 @@ export async function getLatestRoomMessages() {
         roomKey: room.key,
         timestamp: latestmessagedb.timestamp,
       });
-    });
+    }
   }
 
   return roomsList;
@@ -158,7 +158,7 @@ export async function getRoomMessages(
   page: number,
   history = false,
 ) {
-  const limit: number = 150;
+  const limit: number = 75;
   let offset: number = 0;
   if (page !== 0) {
     offset = page * limit;
@@ -192,10 +192,8 @@ async function setReplies(results: [ResultSet]) {
       if (res === undefined) {
         continue;
       }
-      // TODO ** add replies and replyto, sort emojis?
       //The original message this one is replying to
       res.replyto = await getRoomReplyMessage(res.reply);
-      //await getRoomRepliesToMessage(res.hash);
 
       //This message is already displayed as a reaction on someone elses message
       if (
@@ -234,14 +232,14 @@ export async function getRoomReplyMessage(hash: string) {
     'SELECT * FROM roomsmessages WHERE hash = ? ORDER BY timestamp ASC',
     [hash],
   );
-  results.forEach((result) => {
+  for (const result of results) {
     const r = result.rows.item(0);
     if (r === undefined) {
       return false;
     }
     const res: Message = toMessage(r);
     reply.push(res);
-  });
+  }
   return reply;
 }
 
@@ -252,7 +250,7 @@ export async function getLatestRoomHashes(room: string) {
     [room],
   );
 
-  results.forEach((result) => {
+  for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const r = result.rows.item(index);
       if (r === undefined) {
@@ -260,7 +258,7 @@ export async function getLatestRoomHashes(room: string) {
       }
       hashes.push(r.hash);
     }
-  });
+  }
 
   return hashes;
 }
@@ -271,7 +269,7 @@ export async function getRoomRepliesToMessage(hash: string) {
     'SELECT * FROM roomsmessages WHERE reply = ? ORDER BY timestamp ASC',
     [hash],
   );
-  results.forEach((result) => {
+  for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const r = result.rows.item(index);
       if (r === undefined) {
@@ -280,7 +278,7 @@ export async function getRoomRepliesToMessage(hash: string) {
       const res: Message = toMessage(r);
       replies.push(res);
     }
-  });
+  }
   return replies;
 }
 
