@@ -80,8 +80,8 @@ const create_swarm = async (hashkey, key) => {
   const room = new Room();
   const connected = await room.join(hashkey);
   if (!connected) return;
-
   const admin = is_admin(key);
+  if (!admin) Hugin.send('syncing-history', { key });
 
   const active = {
     call: [],
@@ -525,6 +525,7 @@ const send_history = async (address, topic, key) => {
 };
 
 const process_request = async (messages, key) => {
+  let i = 0;
   try {
     for (const m of messages) {
       if (m?.address === Hugin.address) continue;
@@ -544,10 +545,11 @@ const process_request = async (messages, key) => {
       if (!message) continue;
       //Save room message in background mode ??
       message.history = true;
+      i++;
       Hugin.send('swarm-message', { message });
     }
     //Trigger update when all messages are synced? here.
-    Hugin.send('history-update', { key });
+    Hugin.send('history-update', { key, i });
   } catch (e) {
     console.log('error processing history', e);
   }

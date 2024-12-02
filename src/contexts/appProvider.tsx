@@ -46,7 +46,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       color: '#000000',
       icon: 'ic_launcher',
       id: 1244,
-      message: 'Running in background',
+      message: 'Syncing messages...',
       setOnlyAlertOnce: 'true',
       title: 'Hugin',
       visibility: 'public',

@@ -2,6 +2,7 @@ import { peerConnected, peerDisconncted } from '@/services/bare/connections.ts';
 import { saveRoomMessageAndUpdate, setRoomMessages } from '@/services/bare';
 import { getCurrentRoom } from '@/services/zustand';
 import { sleep } from '@/utils';
+import Toast from 'react-native-toast-message';
 
 const rpc_message = async (m) => {
   const json = parse(m);
@@ -41,6 +42,19 @@ const rpc_message = async (m) => {
         await sleep(500);
         if (getCurrentRoom() === json.key) {
           setRoomMessages(json.key, 0);
+          Toast.show({
+            type: 'success',
+            text1: 'Synced ✅',
+            text2: `${json.i} messages in room`,
+          });
+        }
+        break;
+      case 'syncing-history':
+        if (getCurrentRoom() === json.key) {
+          Toast.show({
+            type: 'info',
+            text1: 'Syncing history...',
+          });
         }
         break;
       case 'peer-connected':

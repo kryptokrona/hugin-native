@@ -62,7 +62,6 @@ rpc.register(0, {
         request_download(p.file);
         break;
       case 'keep_alive':
-        console.log('Bare alive');
         break;
       default:
         console.log('Unknown RPC type:', p.type);
