@@ -200,7 +200,7 @@ export async function getRoomMessages(
   page: number,
   history = false,
 ) {
-  const limit: number = 75;
+  const limit: number = history ? 25 : 75;
   let offset: number = 0;
   if (page !== 0) {
     offset = page * limit;
