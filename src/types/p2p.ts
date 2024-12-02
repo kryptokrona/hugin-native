@@ -60,3 +60,11 @@ export interface FileInput extends SelectedFile {
   message: string;
   sig?: string;
 }
+
+export interface FileInfo {
+  fileName: string;
+  path: string;
+  timestamp: number;
+  sent: boolean;
+  hash: string;
+}

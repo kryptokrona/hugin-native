@@ -36,6 +36,7 @@ const rpc_message = async (m) => {
           json.message.hash,
           false,
           json.message.history,
+          json.message.file,
         );
         break;
       case 'history-update':

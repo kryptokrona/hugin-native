@@ -10,7 +10,7 @@ import {
   swarm,
 } from 'lib/native';
 
-import type { FileInput, Message, SelectedFile } from '@/types';
+import type { FileInfo, FileInput, Message, SelectedFile } from '@/types';
 import { containsOnlyEmojis, sleep } from '@/utils';
 
 import { naclHash, newKeyPair, randomKey } from './crypto';
@@ -22,6 +22,7 @@ import {
   saveAccount,
   saveRoomToDatabase,
   saveRoomMessage,
+  saveFileInfo,
 } from './sqlite';
 
 import { notify } from '../utils';
@@ -224,7 +225,12 @@ export const saveRoomMessageAndUpdate = async (
   hash: string,
   sent: boolean,
   history: boolean | undefined = false,
+  file: FileInfo | undefined | boolean,
 ) => {
+  if (typeof file === 'object') {
+    await saveFileInfo(file);
+  }
+
   const newMessage = await saveRoomMessage(
     address,
     message,

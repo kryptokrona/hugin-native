@@ -5,7 +5,7 @@ import {
   openDatabase,
 } from 'react-native-sqlite-storage';
 
-import { Message } from '@/types';
+import { FileInfo, Message } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
 enablePromise(true);
@@ -87,6 +87,30 @@ export async function saveAccount(pk: string, sk: string) {
 export async function loadAccount() {
   const results = await db.executeSql('SELECT * FROM account');
   return results[0].rows.item(0);
+}
+
+export async function saveFileInfo(file: FileInfo) {
+  console.log('Saving room ', file);
+  try {
+    await db.executeSql(
+      'REPLACE INTO files (fileName, hash, timestamp, sent, path)  VALUES (?, ?, ?, ?, ?)',
+      [file.fileName, file.hash, file.timestamp, file.sent, file.path],
+    );
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function loadSavedFiles() {
+  const results = await db.executeSql('SELECT * FROM files');
+  const files: Array<FileInfo> = [];
+
+  for (const result of results) {
+    for (let index = 0; index < result.rows.length; index++) {
+      files.push(result.rows.item(index));
+    }
+  }
+  return files;
 }
 
 export async function saveRoomToDatabase(

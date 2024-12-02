@@ -329,11 +329,19 @@ const download_file = async (fileName, size, chat, key, room = false) => {
           channel: 'Room',
           room,
           hash: file.hash,
-          message: JSON.stringify({ fileName, path: downloadPath }),
+          message: fileName,
           name: 'File shared',
           reply: false,
           sent: false,
           timestamp: file.time,
+          history: false,
+          file: {
+            fileName,
+            path: downloadPath,
+            timestamp: file.time,
+            hash: file.hash,
+            sent: false,
+          },
         };
         Hugin.send('swarm-message', { message });
       } else {
