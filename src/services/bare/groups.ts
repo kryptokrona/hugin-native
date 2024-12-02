@@ -1,5 +1,7 @@
 import { AppState } from 'react-native';
 
+import Toast from 'react-native-toast-message';
+
 import {
   begin_send_file,
   end_swarm,
@@ -99,7 +101,15 @@ export const updateMessages = async (message: Message, history = false) => {
   }
 
   if (!history && !inRoom) {
-    notify({ name: message.nickname, text: message.message }, 'New message');
+    if (current.length === 0) {
+      Toast.show({
+        text1: message.nickname,
+        text2: message.message,
+        type: 'success',
+      });
+    } else {
+      notify({ name: message.nickname, text: message.message }, 'New message');
+    }
   }
 };
 
