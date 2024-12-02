@@ -640,7 +640,7 @@ const share_file_info = async (file, topic) => {
     sig: file.sig,
   };
 
-  const image = check_if_image_or_video(data.fileName, data.size);
+  const image = check_if_image_or_video(file.fileName, file.size);
 
   const message = {
     address: Hugin.address,
