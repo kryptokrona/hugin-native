@@ -93,8 +93,15 @@ export async function saveFileInfo(file: FileInfo) {
   console.log('Saving room ', file);
   try {
     await db.executeSql(
-      'REPLACE INTO files (fileName, hash, timestamp, sent, path)  VALUES (?, ?, ?, ?, ?)',
-      [file.fileName, file.hash, file.timestamp, file.sent, file.path],
+      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image)  VALUES (?, ?, ?, ?, ?, ?)',
+      [
+        file.fileName,
+        file.hash,
+        file.timestamp,
+        file.sent,
+        file.path,
+        file.image,
+      ],
     );
   } catch (err) {
     console.log(err);
@@ -221,6 +228,7 @@ export async function getRoomMessages(
 
 async function setReplies(results: [ResultSet]) {
   const messages: Message[] = [];
+  const files = await loadSavedFiles();
   for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const res = result.rows.item(index);
@@ -228,8 +236,12 @@ async function setReplies(results: [ResultSet]) {
         continue;
       }
       //The original message this one is replying to
-      res.replyto = await getRoomReplyMessage(res.reply);
+      res.replyto = await getRoomReplyMessage(res.reply, files);
+      const file = files.find((a) => a.hash === res.hash);
 
+      if (file) {
+        res.file = file;
+      }
       //This message is already displayed as a reaction on someone elses message
       if (
         res.replyto.length &&
@@ -261,7 +273,10 @@ function addEmoji(replies: Message[]) {
   return reactions;
 }
 
-export async function getRoomReplyMessage(hash: string) {
+export async function getRoomReplyMessage(
+  hash: string,
+  files: Array<FileInfo>,
+) {
   const reply: Message[] = [];
   const results = await db.executeSql(
     'SELECT * FROM roomsmessages WHERE hash = ? ORDER BY timestamp ASC',
@@ -272,7 +287,12 @@ export async function getRoomReplyMessage(hash: string) {
     if (r === undefined) {
       return false;
     }
+    const file = files.find((a: FileInfo) => a.hash === r.hash);
+    if (file) {
+      r.file = file;
+    }
     const res: Message = toMessage(r);
+
     reply.push(res);
   }
   return reply;
@@ -382,6 +402,8 @@ const deleteAllData = async () => {
 const toMessage = (res: any) => {
   const message: Message = {
     address: res.address,
+
+    file: res.file,
 
     //Hash identifier of the message
     hash: res.hash,

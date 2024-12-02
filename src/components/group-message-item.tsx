@@ -34,6 +34,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   userAddress,
   reactions,
   replyHash,
+  file,
   onReplyToMessagePress,
   onEmojiReactionPress,
   replyto,
@@ -53,10 +54,9 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isImageMessage: boolean = false;
       let imagePath = '';
 
-      const parsedMessage = JSON.parse(message ?? '');
-      if (parsedMessage?.path) {
+      if (file?.path && file?.image) {
         isImageMessage = true;
-        imagePath = 'file://' + parsedMessage.path;
+        imagePath = 'file://' + file.path;
       }
 
       return { imagePath, isImageMessage };
@@ -68,8 +68,8 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isImageMessage: boolean = false;
       let imagePath = '';
 
-      const parsedMessage = JSON.parse(replyto?.[0].message ?? '');
-      if (parsedMessage?.path) {
+      const parsedMessage = replyto?.[0].file;
+      if (parsedMessage?.path && parsedMessage?.image) {
         isImageMessage = true;
         imagePath = 'file://' + parsedMessage.path;
       }

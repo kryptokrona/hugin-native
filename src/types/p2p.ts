@@ -25,7 +25,7 @@ export interface Message {
   sent: boolean;
   reactions?: string[];
   joined?: boolean;
-  file?: File | boolean;
+  file?: FileInfo;
   replyto?: Message[] | undefined;
   replies?: Message[] | undefined;
 }
@@ -67,4 +67,5 @@ export interface FileInfo {
   timestamp: number;
   sent: boolean;
   hash: string;
+  image: boolean;
 }

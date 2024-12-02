@@ -54,19 +54,6 @@ async function onAppStateChange(state: string) {
 
 export const setLatestRoomMessages = async () => {
   const rooms = await getLatestRoomMessages();
-  const fixed = [];
-  for (const room of rooms) {
-    try {
-      const m = JSON.parse(room.message);
-      if (m?.fileName) {
-        room.message = m.fileName;
-      }
-      fixed.push(room);
-    } catch (e) {
-      fixed.push(room);
-    }
-  }
-
   setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
 };
 

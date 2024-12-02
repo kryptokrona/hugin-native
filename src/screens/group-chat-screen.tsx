@@ -177,6 +177,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               replyHash={item.hash}
               reactions={item.reactions!}
               replyto={item.replyto}
+              file={item.file!}
             />
           );
         }}

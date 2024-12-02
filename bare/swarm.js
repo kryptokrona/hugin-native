@@ -566,7 +566,7 @@ const save_file_info = (data, topic, address, time, sent, name) => {
     hash: data.hash,
     reply: '',
     sent: sent,
-    file: true,
+    file: false,
   };
   Hugin.send('swarm-message', { message });
 };
@@ -640,19 +640,26 @@ const share_file_info = async (file, topic) => {
     sig: file.sig,
   };
 
-  const image = check_if_image_or_video(file.fileName, file.size);
+  const image = check_if_image_or_video(data.fileName, data.size);
 
   const message = {
     address: Hugin.address,
     name: Hugin.name,
-    message: image
-      ? JSON.stringify({ path: file.path, fileName: file.fileName })
-      : file.fileName,
+    message: file.fileName,
     hash: fileInfo.hash,
     timestamp: file.time,
     room: active.key,
     reply: '',
     sent: true,
+    history: false,
+    file: {
+      path: file.path,
+      fileName: file.fileName,
+      timestamp: file.time,
+      hash: fileInfo.hash,
+      sent: true,
+      image,
+    },
   };
 
   //Send our file info to front end as message

@@ -341,6 +341,7 @@ const download_file = async (fileName, size, chat, key, room = false) => {
             timestamp: file.time,
             hash: file.hash,
             sent: false,
+            image: true,
           },
         };
         Hugin.send('swarm-message', { message });
