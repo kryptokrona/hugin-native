@@ -133,7 +133,7 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
     knownHashes: [],
     request: true,
   });
-  send_joined_message(topic, dht_keys);
+  send_joined_message(topic, dht_keys, connection);
   connection.on('data', async (data) => {
     incoming_message(data, topic, connection, peer);
   });
@@ -171,7 +171,7 @@ const is_admin = (key) => {
   return Hugin.rooms.find((a) => a.key === key && a.admin)?.admin;
 };
 
-const send_joined_message = async (topic, dht_keys) => {
+const send_joined_message = async (topic, dht_keys, connection) => {
   //Use topic as signed message?
   const msg = topic;
   const active = get_active_topic(topic);
@@ -209,7 +209,7 @@ const send_joined_message = async (topic, dht_keys) => {
     screenshare,
   });
 
-  send_swarm_message(data, topic);
+  connection.write(data);
 };
 
 const send_swarm_message = (message, topic) => {
@@ -454,7 +454,7 @@ const check_data_message = async (data, connection, topic) => {
       ) {
         active.search = false;
         con.request = false;
-        process_request(data.messages, active.key);
+        process_request(data.messages, active.key, true);
       }
       return true;
     }
@@ -524,7 +524,7 @@ const send_history = async (address, topic, key) => {
   send_peer_message(address, topic, history);
 };
 
-const process_request = async (messages, key) => {
+const process_request = async (messages, key, live = false) => {
   let i = 0;
   try {
     for (const m of messages) {
@@ -534,7 +534,7 @@ const process_request = async (messages, key) => {
         m: m?.message,
         k: m?.address,
         s: m?.signature,
-        t: m?.time ? m?.time : m?.timestamp,
+        t: live ? Date.now() : m?.time ? m.time : m?.timestamp,
         g: m?.grp ? m?.grp : m?.room,
         r: m?.reply,
         n: m?.name ? m?.name : m?.nickname,
