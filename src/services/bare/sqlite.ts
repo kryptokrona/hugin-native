@@ -53,11 +53,12 @@ export const initDB = async () => {
     await db.executeSql(acc);
 
     const files = `CREATE TABLE IF NOT EXISTS files ( 
-      name TEXT,
+      fileName TEXT,
       hash TEXT,
       timestamp INT,
       sent BOOLEAN,
       path TEXT,
+      image BOOLEAN,
       UNIQUE (hash)
     )`;
     await db.executeSql(files);

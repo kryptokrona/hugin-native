@@ -212,9 +212,11 @@ export const saveRoomMessageAndUpdate = async (
   hash: string,
   sent: boolean,
   history: boolean | undefined = false,
-  file: FileInfo | undefined | boolean,
+  file: FileInfo | undefined,
 ) => {
+  let isFile = false;
   if (typeof file === 'object') {
+    isFile = true;
     await saveFileInfo(file);
   }
 
@@ -230,6 +232,9 @@ export const saveRoomMessageAndUpdate = async (
   );
 
   if (newMessage && !history) {
+    if (isFile) {
+      newMessage.file = file;
+    }
     updateMessages(newMessage);
   }
 
