@@ -51,6 +51,17 @@ export const initDB = async () => {
     secretKey TEXT
   )`;
     await db.executeSql(acc);
+
+    const files = `CREATE TABLE IF NOT EXISTS files ( 
+      name TEXT,
+      hash TEXT,
+      timestamp INT,
+      sent BOOLEAN,
+      path TEXT,
+      UNIQUE (hash)
+    )`;
+    await db.executeSql(files);
+
     create = true;
   } catch (err) {
     console.log(err);
