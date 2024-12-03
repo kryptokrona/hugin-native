@@ -363,12 +363,9 @@ export async function saveRoomMessage(
   if (!message || message?.length === 0) {
     return false;
   }
-  if (await roomMessageExists(hash)) {
-    return false;
-  }
   try {
     await db.executeSql(
-      'INSERT INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
     );
 

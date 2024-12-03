@@ -53,9 +53,14 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   // const tempAvatar = createAvatar();
   // const isAdmin = false; // TBD
   const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
-    (a) => a.room == roomKey,
+    (a) => a.room === roomKey,
   );
 
+  const online = useMemo(() => {
+    return roomUsers;
+  }, [roomUsers]);
+
+  console.log('online', roomUsers.length);
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -118,7 +123,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           <FlatList
             nestedScrollEnabled={true}
             numColumns={2}
-            data={roomUsers}
+            data={online}
             renderItem={OnlineUserMapper}
             keyExtractor={(item, i) => `${item.name}-${i}`}
           />

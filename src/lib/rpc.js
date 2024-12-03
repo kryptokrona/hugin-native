@@ -1,8 +1,12 @@
-import { peerConnected, peerDisconncted } from '@/services/bare/connections.ts';
-import { saveRoomMessageAndUpdate, setRoomMessages } from '@/services/bare';
+import {
+  saveRoomMessageAndUpdate,
+  setRoomMessages,
+  setLatestRoomMessages,
+} from '@/services/bare';
 import { getCurrentRoom } from '@/services/zustand';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
+import { Peers } from 'lib/connections';
 
 const rpc_message = async (m) => {
   const json = parse(m);
@@ -11,7 +15,7 @@ const rpc_message = async (m) => {
     return;
   }
   if (json) {
-    console.log('Got rpc message', json);
+    console.log('Got rpc message', json.type);
     switch (json.type) {
       case 'new-swarm':
         console.log('new swarm!');
@@ -43,12 +47,15 @@ const rpc_message = async (m) => {
         await sleep(500);
         if (getCurrentRoom() === json.key) {
           setRoomMessages(json.key, 0);
-          Toast.show({
-            type: 'success',
-            text1: 'Synced ✅',
-            text2: `${json.i} messages in room`,
-          });
+          if (json.history) {
+            Toast.show({
+              type: 'success',
+              text1: 'Synced ✅',
+              text2: `${json.i} messages in room`,
+            });
+          }
         }
+        setLatestRoomMessages();
         break;
       case 'syncing-history':
         if (getCurrentRoom() === json.key) {
@@ -59,12 +66,12 @@ const rpc_message = async (m) => {
         }
         break;
       case 'peer-connected':
-        console.log('peer-connected!', json);
-        peerConnected(json.joined);
+        console.log('peer-connected!', json.joined.name);
+        Peers.join(json.joined);
         break;
       case 'peer-disconnected':
-        console.log('peer-disconnected!', json);
-        peerDisconncted(json.disconnected);
+        console.log('peer-disconnected!', json.address);
+        Peers.left(json);
         break;
       case 'voice-channel-status':
         console.log('Voice channel status');

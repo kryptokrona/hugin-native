@@ -58,7 +58,7 @@ class Room {
     const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
     const topic = base_keys.publicKey.toString('hex');
     const hash = Buffer.alloc(32).fill(topic);
-    console.log('Joining topic: ', topic);
+    console.log('Joining room....');
     try {
       this.swarm = new HyperSwarm({}, sig, dht_keys, base_keys);
     } catch (e) {
@@ -322,7 +322,7 @@ const check_data_message = async (data, connection, topic) => {
   if (typeof data === 'object') {
     if ('joined' in data) {
       const joined = sanitize_join_swarm_data(data);
-      console.log('joined check', joined);
+      console.log('joined the lobby', joined?.name);
       if (!joined) {
         return 'Ban';
       }
@@ -377,7 +377,7 @@ const check_data_message = async (data, connection, topic) => {
       //     }
 
       Hugin.send('peer-connected', { joined });
-      console.log('Connection updated: Joined:', con.joined);
+      console.log('Connection updated: Joined:', con.joined.name);
       return true;
     }
   }
@@ -527,14 +527,14 @@ const send_history = async (address, topic, key) => {
 const process_request = async (messages, key, live = false) => {
   let i = 0;
   try {
-    for (const m of messages) {
+    for (const m of messages.reverse()) {
       if (m?.address === Hugin.address) continue;
-      if (m?.hash.length !== 64) continue;
+      if (m?.hash?.length !== 64) continue;
       const inc = {
         m: m?.message,
         k: m?.address,
         s: m?.signature,
-        t: live ? Date.now() : m?.time ? m.time : m?.timestamp,
+        t: m?.time ? m.time : m?.timestamp,
         g: m?.grp ? m?.grp : m?.room,
         r: m?.reply,
         n: m?.name ? m?.name : m?.nickname,
@@ -544,7 +544,7 @@ const process_request = async (messages, key, live = false) => {
       const message = sanitize_group_message(inc);
       if (!message) continue;
       //Save room message in background mode ??
-      message.history = true;
+      if (!live) message.history = true;
       i++;
       Hugin.send('swarm-message', { message });
     }
@@ -759,9 +759,8 @@ const connection_closed = (conn, topic) => {
   if (!user) {
     return;
   }
-  const disconnected = { address: user.address, key: active.key };
   // Hugin.send('close-voice-channel-with-peer', user.address);
-  Hugin.send('peer-disconnected', { disconnected });
+  Hugin.send('peer-disconnected', { address: user.address, key: active.key });
   const still_active = active.connections.filter((a) => a.connection !== conn);
   console.log('Connection closed');
   console.log('Still active:', still_active);
