@@ -237,7 +237,7 @@ async function setReplies(results: [ResultSet]) {
         continue;
       }
       //The original message this one is replying to
-      res.replyto = await getRoomReplyMessage(res.reply, files);
+      res.replyto = await getRoomReplyMessage(res.reply);
       const file = files.find((a) => a.hash === res.hash);
 
       if (file) {
@@ -274,11 +274,9 @@ function addEmoji(replies: Message[]) {
   return reactions;
 }
 
-export async function getRoomReplyMessage(
-  hash: string,
-  files: Array<FileInfo>,
-) {
+export async function getRoomReplyMessage(hash: string) {
   const reply: Message[] = [];
+  const files = await loadSavedFiles();
   const results = await db.executeSql(
     'SELECT * FROM roomsmessages WHERE hash = ? ORDER BY timestamp ASC',
     [hash],
