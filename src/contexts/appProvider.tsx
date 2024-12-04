@@ -5,12 +5,13 @@ import { AppState, Platform, SafeAreaView } from 'react-native';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 
 import { bare, keep_alive } from 'lib/native';
+import { Connection, Files } from 'services/bare/globals';
 
 import { useGlobalStore, useUserStore } from '@/services';
 import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
-import { initDB, loadAccount } from '../services/bare/sqlite';
+import { initDB, loadAccount, loadSavedFiles } from '../services/bare/sqlite';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -64,8 +65,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       }
     }
     await initDB();
+    Connection.listen();
     const keys = await loadAccount();
     user.keys = keys;
+    Files.update(await loadSavedFiles());
     await bare(user);
     await setLatestRoomMessages();
     await sleep(100);
