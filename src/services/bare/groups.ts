@@ -6,6 +6,7 @@ import {
   begin_send_file,
   end_swarm,
   group_random_key,
+  send_idle_status,
   send_swarm_msg,
   swarm,
 } from 'lib/native';
@@ -42,12 +43,15 @@ async function onAppStateChange(state: string) {
     console.log('Inactive state');
     //I think this is for iPhone only
   } else if (state === 'background') {
+    send_idle_status(true);
     current = getCurrentRoom();
     setStoreCurrentRoom('');
     //Start background timer to shut off foreground task?
   } else if (state === 'active') {
+    send_idle_status(false);
     setStoreCurrentRoom(current);
     current = '';
+
     //Reset timer?
   }
 }
@@ -84,7 +88,9 @@ export const updateMessages = async (message: Message, history = false) => {
         message.replyto = [reply];
       }
     }
-    const updatedMessages = [...messages, message];
+    const updatedMessages = [...messages, message].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
     setStoreRoomMessages(updatedMessages);
   }
 
