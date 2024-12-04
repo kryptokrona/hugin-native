@@ -63,6 +63,9 @@ rpc.register(0, {
         break;
       case 'keep_alive':
         break;
+      case 'idle_status':
+        Hugin.sleep(p.mode);
+        break;
       default:
         console.log('Unknown RPC type:', p.type);
     }

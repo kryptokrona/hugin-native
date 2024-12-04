@@ -11,6 +11,7 @@ class Account {
     this.keys = {};
     this.bannedList = [];
     this.blockList = [];
+    this.sleeping = false;
   }
 
   init(data, sender, req) {
@@ -62,6 +63,14 @@ class Account {
     const r = await this.req.request(JSON.stringify(data));
     const parse = JSON.parse(r);
     return parse;
+  }
+
+  sleep(mode) {
+    this.sleeping = mode;
+  }
+
+  idle() {
+    return this.sleeping;
   }
 }
 

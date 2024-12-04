@@ -52,7 +52,7 @@ rpc.register(2, {
         const exists = await roomMessageExists(request.hash);
         return JSON.stringify(exists);
       case 'get-room-message':
-        const message = await getRoomReplyMessage(request.hash);
+        const message = await getRoomReplyMessage(request.hash, true);
         return JSON.stringify(message);
     }
   },
@@ -102,9 +102,14 @@ export const begin_send_file = (json_file_data) => {
   return mainRPC.request(data);
 };
 
-export const keep_alive = (json_file_data) => {
+export const keep_alive = () => {
   const data = JSON.stringify({ type: 'keep_alive' });
-  return mainRPC.request(data);
+  mainRPC.request(data);
+};
+
+export const send_idle_status = (status) => {
+  const data = JSON.stringify({ type: 'idle_status', mode: status });
+  mainRPC.request(data);
 };
 
 // Function to test wallet support for different JS engines
