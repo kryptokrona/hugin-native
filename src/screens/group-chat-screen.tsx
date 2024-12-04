@@ -67,6 +67,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     });
   }
 
+  const scrollToBottom = () => {
+    flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+  };
+
+  scrollToBottom();
+
   useFocusEffect(
     React.useCallback(() => {
       // This effect runs when the screen is focused
@@ -108,10 +114,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   //     clearTimeout(timeout);
   //   };
   // }, []);
-
-  const scrollToBottom = () => {
-    flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
-  };
 
   async function onSend(
     text: string,
