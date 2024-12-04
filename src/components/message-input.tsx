@@ -1,13 +1,16 @@
-import { CameraOptions, launchCamera } from 'react-native-image-picker';
-import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
-import DocumentPicker, { types } from 'react-native-document-picker';
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { Styles, commonInputProps } from '@/styles';
 
-import type { SelectedFile } from '@/types';
-import { useThemeStore } from '@/services';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+
 import { useTranslation } from 'react-i18next';
+import DocumentPicker, { types } from 'react-native-document-picker';
+import { CameraOptions, launchCamera } from 'react-native-image-picker';
+
+import { useThemeStore } from '@/services';
+import { Styles, commonInputProps } from '@/styles';
+import type { SelectedFile } from '@/types';
+
+import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
@@ -28,7 +31,7 @@ export const MessageInput: React.FC<Props> = ({
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const color = focus ? theme.accentForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
-
+  const [height, setHeight] = useState(40);
   async function onCameraPress() {
     const options: CameraOptions = {
       mediaType: 'photo',
@@ -96,7 +99,7 @@ export const MessageInput: React.FC<Props> = ({
     if (text.trim() || selectedFile) {
       const trimmedText = text.trim() || '';
       onSend(trimmedText, selectedFile);
-
+      setHeight(40);
       setText('');
       setSelectedFile(null);
     }
@@ -161,7 +164,10 @@ export const MessageInput: React.FC<Props> = ({
         {displayActions &&
           Actions(onCameraPress, onFilePress, theme.primary, styles)}
         <TextInput
-          style={[styles.inputField, { borderColor: theme.input, color }]}
+          style={[
+            styles.inputField,
+            { borderColor: theme.input, color, height: Math.min(height, 60) },
+          ]}
           value={text}
           onChangeText={onChange}
           onBlur={onBlur}
@@ -173,6 +179,9 @@ export const MessageInput: React.FC<Props> = ({
           autoCorrect
           returnKeyLabel={t('send')}
           returnKeyType="send"
+          onContentSizeChange={(event) => {
+            setHeight(event.nativeEvent.contentSize.height);
+          }}
           {...commonInputProps}
         />
         {focus && (
@@ -224,7 +233,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     alignItems: 'center',
     flexDirection: 'row',
-    maxHeight: 60,
+    maxHeight: 80,
     padding: 10,
   },
   inputField: {
