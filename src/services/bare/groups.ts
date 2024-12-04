@@ -155,6 +155,15 @@ export const onLeaveGroup = (key: string) => {
   end_swarm(key);
 };
 
+export const leaveRooms = async () => {
+  const rooms = await getRooms();
+  for (const r of rooms) {
+    end_swarm(r.key);
+  }
+  await sleep(200);
+  return;
+};
+
 export const joinRooms = async () => {
   console.log('********* Joining rooms! ***********');
   const rooms = await getRooms();
