@@ -8,6 +8,8 @@ import {
 import { FileInfo, Message } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
+import { Files } from './globals';
+
 enablePromise(true);
 
 let db: SQLiteDatabase;
@@ -107,6 +109,8 @@ export async function saveFileInfo(file: FileInfo) {
   } catch (err) {
     console.log(err);
   }
+
+  Files.new(file);
 }
 
 export async function loadSavedFiles() {
@@ -201,7 +205,7 @@ export async function getRoomMessages(
   page: number,
   history = false,
 ) {
-  const limit: number = history ? 25 : 75;
+  const limit: number = 55;
   let offset: number = 0;
   if (page !== 0) {
     offset = page * limit;
@@ -229,7 +233,7 @@ export async function getRoomMessages(
 
 async function setReplies(results: [ResultSet]) {
   const messages: Message[] = [];
-  const files = await loadSavedFiles();
+  const files = Files.all();
   for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const res = result.rows.item(index);
@@ -276,7 +280,7 @@ function addEmoji(replies: Message[]) {
 
 export async function getRoomReplyMessage(hash: string, history = false) {
   const reply: Message[] = [];
-  const files = await loadSavedFiles();
+  const files = Files.all();
   const results = await db.executeSql(
     'SELECT * FROM roomsmessages WHERE hash = ? ORDER BY timestamp ASC',
     [hash],
