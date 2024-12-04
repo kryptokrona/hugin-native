@@ -274,7 +274,7 @@ function addEmoji(replies: Message[]) {
   return reactions;
 }
 
-export async function getRoomReplyMessage(hash: string) {
+export async function getRoomReplyMessage(hash: string, history = false) {
   const reply: Message[] = [];
   const files = await loadSavedFiles();
   const results = await db.executeSql(
@@ -287,8 +287,13 @@ export async function getRoomReplyMessage(hash: string) {
       return false;
     }
     const file = files.find((a: FileInfo) => a.hash === r.hash);
-    if (file) {
-      r.file = file;
+    if (history && file) {
+      continue;
+    }
+    if (!history) {
+      if (file) {
+        r.file = file;
+      }
     }
     const res: Message = toMessage(r);
 
