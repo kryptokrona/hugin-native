@@ -109,6 +109,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   //   };
   // }, []);
 
+  const scrollToBottom = () => {
+    flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+  };
+
   async function onSend(
     text: string,
     file: SelectedFile | null,
@@ -143,6 +147,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       );
       setReplyToMessageHash('');
     }
+    scrollToBottom();
   }
 
   function onReplyToMessagePress(hash: string) {
