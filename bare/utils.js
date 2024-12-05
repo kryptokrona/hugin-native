@@ -116,7 +116,7 @@ const sanitize_join_swarm_data = (data) => {
 };
 
 const sanitize_group_message = (data) => {
-  let timestamp = sanitizeHtml(data.t);
+  let timestamp = sanitizeHtml(Date.now());
   if (timestamp?.length > 20 || data.t === undefined) return false;
   let room = sanitizeHtml(data.g);
   if (room?.length > 128 || data.g === undefined) return false;
