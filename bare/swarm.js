@@ -429,7 +429,6 @@ const check_data_message = async (data, connection, topic) => {
       }
 
       if (data.type === PING_SYNC && active.search && INC_HASHES) {
-        if (Hugin.idle()) return true;
         if (con.knownHashes.toString() === data.hashes.toString()) {
           //Already know all the latest messages
           con.request = false;
@@ -447,7 +446,6 @@ const check_data_message = async (data, connection, topic) => {
         request_missed_messages(missing, con.address, topic);
         //Updated knownHashes from this connection
       } else if (data.type === REQUEST_MESSAGES && INC_HASHES) {
-        if (Hugin.idle()) return true;
         send_missing_messages(data.hashes, con.address, topic);
       } else if (
         data.type === MISSING_MESSAGES &&
@@ -849,8 +847,8 @@ const check_if_online = async (topic) => {
   let a = 0;
   async function ping() {
     a++;
-    //Check message state every 200seconds if idle
-    if (a % 20 !== 0 && Hugin.idle()) return;
+    //Check message state every 20seconds if idle
+    if (a % 2 !== 0 && Hugin.idle()) return;
     const active = get_active_topic(topic);
     const hashes = await Hugin.request({
       type: 'get-latest-room-hashes',
