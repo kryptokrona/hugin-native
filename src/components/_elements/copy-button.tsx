@@ -11,6 +11,7 @@ interface CopyButtonProps {
   text: string;
   type?: ElementType;
   small?: boolean;
+  onPress: () => void;
 }
 
 export const CopyButton: React.FC<CopyButtonProps> = ({
@@ -18,6 +19,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   text,
   type = 'primary',
   small = false,
+  onPress,
 }) => {
   // const { t } = useTranslation();
   // const toast = useToast();
@@ -27,6 +29,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
 
   const handleCopy = () => {
     Clipboard.setString(data);
+    onPress();
     // toast.show(`${t('copied')}`);
     // toastPopUp(`${t('copied')}`);
   };

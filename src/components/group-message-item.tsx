@@ -108,6 +108,10 @@ export const GroupMessageItem: React.FC<Props> = ({
     onReaction(emoji!);
   }
 
+  function onPressCopyText() {
+    setActionsModal(false);
+  }
+
   useEffect(() => {
     return () => {
       setActions(true);
@@ -132,6 +136,7 @@ export const GroupMessageItem: React.FC<Props> = ({
               type="secondary"
               data={message ?? ''}
               text={t('copyText')}
+              onPress={onPressCopyText}
             />
             <TextButton
               small
