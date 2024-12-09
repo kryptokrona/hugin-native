@@ -4,7 +4,7 @@ import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
 
 import com.huginmessenger.BuildConfig;
-
+import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import android.app.Application;
 import android.content.Intent;
 import android.util.Log;
@@ -37,6 +37,7 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       // Packages that cannot be autolinked yet can be added manually here
       packages.add(new TurtleCoinPackage());
+      packages.add(new RNBackgroundFetchPackage());
       return packages;
     }
 

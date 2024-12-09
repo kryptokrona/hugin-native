@@ -172,6 +172,8 @@ dependencies {
     implementation project(':react-native-fs')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-document-picker')
+    
+    implementation project(':react-native-background-fetch')
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
