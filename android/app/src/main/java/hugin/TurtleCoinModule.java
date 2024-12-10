@@ -43,6 +43,170 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void cn_fast_hash(
+        final String hashInput,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String hexHash = cnFastHashJNI(hashInput);
+                    
+                    promise.resolve(hexHash);
+                } catch (Exception e) {
+
+                    promise.reject("Error in cnFastHash: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void underivePublicKey(
+        final String derivation,
+        final long index,
+        final String outputKey,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String pub = underivePublicKeyJNI(derivation, index, outputKey);
+                    promise.resolve(pub);
+                } catch (Exception e) {
+                    promise.reject("Error in underivePublicKey: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void generateSignature(
+        final String message,
+        final String publicKey,
+        final String privateKey,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String signature = generateSignatureJNI(message, publicKey, privateKey);
+                    promise.resolve(signature);
+                } catch (Exception e) {
+                    promise.reject("Error in generateSignature: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void checkSignature(
+        final String message,
+        final String publicKey,
+        final String signature,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    boolean isValid = checkSignatureJNI(message, publicKey, signature);
+                    promise.resolve(isValid);
+                } catch (Exception e) {
+                    promise.reject("Error in checkSignature: ", e);
+                }
+            }
+        }).start();
+    }
+
+
+    @ReactMethod
+    public void scReduce32(
+        final String scalar,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String reducedScalar = scReduce32JNI(scalar);
+                    promise.resolve(reducedScalar);
+                } catch (Exception e) {
+                    promise.reject("Error in scReduce32: ", e);
+                }
+            }
+        }).start();
+    }
+    @ReactMethod
+    public void hashToEllipticCurve(
+        final String hash,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String hashCurve = hashToEllipticCurveJNI(hash);
+                    promise.resolve(hashCurve);
+                } catch (Exception e) {
+                    promise.reject("Error in hashToEllipticCurve: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void hashToScalar(
+        final String hash,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String scalar = hashToScalarJNI(hash);
+                    promise.resolve(scalar);
+                } catch (Exception e) {
+                    promise.reject("Error in hashToScalar: ", e);
+                }
+            }
+        }).start();
+    }
+
+
+
+    @ReactMethod
+    public void secretKeyToPublicKey(
+        final String secretKey,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String publicKey = secretKeyToPublicKeyJNI(secretKey);
+                    promise.resolve(publicKey);
+                } catch (Exception e) {
+                    promise.reject("Error in secretKeyToPublicKey: ", e);
+                }
+            }
+        }).start();
+    }
+
+
+    @ReactMethod
+    public void checkKey(
+        final String key,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    boolean isValid = checkKeyJNI(key);
+                    promise.resolve(isValid);
+                } catch (Exception e) {
+                    promise.reject("Error in checkKey: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
     public void generateKeyImage(
         final String publicEphemeral,
         final String privateEphemeral,
@@ -500,4 +664,16 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
         boolean isViewWallet,
         boolean processCoinbaseTransactions
     );
+
+
+    public native String cnFastHashJNI(String hashInput);
+    public native String secretKeyToPublicKeyJNI(String publicKey)
+    private native String scReduce32JNI(String scalar);
+    private native boolean checkKeyJNI(String key);
+    private native String hashToEllipticCurveJNI(String hash);
+    private native String generateSignatureJNI(String message, String publicKey, String privateKey);
+    private native boolean checkSignatureJNI(String message, String publicKey, String signature);
+    private native String hashToScalarJNI(String hash);
+    private native String underivePublicKey(String derivation, long index, String outputKey)
+
 }
