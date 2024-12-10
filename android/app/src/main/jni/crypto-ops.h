@@ -11,33 +11,38 @@ typedef int32_t fe[10];
 
 /* From ge.h */
 
-typedef struct {
+typedef struct
+{
   fe X;
   fe Y;
   fe Z;
 } ge_p2;
 
-typedef struct {
+typedef struct
+{
   fe X;
   fe Y;
   fe Z;
   fe T;
 } ge_p3;
 
-typedef struct {
+typedef struct
+{
   fe X;
   fe Y;
   fe Z;
   fe T;
 } ge_p1p1;
 
-typedef struct {
+typedef struct
+{
   fe yplusx;
   fe yminusx;
   fe xy2d;
 } ge_precomp;
 
-typedef struct {
+typedef struct
+{
   fe YplusX;
   fe YminusX;
   fe Z;
@@ -123,3 +128,4 @@ void sc_sub(unsigned char *, const unsigned char *, const unsigned char *);
 void sc_mulsub(unsigned char *, const unsigned char *, const unsigned char *, const unsigned char *);
 int sc_check(const unsigned char *);
 int sc_isnonzero(const unsigned char *); /* Doesn't normalize */
+void sc_mul(unsigned char *s, const unsigned char *a, const unsigned char *b);
