@@ -134,7 +134,11 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           </Card>
         </TouchableWithoutFeedback>
 
-        <CopyButton text={t('copyInvite')} data={inviteText} />
+        <CopyButton
+          onPress={() => ''}
+          text={t('copyInvite')}
+          data={inviteText}
+        />
 
         {/* <TouchableOpacity
           onPress={onUploadAvatar}

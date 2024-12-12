@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2020, The TurtleCoin Developers
+// Copyright (c) 2019-2024, kryptokrona Developers
+
 #include "crypto.h"
 #include "Java.h"
 #include <StringTools.h>
@@ -95,20 +98,19 @@ Java_com_huginmessenger_TurtleCoinModule_underivePublicKeyJNI(
     jobject instance,
     jstring derivation,
     jlong index,
-    outputKey string)
+    jstring outputKey)
 {
     std::string pub;
-    uint64_t outputIndex = makeNativeUint(env, index);
     std::string d = makeNativeString(env, derivation);
     std::string derived = makeNativeString(env, outputKey);
 
-    const auto success = Core::Cryptography::underivePublicKey(d, outputIndex, derived, pub);
+    const auto success = Core::Cryptography::underivePublicKey(d, index, derived, pub);
     if (!success)
     {
         throw std::invalid_argument("Could not underive value");
     }
 
-    return env->NewStringUTF(pub.c_str())
+    return env->NewStringUTF(pub.c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -119,7 +121,7 @@ Java_com_huginmessenger_TurtleCoinModule_hashToScalarJNI(
 {
     std::string h = makeNativeString(env, hash);
     const auto scalar = Core::Cryptography::hashToScalar(h);
-    return env->NewStringUTF(scalar.c_str())
+    return env->NewStringUTF(scalar.c_str());
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -149,7 +151,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateSignatureJNI(
     std::string pub = makeNativeString(env, publicKey);
     std::string priv = makeNativeString(env, privateKey);
     const auto signature = Core::Cryptography::generateSignature(signable, pub, priv);
-    return env->NewStringUTF(signature.c_str())
+    return env->NewStringUTF(signature.c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -159,8 +161,8 @@ Java_com_huginmessenger_TurtleCoinModule_hashToEllipticCurveJNI(
     jstring hash)
 {
     std::string value = makeNativeString(env, hash);
-    const auto hashcurve = Core::Cryptography::hashToEllipticCurve(hash);
-    return env->NewStringUTF(hashcurve.c_str())
+    const auto hashcurve = Core::Cryptography::hashToEllipticCurve(value);
+    return env->NewStringUTF(hashcurve.c_str());
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
@@ -170,7 +172,7 @@ Java_com_huginmessenger_TurtleCoinModule_checkKeyJNI(
     jstring key)
 {
     std::string value = makeNativeString(env, key);
-    const auto checked = Core::Cryptography::checkKey(key);
+    const auto checked = Core::Cryptography::checkKey(value);
     return static_cast<jboolean>(checked);
 }
 extern "C" JNIEXPORT jstring JNICALL
@@ -180,8 +182,8 @@ Java_com_huginmessenger_TurtleCoinModule_scReduce32JNI(
     jstring scalar)
 {
     std::string value = makeNativeString(env, scalar);
-    const auto reduce = Core::Cryptography::scReduce32(scalar);
-    return env->NewStringUTF(reduce.c_str())
+    const auto reduce = Core::Cryptography::scReduce32(value);
+    return env->NewStringUTF(reduce.c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -193,7 +195,7 @@ Java_com_huginmessenger_TurtleCoinModule_secretKeyToPublicKeyJNI(
     std::string value = makeNativeString(env, jSecretKey);
     std::string publicKey;
     Core::Cryptography::secretKeyToPublicKey(value, publicKey);
-    return env->NewStringUTF(publicKey.c_str())
+    return env->NewStringUTF(publicKey.c_str());
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -206,13 +208,6 @@ Java_com_huginmessenger_TurtleCoinModule_cnFastHashJNI(
     const auto hash = Core::Cryptography::cn_fast_hash(value);
 
     return env->NewStringUTF(hash.c_str());
-}
-
-extern "C" JNIEXPORT jobject JNICALL
-Java_com_huginmessenger_generateKeysJNI(
-    JNIEnv *env,
-    jobject instance)
-{
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL

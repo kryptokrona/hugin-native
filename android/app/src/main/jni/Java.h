@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2020, The TurtleCoin Developers
+// Copyright (c) 2019-2024, kryptokrona Developers
+
 #include "Types.h"
 
 #include <unordered_map>
@@ -30,11 +33,13 @@ KeyOutput makeNativeKeyOutput(JNIEnv *env, jobject jKeyOutput);
 
 std::vector<RawTransaction> makeNativeTransactionVector(JNIEnv *env, jobjectArray jTransactions);
 
+uint64_t makeNativeUint(JNIEnv *env, jlong javaLong);
+
 void byteArrayToHexString(const uint8_t *input, char *output, size_t inputLen);
 
 int char2int(char input);
 
-void hexStringToByteArray(const char* input, uint8_t* output, size_t outputLen);
+void hexStringToByteArray(const char *input, uint8_t *output, size_t outputLen);
 
 std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs(
     const WalletBlockInfo &block,
@@ -50,7 +55,7 @@ void processTransactionOutputs(
     const bool isViewWallet,
     std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> &inputs);
 
-template<typename T>
+template <typename T>
 T makeNative32ByteKey(JNIEnv *env, jstring jKey)
 {
     T result;
@@ -60,7 +65,7 @@ T makeNative32ByteKey(JNIEnv *env, jstring jKey)
     return result;
 }
 
-template<typename T>
+template <typename T>
 T makeNative64ByteKey(JNIEnv *env, jstring jKey)
 {
     T result;
@@ -70,7 +75,7 @@ T makeNative64ByteKey(JNIEnv *env, jstring jKey)
     return result;
 }
 
-template<typename T>
+template <typename T>
 jstring makeJNI32ByteKey(JNIEnv *env, T byteKey)
 {
     /* +1 for \0 byte */
@@ -80,7 +85,7 @@ jstring makeJNI32ByteKey(JNIEnv *env, T byteKey)
     return env->NewStringUTF(output);
 }
 
-template<typename T>
+template <typename T>
 jstring makeJNI64ByteKey(JNIEnv *env, T byteKey)
 {
     /* +1 for \0 byte */

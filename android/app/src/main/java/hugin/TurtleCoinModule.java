@@ -327,7 +327,7 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void checkRingSignature(
+    public void checkRingSignatures(
         final String transactionPrefixHash,
         final String keyImage,
         final ReadableArray inputKeys,
@@ -667,13 +667,13 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
 
 
     public native String cnFastHashJNI(String hashInput);
-    public native String secretKeyToPublicKeyJNI(String publicKey)
-    private native String scReduce32JNI(String scalar);
-    private native boolean checkKeyJNI(String key);
-    private native String hashToEllipticCurveJNI(String hash);
-    private native String generateSignatureJNI(String message, String publicKey, String privateKey);
-    private native boolean checkSignatureJNI(String message, String publicKey, String signature);
-    private native String hashToScalarJNI(String hash);
-    private native String underivePublicKey(String derivation, long index, String outputKey)
+    public native String secretKeyToPublicKeyJNI(String publicKey);
+    public native String scReduce32JNI(String scalar);
+    public native boolean checkKeyJNI(String key);
+    public native String hashToEllipticCurveJNI(String hash);
+    public native String generateSignatureJNI(String message, String publicKey, String privateKey);
+    public native boolean checkSignatureJNI(String message, String publicKey, String signature);
+    public native String hashToScalarJNI(String hash);
+    public native String underivePublicKeyJNI(String derivation, long index, String outputKey);
 
 }
