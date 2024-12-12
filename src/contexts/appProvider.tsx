@@ -12,6 +12,7 @@ import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
 import { initDB, loadAccount, loadSavedFiles } from '../services/bare/sqlite';
+import { Timer } from '../services/utils';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -64,6 +65,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         return;
       }
     }
+
     await initDB();
     Connection.listen();
     const keys = await loadAccount();
@@ -92,6 +94,27 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const stopTasks = () => {
     ReactNativeForegroundService.stopAll();
   };
+
+  const Timeout = new Timer(() => {
+    //Stop bg tasks after 1hour of inactivity.
+    stopTasks();
+  });
+
+  AppState.addEventListener('change', onAppStateChange);
+
+  async function onAppStateChange(state: string) {
+    if (state === 'inactive') {
+      console.log('Inactive state');
+      //I think this is for iPhone only
+    } else if (state === 'background') {
+      console.log('Start timer');
+      Timeout.start();
+      //Start background timer to shut off foreground task?
+    } else if (state === 'active') {
+      console.log('Reset timer');
+      Timeout.reset();
+    }
+  }
 
   return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>;
 };
