@@ -4,7 +4,7 @@
 
 // import { Platform } from 'react-native';
 
-// // import { MixinLimit, MixinLimits, Daemon } from 'kryptokrona-wallet-backend-js';
+// import { MixinLimit, MixinLimits, Daemon } from 'kryptokrona-wallet-backend-js';
 
 // import {
 //   derivePublicKey,
@@ -13,12 +13,21 @@
 //   deriveSecretKey,
 //   generateKeyImage,
 //   checkRingSignature,
-// } from '@/services';
+//   cnFastHash,
+//   secretKeyToPublicKey,
+//   scReduce32,
+//   checkKey,
+//   hashToEllipticCurve,
+//   generateSignature,
+//   checkSignature,
+//   hashToScalar,
+//   underivePublicKey,
+// } from '../services/NativeTest';
 
-// interface PriceApiLink {
-//   url: string;
-//   path: string[];
-// }
+// // interface PriceApiLink {
+// //   url: string;
+// //   path: string[];
+// // }
 
 // class Config {
 //   coinName: string;
@@ -44,13 +53,21 @@
 //   generateRingSignatures?: typeof generateRingSignatures;
 //   deriveSecretKey?: typeof deriveSecretKey;
 //   generateKeyImage?: typeof generateKeyImage;
-//   checkRingSignatures?: typeof checkRingSignature;
+//   checkRingSignature?: typeof checkRingSignature;
+//   cnFastHash?: typeof cnFastHash;
+//   secretKeyToPublicKey?: typeof secretKeyToPublicKey;
+//   scReduce32?: typeof scReduce32;
+//   checkKey?: typeof checkKey;
+//   hashToEllipticCurve?: typeof hashToEllipticCurve;
+//   generateSignature?: typeof generateSignature;
+//   checkSignature?: typeof checkSignature;
+//   hashToScalar?: typeof hashToScalar;
+//   underivePublicKey?: typeof underivePublicKey;
 //   blockStoreMemoryLimit: number;
 //   blocksPerDaemonRequest: number;
 //   chainLaunchTimestamp: Date;
 //   devFeePercentage: number;
 //   devFeeAddress: string;
-//   priceApiLinks: PriceApiLink[];
 //   defaultDaemon: Daemon;
 //   defaultCache: string;
 //   repoLink: string;
@@ -94,12 +111,7 @@
 //     this.integratedAddressLength = 99 + (64 * 11) / 8;
 
 //     if (Platform.OS !== 'ios') {
-//       this.derivePublicKey = derivePublicKey;
-//       this.generateKeyDerivation = generateKeyDerivation;
-//       this.generateRingSignatures = generateRingSignatures;
-//       this.deriveSecretKey = deriveSecretKey;
-//       this.generateKeyImage = generateKeyImage;
-//       this.checkRingSignatures = checkRingSignature;
+
 //     }
 
 //     this.blockStoreMemoryLimit = 1024 * 1024 * 3;
@@ -108,17 +120,6 @@
 //     this.devFeePercentage = 0;
 //     this.devFeeAddress =
 //       'SEKReZ4pekEQHXy6iNMfy5EpurwrVNKgJHuokcyPbdTgQ7UwPanewoC1PmoGDUiYrDB1yLemoLEjTR5yueGXN67TKFXYYhtRgBM';
-
-//     this.priceApiLinks = [
-//       {
-//         path: ['quotes', 'USD', 'price'],
-//         url: 'https://api.coinpaprika.com/v1/tickers/xkr-kryptokrona',
-//       },
-//       {
-//         path: ['kryptokrona', 'usd'],
-//         url: 'https://api.coingecko.com/api/v3/simple/price?ids=kryptokrona&vs_currencies=usd',
-//       },
-//     ];
 
 //     this.defaultDaemon = new Daemon('blocksum.org', 11898, false);
 //     this.defaultCache = 'https://techy.ddns.net';

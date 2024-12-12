@@ -54,8 +54,8 @@ class ConnectionType {
   async restart(type) {
     this.reset = true;
     if (this.type() !== '') {
-      await leaveRooms();
-      await joinRooms();
+      // await leaveRooms();
+      // await joinRooms();
     }
     this.update(type);
     this.done();
