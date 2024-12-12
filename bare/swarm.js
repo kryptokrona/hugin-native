@@ -95,6 +95,7 @@ const create_swarm = async (hashkey, key) => {
     discovery: room.discovery,
     admin: admin ? true : false,
     search: false,
+    buffer: [],
   };
 
   active_swarms.push(active);
@@ -215,6 +216,11 @@ const send_joined_message = async (topic, dht_keys, connection) => {
 const send_swarm_message = (message, topic) => {
   const active = get_active_topic(topic);
   if (!active) {
+    return;
+  }
+  //Buffer any non sent messages if connection was lost.
+  if (active.connections.length === 0) {
+    active.buffer.push(message);
     return;
   }
   for (const chat of active.connections) {
@@ -368,6 +374,12 @@ const check_data_message = async (data, connection, topic) => {
       if (parseInt(active.time) > time && active.requests < 3) {
         request_history(joined.address, topic);
         active.requests++;
+      }
+
+      //Send any buffered messages if connection was lost.
+      if (parseInt(active.time) < time && active.buffer.length) {
+        send_history(joined.address, topic, active.key);
+        active.buffer = [];
       }
 
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
