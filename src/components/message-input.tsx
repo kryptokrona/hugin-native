@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -32,6 +32,19 @@ export const MessageInput: React.FC<Props> = ({
   const color = focus ? theme.accentForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
   const [height, setHeight] = useState(40);
+  const textInputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (replyToName?.length) {
+      focusInput();
+    }
+  }, [replyToName]);
+
+  const focusInput = () => {
+    if (textInputRef.current) {
+      textInputRef.current.focus();
+    }
+  };
   async function onCameraPress() {
     const options: CameraOptions = {
       mediaType: 'photo',
@@ -171,6 +184,7 @@ export const MessageInput: React.FC<Props> = ({
           value={text}
           onChangeText={onChange}
           onBlur={onBlur}
+          ref={textInputRef}
           onFocus={onFocus}
           placeholder="  Aa..."
           placeholderTextColor={theme.mutedForeground}
@@ -185,7 +199,10 @@ export const MessageInput: React.FC<Props> = ({
           {...commonInputProps}
         />
         {focus && (
-          <TouchableOpacity onPress={handleSend} style={styles.btn}>
+          <TouchableOpacity
+            onPress={handleSend}
+            style={styles.btn}
+            hitSlop={{ bottom: 5, left: 5, right: 5, top: 5 }}>
             <CustomIcon name="send" type="IO" size={24} color={theme.primary} />
           </TouchableOpacity>
         )}
