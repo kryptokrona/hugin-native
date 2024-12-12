@@ -5,189 +5,249 @@
 'use strict';
 
 import { NativeModules } from 'react-native';
-// import { TransactionInput } from 'kryptokrona-wallet-backend-js';
+import { TransactionInput } from 'kryptokrona-wallet-backend-js';
 
-export async function cn_fast_hash(value) {
-  return NativeModules.TurtleCoin.cn_fast_hash(value);
+export async function cnFastHash(hashInput) {
+  return NativeModules.TurtleCoin.cnFastHash(hashInput);
 }
 
 export async function secretKeyToPublicKey(secretKey) {
   return NativeModules.TurtleCoin.secretKeyToPublicKey(secretKey);
 }
 
-// export async function generateKeyImage(
-//     publicEphemeral,
-//     privateEphemeral) {
-//     return NativeModules.TurtleCoin.generateKeyImage(
-//         publicEphemeral, privateEphemeral,
-//     );
-// }
+export async function scReduce32(scalar) {
+  return NativeModules.TurtleCoin.scReduce32(scalar);
+}
 
-// export async function deriveSecretKey(
-//     derivation,
-//     outputIndex,
-//     privateSpendKey) {
-//     return NativeModules.TurtleCoin.deriveSecretKey(
-//         derivation, { outputIndex }, privateSpendKey
-//     );
-// }
+export async function checkKey(key) {
+  return NativeModules.TurtleCoin.checkKey(key);
+}
 
-// export async function derivePublicKey(
-//     derivation,
-//     outputIndex,
-//     publicSpendKey) {
-//     return NativeModules.TurtleCoin.derivePublicKey(
-//         derivation, { outputIndex }, publicSpendKey
-//     );
-// }
+export async function hashToEllipticCurve(hash) {
+  return NativeModules.TurtleCoin.hashToEllipticCurve(hash);
+}
 
-// export async function generateKeyDerivation(
-//     transactionPublicKey,
-//     privateViewKey) {
+export async function generateSignature(message, publicKey, privateKey) {
+  return NativeModules.TurtleCoin.generateSignature(
+    message,
+    publicKey,
+    privateKey,
+  );
+}
 
-//     return await NativeModules.TurtleCoin.generateKeyDerivation(
-//         transactionPublicKey, privateViewKey,
-//     );
-// }
+export async function checkSignature(message, publicKey, signature) {
+  return NativeModules.TurtleCoin.checkSignature(message, publicKey, signature);
+}
 
-// export async function generateRingSignatures(
-//     transactionPrefixHash,
-//     keyImage,
-//     inputKeys,
-//     privateKey,
-//     realIndex) {
-//     return NativeModules.TurtleCoin.generateRingSignatures(
-//         transactionPrefixHash, keyImage, inputKeys, privateKey, { realIndex }
-//     );
-// }
+export async function hashToScalar(hash) {
+  return NativeModules.TurtleCoin.hashToScalar(hash);
+}
 
-// export async function checkRingSignature(
-//     transactionPrefixHash,
-//     keyImage,
-//     publicKeys,
-//     signatures) {
-//     return NativeModules.TurtleCoin.checkRingSignature(
-//         transactionPrefixHash, keyImage, publicKeys, signatures
-//     );
-// }
+export async function underivePublicKey(derivation, index, outputKey) {
+  return NativeModules.TurtleCoin.underivePublicKey(
+    derivation,
+    index,
+    outputKey,
+  );
+}
 
-// export async function makePostRequest(endpoint, body) {
-//     if (endpoint !== '/getwalletsyncdata') {
-//         return this.makeRequest(endpoint, 'POST', body);
-//     }
+export async function generateKeyImage(publicEphemeral, privateEphemeral) {
+  return NativeModules.TurtleCoin.generateKeyImage(
+    publicEphemeral,
+    privateEphemeral,
+  );
+}
 
-//     const {
-//         blockCount, blockHashCheckpoints, startHeight, startTimestamp,
-//         skipCoinbaseTransactions
-//     } = body;
+export async function deriveSecretKey(
+  derivation,
+  outputIndex,
+  privateSpendKey,
+) {
+  return NativeModules.TurtleCoin.deriveSecretKey(
+    derivation,
+    { outputIndex },
+    privateSpendKey,
+  );
+}
 
-//     const protocol = this.sslDetermined ? (this.ssl ? 'https' : 'http') : 'https';
-//     const url = `${protocol}://${this.host}:${this.port}/getwalletsyncdata`;
+export async function derivePublicKey(derivation, outputIndex, publicSpendKey) {
+  return NativeModules.TurtleCoin.derivePublicKey(
+    derivation,
+    { outputIndex },
+    publicSpendKey,
+  );
+}
 
-//     /* This is being executed within the Daemon module, so we can get access
-//        to it's class with `this` */
-//     let data = await NativeModules.TurtleCoin.getWalletSyncData(
-//         blockHashCheckpoints,
-//         startHeight,
-//         startTimestamp,
-//         blockCount,
-//         skipCoinbaseTransactions,
-//         url,
-//     );
+export async function generateKeyDerivation(
+  transactionPublicKey,
+  privateViewKey,
+) {
+  return await NativeModules.TurtleCoin.generateKeyDerivation(
+    transactionPublicKey,
+    privateViewKey,
+  );
+}
 
-//     if (data.error) {
-//         if (this.sslDetermined) {
-//             throw new Error(data.error);
-//         }
+export async function generateRingSignatures(
+  transactionPrefixHash,
+  keyImage,
+  inputKeys,
+  privateKey,
+  realIndex,
+) {
+  return NativeModules.TurtleCoin.generateRingSignatures(
+    transactionPrefixHash,
+    keyImage,
+    inputKeys,
+    privateKey,
+    { realIndex },
+  );
+}
 
-//         /* Ssl failed, lets try http */
-//         data = await NativeModules.TurtleCoin.getWalletSyncData(
-//             blockHashCheckpoints,
-//             startHeight,
-//             startTimestamp,
-//             blockCount,
-//             this.config.scanCoinbaseTransactions,
-//             `http://${this.host}:${this.port}/getwalletsyncdata`,
-//         );
+export async function checkRingSignatures(
+  transactionPrefixHash,
+  keyImage,
+  publicKeys,
+  signatures,
+) {
+  return NativeModules.TurtleCoin.checkRingSignatures(
+    transactionPrefixHash,
+    keyImage,
+    publicKeys,
+    signatures,
+  );
+}
 
-//         if (data.error) {
-//             throw new Error(data.error);
-//         }
+export async function makePostRequest(endpoint, body) {
+  if (endpoint !== '/getwalletsyncdata') {
+    return this.makeRequest(endpoint, 'POST', body);
+  }
 
-//         try {
-//             data = JSON.parse(data);
-//         } catch (err) {
-//             throw new Error(err);
-//         }
-//     }
+  const {
+    blockCount,
+    blockHashCheckpoints,
+    startHeight,
+    startTimestamp,
+    skipCoinbaseTransactions,
+  } = body;
 
-//     try {
-//         data = JSON.parse(data)
-//     } catch (err) {
-//         throw new Error(err);
-//     }
+  const protocol = this.sslDetermined ? (this.ssl ? 'https' : 'http') : 'https';
+  const url = `${protocol}://${this.host}:${this.port}/getwalletsyncdata`;
 
-//     return data;
-// }
+  /* This is being executed within the Daemon module, so we can get access
+       to it's class with `this` */
+  let data = await NativeModules.TurtleCoin.getWalletSyncData(
+    blockHashCheckpoints,
+    startHeight,
+    startTimestamp,
+    blockCount,
+    skipCoinbaseTransactions,
+    url,
+  );
 
-// export async function processBlockOutputs(
-//     block,
-//     privateViewKey,
-//     spendKeys,
-//     isViewWallet,
-//     processCoinbaseTransactions) {
+  if (data.error) {
+    if (this.sslDetermined) {
+      throw new Error(data.error);
+    }
 
-//     /* We crash if we pass in something bigger than 2^64, cap it */
-//     capIntToSafeValue(block);
+    /* Ssl failed, lets try http */
+    data = await NativeModules.TurtleCoin.getWalletSyncData(
+      blockHashCheckpoints,
+      startHeight,
+      startTimestamp,
+      blockCount,
+      this.config.scanCoinbaseTransactions,
+      `http://${this.host}:${this.port}/getwalletsyncdata`,
+    );
 
-//     const javaSpendKeys = spendKeys.map(([publicKey, privateKey]) => {
-//         return {
-//             'publicKey': publicKey,
-//             'privateKey': privateKey,
-//         }
-//     })
+    if (data.error) {
+      throw new Error(data.error);
+    }
 
-//     let inputs = await NativeModules.TurtleCoin.processBlockOutputs(
-//         block, privateViewKey, javaSpendKeys, isViewWallet,
-//         processCoinbaseTransactions,
-//     );
+    try {
+      data = JSON.parse(data);
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
 
-//     let jsInputs = inputs.map((data) => {
-//         let tx = block.transactions.find((t) => t.hash === data.input.parentTransactionHash);
+  try {
+    data = JSON.parse(data);
+  } catch (err) {
+    throw new Error(err);
+  }
 
-//         const spendHeight = 0;
+  return data;
+}
 
-//         const globalIndex = data.input.globalOutputIndex === -1
-//                           ? undefined : data.input.globalOutputIndex;
+export async function processBlockOutputs(
+  block,
+  privateViewKey,
+  spendKeys,
+  isViewWallet,
+  processCoinbaseTransactions,
+) {
+  /* We crash if we pass in something bigger than 2^64, cap it */
+  capIntToSafeValue(block);
 
-//         const input = new TransactionInput(
-//             data.input.keyImage,
-//             data.input.amount,
-//             block.blockHeight,
-//             tx.transactionPublicKey,
-//             data.input.transactionIndex,
-//             globalIndex,
-//             data.input.key,
-//             spendHeight,
-//             tx.unlockTime,
-//             data.input.parentTransactionHash,
-//         );
+  const javaSpendKeys = spendKeys.map(([publicKey, privateKey]) => {
+    return {
+      publicKey: publicKey,
+      privateKey: privateKey,
+    };
+  });
 
-//         return [data.publicSpendKey, input];
-//     });
+  let inputs = await NativeModules.TurtleCoin.processBlockOutputs(
+    block,
+    privateViewKey,
+    javaSpendKeys,
+    isViewWallet,
+    processCoinbaseTransactions,
+  );
 
-//     return jsInputs;
-// }
+  let jsInputs = inputs.map((data) => {
+    let tx = block.transactions.find(
+      (t) => t.hash === data.input.parentTransactionHash,
+    );
 
-// /* Native code will explode if we pass in > 2^64 - 1. So, cap it to this.
-//    However, node can't perform math with > 2^53, so we have to cap it to that */
-// function capIntToSafeValue(object) {
-//     Object.keys(object).forEach(function(element) {
-//         /* Recurse if this element is also an object */
-//         if (typeof object[element] === 'object') {
-//             capIntToSafeValue(object[element]);
-//         } else if (typeof object[element] === 'number' && object[element] > Number.MAX_SAFE_INTEGER) {
-//             object[element] = Number.MAX_SAFE_INTEGER;
-//         }
-//     });
-// }
+    const spendHeight = 0;
+
+    const globalIndex =
+      data.input.globalOutputIndex === -1
+        ? undefined
+        : data.input.globalOutputIndex;
+
+    const input = new TransactionInput(
+      data.input.keyImage,
+      data.input.amount,
+      block.blockHeight,
+      tx.transactionPublicKey,
+      data.input.transactionIndex,
+      globalIndex,
+      data.input.key,
+      spendHeight,
+      tx.unlockTime,
+      data.input.parentTransactionHash,
+    );
+
+    return [data.publicSpendKey, input];
+  });
+
+  return jsInputs;
+}
+
+/* Native code will explode if we pass in > 2^64 - 1. So, cap it to this.
+   However, node can't perform math with > 2^53, so we have to cap it to that */
+function capIntToSafeValue(object) {
+  Object.keys(object).forEach(function (element) {
+    /* Recurse if this element is also an object */
+    if (typeof object[element] === 'object') {
+      capIntToSafeValue(object[element]);
+    } else if (
+      typeof object[element] === 'number' &&
+      object[element] > Number.MAX_SAFE_INTEGER
+    ) {
+      object[element] = Number.MAX_SAFE_INTEGER;
+    }
+  });
+}
