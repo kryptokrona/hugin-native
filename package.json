@@ -12,7 +12,7 @@
     "start": "react-native start",
     "test": "jest",
     "patch": "patch-package",
-    "postinstall": "rn-nodeify --install fs,dgram,process,path,console,crypto,buffer,stream,vm,http,https,url,zlib,net,assert,tls --hack --yarn; npx jetifier",
+    "postinstall": "rn-nodeify --install dgram,process,path,console,crypto,buffer,stream,vm,http,https,url,zlib,net,assert,tls --hack --yarn; npx jetifier",
     "get-offline-lists": "wget https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/master/nodes.json -O src/nodes.json && wget https://raw.githubusercontent.com/kryptokrona/hugin-groups/main/groups.json -O src/groups.json"
   },
   "dependencies": {
@@ -29,7 +29,6 @@
     "@supersami/rn-foreground-service": "^2.2.1",
     "@tradle/react-native-http": "^2.0.0",
     "assert": "^1.1.1",
-    "asyncstorage-down": "^4.2.0",
     "b4a": "^1.6.6",
     "bare-console": "4.1.0",
     "bare-fs": "2.3.1",
@@ -75,7 +74,6 @@
     "react-native-fs": "^2.20.0",
     "react-native-image-picker": "^7.1.2",
     "react-native-keychain": "^8.2.0",
-    "react-native-level-fs": "^3.0.0",
     "react-native-modal": "^13.0.1",
     "react-native-month-selector": "^1.4.0",
     "react-native-push-notification": "^8.1.1",
