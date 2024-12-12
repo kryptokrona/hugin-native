@@ -2,7 +2,11 @@ import React, { useLayoutEffect, useState } from 'react';
 
 import { FlatList, TouchableOpacity, View } from 'react-native';
 
-import { useNavigation, type RouteProp } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  type RouteProp,
+} from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -40,7 +44,6 @@ export const GroupsScreen: React.FC<Props> = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [joining, setJoinVisible] = useState(false);
   const [link, setLink] = useState('');
-
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -86,6 +89,15 @@ export const GroupsScreen: React.FC<Props> = () => {
     setLink(text);
   }
 
+  useFocusEffect(
+    React.useCallback(() => {
+      // This effect runs when the screen is focused
+      setStoreCurrentRoom('null');
+
+      return () => {};
+    }, []),
+  );
+
   function onJoinpress() {
     setStoreRoomMessages([]);
     const inviteKey = link.slice(-128);
@@ -96,7 +108,6 @@ export const GroupsScreen: React.FC<Props> = () => {
       joinAndSaveRoom(inviteKey, originalName, user.address, user?.name);
 
       setModalVisible(false);
-
       navigation.navigate(MainScreens.GroupChatScreen, {
         name: roomName,
         roomKey: inviteKey,

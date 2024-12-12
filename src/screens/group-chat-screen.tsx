@@ -76,10 +76,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       setStoreCurrentRoom(roomKey);
-      return () => {
-        // This cleanup runs when the screen is unfocused
-        setStoreCurrentRoom('null');
-      };
+      return () => {};
     }, [roomKey]),
   );
 
