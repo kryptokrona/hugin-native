@@ -13,3 +13,37 @@ export function toHex(str: string) {
   }
   return hex;
 }
+
+export class Timer {
+  private timerId: any = null;
+  private timeLeft: number = 3600;
+  private onEnd: () => void;
+
+  constructor(onEnd: () => void) {
+    this.onEnd = onEnd;
+  }
+
+  async start(): Promise<void> {
+    this.stop();
+    this.timerId = setInterval(() => {
+      this.timeLeft -= 1;
+      console.log('Timer', this.timeLeft);
+      if (this.timeLeft <= 0) {
+        this.stop();
+        this.onEnd();
+      }
+    }, 1000);
+  }
+
+  reset(): void {
+    this.stop();
+    this.timeLeft = 3600;
+  }
+
+  stop(): void {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
+  }
+}

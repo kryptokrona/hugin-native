@@ -31,6 +31,10 @@ class Connections {
     return this.active().some((a) => a.room === key && a.address === address);
   }
 
+  isConnected(key) {
+    return this.active().some((a) => a.room === key);
+  }
+
   update(list) {
     setStoreActiveRoomUsers(list);
   }
