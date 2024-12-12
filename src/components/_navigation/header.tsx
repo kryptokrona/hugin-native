@@ -18,8 +18,6 @@ interface Props {
   onBackPress?: () => void;
 }
 
-const currentRoom = '';
-
 export const Header: React.FC<Props> = ({
   title,
   backButton,
