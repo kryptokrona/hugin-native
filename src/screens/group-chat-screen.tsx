@@ -75,9 +75,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      // This effect runs when the screen is focused
-      setStoreCurrentRoom(roomKey);
-
       return () => {
         // This cleanup runs when the screen is unfocused
         setStoreCurrentRoom('null');
@@ -119,6 +116,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     text: string,
     file: SelectedFile | null,
     reply: string,
+    emoji: boolean | undefined,
   ) {
     if (file) {
       text = file.fileName;
@@ -149,7 +147,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       );
       setReplyToMessageHash('');
     }
-    scrollToBottom();
+    if (!emoji) {
+      scrollToBottom();
+    }
   }
 
   function onReplyToMessagePress(hash: string) {
@@ -158,7 +158,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   async function onEmojiReactionPress(emoji: string, hash: string) {
     //Send hash because of race condition with onCloseReplyPress
-    onSend(emoji, null, hash);
+    onSend(emoji, null, hash, true);
   }
 
   function onCloseReplyPress() {
