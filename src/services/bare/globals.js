@@ -1,5 +1,5 @@
 import NetInfo from '@react-native-community/netinfo';
-import { joinRooms, leaveRooms } from './groups';
+import { close_all_connections } from 'lib/native';
 
 class FilesCache {
   constructor() {
@@ -54,8 +54,11 @@ class ConnectionType {
   async restart(type) {
     this.reset = true;
     if (this.type() !== '') {
-      // await leaveRooms();
-      // await joinRooms();
+      console.log('WANT TO CLOSE ALL CONNECTIONS');
+      console.log('WANT TO CLOSE ALL CONNECTIONS');
+      console.log('WANT TO CLOSE ALL CONNECTIONS');
+      console.log('WANT TO CLOSE ALL CONNECTIONS');
+      close_all_connections();
     }
     this.update(type);
     this.done();

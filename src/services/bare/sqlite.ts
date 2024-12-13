@@ -65,6 +65,12 @@ export const initDB = async () => {
     )`;
     await db.executeSql(files);
 
+    const xkrwallet = `CREATE TABLE IF NOT EXISTS wallet (
+      id INTEGER PRIMARY KEY,
+      json TEXT
+     )`;
+    await db.executeSql(xkrwallet);
+
     create = true;
   } catch (err) {
     console.log(err);
@@ -73,6 +79,97 @@ export const initDB = async () => {
   //Add some init test funcs during dev here:
   getRooms(); //Lists all our room in the console.
 };
+
+function chunkString(string: string, size: number) {
+  const numChunks = Math.ceil(string.length / size);
+  const chunks = new Array(numChunks);
+
+  for (let i = 0, o = 0; i < numChunks; i++, o += size) {
+    chunks[i] = string.substr(o, size);
+  }
+
+  return chunks;
+}
+
+const databaseRowLimit = 1024 * 512; // 512 KB per chunk
+
+export async function saveWallet(wallet: any) {
+  // Serialize wallet into a JSON string
+  const walletString = JSON.stringify(wallet);
+
+  // Split the JSON string into manageable chunks
+  const chunks = chunkString(walletString, databaseRowLimit);
+
+  // Clear the wallet table
+  await db.executeSql('DELETE FROM wallet');
+
+  // Insert each chunk into the database
+  for (let i = 0; i < chunks.length; i++) {
+    await db.executeSql(
+      'INSERT INTO wallet (id, json) VALUES (?, ?)',
+      [i, chunks[i]], // Use parameterized query to safely insert data
+    );
+  }
+}
+
+export async function loadWallet() {
+  console.log('Loading wallet from db..');
+  try {
+    let [data] = await db.executeSql(
+      `SELECT
+            LENGTH(json) AS jsonLength
+        FROM
+            wallet`,
+    );
+
+    if (data && data.rows && data.rows.length === 1) {
+      const len = data.rows.item(0).jsonLength;
+      let result = '';
+
+      if (len > databaseRowLimit) {
+        for (let i = 1; i <= len; i += databaseRowLimit) {
+          const [chunk] = await db.executeSql(
+            `SELECT
+                        SUBSTR(json, ${i}, ${databaseRowLimit}) AS data
+                    FROM
+                        wallet`,
+          );
+
+          if (chunk && chunk.rows && chunk.rows.length === 1) {
+            result += chunk.rows.item(0).data;
+          }
+        }
+
+        return [result, false];
+      }
+    }
+
+    [data] = await db.executeSql(
+      `SELECT
+            json
+        FROM
+            wallet
+        ORDER BY
+            id ASC`,
+    );
+
+    if (data && data.rows && data.rows.length >= 1) {
+      const len = data.rows.length;
+
+      let result = '';
+
+      for (let i = 0; i < len; i++) {
+        result += data.rows.item(i).json;
+      }
+
+      return [result, false];
+    }
+  } catch (err) {
+    return [undefined, true];
+  }
+
+  return [undefined, true];
+}
 
 export async function saveAccount(pk: string, sk: string) {
   console.log('Saving Account ', pk);

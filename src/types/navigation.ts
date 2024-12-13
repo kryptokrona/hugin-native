@@ -1,8 +1,9 @@
-import { AuthScreens, MainScreens, Stacks } from '@/config';
-import type { HuginUser, MessageUser } from './p2p';
-
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import { AuthScreens, MainScreens, Stacks } from '@/config';
+
+import type { HuginUser, MessageUser } from './p2p';
 
 export type MainNavigationParamList = {
   [MainScreens.SettingsScreen]: undefined;

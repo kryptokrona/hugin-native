@@ -5,6 +5,8 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
+import { Wallet } from 'services/kryptokrona/wallet';
+
 import {
   Card,
   Container,
@@ -17,7 +19,6 @@ import {
 } from '@/components';
 import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
-  createUserAddress,
   useGlobalStore,
   usePreferencesStore,
   useThemeStore,
@@ -61,7 +62,14 @@ export const CreateAccScreen: React.FC = () => {
   async function onCreateProfile() {
     setLoading(true);
     await initDB();
-    const address = await createUserAddress();
+
+    //Pick node screen also
+    //And create / import wallet screen
+    //If import Wallet.import(height, seed, node)
+
+    const node = { port: 11898, url: 'blocksum.org' };
+    await Wallet.create(node);
+    const [address] = Wallet.addresses();
 
     useUserStore.setState((state) => ({
       ...state,
