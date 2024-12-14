@@ -92,6 +92,28 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
     return JNI_VERSION_1_6;
 }
 
+extern "C" JNIEXPORT jobject JNICALL
+Java_com_huginmessenger_TurtleCoinModule_generateKeysJNI(
+    JNIEnv *env,
+    jobject instance)
+{
+    std::string publicKey;
+    std::string privateKey;
+    Core::Cryptography::generateKeys(privateKey, publicKey);
+    jclass keyPairClass = env->FindClass("com/huginmessenger/KeyPair");
+    jmethodID constructor = env->GetMethodID(keyPairClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
+
+    jstring jPublicKey = env->NewStringUTF(publicKey.c_str());
+    jstring jSecretKey = env->NewStringUTF(privateKey.c_str());
+
+    jobject keyPairObject = env->NewObject(keyPairClass, constructor, jPublicKey, jSecretKey);
+
+    env->DeleteLocalRef(jPublicKey);
+    env->DeleteLocalRef(jSecretKey);
+
+    return keyPairObject;
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_huginmessenger_TurtleCoinModule_underivePublicKeyJNI(
     JNIEnv *env,
@@ -255,7 +277,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateRingSignaturesJNI(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_huginmessenger_TurtleCoinModule_checkRingSignatureJNI(
+Java_com_huginmessenger_TurtleCoinModule_checkRingSignaturesJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,

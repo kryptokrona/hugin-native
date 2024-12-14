@@ -17,6 +17,7 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableNativeMap;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -26,6 +27,8 @@ import java.net.URL;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import com.huginmessenger.KeyPair;
 
 public class TurtleCoinModule extends ReactContextBaseJavaModule {
     static {
@@ -40,6 +43,24 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "TurtleCoin";
+    }
+
+    @ReactMethod
+    public void generateKeys(final Promise promise) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    KeyPair keyPair = generateKeysJNI();
+                     // Create a HashMap to hold the key-value pairs
+                    WritableMap keyPairMap = new WritableNativeMap();
+                    keyPairMap.putString("public_key", keyPair.publicKey); // Use getter if fields are private
+                    keyPairMap.putString("private_key", keyPair.privateKey);
+                    promise.resolve(keyPairMap);
+                } catch (Exception e) {
+                    promise.reject("Error in generateKeys: ", e);
+                }
+            }
+        }).start();
     }
 
     @ReactMethod
@@ -64,14 +85,14 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void underivePublicKey(
         final String derivation,
-        final long index,
+        final double index,
         final String outputKey,
         final Promise promise) {
 
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    String pub = underivePublicKeyJNI(derivation, index, outputKey);
+                    String pub = underivePublicKeyJNI(derivation, (long)index, outputKey);
                     promise.resolve(pub);
                 } catch (Exception e) {
                     promise.reject("Error in underivePublicKey: ", e);
@@ -327,7 +348,7 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void checkRingSignatures(
+    public void checkRingSignature(
         final String transactionPrefixHash,
         final String keyImage,
         final ReadableArray inputKeys,
@@ -336,7 +357,7 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    boolean success = checkRingSignatureJNI(
+                    boolean success = checkRingSignaturesJNI(
                         transactionPrefixHash,
                         keyImage,
                         arrayToInputKeys(inputKeys),
@@ -650,7 +671,7 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
         long realIndex
     );
 
-    public native boolean checkRingSignatureJNI(
+    public native boolean checkRingSignaturesJNI(
         String transactionPrefixHash,
         String keyImage,
         String[] publicKeys,
@@ -675,5 +696,6 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     public native boolean checkSignatureJNI(String message, String publicKey, String signature);
     public native String hashToScalarJNI(String hash);
     public native String underivePublicKeyJNI(String derivation, long index, String outputKey);
+    public native KeyPair generateKeysJNI();
 
 }

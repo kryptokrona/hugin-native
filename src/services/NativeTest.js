@@ -7,6 +7,10 @@
 import { NativeModules } from 'react-native';
 import { TransactionInput } from 'kryptokrona-wallet-backend-js';
 
+export async function generateKeys() {
+  return NativeModules.TurtleCoin.generateKeys();
+}
+
 export async function cnFastHash(hashInput) {
   return NativeModules.TurtleCoin.cnFastHash(hashInput);
 }
@@ -104,13 +108,13 @@ export async function generateRingSignatures(
   );
 }
 
-export async function checkRingSignatures(
+export async function checkRingSignature(
   transactionPrefixHash,
   keyImage,
   publicKeys,
   signatures,
 ) {
-  return NativeModules.TurtleCoin.checkRingSignatures(
+  return NativeModules.TurtleCoin.checkRingSignature(
     transactionPrefixHash,
     keyImage,
     publicKeys,

@@ -11,7 +11,7 @@ import {
   generateRingSignatures,
   deriveSecretKey,
   generateKeyImage,
-  checkRingSignatures,
+  checkRingSignature,
   cnFastHash,
   secretKeyToPublicKey,
   scReduce32,
@@ -21,6 +21,7 @@ import {
   checkSignature,
   hashToScalar,
   underivePublicKey,
+  generateKeys,
 } from '../services/NativeTest';
 
 class walletConfig {
@@ -149,7 +150,7 @@ class walletConfig {
     this.generateRingSignatures = generateRingSignatures;
     this.deriveSecretKey = deriveSecretKey;
     this.generateKeyImage = generateKeyImage;
-    this.checkRingSignatures = checkRingSignatures;
+    this.checkRingSignature = checkRingSignature;
     this.derivePublicKey = derivePublicKey;
     this.generateKeyDerivation = generateKeyDerivation;
     this.generateRingSignatures = generateRingSignatures;
@@ -164,6 +165,7 @@ class walletConfig {
     this.checkSignature = checkSignature;
     this.hashToScalar = hashToScalar;
     this.underivePublicKey = underivePublicKey;
+    this.generateKeys = generateKeys;
     /**
      * Memory to use for storing downloaded blocks - 3MB
      */

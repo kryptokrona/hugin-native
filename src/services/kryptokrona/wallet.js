@@ -1,7 +1,7 @@
 import { WalletBackend, Daemon } from 'kryptokrona-wallet-backend-js';
 import { WalletConfig } from 'config/wallet-config';
 import { saveWallet, loadWallet } from '../../services/bare/sqlite';
-
+import { processBlockOutputs, makePostRequest } from '../NativeTest';
 export class ActiveWallet {
   constructor() {
     this.active = undefined;
@@ -95,8 +95,13 @@ export class ActiveWallet {
     return this.active.getAddresses();
   }
 
+  balance() {
+    return this.active.getBalance();
+  }
+
   setDaemon(node) {
     this.daemon = new Daemon(node.url, node.port);
+    this.daemon.makePostRequest = makePostRequest;
     this.nodeUrl = node.url;
     this.nodePort = node.port;
   }
@@ -106,6 +111,87 @@ export class ActiveWallet {
       return JSON.parse(json);
     } catch (e) {
       return false;
+    }
+  }
+
+  async start() {
+    console.log('Start this wallet ->', this.active);
+    this.active.setBlockOutputProcessFunc(processBlockOutputs);
+    await this.active.start();
+    console.log('Wallet started');
+    //Disable wallet optimization
+    await this.active.enableAutoOptimization(false);
+    console.log('Wallet enable auto opt');
+    //Disable scanning for transactions in pool
+    await this.active.scanPoolTransactions(false);
+    console.log('Scan pool txs no');
+    //Incoming transaction event
+    this.active.on('incomingtx', (transaction) => {
+      console.log('Incoming tx!', transaction);
+      this.save();
+    });
+
+    this.active.on('createdtx', async (tx) => {
+      console.log('***** outgoing *****', tx);
+      this.save();
+    });
+
+    //Wallet heightchange event with funtion that saves wallet only if we are synced
+    this.active.on(
+      'heightchange',
+      async (walletBlockCount, localDaemonBlockCount, networkBlockCount) => {
+        let synced = networkBlockCount - walletBlockCount <= 2;
+        if (networkBlockCount % 50 === 0) {
+          console.log('walletBlockCount', walletBlockCount);
+          console.log('networkBlockCount', networkBlockCount);
+        }
+
+        if (networkBlockCount === 0) return;
+        if (synced) {
+          console.log('**********');
+          console.log('**Synced**');
+          console.log('**Balance:', await this.balance());
+          console.log('**********');
+          //Send synced event to frontend
+          this.emit('sync', 'Synced');
+        }
+      },
+    );
+  }
+
+  async send(tx) {
+    console.log('transactions', tx);
+    console.log(`✅ SENDING ${tx.amount} TO ${tx.to}`);
+    let result = await this.active.sendTransactionAdvanced(
+      [[tx.to, tx.amount]], // destinations,
+      3, // mixin
+      { fixedFee: 1000, isFixedFee: true }, // fee
+      undefined, //paymentID
+      undefined, // subWalletsToTakeFrom
+      undefined, // changeAddress
+      true, // relayToNetwork
+      false, // sneedAll
+      undefined,
+    );
+    if (result.success) {
+      let amount = tx.amount / 100000;
+      let sent = {
+        message: `You sent ${amount} XKR`,
+        name: 'Transaction sent',
+        hash: parseInt(Date.now()),
+        key: tx.to,
+      };
+      this.emit('sentTx', sent);
+      //Notify
+    } else {
+      console.log(`Failed to send transaction: ${result.error.toString()}`);
+      let error = {
+        message: 'Failed to send',
+        name: 'Transaction error',
+        hash: Date.now(),
+      };
+      //Notify
+      this.emit('failedTx');
     }
   }
 }
