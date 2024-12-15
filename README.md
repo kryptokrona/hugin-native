@@ -28,12 +28,6 @@ npm install
 npm link
 ```
 
-Enable Expo plugin:
-
-```sh
-npx install-expo-modules@latest
-```
-
 > [!IMPORTANT]
 > The first time you build bare, you need to append the `--configure` flag:
 >
