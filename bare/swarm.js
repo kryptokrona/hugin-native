@@ -423,7 +423,6 @@ const check_data_message = async (data, connection, topic) => {
       //Start-up history sync
       if (data.type === REQUEST_HISTORY && con.request) {
         send_history(con.address, topic, active.key);
-        con.request = false;
         return true;
       } else if (data.type === SEND_HISTORY && con.request) {
         process_request(data.messages, active.key);
@@ -779,6 +778,16 @@ const connection_closed = (conn, topic) => {
   active.connections = still_active;
 };
 
+const close_all_connections = () => {
+  for (const swarm of active_swarms) {
+    const active = get_active_topic(swarm.topic);
+    if (!active) continue;
+    for (const a of active.connections) {
+      connection_closed(a.connection, active.topic);
+    }
+  }
+};
+
 const end_swarm = async (topic) => {
   const active = get_active_topic(topic);
   if (!active) {
@@ -920,4 +929,5 @@ module.exports = {
   send_message,
   share_file_info,
   request_download,
+  close_all_connections,
 };

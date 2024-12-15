@@ -11,6 +11,7 @@ const {
   create_swarm,
   end_swarm,
   share_file_info,
+  close_all_connections,
 } = require('./swarm');
 const { Hugin } = require('./account');
 
@@ -65,6 +66,9 @@ rpc.register(0, {
         break;
       case 'idle_status':
         Hugin.sleep(p.mode);
+        break;
+      case 'close_connections':
+        close_all_connections();
         break;
       default:
         console.log('Unknown RPC type:', p.type);

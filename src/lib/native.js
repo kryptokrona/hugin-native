@@ -112,6 +112,11 @@ export const send_idle_status = (status) => {
   mainRPC.request(data);
 };
 
+export const close_all_connections = () => {
+  const data = JSON.stringify({ type: 'close_connections' });
+  mainRPC.request(data);
+};
+
 // Function to test wallet support for different JS engines
 const wallet = async () => {
   // const daemon = new Daemon('privacymine.net', 11898);
