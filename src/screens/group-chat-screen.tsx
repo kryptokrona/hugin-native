@@ -71,7 +71,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
   };
 
-  scrollToBottom();
+  // scrollToBottom();
 
   useFocusEffect(
     React.useCallback(() => {

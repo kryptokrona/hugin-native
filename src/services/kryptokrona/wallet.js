@@ -153,7 +153,7 @@ export class ActiveWallet {
           console.log('**Balance:', await this.balance());
           console.log('**********');
           //Send synced event to frontend
-          this.emit('sync', 'Synced');
+          //   this.emit('sync', 'Synced');
         }
       },
     );
@@ -181,7 +181,7 @@ export class ActiveWallet {
         hash: parseInt(Date.now()),
         key: tx.to,
       };
-      this.emit('sentTx', sent);
+      //   this.emit('sentTx', sent);
       //Notify
     } else {
       console.log(`Failed to send transaction: ${result.error.toString()}`);
@@ -191,7 +191,7 @@ export class ActiveWallet {
         hash: Date.now(),
       };
       //Notify
-      this.emit('failedTx');
+      //   this.emit('failedTx');
     }
   }
 }
