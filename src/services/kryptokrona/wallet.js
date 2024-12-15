@@ -5,17 +5,16 @@ import { processBlockOutputs, makePostRequest } from '../NativeTest';
 export class ActiveWallet {
   constructor() {
     this.active = undefined;
-    this.started = false;
+    this.loaded = false;
+    this.address = undefined;
     this.nodeUrl = undefined;
     this.nodePort = undefined;
-    this.address = undefined;
-    this.started = false;
   }
 
   async init(node) {
     this.setDaemon(node);
     if (!(await this.load())) return false;
-    this.started = true;
+    this.loaded = true;
     return true;
   }
 
@@ -23,12 +22,13 @@ export class ActiveWallet {
     this.setDaemon(node);
     this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
     this.address = this.addresses()[0];
-    this.started = true;
+    this.loaded = true;
+    await this.start();
     await this.save();
   }
 
   async save() {
-    if (!this.started) return;
+    if (!this.loaded) return;
     try {
       console.log('Saving wallet!');
       console.log('--------------->');
@@ -65,6 +65,7 @@ export class ActiveWallet {
 
     this.active = loadedWallet;
     this.address = this.addresses()[0];
+    await this.start();
 
     console.log('Loaded wallet:', this.active);
     console.log('--------------->');
@@ -87,7 +88,9 @@ export class ActiveWallet {
     }
     this.active = wallet;
     this.address = this.addresses()[0];
+    this.loaded = true;
     await this.save();
+    await this.start();
     return true;
   }
 
@@ -181,6 +184,7 @@ export class ActiveWallet {
         hash: parseInt(Date.now()),
         key: tx.to,
       };
+      console.log('Success:', sent);
       //   this.emit('sentTx', sent);
       //Notify
     } else {
