@@ -29,7 +29,7 @@ export const Header: React.FC<Props> = ({
   // const avatar = useUserStore((state) => state.user?.avatar);
   const address = useUserStore((state) => state.user?.address);
   const online = useMemo(() => {
-    return Peers.isConnected(getCurrentRoom());
+    return Peers.connected(getCurrentRoom());
   }, [Peers, getCurrentRoom()]);
 
   useEffect(() => {

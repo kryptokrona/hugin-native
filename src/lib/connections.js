@@ -1,9 +1,10 @@
+import { EventEmitter } from 'events';
 import {
   setStoreActiveRoomUsers,
   getActiveRoomUsers,
 } from '../services/zustand';
 
-class Connections {
+class Connections extends EventEmitter {
   join(peer) {
     console.log('New connection incoming');
     const connected = {
@@ -11,7 +12,7 @@ class Connections {
       name: peer.name,
       room: peer.key,
     };
-    if (this.connected(peer.address, peer.key)) return;
+    if (this.already(peer.address, peer.key)) return;
     const list = this.active();
     list.push(connected);
     this.update(list);
@@ -27,11 +28,11 @@ class Connections {
     console.log('Peer disconnected. Still online:', list.length);
   }
 
-  connected(address, key) {
+  already(address, key) {
     return this.active().some((a) => a.room === key && a.address === address);
   }
 
-  isConnected(key) {
+  connected(key) {
     return this.active().some((a) => a.room === key);
   }
 
