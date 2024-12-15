@@ -51,9 +51,8 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
             public void run() {
                 try {
                     KeyPair keyPair = generateKeysJNI();
-                     // Create a HashMap to hold the key-value pairs
                     WritableMap keyPairMap = new WritableNativeMap();
-                    keyPairMap.putString("public_key", keyPair.publicKey); // Use getter if fields are private
+                    keyPairMap.putString("public_key", keyPair.publicKey);
                     keyPairMap.putString("private_key", keyPair.privateKey);
                     promise.resolve(keyPairMap);
                 } catch (Exception e) {
