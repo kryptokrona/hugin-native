@@ -57,15 +57,18 @@ rpc.register(2, {
         return JSON.stringify(message);
       case 'get-priv-key':
         //Temporary until we sign all messages with xkr address
-        return Wallet.spendKey();
+        const key = Wallet.spendKey();
+        return JSON.stringify(key);
       case 'sign-message':
-        return await Wallet.sign(request.message);
+        const sig = await Wallet.sign(request.message);
+        return JSON.stringify(sig);
       case 'verify-signature':
-        return await Wallet.verify(
+        const verify = await Wallet.verify(
           request.data.message,
           request.data.address,
           request.data.signature,
         );
+        return JSON.stringify(verify);
     }
   },
 });
