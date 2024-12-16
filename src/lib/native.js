@@ -10,6 +10,7 @@ import {
   getRoomReplyMessage,
   getLatestRoomHashes,
 } from '@/services/bare/sqlite';
+import { Wallet } from 'services/kryptokrona/wallet';
 requireNativeModule('HelloBare').install();
 
 // forward bare's logs to console
@@ -54,6 +55,17 @@ rpc.register(2, {
       case 'get-room-message':
         const message = await getRoomReplyMessage(request.hash, true);
         return JSON.stringify(message);
+      case 'get-priv-key':
+        //Temporary until we sign all messages with xkr address
+        return Wallet.spendKey();
+      case 'sign-message':
+        return await Wallet.sign(request.message);
+      case 'verify-signature':
+        return await Wallet.verify(
+          request.data.message,
+          request.data.address,
+          request.data.signature,
+        );
     }
   },
 });
