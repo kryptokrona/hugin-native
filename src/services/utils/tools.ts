@@ -16,7 +16,7 @@ export function toHex(str: string) {
 
 export class Timer {
   private timerId: any = null;
-  private timeLeft: number = 3600;
+  private timeLeft: number = 1800;
   private onEnd: () => void;
 
   constructor(onEnd: () => void) {
@@ -37,7 +37,7 @@ export class Timer {
 
   reset(): void {
     this.stop();
-    this.timeLeft = 3600;
+    this.timeLeft = 1800;
   }
 
   stop(): void {
@@ -45,5 +45,13 @@ export class Timer {
       clearInterval(this.timerId);
       this.timerId = null;
     }
+  }
+}
+
+export function parse(json: any) {
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    return false;
   }
 }
