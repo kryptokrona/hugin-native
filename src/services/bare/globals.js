@@ -52,14 +52,10 @@ class ConnectionType {
   }
 
   async restart(type) {
-    this.reset = true;
     if (this.type() !== '') {
-      console.log('WANT TO CLOSE ALL CONNECTIONS');
-      console.log('WANT TO CLOSE ALL CONNECTIONS');
-      console.log('WANT TO CLOSE ALL CONNECTIONS');
-      console.log('WANT TO CLOSE ALL CONNECTIONS');
       close_all_connections();
     }
+    this.reset = true;
     this.update(type);
     this.done();
   }
