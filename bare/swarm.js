@@ -15,6 +15,7 @@ const {
   sign_joined_message,
   check_hash,
   room_message_exists,
+  sign,
 } = require('./utils');
 const {
   send_file,
@@ -179,7 +180,7 @@ const send_joined_message = async (topic, dht_keys, connection) => {
   if (!active) {
     return;
   }
-  const [idSig, idPub] = await sign_joined_message(dht_keys);
+
   const admin = is_admin(active.key);
   let sig = '';
   if (admin) {
@@ -191,9 +192,7 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     voice = true;
   }
 
-  //XKR signature ** todo remove idPub, idSig in next versions
-
-  //const signature = await sign(message)
+  const signature = await sign(dht_keys.get().publicKey.toString('hex'));
 
   const data = JSON.stringify({
     address: Hugin.address,
@@ -207,8 +206,7 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     topic: topic,
     video: video,
     voice: voice,
-    idPub,
-    idSig,
+    idSig: signature,
     audioMute,
     videoMute,
     screenshare,
@@ -353,22 +351,17 @@ const check_data_message = async (data, connection, topic) => {
         Buffer.from(active.key.slice(-64), 'hex'),
       );
 
-      const verified = verify_signature(
-        connection.remotePublicKey,
-        Buffer.from(data.idSig, 'hex'),
-        Buffer.from(data.idPub, 'hex'),
-      );
+      const verified = await Hugin.request({
+        type: 'verify-signature',
+        data: {
+          message: connection.remotePublicKey.toString('hex'),
+          address: joined.address,
+          signature: joined.idSig,
+        },
+      });
 
       if (!verified) return 'Ban';
 
-      // const verified = await Hugin.request({
-      //   type: 'verify-signature',
-      //   data: {
-      //     message: joined.message,
-      //     address: joined.address,
-      //     signature: joined.signature,
-      //   },
-      // });
       // if (!verified) return 'Error';
 
       con.joined = true;
