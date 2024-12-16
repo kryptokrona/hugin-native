@@ -11,7 +11,8 @@ import { useGlobalStore, useUserStore } from '@/services';
 import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
-import { initDB, loadAccount, loadSavedFiles } from '../services/bare/sqlite';
+import { initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
 
 interface AppProviderProps {
@@ -67,9 +68,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
 
     await initDB();
+    const node = { port: 11898, url: 'blocksum.org' };
     Connection.listen();
-    const keys = await loadAccount();
-    user.keys = keys;
+    if (!(await Wallet.init(node))) {
+      console.log('Could not init wallet... starting new one:');
+      await Wallet.create(node);
+    }
+
     Files.update(await loadSavedFiles());
     await bare(user);
     await setLatestRoomMessages();
@@ -97,6 +102,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   const Timeout = new Timer(() => {
     //Stop bg tasks after 1hour of inactivity.
+    console.log('Stop task!');
+    console.log('Stop task!');
+    console.log('Stop task!');
+    console.log('Stop task!');
     stopTasks();
   });
 

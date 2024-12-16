@@ -191,6 +191,10 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     voice = true;
   }
 
+  //XKR signature ** todo remove idPub, idSig in next versions
+
+  //const signature = await sign(message)
+
   const data = JSON.stringify({
     address: Hugin.address,
     channels: [],
@@ -357,9 +361,15 @@ const check_data_message = async (data, connection, topic) => {
 
       if (!verified) return 'Ban';
 
-      //Check XKR signature ** TODO when we add wallet functionality.
-      // const verified = await verifySignature(joined.message, joined.address, joined.signature)
-      // if(!verified) return "Error"
+      // const verified = await Hugin.request({
+      //   type: 'verify-signature',
+      //   data: {
+      //     message: joined.message,
+      //     address: joined.address,
+      //     signature: joined.signature,
+      //   },
+      // });
+      // if (!verified) return 'Error';
 
       con.joined = true;
       con.address = joined.address;
