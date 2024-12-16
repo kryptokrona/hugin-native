@@ -2,6 +2,9 @@ import { WalletBackend, Daemon } from 'kryptokrona-wallet-backend-js';
 import { WalletConfig } from 'config/wallet-config';
 import { saveWallet, loadWallet } from '../../services/bare/sqlite';
 import { processBlockOutputs, makePostRequest } from '../NativeTest';
+import { parse } from '../utils';
+import { Address, CryptoNote } from 'kryptokrona-utils';
+const xkrUtils = new CryptoNote();
 export class ActiveWallet {
   constructor() {
     this.active = undefined;
@@ -23,7 +26,7 @@ export class ActiveWallet {
     this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
     this.address = this.addresses()[0];
     this.loaded = true;
-    await this.start();
+    // await this.start();
     await this.save();
   }
 
@@ -47,7 +50,7 @@ export class ActiveWallet {
       return false;
     }
 
-    const wallet = this.parse(walletData);
+    const wallet = parse(walletData);
     if (!wallet) return false;
 
     console.log('Wallet parsed...');
@@ -109,12 +112,21 @@ export class ActiveWallet {
     this.nodePort = node.port;
   }
 
-  parse(json) {
-    try {
-      return JSON.parse(json);
-    } catch (e) {
-      return false;
-    }
+  spendKey() {
+    return Wallet.active.getPrimaryAddressPrivateKeys()[0];
+  }
+
+  async sign(message) {
+    return await xkrUtils.signMessage(message, this.spendKey());
+  }
+
+  async verify(message, address, signature) {
+    const sekrAddr = await Address.fromAddress(address);
+    return await xkrUtils.verifyMessageSignature(
+      message,
+      sekrAddr.spend.publicKey,
+      signature,
+    );
   }
 
   async start() {
