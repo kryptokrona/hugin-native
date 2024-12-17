@@ -9,3 +9,4 @@ export * from './seed';
 export * from './settings-item';
 export * from './sync';
 export * from './user-item';
+export * from './full-screen-image';
