@@ -18,6 +18,7 @@ import {
   GroupMessageItem,
   MessageInput,
   ScreenLayout,
+  FullScreenImageViewer,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -51,6 +52,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
+  const [showImage, setShowImage] = useState<boolean>(false);
+  const [showImagePath, setImagePath] = useState<string>(false);
+
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
       return '';
@@ -69,6 +73,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   const scrollToBottom = () => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
+  };
+
+  const showBigImage = (path: string) => {
+    setImagePath(path);
+    setShowImage(true);
   };
 
   // scrollToBottom();
@@ -165,6 +174,13 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
+      {/* Full-Screen Image Viewer */}
+      {showImage && (
+        <FullScreenImageViewer
+          imagePath={showImagePath}
+          onClose={() => setShowImage(false)}
+        />
+      )}
       <FlatList
         inverted
         ref={flatListRef}
@@ -183,6 +199,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               reactions={item.reactions!}
               replyto={item.replyto}
               file={item.file!}
+              onShowImagePress={showBigImage}
             />
           );
         }}

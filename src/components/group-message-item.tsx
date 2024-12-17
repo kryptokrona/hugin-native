@@ -25,6 +25,7 @@ interface Props extends Partial<Message> {
   replyHash?: string;
   onReplyToMessagePress: (val: string) => void;
   onEmojiReactionPress: (val: string, val2: string) => void;
+  onShowImagePress: (path: string | undefined) => void;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -37,6 +38,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   file,
   onReplyToMessagePress,
   onEmojiReactionPress,
+  onShowImagePress,
   replyto,
 }) => {
   const { t } = useTranslation();
@@ -110,6 +112,10 @@ export const GroupMessageItem: React.FC<Props> = ({
 
   function onPressCopyText() {
     setActionsModal(false);
+  }
+
+  function handleImagePress() {
+    onShowImagePress(imageDetails?.imagePath);
   }
 
   useEffect(() => {
@@ -191,11 +197,13 @@ export const GroupMessageItem: React.FC<Props> = ({
               </TextField>
             </View>
             {imageDetails?.isImageMessage ? (
-              <Image
-                style={styles.image}
-                source={{ uri: imageDetails?.imagePath }}
-                resizeMode="cover"
-              />
+              <TouchableOpacity onPress={handleImagePress}>
+                <Image
+                  style={styles.image}
+                  source={{ uri: imageDetails?.imagePath }}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
             ) : (
               <TextField size="small" style={styles.message}>
                 {message ?? ''}
