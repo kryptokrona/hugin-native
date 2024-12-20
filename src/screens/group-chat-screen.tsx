@@ -68,7 +68,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, [replyToMessageHash, messages]);
 
   function onCustomizeGroupPress() {
-    navigation.navigate(MainScreens.ModifyGroupScreen, {
+    navigation.push(MainScreens.ModifyGroupScreen, {
       name,
       roomKey,
     });
