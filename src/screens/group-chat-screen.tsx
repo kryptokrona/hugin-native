@@ -230,5 +230,6 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
+    backgroundColor: 'black'
   },
 });
