@@ -68,7 +68,7 @@ export class ActiveWallet {
 
     this.active = loadedWallet;
     this.address = this.addresses()[0];
-    await this.start();
+    // await this.start();
 
     console.log('Loaded wallet:', this.active);
     console.log('--------------->');
@@ -121,12 +121,17 @@ export class ActiveWallet {
   }
 
   async verify(message, address, signature) {
-    const sekrAddr = await Address.fromAddress(address);
-    return await xkrUtils.verifyMessageSignature(
-      message,
-      sekrAddr.spend.publicKey,
-      signature,
-    );
+    try {
+      const sekrAddr = await Address.fromAddress(address);
+      const verify = await xkrUtils.verifyMessageSignature(
+        message,
+        sekrAddr.spend.publicKey,
+        signature,
+      );
+      return verify;
+    } catch (e) {
+      return false;
+    }
   }
 
   async start() {
