@@ -28,6 +28,7 @@ import {
   onSendGroupMessageWithFile,
   onSendGroupMessage,
   setStoreCurrentRoom,
+  useThemeStore,
 } from '@/services';
 import type {
   SelectedFile,
@@ -43,6 +44,8 @@ interface Props {
 }
 
 export const GroupChatScreen: React.FC<Props> = ({ route }) => {
+  const theme = useThemeStore((state) => state.theme);
+  const backgroundColor = theme.background;
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
@@ -208,7 +211,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         maxToRenderPerBatch={messages.length}
       />
 
-      <KeyboardAvoidingView style={styles.inputWrapper}>
+      <KeyboardAvoidingView style={[styles.inputWrapper, {backgroundColor}]}>
         <MessageInput
           onSend={onSend}
           replyToName={replyToName}
@@ -230,6 +233,5 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
-    backgroundColor: 'black'
-  },
+  }
 });
