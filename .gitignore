@@ -90,3 +90,5 @@ vendor/concurrentqueue
 .expo
 dist/
 web-build/
+
+android/gradlew.bat
