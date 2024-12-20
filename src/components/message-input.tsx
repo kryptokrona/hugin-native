@@ -49,6 +49,7 @@ export const MessageInput: React.FC<Props> = ({
     const options: CameraOptions = {
       mediaType: 'photo',
       quality: 0.5,
+      saveToPhotos: true,
     };
 
     launchCamera(options, (response) => {
