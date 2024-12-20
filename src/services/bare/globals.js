@@ -53,7 +53,7 @@ class ConnectionType {
 
   async restart(type) {
     if (this.type() !== '') {
-      close_all_connections();
+      // close_all_connections();
     }
     this.reset = true;
     this.update(type);
