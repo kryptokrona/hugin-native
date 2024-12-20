@@ -1,13 +1,8 @@
 import React from 'react';
 
-import {
-  View,
-  Modal,
-  Image,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Modal, Image, TouchableOpacity, StyleSheet } from 'react-native';
+
+import { CustomIcon } from './_elements';
 
 interface FullScreenImageViewerProps {
   imagePath: string; // Path to the image file
@@ -23,7 +18,7 @@ export const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
       <View style={styles.overlayContainer}>
         {/* Close Button */}
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeText}>X</Text>
+          <CustomIcon name={'arrow-back-ios'} type={'MI'} size={30} />
         </TouchableOpacity>
 
         {/* Full-Screen Image */}
@@ -39,15 +34,10 @@ export const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
 
 const styles = StyleSheet.create({
   closeButton: {
+    left: 20,
     position: 'absolute',
-    right: 20,
     top: 40,
     zIndex: 10,
-  },
-  closeText: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold',
   },
   fullScreenImage: {
     height: '100%',
