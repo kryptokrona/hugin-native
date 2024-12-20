@@ -97,6 +97,7 @@ const create_swarm = async (hashkey, key) => {
     admin: admin ? true : false,
     search: false,
     buffer: [],
+    peers: [],
   };
 
   active_swarms.push(active);
@@ -133,7 +134,9 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
     video: false,
     voice: false,
     knownHashes: [],
+    peer,
     request: true,
+    publicKey: peer.publicKey.toString('hex'),
   });
   send_joined_message(topic, dht_keys, connection);
   connection.on('data', async (data) => {
@@ -243,7 +246,7 @@ const incoming_message = async (data, topic, connection, peer) => {
     return;
   }
   // Check
-  const check = await check_data_message(str, connection, topic);
+  const check = await check_data_message(str, connection, topic, peer);
   if (check === 'Ban') {
     console.log('Banned connection');
     peer.ban(true);
@@ -255,13 +258,14 @@ const incoming_message = async (data, topic, connection, peer) => {
     return;
   }
   if (check) {
+    peer.priority = 3;
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
   Hugin.send('swarm-message', { message, topic });
 };
 
-const check_data_message = async (data, connection, topic) => {
+const check_data_message = async (data, connection, topic, peer) => {
   try {
     data = JSON.parse(data);
   } catch (e) {
@@ -372,6 +376,9 @@ const check_data_message = async (data, connection, topic) => {
       con.video = joined.video;
       joined.key = active.key;
       con.request = true;
+      console.log('peer.publicKey', peer.publicKey);
+      active.peers.push(peer.publicKey.toString('hex'));
+
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
       if (parseInt(active.time) > time && active.requests < 3) {
@@ -437,6 +444,7 @@ const check_data_message = async (data, connection, topic) => {
 
       const INC_HASHES = data.hashes?.length !== undefined || 0;
       const INC_MESSAGES = data.messages?.length !== undefined || 0;
+      const INC_PEERS = data.peers?.length !== undefined || 0;
       //Check if payload is too big
       if (INC_HASHES) {
         if (data.hashes?.length > 25) return 'Ban';
@@ -447,6 +455,10 @@ const check_data_message = async (data, connection, topic) => {
           //Already know all the latest messages
           con.request = false;
           return true;
+        }
+        if (INC_PEERS && active.peers !== data?.peers) {
+          console.log('Looking for missing peers **--**-->');
+          find_missing_peers(active, data?.peers);
         }
         const missing = await check_missed_messages(
           data.hashes,
@@ -477,6 +489,19 @@ const check_data_message = async (data, connection, topic) => {
   if (Hugin.blocked(con.address)) return;
 
   return false;
+};
+
+const find_missing_peers = async (active, peers) => {
+  for (const peer of peers) {
+    if (typeof peer !== 'string' || peer?.length > 64) continue;
+    if (!active.peers.some((a) => a === peer)) {
+      console.log("'''''''''''''''''''''''''''''''");
+      console.log('Try connect to peer ------------>');
+      console.log("'''''''''''''''''''''''''''''''");
+      active.swarm.joinPeer(Buffer.from(peer, 'hex'));
+      await sleep(100);
+    }
+  }
 };
 
 const check_missed_messages = async (hashes) => {
@@ -775,6 +800,12 @@ const connection_closed = (conn, topic) => {
   }
   // Hugin.send('close-voice-channel-with-peer', user.address);
   Hugin.send('peer-disconnected', { address: user.address, key: active.key });
+
+  const connection = active.connections.find((a) => a.connection === conn);
+  const removedPeer = active.peers.filter((a) => a !== connection.publicKey);
+  console.log('Removed peer', removedPeer);
+  active.peers = removedPeer;
+  console.log('active.peers', active.peers);
   const still_active = active.connections.filter((a) => a.connection !== conn);
   console.log('Connection closed');
   console.log('Still active:', still_active);
@@ -884,7 +915,7 @@ const check_if_online = async (topic) => {
     } else {
       active.search = true;
       let i = 0;
-      const data = { type: 'Ping' };
+      const data = { type: 'Ping', peers: active.peers };
       for (const conn of active.connections) {
         data.hashes = hashes;
         if (i > 4) {
