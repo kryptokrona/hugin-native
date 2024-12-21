@@ -1,0 +1,12 @@
+diff --git a/node_modules/request/lib/har.js b/node_modules/request/lib/har.js
+index 0dedee4..301f0a2 100644
+--- a/node_modules/request/lib/har.js
++++ b/node_modules/request/lib/har.js
+@@ -1,6 +1,6 @@
+ 'use strict'
+ 
+-var fs = require('fs')
++var fs = require('react-native-fs')
+ var qs = require('querystring')
+ var validate = require('har-validator')
+ var extend = require('extend')
