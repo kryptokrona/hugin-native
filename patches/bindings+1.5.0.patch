@@ -1,0 +1,13 @@
+diff --git a/node_modules/bindings/bindings.js b/node_modules/bindings/bindings.js
+index 727413a..e8733a6 100644
+--- a/node_modules/bindings/bindings.js
++++ b/node_modules/bindings/bindings.js
+@@ -2,7 +2,7 @@
+  * Module dependencies.
+  */
+ 
+-var fs = require('fs'),
++var fs = require('bare-fs'),
+   path = require('path'),
+   fileURLToPath = require('file-uri-to-path'),
+   join = path.join,
