@@ -108,7 +108,7 @@ export const GroupsScreen: React.FC<Props> = () => {
       joinAndSaveRoom(inviteKey, originalName, user.address, user?.name);
 
       setModalVisible(false);
-      navigation.navigate(MainScreens.GroupChatScreen, {
+      navigation.push(MainScreens.GroupChatScreen, {
         name: roomName,
         roomKey: inviteKey,
       });
