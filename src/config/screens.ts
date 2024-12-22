@@ -4,6 +4,7 @@ export enum AuthScreens {
   RequestPinScreen = 'RequestPinScreen',
   SplashScreen = 'SplashScreen',
   CreateAccountScreen = 'CreateAccountScreen',
+  DashboardScreen = 'DashboardScreen'
 }
 
 export const TabBar = {
@@ -20,6 +21,11 @@ export const TabBar = {
   SettingsScreen: {
     iconName: 'sliders',
     iconType: 'FA',
+    tabName: 'SettingsTab',
+  },
+  DashboardScreen: {
+    iconName: 'wallet-outline',
+    iconType: 'MCI',
     tabName: 'SettingsTab',
   },
 } as const;
@@ -41,4 +47,5 @@ export enum MainScreens {
   FaqScreen = 'FaqScreen',
   SettingsScreen = 'SettingsScreen',
   UpdateProfileScreen = 'UpdateProfileScreen',
+  DashboardScreen = 'DashboardScreen',
 }

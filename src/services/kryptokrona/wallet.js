@@ -4,6 +4,7 @@ import { saveWallet, loadWallet } from '../../services/bare/sqlite';
 import { processBlockOutputs, makePostRequest } from '../NativeTest';
 import { parse } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
+import { setBalance, setStoreAddress } from '@/services';
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
   constructor() {
@@ -68,11 +69,13 @@ export class ActiveWallet {
 
     this.active = loadedWallet;
     this.address = this.addresses()[0];
-    // await this.start();
 
     console.log('Loaded wallet:', this.active);
     console.log('--------------->');
     console.log('Wallet address:', this.address);
+
+    await this.start();
+
     return true;
   }
 
@@ -101,8 +104,9 @@ export class ActiveWallet {
     return this.active.getAddresses();
   }
 
-  balance() {
-    return this.active.getBalance();
+  async getAndSetBalance() {
+    let [unlockedBalance, lockedBalance] = await this.active.getBalance();
+    setBalance([unlockedBalance, lockedBalance]);
   }
 
   setDaemon(node) {
@@ -145,14 +149,20 @@ export class ActiveWallet {
     //Disable scanning for transactions in pool
     await this.active.scanPoolTransactions(false);
     console.log('Scan pool txs no');
+
+    this.getAndSetBalance();
+    setStoreAddress(this.address);
+
     //Incoming transaction event
-    this.active.on('incomingtx', (transaction) => {
+    this.active.on('incomingtx', async (transaction) => {
       console.log('Incoming tx!', transaction);
+      this.getAndSetBalance();
       this.save();
     });
 
     this.active.on('createdtx', async (tx) => {
       console.log('***** outgoing *****', tx);
+      this.getAndSetBalance();
       this.save();
     });
 
@@ -170,8 +180,8 @@ export class ActiveWallet {
         if (synced) {
           console.log('**********');
           console.log('**Synced**');
-          console.log('**Balance:', await this.balance());
           console.log('**********');
+          this.getAndSetBalance();
           //Send synced event to frontend
           //   this.emit('sync', 'Synced');
         }

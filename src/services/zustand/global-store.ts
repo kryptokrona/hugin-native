@@ -1,9 +1,11 @@
-import type { Message, Room, User } from '@/types';
+import type { Message, Room, User, Balance, Address } from '@/types';
 
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 type GlobalStore = {
+  balance: Balance;
+  address: string;
   authenticated: boolean;
   rooms: Room[];
   thisRoom: string;
@@ -15,6 +17,7 @@ type GlobalStore = {
   setRoomUserList: (payload: User[]) => void;
   setAuthenticated: (payload: boolean) => void;
   setStoreRooms: (payload: Room[]) => void;
+  setBalance: (payload: Balance) => void;
 };
 
 export const useGlobalStore = create<
@@ -25,8 +28,10 @@ export const useGlobalStore = create<
     authenticated: false,
     rooms: [],
     thisRoom: '',
+    address: '',
     roomMessages: [],
     roomUsers: [],
+    balance: {unlocked: 0, locked: 0},
 
     setCurrentRoom: (thisRoom: string) => {
       set({ thisRoom });
@@ -46,6 +51,12 @@ export const useGlobalStore = create<
     },
     setStoreRooms: async (rooms: Room[]) => {
       set({ rooms });
+    },
+    setBalance: async (balance: Balance) => {
+      set({ balance });
+    },
+    setAddress: async (address: string) => {
+      set({ address });
     },
   })),
 );

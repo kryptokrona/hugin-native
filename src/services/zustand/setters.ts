@@ -1,4 +1,4 @@
-import type { Message, Room, User } from '@/types';
+import type { Message, Room, User, Balance } from '@/types';
 
 import { usePreferencesStore, useUserStore } from './async-storage-stores';
 import { useGlobalStore } from './global-store';
@@ -6,6 +6,29 @@ import { useGlobalStore } from './global-store';
 export const setStoreRooms = (rooms: Room[]) => {
   useGlobalStore.setState({ rooms });
 };
+
+export const setBalance = ([unlockedBalance, lockedBalance]: [number, number]) => {
+  console.log('Setting balance');
+  console.log('Setting balance');
+  console.log('Setting balance');
+  console.log('Setting balance');
+  console.log('Setting balance');
+  const balance: Balance = {
+      unlocked: unlockedBalance,
+      locked: lockedBalance,
+  };
+  useGlobalStore.setState({ balance });
+};
+
+export const setStoreAddress = (address: string) => {
+  console.log('Setting address');
+  console.log('Setting address');
+  console.log('Setting address');
+  console.log('Setting address');
+  console.log(address);
+  useGlobalStore.setState({ address });
+};
+
 
 export const setStoreCurrentRoom = (thisRoom: string) => {
   useGlobalStore.setState({ thisRoom });

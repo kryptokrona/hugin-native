@@ -8,6 +8,7 @@ import {
   ModifyGroupScreen,
   SettingsScreen,
   UpdateProfileScreen,
+  DashboardScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -85,6 +86,13 @@ export const MainNavigator = () => {
         component={SettingsScreen}
         options={{
           header: (_props) => <Header title={t('settingsTitle')} />,
+        }}
+      />
+      <Tab.Screen
+        name={MainScreens.DashboardScreen}
+        component={DashboardScreen}
+        options={{
+          header: (_props) => <Header title={t('dashboardTitle')} />,
         }}
       />
       <Tab.Screen

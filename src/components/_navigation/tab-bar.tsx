@@ -10,7 +10,7 @@ import type { IconType } from '@/types';
 
 import { CustomIcon } from '../_elements';
 
-const tabbarButtons = [MainScreens.GroupsScreen, MainScreens.SettingsScreen];
+const tabbarButtons = [MainScreens.DashboardScreen, MainScreens.GroupsScreen, MainScreens.SettingsScreen];
 
 export const MyTabBar: React.FC<BottomTabBarProps> = ({
   state,

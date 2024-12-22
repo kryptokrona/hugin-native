@@ -15,3 +15,11 @@ export const getRoomsMessages = () => {
 export const getActiveRoomUsers = () => {
   return useGlobalStore.getState().roomUsers;
 };
+
+export const getBalance = () => {
+  return useGlobalStore.getState().balance;
+};
+
+export const getAddress = () => {
+  return useGlobalStore.getState().address;
+};
