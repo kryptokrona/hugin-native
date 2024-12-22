@@ -1,0 +1,459 @@
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/arch/generic/lib/argon2-arch.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/arch/generic/lib/argon2-arch.obj
+index d16fa49..360f301 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/arch/generic/lib/argon2-arch.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/arch/generic/lib/argon2-arch.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/argon2.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/argon2.obj
+index 94e4982..9579ad1 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/argon2.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/argon2.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/blake2/blake2.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/blake2/blake2.obj
+index 88343cd..ec12d94 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/blake2/blake2.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/blake2/blake2.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/core.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/core.obj
+index cb7bc94..35f2dbc 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/core.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/core.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/encoding.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/encoding.obj
+index efc24cf..8df62eb 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/encoding.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/encoding.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/genkat.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/genkat.obj
+index f4d74ac..e975cf6 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/genkat.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/genkat.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/impl-select.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/impl-select.obj
+index dee53eb..32a3f8a 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/impl-select.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/impl-select.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/thread.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/thread.obj
+index 7cd36d9..b511bd5 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/thread.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/argon2/lib/thread.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/equal.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/equal.obj
+index baeb7aa..b14d443 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/equal.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/equal.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_0.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_0.obj
+index ec3af4c..e8b3696 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_0.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_0.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_1.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_1.obj
+index 6d4adfe..271ebd4 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_1.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_1.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_add.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_add.obj
+index 7be1987..6bd51cf 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_add.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_add.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_cmov.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_cmov.obj
+index 33dcb30..24c3d84 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_cmov.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_cmov.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_copy.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_copy.obj
+index fb934ba..18ea2e3 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_copy.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_copy.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_divpowm1.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_divpowm1.obj
+index 74ed5e4..5a8496d 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_divpowm1.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_divpowm1.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_frombytes.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_frombytes.obj
+index 87aa546..951781e 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_frombytes.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_frombytes.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_invert.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_invert.obj
+index ad60f44..619fb0d 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_invert.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_invert.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnegative.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnegative.obj
+index 3248cbd..2d18745 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnegative.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnegative.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnonzero.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnonzero.obj
+index f84c533..40d4b5d 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnonzero.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_isnonzero.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_mul.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_mul.obj
+index 7f693af..b218da8 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_mul.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_mul.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_neg.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_neg.obj
+index f35784f..931196d 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_neg.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_neg.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq.obj
+index c986b05..14ac4aa 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq2.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq2.obj
+index f52c604..b0e9554 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq2.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sq2.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sub.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sub.obj
+index 272a717..1a1c0a1 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sub.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_sub.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_tobytes.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_tobytes.obj
+index 7d3b8c9..62a28dd 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_tobytes.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/fe_tobytes.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_add.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_add.obj
+index 89a3863..3a3f495 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_add.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_add.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_0.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_0.obj
+index 3b5bbdf..e7c7f68 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_0.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_0.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_cmov.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_cmov.obj
+index 26eea04..6be09a0 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_cmov.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_cached_cmov.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_check_subgroup_precomp_vartime.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_check_subgroup_precomp_vartime.obj
+index 4782a77..23a9cd8 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_check_subgroup_precomp_vartime.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_check_subgroup_precomp_vartime.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_base_vartime.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_base_vartime.obj
+index f366c3a..8b2ff02 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_base_vartime.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_base_vartime.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_precomp_vartime.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_precomp_vartime.obj
+index 9c11aac..a8d55b4 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_precomp_vartime.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_double_scalarmult_precomp_vartime.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_dsm_precomp.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_dsm_precomp.obj
+index efe1840..668b1bd 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_dsm_precomp.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_dsm_precomp.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_frombytes_vartime.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_frombytes_vartime.obj
+index 27a9e91..3acb26a 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_frombytes_vartime.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_frombytes_vartime.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_fromfe_frombytes_vartime.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_fromfe_frombytes_vartime.obj
+index bd18415..f340381 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_fromfe_frombytes_vartime.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_fromfe_frombytes_vartime.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_madd.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_madd.obj
+index 6c5542e..f382ed4 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_madd.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_madd.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_msub.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_msub.obj
+index ed5a5db..fb5a73c 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_msub.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_msub.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_mul8.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_mul8.obj
+index c58e01e..a3a9687 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_mul8.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_mul8.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p2.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p2.obj
+index 609852d..3a765b4 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p2.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p2.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p3.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p3.obj
+index 1fd233c..1ca71b2 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p3.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p1p1_to_p3.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_0.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_0.obj
+index 76b061d..7f77876 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_0.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_0.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_dbl.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_dbl.obj
+index 02b7d14..9ce48a3 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_dbl.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p2_dbl.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_0.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_0.obj
+index aa04d12..34343d2 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_0.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_0.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_dbl.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_dbl.obj
+index 9c09f58..9fa1d92 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_dbl.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_dbl.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_cached.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_cached.obj
+index eb50734..80aebf0 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_cached.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_cached.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_p2.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_p2.obj
+index e8ca7ef..66d3bbb 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_p2.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_to_p2.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_tobytes.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_tobytes.obj
+index fa32180..4ffe3cc 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_tobytes.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_p3_tobytes.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_0.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_0.obj
+index fc74f5f..555b35a 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_0.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_0.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_cmov.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_cmov.obj
+index d1a5f7c..010a3c1 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_cmov.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_precomp_cmov.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult.obj
+index 7934727..a41fa7c 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult_base.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult_base.obj
+index 1f8c21f..350eb7d 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult_base.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_scalarmult_base.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_sub.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_sub.obj
+index b42028c..0da3155 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_sub.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_sub.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_tobytes.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_tobytes.obj
+index 8c8c88c..6d57871 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_tobytes.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/ge_tobytes.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_3.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_3.obj
+index 38758cb..5e61f38 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_3.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_3.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_4.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_4.obj
+index 8962d13..845ae3b 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_4.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/load_4.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/negative.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/negative.obj
+index 02ee04d..3cb1f34 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/negative.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/negative.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_0.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_0.obj
+index a4ec370..186a0e2 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_0.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_0.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_add.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_add.obj
+index 36b34bd..1829c09 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_add.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_add.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_check.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_check.obj
+index d8fe281..2d6d66c 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_check.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_check.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_isnonzero.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_isnonzero.obj
+index e696b17..5216fea 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_isnonzero.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_isnonzero.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mul.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mul.obj
+index 73add3b..674e207 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mul.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mul.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_muladd.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_muladd.obj
+index 077ea18..9185ec6 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_muladd.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_muladd.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mulsub.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mulsub.obj
+index 995a383..4141fdd 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mulsub.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_mulsub.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce.obj
+index fadf026..33dbae6 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce32.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce32.obj
+index b378fc3..e77f91b 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce32.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_reduce32.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_sub.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_sub.obj
+index bdf2f3a..351e384 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_sub.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/sc_sub.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/signum.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/signum.obj
+index 86aff18..8a5ed9e 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/signum.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/signum.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/slide.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/slide.obj
+index 4fed44d..02e9e47 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/slide.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/external/ed25519/slide.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/StringTools.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/StringTools.obj
+index 897feec..ed9bb31 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/StringTools.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/StringTools.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/aesb.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/aesb.obj
+index ef36bb7..c0abbf3 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/aesb.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/aesb.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/blake256.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/blake256.obj
+index 344cfca..0278ca9 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/blake256.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/blake256.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/chacha8.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/chacha8.obj
+index b8f65b7..20f796b 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/chacha8.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/chacha8.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/crypto.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/crypto.obj
+index 97f6900..06727f2 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/crypto.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/crypto.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/groestl.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/groestl.obj
+index 1f72627..88c36ea 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/groestl.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/groestl.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-blake.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-blake.obj
+index b066dfc..4427a8f 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-blake.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-blake.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-groestl.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-groestl.obj
+index 3870faf..ccacbf9 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-groestl.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-groestl.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-jh.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-jh.obj
+index 65f5021..88a8bb2 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-jh.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-jh.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-skein.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-skein.obj
+index 95398d5..9f20b49 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-skein.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash-extra-skein.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash.obj
+index 5dcd7bb..b705bb8 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/hash.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/jh.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/jh.obj
+index b2e820e..4cc819f 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/jh.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/jh.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/keccak.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/keccak.obj
+index 1724fb6..6bd2e42 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/keccak.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/keccak.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/multisig.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/multisig.obj
+index 129e037..edaef74 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/multisig.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/multisig.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/oaes_lib.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/oaes_lib.obj
+index bab8e07..fb8d080 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/oaes_lib.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/oaes_lib.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/random.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/random.obj
+index 44c7ffd..cb676c1 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/random.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/random.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/skein.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/skein.obj
+index a8645a0..e085ab6 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/skein.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/skein.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-arm.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-arm.obj
+index aba79e3..3abe248 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-arm.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-arm.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-portable.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-portable.obj
+index 3c31afe..2502521 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-portable.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-portable.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-x86.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-x86.obj
+index 0548540..5e8b839 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-x86.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/slow-hash-x86.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/tree-hash.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/tree-hash.obj
+index e659a55..22764d2 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/tree-hash.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/tree-hash.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto-node.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto-node.obj
+index d044846..115b9f7 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto-node.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto-node.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto.obj
+index 35edd39..988a097 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/src/turtlecoin-crypto.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.command.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.command.1.tlog
+similarity index 87%
+rename from node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.command.1.tlog
+rename to node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.command.1.tlog
+index f8dada9..18f6bb9 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.command.1.tlog and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.command.1.tlog differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.read.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.read.1.tlog
+similarity index 73%
+rename from node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.read.1.tlog
+rename to node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.read.1.tlog
+index f2202fa..1888254 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.read.1.tlog and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.read.1.tlog differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.write.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.write.1.tlog
+new file mode 100644
+index 0000000..972616f
+Binary files /dev/null and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/CL.write.1.tlog differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.command.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.command.1.tlog
+new file mode 100644
+index 0000000..f0f7304
+Binary files /dev/null and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.command.1.tlog differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.read.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.read.1.tlog
+new file mode 100644
+index 0000000..7bd44a3
+Binary files /dev/null and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.read.1.tlog differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.write.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.write.1.tlog
+new file mode 100644
+index 0000000..2c4e205
+Binary files /dev/null and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/link.write.1.tlog differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/turtlecoin-crypto.lastbuildstate b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/turtlecoin-crypto.lastbuildstate
+similarity index 51%
+rename from node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/turtlecoin-crypto.lastbuildstate
+rename to node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/turtlecoin-crypto.lastbuildstate
+index cbaed44..afaecdd 100644
+--- a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/turtlecoin-crypto.lastbuildstate
++++ b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.66D4C344.tlog/turtlecoin-crypto.lastbuildstate
+@@ -1,2 +1,2 @@
+ PlatformToolSet=v142:VCToolArchitecture=Native64Bit:VCToolsVersion=14.29.30133:TargetPlatformVersion=10.0.19041.0:
+-Release|x64|C:\Users\nilsjr\AppData\Local\Temp\tmp-14552gof7jqvJtRIh\node_modules\kryptokrona-crypto\build\|
++Release|x64|C:\Users\nilsjr\git\hugin-native\node_modules\kryptokrona-crypto\build\|
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.write.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.write.1.tlog
+deleted file mode 100644
+index 6f15b55..0000000
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/CL.write.1.tlog and /dev/null differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.command.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.command.1.tlog
+deleted file mode 100644
+index 055ef65..0000000
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.command.1.tlog and /dev/null differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.read.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.read.1.tlog
+deleted file mode 100644
+index 7a73885..0000000
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.read.1.tlog and /dev/null differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.write.1.tlog b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.write.1.tlog
+deleted file mode 100644
+index 7ca4ee1..0000000
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtleco.6A5ACDFB.tlog/link.write.1.tlog and /dev/null differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.iobj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.iobj
+index b51c374..acc19c4 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.iobj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.iobj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.ipdb b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.ipdb
+index 34c7dc0..49f83e9 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.ipdb and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.ipdb differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.node.recipe b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.node.recipe
+index 67a05f2..53c8152 100644
+--- a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.node.recipe
++++ b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/turtlecoin-crypto.node.recipe
+@@ -2,7 +2,7 @@
+ <Project>
+   <ProjectOutputs>
+     <ProjectOutput>
+-      <FullPath>C:\Users\nilsjr\AppData\Local\Temp\tmp-14552gof7jqvJtRIh\node_modules\kryptokrona-crypto\build\Release\turtlecoin-crypto.node</FullPath>
++      <FullPath>C:\Users\nilsjr\git\hugin-native\node_modules\kryptokrona-crypto\build\Release\turtlecoin-crypto.node</FullPath>
+     </ProjectOutput>
+   </ProjectOutputs>
+   <ContentFiles />
+diff --git a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/win_delay_load_hook.obj b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/win_delay_load_hook.obj
+index 10850ab..998c04b 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/win_delay_load_hook.obj and b/node_modules/kryptokrona-crypto/build/Release/obj/turtlecoin-crypto/win_delay_load_hook.obj differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.node b/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.node
+index 3d834f0..eb14f29 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.node and b/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.node differ
+diff --git a/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.pdb b/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.pdb
+index 5ecb3b5..dd98ed6 100644
+Binary files a/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.pdb and b/node_modules/kryptokrona-crypto/build/Release/turtlecoin-crypto.pdb differ
+diff --git a/node_modules/kryptokrona-crypto/build/binding.sln b/node_modules/kryptokrona-crypto/build/binding.sln
+index 99fc17b..446410b 100644
+--- a/node_modules/kryptokrona-crypto/build/binding.sln
++++ b/node_modules/kryptokrona-crypto/build/binding.sln
+@@ -1,6 +1,6 @@
+ Microsoft Visual Studio Solution File, Format Version 12.00
+ # Visual Studio 2015
+-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "turtlecoin-crypto", "turtlecoin-crypto.vcxproj", "{6A5ACDFB-742A-8F9D-E2A5-57AD293303ED}"
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "turtlecoin-crypto", "turtlecoin-crypto.vcxproj", "{66D4C344-8FCF-B4B1-5685-49EBF90D54E6}"
+ EndProject
+ Global
+ 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+@@ -8,10 +8,10 @@ Global
+ 		Release|x64 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+-		{6A5ACDFB-742A-8F9D-E2A5-57AD293303ED}.Debug|x64.ActiveCfg = Debug|x64
+-		{6A5ACDFB-742A-8F9D-E2A5-57AD293303ED}.Debug|x64.Build.0 = Debug|x64
+-		{6A5ACDFB-742A-8F9D-E2A5-57AD293303ED}.Release|x64.ActiveCfg = Release|x64
+-		{6A5ACDFB-742A-8F9D-E2A5-57AD293303ED}.Release|x64.Build.0 = Release|x64
++		{66D4C344-8FCF-B4B1-5685-49EBF90D54E6}.Debug|x64.ActiveCfg = Debug|x64
++		{66D4C344-8FCF-B4B1-5685-49EBF90D54E6}.Debug|x64.Build.0 = Debug|x64
++		{66D4C344-8FCF-B4B1-5685-49EBF90D54E6}.Release|x64.ActiveCfg = Release|x64
++		{66D4C344-8FCF-B4B1-5685-49EBF90D54E6}.Release|x64.Build.0 = Release|x64
+ 	EndGlobalSection
+ 	GlobalSection(SolutionProperties) = preSolution
+ 		HideSolutionNode = FALSE
+diff --git a/node_modules/kryptokrona-crypto/build/config.gypi b/node_modules/kryptokrona-crypto/build/config.gypi
+index d8085fc..5bbd7f1 100644
+--- a/node_modules/kryptokrona-crypto/build/config.gypi
++++ b/node_modules/kryptokrona-crypto/build/config.gypi
+@@ -411,11 +411,10 @@
+     "standalone_static_library": 1,
+     "msbuild_path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community\\MSBuild\\Current\\Bin\\MSBuild.exe",
+     "cache": "C:\\Users\\nilsjr\\AppData\\Local\\npm-cache",
+-    "force": "true",
+     "globalconfig": "C:\\Program Files\\nodejs\\etc\\npmrc",
+     "global_prefix": "C:\\Program Files\\nodejs",
+     "init_module": "C:\\Users\\nilsjr\\.npm-init.js",
+-    "local_prefix": "C:\\Users\\nilsjr\\AppData\\Local\\Temp\\tmp-14552gof7jqvJtRIh",
++    "local_prefix": "C:\\Users\\nilsjr\\git\\hugin-native",
+     "node_gyp": "C:\\Users\\nilsjr\\AppData\\Roaming\\nvm\\v18.20.2\\node_modules\\npm\\node_modules\\node-gyp\\bin\\node-gyp.js",
+     "npm_version": "10.5.0",
+     "prefix": "C:\\Program Files\\nodejs",
+diff --git a/node_modules/kryptokrona-crypto/build/turtlecoin-crypto.vcxproj b/node_modules/kryptokrona-crypto/build/turtlecoin-crypto.vcxproj
+index 21fff70..c4b5028 100644
+--- a/node_modules/kryptokrona-crypto/build/turtlecoin-crypto.vcxproj
++++ b/node_modules/kryptokrona-crypto/build/turtlecoin-crypto.vcxproj
+@@ -11,7 +11,7 @@
+     </ProjectConfiguration>
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+-    <ProjectGuid>{6A5ACDFB-742A-8F9D-E2A5-57AD293303ED}</ProjectGuid>
++    <ProjectGuid>{66D4C344-8FCF-B4B1-5685-49EBF90D54E6}</ProjectGuid>
+     <Keyword>Win32Proj</Keyword>
+     <RootNamespace>turtlecoin-crypto</RootNamespace>
+     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+diff --git a/node_modules/kryptokrona-crypto/dist/index.js b/node_modules/kryptokrona-crypto/dist/index.js
+index 951645c..aa362b6 100644
+--- a/node_modules/kryptokrona-crypto/dist/index.js
++++ b/node_modules/kryptokrona-crypto/dist/index.js
+@@ -1271,21 +1271,8 @@ exports.Crypto = Crypto;
+  * @ignore
+  */
+ function initialize() {
+-    if (moduleVars.crypto === null) {
+-        if (loadNativeAddon()) {
+-            return true;
+-        }
+-        if (loadBrowserWASM()) {
+-            return true;
+-        }
+-        if (loadWASMJS()) {
+-            return true;
+-        }
+-        return loadNativeJS();
+-    }
+-    else {
+-        return true;
+-    }
++    loadNativeJS();
++    return true
+ }
+ /**
+  * @ignore
+@@ -1413,13 +1400,14 @@ function loadNativeAddon() {
+  */
+ function loadNativeJS() {
+     try {
+-        const Self = require('./turtlecoin-crypto.js')();
+-        if (Object.getOwnPropertyNames(Self).length === 0 ||
+-            typeof Self.cn_fast_hash === 'undefined') {
+-            return false;
+-        }
++        // const Self = require('./turtlecoin-crypto.js')();
++        // if (Object.getOwnPropertyNames(Self).length === 0 ||
++        //     typeof Self.cn_fast_hash === 'undefined') {
++        //     return false;
++        // }
++        const Self = {}
+         moduleVars.crypto = Self;
+-        moduleVars.type = Interfaces_1.CryptoType.JS;
++        moduleVars.type = Interfaces_1.CryptoType.EXTERNAL;
+         return true;
+     }
+     catch (e) {
