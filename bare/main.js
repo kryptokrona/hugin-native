@@ -87,6 +87,7 @@ const updateBareUser = (user) => {
 };
 
 const newSwarm = async (hashkey, key, admin) => {
+  if (Hugin.rooms.some((a) => a.key === key)) return;
   const topic = await create_swarm(hashkey, key);
   Hugin.rooms.push({ key, topic, admin });
 };
