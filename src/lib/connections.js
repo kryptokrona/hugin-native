@@ -11,6 +11,7 @@ class Connections extends EventEmitter {
       address: peer.address,
       name: peer.name,
       room: peer.key,
+      avatar: peer.avatar,
     };
     if (this.already(peer.address, peer.key)) return;
     const list = this.active();

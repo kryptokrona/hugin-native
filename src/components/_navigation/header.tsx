@@ -26,7 +26,7 @@ export const Header: React.FC<Props> = ({
 }) => {
   const navigation = useNavigation();
   const theme = useThemeStore((state) => state.theme);
-  // const avatar = useUserStore((state) => state.user?.avatar);
+  const avatar = useUserStore((state) => state.user?.avatar);
   const address = useUserStore((state) => state.user?.address);
   const online = useMemo(() => {
     return Peers.connected(getCurrentRoom());
@@ -58,9 +58,11 @@ export const Header: React.FC<Props> = ({
         )}
         {!backButton && (
           <>
-            {address && (
+            {address && avatar?.length === 0 && (
               <Avatar base64={getAvatar(address)} address={address} size={30} />
             )}
+
+            {avatar!.length > 0 && <Avatar base64={avatar} size={30} />}
             {/* <HuginSvg style={styles.logo} /> */}
           </>
         )}

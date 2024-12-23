@@ -3,6 +3,9 @@ import {
   ImageLibraryOptions,
   launchImageLibrary,
 } from 'react-native-image-picker';
+import Toast from 'react-native-toast-message';
+
+import { Peers } from 'lib/connections';
 
 function hashCode(str: string) {
   let hash = 0;
@@ -47,6 +50,12 @@ export function getAvatar(
   format: 'png' | 'svg' = 'png',
   big = false,
 ) {
+  const found = Peers.active().find(
+    (a) => a.address === hash && a.avatar?.length !== 0,
+  );
+  if (found) {
+    return found.avatar;
+  }
   // Displays a fixed identicon until user adds new contact address in the input field
   if (hash?.length < 15) {
     hash =
@@ -102,6 +111,12 @@ export const pickAvatar = async () => {
   };
   const result = await launchImageLibrary(options);
   const base64 = result.assets?.[0].base64;
-
+  if (base64!.length > 273000) {
+    Toast.show({
+      text1: 'Avatar size exceeds maximum size',
+      type: 'info',
+    });
+    return undefined;
+  }
   return base64;
 };

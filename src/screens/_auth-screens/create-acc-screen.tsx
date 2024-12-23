@@ -8,8 +8,10 @@ import { useTranslation } from 'react-i18next';
 import { Wallet } from 'services/kryptokrona/wallet';
 
 import {
+  Avatar,
   Card,
   Container,
+  CustomIcon,
   Header,
   InputField,
   Pincode,
@@ -19,6 +21,7 @@ import {
 } from '@/components';
 import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
+  updateUser,
   useGlobalStore,
   usePreferencesStore,
   useThemeStore,
@@ -27,6 +30,7 @@ import {
 import { AuthMethods, AuthStackNavigationType } from '@/types';
 
 import { initDB } from '../../services/bare/sqlite';
+import { pickAvatar } from '../../utils/avatar';
 
 export const CreateAccScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -38,6 +42,8 @@ export const CreateAccScreen: React.FC = () => {
   const borderColor = theme.border;
 
   const [name, setName] = useState<string>('');
+  const [avatar, setAvatar] = useState<string>('');
+
   const [authMethod, setAuthMethod] = useState<AuthMethods>(
     AuthMethods.reckless,
   );
@@ -118,6 +124,14 @@ export const CreateAccScreen: React.FC = () => {
     }
   }
 
+  async function onUpdateAvatar() {
+    const base64 = await pickAvatar();
+    if (base64) {
+      await updateUser({ avatar: base64 });
+      setAvatar(base64);
+    }
+  }
+
   function onEnterPin(pin: string) {
     setPincode(pin);
   }
@@ -125,6 +139,23 @@ export const CreateAccScreen: React.FC = () => {
   return (
     <ScreenLayout>
       <View>
+        <TextField type="muted" size="small">
+          {'Avatar'}
+        </TextField>
+        <TouchableOpacity
+          onPress={onUpdateAvatar}
+          style={styles.avatarContainer}>
+          <View style={styles.avatarButton}>
+            <CustomIcon
+              type="MI"
+              name="mode-edit"
+              size={20}
+              color={theme.primary}
+            />
+          </View>
+        </TouchableOpacity>
+
+        {avatar.length > 0 && <Avatar base64={avatar} size={70} />}
         <InputField
           label={t('nickname')}
           value={name}
@@ -137,6 +168,7 @@ export const CreateAccScreen: React.FC = () => {
 
       <Card>
         {/* // TODO translation */}
+
         <TextField size="small">{'Auth method'}</TextField>
         <View style={styles.radioGroup}>
           <TouchableOpacity
@@ -207,6 +239,16 @@ export const CreateAccScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  avatarButton: {
+    bottom: 0,
+    left: 10,
+    padding: 10,
+    position: 'relative',
+  },
+  avatarContainer: {
+    alignSelf: 'flex-start',
+    position: 'relative',
+  },
   radioButton: {
     flexDirection: 'row',
     // alignItems: 'center',

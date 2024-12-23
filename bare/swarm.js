@@ -16,6 +16,7 @@ const {
   check_hash,
   room_message_exists,
   sign,
+  sleep,
 } = require('./utils');
 const {
   send_file,
@@ -83,6 +84,15 @@ const create_swarm = async (hashkey, key) => {
   if (!connected) return;
   const admin = is_admin(key);
   if (!admin) Hugin.send('syncing-history', { key });
+
+  Hugin.send('peer-connected', {
+    joined: {
+      name: Hugin.name,
+      address: Hugin.address,
+      key,
+      avatar: Hugin.avatar,
+    },
+  });
 
   const active = {
     call: [],
@@ -498,7 +508,7 @@ const check_data_message = async (data, connection, topic, peer) => {
 
 const find_missing_peers = async (active, peers) => {
   for (const peer of peers) {
-    if (typeof peer !== 'string' || peer?.length > 64) continue;
+    if (typeof peer !== 'string' || peer?.length !== 64) continue;
     if (!active.peers.some((a) => a === peer)) {
       console.log("'''''''''''''''''''''''''''''''");
       console.log('Try connect to peer ------------>');

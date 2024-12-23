@@ -91,10 +91,13 @@ const sanitize_join_swarm_data = (data) => {
   if (typeof screenshare !== 'boolean') return false;
 
   // if (typeof data?.avatar !== 'string') return false;
-  const avatar = Buffer.from(data.avatar, 'base64');
-  if (avatar.length > 200000) {
-    console.log('Avatar too big');
-    return false;
+  let avatar = '';
+  if (data.avatar !== undefined) {
+    avatar = data.avatar;
+    if (avatar.length > 273000) {
+      console.log('Avatar too big');
+      return false;
+    }
   }
   const channels = [];
 

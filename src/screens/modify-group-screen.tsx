@@ -114,8 +114,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     return `hugin://${linkName}/${roomKey}`;
   }, [name, roomKey]);
 
-  console.log({ roomUsers });
-
   return (
     <ScreenLayout>
       <View style={styles.scrollViewContainer}>

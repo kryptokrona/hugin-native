@@ -6,7 +6,9 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import {
+  Avatar,
   Container,
+  CustomIcon,
   InputField,
   Pincode,
   ScreenLayout,
@@ -25,6 +27,8 @@ import {
   MainNavigationParamList,
   MainStackNavigationType,
 } from '@/types';
+
+import { pickAvatar } from '../utils/avatar';
 
 interface Props {
   route: RouteProp<
@@ -73,12 +77,12 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     }));
     navigation.goBack();
   };
-  // async function onUpdateAvatar() {
-  //   const base64 = await pickAvatar();
-  //   if (base64) {
-  //     await updateUser({ avatar: base64 });
-  //   }
-  // }
+  async function onUpdateAvatar() {
+    const base64 = await pickAvatar();
+    if (base64) {
+      await updateUser({ avatar: base64 });
+    }
+  }
 
   function onSetAuthMethod(method: AuthMethods) {
     switch (method) {
@@ -108,7 +112,12 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     <ScreenLayout>
       <View>
         <View>
-          {/* <TouchableOpacity onPress={onUpdateAvatar} style={styles.header}>
+          <TextField type="muted" size="small">
+            {'Avatar'}
+          </TextField>
+          <TouchableOpacity
+            onPress={onUpdateAvatar}
+            style={styles.avatarContainer}>
             <Avatar base64={avatar} address={address} size={70} />
             <View style={styles.avatarButton}>
               <CustomIcon
@@ -118,7 +127,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
                 color={theme.primary}
               />
             </View>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
           <InputField
             label={t('name')}
             value={value}
@@ -194,15 +203,26 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 };
 
 const styles = StyleSheet.create({
+  avatarButton: {
+    bottom: 12,
+    position: 'absolute',
+    right: 10,
+  },
+  avatarContainer: {
+    alignSelf: 'flex-start',
+    position: 'relative',
+  },
   radioButton: {
     flexDirection: 'row',
     // alignItems: 'center',
     marginBottom: 10,
   },
+
   radioGroup: {
     flexDirection: 'column',
     marginVertical: 10,
   },
+
   radioSelected: {
     borderRadius: 10,
     height: 20,
