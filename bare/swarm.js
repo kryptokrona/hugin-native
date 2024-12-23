@@ -378,6 +378,11 @@ const check_data_message = async (data, connection, topic, peer) => {
       con.request = true;
       console.log('peer.publicKey', peer.publicKey);
       active.peers.push(peer.publicKey.toString('hex'));
+      let uniq = {};
+      const peers = active.peers.filter(
+        (obj) => !uniq[obj] && (uniq[obj] = true),
+      );
+      active.peers = peers;
 
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
@@ -901,7 +906,6 @@ const check_if_online = async (topic) => {
   const interval = setInterval(ping, 10 * 1000);
   let a = 0;
   async function ping() {
-    a++;
     //Check message state every 20seconds if idle
     if (a % 2 !== 0 && Hugin.idle()) return;
     const active = get_active_topic(topic);
@@ -915,7 +919,13 @@ const check_if_online = async (topic) => {
     } else {
       active.search = true;
       let i = 0;
-      const data = { type: 'Ping', peers: active.peers };
+      let peers = [];
+      //Send peer info on the first three pings. Then every 10 times.
+      if (a < 3 || a % 10 === 0) {
+        peers = active.peers;
+        a++;
+      }
+      const data = { type: 'Ping', peers };
       for (const conn of active.connections) {
         data.hashes = hashes;
         if (i > 4) {
