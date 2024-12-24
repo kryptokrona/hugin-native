@@ -8,7 +8,8 @@ import {
   ModifyGroupScreen,
   SettingsScreen,
   UpdateProfileScreen,
-  DashboardScreen
+  DashboardScreen,
+  SendTransactionScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -55,6 +56,32 @@ const GroupsStack = () => {
   );
 };
 
+const WalletStack = () => {
+  return (
+    <NativeStack.Navigator>
+      <NativeStack.Screen
+        name={MainScreens.DashboardScreen}
+        component={DashboardScreen}
+        options={{
+          header: (_props) => <Header title={'Wallet'} />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.SendTransactionScreen}
+        component={SendTransactionScreen}
+        options={{
+          header: (_props) => (
+            <Header
+              title={'Send transaction'}
+              backButton
+            />
+          ),
+        }}
+      />
+    </NativeStack.Navigator>
+  );
+};
+
 // Main Tab Navigator
 export const MainNavigator = () => {
   return (
@@ -73,6 +100,13 @@ export const MainNavigator = () => {
           tabBarLabel: t('rooms'), // Display "Rooms" in the tab bar
         }}
       />
+      <Tab.Screen
+        name={MainScreens.DashboardScreen}
+        component={WalletStack}
+        options={{
+          tabBarLabel: 'Wallet', // Display "Rooms" in the tab bar
+        }}
+      />
       {/* Independent Screens */}
       <Tab.Screen
         name={MainScreens.AddGroupScreen}
@@ -86,13 +120,6 @@ export const MainNavigator = () => {
         component={SettingsScreen}
         options={{
           header: (_props) => <Header title={t('settingsTitle')} />,
-        }}
-      />
-      <Tab.Screen
-        name={MainScreens.DashboardScreen}
-        component={DashboardScreen}
-        options={{
-          header: (_props) => <Header title={t('dashboardTitle')} />,
         }}
       />
       <Tab.Screen

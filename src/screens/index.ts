@@ -14,4 +14,5 @@ export * from './settings-screen';
 export * from './transaction-screen';
 export * from './transfer-screen';
 export * from './update-profile-screen';
-export * from './dashboard-screen'
+export * from './dashboard-screen';
+export * from './send-transaction-screen';

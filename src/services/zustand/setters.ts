@@ -1,4 +1,5 @@
 import type { Message, Room, User, Balance } from '@/types';
+import type { Transaction } from 'kryptokrona-wallet-backend-js';
 
 import { usePreferencesStore, useUserStore } from './async-storage-stores';
 import { useGlobalStore } from './global-store';
@@ -8,11 +9,6 @@ export const setStoreRooms = (rooms: Room[]) => {
 };
 
 export const setBalance = ([unlockedBalance, lockedBalance]: [number, number]) => {
-  console.log('Setting balance');
-  console.log('Setting balance');
-  console.log('Setting balance');
-  console.log('Setting balance');
-  console.log('Setting balance');
   const balance: Balance = {
       unlocked: unlockedBalance,
       locked: lockedBalance,
@@ -20,12 +16,11 @@ export const setBalance = ([unlockedBalance, lockedBalance]: [number, number]) =
   useGlobalStore.setState({ balance });
 };
 
+export const setTransactions = (transactions: Transaction[]) => {
+  useGlobalStore.setState({ transactions });
+};
+
 export const setStoreAddress = (address: string) => {
-  console.log('Setting address');
-  console.log('Setting address');
-  console.log('Setting address');
-  console.log('Setting address');
-  console.log(address);
   useGlobalStore.setState({ address });
 };
 

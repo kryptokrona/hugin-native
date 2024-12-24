@@ -48,4 +48,5 @@ export enum MainScreens {
   SettingsScreen = 'SettingsScreen',
   UpdateProfileScreen = 'UpdateProfileScreen',
   DashboardScreen = 'DashboardScreen',
+  SendTransactionScreen = 'SendTransactionScreen'
 }

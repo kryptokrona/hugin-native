@@ -1,4 +1,5 @@
 import type { Message, Room, User, Balance, Address } from '@/types';
+import type { Transaction } from 'kryptokrona-wallet-backend-js';
 
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
@@ -11,6 +12,7 @@ type GlobalStore = {
   thisRoom: string;
   roomMessages: Message[];
   roomUsers: User[];
+  transactions: Transaction[];
   setRooms: (payload: Room[]) => void;
   setRoomMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
@@ -32,9 +34,14 @@ export const useGlobalStore = create<
     roomMessages: [],
     roomUsers: [],
     balance: {unlocked: 0, locked: 0},
+    transactions: [],
 
     setCurrentRoom: (thisRoom: string) => {
       set({ thisRoom });
+    },
+
+    setTransactions: (transactions: Transaction[]) => {
+      set({ transactions });
     },
 
     setRoomMessages: (roomMessages: Message[]) => {
