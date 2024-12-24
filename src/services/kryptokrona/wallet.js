@@ -4,7 +4,7 @@ import { saveWallet, loadWallet } from '../../services/bare/sqlite';
 import { processBlockOutputs, makePostRequest } from '../NativeTest';
 import { parse } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
-import { setBalance, setStoreAddress } from '@/services';
+import { setBalance, setStoreAddress, setTransactions } from '@/services';
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
   constructor() {
@@ -107,6 +107,15 @@ export class ActiveWallet {
   async getAndSetBalance() {
     let [unlockedBalance, lockedBalance] = await this.active.getBalance();
     setBalance([unlockedBalance, lockedBalance]);
+    console.log('Getting txx')
+    console.log('Getting txx')
+    console.log('Getting txx')
+    console.log('Getting txx')
+    const transactions = await this.active.getTransactions();
+    console.log('Got txx')
+    console.log('Got txx')
+    console.log('Got txx')
+    setTransactions(transactions);
   }
 
   setDaemon(node) {

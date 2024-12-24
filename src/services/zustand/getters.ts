@@ -23,3 +23,7 @@ export const getBalance = () => {
 export const getAddress = () => {
   return useGlobalStore.getState().address;
 };
+
+export const getTransactions = () => {
+  return useGlobalStore.getState().transactions;
+};

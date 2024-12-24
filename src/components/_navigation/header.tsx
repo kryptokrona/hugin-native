@@ -62,7 +62,7 @@ export const Header: React.FC<Props> = ({
               <Avatar base64={getAvatar(address)} address={address} size={30} />
             )}
 
-            {avatar!.length > 0 && <Avatar base64={avatar} size={30} />}
+            {avatar?.length > 0 && <Avatar base64={avatar} size={30} />}
             {/* <HuginSvg style={styles.logo} /> */}
           </>
         )}
