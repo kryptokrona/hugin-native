@@ -68,16 +68,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
 
     await initDB();
+    await setLatestRoomMessages();
     const node = { port: 11898, url: 'blocksum.org' };
     Connection.listen();
     if (!(await Wallet.init(node))) {
       console.log('Could not init wallet... starting new one:');
       await Wallet.create(node);
     }
-
     Files.update(await loadSavedFiles());
     await bare(user);
-    await setLatestRoomMessages();
     await sleep(100);
     await joinRooms();
   }
