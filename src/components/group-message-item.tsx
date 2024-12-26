@@ -4,7 +4,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
-import { useThemeStore } from '@/services';
+import { useThemeStore, Wallet } from '@/services';
 import { Message } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
@@ -88,8 +88,8 @@ export const GroupMessageItem: React.FC<Props> = ({
     setActionsModal(false);
   }
 
-  function onBlockUser() {
-    console.log('onBlockUser press');
+  function onTipUser() {
+    Wallet.send({ amount: 100000, to: userAddress });
   }
 
   function hideActions() {
@@ -147,9 +147,9 @@ export const GroupMessageItem: React.FC<Props> = ({
             <TextButton
               small
               type="secondary"
-              onPress={onBlockUser}
-              icon={<CustomIcon name="block-helper" type="MCI" size={16} />}>
-              {t('blockUser')}
+              onPress={onTipUser}
+              icon={<CustomIcon name="attach-money" type="MI" size={16} />}>
+              {t('tipUser')}
             </TextButton>
           </View>
         )}
