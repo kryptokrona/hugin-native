@@ -12,3 +12,4 @@ export * from './user-item';
 export * from './full-screen-image';
 export * from './transaction';
 export * from './separator';
+export * from './loading-bar';
