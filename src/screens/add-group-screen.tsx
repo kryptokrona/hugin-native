@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { View } from 'react-native';
 
-import {
-  CommonActions,
-  useNavigation,
-  type RouteProp,
-} from '@react-navigation/native';
+import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
@@ -34,18 +30,10 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
     if (generated?.invite && name && address && admin) {
       joinAndSaveRoom(generated.invite, name, address, userName, admin);
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 1,
-          routes: [
-            { name: MainScreens.GroupsScreen },
-            {
-              name: MainScreens.GroupChatScreen,
-              params: { name, roomKey: generated.invite },
-            },
-          ],
-        }),
-      );
+      navigation.navigate(MainScreens.GroupChatScreen, {
+        name,
+        roomKey: generated.invite,
+      });
     }
   }
 
@@ -55,7 +43,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
       const [invite, seed] = JSON.parse(keys);
 
       if (invite) {
-        return { invite, admin: seed };
+        return { admin: seed, invite };
       }
     } catch (e) {
       console.error('Error create random group key', e);

@@ -100,7 +100,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   // }
 
   function OnlineUserMapper({ item }: { item: User }) {
-    console.log(item);
     return <UserItem {...item} />;
   }
 
