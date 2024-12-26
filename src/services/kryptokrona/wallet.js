@@ -107,14 +107,7 @@ export class ActiveWallet {
   async getAndSetBalance() {
     let [unlockedBalance, lockedBalance] = await this.active.getBalance();
     setBalance([unlockedBalance, lockedBalance]);
-    console.log('Getting txx')
-    console.log('Getting txx')
-    console.log('Getting txx')
-    console.log('Getting txx')
     const transactions = await this.active.getTransactions();
-    console.log('Got txx')
-    console.log('Got txx')
-    console.log('Got txx')
     setTransactions(transactions);
   }
 
