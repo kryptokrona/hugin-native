@@ -227,6 +227,13 @@ export class ActiveWallet {
       //   this.emit('failedTx');
     }
   }
+
+  node(node) {
+    let nodeUrl = node.split(':')[0];
+    let nodePort = parseInt(node.split(':')[1]);
+    this.setDaemon(nodeUrl, nodePort);
+    this.active.swapNode(this.daemon);
+  }
 }
 
 export const Wallet = new ActiveWallet();
