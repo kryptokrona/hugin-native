@@ -1,0 +1,17 @@
+Todo:
+    ✔ Fix tips @done(24-12-27 22:22)
+    ☐ Fix status icon (green/grey)
+
+
+Todo wallet:
+    ✔ Node picker @done(24-12-28 00:41)
+    ✔ Send transaction page @done(24-12-24 01:45)
+    ✔ Transaction history @done(24-12-24 01:45)
+    ☐ Backup keys
+    ☐ Notifications
+    ☐ Sync status
+    ☐ Fiat value
+
+Todo node picker:
+    ☐ Handle themes
+
