@@ -231,7 +231,7 @@ export class ActiveWallet {
   node(node) {
     const nodeUrl = node.split(':')[0];
     const nodePort = parseInt(node.split(':')[1]);
-    const picked = { node: nodeUrl, port: nodePort };
+    const picked = { url: nodeUrl, port: nodePort };
     this.setDaemon(picked);
     this.active.swapNode(this.daemon);
   }
