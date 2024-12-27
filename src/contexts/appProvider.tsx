@@ -7,7 +7,7 @@ import ReactNativeForegroundService from '@supersami/rn-foreground-service';
 import { bare, keep_alive } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
-import { useGlobalStore, useUserStore } from '@/services';
+import { useGlobalStore, usePreferencesStore, useUserStore } from '@/services';
 import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
@@ -22,6 +22,7 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
+  const preferences = usePreferencesStore((state) => state.preferences);
   const addTask = async () => {
     if (Platform.OS === 'android') {
       ReactNativeForegroundService.add_task(() => keep_alive(), {
@@ -69,7 +70,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     await initDB();
     await setLatestRoomMessages();
-    const node = { port: 11898, url: 'blocksum.org' };
+    const node = { port: parseInt(preferences.node.split(':')[1]), url: preferences.node.split(':')[0] };
     Connection.listen();
     if (!(await Wallet.init(node))) {
       console.log('Could not init wallet... starting new one:');

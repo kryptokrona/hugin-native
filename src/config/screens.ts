@@ -44,6 +44,7 @@ export enum MainScreens {
   MessagesScreen = 'MessagesScreen',
   ChangeLanguageScreen = 'ChangeLanguageScreen',
   ChangeThemeScreen = 'ChangeThemeScreen',
+  PickNodeScreen = 'PickNodeScreen',
   FaqScreen = 'FaqScreen',
   SettingsScreen = 'SettingsScreen',
   UpdateProfileScreen = 'UpdateProfileScreen',

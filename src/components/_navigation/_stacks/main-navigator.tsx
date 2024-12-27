@@ -9,7 +9,8 @@ import {
   SettingsScreen,
   UpdateProfileScreen,
   DashboardScreen,
-  SendTransactionScreen
+  SendTransactionScreen,
+  PickNodeScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -141,6 +142,13 @@ export const MainNavigator = () => {
         component={ChangeThemeScreen}
         options={{
           header: (_props) => <Header title={t('changeTheme')} backButton />,
+        }}
+      />
+        <Tab.Screen
+        name={MainScreens.PickNodeScreen}
+        component={PickNodeScreen}
+        options={{
+          header: (_props) => <Header title={t('nodePicker')} backButton />,
         }}
       />
     </Tab.Navigator>

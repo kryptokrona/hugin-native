@@ -157,6 +157,7 @@ export const defaultPreferences: Preferences = {
   authMethod: AuthMethods.reckless,
   language: 'en',
   nickname: 'Anon',
+  node: 'blocksum.org:11898'
 };
 
 export const defaultUser: User = {

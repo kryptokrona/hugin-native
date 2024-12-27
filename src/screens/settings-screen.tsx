@@ -36,6 +36,11 @@ const items: Item[] = [
     screen: MainScreens.UpdateProfileScreen,
     title: 'updateProfile',
   },
+  {
+    icon: { name: 'server', type: 'FA6' },
+    screen: MainScreens.PickNodeScreen,
+    title: 'nodePicker',
+  },
 
   // {
   //   icon: { name: 'trash-2', type: 'FI' },

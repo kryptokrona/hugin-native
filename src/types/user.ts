@@ -20,6 +20,7 @@ export interface Preferences {
   language: string;
   // limitData: boolean;
   nickname: string;
+  node: string;
 }
 
 export interface Payee {
