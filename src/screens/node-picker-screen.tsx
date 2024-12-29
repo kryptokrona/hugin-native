@@ -19,7 +19,7 @@ import {
   TextField,
 } from '@/components';
 import { useNavigation } from '@react-navigation/native';
-import { usePreferencesStore, Wallet } from '@/services';
+import { usePreferencesStore, useThemeStore, Wallet } from '@/services';
 import { Preferences } from '@/types';
 import { sleep } from '@/utils';
 
@@ -31,6 +31,12 @@ export const PickNodeScreen: React.FC<Props> = () => {
   const [loadingNode, setLoadingNode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCheck, setCheckLoading] = useState(false);
+
+  const theme = useThemeStore((state) => state.theme);
+
+  const color = theme.foreground;
+
+  const borderColor = theme.input;
   
 
   async function fetchWithTimeout(url, options, timeout = 1000) {
@@ -132,9 +138,10 @@ export const PickNodeScreen: React.FC<Props> = () => {
       style={[
         styles.nodeCard,
         selectedNode === index && styles.selectedNodeCard,
+        {borderColor: borderColor}
       ]}
       onPress={() => chooseNode(item)}>
-      <Text>{item.name}</Text>
+      <Text style={{color}}>{item.name}</Text>
       <View
         style={[
           styles.statusIndicator,
@@ -147,7 +154,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
   return (
     <ScreenLayout>
           <View style={{flex: 1}}>
-            <Text style={styles.title}>Pick a Node</Text>
+            <Text style={[styles.title, {color}]}>Pick a Node</Text>
             <View>
               <InputField
                 label={'Enter node URL'}
@@ -214,12 +221,10 @@ const styles = StyleSheet.create({
     padding: 12,
     marginVertical: 4,
     borderRadius: 8,
-    backgroundColor: '#f9f9f9',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
   },
   selectedNodeCard: {
     borderColor: '#4caf50',
