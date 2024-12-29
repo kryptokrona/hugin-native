@@ -39,7 +39,7 @@ const items: Item[] = [
   {
     icon: { name: 'server', type: 'FA6' },
     screen: MainScreens.PickNodeScreen,
-    title: 'nodePicker',
+    title: 'useCustomNode',
   },
 
   // {

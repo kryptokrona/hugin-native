@@ -8,6 +8,11 @@ export const setStoreRooms = (rooms: Room[]) => {
   useGlobalStore.setState({ rooms });
 };
 
+export const setSyncStatus = (syncStatus: number[]) => {
+  console.log('syncStatus', syncStatus)
+  useGlobalStore.setState({ syncStatus });
+};
+
 export const setBalance = ([unlockedBalance, lockedBalance]: [number, number]) => {
   const balance: Balance = {
       unlocked: unlockedBalance,

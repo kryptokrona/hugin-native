@@ -1,3 +1,5 @@
+import { WalletStatusScreen } from "screens/wallet-status-screen";
+
 export enum AuthScreens {
   ForgotPinScreen = 'ForgotPinScreen',
   RequestFingerPrintScreen = 'RequestFingerPrintScreen',
@@ -49,5 +51,6 @@ export enum MainScreens {
   SettingsScreen = 'SettingsScreen',
   UpdateProfileScreen = 'UpdateProfileScreen',
   DashboardScreen = 'DashboardScreen',
-  SendTransactionScreen = 'SendTransactionScreen'
+  SendTransactionScreen = 'SendTransactionScreen',
+  WalletStatusScreen = 'WalletStatusScreen'
 }

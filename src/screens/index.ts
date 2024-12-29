@@ -17,3 +17,4 @@ export * from './update-profile-screen';
 export * from './dashboard-screen';
 export * from './send-transaction-screen';
 export * from './node-picker-screen';
+export * from './wallet-status-screen';

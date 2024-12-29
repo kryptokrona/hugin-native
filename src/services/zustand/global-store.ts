@@ -13,6 +13,7 @@ type GlobalStore = {
   roomMessages: Message[];
   roomUsers: User[];
   transactions: Transaction[];
+  syncStatus: Number[];
   setRooms: (payload: Room[]) => void;
   setRoomMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
@@ -20,6 +21,7 @@ type GlobalStore = {
   setAuthenticated: (payload: boolean) => void;
   setStoreRooms: (payload: Room[]) => void;
   setBalance: (payload: Balance) => void;
+  setSyncStatus: (payload: Number[]) => void;
 };
 
 export const useGlobalStore = create<
@@ -35,6 +37,11 @@ export const useGlobalStore = create<
     roomUsers: [],
     balance: {unlocked: 0, locked: 0},
     transactions: [],
+    syncStatus: [],
+
+    setSyncStatus: (syncStatus: number[]) => {
+      set({ syncStatus })
+    },
 
     setCurrentRoom: (thisRoom: string) => {
       set({ thisRoom });

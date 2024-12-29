@@ -10,7 +10,8 @@ import {
   UpdateProfileScreen,
   DashboardScreen,
   SendTransactionScreen,
-  PickNodeScreen
+  PickNodeScreen,
+  WalletStatusScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -74,6 +75,18 @@ const WalletStack = () => {
           header: (_props) => (
             <Header
               title={'Send transaction'}
+              backButton
+            />
+          ),
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.WalletStatusScreen}
+        component={WalletStatusScreen}
+        options={{
+          header: (_props) => (
+            <Header
+              title={'Wallet status'}
               backButton
             />
           ),

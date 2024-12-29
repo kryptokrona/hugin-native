@@ -1,12 +1,12 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import {
   useFocusEffect,
   useNavigation,
   type RouteProp,
 } from '@react-navigation/native';
-import { ScrollView, RefreshControl, Text, StyleSheet, View, FlatList } from 'react-native';
+import { ScrollView, RefreshControl, Text, StyleSheet, View, FlatList, TouchableOpacity } from 'react-native';
 
-import { ScreenLayout, CopyButton, TextButton, Separator, TransactionItem } from '@/components';
+import { ScreenLayout, CopyButton, TextButton, Separator, TransactionItem, Header, CustomIcon } from '@/components';
 // import { Transaction } from '@/types';
 import { t } from 'i18next';
 import { getBalance, getAddress, useGlobalStore, useThemeStore } from '@/services';
@@ -18,17 +18,46 @@ export const DashboardScreen: React.FC = () => {
   // const [refreshing, setRefreshing] = useState(false);
 
   const navigation = useNavigation<MainStackNavigationType>();
+  const online = true;
+  const status = useGlobalStore((state) => state.syncStatus);
+  const synced = (status[0] == status[2]);
+
+  const goToStatusPage = () => {
+    console.log('Clicked');
+    navigation.push(MainScreens.WalletStatusScreen);
+  }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      header: () => (
+        <Header
+          title={t('wallet')}
+          right={
+            <TouchableOpacity style={{flexDirection: 'row'}} onPress={goToStatusPage}>
+              <View style={{marginTop: 4, marginRight: 5}}>
+              <CustomIcon
+                name={'lens'}
+                size={14}
+                type={'MI'}
+                color={`${synced ? 'green' : 'yellow'}`}
+              />
+              </View>
+              <CustomIcon type="FA6" name="server" size={24} />
+            </TouchableOpacity>
+          }
+        />
+      ),
+    });
+  }, [navigation]);
 
     // Subscribe to balance and address from the store
     const balance = useGlobalStore((state) => state.balance);
     const address = useGlobalStore((state) => state.address);
     const transactions = useGlobalStore((state) => state.transactions);
 
-      const theme = useThemeStore((state) => state.theme);
-    
-      const color = theme.foreground;
-    
-      const borderColor = theme.mutedForeground;
+    const theme = useThemeStore((state) => state.theme);
+    const color = theme.foreground;
+    const borderColor = theme.mutedForeground;
 
   const transactionsCB = ({ item }: { item: Transaction }) => {
     return <TransactionItem item={item} />;

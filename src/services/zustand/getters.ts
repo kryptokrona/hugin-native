@@ -27,3 +27,7 @@ export const getAddress = () => {
 export const getTransactions = () => {
   return useGlobalStore.getState().transactions;
 };
+
+export const getSyncStatus = () => {
+  return useGlobalStore.getState().syncStatus;
+};

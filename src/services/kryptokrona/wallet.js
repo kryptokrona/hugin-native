@@ -4,7 +4,7 @@ import { saveWallet, loadWallet } from '../../services/bare/sqlite';
 import { processBlockOutputs, makePostRequest } from '../NativeTest';
 import { parse } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
-import { setBalance, setStoreAddress, setTransactions } from '@/services';
+import { setBalance, setStoreAddress, setTransactions, setSyncStatus } from '@/services';
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
   constructor() {
@@ -111,6 +111,12 @@ export class ActiveWallet {
     setTransactions(transactions);
   }
 
+  async getAndSetSyncStatus() {
+    const [walletBlockCount, localDaemonBlockCount, networkBlockCount] =
+     this.active.getSyncStatus();
+     setSyncStatus([walletBlockCount, localDaemonBlockCount, networkBlockCount]);
+  }
+
   setDaemon(node) {
     this.daemon = new Daemon(node.url, node.port);
     this.daemon.makePostRequest = makePostRequest;
@@ -153,7 +159,11 @@ export class ActiveWallet {
     console.log('Scan pool txs no');
 
     this.getAndSetBalance();
+    this.getAndSetSyncStatus();
     setStoreAddress(this.address);
+    const syncStatusInterval = setInterval(this.getAndSetSyncStatus, 2000);
+    const saveInterval = setInterval(this.save, 30000);
+
 
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
@@ -172,6 +182,7 @@ export class ActiveWallet {
     this.active.on(
       'heightchange',
       async (walletBlockCount, localDaemonBlockCount, networkBlockCount) => {
+        this.getAndSetSyncStatus();
         let synced = networkBlockCount - walletBlockCount <= 2;
         if (networkBlockCount % 50 === 0) {
           console.log('walletBlockCount', walletBlockCount);
@@ -184,6 +195,10 @@ export class ActiveWallet {
           console.log('**Synced**');
           console.log('**********');
           this.getAndSetBalance();
+          this.getAndSetSyncStatus();
+          clearInterval(syncStatusInterval);
+          clearInterval(saveInterval);
+          await this.save();
           //Send synced event to frontend
           //   this.emit('sync', 'Synced');
         }
