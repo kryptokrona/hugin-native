@@ -5,19 +5,22 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useThemeStore, Wallet } from '@/services';
-import { Message } from '@/types';
+import { AuthStackNavigationType, Message } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
   Avatar,
   CopyButton,
   CustomIcon,
+  InputField,
   Reactions,
   TextButton,
   TextField,
 } from './_elements';
 import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
+import { useNavigation } from '@react-navigation/native';
+import { MainScreens } from '@/config';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -45,10 +48,14 @@ export const GroupMessageItem: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
   const [actions, setActions] = useState(true);
+  const [tipping, setTipping] = useState(false);
+  const [tipAmount, setTipAmount] = useState(0);
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
   const name = nickname ?? 'Anon';
+
+  const navigation = useNavigation<AuthStackNavigationType>();
 
   // Parse the message to see if it's JSON with a "path" property
   const imageDetails = useMemo(() => {
@@ -89,7 +96,17 @@ export const GroupMessageItem: React.FC<Props> = ({
   }
 
   function onTipUser() {
-    Wallet.send({ amount: 100000, to: userAddress });
+    // navigation.navigate(MainScreens.SendTransactionScreen, { address: userAddress });
+    navigation.navigate(MainScreens.DashboardScreen, {
+      screen: MainScreens.SendTransactionScreen,
+      params: { address: userAddress },
+    });
+    // setTipping(true);
+  }
+
+  function sendTip() {
+    Wallet.send({ amount: parseInt(tipAmount * 100000), to: userAddress });
+    setTipping(false);
   }
 
   function hideActions() {
@@ -126,6 +143,19 @@ export const GroupMessageItem: React.FC<Props> = ({
 
   return (
     <TouchableOpacity style={styles.container} onLongPress={handleLongPress}>
+      {tipping && (
+          <TouchableOpacity style={styles.modal} onPress={() => setTipping(false)}>
+          <View style={styles.tipContainer}>
+          <InputField
+            label={t('tipUser')}
+            value={tipAmount}
+            onChange={setTipAmount}
+            onSubmitEditing={sendTip}
+          />
+          <TextButton onPress={sendTip}>{t('send')}</TextButton>
+          </View>
+        </TouchableOpacity>
+      )}
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
         {actions && (
@@ -218,6 +248,7 @@ export const GroupMessageItem: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
+  modal: {position: 'absolute', width: '100%', height: '100vh', backgroundColor: 'magenta'},
   avatar: { marginRight: 10 },
   container: {
     flexDirection: 'row',

@@ -15,9 +15,9 @@ import Toast from 'react-native-toast-message';
 
 interface Props {}
 
-export const SendTransactionScreen: React.FC<Props> = () => {
+export const SendTransactionScreen: React.FC<Props> = ({route}) => {
   // Form states
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState(route.params?.address || '');
   const [paymentId, setPaymentId] = useState('');
   const [amount, setAmount] = useState('');
   const [preparedTx, setPreparedTx] = useState({});
@@ -83,7 +83,13 @@ export const SendTransactionScreen: React.FC<Props> = () => {
     const result = await Wallet.active.sendPreparedTransaction(preparedTx.transactionHash);
     
     if (result.success) {
-        navigation.pop();
+        if (route.address) {
+          console.log('Pop 2');
+          navigation.pop(2)
+        } else {
+          navigation.pop()
+        }
+        
 
         Toast.show({
             type: 'success',
