@@ -54,12 +54,12 @@ export const WalletStatusScreen: React.FC<Props> = () => {
   return (
     <ScreenLayout>
       <View style={{textAlign: 'center'}}>
-        <Text style={{color}}>Current node:</Text>
-        <Text style={{color}}>{selectedNode}</Text>
+        <Text style={[styles.detail, {color}]}>Current node:</Text>
+        <Text style={[styles.detail, {color}]}>{selectedNode}</Text>
         <TextButton onPress={goToNodePicker}>Change node</TextButton>
-        <Text style={{color}}>Sync status:</Text>
+        <Text style={[styles.detail, {color}]}>Sync status:</Text>
         <Progress.Bar progress={(status[0] / status[2])} width={'400'} color={color} />
-        <Text style={{color}}>{status[0]} / {status[2]}</Text>
+        <Text style={[styles.detail, {color, textAlign: 'center'}]}>{status[0]} / {status[2]}</Text>
         <InputField
           label="Resync height"
           value={resyncHeight}

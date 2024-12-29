@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import {
   useFocusEffect,
   useNavigation,
@@ -20,7 +20,12 @@ export const DashboardScreen: React.FC = () => {
   const navigation = useNavigation<MainStackNavigationType>();
   const online = true;
   const status = useGlobalStore((state) => state.syncStatus);
-  const synced = (status[0] == status[2]);
+  const [synced, setSynced] = useState((status[0] == status[2]));
+
+  useEffect(() => {
+    console.log(status[0], status[2]);
+    setSynced(((status[2] - status[0]) < 2));
+  }, [status]);
 
   const goToStatusPage = () => {
     console.log('Clicked');
@@ -48,7 +53,7 @@ export const DashboardScreen: React.FC = () => {
         />
       ),
     });
-  }, [navigation]);
+  }, [navigation, synced]);
 
     // Subscribe to balance and address from the store
     const balance = useGlobalStore((state) => state.balance);
