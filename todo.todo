@@ -1,17 +1,21 @@
 Todo:
     ✔ Fix tips @done(24-12-27 22:22)
-    ☐ Fix status icon (green/grey)
+    ☐ Fix header status icon (green/grey)
+    ☐ Style toasts
+    ☐ Include all translations
 
 
 Todo wallet:
     ✔ Node picker @done(24-12-28 00:41)
     ✔ Send transaction page @done(24-12-24 01:45)
     ✔ Transaction history @done(24-12-24 01:45)
-    ☐ Backup keys
+    ☐ Transaction details
+    ✔ Backup keys @done(24-12-29 22:38)
     ☐ Notifications
-    ☐ Sync status
+    ✔ Sync status @done(24-12-29 22:38)
     ☐ Fiat value
 
 Todo node picker:
-    ☐ Handle themes
+    ✔ Handle themes @done(24-12-29 22:38)
+    ☐ Invoke when creating/importing wallet
 
