@@ -44,7 +44,13 @@ export const DashboardScreen: React.FC = () => {
                 name={'lens'}
                 size={14}
                 type={'MI'}
-                color={`${synced ? 'green' : 'yellow'}`}
+                color={
+                  status[2] === 0 
+                    ? 'red' 
+                    : synced 
+                    ? 'green' 
+                    : 'yellow'
+                }
               />
               </View>
               <CustomIcon type="FA6" name="server" size={24} />
