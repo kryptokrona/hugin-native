@@ -56,7 +56,7 @@ class walletConfig {
     /**
      * Request timeout for daemon operations in milliseconds
      */
-    this.requestTimeout = 10 * 1000;
+    this.requestTimeout = 2 * 1000;
 
     /**
      * The block time of your coin, in seconds
