@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { useThemeStore, Wallet } from '@/services';
+import { useThemeStore } from '@/services';
 import { AuthStackNavigationType, Message } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
@@ -12,15 +13,12 @@ import {
   Avatar,
   CopyButton,
   CustomIcon,
-  InputField,
   Reactions,
   TextButton,
   TextField,
 } from './_elements';
 import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
-import { useNavigation } from '@react-navigation/native';
-import { MainScreens } from '@/config';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -29,6 +27,7 @@ interface Props extends Partial<Message> {
   onReplyToMessagePress: (val: string) => void;
   onEmojiReactionPress: (val: string, val2: string) => void;
   onShowImagePress: (path: string | undefined) => void;
+  onTipPress: (address: string) => void;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -42,14 +41,13 @@ export const GroupMessageItem: React.FC<Props> = ({
   onReplyToMessagePress,
   onEmojiReactionPress,
   onShowImagePress,
+  onTipPress,
   replyto,
 }) => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
   const [actions, setActions] = useState(true);
-  const [tipping, setTipping] = useState(false);
-  const [tipAmount, setTipAmount] = useState(0);
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
@@ -96,17 +94,8 @@ export const GroupMessageItem: React.FC<Props> = ({
   }
 
   function onTipUser() {
-    // navigation.navigate(MainScreens.SendTransactionScreen, { address: userAddress });
-    navigation.navigate(MainScreens.DashboardScreen, {
-      screen: MainScreens.SendTransactionScreen,
-      params: { address: userAddress },
-    });
-    // setTipping(true);
-  }
-
-  function sendTip() {
-    Wallet.send({ amount: parseInt(tipAmount * 100000), to: userAddress });
-    setTipping(false);
+    onTipPress(userAddress);
+    setActionsModal(false);
   }
 
   function hideActions() {
@@ -143,19 +132,6 @@ export const GroupMessageItem: React.FC<Props> = ({
 
   return (
     <TouchableOpacity style={styles.container} onLongPress={handleLongPress}>
-      {tipping && (
-          <TouchableOpacity style={styles.modal} onPress={() => setTipping(false)}>
-          <View style={styles.tipContainer}>
-          <InputField
-            label={t('tipUser')}
-            value={tipAmount}
-            onChange={setTipAmount}
-            onSubmitEditing={sendTip}
-          />
-          <TextButton onPress={sendTip}>{t('send')}</TextButton>
-          </View>
-        </TouchableOpacity>
-      )}
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
         {actions && (
@@ -248,7 +224,6 @@ export const GroupMessageItem: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-  modal: {position: 'absolute', width: '100%', height: '100vh', backgroundColor: 'magenta'},
   avatar: { marginRight: 10 },
   container: {
     flexDirection: 'row',

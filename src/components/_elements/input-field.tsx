@@ -11,7 +11,7 @@ import { TextField } from './text-field';
 
 interface Props {
   label: string;
-  value: string | null;
+  value: string | number | null;
   onChange: (value: string) => void;
   error?: boolean;
   errorText?: string;

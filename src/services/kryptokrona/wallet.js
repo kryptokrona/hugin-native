@@ -4,7 +4,13 @@ import { saveWallet, loadWallet } from '../../services/bare/sqlite';
 import { processBlockOutputs, makePostRequest } from '../NativeTest';
 import { parse } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
-import { setBalance, setStoreAddress, setTransactions, setSyncStatus } from '@/services';
+import {
+  setBalance,
+  setStoreAddress,
+  setTransactions,
+  setSyncStatus,
+} from '@/services';
+import Toast from 'react-native-toast-message';
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
   constructor() {
@@ -111,12 +117,6 @@ export class ActiveWallet {
     setTransactions(transactions);
   }
 
-  async getAndSetSyncStatus() {
-    const [walletBlockCount, localDaemonBlockCount, networkBlockCount] =
-     this.active.getSyncStatus();
-     setSyncStatus([walletBlockCount, localDaemonBlockCount, networkBlockCount]);
-  }
-
   setDaemon(node) {
     this.daemon = new Daemon(node.url, node.port);
     this.daemon.makePostRequest = makePostRequest;
@@ -161,9 +161,7 @@ export class ActiveWallet {
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
     setStoreAddress(this.address);
-    const syncStatusInterval = setInterval(this.getAndSetSyncStatus, 2000);
     const saveInterval = setInterval(this.save, 30000);
-
 
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
@@ -182,9 +180,9 @@ export class ActiveWallet {
     this.active.on(
       'heightchange',
       async (walletBlockCount, localDaemonBlockCount, networkBlockCount) => {
-        this.getAndSetSyncStatus();
         let synced = networkBlockCount - walletBlockCount <= 2;
-        if (networkBlockCount % 50 === 0) {
+        if (networkBlockCount % 100 === 0) {
+          this.getAndSetSyncStatus();
           console.log('walletBlockCount', walletBlockCount);
           console.log('networkBlockCount', networkBlockCount);
         }
@@ -196,7 +194,6 @@ export class ActiveWallet {
           console.log('**********');
           this.getAndSetBalance();
           this.getAndSetSyncStatus();
-          clearInterval(syncStatusInterval);
           clearInterval(saveInterval);
           await this.save();
           //Send synced event to frontend
@@ -229,6 +226,10 @@ export class ActiveWallet {
         key: tx.to,
       };
       console.log('Success:', sent);
+      Toast.show({
+        type: 'success',
+        text1: 'Transaction sent ✅',
+      });
       //   this.emit('sentTx', sent);
       //Notify
     } else {
@@ -238,6 +239,10 @@ export class ActiveWallet {
         name: 'Transaction error',
         hash: Date.now(),
       };
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to send transaction',
+      });
       //Notify
       //   this.emit('failedTx');
     }
@@ -249,6 +254,12 @@ export class ActiveWallet {
     const picked = { url: nodeUrl, port: nodePort };
     this.setDaemon(picked);
     this.active.swapNode(this.daemon);
+  }
+
+  getAndSetSyncStatus() {
+    const [walletBlockCount, localDaemonBlockCount, networkBlockCount] =
+      this.active.getSyncStatus();
+    setSyncStatus([walletBlockCount, localDaemonBlockCount, networkBlockCount]);
   }
 }
 

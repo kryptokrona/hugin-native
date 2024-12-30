@@ -70,7 +70,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     await initDB();
     await setLatestRoomMessages();
-    const node = { port: parseInt(preferences.node.split(':')[1]), url: preferences.node.split(':')[0] };
+    let node = {};
+    if (preferences?.node === undefined) {
+      node = { port: 11898, url: 'blocksum.org' };
+    } else {
+      node = {
+        port: parseInt(preferences.node.split(':')[1]),
+        url: preferences.node.split(':')[0],
+      };
+    }
     Connection.listen();
     if (!(await Wallet.init(node))) {
       console.log('Could not init wallet... starting new one:');

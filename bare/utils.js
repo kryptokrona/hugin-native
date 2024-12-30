@@ -94,6 +94,10 @@ const sanitize_join_swarm_data = (data) => {
   let avatar = '';
   if (data.avatar !== undefined) {
     avatar = data.avatar;
+    const base64 = /^[A-Za-z0-9+/]+={0,2}$/;
+    if (!base64.test(avatar)) {
+      return false;
+    }
     if (avatar.length > 273000) {
       console.log('Avatar too big');
       return false;

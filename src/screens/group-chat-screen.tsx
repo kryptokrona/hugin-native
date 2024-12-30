@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from 'react-native';
 
 import {
@@ -12,6 +13,7 @@ import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
+import { t } from 'i18next';
 
 import {
   CustomIcon,
@@ -19,6 +21,8 @@ import {
   MessageInput,
   ScreenLayout,
   FullScreenImageViewer,
+  InputField,
+  TextButton,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -29,6 +33,7 @@ import {
   onSendGroupMessage,
   setStoreCurrentRoom,
   useThemeStore,
+  Wallet,
 } from '@/services';
 import type {
   SelectedFile,
@@ -57,6 +62,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   const [showImage, setShowImage] = useState<boolean>(false);
   const [showImagePath, setImagePath] = useState<string>(false);
+  const [tipping, setTipping] = useState(false);
+  const [tipAmount, setTipAmount] = useState<string>('0');
+  const [tipAddress, setTipAddress] = useState<string>('');
 
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
@@ -82,6 +90,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setImagePath(path);
     setShowImage(true);
   };
+
+  function sendTip() {
+    Wallet.send({ amount: parseInt(tipAmount * 100000), to: tipAddress });
+    setTipping(false);
+  }
 
   // scrollToBottom();
 
@@ -175,6 +188,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setReplyToMessageHash('');
   }
 
+  function onTip(address: string) {
+    setTipping(true);
+    setTipAddress(address);
+  }
+
   return (
     <ScreenLayout>
       {/* Full-Screen Image Viewer */}
@@ -183,6 +201,25 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           imagePath={showImagePath}
           onClose={() => setShowImage(false)}
         />
+      )}
+      {tipping && (
+        <TouchableOpacity
+          style={[styles.modal, { backgroundColor }]}
+          onPress={() => setTipping(false)}>
+          <View style={styles.tipContainer}>
+            <InputField
+              label={''}
+              value={tipAmount}
+              onChange={setTipAmount}
+              onSubmitEditing={sendTip}
+            />
+            <TextButton onPress={sendTip}>{t('send')}</TextButton>
+            <View style={styles.divider} />
+            <TextButton onPress={() => setTipping(false)}>
+              {t('close')}
+            </TextButton>
+          </View>
+        </TouchableOpacity>
       )}
       <FlatList
         inverted
@@ -198,6 +235,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               userAddress={item.address}
               onReplyToMessagePress={onReplyToMessagePress}
               onEmojiReactionPress={onEmojiReactionPress}
+              onTipPress={onTip}
               replyHash={item.hash}
               reactions={item.reactions!}
               replyto={item.replyto}
@@ -211,7 +249,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         maxToRenderPerBatch={messages.length}
       />
 
-      <KeyboardAvoidingView style={[styles.inputWrapper, {backgroundColor}]}>
+      <KeyboardAvoidingView style={[styles.inputWrapper, { backgroundColor }]}>
         <MessageInput
           onSend={onSend}
           replyToName={replyToName}
@@ -233,5 +271,18 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
-  }
+  },
+  modal: {
+    alignSelf: 'center',
+    position: 'absolute',
+    top: '10%',
+    width: '50%',
+    zIndex: 5,
+  },
+  tipContainer: {
+    height: '100vh',
+    padding: 20,
+    // backgroundColor: 'red',
+    zIndex: 5,
+  },
 });
