@@ -92,7 +92,7 @@ const sanitize_join_swarm_data = (data) => {
 
   // if (typeof data?.avatar !== 'string') return false;
   let avatar = '';
-  if (data.avatar !== undefined) {
+  if (data.avatar !== undefined || data.avatar?.length > 0) {
     avatar = data.avatar;
     const base64 = /^[A-Za-z0-9+/]+={0,2}$/;
     if (!base64.test(avatar)) {

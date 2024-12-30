@@ -15,6 +15,8 @@ import {
 } from '@react-navigation/native';
 import { t } from 'i18next';
 
+import { Peers } from 'lib/connections';
+
 import {
   CustomIcon,
   GroupMessageItem,
@@ -42,8 +44,6 @@ import type {
   MainNavigationParamList,
   Message,
 } from '@/types';
-
-import { Peers } from 'lib/connections';
 
 import { Header } from '../components/_navigation/header';
 
@@ -94,14 +94,22 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setShowImage(true);
   };
 
-  function sendTip() {
-    Wallet.send({ amount: parseInt(tipAmount * 100000), to: tipAddress });
+  async function sendTip() {
+    const amount = parseInt(tipAmount * 100000);
+    const sent = await Wallet.send({
+      amount: amount,
+      to: tipAddress,
+    });
     setTipping(false);
+    if (sent) {
+      const to = messages.find((a) => a.address === tipAddress);
+      onSend(`Sent ${tipAmount} XKR to ${to?.nickname}`, null, '', false);
+    }
   }
 
-    const online = useMemo(() => {
-      return Peers.connected(getCurrentRoom());
-    }, [Peers, getCurrentRoom()]);
+  const online = useMemo(() => {
+    return Peers.connected(getCurrentRoom());
+  }, [Peers, getCurrentRoom()]);
 
   // scrollToBottom();
 
@@ -121,14 +129,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           backButton
           title={name}
           right={
-            <TouchableOpacity style={{flexDirection: 'row'}} onPress={onCustomizeGroupPress}>
-              <View style={{marginTop: 4, marginRight: 5}}>
-              <CustomIcon
-                name={'lens'}
-                size={14}
-                type={'MI'}
-                color={`${online ? 'green' : 'grey'}`}
-              />
+            <TouchableOpacity
+              style={{ flexDirection: 'row' }}
+              onPress={onCustomizeGroupPress}>
+              <View style={{ marginRight: 5, marginTop: 4 }}>
+                <CustomIcon
+                  name={'lens'}
+                  size={14}
+                  type={'MI'}
+                  color={`${online ? 'green' : 'grey'}`}
+                />
               </View>
               <CustomIcon type="FA5" name={icon} />
             </TouchableOpacity>
