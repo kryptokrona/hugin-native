@@ -182,7 +182,7 @@ export class ActiveWallet {
       'heightchange',
       async (walletBlockCount, localDaemonBlockCount, networkBlockCount) => {
         let synced = networkBlockCount - walletBlockCount <= 2;
-        if (networkBlockCount % 100 === 0) {
+        if (walletBlockCount % 100 === 0) {
           this.getAndSetSyncStatus();
           console.log('walletBlockCount', walletBlockCount);
           console.log('networkBlockCount', networkBlockCount);

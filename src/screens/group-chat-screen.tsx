@@ -34,6 +34,7 @@ import {
   setStoreCurrentRoom,
   useThemeStore,
   Wallet,
+  getCurrentRoom,
 } from '@/services';
 import type {
   SelectedFile,
@@ -41,6 +42,8 @@ import type {
   MainNavigationParamList,
   Message,
 } from '@/types';
+
+import { Peers } from 'lib/connections';
 
 import { Header } from '../components/_navigation/header';
 
@@ -96,6 +99,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipping(false);
   }
 
+    const online = useMemo(() => {
+      return Peers.connected(getCurrentRoom());
+    }, [Peers, getCurrentRoom()]);
+
   // scrollToBottom();
 
   useFocusEffect(
@@ -114,7 +121,15 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           backButton
           title={name}
           right={
-            <TouchableOpacity onPress={onCustomizeGroupPress}>
+            <TouchableOpacity style={{flexDirection: 'row'}} onPress={onCustomizeGroupPress}>
+              <View style={{marginTop: 4, marginRight: 5}}>
+              <CustomIcon
+                name={'lens'}
+                size={14}
+                type={'MI'}
+                color={`${online ? 'green' : 'grey'}`}
+              />
+              </View>
               <CustomIcon type="FA5" name={icon} />
             </TouchableOpacity>
           }
