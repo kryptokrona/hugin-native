@@ -4,9 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import { Peers } from 'lib/connections';
-
-import { getCurrentRoom, useThemeStore, useUserStore } from '@/services';
+import { useThemeStore, useUserStore } from '@/services';
 import { getAvatar } from '@/utils';
 
 import { Avatar, CustomIcon, TextField } from '../_elements';
@@ -28,9 +26,6 @@ export const Header: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const avatar = useUserStore((state) => state.user?.avatar);
   const address = useUserStore((state) => state.user?.address);
-  const online = useMemo(() => {
-    return Peers.connected(getCurrentRoom());
-  }, [Peers, getCurrentRoom()]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
@@ -70,14 +65,6 @@ export const Header: React.FC<Props> = ({
       <View style={styles.center}>
         {title && <TextField maxLength={24}>{title}</TextField>}
       </View>
-      {backButton && (
-        <CustomIcon
-          name={'lens'}
-          size={14}
-          type={'MI'}
-          color={`${online ? 'green' : 'grey'}`}
-        />
-      )}
       <View style={styles.side}>{right}</View>
     </View>
   );
