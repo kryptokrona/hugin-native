@@ -309,6 +309,7 @@ const styles = StyleSheet.create({
     top: '10%',
     width: '50%',
     zIndex: 5,
+    borderRadius: 20
   },
   tipContainer: {
     height: '100vh',
