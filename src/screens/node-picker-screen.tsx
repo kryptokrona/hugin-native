@@ -23,6 +23,11 @@ import { usePreferencesStore, useThemeStore, Wallet } from '@/services';
 import { Preferences } from '@/types';
 import { sleep } from '@/utils';
 
+import { WalletConfig } from 'config/wallet-config';
+
+import offline_node_list from '../config/nodes.json';
+
+
 export const PickNodeScreen: React.FC<Props> = () => {
   const preferences = usePreferencesStore((state) => state.preferences);
   const [nodeInput, setNodeInput] = useState(preferences.node || ''); // Initialize with preferences.node
@@ -50,10 +55,27 @@ export const PickNodeScreen: React.FC<Props> = () => {
 
   useEffect(() => {
     const fetchNodes = async () => {
-      const response = await fetch(
-        'https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/main/nodes.json'
-      );
-      const data = await response.json();
+      let response;
+      for (const url of WalletConfig.nodeListURLs) {
+
+        try {
+          response = await fetchWithTimeout(
+          url, {}
+        );
+          break;
+        } catch (err) {
+        }
+
+      }
+
+      let data;
+
+      if (!response) {
+        data = offline_node_list;
+      } else {
+        data = await response.json();
+      }
+      
       setNodeList(data.nodes);
     };
 

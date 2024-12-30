@@ -11,7 +11,8 @@ import type {
   AuthStackNavigationType,
 } from '@/types';
 import { useTranslation } from 'react-i18next';
-import { useGlobalStore } from '@/services';
+import { useGlobalStore, Wallet } from '@/services';
+import { useState } from 'react';
 
 interface Item {
   title: string;
@@ -19,6 +20,21 @@ interface Item {
   screen?: MainScreens;
   function?: () => Promise<void>;
 }
+
+interface Props {
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.SettingsScreen>;
+}
+export const SettingsScreen: React.FC<Props> = () => {
+  // const { t } = useTranslation();
+  const navigation = useNavigation<MainStackNavigationType>();
+  const authNavigation = useNavigation<any>();
+  const [syncActivated, setSyncActivated] = useState(Wallet.started);
+
+  const toggleSync = async () => {
+    setSyncActivated(await Wallet.toggle());
+  }
+
+  const syncActivatedIcon = syncActivated ? 'checkbox-marked-outline' : 'checkbox-blank-outline';
 
 const items: Item[] = [
   {
@@ -41,42 +57,14 @@ const items: Item[] = [
     screen: MainScreens.PickNodeScreen,
     title: 'useCustomNode',
   },
+  {
+    icon: { name: syncActivatedIcon, type: 'MCI' },
+    screen: MainScreens.PickNodeScreen,
+    title: 'Activate wallet sync',
+    function: toggleSync
+  }
 
-  // {
-  //   icon: { name: 'trash-2', type: 'FI' },
-  //   // screen: MainScreens.UpdateProfileScreen,
-  //   title: 'deleteUser',
-  //   function: async () => {
-  //     Alert.alert(
-  //       'Delete User',
-  //       'Are you sure you want to delete your account?',
-  //       [
-  //         { text: 'Cancel', style: 'cancel' },
-  //         {
-  //           text: 'Delete',
-  //           style: 'destructive',
-  //           onPress: async () => {
-  //             try {
-  //               // await  // TODO delete sql stuff, delete user and preferences in stores
-  //               console.log('User deleted successfully');
-  //             } catch (error) {
-  //               console.error('Failed to delete user:', error);
-  //             }
-  //           },
-  //         },
-  //       ],
-  //     );
-  //   },
-  // }, // TODO delete user in the future
 ];
-
-interface Props {
-  route: RouteProp<MainNavigationParamList, typeof MainScreens.SettingsScreen>;
-}
-export const SettingsScreen: React.FC<Props> = () => {
-  // const { t } = useTranslation();
-  const navigation = useNavigation<MainStackNavigationType>();
-  const authNavigation = useNavigation<any>();
 
   const itemMapper = (item: Item) => {
     async function onPress() {
