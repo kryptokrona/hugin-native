@@ -19,6 +19,7 @@ export class ActiveWallet {
     this.address = undefined;
     this.nodeUrl = undefined;
     this.nodePort = undefined;
+    this.started = false;
   }
 
   async init(node) {
@@ -157,7 +158,7 @@ export class ActiveWallet {
     //Disable scanning for transactions in pool
     await this.active.scanPoolTransactions(false);
     console.log('Scan pool txs no');
-
+    this.started = true;
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
     setStoreAddress(this.address);
@@ -260,6 +261,17 @@ export class ActiveWallet {
     const [walletBlockCount, localDaemonBlockCount, networkBlockCount] =
       this.active.getSyncStatus();
     setSyncStatus([walletBlockCount, localDaemonBlockCount, networkBlockCount]);
+  }
+
+  async toggle() {
+    if (!this.started) {
+      await this.active.start();
+    } else {
+      this.active.stop();
+    }
+    this.started = !this.started;
+
+    return this.started;
   }
 }
 
