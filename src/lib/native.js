@@ -97,12 +97,13 @@ export const end_swarm = (key) => {
   return mainRPC.request(data);
 };
 
-export const send_swarm_msg = async (key, message, reply) => {
+export const send_swarm_msg = async (key, message, reply, tip) => {
   const data = JSON.stringify({
     type: 'send_room_msg',
     key,
     message,
     reply,
+    tip
   });
   return await mainRPC.request(data);
 };

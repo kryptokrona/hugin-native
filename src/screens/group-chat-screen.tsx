@@ -101,9 +101,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       to: tipAddress,
     });
     setTipping(false);
-    if (sent) {
+    if (sent.success) {
       const to = messages.find((a) => a.address === tipAddress);
-      onSend(`Sent ${tipAmount} XKR to ${to?.nickname}`, null, '', false);
+      onSend('', null, '', false, {amount, receiver: to.nickname, hash: sent.transactionHash});
     }
   }
 
@@ -165,6 +165,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     file: SelectedFile | null,
     reply: string,
     emoji: boolean | undefined,
+    tip: JSON | undefined,
   ) {
     if (file) {
       text = file.fileName;
@@ -180,6 +181,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         roomKey,
         text,
         reply ? reply : replyToMessageHash,
+        tip ? tip : false
       );
       const save = JSON.parse(sent);
 
@@ -192,6 +194,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         save.n,
         save.hash,
         true,
+        undefined,
+        undefined,
+        tip
       );
       setReplyToMessageHash('');
     }
@@ -266,6 +271,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               replyto={item.replyto}
               file={item.file!}
               onShowImagePress={showBigImage}
+              tip={item.tip}
             />
           );
         }}

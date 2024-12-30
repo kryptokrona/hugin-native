@@ -164,7 +164,7 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
   });
 };
 
-function send_message(message, topic, reply, invite) {
+function send_message(message, topic, reply, invite, tip=false) {
   const message_json = {
     c: 'channel in room?',
     g: invite,
@@ -175,6 +175,7 @@ function send_message(message, topic, reply, invite) {
     r: reply,
     s: 'sig',
     t: Date.now(),
+    tip // {amount, sender, receiver, hash}
   };
 
   const send = JSON.stringify(message_json);

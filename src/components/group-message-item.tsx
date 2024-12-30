@@ -16,6 +16,7 @@ import {
   Reactions,
   TextButton,
   TextField,
+  Tip,
 } from './_elements';
 import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
@@ -43,7 +44,9 @@ export const GroupMessageItem: React.FC<Props> = ({
   onShowImagePress,
   onTipPress,
   replyto,
+  tip
 }) => {
+  try {tip = JSON.parse(tip)} catch {}
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
@@ -215,6 +218,9 @@ export const GroupMessageItem: React.FC<Props> = ({
                 {message ?? ''}
               </TextField>
             )}
+            {tip && 
+            <View><Tip tip={tip} /></View>
+            }
             <Reactions items={reactions} onReact={onPressReaction} />
           </View>
         </View>

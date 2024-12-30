@@ -48,6 +48,13 @@ export const initDB = async () => {
   )`;
     await db.executeSql(query);
 
+    query = `ALTER TABLE roomsmessages ADD tip TEXT`;
+    try {
+      await db.executeSql(query);
+    } catch (err) {
+
+    }
+
     const acc = `CREATE TABLE IF NOT EXISTS account ( 
     publicKey TEXT,
     secretKey TEXT
@@ -464,15 +471,16 @@ export async function saveRoomMessage(
   nickname: string,
   hash: string,
   sent: boolean,
+  tip: JSON | false
 ) {
   console.log('Saving message: ', message);
-  if (!message || message?.length === 0) {
+  if ((!message || message?.length === 0) && !tip) {
     return false;
   }
   try {
     await db.executeSql(
-      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0],
+      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0, JSON.stringify(tip)],
     );
 
     const newMessage: Message = {
@@ -485,6 +493,7 @@ export async function saveRoomMessage(
       room: room,
       sent: sent,
       timestamp: timestamp,
+      tip
     };
     return newMessage;
   } catch (err) {
@@ -536,6 +545,8 @@ const toMessage = (res: any) => {
 
     //Timestmap
     timestamp: res.timestamp,
+
+    tip: res.tip
   };
 
   return message;

@@ -121,8 +121,9 @@ export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string | null,
+  tip: JSON | false
 ) => {
-  return await send_swarm_msg(key, message, reply);
+  return await send_swarm_msg(key, message, reply, tip);
 };
 
 export const onSendGroupMessageWithFile = (
@@ -228,6 +229,7 @@ export const saveRoomMessageAndUpdate = async (
   sent: boolean,
   history: boolean | undefined = false,
   file: FileInfo | undefined,
+  tip: JSON | undefined
 ) => {
   let isFile = false;
   if (typeof file === 'object') {
@@ -244,6 +246,7 @@ export const saveRoomMessageAndUpdate = async (
     nickname,
     hash,
     sent,
+    tip
   );
 
   if (newMessage && !history) {

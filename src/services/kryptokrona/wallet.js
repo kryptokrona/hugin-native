@@ -233,7 +233,7 @@ export class ActiveWallet {
       });
       //   this.emit('sentTx', sent);
       //Notify
-      return true;
+      return result;
     } else {
       console.log(`Failed to send transaction: ${result.error.toString()}`);
       let error = {
@@ -245,7 +245,7 @@ export class ActiveWallet {
         type: 'error',
         text1: 'Failed to send transaction',
       });
-      return false;
+      return result;
       //Notify
       //   this.emit('failedTx');
     }

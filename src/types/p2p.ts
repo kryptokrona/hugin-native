@@ -28,6 +28,7 @@ export interface Message {
   file?: FileInfo;
   replyto?: Message[] | undefined;
   replies?: Message[] | undefined;
+  tip?: JSON | undefined;
 }
 
 export interface File {

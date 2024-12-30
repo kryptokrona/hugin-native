@@ -41,6 +41,7 @@ const rpc_message = async (m) => {
           false,
           json.message.history,
           json.message.file,
+          json.message.tip
         );
         break;
       case 'history-update':

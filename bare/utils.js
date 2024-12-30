@@ -144,6 +144,13 @@ const sanitize_group_message = (data) => {
   if (nick?.length > 50 || data.n === undefined) return false;
   let txHash = sanitizeHtml(data.hash);
   if (txHash?.length > 64 || data.hash === undefined) return false;
+  let tip = false;
+  if (data.tip) {
+    if (typeof data.tip.amount !== 'number') return false;
+    if (typeof data.tip.receiver !== 'string') return false;
+    if (typeof data.tip.hash !== 'string') return false;
+    tip = {amount: data.tip.amount, receiver: sanitizeHtml(data.tip.receiver), hash: sanitizeHtml(data.tip.hash)}
+  }
 
   const clean_object = {
     message: text,
@@ -157,6 +164,7 @@ const sanitize_group_message = (data) => {
     sent: false,
     channel: 'channel',
     hash: txHash,
+    tip: tip
   };
 
   return clean_object;
