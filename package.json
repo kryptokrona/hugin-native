@@ -54,7 +54,7 @@
     "int-encoder": "^1.1.1",
     "keypear": "^1.2.2",
     "kryptokrona-crypto": "^1.0.3",
-    "kryptokrona-wallet-backend-js": "^2.5.7",
+    "kryptokrona-wallet-backend-js": "^2.5.8",
     "moment": "^2.30.1",
     "patch-package": "^8.0.0",
     "path-browserify": "0.0.0",
