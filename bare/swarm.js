@@ -164,7 +164,7 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
   });
 };
 
-function send_message(message, topic, reply, invite, tip=false) {
+function send_message(message, topic, reply, invite, tip = false) {
   const message_json = {
     c: 'channel in room?',
     g: invite,
@@ -175,7 +175,7 @@ function send_message(message, topic, reply, invite, tip=false) {
     r: reply,
     s: 'sig',
     t: Date.now(),
-    tip // {amount, sender, receiver, hash}
+    tip, // {amount, sender, receiver, hash}
   };
 
   const send = JSON.stringify(message_json);
@@ -473,6 +473,7 @@ const check_data_message = async (data, connection, topic, peer) => {
           return true;
         }
         if (INC_PEERS && active.peers !== data?.peers) {
+          if (data.peers?.length > 100) return 'Ban';
           console.log('Looking for missing peers **--**-->');
           find_missing_peers(active, data?.peers);
         }
