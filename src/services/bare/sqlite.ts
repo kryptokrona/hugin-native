@@ -283,7 +283,7 @@ export async function getLatestRoomMessages() {
   for (const room of rooms) {
     //Loop through list and get one message from each room
     const results = await db.executeSql(
-      'SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT 1',
+      'SELECT * FROM roomsmessages WHERE room = ? AND message IS NOT "" ORDER BY timestamp DESC LIMIT 1',
       [room.key],
     );
 
