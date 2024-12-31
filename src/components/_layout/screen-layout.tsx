@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 8,
     paddingHorizontal: 12,
-    paddingTop: 20,
+    paddingTop: 5,
     paddingVertical: 4,
   },
   keyboardAvoidingView: {
