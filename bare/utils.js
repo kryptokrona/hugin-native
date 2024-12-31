@@ -148,8 +148,7 @@ const sanitize_group_message = (data) => {
   if (data.tip) {
     if (typeof data.tip.amount !== 'number') return false;
     if (typeof data.tip.receiver !== 'string') return false;
-    if (typeof data.tip.hash !== 'string') return false;
-    tip = {amount: data.tip.amount, receiver: sanitizeHtml(data.tip.receiver), hash: sanitizeHtml(data.tip.hash)}
+    tip = {amount: data.tip.amount, receiver: sanitizeHtml(data.tip.receiver)}
   }
 
   const clean_object = {
