@@ -42,7 +42,7 @@ export const MessageInput: React.FC<Props> = ({
 
   const focusInput = () => {
     if (textInputRef.current) {
-      setTimeout(() => textInputRef.current.focus(), 100)
+      setTimeout(() => textInputRef.current.focus(), 200);
     }
   };
   async function onCameraPress() {
@@ -199,14 +199,13 @@ export const MessageInput: React.FC<Props> = ({
           }}
           {...commonInputProps}
         />
-        
-          <TouchableOpacity
-            onPress={handleSend}
-            style={styles.btn}
-            hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }}>
-            <CustomIcon name="send" type="IO" size={24} color={theme.primary} />
-          </TouchableOpacity>
-        
+
+        <TouchableOpacity
+          onPress={handleSend}
+          style={styles.btn}
+          hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }}>
+          <CustomIcon name="send" type="IO" size={24} color={theme.primary} />
+        </TouchableOpacity>
       </View>
     </View>
   );
