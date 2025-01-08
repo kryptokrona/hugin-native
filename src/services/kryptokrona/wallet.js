@@ -162,19 +162,16 @@ export class ActiveWallet {
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
     setStoreAddress(this.address);
-    const saveInterval = setInterval(this.save, 30000);
-
+    this.saver();
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
       console.log('Incoming tx!', transaction);
       this.getAndSetBalance();
-      this.save();
     });
 
     this.active.on('createdtx', async (tx) => {
       console.log('***** outgoing *****', tx);
       this.getAndSetBalance();
-      this.save();
     });
 
     //Wallet heightchange event with funtion that saves wallet only if we are synced
@@ -195,8 +192,6 @@ export class ActiveWallet {
           console.log('**********');
           this.getAndSetBalance();
           this.getAndSetSyncStatus();
-          clearInterval(saveInterval);
-          await this.save();
           //Send synced event to frontend
           //   this.emit('sync', 'Synced');
         }
@@ -249,6 +244,10 @@ export class ActiveWallet {
       //Notify
       //   this.emit('failedTx');
     }
+  }
+
+  saver() {
+    setInterval(this.save, 30000);
   }
 
   node(node) {
