@@ -72,7 +72,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await setLatestRoomMessages();
     let node = {};
     if (preferences?.node === undefined) {
-      node = { port: 11898, url: 'blocksum.org' };
+      node = { port: 80, url: 'node.xkr.network' };
     } else {
       node = {
         port: parseInt(preferences.node.split(':')[1]),
@@ -80,10 +80,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       };
     }
     Connection.listen();
-    if (!(await Wallet.init(node))) {
-      console.log('Could not init wallet... starting new one:');
-      await Wallet.create(node);
-    }
+    await Wallet.init(node);
+
     Files.update(await loadSavedFiles());
     await bare(user);
     await sleep(100);
