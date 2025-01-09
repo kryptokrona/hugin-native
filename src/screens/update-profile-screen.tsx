@@ -5,6 +5,11 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
+// import { Peers } from 'lib/connections';
+
+import { Peers } from 'lib/connections';
+import { update_bare_user } from 'lib/native';
+
 import {
   Avatar,
   Container,
@@ -63,8 +68,9 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
 
   const onSave = async () => {
     await updateUser({ name: value });
+    Peers.name(address, value);
     let mPincode = null;
-
+    update_bare_user({ address, avatar, name: value });
     if (authMethod === AuthMethods.pincode) {
       mPincode = pincode ? pincode : preferences.pincode;
     } else if (authMethod === AuthMethods.reckless) {

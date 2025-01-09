@@ -45,6 +45,16 @@ class Connections extends EventEmitter {
     const users = getActiveRoomUsers();
     return users;
   }
+
+  name(address, name) {
+    let list = this.active();
+    list.some((a) => {
+      if (a.address === address) {
+        a.name = name;
+      }
+    });
+    this.update(list);
+  }
 }
 
 const Peers = new Connections();

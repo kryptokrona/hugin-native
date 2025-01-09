@@ -1,18 +1,19 @@
-import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
+import { Platform } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNFS from 'react-native-fs';
+import { create } from 'zustand';
 import {
   createJSONStorage,
   persist,
   subscribeWithSelector,
 } from 'zustand/middleware';
+
 import { defaultTheme, themes } from '@/styles';
+import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
 
 import { ASYNC_STORAGE_KEYS } from './async-storage-keys';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
-import RNFS from 'react-native-fs';
-import { create } from 'zustand';
 import { setAuthenticated } from './global-store';
-import { update_bare_user } from 'lib/native';
 
 interface UserStore {
   user: User;
@@ -77,13 +78,6 @@ export const useUserStore = create<UserStore>()(
   ),
 );
 
-useUserStore.subscribe(
-  (state) => state.user,
-  async (user) => {
-    await update_bare_user(user);
-  },
-);
-
 interface ThemeStore {
   theme: Theme;
   setTheme: (theme: Theme) => void;
@@ -100,7 +94,7 @@ export const useThemeStore = create<ThemeStore>()(
       onRehydrateStorage: () => () => {
         useThemeStore.setState((state) => {
           const themeName = state.theme.name as ThemeName;
-          const mode = state.theme.mode;
+          const { mode } = state.theme;
           return {
             theme: themes[themeName][mode],
           };
@@ -122,11 +116,11 @@ export const usePreferencesStore = create<PreferencesStore>()(
   persist(
     (set) => ({
       preferences: defaultPreferences,
-      setPreferences: (preferences) => set({ preferences }),
       setAuthMethod: (authMethod) =>
         set((state) => ({
           preferences: { ...state.preferences, authMethod },
         })),
+      setPreferences: (preferences) => set({ preferences }),
     }),
     {
       merge: (persistedState: unknown, currentState: PreferencesStore) => {
@@ -153,11 +147,11 @@ export const usePreferencesStore = create<PreferencesStore>()(
 );
 
 export const defaultPreferences: Preferences = {
-  pincode: null,
   authMethod: AuthMethods.reckless,
   language: 'en',
   nickname: 'Anon',
-  node: 'blocksum.org:11898'
+  node: 'blocksum.org:11898',
+  pincode: null,
 };
 
 export const defaultUser: User = {
@@ -165,10 +159,11 @@ export const defaultUser: User = {
   downloadDir:
     Platform.OS === 'android'
       ? RNFS.DownloadDirectoryPath
-      : RNFS.DocumentDirectoryPath, // TODO test this properly
+      : RNFS.DocumentDirectoryPath,
+  keys: {},
+  // TODO test this properly
   name: 'Anon',
   room: 'lobby',
-  keys: {},
 };
 
 export const getAuthMethod = () => {
