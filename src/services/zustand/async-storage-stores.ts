@@ -150,7 +150,7 @@ export const defaultPreferences: Preferences = {
   authMethod: AuthMethods.reckless,
   language: 'en',
   nickname: 'Anon',
-  node: 'blocksum.org:11898',
+  node: 'node.xkr.network:80',
   pincode: null,
 };
 
