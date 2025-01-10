@@ -1,8 +1,8 @@
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
 import { Wallet } from 'services/kryptokrona/wallet';
@@ -36,6 +36,8 @@ export const CreateAccScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<any>();
+  const route = useRoute();
+
 
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.accentForeground;
@@ -50,6 +52,16 @@ export const CreateAccScreen: React.FC = () => {
   const [pincode, setPincode] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [seedWords, setSeedWords] = useState<string[]>([]);
+  const [blockHeight, setBlockHeight] = useState<number>(0);
+  // Access navigation parameters and set state
+  useEffect(() => {
+    if (route.params?.selectedValues) {
+      setSeedWords(route.params.selectedValues.seedWords);
+      setBlockHeight(route.params.selectedValues.blockHeight);
+    }
+  }, [route.params]);
 
   const nameError = !name || name.length === 0;
 
@@ -74,7 +86,15 @@ export const CreateAccScreen: React.FC = () => {
     //If import Wallet.import(height, seed, node)
 
     const node = { port: 11898, url: 'blocksum.org' };
-    await Wallet.create(node);
+      console.log('seedWords', seedWords);
+    if (seedWords) {
+      console.log('Importing')
+      await Wallet.import(blockHeight, seedWords.join(' '), node);
+    } else {
+      console.log('Creating')
+      await Wallet.create(node);
+    }
+
     const [address] = Wallet.addresses();
 
     useUserStore.setState((state) => ({

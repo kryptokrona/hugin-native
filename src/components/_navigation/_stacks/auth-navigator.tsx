@@ -1,7 +1,9 @@
 import {
+  WelcomeScreen,
   CreateAccScreen,
   RequestFingerprintScreen,
   RequestPinScreen,
+  RestoreAccountScreen
 } from '@/screens';
 
 import { AuthScreens } from '@/config';
@@ -34,7 +36,7 @@ export const AuthNavigator = () => {
   let initialRouteName = AuthScreens.CreateAccountScreen;
 
   if (!user?.address) {
-    initialRouteName = AuthScreens.CreateAccountScreen;
+    initialRouteName = AuthScreens.WelcomeScreen;
   } else {
     if (authMethod === AuthMethods.pincode) {
       initialRouteName = AuthScreens.RequestPinScreen;
@@ -70,6 +72,14 @@ export const AuthNavigator = () => {
       <Stack.Screen
         name={AuthScreens.CreateAccountScreen}
         component={CreateAccScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.WelcomeScreen}
+        component={WelcomeScreen}
+      />
+      <Stack.Screen
+        name={AuthScreens.RestoreAccountScreen}
+        component={RestoreAccountScreen}
       />
     </Stack.Navigator>
   );
