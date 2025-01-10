@@ -1,8 +1,14 @@
 Todo:
     ✔ Fix tips @done(24-12-27 22:22)
-    ☐ Fix header status icon (green/grey)
+    ✔ Fix header status icon (green/grey) @done(24-12-30 21:20)
     ☐ Style toasts
     ☐ Include all translations
+    ☐ Add calls
+    ✔ Add amount to tips @done(24-12-30 21:20)
+    ☐ Add dms
+    ☐ Fix styling for tips
+    ☐ Fix tip notification
+    ☐ Delete account function
 
 
 Todo wallet:
@@ -14,6 +20,8 @@ Todo wallet:
     ☐ Notifications
     ✔ Sync status @done(24-12-29 22:38)
     ☐ Fiat value
+    ✔ Restore account choice on new account @done(25-01-10 20:07)
+    ☐ Send all
 
 Todo node picker:
     ✔ Handle themes @done(24-12-29 22:38)
