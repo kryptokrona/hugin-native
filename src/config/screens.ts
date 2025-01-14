@@ -1,6 +1,8 @@
 import { WalletStatusScreen } from "screens/wallet-status-screen";
 
 export enum AuthScreens {
+  WelcomeScreen = 'WelcomeScreen',
+  RestoreAccountScreen = 'RestoreAccountScreen',
   ForgotPinScreen = 'ForgotPinScreen',
   RequestFingerPrintScreen = 'RequestFingerPrintScreen',
   RequestPinScreen = 'RequestPinScreen',

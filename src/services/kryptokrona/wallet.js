@@ -88,9 +88,9 @@ export class ActiveWallet {
 
   async import(height, seed, node) {
     this.setDaemon(node);
-    const [wallet, error] = WalletBackend.importWalletFromSeed(
+    const [wallet, error] = await WalletBackend.importWalletFromSeed(
       this.daemon,
-      height,
+      parseInt(height),
       seed.toLowerCase(),
       WalletConfig,
     );
@@ -149,6 +149,7 @@ export class ActiveWallet {
 
   async start() {
     console.log('Start this wallet ->', this.active);
+    setStoreAddress(this.address);
     this.active.setBlockOutputProcessFunc(processBlockOutputs);
     await this.active.start();
     console.log('Wallet started');
@@ -161,7 +162,6 @@ export class ActiveWallet {
     this.started = true;
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
-    setStoreAddress(this.address);
     this.saver();
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
