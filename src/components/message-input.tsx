@@ -42,7 +42,7 @@ export const MessageInput: React.FC<Props> = ({
 
   const focusInput = () => {
     if (textInputRef.current) {
-      setTimeout(() => textInputRef.current.focus(), 200);
+      setTimeout(() => textInputRef.current.focus(), 100);
     }
   };
   async function onCameraPress() {
