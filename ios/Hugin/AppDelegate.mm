@@ -1,6 +1,8 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
+#import <React/RCTBridge.h>
+#import "TurtleCoinModule.h" // Import your module
 
 @implementation AppDelegate
 
@@ -12,6 +14,13 @@
   self.initialProps = @{};
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+// Explicitly register extra modules for the bridge
+- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge {
+  return @[
+    [[TurtleCoinModule alloc] init] // Add your custom module here
+  ];
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge

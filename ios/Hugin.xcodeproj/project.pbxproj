@@ -35,6 +35,9 @@
 		3EF5CBA02C14E0190071ADEE /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB8D2C14E0190071ADEE /* Ionicons.ttf */; };
 		3EF5CBA12C14E0190071ADEE /* Octicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB8E2C14E0190071ADEE /* Octicons.ttf */; };
 		3EF5CBA22C14E0190071ADEE /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB8F2C14E0190071ADEE /* Fontisto.ttf */; };
+		4A4F49FA2D382A7F00A4199A /* TurtleCoinModule.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4A4F49F92D382A7F00A4199A /* TurtleCoinModule.mm */; settings = {COMPILER_FLAGS = "-stdlib=libc++ -std=c++17"; }; };
+		4A4F49FB2D382A7F00A4199A /* TurtleCoinModule.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 4A4F49F82D382A7F00A4199A /* TurtleCoinModule.h */; };
+		4A4F49FF2D382B8500A4199A /* libTurtleCoinModule.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A4F49F62D382A7E00A4199A /* libTurtleCoinModule.a */; };
 		4F96809E00304521A1D16DE3 /* Montserrat-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B9BEF04A67474451B1AA7544 /* Montserrat-Thin.ttf */; };
 		6311024F685D47DAB572A5CE /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55E26584F1ED499A886E78F6 /* Roboto-Regular.ttf */; };
 		7383CDBC103742BC8AD01099 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 82BE6AF21DF54D9D8A7FAC19 /* Montserrat-Bold.ttf */; };
@@ -61,7 +64,27 @@
 			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
 			remoteInfo = Hugin;
 		};
+		4A4F4A002D382B8500A4199A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4A4F49F52D382A7E00A4199A;
+			remoteInfo = TurtleCoinModule;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4A4F49F42D382A7E00A4199A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				4A4F49FB2D382A7F00A4199A /* TurtleCoinModule.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0035EC09969A4AAF90E67356 /* Montserrat-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Light.ttf"; path = "../src/assets/fonts/Montserrat-Light.ttf"; sourceTree = "<group>"; };
@@ -103,6 +126,17 @@
 		3EF5CB8E2C14E0190071ADEE /* Octicons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		3EF5CB8F2C14E0190071ADEE /* Fontisto.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = Fontisto.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf"; sourceTree = "<group>"; };
 		450882FFA2D04E1AA2E203BB /* Roboto-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Light.ttf"; path = "../src/assets/fonts/Roboto-Light.ttf"; sourceTree = "<group>"; };
+		4A4F49F62D382A7E00A4199A /* libTurtleCoinModule.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libTurtleCoinModule.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		4A4F49F82D382A7F00A4199A /* TurtleCoinModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TurtleCoinModule.h; sourceTree = "<group>"; };
+		4A4F49F92D382A7F00A4199A /* TurtleCoinModule.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = TurtleCoinModule.mm; sourceTree = "<group>"; };
+		4A994DC32D3840FD00193B37 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		4A994DC52D38410700193B37 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		4A994DC72D38410F00193B37 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4A994DC92D38411500193B37 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		4A994DCB2D38411C00193B37 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		4A994DCD2D38414900193B37 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/System/Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
+		4A994DD12D384B3E00193B37 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		4A994DD32D384B6D00193B37 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk/usr/lib/libc++.tbd"; sourceTree = DEVELOPER_DIR; };
 		53763BC343EC400F9F28EF9D /* Roboto-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Black.ttf"; path = "../src/assets/fonts/Roboto-Black.ttf"; sourceTree = "<group>"; };
 		55E26584F1ED499A886E78F6 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Regular.ttf"; path = "../src/assets/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-Hugin.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin.release.xcconfig"; path = "Target Support Files/Pods-Hugin/Pods-Hugin.release.xcconfig"; sourceTree = "<group>"; };
@@ -136,7 +170,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4A4F49FF2D382B8500A4199A /* libTurtleCoinModule.a in Frameworks */,
 				0C80B921A6F3F58F76C31292 /* libPods-Hugin.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4A4F49F32D382A7E00A4199A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,11 +220,28 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4A994DD12D384B3E00193B37 /* libc++.tbd */,
+				4A994DD32D384B6D00193B37 /* libc++.tbd */,
+				4A994DCD2D38414900193B37 /* CoreGraphics.framework */,
+				4A994DCB2D38411C00193B37 /* CoreVideo.framework */,
+				4A994DC92D38411500193B37 /* QuartzCore.framework */,
+				4A994DC72D38410F00193B37 /* Foundation.framework */,
+				4A994DC52D38410700193B37 /* CoreGraphics.framework */,
+				4A994DC32D3840FD00193B37 /* UIKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-Hugin.a */,
 				19F6CBCC0A4E27FBF8BF4A61 /* libPods-Hugin-HuginTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4A4F49F72D382A7F00A4199A /* TurtleCoinModule */ = {
+			isa = PBXGroup;
+			children = (
+				4A4F49F82D382A7F00A4199A /* TurtleCoinModule.h */,
+				4A4F49F92D382A7F00A4199A /* TurtleCoinModule.mm */,
+			);
+			path = TurtleCoinModule;
 			sourceTree = "<group>";
 		};
 		737FF4891AEDF81425B81E8C /* HuginTests */ = {
@@ -206,6 +265,7 @@
 				13B07FAE1A68108700A75B9A /* Hugin */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* HuginTests */,
+				4A4F49F72D382A7F00A4199A /* TurtleCoinModule */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
@@ -222,6 +282,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* Hugin.app */,
 				00E356EE1AD99517003FC87E /* HuginTests.xctest */,
+				4A4F49F62D382A7E00A4199A /* libTurtleCoinModule.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -338,11 +399,29 @@
 			buildRules = (
 			);
 			dependencies = (
+				4A4F4A012D382B8500A4199A /* PBXTargetDependency */,
 			);
 			name = Hugin;
 			productName = Hugin;
 			productReference = 13B07F961A680F5B00A75B9A /* Hugin.app */;
 			productType = "com.apple.product-type.application";
+		};
+		4A4F49F52D382A7E00A4199A /* TurtleCoinModule */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4A4F49FC2D382A7F00A4199A /* Build configuration list for PBXNativeTarget "TurtleCoinModule" */;
+			buildPhases = (
+				4A4F49F22D382A7E00A4199A /* Sources */,
+				4A4F49F32D382A7E00A4199A /* Frameworks */,
+				4A4F49F42D382A7E00A4199A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TurtleCoinModule;
+			productName = TurtleCoinModule;
+			productReference = 4A4F49F62D382A7E00A4199A /* libTurtleCoinModule.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
@@ -358,6 +437,9 @@
 					};
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
+					};
+					4A4F49F52D382A7E00A4199A = {
+						CreatedOnToolsVersion = 15.4;
 					};
 				};
 			};
@@ -376,6 +458,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* Hugin */,
 				00E356ED1AD99517003FC87E /* HuginTests */,
+				4A4F49F52D382A7E00A4199A /* TurtleCoinModule */,
 			);
 		};
 /* End PBXProject section */
@@ -623,6 +706,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4A4F49F22D382A7E00A4199A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4A4F49FA2D382A7F00A4199A /* TurtleCoinModule.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -630,6 +721,11 @@
 			isa = PBXTargetDependency;
 			target = 13B07F861A680F5B00A75B9A /* Hugin */;
 			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
+		};
+		4A4F4A012D382B8500A4199A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4A4F49F52D382A7E00A4199A /* TurtleCoinModule */;
+			targetProxy = 4A4F4A002D382B8500A4199A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -694,8 +790,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				CXX = "";
 				DEVELOPMENT_TEAM = P8M9G622QT;
 				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/hermes-engine/destroot/Library/Frameworks/universal\"",
+					"\"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built\"",
+				);
 				INFOPLIST_FILE = Hugin/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -703,6 +805,15 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-stdlib=libc++",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -724,7 +835,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				CXX = "";
 				DEVELOPMENT_TEAM = P8M9G622QT;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"${PODS_ROOT}/hermes-engine/destroot/Library/Frameworks/universal\"",
+					"\"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built\"",
+				);
 				INFOPLIST_FILE = Hugin/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -742,6 +859,88 @@
 				PRODUCT_NAME = Hugin;
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		4A4F49FD2D382A7F00A4199A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				HEADER_SEARCH_PATHS = (
+					"/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/c++/v1/**",
+					"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include/**",
+					"${SRCROOT}/../ios/Pods/Headers/**",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-stdlib=libc++",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4A4F49FE2D382A7F00A4199A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				HEADER_SEARCH_PATHS = (
+					"/Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/include/c++/v1/**",
+					"/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include/**",
+					"${SRCROOT}/../ios/Pods/Headers/**",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_FAST_MATH = YES;
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
+					"-stdlib=libc++",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -917,6 +1116,15 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4A4F49FC2D382A7F00A4199A /* Build configuration list for PBXNativeTarget "TurtleCoinModule" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4A4F49FD2D382A7F00A4199A /* Debug */,
+				4A4F49FE2D382A7F00A4199A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -12,9 +12,4 @@ Pod::Spec.new do |s|
     s.requires_arc = true
     s.dependency 'React-Core'
     s.frameworks = 'Foundation'
-    s.pod_target_xcconfig = {
-        'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
-        'CLANG_CXX_LIBRARY' => 'libc++'
-      }
-    s.compiler_flags = '-std=c++17'
   end

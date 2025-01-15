@@ -6,7 +6,11 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, '12'
+require_relative '../node_modules/react-native/scripts/react_native_pods.rb'
+require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules.rb'
+
+
+platform :ios, '14.0'
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -23,29 +27,13 @@ target 'Hugin' do
     rescue => e
       Pod::UI.warn e
     end
-    begin
-      expo_patch_react_imports!(installer)
-    rescue => e
-      Pod::UI.warn e
-    end
-    begin
-      expo_patch_react_imports!(installer)
-    rescue => e
-      Pod::UI.warn e
-    end
-    begin
-      expo_patch_react_imports!(installer)
-    rescue => e
-      Pod::UI.warn e
-    end
   end
   config = use_native_modules!
-  use_react_native!(path: config[:reactNativePath])
-  pod 'React', :path => '../node_modules/react-native/'
 
-  pod 'TurtleCoinModule', :path => './ios/crypto'
-  
+  use_react_native!
+
   pod 'HelloBare', :path => '../modules/hello-bare/ios'
+  #pod 'TurtleCoinModule', :path => './crypto' # Added the TurtleCoinModule pod
 
   target 'HuginTests' do
     inherit! :complete
@@ -53,20 +41,30 @@ target 'Hugin' do
   end
 
   post_install do |installer|
-    # React Native specific post-install script
+    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false,
-      # Uncomment to enable ccache (if supported in your environment)
       # :ccache_enabled => true
     )
-  
-    # Additional build settings for C++17 and libc++
+
+    installer.pods_project.targets.each do |target|
+      if target.name == 'TurtleCoinModule'
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public/React-Core'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public/React-RCTUtils'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public'
+        end
+      end
+    end
+
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       end
     end
   end
