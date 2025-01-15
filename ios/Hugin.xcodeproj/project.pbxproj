@@ -16,8 +16,6 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		16FF29976C6B4CB9A611316D /* Montserrat-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB1CFF59AEC54F5DB494AA09 /* Montserrat-ExtraLight.ttf */; };
 		30F4E9A0E3F24269803CFA03 /* Montserrat-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0035EC09969A4AAF90E67356 /* Montserrat-Light.ttf */; };
-		3E1ADCAE2C19FDAC0019D938 /* Montserrat-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3E1ADCAD2C19FDAC0019D938 /* Montserrat-SemiBold.ttf */; };
-		3E1ADCB02C19FDB30019D938 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3E1ADCAF2C19FDB30019D938 /* Montserrat-Bold.ttf */; };
 		3EF5CB902C14E0190071ADEE /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB7D2C14E0180071ADEE /* Zocial.ttf */; };
 		3EF5CB912C14E0190071ADEE /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB7E2C14E0180071ADEE /* EvilIcons.ttf */; };
 		3EF5CB922C14E0190071ADEE /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB7F2C14E0180071ADEE /* FontAwesome.ttf */; };
@@ -404,14 +402,12 @@
 				3EF5CB9F2C14E0190071ADEE /* MaterialCommunityIcons.ttf in Resources */,
 				3EF5CB9A2C14E0190071ADEE /* SimpleLineIcons.ttf in Resources */,
 				3EF5CB932C14E0190071ADEE /* Feather.ttf in Resources */,
-				3E1ADCAE2C19FDAC0019D938 /* Montserrat-SemiBold.ttf in Resources */,
 				D91053670CB58E93792F1E04 /* PrivacyInfo.xcprivacy in Resources */,
 				3EF5CB9C2C14E0190071ADEE /* FontAwesome5_Regular.ttf in Resources */,
 				3EF5CB9D2C14E0190071ADEE /* FontAwesome6_Brands.ttf in Resources */,
 				3EF5CB952C14E0190071ADEE /* FontAwesome5_Brands.ttf in Resources */,
 				92475B7FDE014E53ADC3331C /* Montserrat-Black.ttf in Resources */,
 				FBFEDE2D0B28489A80C30051 /* Montserrat-ExtraBold.ttf in Resources */,
-				3E1ADCB02C19FDB30019D938 /* Montserrat-Bold.ttf in Resources */,
 				3EF5CB962C14E0190071ADEE /* FontAwesome6_Solid.ttf in Resources */,
 				3EF5CB972C14E0190071ADEE /* Foundation.ttf in Resources */,
 				16FF29976C6B4CB9A611316D /* Montserrat-ExtraLight.ttf in Resources */,
@@ -823,10 +819,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -899,10 +892,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
