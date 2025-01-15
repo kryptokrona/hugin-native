@@ -8,13 +8,15 @@ Pod::Spec.new do |s|
     s.author       = { 'The Kryptokrona Developers' => 'info@kryptokrona.se' }
     s.source       = { git: 'https://github.com/kryptokrona/hugin-native.git' }
     s.platform     = :ios, '14.0'
-    s.source_files = 'ios/crypto/*.{mm,h,cpp}'
+    s.source_files = '*.{mm,h,cpp}'
     s.requires_arc = true
     s.dependency 'React-Core'
     s.frameworks = 'Foundation'
     s.pod_target_xcconfig = {
         'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
-        'CLANG_CXX_LIBRARY' => 'libc++'
+        'CLANG_CXX_LIBRARY' => 'libc++',
+        'OTHER_CFLAGS' => '-fobjc-arc',
+        'OTHER_LDFLAGS' => '-ObjC'
       }
       s.compiler_flags = '-std=c++17'
   end

@@ -1,15 +1,29 @@
 
 // Copyright (c) 2019-2025, The Kryptokrona Developers
 
-#import "React/RCTBridgeModule.h"
+#ifdef __OBJC__
 #import <Foundation/Foundation.h>
+#import "React/RCTBridgeModule.h"
+#endif
 #include "Types.h"
 #include "CryptoTypes.h"
 #include "StringTools.h"
 #include "kryptokrona.h"
+#include "crypto.h"
+#include "TurtleCoinModule.h"
+#include <unordered_map>
 
-@interface TurtleCoinModule : NSObject <RCTBridgeModule>
-@end
+
+WalletBlockInfo convertWalletBlockInfo(NSDictionary *block);
+
+std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs(
+    const WalletBlockInfo &block,
+    const Crypto::SecretKey &privateViewKey,
+    const std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> &spendKeys,
+    const bool isViewWallet,
+    const bool processCoinbaseTransactions);
+
+
 
 @implementation TurtleCoinModule
 
@@ -143,7 +157,7 @@ RCT_EXPORT_METHOD(generateRingSignatures:(NSString *)prefixHash
 
     std::vector<std::string> cppSignatures;
 
-    bool result = Cryptography::generateRingSignatures(
+    bool result = Core::Cryptography::generateRingSignatures(
         cppPrefixHash,
         cppKeyImage,
         cppPublicKeys,
@@ -190,7 +204,7 @@ RCT_EXPORT_METHOD(checkRingSignature:(NSString *)prefixHash
         cppSignatures.push_back([sig UTF8String]);
     }
 
-    bool result = Cryptography::checkRingSignature(
+    bool result = Core::Cryptography::checkRingSignature(
         cppPrefixHash,
         cppKeyImage,
         cppPublicKeys,
@@ -210,7 +224,7 @@ RCT_EXPORT_METHOD(generateKeyDerivation:(NSString *)publicKey
     std::string cppPrivateKey = [privateKey UTF8String];
     std::string cppDerivation; // Output variable
 
-    bool success = Cryptography::generateKeyDerivation(cppPublicKey, cppPrivateKey, cppDerivation);
+    bool success = Core::Cryptography::generateKeyDerivation(cppPublicKey, cppPrivateKey, cppDerivation);
 
     if (success) {
         // Convert the C++ string back to NSString and resolve it
@@ -234,7 +248,7 @@ RCT_EXPORT_METHOD(generateKeyImage:(NSString *)publicKey
     std::string cppPrivateKey = [privateKey UTF8String];
 
     try {
-        std::string keyImage = Cryptography::generateKeyImage(cppPublicKey, cppPrivateKey);
+        std::string keyImage = Core::Cryptography::generateKeyImage(cppPublicKey, cppPrivateKey);
 
         resolve([NSString stringWithUTF8String:keyImage.c_str()]);
     } catch (const std::exception &e) {
@@ -265,7 +279,7 @@ RCT_EXPORT_METHOD(deriveSecretKey:(NSString *)derivation
     std::string cppPrivateKey = [privateKey UTF8String];
 
     try {
-        std::string secretKey = Cryptography::deriveSecretKey(cppDerivation, cppOutputIndex, cppPrivateKey);
+        std::string secretKey = Core::Cryptography::deriveSecretKey(cppDerivation, cppOutputIndex, cppPrivateKey);
 
         resolve([NSString stringWithUTF8String:secretKey.c_str()]);
     } catch (const std::exception &e) {
@@ -291,27 +305,24 @@ RCT_EXPORT_METHOD(derivePublicKey:(NSString *)derivation
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
     // Convert Objective-C types to C++ types
-    const char *cppDerivation = [derivation UTF8String];
+    std::string cppDerivation = [derivation UTF8String];
     uint64_t cppOutputIndex = [outputIndex unsignedLongLongValue];
-    const char *cppPublicKey = [publicKey UTF8String];
-    char *cppOutPublicKey = nullptr;
+    std::string cppPublicKey = [publicKey UTF8String];
+    std::string cppOutPublicKey;  // Derived public key (output variable)
 
     try {
-        // Call the C++ function
-        int result = Cryptography::derivePublicKey(cppDerivation, cppOutputIndex, cppPublicKey, cppOutPublicKey);
+        // Call the correct version of derivePublicKey
+        bool result = Core::Cryptography::derivePublicKey(
+            cppDerivation, cppOutputIndex, cppPublicKey, cppOutPublicKey);
 
-        if (result == 0) {
-            // Convert the output public key to NSString
-            NSString *outPublicKey = [NSString stringWithUTF8String:cppOutPublicKey];
-
-            delete[] cppOutPublicKey;
-
-            resolve(outPublicKey);
+        if (result) {
+            // Convert the derived public key to NSString and resolve
+            resolve([NSString stringWithUTF8String:cppOutPublicKey.c_str()]);
         } else {
-            // Handle error if result is non-zero
+            // Handle failure
             NSString *errorMessage = @"Failed to derive public key";
             NSError *error = [NSError errorWithDomain:@"DerivePublicKeyError"
-                                                 code:result
+                                                 code:1
                                              userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
             reject(@"derive_public_key_failed", errorMessage, error);
         }
@@ -331,6 +342,7 @@ RCT_EXPORT_METHOD(derivePublicKey:(NSString *)derivation
     }
 }
 
+
 RCT_EXPORT_METHOD(cnFastHash:(NSString *)input
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
@@ -338,7 +350,7 @@ RCT_EXPORT_METHOD(cnFastHash:(NSString *)input
     std::string cppInput = [input UTF8String];
 
     try {
-        std::string cppHash = Cryptography::cn_fast_hash(cppInput);
+        std::string cppHash = Core::Cryptography::cn_fast_hash(cppInput);
 
         NSString *hash = [NSString stringWithUTF8String:cppHash.c_str()];
 
@@ -359,6 +371,100 @@ RCT_EXPORT_METHOD(cnFastHash:(NSString *)input
     }
 }
 
+void processTransactionOutputs(
+    const RawTransaction &tx,
+    const Crypto::SecretKey &privateViewKey,
+    const std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> &spendKeys,
+    const bool isViewWallet,
+    std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> &inputs)
+{
+    Crypto::KeyDerivation derivation;
+
+    /* Generate the key derivation from the random tx public key, and our private
+       view key */
+    Crypto::crypto_funcs::generate_key_derivation(
+        tx.transactionPublicKey, privateViewKey, derivation);
+
+    uint32_t outputIndex = 0;
+
+    for (const auto &output : tx.keyOutputs)
+    {
+        Crypto::PublicKey derivedSpendKey;
+
+        /* Derive the public spend key from the transaction, using the previous
+           derivation */
+        Crypto::crypto_funcs::underive_public_key(
+            derivation, outputIndex, output.key, derivedSpendKey);
+
+        /* See if the derived spend key matches any of our spend keys */
+        const auto ourPrivateSpendKey = spendKeys.find(derivedSpendKey);
+
+        /* If it does, the transaction belongs to us */
+        if (ourPrivateSpendKey != spendKeys.end())
+        {
+            TransactionInput input;
+
+            input.amount = output.amount;
+            input.transactionIndex = outputIndex;
+            input.globalOutputIndex = output.globalIndex;
+            input.key = output.key;
+            input.parentTransactionHash = tx.hash;
+
+            if (!isViewWallet)
+            {
+                /* Make a temporary key pair */
+                Crypto::PublicKey tmpPublicKey;
+                Crypto::SecretKey tmpSecretKey;
+
+                /* Get the tmp public key from the derivation, the index,
+                   and our public spend key */
+                Crypto::crypto_funcs::derive_public_key(
+                    derivation, outputIndex, derivedSpendKey, tmpPublicKey);
+
+                /* Get the tmp private key from the derivation, the index,
+                   and our private spend key */
+                Crypto::crypto_funcs::derive_secret_key(
+                    derivation, outputIndex, ourPrivateSpendKey->second, tmpSecretKey);
+
+                /* Get the key image from the tmp public and private key */
+                Crypto::crypto_funcs::generate_key_image(
+                    tmpPublicKey, tmpSecretKey, input.keyImage);
+            }
+
+            inputs.emplace_back(derivedSpendKey, input);
+        }
+
+        outputIndex++;
+    }
+}
+
+std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputsiOS(
+    const WalletBlockInfo &block,
+    const Crypto::SecretKey &privateViewKey,
+    const std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> &spendKeys,
+    const bool isViewWallet,
+    const bool processCoinbaseTransactions)
+{
+
+    std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> inputs;
+
+    /* Process the coinbase tx if we're not skipping them for speed */
+    if (processCoinbaseTransactions && block.coinbaseTransaction)
+    {
+        processTransactionOutputs(
+            *block.coinbaseTransaction, privateViewKey, spendKeys, isViewWallet, inputs);
+    }
+
+    /* Process the normal txs */
+    for (const auto &tx : block.transactions)
+    {
+        processTransactionOutputs(
+            tx, privateViewKey, spendKeys, isViewWallet, inputs);
+    }
+
+    return inputs;
+}
+
 RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
                   privateViewKey:(NSString *)privateViewKey
                   spendKeys:(NSDictionary *)spendKeys
@@ -372,29 +478,35 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
     std::string cppPrivateViewKey = [privateViewKey UTF8String];
 
     std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> cppSpendKeys;
-    for (const auto &key : spendKeys) {
-        NSString *publicKey = key.first;
-        NSString *secretKey = key.second;
-        
+    for (NSString *publicKey in spendKeys) {
+        NSString *secretKey = spendKeys[publicKey];
+
         Crypto::PublicKey cppPublicKey;
         Crypto::SecretKey cppSecretKey;
-        
+
         Common::podFromHex([publicKey UTF8String], cppPublicKey);
         Common::podFromHex([secretKey UTF8String], cppSecretKey);
-        
+
         cppSpendKeys[cppPublicKey] = cppSecretKey;
     }
 
+
     // Call the C++ function
     try {
-        inputs = processBlockOutputs(
-            cppBlockInfo,
-            cppPrivateViewKey,
-            cppSpendKeys,
-            isViewWallet,
-            processCoinbaseTransactions);
+        Crypto::SecretKey cppPrivateViewKeySecret;
+        Common::podFromHex(cppPrivateViewKey, cppPrivateViewKeySecret);
 
-        NSArray parsedInputs = convertInputsToNSArray(inputs);
+        std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> inputs;
+
+        inputs = processBlockOutputsiOS(
+            cppBlockInfo,                             // WalletBlockInfo
+            cppPrivateViewKeySecret,                  // Crypto::SecretKey
+            cppSpendKeys,                             // std::unordered_map<Crypto::PublicKey, Crypto::SecretKey>
+            static_cast<bool>(isViewWallet),          // bool
+            static_cast<bool>(processCoinbaseTransactions)); // bool
+
+
+        NSArray *parsedInputs = convertInputsToNSArray(inputs);
 
         resolve(parsedInputs);
         
@@ -420,32 +532,38 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
 
 // Convert TransactionInput to NS
 NSDictionary *transactionInputToNS(const TransactionInput &input) {
-    Common::podToHex(input.key);
-    Common::podToHex(input.keyImage);
-  return @{
-    @"keyImage": [NSString stringWithUTF8String:input.keyImage.c_str()], 
-    @"amount": @(input.amount), 
-    @"transactionIndex": @(input.transactionIndex), 
-    @"globalOutputIndex": @(input.globalOutputIndex),
-    @"key": [NSString stringWithUTF8String:input.key.c_str()], 
-    @"parentTransactionHash": [NSString stringWithUTF8String:input.parentTransactionHash.c_str()]
-};
+    // Convert keyImage and key to hex strings
+    std::string keyImageString = Common::podToHex(input.keyImage);
+    std::string keyString = Common::podToHex(input.key);
+
+    return @{
+        @"keyImage": [NSString stringWithUTF8String:keyImageString.c_str()],
+        @"amount": @(input.amount),
+        @"transactionIndex": @(input.transactionIndex),
+        @"globalOutputIndex": @(input.globalOutputIndex),
+        @"key": [NSString stringWithUTF8String:keyString.c_str()],
+        @"parentTransactionHash": [NSString stringWithUTF8String:input.parentTransactionHash.c_str()]
+    };
 }
+
 
 // Convert std::vector<std::tuple<PublicKey, TransactionInput>> to NSArray
 NSArray *convertInputsToNSArray(const std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> &inputs) {
     NSMutableArray *result = [NSMutableArray array];
 
     for (const auto &[publicSpendKey, input] : inputs) {
-        Common::podToHex(publicSpendKey);
+        // Convert Crypto::PublicKey to a hex string
+        std::string publicSpendKeyHex = Common::podToHex(publicSpendKey);
+
         [result addObject:@{
-            @"publicSpendKey": [NSString stringWithUTF8String:publicSpendKey.c_str()],
+            @"publicSpendKey": [NSString stringWithUTF8String:publicSpendKeyHex.c_str()],
             @"input": transactionInputToNS(input)
         }];
     }
 
     return result;
 }
+
 
 // Parse blockinfo from JS -> C++ types
 WalletBlockInfo convertWalletBlockInfo(NSDictionary *block) {
@@ -454,58 +572,60 @@ WalletBlockInfo convertWalletBlockInfo(NSDictionary *block) {
     // Parse Coinbase Transaction
     NSDictionary *coinbaseTransaction = block[@"coinbaseTransaction"];
     if (coinbaseTransaction && ![coinbaseTransaction isEqual:[NSNull null]]) {
-        RawTransaction coinbaseTransaction;
+        RawTransaction parsedCoinbaseTransaction;
 
         // Convert NSString to const char*
         const char *publicKeyHex = [coinbaseTransaction[@"transactionPublicKey"] UTF8String];
         Crypto::PublicKey publicKey = Crypto::PublicKey();
         Common::podFromHex(publicKeyHex, publicKey);
 
-        coinbaseTransaction.keyOutputs = parseKeyOutputs(coinbaseTransaction[@"keyOutputs"]);
-        coinbaseTransaction.hash = [coinbaseTransaction[@"hash"] UTF8String];
-        coinbaseTransaction.transactionPublicKey = publicKey;
+        parsedCoinbaseTransaction.keyOutputs = parseKeyOutputs(coinbaseTransaction[@"keyOutputs"]);
+        parsedCoinbaseTransaction.hash = [coinbaseTransaction[@"hash"] UTF8String];
+        parsedCoinbaseTransaction.transactionPublicKey = publicKey;
 
-        walletBlockInfo.coinbaseTransaction = coinbaseTransaction;
+        walletBlockInfo.coinbaseTransaction = parsedCoinbaseTransaction;
     }
 
     // Parse Transactions
     NSArray *transactionsArray = block[@"transactions"];
     for (NSDictionary *tx in transactionsArray) {
-        RawTransaction transaction;
-        
-        Crypto::PublicKey publicKey = Crypto::PublicKey();
+        RawTransaction parsedTransaction;
+
         const char *publicKeyHex = [tx[@"transactionPublicKey"] UTF8String];
+        Crypto::PublicKey publicKey = Crypto::PublicKey();
         Common::podFromHex(publicKeyHex, publicKey);
 
-        transaction.keyOutputs = parseKeyOutputs(tx[@"keyOutputs"]);
-        transaction.hash = [tx[@"hash"] UTF8String];
-        transaction.transactionPublicKey = publicKey;
+        parsedTransaction.keyOutputs = parseKeyOutputs(tx[@"keyOutputs"]);
+        parsedTransaction.hash = [tx[@"hash"] UTF8String];
+        parsedTransaction.transactionPublicKey = publicKey;
 
-        walletBlockInfo.transactions.push_back(transaction);
+        walletBlockInfo.transactions.push_back(parsedTransaction);
     }
 
     return walletBlockInfo;
 }
 
+
 // Parse Key Outputs
 std::vector<KeyOutput> parseKeyOutputs(NSArray *keyOutputsArray) {
     std::vector<KeyOutput> keyOutputs;
 
-    for (NSDictionary *keyOutputs in keyOutputsArray) {
-        KeyOutput keyOutput;
+    for (NSDictionary *keyOutput in keyOutputsArray) {
+        KeyOutput parsedOutput;
 
         Crypto::PublicKey key = Crypto::PublicKey();
-        Common::podFromHex(keyOutputs[@"key"], key);
+        Common::podFromHex([keyOutput[@"key"] UTF8String], key);
 
-        keyOutput.key = key;
-        keyOutput.amount = [keyOutputs[@"amount"] unsignedLongLongValue];
-        keyOutput.globalIndex = [keyOutputs[@"globalIndex"] longLongValue];
+        parsedOutput.key = key;
+        parsedOutput.amount = [keyOutput[@"amount"] unsignedLongLongValue];
+        parsedOutput.globalIndex = [keyOutput[@"globalIndex"] longLongValue];
 
-        keyOutputs.push_back(keyOutput);
+        keyOutputs.push_back(parsedOutput);
     }
 
     return keyOutputs;
 }
+
 
 
 ///---- Conversion functions ----///
