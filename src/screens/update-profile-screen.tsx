@@ -5,8 +5,6 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-// import { Peers } from 'lib/connections';
-
 import { Peers } from 'lib/connections';
 import { update_bare_user } from 'lib/native';
 
@@ -44,7 +42,6 @@ interface Props {
 
 export const UpdateProfileScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
-  // const theme = useThemeStore((state) => state.theme);
   const navigation = useNavigation<MainStackNavigationType>();
   const preferences = usePreferencesStore((state) => state.preferences);
   const { name, avatar, address } = useUserStore((state) => state.user);
@@ -53,7 +50,6 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     preferences.authMethod,
   );
   const [pincode, setPincode] = useState<string>('');
-  // const [displayPincode, setDisplayPincode] = useState(false);
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.accentForeground;
   const borderColor = theme.border;

@@ -8,5 +8,6 @@ export * from './reactions';
 export * from './reply-indicator';
 export * from './text-button';
 export * from './text-field';
-export * from './xkr-logo';
 export * from './tip';
+export * from './unreads';
+export * from './xkr-logo';

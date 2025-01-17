@@ -48,12 +48,10 @@ export const initDB = async () => {
   )`;
     await db.executeSql(query);
 
-    query = `ALTER TABLE roomsmessages ADD tip TEXT`;
+    query = 'ALTER TABLE roomsmessages ADD tip TEXT';
     try {
       await db.executeSql(query);
-    } catch (err) {
-
-    }
+    } catch (err) {}
 
     const acc = `CREATE TABLE IF NOT EXISTS account ( 
     publicKey TEXT,
@@ -293,6 +291,7 @@ export async function getLatestRoomMessages() {
         return;
       }
       roomsList.unshift({
+        address: latestmessagedb.address,
         message: latestmessagedb.message,
         name: room.name,
         roomKey: room.key,
@@ -471,7 +470,7 @@ export async function saveRoomMessage(
   nickname: string,
   hash: string,
   sent: boolean,
-  tip: JSON | false
+  tip: JSON | false = false,
 ) {
   console.log('Saving message: ', message);
   if ((!message || message?.length === 0) && !tip) {
@@ -480,7 +479,17 @@ export async function saveRoomMessage(
   try {
     await db.executeSql(
       'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [address, message, room, reply, timestamp, nickname, hash, sent ? 1 : 0, JSON.stringify(tip)],
+      [
+        address,
+        message,
+        room,
+        reply,
+        timestamp,
+        nickname,
+        hash,
+        sent ? 1 : 0,
+        JSON.stringify(tip),
+      ],
     );
 
     const newMessage: Message = {
@@ -493,7 +502,7 @@ export async function saveRoomMessage(
       room: room,
       sent: sent,
       timestamp: timestamp,
-      tip
+      tip,
     };
     return newMessage;
   } catch (err) {
@@ -501,6 +510,7 @@ export async function saveRoomMessage(
   }
 }
 
+// TODO if remove acc maybe remove delete storage stuff ?
 const deleteAllData = async () => {
   try {
     const results = await db.executeSql('DELETE FROM rooms');
@@ -546,7 +556,7 @@ const toMessage = (res: any) => {
     //Timestmap
     timestamp: res.timestamp,
 
-    tip: res.tip
+    tip: res.tip,
   };
 
   return message;

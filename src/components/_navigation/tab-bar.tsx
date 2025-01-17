@@ -5,12 +5,16 @@ import { TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native';
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { MainScreens, TabBar } from '@/config';
-import { useThemeStore } from '@/services';
+import { useGlobalStore, useThemeStore } from '@/services';
 import type { IconType } from '@/types';
 
-import { CustomIcon } from '../_elements';
+import { CustomIcon, Unreads } from '../_elements';
 
-const tabbarButtons = [MainScreens.DashboardScreen, MainScreens.GroupsScreen, MainScreens.SettingsScreen];
+const tabbarButtons = [
+  MainScreens.DashboardScreen,
+  MainScreens.GroupsScreen,
+  MainScreens.SettingsScreen,
+];
 
 export const MyTabBar: React.FC<BottomTabBarProps> = ({
   state,
@@ -19,6 +23,12 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
 }) => {
   const theme = useThemeStore((state) => state.theme);
   const [keyboardShow, setKeyboardShow] = useState(false);
+  const rooms = useGlobalStore((state) => state.rooms);
+
+  const totalUnreads = rooms.reduce(
+    (sum, room) => sum + (room.unreads || 0),
+    0,
+  );
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -87,6 +97,12 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             onPress={onPress}
             onLongPress={onLongPress}
             style={[styles.tab]}>
+            {route.name === MainScreens.GroupsScreen && (
+              <Unreads
+                unreads={totalUnreads}
+                style={{ bottom: 10, right: 20 }}
+              />
+            )}
             <CustomIcon
               name={icon?.iconName}
               type={icon.iconType as IconType}
