@@ -63,7 +63,7 @@ export const setLatestRoomMessages = async () => {
 
   const currentRooms = useGlobalStore.getState().rooms;
   const userAddress = useUserStore.getState().user.address;
-
+  const currentRoom = useGlobalStore.getState().thisRoom;
   const updatedRooms = latestRooms?.map((latestRoom) => {
     const existingRoom = currentRooms.find(
       (room) => room.roomKey === latestRoom.roomKey,
@@ -80,7 +80,7 @@ export const setLatestRoomMessages = async () => {
 
     return {
       ...latestRoom,
-      unreads: newUnreads,
+      unreads: currentRoom === latestRoom.RoomKey ? 0 : newUnreads, // Reset unreads if in room
     };
   });
 
