@@ -111,12 +111,13 @@ export const pickAvatar = async () => {
   };
   const result = await launchImageLibrary(options);
   const base64 = result.assets?.[0].base64;
-  if (base64 && base64?.length > 273000) {
+  if (base64 && base64.length > 273000) {
+    const maxSizeKB = (273000 / 1024).toFixed(2);
     Toast.show({
-      text1: 'Avatar size exceeds maximum size',
+      text1: `Avatar size exceeds the maximum size of ${maxSizeKB} KB`,
       type: 'info',
     });
-    return undefined;
+    return null;
   }
-  return base64;
+  return base64 ?? null;
 };

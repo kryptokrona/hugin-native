@@ -18,7 +18,7 @@ git submodule update --init --recursive
 > [!NOTE]
 > From now on, you should run `npx bare-dev vendor sync` after updating `bare` git submodule.
 
-Install node modules:
+## Install node modules:
 
 ```sh
 npm install
@@ -35,10 +35,16 @@ npm link
 > npx hello-pear --configure
 > ```
 
-Patch node modules:
+## Patch node modules:
 
 ```sh
 npm run patch
+```
+
+## Get nodes
+
+```sh
+npm run getnodes
 ```
 
 ### Good to know

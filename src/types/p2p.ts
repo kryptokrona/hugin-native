@@ -12,6 +12,7 @@ export interface Room {
   name: string;
   message: string;
   timestamp: number;
+  unreads?: number;
 }
 
 export interface Message {
@@ -28,7 +29,7 @@ export interface Message {
   file?: FileInfo;
   replyto?: Message[] | undefined;
   replies?: Message[] | undefined;
-  tip?: JSON | undefined;
+  tip?: JSON | false;
 }
 
 export interface File {
