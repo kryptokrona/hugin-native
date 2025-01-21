@@ -21,9 +21,9 @@ import {
   getRooms,
   removeRoomFromDatabase,
   saveAccount,
-  saveRoomToDatabase,
-  saveRoomMessage,
   saveFileInfo,
+  saveRoomMessage,
+  saveRoomToDatabase,
 } from './sqlite';
 
 import { notify } from '../utils';
@@ -33,6 +33,8 @@ import {
   setStoreCurrentRoom,
   setStoreRoomMessages,
   setStoreRooms,
+  useGlobalStore,
+  useUserStore,
 } from '../zustand';
 
 AppState.addEventListener('change', onAppStateChange);
@@ -57,8 +59,32 @@ async function onAppStateChange(state: string) {
 }
 
 export const setLatestRoomMessages = async () => {
-  const rooms = await getLatestRoomMessages();
-  setStoreRooms(rooms.sort((a, b) => b.timestamp - a.timestamp));
+  const latestRooms = await getLatestRoomMessages();
+
+  const currentRooms = useGlobalStore.getState().rooms;
+  const userAddress = useUserStore.getState().user.address;
+  const currentRoom = useGlobalStore.getState().thisRoom;
+  const updatedRooms = latestRooms?.map((latestRoom) => {
+    const existingRoom = currentRooms.find(
+      (room) => room.roomKey === latestRoom.roomKey,
+    );
+
+    const isFromUser = latestRoom.address === userAddress;
+
+    const newUnreads =
+      existingRoom &&
+      latestRoom.timestamp > (existingRoom.timestamp || 0) &&
+      !isFromUser
+        ? (existingRoom.unreads || 0) + 1
+        : existingRoom?.unreads || 0;
+
+    return {
+      ...latestRoom,
+      unreads: currentRoom === latestRoom.RoomKey ? 0 : newUnreads, // Reset unreads if in room
+    };
+  });
+
+  setStoreRooms(updatedRooms?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
 };
 
 export const updateMessages = async (message: Message, history = false) => {
@@ -114,6 +140,7 @@ export const updateVoiceChannelStatus = (status: any) => {
 export const setRoomMessages = async (room: string, page: number) => {
   console.log('Load message page:', page);
   const messages = await getRoomMessages(room, page);
+
   setStoreRoomMessages(messages);
 };
 
@@ -121,7 +148,7 @@ export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string | null,
-  tip: JSON | false
+  tip: JSON | false,
 ) => {
   return await send_swarm_msg(key, message, reply, tip);
 };
@@ -131,7 +158,6 @@ export const onSendGroupMessageWithFile = (
   file: SelectedFile,
   message: string,
 ) => {
-  console.log('here 1', { key });
   const fileData: FileInput = {
     ...file,
     key,
@@ -228,8 +254,8 @@ export const saveRoomMessageAndUpdate = async (
   hash: string,
   sent: boolean,
   history: boolean | undefined = false,
-  file: FileInfo | undefined,
-  tip: JSON | undefined
+  file?: FileInfo | undefined,
+  tip?: JSON | undefined,
 ) => {
   let isFile = false;
   if (typeof file === 'object') {
@@ -246,7 +272,7 @@ export const saveRoomMessageAndUpdate = async (
     nickname,
     hash,
     sent,
-    tip
+    tip,
   );
 
   if (newMessage && !history) {

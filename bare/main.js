@@ -3,7 +3,6 @@ require('./runtime');
 // Tell app we're ready
 HelloBare.onReady();
 const { group_key } = require('./utils');
-// const { hyperBee } = require('./hypercore');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
 const {

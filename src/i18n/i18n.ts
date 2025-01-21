@@ -2,8 +2,6 @@ import RNLanguageDetector from '@os-team/i18next-react-native-language-detector'
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-// import { globals } from '@/config';
-
 import ben from './translations/ben.json';
 import bho from './translations/bho.json';
 import de from './translations/de.json';
@@ -25,12 +23,6 @@ import tr from './translations/tr.json';
 import uk from './translations/uk.json';
 import ur from './translations/ur.json';
 import zh from './translations/zh.json';
-
-// globals.language = 'en';
-
-// if (globals.language === 'zh') {
-//   globals.language = 'zh-cn';
-// }
 
 i18next
   // .use(languageDetector)

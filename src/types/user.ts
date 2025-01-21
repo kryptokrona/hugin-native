@@ -1,9 +1,3 @@
-export interface UnreadMessages {
-  boards: number;
-  groups: number;
-  pms: number;
-}
-
 export enum AuthMethods {
   reckless = 'reckless',
   pincode = 'pincode',
@@ -14,11 +8,7 @@ export enum AuthMethods {
 export interface Preferences {
   authMethod: AuthMethods | null;
   pincode: string | null;
-  // cache: string;
-  // cacheEnabled: boolean;
-  // currency: string;
   language: string;
-  // limitData: boolean;
   nickname: string;
   node: string;
 }

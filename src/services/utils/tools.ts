@@ -27,7 +27,7 @@ export class Timer {
     this.stop();
     this.timerId = setInterval(() => {
       this.timeLeft -= 1;
-      console.log('Timer', this.timeLeft);
+      // console.log('Timer', this.timeLeft);
       if (this.timeLeft <= 0) {
         this.stop();
         this.onEnd();
