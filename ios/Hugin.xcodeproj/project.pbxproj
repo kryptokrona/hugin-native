@@ -771,8 +771,7 @@
 					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
 					"\"$(PODS_ROOT)/boost\"",
 					"\"$(PODS_ROOT)/Headers/Private/React-Core\"",
-					"\"$(PODS_TARGET_SRCROOT)/include/\"",
-					"${SRCROOT}/../ios/Pods/Headers/**",
+					"\"$(PODS_TARGET_SRCROOT)/include/\""
 				);
 				INFOPLIST_FILE = Hugin/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;

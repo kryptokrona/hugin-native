@@ -526,6 +526,315 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
     }
 }
 
+RCT_EXPORT_METHOD(scReduce32:(NSString *)data
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSString to a C++ std::string
+        std::string cppData = [data UTF8String];
+
+        // Call the C++ implementation of scReduce32
+        std::string result = Core::Cryptography::scReduce32(cppData);
+
+        // Convert the result back to NSString and resolve the promise
+        resolve([NSString stringWithUTF8String:result.c_str()]);
+    } catch (const std::exception &e) {
+        // Handle any exceptions thrown by the C++ function
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"scReduce32Error"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"sc_reduce32_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"scReduce32Error"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"sc_reduce32_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(secretKeyToPublicKey:(NSString *)privateKey
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSString to a C++ std::string
+        std::string cppPrivateKey = [privateKey UTF8String];
+        
+        // Declare a std::string to hold the public key
+        std::string cppPublicKey;
+
+        // Call the C++ function
+        bool success = Core::Cryptography::secretKeyToPublicKey(cppPrivateKey, cppPublicKey);
+
+        // Check if the function was successful
+        if (success) {
+            // Convert the public key std::string to NSString and resolve the promise
+            NSString *publicKey = [NSString stringWithUTF8String:cppPublicKey.c_str()];
+            resolve(publicKey);
+        } else {
+            // Handle the case where the conversion failed
+            NSString *errorMessage = @"Failed to convert secret key to public key";
+            NSError *error = [NSError errorWithDomain:@"SecretKeyToPublicKeyError"
+                                                 code:1
+                                             userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+            reject(@"secret_key_to_public_key_failed", errorMessage, error);
+        }
+    } catch (const std::exception &e) {
+        // Handle any exceptions thrown by the C++ function
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"SecretKeyToPublicKeyError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"secret_key_to_public_key_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"SecretKeyToPublicKeyError"
+                                             code:3
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"secret_key_to_public_key_failed", @"Unknown error occurred", error);
+    }
+}
+
+
+RCT_EXPORT_METHOD(checkKey:(NSString *)publicKey
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSString to a C++ std::string
+        std::string cppPublicKey = [publicKey UTF8String];
+
+        // Call the C++ function
+        bool isValid = Core::Cryptography::checkKey(cppPublicKey);
+
+        // Resolve the result as a boolean to JavaScript
+        resolve(@(isValid));
+    } catch (const std::exception &e) {
+        // Handle any exceptions thrown by the C++ function
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"CheckKeyError"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"check_key_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"CheckKeyError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"check_key_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(hashToEllipticCurve:(NSString *)hash
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSString to a C++ std::string
+        std::string cppHash = [hash UTF8String];
+
+        // Call the C++ function
+        std::string ellipticCurveHex = Core::Cryptography::hashToEllipticCurve(cppHash);
+
+        // Convert the result back to NSString and resolve the promise
+        resolve([NSString stringWithUTF8String:ellipticCurveHex.c_str()]);
+    } catch (const std::exception &e) {
+        // Handle any exceptions thrown by the C++ function
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"HashToEllipticCurveError"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"hash_to_elliptic_curve_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"HashToEllipticCurveError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"hash_to_elliptic_curve_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(generateSignature:(NSString *)prefixHash
+                  publicKey:(NSString *)publicKey
+                  privateKey:(NSString *)privateKey
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSStrings to std::strings
+        std::string cppPrefixHash = [prefixHash UTF8String];
+        std::string cppPublicKey = [publicKey UTF8String];
+        std::string cppPrivateKey = [privateKey UTF8String];
+
+        // Call the C++ function
+        std::string signatureHex = Core::Cryptography::generateSignature(
+            cppPrefixHash,
+            cppPublicKey,
+            cppPrivateKey
+        );
+
+        // Convert the result to NSString and resolve the promise
+        resolve([NSString stringWithUTF8String:signatureHex.c_str()]);
+    } catch (const std::exception &e) {
+        // Handle C++ exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"GenerateSignatureError"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"generate_signature_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"GenerateSignatureError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"generate_signature_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(checkSignature:(NSString *)prefixHash
+                  publicKey:(NSString *)publicKey
+                  signature:(NSString *)signature
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSStrings to std::strings
+        std::string cppPrefixHash = [prefixHash UTF8String];
+        std::string cppPublicKey = [publicKey UTF8String];
+        std::string cppSignature = [signature UTF8String];
+
+        // Call the C++ function
+        bool isValid = Core::Cryptography::checkSignature(
+            cppPrefixHash,
+            cppPublicKey,
+            cppSignature
+        );
+
+        // Resolve the result back to JavaScript
+        resolve(@(isValid));
+    } catch (const std::exception &e) {
+        // Handle C++ exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"CheckSignatureError"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"check_signature_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"CheckSignatureError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"check_signature_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(hashToScalar:(NSString *)hash
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert the input NSString to a std::string
+        std::string cppHash = [hash UTF8String];
+
+        // Call the C++ function
+        std::string result = Core::Cryptography::hashToScalar(cppHash);
+
+        // Convert the result back to NSString and resolve
+        resolve([NSString stringWithUTF8String:result.c_str()]);
+    } catch (const std::exception &e) {
+        // Handle C++ exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"HashToScalarError"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"hash_to_scalar_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"HashToScalarError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"hash_to_scalar_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(underivePublicKey:(NSString *)derivation
+                  outputIndex:(nonnull NSNumber *)outputIndex
+                  derivedKey:(NSString *)derivedKey
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert inputs from NSString and NSNumber to C++ types
+        std::string cppDerivation = [derivation UTF8String];
+        uint64_t cppOutputIndex = [outputIndex unsignedLongLongValue];
+        std::string cppDerivedKey = [derivedKey UTF8String];
+
+        // Declare a std::string to hold the public key
+        std::string cppPublicKey;
+
+        // Call the C++ function
+        bool success = Core::Cryptography::underivePublicKey(
+            cppDerivation, cppOutputIndex, cppDerivedKey, cppPublicKey);
+
+        if (success) {
+            // Convert the public key to NSString and resolve
+            NSString *publicKey = [NSString stringWithUTF8String:cppPublicKey.c_str()];
+            resolve(publicKey);
+        } else {
+            // Handle failure and reject with an appropriate error
+            NSError *error = [NSError errorWithDomain:@"UnderivePublicKeyError"
+                                                 code:1
+                                             userInfo:@{NSLocalizedDescriptionKey: @"Failed to underive public key"}];
+            reject(@"underive_public_key_failed", @"Failed to underive public key", error);
+        }
+    } catch (const std::exception &e) {
+        // Handle C++ exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"UnderivePublicKeyError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"underive_public_key_exception", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"UnderivePublicKeyError"
+                                             code:3
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"underive_public_key_exception", @"Unknown error occurred", error);
+    }
+}
+
+
+RCT_EXPORT_METHOD(generateKeys:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Declare variables to store the generated keys
+        std::string cppPrivateKey;
+        std::string cppPublicKey;
+
+        // Call the C++ function to generate keys
+        Core::Cryptography::generateKeys(cppPrivateKey, cppPublicKey);
+
+        // Create a dictionary to hold the keys
+        NSDictionary *keyPair = @{
+            @"public_key": [NSString stringWithUTF8String:cppPublicKey.c_str()],
+            @"private_key": [NSString stringWithUTF8String:cppPrivateKey.c_str()]
+        };
+
+        // Resolve the promise with the key pair
+        resolve(keyPair);
+    } catch (const std::exception &e) {
+        // Handle standard exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"GenerateKeysError"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"generate_keys_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"GenerateKeysError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"generate_keys_failed", @"Unknown error occurred", error);
+    }
+}
+
+
+
 @end
 
 ///---- Conversion functions ----///
