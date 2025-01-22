@@ -12,18 +12,11 @@
 #include "crypto.h"
 #include "TurtleCoinModule.h"
 #include <unordered_map>
+#import <React/RCTLog.h>
+
 
 
 WalletBlockInfo convertWalletBlockInfo(NSDictionary *block);
-
-std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs(
-    const WalletBlockInfo &block,
-    const Crypto::SecretKey &privateViewKey,
-    const std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> &spendKeys,
-    const bool isViewWallet,
-    const bool processCoinbaseTransactions);
-
-
 
 @implementation TurtleCoinModule
 
@@ -39,6 +32,8 @@ RCT_EXPORT_METHOD(getWalletSyncData:(NSArray<NSString *> *)blockHashCheckpoints
                   url:(NSString *)url
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
+
+    RCTLog(@"Get wallet sync data called");
 
     if (blockCount < BLOCK_COUNT) {
         BLOCK_COUNT = blockCount;
@@ -467,29 +462,46 @@ std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs
 
 RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
                   privateViewKey:(NSString *)privateViewKey
-                  spendKeys:(NSDictionary *)spendKeys
+                  spendKeys:(NSArray *)spendKeys // Changed to NSArray
                   isViewWallet:(BOOL)isViewWallet
                   processCoinbaseTransactions:(BOOL)processCoinbaseTransactions
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-    
+
+    RCTLogInfo(@"processBlockOutputs called.");
+
     WalletBlockInfo cppBlockInfo = convertWalletBlockInfo(block);
 
     std::string cppPrivateViewKey = [privateViewKey UTF8String];
 
     std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> cppSpendKeys;
-    for (NSString *publicKey in spendKeys) {
-        NSString *secretKey = spendKeys[publicKey];
 
-        Crypto::PublicKey cppPublicKey;
-        Crypto::SecretKey cppSecretKey;
+    // Loop through the NSArray of key pairs
+    for (NSDictionary *keyPair in spendKeys) {
+        if (![keyPair isKindOfClass:[NSDictionary class]]) {
+            RCTLogError(@"Invalid entry in spendKeys array: %@", keyPair);
+            continue; // Skip invalid entries
+        }
 
-        Common::podFromHex([publicKey UTF8String], cppPublicKey);
-        Common::podFromHex([secretKey UTF8String], cppSecretKey);
+        NSString *publicKey = keyPair[@"publicKey"];
+        NSString *privateKey = keyPair[@"privateKey"];
 
-        cppSpendKeys[cppPublicKey] = cppSecretKey;
+        if (publicKey && privateKey) {
+            Crypto::PublicKey cppPublicKey;
+            Crypto::SecretKey cppSecretKey;
+
+            // Convert from hex strings to C++ types
+            Common::podFromHex([publicKey UTF8String], cppPublicKey);
+            Common::podFromHex([privateKey UTF8String], cppSecretKey);
+
+            // Insert into the unordered_map
+            cppSpendKeys[cppPublicKey] = cppSecretKey;
+
+            RCTLogInfo(@"Added publicKey: %@ to cppSpendKeys map.", publicKey);
+        } else {
+            RCTLogError(@"Invalid key pair: %@", keyPair);
+        }
     }
-
 
     // Call the C++ function
     try {
@@ -505,11 +517,10 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
             static_cast<bool>(isViewWallet),          // bool
             static_cast<bool>(processCoinbaseTransactions)); // bool
 
-
         NSArray *parsedInputs = convertInputsToNSArray(inputs);
 
         resolve(parsedInputs);
-        
+
     } catch (const std::exception &e) {
         // Handle C++ exceptions gracefully
         NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
@@ -777,10 +788,11 @@ RCT_EXPORT_METHOD(underivePublicKey:(NSString *)derivation
             resolve(publicKey);
         } else {
             // Handle failure and reject with an appropriate error
+            NSString *errorMessage = @"Failed to underive public key";
             NSError *error = [NSError errorWithDomain:@"UnderivePublicKeyError"
                                                  code:1
-                                             userInfo:@{NSLocalizedDescriptionKey: @"Failed to underive public key"}];
-            reject(@"underive_public_key_failed", @"Failed to underive public key", error);
+                                             userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+            reject(@"underive_public_key_failed", errorMessage, error);
         }
     } catch (const std::exception &e) {
         // Handle C++ exceptions
@@ -797,6 +809,7 @@ RCT_EXPORT_METHOD(underivePublicKey:(NSString *)derivation
         reject(@"underive_public_key_exception", @"Unknown error occurred", error);
     }
 }
+
 
 
 RCT_EXPORT_METHOD(generateKeys:(RCTPromiseResolveBlock)resolve
@@ -917,6 +930,7 @@ WalletBlockInfo convertWalletBlockInfo(NSDictionary *block) {
 
 // Parse Key Outputs
 std::vector<KeyOutput> parseKeyOutputs(NSArray *keyOutputsArray) {
+    RCTLog(@"parseKeyOutputs called");
     std::vector<KeyOutput> keyOutputs;
 
     for (NSDictionary *keyOutput in keyOutputsArray) {
