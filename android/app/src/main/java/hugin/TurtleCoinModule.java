@@ -63,7 +63,7 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void cn_fast_hash(
+    public void cnFastHash(
         final String hashInput,
         final Promise promise) {
 
