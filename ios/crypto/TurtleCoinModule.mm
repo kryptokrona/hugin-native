@@ -15,7 +15,6 @@
 #import <React/RCTLog.h>
 
 
-
 WalletBlockInfo convertWalletBlockInfo(NSDictionary *block);
 
 @implementation TurtleCoinModule
@@ -32,8 +31,6 @@ RCT_EXPORT_METHOD(getWalletSyncData:(NSArray<NSString *> *)blockHashCheckpoints
                   url:(NSString *)url
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-
-    RCTLog(@"Get wallet sync data called");
 
     if (blockCount < BLOCK_COUNT) {
         BLOCK_COUNT = blockCount;
@@ -137,47 +134,76 @@ RCT_EXPORT_METHOD(generateRingSignatures:(NSString *)prefixHash
                   keyImage:(NSString *)keyImage
                   publicKeys:(NSArray<NSString *> *)publicKeys
                   transactionSecretKey:(NSString *)transactionSecretKey
-                  realOutput:(NSInteger)realOutput
+                  realOutput:(NSDictionary *)realOutput
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
-    std::string cppPrefixHash = [prefixHash UTF8String];
-    std::string cppKeyImage = [keyImage UTF8String];
-    std::vector<std::string> cppPublicKeys;
-    for (NSString *key in publicKeys) {
-        cppPublicKeys.push_back([key UTF8String]);
-    }
-    std::string cppTransactionSecretKey = [transactionSecretKey UTF8String];
-    uint64_t cppRealOutput = (uint64_t)realOutput;
+    // Log the input for debugging
+    NSLog(@"Generating ring signatures for keyImage: %@", keyImage);
 
-    std::vector<std::string> cppSignatures;
-
-    bool result = Core::Cryptography::generateRingSignatures(
-        cppPrefixHash,
-        cppKeyImage,
-        cppPublicKeys,
-        cppTransactionSecretKey,
-        cppRealOutput,
-        cppSignatures
-    );
-
-    if (result) {
-
-        NSMutableArray *signaturesArray = [NSMutableArray array];
-        for (const auto &sig : cppSignatures) {
-            [signaturesArray addObject:[NSString stringWithUTF8String:sig.c_str()]];
+    try {
+        // Convert Objective-C types to C++ types
+        std::string cppPrefixHash = [prefixHash UTF8String];
+        std::string cppKeyImage = [keyImage UTF8String];
+        std::vector<std::string> cppPublicKeys;
+        for (NSString *key in publicKeys) {
+            cppPublicKeys.push_back([key UTF8String]);
         }
+        std::string cppTransactionSecretKey = [transactionSecretKey UTF8String];
 
-        // Resolve the promise with the signatures array
-        resolve(signaturesArray);
-    } else {
-        // Handle errors and reject the promise
+        // Extract realIndex from the realOutput dictionary
+        NSNumber *realOutputIndex = realOutput[@"realIndex"];
+        if (![realOutputIndex isKindOfClass:[NSNumber class]]) {
+            reject(@"invalid_argument", @"realOutput must contain a valid number under 'realIndex'", nil);
+            return;
+        }
+        uint64_t cppRealOutput = [realOutputIndex unsignedLongLongValue];
+
+        // Initialize the C++ vector for signatures
+        std::vector<std::string> cppSignatures;
+
+        // Call the C++ function to generate ring signatures
+        bool result = Core::Cryptography::generateRingSignatures(
+            cppPrefixHash,
+            cppKeyImage,
+            cppPublicKeys,
+            cppTransactionSecretKey,
+            cppRealOutput,
+            cppSignatures
+        );
+
+        if (result) {
+            // Convert the C++ signatures vector to NSArray
+            NSMutableArray *signaturesArray = [NSMutableArray array];
+            for (const auto &sig : cppSignatures) {
+                [signaturesArray addObject:[NSString stringWithUTF8String:sig.c_str()]];
+            }
+
+            // Resolve the promise with the signatures array
+            resolve(signaturesArray);
+        } else {
+            // Reject the promise if generation failed
+            NSError *error = [NSError errorWithDomain:@"GenerateRingSignaturesError"
+                                                 code:1
+                                             userInfo:@{NSLocalizedDescriptionKey: @"Failed to generate ring signatures"}];
+            reject(@"generate_error", @"Failed to generate ring signatures", error);
+        }
+    } catch (const std::exception &e) {
+        // Handle C++ exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
         NSError *error = [NSError errorWithDomain:@"GenerateRingSignaturesError"
-                                             code:1
-                                         userInfo:@{NSLocalizedDescriptionKey: @"Failed to generate ring signatures"}];
-        reject(@"generate_error", @"Failed to generate ring signatures", error);
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"generate_exception", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"GenerateRingSignaturesError"
+                                             code:3
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"generate_exception", @"Unknown error occurred", error);
     }
 }
+
 
 RCT_EXPORT_METHOD(checkRingSignature:(NSString *)prefixHash
                   keyImage:(NSString *)keyImage
@@ -263,19 +289,29 @@ RCT_EXPORT_METHOD(generateKeyImage:(NSString *)publicKey
 }
 
 RCT_EXPORT_METHOD(deriveSecretKey:(NSString *)derivation
-                  outputIndex:(nonnull NSNumber *)outputIndex
+                  outputIndex:(NSDictionary *)outputIndex
                   privateKey:(NSString *)privateKey
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
+
+    // Extract the numeric value from the outputIndex map
+    NSNumber *outputIndexNumber = outputIndex[@"outputIndex"];
+    if (![outputIndexNumber isKindOfClass:[NSNumber class]]) {
+        reject(@"invalid_argument", @"outputIndex must contain a valid number under the 'value' key", nil);
+        return;
+    }
+
     // Convert Objective-C types to C++ types
     std::string cppDerivation = [derivation UTF8String];
-    uint64_t cppOutputIndex = [outputIndex unsignedLongLongValue];
+    uint64_t cppOutputIndex = [outputIndexNumber unsignedLongLongValue];
     std::string cppPrivateKey = [privateKey UTF8String];
 
     try {
+        // Call the C++ function
         std::string secretKey = Core::Cryptography::deriveSecretKey(cppDerivation, cppOutputIndex, cppPrivateKey);
 
+        // Convert the result back to NSString and resolve
         resolve([NSString stringWithUTF8String:secretKey.c_str()]);
     } catch (const std::exception &e) {
         // Handle standard exceptions
@@ -293,15 +329,23 @@ RCT_EXPORT_METHOD(deriveSecretKey:(NSString *)derivation
     }
 }
 
+
 RCT_EXPORT_METHOD(derivePublicKey:(NSString *)derivation
-                  outputIndex:(nonnull NSNumber *)outputIndex
+                  outputIndex:(NSDictionary *)outputIndex
                   publicKey:(NSString *)publicKey
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
+    // Extract the numeric value from the outputIndex map
+    NSNumber *outputIndexNumber = outputIndex[@"outputIndex"];
+    if (![outputIndexNumber isKindOfClass:[NSNumber class]]) {
+        reject(@"invalid_argument", @"outputIndex must contain a valid number under the 'value' key", nil);
+        return;
+    }
+
     // Convert Objective-C types to C++ types
     std::string cppDerivation = [derivation UTF8String];
-    uint64_t cppOutputIndex = [outputIndex unsignedLongLongValue];
+    uint64_t cppOutputIndex = [outputIndexNumber unsignedLongLongValue];
     std::string cppPublicKey = [publicKey UTF8String];
     std::string cppOutPublicKey;  // Derived public key (output variable)
 
@@ -336,6 +380,7 @@ RCT_EXPORT_METHOD(derivePublicKey:(NSString *)derivation
         reject(@"derive_public_key_failed", @"Unknown error occurred", error);
     }
 }
+
 
 
 RCT_EXPORT_METHOD(cnFastHash:(NSString *)input
@@ -467,9 +512,6 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
                   processCoinbaseTransactions:(BOOL)processCoinbaseTransactions
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
-
-    RCTLogInfo(@"processBlockOutputs called.");
-
     WalletBlockInfo cppBlockInfo = convertWalletBlockInfo(block);
 
     std::string cppPrivateViewKey = [privateViewKey UTF8String];
@@ -479,7 +521,6 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
     // Loop through the NSArray of key pairs
     for (NSDictionary *keyPair in spendKeys) {
         if (![keyPair isKindOfClass:[NSDictionary class]]) {
-            RCTLogError(@"Invalid entry in spendKeys array: %@", keyPair);
             continue; // Skip invalid entries
         }
 
@@ -497,9 +538,7 @@ RCT_EXPORT_METHOD(processBlockOutputs:(NSDictionary *)block
             // Insert into the unordered_map
             cppSpendKeys[cppPublicKey] = cppSecretKey;
 
-            RCTLogInfo(@"Added publicKey: %@ to cppSpendKeys map.", publicKey);
         } else {
-            RCTLogError(@"Invalid key pair: %@", keyPair);
         }
     }
 
@@ -772,7 +811,7 @@ RCT_EXPORT_METHOD(underivePublicKey:(NSString *)derivation
     try {
         // Convert inputs from NSString and NSNumber to C++ types
         std::string cppDerivation = [derivation UTF8String];
-        uint64_t cppOutputIndex = [outputIndex unsignedLongLongValue];
+        uint64_t cppOutputIndex = [outputIndex unsignedLongValue];
         std::string cppDerivedKey = [derivedKey UTF8String];
 
         // Declare a std::string to hold the public key
@@ -930,7 +969,6 @@ WalletBlockInfo convertWalletBlockInfo(NSDictionary *block) {
 
 // Parse Key Outputs
 std::vector<KeyOutput> parseKeyOutputs(NSArray *keyOutputsArray) {
-    RCTLog(@"parseKeyOutputs called");
     std::vector<KeyOutput> keyOutputs;
 
     for (NSDictionary *keyOutput in keyOutputsArray) {

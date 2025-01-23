@@ -41,7 +41,7 @@ std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs
                       keyImage:(NSString *)keyImage
                     publicKeys:(NSArray<NSString *> *)publicKeys
           transactionSecretKey:(NSString *)transactionSecretKey
-                    realOutput:(NSInteger)realOutput
+                    realOutput:(NSDictionary *)realOutput
                       resolver:(RCTPromiseResolveBlock)resolve
                       rejecter:(RCTPromiseRejectBlock)reject;
 
