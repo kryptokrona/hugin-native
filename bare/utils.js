@@ -92,7 +92,7 @@ const sanitize_join_swarm_data = (data) => {
 
   // if (typeof data?.avatar !== 'string') return false;
   let avatar = '';
-  if (data.avatar !== undefined || data.avatar?.length > 0) {
+  if (data.avatar !== undefined && data.avatar?.length > 0) {
     avatar = data.avatar;
     const base64 = /^[A-Za-z0-9+/]+={0,2}$/;
     if (!base64.test(avatar)) {
@@ -148,7 +148,10 @@ const sanitize_group_message = (data) => {
   if (data.tip) {
     if (typeof data.tip.amount !== 'number') return false;
     if (typeof data.tip.receiver !== 'string') return false;
-    tip = {amount: data.tip.amount, receiver: sanitizeHtml(data.tip.receiver)}
+    tip = {
+      amount: data.tip.amount,
+      receiver: sanitizeHtml(data.tip.receiver),
+    };
   }
 
   const clean_object = {
@@ -163,7 +166,7 @@ const sanitize_group_message = (data) => {
     sent: false,
     channel: 'channel',
     hash: txHash,
-    tip: tip
+    tip: tip,
   };
 
   return clean_object;
