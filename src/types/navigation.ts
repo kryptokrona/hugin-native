@@ -26,6 +26,10 @@ export type MainNavigationParamList = {
         name?: string;
       }
     | undefined;
+  [MainScreens.PickNodeScreen]: undefined;
+  [MainScreens.DashboardScreen]: undefined;
+  [MainScreens.SendTransactionScreen]: undefined;
+  [MainScreens.WalletStatusScreen]: undefined;
 };
 
 export type MainStackNavigationType =
@@ -47,6 +51,8 @@ export type AuthStackParamList = {
     | undefined;
   [AuthScreens.SplashScreen]: undefined;
   [AuthScreens.CreateAccountScreen]: undefined;
+  [AuthScreens.WelcomeScreen]: undefined;
+  [AuthScreens.RestoreAccountScreen]: undefined;
 };
 
 export type AuthStackNavigationType =

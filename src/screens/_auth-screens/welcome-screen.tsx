@@ -1,45 +1,54 @@
-import { Text } from 'react-native';
-
-import { ScreenLayout, TextButton } from '@/components';
 import { useLayoutEffect } from 'react';
+
+import { StyleSheet, View } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
+
+import { ScreenLayout, TextButton, TextField } from '@/components';
+import { AuthScreens } from '@/config';
+import { useThemeStore } from '@/services';
 import { AuthStackNavigationType } from '@/types';
-import { useTranslation } from 'react-i18next';
 
 interface Props {}
 
 export const WelcomeScreen: React.FC<Props> = () => {
-
   const navigation = useNavigation<AuthStackNavigationType>();
-  const { t } = useTranslation();
+  const theme = useThemeStore((state) => state.theme);
 
   const createAccount = () => {
-    navigation.push('CreateAccountScreen');
-  }
+    navigation.push(AuthScreens.CreateAccountScreen);
+  };
 
   const restoreAccount = () => {
-    navigation.push('RestoreAccountScreen');
-  }
+    navigation.push(AuthScreens.RestoreAccountScreen);
+  };
 
-    useLayoutEffect(() => {
-      navigation.setOptions({
-        header: () => <></>,
-      });
-    }, []);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      header: () => <></>,
+    });
+  }, []);
 
+  // TODO fix translation
   return (
     <ScreenLayout>
-      <Text style={{'color': 'white'}}>Welcome to Hugin Messenger!</Text>
-      <TextButton
-        onPress={createAccount}
-        >
-        {'Create new account'}
-      </TextButton>
-      <TextButton
-        onPress={restoreAccount}
-        >
-        {'Restore account'}
-      </TextButton>
+      <View style={Styles.container}>
+        <TextField
+          size="large"
+          style={{ color: theme.foreground, marginBottom: 40 }}>
+          Welcome to Hugin Messenger!
+        </TextField>
+        <TextButton onPress={createAccount}>{'Create new account'}</TextButton>
+        <TextButton onPress={restoreAccount}>{'Restore account'}</TextButton>
+      </View>
     </ScreenLayout>
   );
 };
+
+const Styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    margin: 20,
+    marginTop: 100,
+  },
+});

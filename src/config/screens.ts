@@ -1,5 +1,3 @@
-import { WalletStatusScreen } from "screens/wallet-status-screen";
-
 export enum AuthScreens {
   WelcomeScreen = 'WelcomeScreen',
   RestoreAccountScreen = 'RestoreAccountScreen',
@@ -8,10 +6,16 @@ export enum AuthScreens {
   RequestPinScreen = 'RequestPinScreen',
   SplashScreen = 'SplashScreen',
   CreateAccountScreen = 'CreateAccountScreen',
-  DashboardScreen = 'DashboardScreen'
+  DashboardScreen = 'DashboardScreen',
 }
 
 export const TabBar = {
+  DashboardScreen: {
+    iconName: 'wallet-outline',
+    iconType: 'MCI',
+    tabName: 'SettingsTab',
+  },
+
   GroupsScreen: {
     iconName: 'comment-text-multiple-outline',
     iconType: 'MCI',
@@ -25,11 +29,6 @@ export const TabBar = {
   SettingsScreen: {
     iconName: 'sliders',
     iconType: 'FA',
-    tabName: 'SettingsTab',
-  },
-  DashboardScreen: {
-    iconName: 'wallet-outline',
-    iconType: 'MCI',
     tabName: 'SettingsTab',
   },
 } as const;
@@ -54,5 +53,5 @@ export enum MainScreens {
   UpdateProfileScreen = 'UpdateProfileScreen',
   DashboardScreen = 'DashboardScreen',
   SendTransactionScreen = 'SendTransactionScreen',
-  WalletStatusScreen = 'WalletStatusScreen'
+  WalletStatusScreen = 'WalletStatusScreen',
 }
