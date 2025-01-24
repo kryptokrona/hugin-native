@@ -2,12 +2,15 @@ import { useEffect } from 'react';
 
 import { AppState, Platform, SafeAreaView } from 'react-native';
 
-import ReactNativeForegroundService from '@supersami/rn-foreground-service';
-
 import { bare, keep_alive } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
-import { useGlobalStore, usePreferencesStore, useUserStore } from '@/services';
+import {
+  useGlobalStore,
+  usePreferencesStore,
+  useThemeStore,
+  useUserStore,
+} from '@/services';
 import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
@@ -20,12 +23,22 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const theme = useThemeStore((state) => state.theme);
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
+
+  let ReactNativeForegroundService: any;
+
+  if (Platform.OS === 'android') {
+    async () => {
+      ReactNativeForegroundService = { default: ReactNativeForegroundService } =
+        await import('@supersami/rn-foreground-service');
+    };
+  }
   const addTask = async () => {
     if (Platform.OS === 'android') {
-      ReactNativeForegroundService.add_task(() => keep_alive(), {
+      ReactNativeForegroundService?.add_task(() => keep_alive(), {
         delay: 10000,
         onError: (e) => {
           console.error('Error starting task', e);
@@ -112,7 +125,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     console.log('Stop task!');
     console.log('Stop task!');
     console.log('Stop task!');
-    stopTasks();
+
+    if (Platform.OS === 'android') {
+      stopTasks();
+    }
   });
 
   AppState.addEventListener('change', onAppStateChange);
@@ -131,5 +147,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }
 
-  return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>;
+  return (
+    <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
+      {children}
+    </SafeAreaView>
+  );
 };
