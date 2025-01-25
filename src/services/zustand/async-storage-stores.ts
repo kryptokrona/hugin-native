@@ -156,10 +156,7 @@ export const defaultPreferences: Preferences = {
 
 export const defaultUser: User = {
   address: '',
-  downloadDir:
-    Platform.OS === 'android'
-      ? RNFS.DownloadDirectoryPath
-      : RNFS.DocumentDirectoryPath,
+  downloadDir: RNFS.CachesDirectoryPath,
   keys: {},
   // TODO test this properly
   name: 'Anon',
