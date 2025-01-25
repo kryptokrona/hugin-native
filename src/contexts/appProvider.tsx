@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { AppState, Platform, SafeAreaView } from 'react-native';
 
 import { bare, keep_alive } from 'lib/native';
+import { keychain } from 'services/bare/crypto';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
@@ -15,6 +16,7 @@ import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
 import { initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
 
@@ -94,6 +96,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
     Connection.listen();
     await Wallet.init(node);
+
+    const keys = Wallet.privateKeys();
+
+    const contacts = [
+      'ec5bc96b9e2431fbe146d23de585acc9cad32ac1adaf412f830dc68985fa6d27',
+    ]; //KNOWN pub keys from db
+    await MessageSync.init(node, contacts, keys);
+
+    //Set this somewhere in a state?
+    const huginAddress = Wallet.address + keychain.getMsgKey();
+
+    console.log('huginAddress', huginAddress);
 
     Files.update(await loadSavedFiles());
     await bare(user);

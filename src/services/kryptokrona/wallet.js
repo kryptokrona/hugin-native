@@ -129,6 +129,10 @@ export class ActiveWallet {
     return Wallet.active.getPrimaryAddressPrivateKeys()[0];
   }
 
+  privateKeys() {
+    return Wallet.active.getPrimaryAddressPrivateKeys();
+  }
+
   async sign(message) {
     return await xkrUtils.signMessage(message, this.spendKey());
   }
