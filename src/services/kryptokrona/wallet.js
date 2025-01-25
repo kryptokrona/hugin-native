@@ -162,7 +162,7 @@ export class ActiveWallet {
     this.started = true;
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
-    this.saver();
+    setInterval(() => this.save(), 10000);
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
       console.log('Incoming tx!', transaction);
@@ -244,10 +244,6 @@ export class ActiveWallet {
       //Notify
       //   this.emit('failedTx');
     }
-  }
-
-  saver() {
-    setInterval(this.save, 30000);
   }
 
   node(node) {
