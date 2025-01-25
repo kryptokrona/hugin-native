@@ -5,12 +5,7 @@ module.exports = {
   },
   assets: ['./src/assets/fonts'],
   dependencies: {
-    // Avoid adding react-native-vector-icons to bundle
-    'react-native-vector-icons': {
-      platforms: {
-        ios: null,
-      },
-    },
+    
     'react-native-background-fetch': {
       platforms: {
         android: null,
