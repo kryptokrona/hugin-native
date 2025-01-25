@@ -4,13 +4,14 @@ import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 import DocumentPicker, { types } from 'react-native-document-picker';
-import { CameraOptions, launchCamera } from 'react-native-image-picker';
+import { CameraOptions, launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
 import type { SelectedFile } from '@/types';
 
 import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
+import { Platform } from 'react-native';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
@@ -56,7 +57,7 @@ export const MessageInput: React.FC<Props> = ({
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
-        console.error('ImagePicker Error: ', response.errorMessage);
+        console.error('ImagePicker Error: ', response);
       } else {
         const asset = response?.assets?.[0];
         if (asset) {
@@ -79,34 +80,69 @@ export const MessageInput: React.FC<Props> = ({
   }
 
   async function onFilePress() {
-    try {
-      const res = await DocumentPicker.pickSingle({
-        copyTo: 'documentDirectory',
-        type: [types.allFiles],
-      });
-
-      const { size, name, uri, type, fileCopyUri } = res;
-      if (!uri || !name || !size) {
-        return;
+    if (Platform.OS == 'android') {
+      try {
+        const res = await DocumentPicker.pickSingle({
+          copyTo: 'documentDirectory',
+          type: [types.allFiles],
+        });
+  
+        const { size, name, uri, type, fileCopyUri } = res;
+        if (!uri || !name || !size) {
+          return;
+        }
+  
+        const fileInfo: SelectedFile = {
+          fileName: name,
+          path: fileCopyUri?.slice(7, fileCopyUri.length),
+          size,
+          time: new Date().getTime(),
+          type,
+          uri: uri,
+        };
+  
+        setSelectedFile(fileInfo);
+      } catch (err) {
+        if (DocumentPicker.isCancel(err)) {
+          console.log('User cancelled file picker');
+        } else {
+          console.error('DocumentPicker Error: ', err);
+        }
       }
+    } else {
 
-      const fileInfo: SelectedFile = {
-        fileName: name,
-        path: fileCopyUri?.slice(7, fileCopyUri.length),
-        size,
-        time: new Date().getTime(),
-        type,
-        uri: uri,
+      const options: CameraOptions = {
+        mediaType: 'photo',
+        quality: 0.5,
+        saveToPhotos: true,
       };
-
-      setSelectedFile(fileInfo);
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log('User cancelled file picker');
-      } else {
-        console.error('DocumentPicker Error: ', err);
-      }
+  
+      launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorCode) {
+          console.error('ImagePicker Error: ', response.errorMessage);
+        } else {
+          const asset = response?.assets?.[0];
+          if (asset) {
+            const { fileSize, uri, fileName, type, originalPath } = asset;
+            if (!uri || !fileName || !fileSize) {
+              return;
+            }
+            const fileInfo: SelectedFile = {
+              fileName: fileName,
+              path: uri?.slice(7, uri.length),
+              size: fileSize,
+              time: new Date().getTime(),
+              type: type ?? 'image',
+              uri: uri,
+            };
+            setSelectedFile(fileInfo);
+          }
+        }
+      });
     }
+    
   }
 
   function handleSend() {
@@ -258,5 +294,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flex: 1,
     marginHorizontal: 6,
+    minHeight: 40
   },
 });
