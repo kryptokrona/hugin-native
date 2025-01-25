@@ -1,4 +1,4 @@
-import { cnFastHash, generateKeyDerivation } from 'services/NativeTest';
+import { cnFastHash, generateKeyDerivation } from '@/services';
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';
 import { trimExtra } from '@/services/utils';
@@ -14,30 +14,31 @@ class Syncer {
 
   async init(node, known, keys) {
     this.node = node;
-    this.lastChecked = Date.now() - 60 * 60 * 24;
+    this.lastChecked = (Date.now() / 1000) - (60 * 60 * 24);
     this.keys = keys;
     this.known_keys = known;
-    await start();
+    await this.start();
   }
 
   async start() {
     while (true) {
       await sleep(3000);
-      await sync();
+      await this.sync();
     }
   }
 
-  async get_pool(node) {
+  async get_pool() {
     try {
       const lastChecked = this.lastChecked;
       this.lastChecked = Math.floor(Date.now() / 1000);
       const resp = await fetch(
-        'http://' + node.node + ':' + node.port.toString() + '/get_pool',
+        'https://' + this.node.url + ':' + this.node.port.toString() + '/get_pool',
         {
           method: 'POST',
-          body: JSON.stringify({ timestampBegin: lastChecked }),
+          body: JSON.stringify({ timestampBegin: 0 }),
         },
       );
+      console.log('resp', resp)
       return await resp.json();
     } catch (e) {
       //Node error
@@ -53,7 +54,9 @@ class Syncer {
       //So we do not update the latest checked timestmap and miss any messages.
       if (incoming) return false;
       //Latest version, fetch more messages with last checked timestamp
-      json = await this.get_pool(this.node);
+      json = await this.get_pool();
+
+      console.log('json', json)
 
       if (!json) {
         console.log('ERRRORRORRR');
@@ -122,7 +125,7 @@ class Syncer {
             continue;
           }
           //Check for private message //TODO remove this when viewtags are active
-          if (await this.check_for_pm(thisExtra, que)) continue;
+          // if (await this.check_for_pm(thisExtra, que)) continue;
           //Check for group message
           //   if (await check_for_group_message(thisExtra, thisHash, que)) continue;
         }
@@ -135,6 +138,7 @@ class Syncer {
   async check_for_pm(thisExtra, que = false) {
     const [privateSpendKey, privateViewKey] = this.keys;
     const keys = { privateSpendKey, privateViewKey };
+    console.log('thisExtra, this.known_keys, keys', thisExtra, this.known_keys, keys)
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
     console.log('FOUND A MESSAGE WOOHP ------->');
     console.log('FOUND A MESSAGE WOOHP ------->');

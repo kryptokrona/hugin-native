@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { AppState, Platform, SafeAreaView } from 'react-native';
 
 import { bare, keep_alive } from 'lib/native';
-import { keychain } from 'services/bare/crypto';
+import { keychain } from '../services/bare/crypto';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
@@ -11,6 +11,7 @@ import {
   usePreferencesStore,
   useThemeStore,
   useUserStore,
+  // keychain
 } from '@/services';
 import { sleep } from '@/utils';
 
@@ -101,9 +102,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     const contacts = [
       'ec5bc96b9e2431fbe146d23de585acc9cad32ac1adaf412f830dc68985fa6d27',
+      '7368d6437260c59e5cc2609d8baa2b038bea03c14fd77db8e026678aaa63624b'
     ]; //KNOWN pub keys from db
-    await MessageSync.init(node, contacts, keys);
+    MessageSync.init(node, contacts, keys);
 
+    console.log('huginAddress');
     //Set this somewhere in a state?
     const huginAddress = Wallet.address + keychain.getMsgKey();
 
