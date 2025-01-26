@@ -14,7 +14,7 @@ class Syncer {
 
   async init(node, known, keys) {
     this.node = node;
-    this.lastChecked = (Date.now() / 1000) - (60 * 60 * 24);
+    this.lastChecked = Date.now() / 1000 - 60 * 60 * 24;
     this.keys = keys;
     this.known_keys = known;
     await this.start();
@@ -32,13 +32,16 @@ class Syncer {
       const lastChecked = this.lastChecked;
       this.lastChecked = Math.floor(Date.now() / 1000);
       const resp = await fetch(
-        'https://' + this.node.url + ':' + this.node.port.toString() + '/get_pool',
+        'https://' +
+          this.node.url +
+          ':' +
+          this.node.port.toString() +
+          '/get_pool',
         {
           method: 'POST',
-          body: JSON.stringify({ timestampBegin: 0 }),
+          body: JSON.stringify({ timestampBegin: lastChecked }),
         },
       );
-      console.log('resp', resp)
       return await resp.json();
     } catch (e) {
       //Node error
@@ -56,10 +59,8 @@ class Syncer {
       //Latest version, fetch more messages with last checked timestamp
       json = await this.get_pool();
 
-      console.log('json', json)
-
       if (!json) {
-        console.log('ERRRORRORRR');
+        console.log('Error syncing json from get_pool:');
         return false;
       }
       const transactions = this.trim(json);
@@ -130,6 +131,7 @@ class Syncer {
           //   if (await check_for_group_message(thisExtra, thisHash, que)) continue;
         }
       } catch (err) {
+        console.log('Error decrypting...');
         console.log(err);
       }
     }
@@ -138,21 +140,18 @@ class Syncer {
   async check_for_pm(thisExtra, que = false) {
     const [privateSpendKey, privateViewKey] = this.keys;
     const keys = { privateSpendKey, privateViewKey };
-    console.log('thisExtra, this.known_keys, keys', thisExtra, this.known_keys, keys)
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
-    console.log('FOUND A MESSAGE WOOHP ------->');
-    console.log('FOUND A MESSAGE WOOHP ------->');
-    console.log('FOUND A MESSAGE WOOHP ------->');
+    if (!message) return false;
     console.log('FOUND A MESSAGE WOOHP ------->');
     console.log('', message);
-    if (!message) return false;
     if (message.type === 'sealedbox' || 'box') {
       message.sent = false;
       if (que) {
         this.incoming_pm_que.push(message);
         return true;
       }
-      save_message(message);
+      //save_message(message);
+      //TODO**add save here
       return true;
     }
   }
@@ -209,7 +208,7 @@ class Syncer {
     const sorted = this.incoming_pm_que.sort((a, b) => a.t - b.t);
     for (const message of sorted) {
       // save_message(message)
-      ///SAVE here
+      ///TODO ** SAVE here
     }
     this.incoming_pm_que = [];
   }

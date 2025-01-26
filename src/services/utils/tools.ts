@@ -14,6 +14,11 @@ export function toHex(str: string) {
   return hex;
 }
 
+export const hexToUint = (hexString: string) =>
+  new Uint8Array(
+    hexString.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
+  );
+
 export function fromHex(hex: string) {
   let str;
   try {

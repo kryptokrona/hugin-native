@@ -2,12 +2,8 @@ import tweetnacl from 'tweetnacl';
 
 import { loadAccount } from './sqlite';
 
+import { hexToUint } from '../../services/utils';
 import { Wallet } from '../kryptokrona';
-
-const hexToUint = (hexString: string) =>
-  new Uint8Array(
-    hexString.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ?? [],
-  );
 
 export const keychain = {
   getKeyPair() {
@@ -26,6 +22,20 @@ export const keychain = {
     return keyPair;
   },
 };
+
+export function nonceFromTimestamp(tmstmp: number) {
+  let nonce = hexToUint(String(tmstmp));
+
+  while (nonce.length < tweetnacl.box.nonceLength) {
+    const tmp_nonce = Array.from(nonce);
+
+    tmp_nonce.push(0);
+
+    nonce = Uint8Array.from(tmp_nonce);
+  }
+
+  return nonce;
+}
 
 export function naclHash(val: string) {
   const hash = tweetnacl.hash(hexToUint(val));
