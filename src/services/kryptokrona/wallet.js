@@ -1,7 +1,11 @@
 import { WalletBackend, Daemon } from 'kryptokrona-wallet-backend-js';
 import { WalletConfig } from 'config/wallet-config';
 import { saveWallet, loadWallet } from '../../services/bare/sqlite';
-import { processBlockOutputs, makePostRequest } from '../NativeTest';
+import {
+  processBlockOutputs,
+  makePostRequest,
+  generateDeterministicSubwalletKeys,
+} from '../NativeTest';
 import { parse } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
 import {
@@ -155,13 +159,15 @@ export class ActiveWallet {
     console.log('Start this wallet ->', this.active);
     setStoreAddress(this.address);
     this.active.setBlockOutputProcessFunc(processBlockOutputs);
-    await this.active.start();
-    console.log('Wallet started');
     //Disable wallet optimization
     await this.active.enableAutoOptimization(false);
     console.log('Wallet enable auto opt');
     //Disable scanning for transactions in pool
     await this.active.scanPoolTransactions(false);
+
+    await this.active.start();
+    console.log('Wallet started');
+    await this.message_wallet();
     console.log('Scan pool txs no');
     this.started = true;
     this.getAndSetBalance();
@@ -273,6 +279,15 @@ export class ActiveWallet {
     this.started = !this.started;
 
     return this.started;
+  }
+
+  async message_wallet() {
+    if (this.active.subWallets.getAddresses().length < 2) {
+      const subWalletKeys = await generateDeterministicSubwalletKeys(
+        this.spendKey(),
+      );
+      await this.active.importSubWallet(subWalletKeys.private_key);
+    }
   }
 }
 

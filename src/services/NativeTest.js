@@ -7,6 +7,16 @@
 import { NativeModules } from 'react-native';
 import { TransactionInput } from 'kryptokrona-wallet-backend-js';
 
+export async function generateDeterministicSubwalletKeys(
+  basePrivateKey,
+  walletIndex,
+) {
+  return NativeModules.TurtleCoin.generateDeterministicSubwalletKeys(
+    basePrivateKey,
+    walletIndex,
+  );
+}
+
 export async function generateKeys() {
   return NativeModules.TurtleCoin.generateKeys();
 }
