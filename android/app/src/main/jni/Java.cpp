@@ -93,6 +93,40 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
 }
 
 extern "C" JNIEXPORT jobject JNICALL
+Java_com_huginmessenger_TurtleCoinModule_generateDeterministicSubwalletKeysJNI(
+    JNIEnv *env,
+    jobject instance,
+    jstring basePrivateKey,
+    jlong walletIndex)
+{
+    std::string basePrivateKeyStr = makeNativeString(env, basePrivateKey);
+    uint64_t nativeWalletIndex = static_cast<uint64_t>(walletIndex);
+
+    std::string privateKey;
+    std::string publicKey;
+
+    bool success = Core::Cryptography::generateDeterministicSubwalletKeys(
+        basePrivateKeyStr, nativeWalletIndex, privateKey, publicKey);
+
+    if (!success)
+    {
+        return nullptr;
+    }
+
+    jclass keyPairClass = env->FindClass("com/huginmessenger/KeyPair");
+    jmethodID constructor = env->GetMethodID(keyPairClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
+
+    jstring jPublicKey = env->NewStringUTF(publicKey.c_str());
+    jstring jPrivateKey = env->NewStringUTF(privateKey.c_str());
+    jobject keyPairObject = env->NewObject(keyPairClass, constructor, jPublicKey, jPrivateKey);
+
+    env->DeleteLocalRef(jPublicKey);
+    env->DeleteLocalRef(jPrivateKey);
+
+    return keyPairObject;
+}
+
+extern "C" JNIEXPORT jobject JNICALL
 Java_com_huginmessenger_TurtleCoinModule_generateKeysJNI(
     JNIEnv *env,
     jobject instance)
