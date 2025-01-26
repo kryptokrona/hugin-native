@@ -169,6 +169,7 @@ export class ActiveWallet {
     console.log('Wallet started');
     await this.message_wallet();
     console.log('Scan pool txs no');
+    this.optimize_message_inputs();
     this.started = true;
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
@@ -176,6 +177,7 @@ export class ActiveWallet {
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
       console.log('Incoming tx!', transaction);
+      this.optimize_message_inputs();
       this.getAndSetBalance();
     });
 
@@ -283,12 +285,81 @@ export class ActiveWallet {
 
   async message_wallet() {
     if (this.active.subWallets.getAddresses().length < 2) {
-      const subWalletKeys = await generateDeterministicSubwalletKeys(
-        this.spendKey(),
-      );
-      await this.active.importSubWallet(subWalletKeys.private_key);
+      const subWalletKeys = await generateDeterministicSubwalletKeys(this.spendKey(), 1);
+      const [address, error] = await this.active.importSubWallet(subWalletKeys.private_key);
     }
   }
+
+
+async optimize_message_inputs(force = false) {
+
+  let [mainWallet, messageSubWallet] = this.active.getAddresses();
+
+  const [walletHeight, localHeight, networkHeight] =
+    await Wallet.active.getSyncStatus();
+
+  let inputs = await this.active.subWallets.getSpendableTransactionInputs(
+    [messageSubWallet],
+    networkHeight,
+  );
+
+  if (inputs.length > 25 && !force) {
+    optimized = true;
+    return;
+  }
+
+  let payments = [];
+  let i = 0;
+  /* User payment */
+  while (i <= 49) {
+    payments.push([messageSubWallet, 1000]);
+    i += 1;
+  }
+
+  let result = await this.active.sendTransactionAdvanced(
+    payments, // destinations,
+    3, // mixin
+    { fixedFee: 1000, isFixedFee: true }, // fee
+    undefined, //paymentID
+    [mainWallet], // subWalletsToTakeFrom
+    undefined, // changeAddress
+    true, // relayToNetwork
+    false, // sneedAll
+    undefined,
+  );
+
+  if (result.success) {
+
+    // reset_optimize(); TODO** set timer? or wait for optimize tx to return?
+
+    let optimizeMessage = {
+      message: 'Your wallet is creating message inputs, please wait',
+      name: 'Optimizing',
+      hash: parseInt(Date.now()),
+      key: mainWallet,
+      optimized: true,
+    };
+
+    // Hugin.send('sent_tx', sent);
+    console.log('Optimize completed: ', optimizeMessage);
+    return true;
+  } else {
+    optimized = false;
+
+    let error = {
+      message: 'Optimize failed',
+      name: 'Optimizing wallet failed',
+      hash: parseInt(Date.now()),
+      key: mainWallet,
+    };
+    console.log('Error:', error);
+    return false;
+  }
+}
+
+
+  
+
 }
 
 export const Wallet = new ActiveWallet();

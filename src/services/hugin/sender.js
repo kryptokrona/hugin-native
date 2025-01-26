@@ -1,16 +1,17 @@
-import { Wallet } from '../services/kryptokrona';
 import {
+  MessageSync,
   generateKeys,
   generateKeyDerivation,
   cnFastHash,
-} from '../services/NativeTest';
+  hexToUint,
+  keychain,
+  nonceFromTimestamp,
+  Wallet
+} from '@/services';
+// import { Wallet } from '../kryptokrona/wallet';
 import { Address } from 'kryptokrona-utils';
 import naclUtil from 'tweetnacl-util';
-import { MessageSync } from './syncer';
 import * as NaclSealed from 'tweetnacl-sealed-box';
-import { hexToUint } from '../services/utils';
-import { keychain } from '../services/bare/crypto';
-import { nonceFromTimestamp } from '../services/bare';
 
 let optimized = false;
 
@@ -171,72 +172,3 @@ const check_balance = async () => {
   }
   return true;
 };
-
-async function optimize_message_inputs(force = false) {
-  let [mainWallet, messageSubWallet] = Wallet.active.getAddresses();
-  const [walletHeight, localHeight, networkHeight] =
-    await Wallet.active.getSyncStatus();
-
-  let inputs = await Wallet.active.subWallets.getSpendableTransactionInputs(
-    [messageSubWallet],
-    networkHeight,
-  );
-
-  if (inputs.length > 25 && !force) {
-    optimized = true;
-    return;
-  }
-
-  if (optimized) {
-    return;
-  }
-
-  let payments = [];
-  let i = 0;
-  /* User payment */
-  while (i <= 49) {
-    payments.push([messageSubWallet, 1000]);
-    i += 1;
-  }
-
-  let result = await Wallet.active.sendTransactionAdvanced(
-    payments, // destinations,
-    3, // mixin
-    { fixedFee: 1000, isFixedFee: true }, // fee
-    undefined, //paymentID
-    [mainWallet], // subWalletsToTakeFrom
-    undefined, // changeAddress
-    true, // relayToNetwork
-    false, // sneedAll
-    undefined,
-  );
-
-  if (result.success) {
-    optimized = true;
-
-    // reset_optimize(); TODO** set timer? or wait for optimize tx to return?
-
-    let optimizeMessage = {
-      message: 'Your wallet is creating message inputs, please wait',
-      name: 'Optimizing',
-      hash: parseInt(Date.now()),
-      key: mainWallet,
-      optimized: true,
-    };
-
-    // Hugin.send('sent_tx', sent);
-    console.log('Optimize completed: ', optimizeMessage);
-    return true;
-  } else {
-    optimized = false;
-
-    let error = {
-      message: 'Optimize failed',
-      name: 'Optimizing wallet failed',
-      hash: parseInt(Date.now()),
-      key: mainWallet,
-    };
-    console.log('Error:', error);
-    return false;
-  }
-}
