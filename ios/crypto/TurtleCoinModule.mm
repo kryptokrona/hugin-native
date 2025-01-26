@@ -885,6 +885,61 @@ RCT_EXPORT_METHOD(generateKeys:(RCTPromiseResolveBlock)resolve
     }
 }
 
+RCT_EXPORT_METHOD(generateDeterministicSubwalletKeys:(NSString *)basePrivateKey
+                  walletIndex:(nonnull NSNumber *)walletIndex
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    try {
+        // Convert Objective-C types to C++ types
+        std::string cppBasePrivateKey = [basePrivateKey UTF8String];
+        uint64_t cppWalletIndex = [walletIndex unsignedLongLongValue];
+
+        // Variables to store the generated keys
+        std::string cppPrivateKey;
+        std::string cppPublicKey;
+
+        // Call the C++ function
+        bool success = Core::Cryptography::generateDeterministicSubwalletKeys(
+            cppBasePrivateKey, cppWalletIndex, cppPrivateKey, cppPublicKey);
+
+        if (success) {
+            // Convert the results to NSString
+            NSString *publicKey = [NSString stringWithUTF8String:cppPublicKey.c_str()];
+            NSString *privateKey = [NSString stringWithUTF8String:cppPrivateKey.c_str()];
+
+            // Create a dictionary to hold the key pair
+            NSDictionary *keyPair = @{
+                @"public_key": publicKey,
+                @"private_key": privateKey
+            };
+
+            // Resolve the promise with the key pair
+            resolve(keyPair);
+        } else {
+            // Handle failure and reject the promise
+            NSString *errorMessage = @"Failed to generate deterministic subwallet keys";
+            NSError *error = [NSError errorWithDomain:@"GenerateSubwalletKeysError"
+                                                 code:1
+                                             userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+            reject(@"generate_subwallet_keys_failed", errorMessage, error);
+        }
+    } catch (const std::exception &e) {
+        // Handle C++ exceptions
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"GenerateSubwalletKeysError"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"generate_subwallet_keys_failed", errorMessage, error);
+    } catch (...) {
+        // Handle unknown exceptions
+        NSError *error = [NSError errorWithDomain:@"GenerateSubwalletKeysError"
+                                             code:3
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"generate_subwallet_keys_failed", @"Unknown error occurred", error);
+    }
+}
+
+
 
 
 @end

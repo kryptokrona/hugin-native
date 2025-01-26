@@ -127,4 +127,9 @@ std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs
 - (void)generateKeys:(RCTPromiseResolveBlock)resolve
             rejecter:(RCTPromiseRejectBlock)reject;
 
+- (void)generateDeterministicSubwalletKeys:(NSString *)basePrivateKey
+                               walletIndex:(NSNumber *)walletIndex
+                                  resolver:(RCTPromiseResolveBlock)resolve
+                                  rejecter:(RCTPromiseRejectBlock)reject;
+
 @end
