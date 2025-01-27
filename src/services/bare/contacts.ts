@@ -18,6 +18,7 @@ import { naclHash, newKeyPair, randomKey } from './crypto';
 import {
   getLatestMessages,
   getLatestRoomMessages,
+  getMessages,
   getRoomMessages,
   getRooms,
   removeRoomFromDatabase,
@@ -31,7 +32,9 @@ import { notify } from '../utils';
 import {
   getCurrentRoom,
   getRoomsMessages,
+  setStoreContacts,
   setStoreCurrentRoom,
+  setStoreMessages,
   setStoreRoomMessages,
   setStoreRooms,
   useGlobalStore,
@@ -85,7 +88,7 @@ export const setLatestMessages = async () => {
     };
   });
 
-  setStoreRooms(updatedContacts?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
+  setStoreContacts(updatedContacts?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
 };
 
 const updateMessages = async (message: Message, history = false) => {
@@ -138,11 +141,11 @@ const updateVoiceChannelStatus = (status: any) => {
   //Update the user voice status
 };
 
-const setRoomMessages = async (room: string, page: number) => {
+export const setMessages = async (contact: string, page: number) => {
   console.log('Load message page:', page);
-  const messages = await getRoomMessages(room, page);
+  const messages = await getMessages(contact, page);
 
-  setStoreRoomMessages(messages);
+  setStoreMessages(messages);
 };
 
 const onSendGroupMessage = async (

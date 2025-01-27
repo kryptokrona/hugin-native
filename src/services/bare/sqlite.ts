@@ -55,13 +55,16 @@ export const initDB = async () => {
     //   unreads?: number;
     // }
 
-    query = `CREATE TABLE IF NOT EXISTS contacts ( 
-        name TEXT,
-        address TEXT,
-        messagekey TEXT default null,
-        latestmessage INT default 0,
-        UNIQUE (address)
-    )`;
+
+    query = `CREATE TABLE IF NOT EXISTS contacts (
+      name TEXT,
+      address TEXT NOT NULL,
+      messagekey TEXT NOT NULL,
+      latestmessage INT DEFAULT 0,
+      UNIQUE (address, messagekey)
+  )`;
+  
+  
 
     await db.executeSql(query);
 
@@ -115,7 +118,6 @@ export const initDB = async () => {
 
   //Add some init test funcs during dev here:
   getRooms(); //Lists all our room in the console.
-  getMessages('SEKReYBdcbSGec34un6wcmG6T7BgznuAEP8YWeTZuxRY9SXtuDskYq4C4JKtU8vD8efT7fuD59YqLfw9JEtpbhmBjkTNBnQFL4d', 0);
 };
 
 function chunkString(string: string, size: number) {
@@ -308,6 +310,24 @@ export async function getRooms() {
   return rooms;
 }
 
+export async function addContact(name: string, address: string, messagekey: string) {
+  try {
+
+    const contactExists = await getContact(address);
+
+    if(contactExists) return false;
+
+    const result = await db.executeSql(
+      'INSERT INTO contacts (name, address, messagekey, latestmessage) VALUES (?, ?, ?, ?)',
+      [name, address, messagekey, Date.now()],
+    );
+    return true;
+  } catch (err) {
+    console.log('Failed to add contact: ', err)
+    return false;
+  }
+}
+
 export async function getContacts() {
   const results = await db.executeSql('SELECT * FROM contacts');
   const contacts: Array<any> = [];
@@ -320,6 +340,20 @@ export async function getContacts() {
   }
 
   return contacts;
+}
+
+export async function getContact(address: string) {
+  const results = await db.executeSql('SELECT * FROM contacts WHERE address = ?', [address]);
+  const contacts: Array<any> = [];
+  //const rooms: Room[] = [];
+
+  for (const result of results) {
+    for (let index = 0; index < result.rows.length; index++) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export async function getLatestMessages() {
@@ -429,6 +463,9 @@ export async function getMessages(
     for (const result of results) {
       for (let index = 0; index < result.rows.length; index++) {
         const res = result.rows.item(index);
+        res.room = res.sent ? 'me' : res.conversation;
+        res.address = res.sent ? 'me' : res.conversation;
+        res.nickname = 'FixMe'; // TODO: Get actual nickname from contacts
         const r: Message = toMessage(res);
         messages.push(r);
       }

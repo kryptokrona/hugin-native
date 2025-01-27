@@ -7,7 +7,8 @@ import { Avatar, TextField, Unreads } from './_elements';
 
 interface Props {
   name: string;
-  roomKey: string;
+  roomKey?: string;
+  address?: string;
   message: string;
   unreads?: number;
   onPress: (key: string, name: string) => void;
@@ -16,10 +17,12 @@ interface Props {
 export const PreviewItem: React.FC<Props> = ({
   name,
   roomKey,
+  address,
   message,
   onPress,
   unreads = 0,
 }) => {
+  roomKey = roomKey ? roomKey : address;
   // const [isPressed, setIsPressed] = useState(false);
   const theme = useThemeStore((state) => state.theme);
   const isNew = false; // dummy
@@ -47,7 +50,8 @@ export const PreviewItem: React.FC<Props> = ({
     >
       <View style={styles.avatarContainer}>
         <Unreads unreads={unreads} />
-        <Avatar size={50} base64={getAvatar(roomKey)} />
+        {roomKey?.length > 15 && <Avatar size={50} base64={getAvatar(roomKey)} />}
+        
       </View>
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">

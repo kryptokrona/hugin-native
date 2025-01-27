@@ -12,7 +12,8 @@ import {
   SendTransactionScreen,
   PickNodeScreen,
   WalletStatusScreen,
-  MessagesScreen
+  MessagesScreen,
+  MessageScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -69,9 +70,9 @@ const MessagesStack = () => {
           header: (_props) => <Header title={t('messages')} />,
         }}
       />
-      {/* <NativeStack.Screen
-        name={MainScreens.GroupChatScreen}
-        component={GroupChatScreen}
+      <NativeStack.Screen
+        name={MainScreens.MessageScreen}
+        component={MessageScreen}
         options={{
           header: (_props) => (
             <Header
@@ -81,7 +82,7 @@ const MessagesStack = () => {
           ),
         }}
       />
-      <NativeStack.Screen
+      {/* <NativeStack.Screen
         name={MainScreens.ModifyGroupScreen}
         component={ModifyGroupScreen}
         options={{

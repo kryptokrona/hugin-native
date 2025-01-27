@@ -13,10 +13,12 @@ type GlobalStore = {
   thisRoom: string;
   thisContact: string;
   roomMessages: Message[];
+  messages: Message[];
   roomUsers: User[];
   transactions: Transaction[];
   syncStatus: number[];
   setRoomMessages: (payload: Message[]) => void;
+  setMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
   setCurrentContact: (payload: string) => void;
   setRoomUserList: (payload: User[]) => void;
@@ -36,6 +38,7 @@ export const useGlobalStore = create<
     authenticated: false,
     balance: { locked: 0, unlocked: 0 },
     roomMessages: [],
+    messages: [],
     roomUsers: [],
     rooms: [],
     contacts: [],
@@ -58,6 +61,10 @@ export const useGlobalStore = create<
 
     setRoomMessages: (roomMessages: Message[]) => {
       set({ roomMessages });
+    },
+
+    setMessages: (messages: Message[]) => {
+      set({ messages });
     },
 
     setRoomUserList: (roomUsers: User[]) => {

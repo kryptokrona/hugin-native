@@ -46,6 +46,14 @@ export const setStoreRoomMessages = (roomMessages: Message[]) => {
   useGlobalStore.setState({ roomMessages });
 };
 
+export const setStoreCurrentContact = (thisContact: string) => {
+  useGlobalStore.setState({ thisContact });
+};
+
+export const setStoreMessages = (messages: Message[]) => {
+  useGlobalStore.setState({ messages });
+};
+
 export const setStoreActiveRoomUsers = (roomUsers: User[]) => {
   useGlobalStore.setState({ roomUsers });
 };

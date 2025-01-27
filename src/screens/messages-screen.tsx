@@ -23,13 +23,14 @@ import {
 import { MainScreens } from '@/config';
 import {
   joinAndSaveRoom,
-  setRoomMessages,
-  setStoreCurrentRoom,
-  setStoreRoomMessages,
+  setStoreCurrentContact,
+  setStoreMessages,
   useGlobalStore,
   useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
+
+import {setMessages} from '../services/bare/contacts';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
@@ -65,9 +66,9 @@ export const MessagesScreen: React.FC<Props> = () => {
   }
 
   async function onPress(roomKey: string, name: string) {
-    await setRoomMessages(roomKey, 0);
-    setStoreCurrentRoom(roomKey);
-    navigation.navigate(MainScreens.GroupChatScreen, { name, roomKey });
+    await setMessages(roomKey, 0);
+    setStoreCurrentContact(roomKey);
+    navigation.navigate(MainScreens.MessageScreen, { name, roomKey });
   }
 
   function onCloseModal() {
@@ -81,7 +82,7 @@ export const MessagesScreen: React.FC<Props> = () => {
   }
 
   function onCreateRoom() {
-    setStoreRoomMessages([]);
+    setStoreMessages([]);
     setModalVisible(false);
     navigation.navigate(MainScreens.AddGroupScreen);
   }
@@ -93,14 +94,14 @@ export const MessagesScreen: React.FC<Props> = () => {
   useFocusEffect(
     React.useCallback(() => {
       // This effect runs when the screen is focused
-      setStoreCurrentRoom('null');
+      setStoreCurrentContact('null');
 
       return () => {};
     }, []),
   );
 
   function onJoinpress() {
-    setStoreRoomMessages([]);
+    setStoreMessages([]);
     const inviteKey = link.slice(-128);
     const parse = link.split('hugin://')[1];
     const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
@@ -149,7 +150,7 @@ export const MessagesScreen: React.FC<Props> = () => {
       )}
       <FlatList
         data={contacts}
-        keyExtractor={(item, i) => `${item.roomKey}-${i}`}
+        keyExtractor={(item, i) => `${item.address}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
     </ScreenLayout>

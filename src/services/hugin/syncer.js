@@ -1,7 +1,8 @@
 import { cnFastHash, generateKeyDerivation } from '@/services';
 
 import {
-  saveMessage
+  saveMessage,
+  addContact
 } from '../bare/sqlite';
 
 import { extraDataToMessage } from 'hugin-crypto';
@@ -158,6 +159,7 @@ class Syncer {
       //save_message(message);
       //TODO**add save here
       saveMessage(message.from, message.msg, message.r, message.t, thisHash, false, undefined );
+      addContact(message.from,message.from,message.k);
       return true;
     }
   }

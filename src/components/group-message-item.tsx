@@ -194,7 +194,9 @@ export const GroupMessageItem: React.FC<Props> = ({
 
         <View style={styles.messageContainer}>
           <View style={styles.avatar}>
+            {userAddress.length > 15 &&
             <Avatar base64={getAvatar(userAddress)} size={24} />
+          }
           </View>
           <View>
             <View style={styles.info}>
