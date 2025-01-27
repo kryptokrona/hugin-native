@@ -11,7 +11,8 @@ import {
   DashboardScreen,
   SendTransactionScreen,
   PickNodeScreen,
-  WalletStatusScreen
+  WalletStatusScreen,
+  MessagesScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -54,6 +55,39 @@ const GroupsStack = () => {
           header: (_props) => <Header backButton title={t('modify')} />,
         }}
       />
+    </NativeStack.Navigator>
+  );
+};
+
+const MessagesStack = () => {
+  return (
+    <NativeStack.Navigator>
+      <NativeStack.Screen
+        name={MainScreens.MessagesScreen}
+        component={MessagesScreen}
+        options={{
+          header: (_props) => <Header title={t('messages')} />,
+        }}
+      />
+      {/* <NativeStack.Screen
+        name={MainScreens.GroupChatScreen}
+        component={GroupChatScreen}
+        options={{
+          header: (_props) => (
+            <Header
+              title={'Untitled'}
+              backButton
+            />
+          ),
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.ModifyGroupScreen}
+        component={ModifyGroupScreen}
+        options={{
+          header: (_props) => <Header backButton title={t('modify')} />,
+        }}
+      /> */}
     </NativeStack.Navigator>
   );
 };
@@ -112,6 +146,13 @@ export const MainNavigator = () => {
         component={GroupsStack}
         options={{
           tabBarLabel: t('rooms'), // Display "Rooms" in the tab bar
+        }}
+      />
+      <Tab.Screen
+        name={MainScreens.MessagesScreen}
+        component={MessagesStack}
+        options={{
+          tabBarLabel: t('messages'),
         }}
       />
       <Tab.Screen

@@ -2,23 +2,27 @@ import type { Transaction } from 'kryptokrona-wallet-backend-js';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { Balance, Message, Room, User } from '@/types';
+import type { Balance, Message, Room, User, Contact } from '@/types';
 
 type GlobalStore = {
   balance: Balance;
   address: string;
   authenticated: boolean;
   rooms: Room[];
+  contacts: Contact[];
   thisRoom: string;
+  thisContact: string;
   roomMessages: Message[];
   roomUsers: User[];
   transactions: Transaction[];
   syncStatus: number[];
   setRoomMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
+  setCurrentContact: (payload: string) => void;
   setRoomUserList: (payload: User[]) => void;
   setAuthenticated: (payload: boolean) => void;
   setStoreRooms: (payload: Room[]) => void;
+  setStoreContacts: (payload: Contact[]) => void;
   setBalance: (payload: Balance) => void;
   setSyncStatus: (payload: number[]) => void;
 };
@@ -34,6 +38,7 @@ export const useGlobalStore = create<
     roomMessages: [],
     roomUsers: [],
     rooms: [],
+    contacts: [],
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -47,6 +52,9 @@ export const useGlobalStore = create<
     setCurrentRoom: (thisRoom: string) => {
       set({ thisRoom });
     },
+    setCurrentContact: (thisContact: string) => {
+      set({ thisContact });
+    },
 
     setRoomMessages: (roomMessages: Message[]) => {
       set({ roomMessages });
@@ -58,6 +66,9 @@ export const useGlobalStore = create<
     setStoreRooms: async (rooms: Room[]) => {
       set({ rooms });
     },
+    setStoreContacts: (contacts: Contact[]) => {
+      set({ contacts });
+    },
     setSyncStatus: (syncStatus: number[]) => {
       set({ syncStatus });
     },
@@ -66,6 +77,7 @@ export const useGlobalStore = create<
     },
     syncStatus: [],
     thisRoom: '',
+    thisContact: '',
     transactions: [],
   })),
 );

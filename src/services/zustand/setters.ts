@@ -1,12 +1,16 @@
 import type { Transaction } from 'kryptokrona-wallet-backend-js';
 
-import type { Balance, Message, Room, User } from '@/types';
+import type { Balance, Message, Room, User, Contact } from '@/types';
 
 import { usePreferencesStore, useUserStore } from './async-storage-stores';
 import { useGlobalStore } from './global-store';
 
 export const setStoreRooms = (rooms: Room[]) => {
   useGlobalStore.setState({ rooms });
+};
+
+export const setStoreContacts = (contacts: Contact[]) => {
+  useGlobalStore.setState({ contacts });
 };
 
 export const setSyncStatus = (syncStatus: number[]) => {

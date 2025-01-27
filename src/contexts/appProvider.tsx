@@ -14,7 +14,7 @@ import {
 } from '@/services';
 import { sleep } from '@/utils';
 
-import { joinRooms, setLatestRoomMessages } from '../services/bare';
+import { joinRooms, setLatestMessages, setLatestRoomMessages } from '../services/bare';
 import { keychain } from '../services/bare/crypto';
 import { initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
@@ -90,6 +90,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     await initDB();
     await setLatestRoomMessages();
+    await setLatestMessages();
     let node = {};
     if (preferences?.node === undefined) {
       node = { port: 80, url: 'node.xkr.network' };

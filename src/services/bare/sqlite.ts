@@ -48,6 +48,38 @@ export const initDB = async () => {
   )`;
     await db.executeSql(query);
 
+    // export interface Contact {
+    //   name: string;
+    //   address: string;
+    //   messagekey: string;
+    //   unreads?: number;
+    // }
+
+    query = `CREATE TABLE IF NOT EXISTS contacts ( 
+        name TEXT,
+        address TEXT,
+        messagekey TEXT default null,
+        latestmessage INT default 0,
+        UNIQUE (address)
+    )`;
+
+    await db.executeSql(query);
+
+    // query = "DROP TABLE messages";
+    // await db.executeSql(query);
+
+    query = `CREATE TABLE IF NOT EXISTS messages ( 
+      conversation TEXT,
+      message TEXT,
+      reply TEXT,
+      timestamp INT,
+      hash TEXT,
+      sent BOOLEAN,
+      tip TEXT,
+      UNIQUE (hash)
+  )`;
+    await db.executeSql(query);
+
     query = 'ALTER TABLE roomsmessages ADD tip TEXT';
     try {
       await db.executeSql(query);
@@ -83,6 +115,7 @@ export const initDB = async () => {
 
   //Add some init test funcs during dev here:
   getRooms(); //Lists all our room in the console.
+  getMessages('SEKReYBdcbSGec34un6wcmG6T7BgznuAEP8YWeTZuxRY9SXtuDskYq4C4JKtU8vD8efT7fuD59YqLfw9JEtpbhmBjkTNBnQFL4d', 0);
 };
 
 function chunkString(string: string, size: number) {
@@ -275,6 +308,48 @@ export async function getRooms() {
   return rooms;
 }
 
+export async function getContacts() {
+  const results = await db.executeSql('SELECT * FROM contacts');
+  const contacts: Array<any> = [];
+  //const rooms: Room[] = [];
+
+  for (const result of results) {
+    for (let index = 0; index < result.rows.length; index++) {
+      contacts.push(result.rows.item(index));
+    }
+  }
+
+  return contacts;
+}
+
+export async function getLatestMessages() {
+  const contactsList: Array<any> = [];
+  const contacts = await getContacts();
+  for (const contact of contacts) {
+    //Loop through list and get one message from each room
+    const results = await db.executeSql(
+      'SELECT * FROM messages WHERE conversation = ? AND message IS NOT "" ORDER BY timestamp DESC LIMIT 1',
+      [contact.address],
+    );
+
+    for (const result of results) {
+      const latestmessagedb = result.rows.item(0);
+      if (latestmessagedb === undefined) {
+        return;
+      }
+      contactsList.unshift({
+        message: latestmessagedb.message,
+        name: contact.name,
+        address: contact.address,
+        key: contact.key,
+        timestamp: latestmessagedb.timestamp,
+      });
+    }
+  }
+
+  return contactsList;
+}
+
 export async function getLatestRoomMessages() {
   const roomsList: Array<any> = [];
   const rooms = await getRooms();
@@ -327,6 +402,39 @@ export async function getRoomMessages(
         messages.push(r);
       }
     }
+
+    return messages;
+  }
+
+  return await setReplies(results);
+}
+
+export async function getMessages(
+  conversation: string,
+  page: number,
+  history = true,
+) {
+  const limit: number = 55;
+  let offset: number = 0;
+  if (page !== 0) {
+    offset = page * limit;
+  }
+  const results: [ResultSet] = await db.executeSql(
+    `SELECT * FROM messages WHERE conversation = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
+    [conversation],
+  );
+
+  if (history) {
+    const messages = [];
+    for (const result of results) {
+      for (let index = 0; index < result.rows.length; index++) {
+        const res = result.rows.item(index);
+        const r: Message = toMessage(res);
+        messages.push(r);
+      }
+    }
+
+    console.log('messagesdebug:', messages)
 
     return messages;
   }
@@ -506,6 +614,53 @@ export async function saveRoomMessage(
     };
     return newMessage;
   } catch (err) {
+    return false;
+  }
+}
+
+export async function saveMessage(
+  conversation: string,
+  message: string,
+  reply: string,
+  timestamp: number,
+  hash: string,
+  sent: boolean,
+  myaddress: string,
+  tip: JSON | false = false,
+) {
+  console.log('Saving message: ', message);
+  if ((!message || message?.length === 0) && !tip) {
+    return false;
+  }
+  try {
+    await db.executeSql(
+      'REPLACE INTO messages (conversation, message, reply, timestamp, hash, sent, tip) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [
+        conversation,
+        message,
+        reply,
+        timestamp,
+        hash,
+        sent ? 1 : 0,
+        JSON.stringify(tip),
+      ],
+    );
+
+    const newMessage: Message = {
+      address: sent ? myaddress : conversation,
+      hash: hash,
+      message: message,
+      nickname: 'FixMe', // get nickname from contacts
+      reactions: [],
+      reply: reply,
+      room: conversation,
+      sent: sent,
+      timestamp: timestamp,
+      tip,
+    };
+    return newMessage;
+  } catch (err) { 
+    console.log('savemsgerror:', err)
     return false;
   }
 }

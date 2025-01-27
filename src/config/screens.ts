@@ -21,11 +21,11 @@ export const TabBar = {
     iconType: 'MCI',
     tabName: 'GroupsTab',
   },
-  // MessagesTab: {
-  //   iconName: 'comment-text-outline',
-  //   iconType: 'MCI',
-  //   tabName: 'MessagesTab',
-  // },
+  MessagesScreen: {
+    iconName: 'comment-text-outline',
+    iconType: 'MCI',
+    tabName: 'MessagesTab',
+  },
   SettingsScreen: {
     iconName: 'sliders',
     iconType: 'FA',

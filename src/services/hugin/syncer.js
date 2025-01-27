@@ -1,4 +1,9 @@
 import { cnFastHash, generateKeyDerivation } from '@/services';
+
+import {
+  saveMessage
+} from '../bare/sqlite';
+
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';
 import { trimExtra } from '@/services/utils';
@@ -122,7 +127,7 @@ class Syncer {
           //Check for viewtag
 
           if (await this.check_for_viewtag(thisExtra)) {
-            await this.check_for_pm(thisExtra, que);
+            await this.check_for_pm(thisExtra, thisHash, que);
             continue;
           }
           //Check for private message //TODO remove this when viewtags are active
@@ -137,7 +142,7 @@ class Syncer {
     }
   }
 
-  async check_for_pm(thisExtra, que = false) {
+  async check_for_pm(thisExtra, thisHash, que = false) {
     const [privateSpendKey, privateViewKey] = this.keys;
     const keys = { privateSpendKey, privateViewKey };
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
@@ -152,6 +157,7 @@ class Syncer {
       }
       //save_message(message);
       //TODO**add save here
+      saveMessage(message.from, message.msg, message.r, message.t, thisHash, false, undefined );
       return true;
     }
   }

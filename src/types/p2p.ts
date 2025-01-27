@@ -15,6 +15,14 @@ export interface Room {
   unreads?: number;
 }
 
+export interface Contact {
+  name: string;
+  address: string;
+  messagekey: string;
+  message: string;
+  unreads?: number;
+}
+
 export interface Message {
   address: string;
   message: string;
