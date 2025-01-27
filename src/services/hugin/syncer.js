@@ -14,7 +14,7 @@ class Syncer {
 
   async init(node, known, keys) {
     this.node = node;
-    this.lastChecked = Date.now() / 1000 - 60 * 60 * 24;
+    this.lastChecked = Math.floor(Date.now() / 1000) - 60 * 60 * 24;
     this.keys = keys;
     this.known_keys = known;
     await this.start();
@@ -45,6 +45,7 @@ class Syncer {
       return await resp.json();
     } catch (e) {
       //Node error
+      console.log('err', e);
       return false;
     }
   }
@@ -58,7 +59,6 @@ class Syncer {
       if (incoming) return false;
       //Latest version, fetch more messages with last checked timestamp
       json = await this.get_pool();
-
       if (!json) {
         console.log('Error syncing json from get_pool:');
         return false;

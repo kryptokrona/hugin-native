@@ -46,12 +46,12 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void generateDeterministicSubwalletKeys(String basePrivateKey, long walletIndex, final Promise promise) {
+    public void generateDeterministicSubwalletKeys(String basePrivateKey, double walletIndex, final Promise promise) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    KeyPair keyPair = generateDeterministicSubwalletKeysJNI(basePrivateKey, walletIndex);
+                    KeyPair keyPair = generateDeterministicSubwalletKeysJNI(basePrivateKey, (long)walletIndex);
                     if (keyPair == null) {
                         promise.reject("Error", "Failed to generate deterministic subwallet keys");
                         return;
@@ -721,6 +721,6 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     public native String hashToScalarJNI(String hash);
     public native String underivePublicKeyJNI(String derivation, long index, String outputKey);
     public native KeyPair generateKeysJNI();
-    public native KeyPair generateDeterministicSubwalletKeysJNI(String basePrivateKey, long walletIndex);
+    public native KeyPair generateDeterministicSubwalletKeysJNI(String basePrivateKey, double walletIndex);
 
 }

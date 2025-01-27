@@ -1,18 +1,19 @@
-import { Alert, FlatList } from 'react-native';
+import { useState } from 'react';
+
+import { FlatList } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
 import { MainScreens, Stacks } from '@/config';
+import { useGlobalStore } from '@/services';
 import type {
   CustomIconProps,
   MainStackNavigationType,
   MainNavigationParamList,
-  AuthStackNavigationType,
 } from '@/types';
-import { useTranslation } from 'react-i18next';
-import { useGlobalStore, Wallet } from '@/services';
-import { useState } from 'react';
+
+import { Wallet } from '../services/kryptokrona';
 
 interface Item {
   title: string;
@@ -32,39 +33,40 @@ export const SettingsScreen: React.FC<Props> = () => {
 
   const toggleSync = async () => {
     setSyncActivated(await Wallet.toggle());
-  }
+  };
 
-  const syncActivatedIcon = syncActivated ? 'checkbox-marked-outline' : 'checkbox-blank-outline';
+  const syncActivatedIcon = syncActivated
+    ? 'checkbox-marked-outline'
+    : 'checkbox-blank-outline';
 
-const items: Item[] = [
-  {
-    icon: { name: 'theme-light-dark', type: 'MCI' },
-    screen: MainScreens.ChangeThemeScreen,
-    title: 'changeTheme',
-  },
-  {
-    icon: { name: 'globe', type: 'SLI' },
-    screen: MainScreens.ChangeLanguageScreen,
-    title: 'changeLanguage',
-  },
-  {
-    icon: { name: 'user-circle', type: 'FA6' },
-    screen: MainScreens.UpdateProfileScreen,
-    title: 'updateProfile',
-  },
-  {
-    icon: { name: 'server', type: 'FA6' },
-    screen: MainScreens.PickNodeScreen,
-    title: 'useCustomNode',
-  },
-  {
-    icon: { name: syncActivatedIcon, type: 'MCI' },
-    screen: MainScreens.PickNodeScreen,
-    title: 'Activate wallet sync',
-    function: toggleSync
-  }
-
-];
+  const items: Item[] = [
+    {
+      icon: { name: 'theme-light-dark', type: 'MCI' },
+      screen: MainScreens.ChangeThemeScreen,
+      title: 'changeTheme',
+    },
+    {
+      icon: { name: 'globe', type: 'SLI' },
+      screen: MainScreens.ChangeLanguageScreen,
+      title: 'changeLanguage',
+    },
+    {
+      icon: { name: 'user-circle', type: 'FA6' },
+      screen: MainScreens.UpdateProfileScreen,
+      title: 'updateProfile',
+    },
+    {
+      icon: { name: 'server', type: 'FA6' },
+      screen: MainScreens.PickNodeScreen,
+      title: 'useCustomNode',
+    },
+    {
+      function: toggleSync,
+      icon: { name: syncActivatedIcon, type: 'MCI' },
+      screen: MainScreens.PickNodeScreen,
+      title: 'Activate wallet sync',
+    },
+  ];
 
   const itemMapper = (item: Item) => {
     async function onPress() {

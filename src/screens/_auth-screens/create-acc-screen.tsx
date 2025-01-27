@@ -5,8 +5,6 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { Wallet } from 'services/kryptokrona/wallet';
-
 import {
   Avatar,
   Card,
@@ -30,6 +28,7 @@ import {
 import { AuthMethods, AuthStackNavigationType } from '@/types';
 
 import { initDB } from '../../services/bare/sqlite';
+import { Wallet } from '../../services/kryptokrona/wallet';
 import { pickAvatar } from '../../utils/avatar';
 
 export const CreateAccScreen: React.FC = () => {
@@ -37,7 +36,6 @@ export const CreateAccScreen: React.FC = () => {
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<any>();
   const route = useRoute();
-
 
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.accentForeground;
@@ -86,12 +84,12 @@ export const CreateAccScreen: React.FC = () => {
     //If import Wallet.import(height, seed, node)
 
     const node = { port: 11898, url: 'blocksum.org' };
-      console.log('seedWords', seedWords);
-    if (seedWords) {
-      console.log('Importing')
+    console.log('seedWords', seedWords);
+    if (seedWords?.length === 25) {
+      console.log('Importing');
       await Wallet.import(blockHeight, seedWords.join(' '), node);
     } else {
-      console.log('Creating')
+      console.log('Creating');
       await Wallet.create(node);
     }
 

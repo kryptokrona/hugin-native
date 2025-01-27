@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { AppState, Platform, SafeAreaView } from 'react-native';
 
 import { bare, keep_alive } from 'lib/native';
-import { keychain } from '../services/bare/crypto';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
@@ -16,6 +15,7 @@ import {
 import { sleep } from '@/utils';
 
 import { joinRooms, setLatestRoomMessages } from '../services/bare';
+import { keychain } from '../services/bare/crypto';
 import { initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
@@ -25,20 +25,21 @@ interface AppProviderProps {
   children: React.ReactNode;
 }
 
+//TODO** FIX android import. This does not work
+// let ReactNativeForegroundService: any;
+// async function importPackage() {
+//   async () => {
+//     ReactNativeForegroundService = { default: ReactNativeForegroundService } =
+//       await import('@supersami/rn-foreground-service');
+//   };
+// }
+
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
 
-  let ReactNativeForegroundService: any;
-
-  if (Platform.OS === 'android') {
-    async () => {
-      ReactNativeForegroundService = { default: ReactNativeForegroundService } =
-        await import('@supersami/rn-foreground-service');
-    };
-  }
   const addTask = async () => {
     if (Platform.OS === 'android') {
       ReactNativeForegroundService?.add_task(() => keep_alive(), {
@@ -76,13 +77,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   async function init() {
     //Check if android background task is already running
-    if (Platform.OS === 'android') {
-      addTask();
-      const err = await startTask();
-      if (err) {
-        return;
-      }
-    }
+
+    //TODO** FIX android foreground import. This does not work
+    // if (Platform.OS === 'android') {
+    //   await importPackage();
+    //   addTask();
+    //   const err = await startTask();
+    //   if (err) {
+    //     return;
+    //   }
+    // }
 
     await initDB();
     await setLatestRoomMessages();
@@ -102,7 +106,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     const contacts = [
       'ec5bc96b9e2431fbe146d23de585acc9cad32ac1adaf412f830dc68985fa6d27',
-      '7368d6437260c59e5cc2609d8baa2b038bea03c14fd77db8e026678aaa63624b'
+      '7368d6437260c59e5cc2609d8baa2b038bea03c14fd77db8e026678aaa63624b',
     ]; //KNOWN pub keys from db
     MessageSync.init(node, contacts, keys);
 

@@ -5,16 +5,25 @@ import {
   processBlockOutputs,
   makePostRequest,
   generateDeterministicSubwalletKeys,
+  cnFastHash,
+  generateKeyDerivation,
+  generateKeys,
 } from '../NativeTest';
-import { parse } from '../utils';
+import { hexToUint, parse } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
 import {
   setBalance,
   setStoreAddress,
   setTransactions,
   setSyncStatus,
+  keychain,
+  nonceFromTimestamp,
+  MessageSync,
 } from '@/services';
 import Toast from 'react-native-toast-message';
+import naclUtil from 'tweetnacl-util';
+import * as NaclSealed from 'tweetnacl-sealed-box';
+
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
   constructor() {
@@ -27,6 +36,7 @@ export class ActiveWallet {
   }
 
   async init(node) {
+    console.log('Init wallet!');
     this.setDaemon(node);
     if (!(await this.load())) return false;
     this.loaded = true;
@@ -130,11 +140,11 @@ export class ActiveWallet {
   }
 
   spendKey() {
-    return Wallet.active.getPrimaryAddressPrivateKeys()[0];
+    return this.active.getPrimaryAddressPrivateKeys()[0];
   }
 
   privateKeys() {
-    return Wallet.active.getPrimaryAddressPrivateKeys();
+    return this.active.getPrimaryAddressPrivateKeys();
   }
 
   async sign(message) {
@@ -167,7 +177,7 @@ export class ActiveWallet {
 
     await this.active.start();
     console.log('Wallet started');
-    await this.message_wallet();
+    await this.create_message_wallet();
     console.log('Scan pool txs no');
     this.optimize_message_inputs();
     this.started = true;
@@ -195,6 +205,10 @@ export class ActiveWallet {
           this.getAndSetSyncStatus();
           console.log('walletBlockCount', walletBlockCount);
           console.log('networkBlockCount', networkBlockCount);
+        }
+
+        if (walletBlockCount === 0) {
+          await this.active.reset(networkBlockCount - 100);
         }
 
         if (networkBlockCount === 0) return;
@@ -283,83 +297,234 @@ export class ActiveWallet {
     return this.started;
   }
 
-  async message_wallet() {
+  async create_message_wallet() {
     if (this.active.subWallets.getAddresses().length < 2) {
-      const subWalletKeys = await generateDeterministicSubwalletKeys(this.spendKey(), 1);
-      const [address, error] = await this.active.importSubWallet(subWalletKeys.private_key);
+      const subWalletKeys = await generateDeterministicSubwalletKeys(
+        this.spendKey(),
+        1,
+      );
+      const [address, error] = await this.active.importSubWallet(
+        subWalletKeys.private_key,
+      );
     }
   }
 
+  async optimize_message_inputs(force = false) {
+    let [mainWallet, messageSubWallet] = this.addresses();
 
-async optimize_message_inputs(force = false) {
+    const [walletHeight, localHeight, networkHeight] =
+      await this.active.getSyncStatus();
 
-  let [mainWallet, messageSubWallet] = this.active.getAddresses();
+    let inputs = await this.active.subWallets.getSpendableTransactionInputs(
+      [messageSubWallet],
+      networkHeight,
+    );
 
-  const [walletHeight, localHeight, networkHeight] =
-    await Wallet.active.getSyncStatus();
+    if (inputs.length > 25 && !force) {
+      optimized = true;
+      return;
+    }
 
-  let inputs = await this.active.subWallets.getSpendableTransactionInputs(
-    [messageSubWallet],
-    networkHeight,
-  );
+    let payments = [];
+    let i = 0;
+    /* User payment */
+    while (i <= 49) {
+      payments.push([messageSubWallet, 1000]);
+      i += 1;
+    }
 
-  if (inputs.length > 25 && !force) {
-    optimized = true;
-    return;
+    let result = await this.active.sendTransactionAdvanced(
+      payments, // destinations,
+      3, // mixin
+      { fixedFee: 1000, isFixedFee: true }, // fee
+      undefined, //paymentID
+      [mainWallet], // subWalletsToTakeFrom
+      undefined, // changeAddress
+      true, // relayToNetwork
+      false, // sneedAll
+      undefined,
+    );
+
+    if (result.success) {
+      // reset_optimize(); TODO** set timer? or wait for optimize tx to return?
+
+      let optimizeMessage = {
+        message: 'Your wallet is creating message inputs, please wait',
+        name: 'Optimizing',
+        hash: parseInt(Date.now()),
+        key: mainWallet,
+        optimized: true,
+      };
+
+      // Hugin.send('sent_tx', sent);
+      console.log('Optimize completed: ', optimizeMessage);
+      return true;
+    } else {
+      optimized = false;
+
+      let error = {
+        message: 'Optimize failed',
+        name: 'Optimizing wallet failed',
+        hash: parseInt(Date.now()),
+        key: mainWallet,
+      };
+      console.log('Error:', error);
+      return false;
+    }
   }
 
-  let payments = [];
-  let i = 0;
-  /* User payment */
-  while (i <= 49) {
-    payments.push([messageSubWallet, 1000]);
-    i += 1;
+  async send_message(message, receiver, beam = false) {
+    //Assert address length
+    if (receiver.length !== 163) {
+      console.log('Error: Address too long/short');
+      return;
+    }
+    if (message.length === 0) {
+      console.log('Error: No message to send');
+      return;
+    }
+
+    //Split address and check history
+    let address = receiver.substring(0, 99);
+    let messageKey = receiver.substring(99, 163);
+    let has_history = await this.check_history(messageKey, address);
+    if (!beam_this) {
+      let balance = await this.check_balance();
+      if (!balance) {
+        console.log('Error: No balance to send with');
+        return;
+      }
+    }
+
+    let payload_hex;
+    const seal = has_history ? false : true;
+
+    payload_hex = await this.encrypt_hugin_message(
+      message,
+      messageKey,
+      seal,
+      address,
+    );
+    //Choose subwallet with message inputs
+    let messageSubWallet = this.addresses()[1];
+
+    if (!beam) {
+      let result = await this.active.sendTransactionAdvanced(
+        [[messageSubWallet, 1000]], // destinations,
+        3, // mixin
+        { fixedFee: 1000, isFixedFee: true }, // fee
+        undefined, //paymentID
+        [messageSubWallet], // subWalletsToTakeFrom
+        undefined, // changeAddresss
+        true, // relayToNetwork
+        false, // sneedAll
+        Buffer.from(payload_hex, 'hex'),
+      );
+      if (result.success) {
+        //save_message(sentMsg);
+        this.optimize_message_inputs();
+        optimized = true;
+      } else {
+        let error = {
+          message: `Failed to send, please wait a couple of minutes.`,
+          name: 'Error',
+          hash: Date.now(),
+        };
+        optimized = false;
+        this.optimize_message_inputs(true);
+        console.log(
+          `Error: Failed to send transaction: ${result.error.toString()}`,
+        );
+        console.log('Error: ', error);
+      }
+    } else if (beam) {
+      send_beam_message(sendMsg, address);
+    }
+
+    //TODO save message
   }
 
-  let result = await this.active.sendTransactionAdvanced(
-    payments, // destinations,
-    3, // mixin
-    { fixedFee: 1000, isFixedFee: true }, // fee
-    undefined, //paymentID
-    [mainWallet], // subWalletsToTakeFrom
-    undefined, // changeAddress
-    true, // relayToNetwork
-    false, // sneedAll
-    undefined,
-  );
+  async encrypt_hugin_message(message, messageKey, sealed = false, toAddr) {
+    let timestamp = Date.now();
+    let my_address = this.address;
+    const addr = await Address.fromAddress(toAddr);
+    const [privateSpendKey, privateViewKey] = this.privateKeys();
+    let xkr_private_key = privateSpendKey;
+    let box;
 
-  if (result.success) {
+    //Create the view tag using a one time private key and the receiver view key
+    const keys = await generateKeys();
+    const toKey = addr.m_keys.m_viewKeys.m_publicKey;
+    const outDerivation = await generateKeyDerivation(toKey, keys.private_key);
+    const hashDerivation = await cnFastHash(outDerivation);
+    const viewTag = hashDerivation.substring(0, 2);
 
-    // reset_optimize(); TODO** set timer? or wait for optimize tx to return?
+    if (sealed) {
+      let signature = await this.sign(message, xkr_private_key);
+      let payload_json = {
+        from: my_address,
+        k: Buffer.from(keychain.getKeyPair().publicKey).toString('hex'),
+        msg: message,
+        s: signature,
+      };
+      let payload_json_decoded = naclUtil.decodeUTF8(
+        JSON.stringify(payload_json),
+      );
+      box = new NaclSealed.sealedbox(
+        payload_json_decoded,
+        nonceFromTimestamp(timestamp),
+        hexToUint(messageKey),
+      );
+    } else if (!sealed) {
+      console.log('Has history, not using sealedbox');
+      let payload_json = { from: my_address, msg: message };
+      let payload_json_decoded = naclUtil.decodeUTF8(
+        JSON.stringify(payload_json),
+      );
 
-    let optimizeMessage = {
-      message: 'Your wallet is creating message inputs, please wait',
-      name: 'Optimizing',
-      hash: parseInt(Date.now()),
-      key: mainWallet,
-      optimized: true,
+      box = nacl.box(
+        payload_json_decoded,
+        nonceFromTimestamp(timestamp),
+        hexToUint(messageKey),
+        keychain.getKeyPair().secretKey,
+      );
+    }
+    //Box object
+    let payload_box = {
+      box: Buffer.from(box).toString('hex'),
+      t: timestamp,
+      txKey: keys.public_key,
+      vt: viewTag,
     };
+    // Convert json to hex
+    let payload_hex = toHex(JSON.stringify(payload_box));
+    return payload_hex;
+  }
 
-    // Hugin.send('sent_tx', sent);
-    console.log('Optimize completed: ', optimizeMessage);
+  async check_history(messageKey) {
+    //Check history
+    if (MessageSync.known_keys.indexOf(messageKey) > -1) {
+      return true;
+    } else {
+      MessageSync.known_keys.push(messageKey);
+      return false;
+    }
+  }
+
+  async check_balance() {
+    try {
+      let [munlockedBalance, mlockedBalance] = await this.active.getBalance();
+
+      if (munlockedBalance < 11) {
+        console.log('Error: Not enough unlocked funds.');
+        return false;
+      }
+    } catch (err) {
+      console.log('Error:', err);
+      return false;
+    }
     return true;
-  } else {
-    optimized = false;
-
-    let error = {
-      message: 'Optimize failed',
-      name: 'Optimizing wallet failed',
-      hash: parseInt(Date.now()),
-      key: mainWallet,
-    };
-    console.log('Error:', error);
-    return false;
   }
-}
-
-
-  
-
 }
 
 export const Wallet = new ActiveWallet();
