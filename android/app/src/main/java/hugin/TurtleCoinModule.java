@@ -721,6 +721,6 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
     public native String hashToScalarJNI(String hash);
     public native String underivePublicKeyJNI(String derivation, long index, String outputKey);
     public native KeyPair generateKeysJNI();
-    public native KeyPair generateDeterministicSubwalletKeysJNI(String basePrivateKey, double walletIndex);
+    public native KeyPair generateDeterministicSubwalletKeysJNI(String basePrivateKey, long walletIndex);
 
 }
