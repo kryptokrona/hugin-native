@@ -1,29 +1,25 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { InputField, ScreenLayout, TextButton } from '@/components';
-import Clipboard from '@react-native-clipboard/clipboard';
-import { Styles, backgroundType, textType } from '@/styles';
 
-import {prettyPrintAmount} from 'kryptokrona-wallet-backend-js';
+import { StyleSheet, Text, View } from 'react-native';
+
+import Clipboard from '@react-native-clipboard/clipboard';
+import { useNavigation } from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 
-
-import {
-    useNavigation,
-  } from '@react-navigation/native';
-
-import { useGlobalStore, usePreferencesStore, useThemeStore, Wallet } from '@/services';
-import Toast from 'react-native-toast-message';
-import { MainStackNavigationType, Preferences } from '@/types';
+import { InputField, ScreenLayout, TextButton } from '@/components';
 import { MainScreens } from '@/config';
+import { useGlobalStore, usePreferencesStore, useThemeStore } from '@/services';
+import { MainStackNavigationType, Preferences } from '@/types';
+
+import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {}
 
 export const WalletStatusScreen: React.FC<Props> = () => {
-
-  
   const preferences = usePreferencesStore((state) => state.preferences);
-  const [selectedNode, setSelectedNode] = useState<Preferences | null>(preferences.node);
+  const [selectedNode, setSelectedNode] = useState<Preferences | null>(
+    preferences.node,
+  );
 
   const navigation = useNavigation<MainStackNavigationType>();
 
@@ -38,28 +34,33 @@ export const WalletStatusScreen: React.FC<Props> = () => {
 
   const goToNodePicker = () => {
     navigation.navigate(MainScreens.PickNodeScreen);
-  }
+  };
 
   const resyncWallet = () => {
     console.log('Clicked');
     Wallet.active.rewind(parseInt(resyncHeight));
-  }
+  };
 
   const copyMnemonic = async () => {
     const mnemonic = await Wallet.active.getMnemonicSeed();
     Clipboard.setString(mnemonic[0]);
-  }
-  
+  };
 
   return (
     <ScreenLayout>
-      <View style={{textAlign: 'center'}}>
-        <Text style={[styles.detail, {color}]}>Current node:</Text>
-        <Text style={[styles.detail, {color}]}>{selectedNode}</Text>
+      <View style={{ textAlign: 'center' }}>
+        <Text style={[styles.detail, { color }]}>Current node:</Text>
+        <Text style={[styles.detail, { color }]}>{selectedNode}</Text>
         <TextButton onPress={goToNodePicker}>Change node</TextButton>
-        <Text style={[styles.detail, {color}]}>Sync status:</Text>
-        <Progress.Bar progress={(status[0] / status[2])} width={'400'} color={color} />
-        <Text style={[styles.detail, {color, textAlign: 'center'}]}>{status[0]} / {status[2]}</Text>
+        <Text style={[styles.detail, { color }]}>Sync status:</Text>
+        <Progress.Bar
+          progress={status[0] / status[2]}
+          width={'400'}
+          color={color}
+        />
+        <Text style={[styles.detail, { color, textAlign: 'center' }]}>
+          {status[0]} / {status[2]}
+        </Text>
         <InputField
           label="Resync height"
           value={resyncHeight}
@@ -74,63 +75,63 @@ export const WalletStatusScreen: React.FC<Props> = () => {
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    padding: 16,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
-    width: '100%',
-  },
-  field: {
+  actions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  input: {
-    margin: 0
+    justifyContent: 'space-between',
+    marginTop: 16,
   },
   button: {
-    margin: 0
+    margin: 0,
   },
   buttonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: 'bold',
   },
-  transactionBox: {
-    padding: 16,
-    borderRadius: 8,
-    width: '100%',
-    borderWidth: 1
-  },
-  noTransaction: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heading: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-    marginTop: 8,
-    fontFamily: 'Montserrat-SemiBold',
+  column: {
+    flex: 1,
   },
   detail: {
-    fontSize: 14,
     color: '#00ffcc',
-    marginBottom: 16,
     fontFamily: 'Montserrat-Medium',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  field: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  heading: {
+    color: 'white',
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  input: {
+    margin: 0,
+  },
+  noTransaction: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
   },
-  column: {
-    flex: 1,
+  transactionBox: {
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
+    width: '100%',
   },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+    padding: 16,
+    width: '100%',
   },
 });
