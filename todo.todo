@@ -27,3 +27,6 @@ Todo node picker:
     ✔ Handle themes @done(24-12-29 22:38)
     ☐ Invoke when creating/importing wallet
 
+Bugs:
+    ☐ Make sure new accounts don't get stuck on 0
+    ☐ Pick best random node for new account (no hard coded)
