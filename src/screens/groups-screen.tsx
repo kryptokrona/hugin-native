@@ -22,14 +22,13 @@ import {
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
-  joinAndSaveRoom,
-  setRoomMessages,
   setStoreCurrentRoom,
   setStoreRoomMessages,
   useGlobalStore,
   useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
+import {joinAndSaveRoom, setRoomMessages} from '../services/bare/groups';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;

@@ -44,7 +44,8 @@ export const GroupMessageItem: React.FC<Props> = ({
   onShowImagePress,
   onTipPress,
   replyto,
-  tip
+  tip,
+  dm=false
 }) => {
   try {tip = JSON.parse(tip)} catch {}
   const { t } = useTranslation();
@@ -89,6 +90,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   }, [replyto]);
 
   function handleLongPress() {
+    if(dm) return false;
     setActionsModal(true);
   }
 

@@ -30,9 +30,6 @@ import { MainScreens } from '@/config';
 import {
   useGlobalStore,
   useUserStore,
-  saveRoomMessageAndUpdate,
-  onSendGroupMessageWithFile,
-  onSendGroupMessage,
   setStoreCurrentRoom,
   useThemeStore,
   Wallet,
@@ -44,6 +41,8 @@ import type {
   MainNavigationParamList,
   Message,
 } from '@/types';
+
+import {onSendGroupMessage, saveRoomMessageAndUpdate, onSendGroupMessageWithFile} from '../services/bare/groups'
 
 import { Header } from '../components/_navigation/header';
 

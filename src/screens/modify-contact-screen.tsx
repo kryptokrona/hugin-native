@@ -29,7 +29,7 @@ import {
 } from '@/components';
 import { MainScreens } from '@/config';
 import { setStoreCurrentContact, setStoreCurrentRoom, useGlobalStore } from '@/services';
-import { setLatestMessages } from '../services/bare/contacts';
+import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import {
   MainNavigationParamList,
   MainStackNavigationType,
@@ -77,6 +77,7 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
     const updatedName = await updateContact(newName, roomKey);
     if (updatedName === newName) {
       setLatestMessages();
+      await setMessages(roomKey, 0);
       navigation.navigate(MainScreens.MessageScreen, { roomKey, name: newName })
     }
   }

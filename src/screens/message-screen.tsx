@@ -265,6 +265,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         renderItem={({ item }) => {
           return (
             <GroupMessageItem
+              dm={true}
               message={item.message}
               timestamp={item.timestamp}
               nickname={item.nickname}
