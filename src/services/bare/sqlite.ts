@@ -667,6 +667,7 @@ export async function saveMessage(
   sent: boolean,
   myaddress: string,
   tip: JSON | false = false,
+  nickname: string | undefined,
 ) {
   console.log('Saving message: ', message);
   if ((!message || message?.length === 0) && !tip) {
@@ -686,11 +687,16 @@ export async function saveMessage(
       ],
     );
 
+    if (!sent) {
+      const contact = await getContact(conversation);
+      nickname = contact.name;
+    }
+
     const newMessage: Message = {
       address: sent ? myaddress : conversation,
       hash: hash,
       message: message,
-      nickname: 'FixMe', // get nickname from contacts
+      nickname: nickname,
       reactions: [],
       reply: reply,
       room: conversation,
