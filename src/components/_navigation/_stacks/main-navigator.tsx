@@ -13,7 +13,8 @@ import {
   PickNodeScreen,
   WalletStatusScreen,
   MessagesScreen,
-  MessageScreen
+  MessageScreen,
+  ModifyContactScreen
 } from '@/screens';
 import { MainScreens } from '@/config';
 import { Header } from '../header';
@@ -82,13 +83,13 @@ const MessagesStack = () => {
           ),
         }}
       />
-      {/* <NativeStack.Screen
-        name={MainScreens.ModifyGroupScreen}
-        component={ModifyGroupScreen}
+      <NativeStack.Screen
+        name={MainScreens.ModifyContactScreen}
+        component={ModifyContactScreen}
         options={{
           header: (_props) => <Header backButton title={t('modify')} />,
         }}
-      /> */}
+      />
     </NativeStack.Navigator>
   );
 };

@@ -91,8 +91,7 @@ export const updateMessage = async (message: Message, history = false) => {
   const inRoom = thisContact === message.room;
   if (inRoom) {
     const messages = await getMessages(thisContact, 0);
-    const updated = [...messages, message];
-    setStoreMessages(updated);
+    setStoreMessages(messages);
   }
 };
 

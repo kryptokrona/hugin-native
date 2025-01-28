@@ -23,6 +23,7 @@ import {
   FullScreenImageViewer,
   InputField,
   TextButton,
+  Avatar,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -44,6 +45,7 @@ import { Peers } from '../lib/connections';
 import { updateMessage } from '../services/bare/contacts';
 import { saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
+import { getAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessageScreen>;
@@ -81,7 +83,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   }, [replyToMessageHash, messages]);
 
   function onCustomizeGroupPress() {
-    navigation.push(MainScreens.ModifyGroupScreen, {
+    navigation.push(MainScreens.ModifyContactScreen, {
       name,
       roomKey,
     });
@@ -139,14 +141,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
               style={{ flexDirection: 'row' }}
               onPress={onCustomizeGroupPress}>
               <View style={{ marginRight: 5, marginTop: 4 }}>
-                <CustomIcon
-                  name={'lens'}
-                  size={14}
-                  type={'MI'}
-                  color={`${online ? 'green' : 'grey'}`}
-                />
+                {roomKey && (
+                  <Avatar base64={getAvatar(roomKey)} address={roomKey} size={30} />
+                )}
               </View>
-              <CustomIcon type="FA5" name={icon} />
             </TouchableOpacity>
           }
         />

@@ -54,4 +54,5 @@ export enum MainScreens {
   DashboardScreen = 'DashboardScreen',
   SendTransactionScreen = 'SendTransactionScreen',
   WalletStatusScreen = 'WalletStatusScreen',
+  ModifyContactScreen = 'ModifyContactScreen'
 }

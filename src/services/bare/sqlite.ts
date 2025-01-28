@@ -9,6 +9,7 @@ import { FileInfo, Message } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
 import { Files } from './globals';
+import { useUserStore } from '../zustand';
 
 enablePromise(true);
 
@@ -55,6 +56,12 @@ export const initDB = async () => {
     //   unreads?: number;
     // }
 
+    // query = "DROP TABLE contacts";
+    // await db.executeSql(query);
+
+    // query = "DROP TABLE messages";
+    // await db.executeSql(query);
+
     query = `CREATE TABLE IF NOT EXISTS contacts (
       name TEXT,
       address TEXT NOT NULL,
@@ -64,9 +71,6 @@ export const initDB = async () => {
   )`;
 
     await db.executeSql(query);
-
-    // query = "DROP TABLE messages";
-    // await db.executeSql(query);
 
     query = `CREATE TABLE IF NOT EXISTS messages ( 
       conversation TEXT,
@@ -293,6 +297,26 @@ export async function removeRoomFromDatabase(key: string) {
   return true;
 }
 
+export async function deleteContact(address: string) {
+  try {
+    let results = await db.executeSql('DELETE FROM contacts WHERE address = ?', [
+      address,
+    ]);
+    //We also need to call getLatestRoomMessages to update the list in frontend after this func
+    console.log(results);
+
+    results = await db.executeSql('DELETE FROM messages WHERE conversation = ?', [
+      address,
+    ]);
+
+  } catch (err) {
+    console.log('Error removing room', err);
+    return false;
+  }
+  //Update active room list
+  return true;
+}
+
 export async function getRooms() {
   const results = await db.executeSql('SELECT * FROM rooms');
   const rooms: Array<any> = [];
@@ -323,6 +347,10 @@ export async function addContact(
       'INSERT INTO contacts (name, address, messagekey, latestmessage) VALUES (?, ?, ?, ?)',
       [name, address, messagekey, Date.now()],
     );
+    console.log('Added contact: ', address, messagekey, name );
+
+    await saveMessage(address, 'Conversation started', '', Date.now(), '123', true, 'me', false, 'Me');
+
     return { address, messagekey, name };
   } catch (err) {
     console.log('Failed to add contact: ', err);
@@ -457,6 +485,9 @@ export async function getMessages(
   if (page !== 0) {
     offset = page * limit;
   }
+  const { name, address } = useUserStore.getState().user;
+
+  
   const results: [ResultSet] = await db.executeSql(
     `SELECT * FROM messages WHERE conversation = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
     [conversation],
@@ -467,10 +498,10 @@ export async function getMessages(
     for (const result of results) {
       for (let index = 0; index < result.rows.length; index++) {
         const res = result.rows.item(index);
-        res.room = res.sent ? 'me' : res.conversation;
-        res.address = res.sent ? 'me' : res.conversation;
+        res.room = res.conversation;
+        res.address = res.sent ? address : res.conversation;
         const contact = await getContact(res.address);
-        res.nickname = res.sent ? 'me' : contact.name;
+        res.nickname = res.sent ? name : contact.name;
         const r: Message = toMessage(res);
         messages.push(r);
       }
@@ -620,7 +651,6 @@ export async function saveRoomMessage(
   sent: boolean,
   tip: JSON | false = false,
 ) {
-  console.log('Saving message: ', message);
   if ((!message || message?.length === 0) && !tip) {
     return false;
   }
@@ -652,6 +682,7 @@ export async function saveRoomMessage(
       timestamp: timestamp,
       tip,
     };
+    console.log('Saved message: ', newMessage);
     return newMessage;
   } catch (err) {
     return false;

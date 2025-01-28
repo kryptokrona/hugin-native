@@ -30,7 +30,9 @@ import {
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
-import {setMessages} from '../services/bare/contacts';
+import {setLatestMessages, setMessages} from '../services/bare/contacts';
+import Clipboard from '@react-native-clipboard/clipboard';
+import { addContact, saveMessage } from '../services/bare/sqlite';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
@@ -82,9 +84,11 @@ export const MessagesScreen: React.FC<Props> = () => {
   }
 
   function onCreateRoom() {
-    setStoreMessages([]);
+    // setStoreMessages([]);
+    Clipboard.setString(user.huginAddress);
     setModalVisible(false);
-    navigation.navigate(MainScreens.AddGroupScreen);
+
+    // navigation.navigate(MainScreens.AddGroupScreen);
   }
 
   function onInputChange(text: string) {
@@ -100,22 +104,28 @@ export const MessagesScreen: React.FC<Props> = () => {
     }, []),
   );
 
-  function onJoinpress() {
+  async function onJoinpress() {
     setStoreMessages([]);
-    const inviteKey = link.slice(-128);
-    const parse = link.split('hugin://')[1];
-    const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
-    const originalName = roomName.replace(/-/g, ' ');
-    if (inviteKey && originalName && user?.address) {
-      joinAndSaveRoom(inviteKey, originalName, user.address, user?.name);
 
-      setModalVisible(false);
-      navigation.push(MainScreens.GroupChatScreen, {
-        name: roomName,
-        roomKey: inviteKey,
-      });
-      setLink('');
-    }
+    const xkrAddr = link.substring(0,99);
+    const messageKey = link.slice(-64);
+    
+    await addContact('Anon', xkrAddr, messageKey);
+
+    setLatestMessages();
+
+    setModalVisible(false);
+
+    await setMessages(xkrAddr, 0);
+    setStoreCurrentContact(xkrAddr);
+
+    navigation.navigate(MainScreens.MessageScreen, { name: 'Anon', roomKey: xkrAddr });
+    // navigation.push(MainScreens.MessageScreen, {
+    //   name: 'Anon',
+    //   roomKey: xkrAddr
+    // });
+    setLink('');
+  
   }
 
   return (
@@ -124,22 +134,22 @@ export const MessagesScreen: React.FC<Props> = () => {
         {joining && (
           <View style={styles.inviteContainer}>
             <InputField
-              label={t('inviteLink')}
+              label={t('huginAddress')}
               value={link}
               onChange={onInputChange}
               onSubmitEditing={onJoinpress}
             />
-            <TextButton onPress={onJoinpress}>{t('joinRoom')}</TextButton>
+            <TextButton onPress={onJoinpress}>{t('addUser')}</TextButton>
           </View>
         )}
 
         {!joining && (
           <View>
-            <TextField size="small">{t('createRoomDescr')}</TextField>
-            <TextButton onPress={onCreateRoom}>{t('createRoom')}</TextButton>
+            <TextField size="small">{t('copyAddress')}</TextField>
+            <TextButton onPress={onCreateRoom}>{t('copy')}</TextButton>
             <View style={styles.divider} />
-            <TextField size="small">{t('joinRoomDescr')}</TextField>
-            <TextButton onPress={onJoinPress}>{t('joinRoom')}</TextButton>
+            <TextField size="small">{t('addUserDescr')}</TextField>
+            <TextButton onPress={onJoinPress}>{t('addUser')}</TextButton>
           </View>
         )}
       </ModalCenter>

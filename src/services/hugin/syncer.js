@@ -3,7 +3,7 @@ import {
   generateKeyDerivation,
   setStoreContacts,
 } from '@/services';
-import { saveMessage, addContact } from '../bare/sqlite';
+import { saveMessage, addContact, getContacts } from '../bare/sqlite';
 import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';

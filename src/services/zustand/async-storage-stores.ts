@@ -150,7 +150,7 @@ export const defaultPreferences: Preferences = {
   authMethod: AuthMethods.reckless,
   language: 'en',
   nickname: 'Anon',
-  node: 'node.xkr.network:80',
+  node: 'kaffenod.xyz:443',
   pincode: null,
 };
 
@@ -161,6 +161,7 @@ export const defaultUser: User = {
   // TODO test this properly
   name: 'Anon',
   room: 'lobby',
+  huginAddress: ''
 };
 
 export const getAuthMethod = () => {

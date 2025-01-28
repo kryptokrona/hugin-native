@@ -9,6 +9,7 @@ export * from './main-screen';
 export * from './message-screen';
 export * from './messages-screen';
 export * from './modify-group-screen';
+export * from './modify-contact-screen';
 export * from './recipients-screen';
 export * from './settings-screen';
 export * from './transaction-screen';

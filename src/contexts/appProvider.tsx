@@ -7,6 +7,7 @@ import { Connection, Files } from 'services/bare/globals';
 
 import {
   setStoreContacts,
+  updateUser,
   useGlobalStore,
   usePreferencesStore,
   useThemeStore,
@@ -122,6 +123,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const huginAddress = Wallet.address + keychain.getMsgKey();
 
     console.log('huginAddress', huginAddress);
+
+    await updateUser({ huginAddress });
 
     Files.update(await loadSavedFiles());
     await bare(user);
