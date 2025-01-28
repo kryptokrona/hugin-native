@@ -191,6 +191,7 @@ export class ActiveWallet {
     this.active.on('createdtx', async (tx) => {
       console.log('***** outgoing *****', tx);
       this.getAndSetBalance();
+      await this.save();
     });
 
     //Wallet heightchange event with funtion that saves wallet only if we are synced

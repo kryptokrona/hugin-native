@@ -1,8 +1,9 @@
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 
 import {
   FlatList,
   StyleSheet,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -15,9 +16,12 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import {
+  Avatar,
   Card,
   CopyButton,
   Header,
+  InputField,
+  ModalCenter,
   ScreenLayout,
   TextButton,
   TextField,
@@ -31,7 +35,8 @@ import {
   MainStackNavigationType,
   User,
 } from '@/types';
-import { deleteContact } from '../services/bare/sqlite';
+import { deleteContact, getLatestMessages, updateContact } from '../services/bare/sqlite';
+import { getAvatar } from '../utils/avatar';
 
 interface Props {
   route: RouteProp<
@@ -43,11 +48,12 @@ interface Props {
 export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
-  console.log('name, roomKey', name, roomKey);
   const navigation = useNavigation<MainStackNavigationType>();
     const contacts = useGlobalStore((state) => state.contacts);
     const messageKey = contacts.find((a) => a.address === roomKey)?.messagekey;
     const huginAddress = roomKey + messageKey;
+    const [modalVisible, setModalVisible] = useState(false);
+    const [newName, setNewName] =  useState(name);
   // const theme = useThemeStore((state) => state.theme);
   // const [avatar, setAvatar] = useState<string | null>(null);
   // const [groupName, setGroupName] = useState<string>(name); // route.params.name
@@ -59,6 +65,23 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   // const tempAvatar = createAvatar();
   // const isAdmin = false; // TBD
 
+  const onCloseModal = () => {
+    setModalVisible(false);
+  }
+
+  const onNameChange = (text: string) => {
+    setNewName(text);
+  }
+
+  const onChangeName = async () => {
+    const updatedName = await updateContact(newName, roomKey);
+    if (updatedName === newName) {
+      setLatestMessages();
+      navigation.navigate(MainScreens.MessageScreen, { roomKey, name: newName })
+    }
+  }
+  
+
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -68,6 +91,21 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
           onBackPress={() =>
             navigation.navigate(MainScreens.MessageScreen, { name, roomKey })
           }
+          right={
+                      <View
+                        style={{ flexDirection: 'row' }}
+                        >
+                        <View style={{ marginRight: 5, marginTop: 4 }}>
+                          {roomKey && (
+                            <Avatar
+                              base64={getAvatar(roomKey)}
+                              address={roomKey}
+                              size={30}
+                            />
+                          )}
+                        </View>
+                      </View>
+                    }
         />
       ),
     });
@@ -110,6 +148,16 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
+      <ModalCenter visible={modalVisible} closeModal={onCloseModal}>
+                <View>
+                  <InputField
+                    label={t('nickname')}
+                    value={newName}
+                    onChange={onNameChange}
+                  />
+                  <TextButton onPress={onChangeName}>{t('changeName')}</TextButton>
+                </View>
+      </ModalCenter>
       <View style={styles.scrollViewContainer}>
 
         <TouchableWithoutFeedback>
@@ -123,6 +171,10 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
           text={t('copy')}
           data={inviteText}
         />
+
+        <TextButton onPress={() => setModalVisible(true)}>
+            {t('changeName')}
+          </TextButton>
 
         {/* <TouchableOpacity
           onPress={onUploadAvatar}

@@ -291,6 +291,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           onSend={onSend}
           replyToName={replyToName}
           onCloseReplyPress={onCloseReplyPress}
+          dm={true}
         />
       </KeyboardAvoidingView>
     </ScreenLayout>

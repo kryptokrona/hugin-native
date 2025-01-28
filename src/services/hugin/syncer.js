@@ -180,7 +180,6 @@ class Syncer {
       }
       if (added) {
         this.known_keys.push(added.messagekey);
-        setStoreContacts([...(await getContacts()), added]);
       }
       setLatestMessages();
       return true;
