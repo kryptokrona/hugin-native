@@ -9,6 +9,7 @@ import { FileInfo, Message } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
 import { Files } from './globals';
+
 import { useUserStore } from '../zustand';
 
 enablePromise(true);
@@ -299,16 +300,17 @@ export async function removeRoomFromDatabase(key: string) {
 
 export async function deleteContact(address: string) {
   try {
-    let results = await db.executeSql('DELETE FROM contacts WHERE address = ?', [
-      address,
-    ]);
+    let results = await db.executeSql(
+      'DELETE FROM contacts WHERE address = ?',
+      [address],
+    );
     //We also need to call getLatestRoomMessages to update the list in frontend after this func
     console.log(results);
 
-    results = await db.executeSql('DELETE FROM messages WHERE conversation = ?', [
-      address,
-    ]);
-
+    results = await db.executeSql(
+      'DELETE FROM messages WHERE conversation = ?',
+      [address],
+    );
   } catch (err) {
     console.log('Error removing room', err);
     return false;
@@ -347,9 +349,19 @@ export async function addContact(
       'INSERT INTO contacts (name, address, messagekey, latestmessage) VALUES (?, ?, ?, ?)',
       [name, address, messagekey, Date.now()],
     );
-    console.log('Added contact: ', address, messagekey, name );
+    console.log('Added contact: ', address, messagekey, name);
 
-    await saveMessage(address, 'Conversation started', '', Date.now(), '123', true, 'me', false, 'Me');
+    await saveMessage(
+      address,
+      'Conversation started',
+      '',
+      Date.now(),
+      '123',
+      true,
+      'me',
+      false,
+      'Me',
+    );
 
     return { address, messagekey, name };
   } catch (err) {
@@ -487,7 +499,6 @@ export async function getMessages(
   }
   const { name, address } = useUserStore.getState().user;
 
-  
   const results: [ResultSet] = await db.executeSql(
     `SELECT * FROM messages WHERE conversation = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
     [conversation],
@@ -640,6 +651,21 @@ export async function roomMessageExists(hash: string) {
   }
   return true;
 }
+
+export async function messageExists(hash: string) {
+  const messageExist = `SELECT *
+  FROM messages
+  WHERE hash = '${hash}'
+  `;
+
+  const results: [ResultSet] = await db.executeSql(messageExist);
+  const res = results[0].rows.item(0);
+  if (res === undefined) {
+    return false;
+  }
+  return true;
+}
+
 export async function saveRoomMessage(
   address: string,
   message: string,

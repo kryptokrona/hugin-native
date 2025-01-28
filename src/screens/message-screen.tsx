@@ -16,7 +16,6 @@ import {
 import { t } from 'i18next';
 
 import {
-  CustomIcon,
   GroupMessageItem,
   MessageInput,
   ScreenLayout,
@@ -39,13 +38,13 @@ import type {
   MainNavigationParamList,
   Message,
 } from '@/types';
+import { getAvatar } from '@/utils';
 
 import { Header } from '../components/_navigation/header';
 import { Peers } from '../lib/connections';
-import { updateMessage } from '../services/bare/contacts';
+import { setLatestMessages, updateMessage } from '../services/bare/contacts';
 import { saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { getAvatar } from '@/utils';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessageScreen>;
@@ -142,7 +141,11 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
               onPress={onCustomizeGroupPress}>
               <View style={{ marginRight: 5, marginTop: 4 }}>
                 {roomKey && (
-                  <Avatar base64={getAvatar(roomKey)} address={roomKey} size={30} />
+                  <Avatar
+                    base64={getAvatar(roomKey)}
+                    address={roomKey}
+                    size={30}
+                  />
                 )}
               </View>
             </TouchableOpacity>
@@ -197,6 +200,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         );
         if (saved) {
           updateMessage(saved);
+          setLatestMessages();
         }
       }
 
