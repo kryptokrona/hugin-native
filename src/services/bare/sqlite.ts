@@ -372,6 +372,24 @@ export async function addContact(
   }
 }
 
+export async function updateContact(
+  name: string,
+  address: string
+) {
+  try {
+
+    const result = await db.executeSql(
+      'UPDATE contacts SET name = ? WHERE address = ?',
+      [name, address],
+    );
+    console.log('Updated contact: ', name, address);
+
+    return name;
+  } catch (err) {
+    console.log('Failed to add contact: ', err);
+  }
+}
+
 export async function getContacts() {
   const results = await db.executeSql('SELECT * FROM contacts');
   const contacts: Array<any> = [];

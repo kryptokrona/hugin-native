@@ -47,6 +47,7 @@ export const MessagesScreen: React.FC<Props> = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [joining, setJoinVisible] = useState(false);
   const [link, setLink] = useState('');
+  const [name, setName] = useState('Anon');
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -94,6 +95,10 @@ export const MessagesScreen: React.FC<Props> = () => {
     setLink(text);
   }
 
+  function onNameChange(text: string) {
+    setName(text);
+  }
+
   useFocusEffect(
     React.useCallback(() => {
       // This effect runs when the screen is focused
@@ -109,7 +114,7 @@ export const MessagesScreen: React.FC<Props> = () => {
     const xkrAddr = link.substring(0, 99);
     const messageKey = link.slice(-64);
 
-    await addContact('Anon', xkrAddr, messageKey, true);
+    await addContact(name, xkrAddr, messageKey, true);
 
     setLatestMessages();
 
@@ -118,10 +123,7 @@ export const MessagesScreen: React.FC<Props> = () => {
     await setMessages(xkrAddr, 0);
     setStoreCurrentContact(xkrAddr);
 
-    navigation.navigate(MainScreens.MessageScreen, {
-      name: 'Anon',
-      roomKey: xkrAddr,
-    });
+    navigation.navigate(MainScreens.MessageScreen, { name: name, roomKey: xkrAddr });
     // navigation.push(MainScreens.MessageScreen, {
     //   name: 'Anon',
     //   roomKey: xkrAddr
@@ -134,6 +136,11 @@ export const MessagesScreen: React.FC<Props> = () => {
       <ModalCenter visible={modalVisible} closeModal={onCloseModal}>
         {joining && (
           <View style={styles.inviteContainer}>
+            <InputField
+              label={t('nickname')}
+              value={name}
+              onChange={onNameChange}
+            />
             <InputField
               label={t('huginAddress')}
               value={link}

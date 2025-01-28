@@ -111,7 +111,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await Wallet.init(node);
 
     const contacts = await getContacts();
-    setStoreContacts(contacts);
     const knownKeys = [];
     for (const contact of contacts) {
       knownKeys.push(contact.messagekey);
