@@ -194,6 +194,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           hash,
           true,
           address,
+          name,
         );
         if (saved) {
           updateMessage(saved);
