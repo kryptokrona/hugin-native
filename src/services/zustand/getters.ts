@@ -16,6 +16,10 @@ export const getActiveRoomUsers = () => {
   return useGlobalStore.getState().roomUsers;
 };
 
+export const getCurrentContact = () => {
+  return useGlobalStore.getState().thisContact;
+};
+
 export const getBalance = () => {
   return useGlobalStore.getState().balance;
 };

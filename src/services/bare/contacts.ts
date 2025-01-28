@@ -1,7 +1,5 @@
 import { AppState } from 'react-native';
 
-import Toast from 'react-native-toast-message';
-
 import {
   begin_send_file,
   end_swarm,
@@ -12,14 +10,12 @@ import {
 } from 'lib/native';
 
 import type { FileInfo, FileInput, Message, SelectedFile } from '@/types';
-import { containsOnlyEmojis, sleep } from '@/utils';
+import { sleep } from '@/utils';
 
 import { naclHash, newKeyPair, randomKey } from './crypto';
 import {
   getLatestMessages,
-  getLatestRoomMessages,
   getMessages,
-  getRoomMessages,
   getRooms,
   removeRoomFromDatabase,
   saveAccount,
@@ -28,15 +24,12 @@ import {
   saveRoomToDatabase,
 } from './sqlite';
 
-import { notify } from '../utils';
 import {
+  getCurrentContact,
   getCurrentRoom,
-  getRoomsMessages,
   setStoreContacts,
   setStoreCurrentRoom,
   setStoreMessages,
-  setStoreRoomMessages,
-  setStoreRooms,
   useGlobalStore,
   useUserStore,
 } from '../zustand';
@@ -70,7 +63,7 @@ export const setLatestMessages = async () => {
   const currentContact = useGlobalStore.getState().thisContact;
   const updatedContacts = latestContacts?.map((latestContact) => {
     const existingContact = latestContacts.find(
-      (contact) => contact.key === latestContact.key,
+      (contact) => contact.messagekey === latestContact.messagekey,
     );
 
     const isFromUser = latestContact.address === userAddress;
@@ -88,52 +81,18 @@ export const setLatestMessages = async () => {
     };
   });
 
-  setStoreContacts(updatedContacts?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
+  setStoreContacts(
+    updatedContacts?.sort((a, b) => b.timestamp - a.timestamp) ?? [],
+  );
 };
 
-const updateMessages = async (message: Message, history = false) => {
-  const thisRoom = getCurrentRoom();
-  const inRoom = thisRoom === message.room;
-  if (inRoom || current) {
-    const messages = getRoomsMessages();
-
-    //Update reply
-    if (message.reply?.length === 64) {
-      if (containsOnlyEmojis(message.message) && message.message.length < 9) {
-        const updatedMessage = messages.map((msg) => {
-          if (msg.hash === message.reply) {
-            return {
-              ...msg,
-              reactions: [...(msg.reactions || []), message.message],
-            };
-          }
-          return msg;
-        });
-        setStoreRoomMessages(updatedMessage);
-        return;
-      }
-      //Add original message to this reply
-      const reply = messages.find((a) => a.hash === message.reply);
-      if (reply !== undefined) {
-        message.replyto = [reply];
-      }
-    }
-    const updatedMessages = [...messages, message].sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
-    setStoreRoomMessages(updatedMessages);
-  }
-
-  if (!history && !inRoom) {
-    if (current.length === 0) {
-      Toast.show({
-        text1: message.nickname,
-        text2: message.message,
-        type: 'success',
-      });
-    } else {
-      notify({ name: message.nickname, text: message.message }, 'New message');
-    }
+export const updateMessage = async (message: Message, history = false) => {
+  const thisContact = getCurrentContact();
+  const inRoom = thisContact === message.room;
+  if (inRoom) {
+    const messages = await getMessages(thisContact, 0);
+    const updated = [...messages, message];
+    setStoreMessages(updated);
   }
 };
 
@@ -144,7 +103,7 @@ const updateVoiceChannelStatus = (status: any) => {
 export const setMessages = async (contact: string, page: number) => {
   console.log('Load message page:', page);
   const messages = await getMessages(contact, page);
-
+  console.log('Set store messs');
   setStoreMessages(messages);
 };
 
@@ -283,7 +242,7 @@ const saveRoomMessageAndUpdate = async (
     if (isFile) {
       newMessage.file = file;
     }
-    updateMessages(newMessage);
+    updateMessage(newMessage);
   }
 
   if (!history) {

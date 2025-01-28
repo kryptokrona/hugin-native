@@ -1,10 +1,10 @@
-import { cnFastHash, generateKeyDerivation } from '@/services';
-
 import {
-  saveMessage,
-  addContact
-} from '../bare/sqlite';
-
+  cnFastHash,
+  generateKeyDerivation,
+  setStoreContacts,
+} from '@/services';
+import { saveMessage, addContact } from '../bare/sqlite';
+import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';
 import { trimExtra } from '@/services/utils';
@@ -34,25 +34,27 @@ class Syncer {
   }
 
   async get_pool() {
+    const lastChecked = this.lastChecked;
+    this.lastChecked = Math.floor(Date.now() / 1000);
+    const payload = {
+      method: 'POST',
+      body: JSON.stringify({ timestampBegin: lastChecked }),
+    };
+    const protocol = 'https://';
+    const input = this.node.url + ':' + this.node.port.toString() + '/get_pool';
     try {
-      const lastChecked = this.lastChecked;
-      this.lastChecked = Math.floor(Date.now() / 1000);
-      const resp = await fetch(
-        'https://' +
-          this.node.url +
-          ':' +
-          this.node.port.toString() +
-          '/get_pool',
-        {
-          method: 'POST',
-          body: JSON.stringify({ timestampBegin: lastChecked }),
-        },
-      );
+      const resp = await fetch(protocol + input, payload);
       return await resp.json();
     } catch (e) {
-      //Node error
-      console.log('err', e);
-      return false;
+      //Try http
+      try {
+        const protocol = 'http://';
+        const resp = await fetch(protocol + input, payload);
+        return await resp.json();
+      } catch (e) {
+        //Node error
+        return false;
+      }
     }
   }
 
@@ -156,10 +158,25 @@ class Syncer {
         this.incoming_pm_que.push(message);
         return true;
       }
-      //save_message(message);
-      //TODO**add save here
-      saveMessage(message.from, message.msg, message.r, message.t, thisHash, false, undefined );
-      addContact(message.from,message.from,message.k);
+
+      const added = await addContact(message.from, message.from, message.k);
+      const saved = await saveMessage(
+        message.from,
+        message.msg,
+        message.r,
+        message.t,
+        thisHash,
+        false,
+        undefined,
+      );
+      if (saved) {
+        updateMessage(saved);
+      }
+      if (added) {
+        this.known_keys.push(added.messagekey);
+        setStoreContacts([...(await getContacts()), added]);
+      }
+      setLatestMessages();
       return true;
     }
   }

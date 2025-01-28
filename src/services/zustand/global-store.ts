@@ -37,11 +37,11 @@ export const useGlobalStore = create<
     address: '',
     authenticated: false,
     balance: { locked: 0, unlocked: 0 },
-    roomMessages: [],
+    contacts: [],
     messages: [],
+    roomMessages: [],
     roomUsers: [],
     rooms: [],
-    contacts: [],
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -52,29 +52,29 @@ export const useGlobalStore = create<
       set({ balance });
     },
 
-    setCurrentRoom: (thisRoom: string) => {
-      set({ thisRoom });
-    },
     setCurrentContact: (thisContact: string) => {
       set({ thisContact });
     },
-
-    setRoomMessages: (roomMessages: Message[]) => {
-      set({ roomMessages });
+    setCurrentRoom: (thisRoom: string) => {
+      set({ thisRoom });
     },
 
     setMessages: (messages: Message[]) => {
       set({ messages });
     },
 
+    setRoomMessages: (roomMessages: Message[]) => {
+      set({ roomMessages });
+    },
+
     setRoomUserList: (roomUsers: User[]) => {
       set({ roomUsers });
     },
-    setStoreRooms: async (rooms: Room[]) => {
-      set({ rooms });
-    },
     setStoreContacts: (contacts: Contact[]) => {
       set({ contacts });
+    },
+    setStoreRooms: async (rooms: Room[]) => {
+      set({ rooms });
     },
     setSyncStatus: (syncStatus: number[]) => {
       set({ syncStatus });
@@ -83,8 +83,8 @@ export const useGlobalStore = create<
       set({ transactions });
     },
     syncStatus: [],
-    thisRoom: '',
     thisContact: '',
+    thisRoom: '',
     transactions: [],
   })),
 );

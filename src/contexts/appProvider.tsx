@@ -6,6 +6,7 @@ import { bare, keep_alive } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
+  setStoreContacts,
   useGlobalStore,
   usePreferencesStore,
   useThemeStore,
@@ -14,9 +15,13 @@ import {
 } from '@/services';
 import { sleep } from '@/utils';
 
-import { joinRooms, setLatestMessages, setLatestRoomMessages } from '../services/bare';
+import {
+  joinRooms,
+  setLatestMessages,
+  setLatestRoomMessages,
+} from '../services/bare';
 import { keychain } from '../services/bare/crypto';
-import { initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
@@ -91,6 +96,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await initDB();
     await setLatestRoomMessages();
     await setLatestMessages();
+
     let node = {};
     if (preferences?.node === undefined) {
       node = { port: 80, url: 'node.xkr.network' };
@@ -103,15 +109,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Connection.listen();
     await Wallet.init(node);
 
+    const contacts = await getContacts();
+    setStoreContacts(contacts);
+    const knownKeys = [];
+    for (const contact of contacts) {
+      knownKeys.push(contact.messagekey);
+    }
     const keys = Wallet.privateKeys();
+    MessageSync.init(node, knownKeys, keys);
 
-    const contacts = [
-      'ec5bc96b9e2431fbe146d23de585acc9cad32ac1adaf412f830dc68985fa6d27',
-      '7368d6437260c59e5cc2609d8baa2b038bea03c14fd77db8e026678aaa63624b',
-    ]; //KNOWN pub keys from db
-    MessageSync.init(node, contacts, keys);
-
-    console.log('huginAddress');
     //Set this somewhere in a state?
     const huginAddress = Wallet.address + keychain.getMsgKey();
 

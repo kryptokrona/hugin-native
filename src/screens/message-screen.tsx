@@ -15,8 +15,6 @@ import {
 } from '@react-navigation/native';
 import { t } from 'i18next';
 
-import { Peers } from 'lib/connections';
-
 import {
   CustomIcon,
   GroupMessageItem,
@@ -30,13 +28,9 @@ import { MainScreens } from '@/config';
 import {
   useGlobalStore,
   useUserStore,
-  saveRoomMessageAndUpdate,
-  onSendGroupMessageWithFile,
-  onSendGroupMessage,
-  setStoreCurrentRoom,
   useThemeStore,
-  Wallet,
   getCurrentRoom,
+  setStoreCurrentContact,
 } from '@/services';
 import type {
   SelectedFile,
@@ -46,6 +40,10 @@ import type {
 } from '@/types';
 
 import { Header } from '../components/_navigation/header';
+import { Peers } from '../lib/connections';
+import { updateMessage } from '../services/bare/contacts';
+import { saveMessage } from '../services/bare/sqlite';
+import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessageScreen>;
@@ -58,8 +56,12 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { name: userName } = useUserStore((state) => state.user);
-  const { address, name } = route.params;
+  const contacts = useGlobalStore((state) => state.contacts);
+  const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.messages);
+  const messageKey = contacts.find((a) => a.address === roomKey)?.messagekey;
+  const huginAddress = roomKey + messageKey;
+  console.log('Got hugin send to address', huginAddress);
   // Use getRoomMessages with a page index (0 is default) to load more messages
   //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
@@ -81,7 +83,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   function onCustomizeGroupPress() {
     navigation.push(MainScreens.ModifyGroupScreen, {
       name,
-      address,
+      roomKey,
     });
   }
 
@@ -119,9 +121,9 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      setStoreCurrentRoom(address);
+      setStoreCurrentContact(roomKey);
       return () => {};
-    }, [address]),
+    }, [roomKey]),
   );
 
   useLayoutEffect(() => {
@@ -150,7 +152,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         />
       ),
     });
-  }, [address, name]);
+  }, [roomKey, name]);
 
   // useLayoutEffect(() => {
   //   const timeout = setTimeout(() => {
@@ -177,31 +179,27 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
     console.log('Sending to room:', name);
     if (file) {
-      onSendGroupMessageWithFile(address, file, text);
+      // onSendGroupMessageWithFile(address, file, text);
       //If we need to return something... or print something locally
       // console.log('sent file!', sentFile);
     } else {
-      const sent = await onSendGroupMessage(
-        address,
-        text,
-        reply ? reply : replyToMessageHash,
-        tip ? tip : false,
-      );
-      const save = JSON.parse(sent);
+      const hash = await Wallet.send_message(text, huginAddress);
 
-      await saveRoomMessageAndUpdate(
-        save.k,
-        save.m,
-        save.g,
-        save.r,
-        save.t,
-        save.n,
-        save.hash,
-        true,
-        undefined,
-        undefined,
-        tip,
-      );
+      if (hash) {
+        const saved = await saveMessage(
+          roomKey,
+          text,
+          '',
+          Date.now(),
+          hash,
+          true,
+          undefined,
+        );
+        if (saved) {
+          updateMessage(saved);
+        }
+      }
+
       setReplyToMessageHash('');
     }
     if (!emoji) {

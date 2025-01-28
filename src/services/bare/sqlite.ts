@@ -55,7 +55,6 @@ export const initDB = async () => {
     //   unreads?: number;
     // }
 
-
     query = `CREATE TABLE IF NOT EXISTS contacts (
       name TEXT,
       address TEXT NOT NULL,
@@ -63,8 +62,6 @@ export const initDB = async () => {
       latestmessage INT DEFAULT 0,
       UNIQUE (address, messagekey)
   )`;
-  
-  
 
     await db.executeSql(query);
 
@@ -310,21 +307,25 @@ export async function getRooms() {
   return rooms;
 }
 
-export async function addContact(name: string, address: string, messagekey: string) {
+export async function addContact(
+  name: string,
+  address: string,
+  messagekey: string,
+) {
   try {
-
     const contactExists = await getContact(address);
 
-    if(contactExists) return false;
+    if (contactExists) {
+      return false;
+    }
 
     const result = await db.executeSql(
       'INSERT INTO contacts (name, address, messagekey, latestmessage) VALUES (?, ?, ?, ?)',
       [name, address, messagekey, Date.now()],
     );
-    return true;
+    return { address, messagekey, name };
   } catch (err) {
-    console.log('Failed to add contact: ', err)
-    return false;
+    console.log('Failed to add contact: ', err);
   }
 }
 
@@ -343,13 +344,16 @@ export async function getContacts() {
 }
 
 export async function getContact(address: string) {
-  const results = await db.executeSql('SELECT * FROM contacts WHERE address = ?', [address]);
+  const results = await db.executeSql(
+    'SELECT * FROM contacts WHERE address = ?',
+    [address],
+  );
   const contacts: Array<any> = [];
   //const rooms: Room[] = [];
 
   for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
-      return true;
+      return result.rows.item(0);
     }
   }
 
@@ -372,10 +376,10 @@ export async function getLatestMessages() {
         return;
       }
       contactsList.unshift({
-        message: latestmessagedb.message,
-        name: contact.name,
         address: contact.address,
-        key: contact.key,
+        message: latestmessagedb.message,
+        messagekey: contact.messagekey,
+        name: contact.name,
         timestamp: latestmessagedb.timestamp,
       });
     }
@@ -465,15 +469,14 @@ export async function getMessages(
         const res = result.rows.item(index);
         res.room = res.sent ? 'me' : res.conversation;
         res.address = res.sent ? 'me' : res.conversation;
-        res.nickname = 'FixMe'; // TODO: Get actual nickname from contacts
+        const contact = await getContact(res.address);
+        res.nickname = res.sent ? 'me' : contact.name;
         const r: Message = toMessage(res);
         messages.push(r);
       }
     }
 
-    console.log('messagesdebug:', messages)
-
-    return messages;
+    return messages.reverse();
   }
 
   return await setReplies(results);
@@ -696,8 +699,8 @@ export async function saveMessage(
       tip,
     };
     return newMessage;
-  } catch (err) { 
-    console.log('savemsgerror:', err)
+  } catch (err) {
+    console.log('savemsgerror:', err);
     return false;
   }
 }

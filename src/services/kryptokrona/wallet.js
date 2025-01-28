@@ -9,20 +9,20 @@ import {
   generateKeyDerivation,
   generateKeys,
 } from '../NativeTest';
-import { hexToUint, parse } from '../utils';
+import { hexToUint, parse, toHex } from '../utils';
 import { Address, CryptoNote } from 'kryptokrona-utils';
 import {
   setBalance,
   setStoreAddress,
   setTransactions,
   setSyncStatus,
-  keychain,
-  nonceFromTimestamp,
-  MessageSync,
 } from '@/services';
 import Toast from 'react-native-toast-message';
 import naclUtil from 'tweetnacl-util';
 import * as NaclSealed from 'tweetnacl-sealed-box';
+import tweetnacl from 'tweetnacl';
+import { nonceFromTimestamp, keychain } from '../bare/crypto';
+import { MessageSync } from '../hugin/syncer';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -169,20 +169,17 @@ export class ActiveWallet {
     console.log('Start this wallet ->', this.active);
     setStoreAddress(this.address);
     this.active.setBlockOutputProcessFunc(processBlockOutputs);
-    //Disable wallet optimization
-    await this.active.enableAutoOptimization(false);
-    console.log('Wallet enable auto opt');
-    //Disable scanning for transactions in pool
-    await this.active.scanPoolTransactions(false);
+    this.active.enableAutoOptimization(false);
+    this.active.scanPoolTransactions(false);
 
     await this.active.start();
-    console.log('Wallet started');
     await this.create_message_wallet();
-    console.log('Scan pool txs no');
     this.optimize_message_inputs();
-    this.started = true;
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
+    this.started = true;
+    console.log('Wallet started');
+
     setInterval(() => this.save(), 30000);
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
@@ -307,6 +304,10 @@ export class ActiveWallet {
         subWalletKeys.private_key,
       );
     }
+    console.log(
+      'this.active.subWallets.getAddresses()',
+      this.active.subWallets.getAddresses(),
+    );
   }
 
   async optimize_message_inputs(force = false) {
@@ -388,12 +389,10 @@ export class ActiveWallet {
     let address = receiver.substring(0, 99);
     let messageKey = receiver.substring(99, 163);
     let has_history = await this.check_history(messageKey, address);
-    if (!beam_this) {
-      let balance = await this.check_balance();
-      if (!balance) {
-        console.log('Error: No balance to send with');
-        return;
-      }
+    let balance = await this.check_balance();
+    if (!balance) {
+      console.log('Error: No balance to send with');
+      return;
     }
 
     let payload_hex;
@@ -407,40 +406,37 @@ export class ActiveWallet {
     );
     //Choose subwallet with message inputs
     let messageSubWallet = this.addresses()[1];
-
-    if (!beam) {
-      let result = await this.active.sendTransactionAdvanced(
-        [[messageSubWallet, 1000]], // destinations,
-        3, // mixin
-        { fixedFee: 1000, isFixedFee: true }, // fee
-        undefined, //paymentID
-        [messageSubWallet], // subWalletsToTakeFrom
-        undefined, // changeAddresss
-        true, // relayToNetwork
-        false, // sneedAll
-        Buffer.from(payload_hex, 'hex'),
+    let result = await this.active.sendTransactionAdvanced(
+      [[messageSubWallet, 1000]], // destinations,
+      3, // mixin
+      { fixedFee: 1000, isFixedFee: true }, // fee
+      undefined, //paymentID
+      [messageSubWallet], // subWalletsToTakeFrom
+      undefined, // changeAddresss
+      true, // relayToNetwork
+      false, // sneedAll
+      Buffer.from(payload_hex, 'hex'),
+    );
+    if (result.success) {
+      //save_message(sentMsg);
+      this.optimize_message_inputs();
+      optimized = true;
+    } else {
+      let error = {
+        message: `Failed to send, please wait a couple of minutes.`,
+        name: 'Error',
+        hash: Date.now(),
+      };
+      optimized = false;
+      this.optimize_message_inputs(true);
+      console.log(
+        `Error: Failed to send transaction: ${result.error.toString()}`,
       );
-      if (result.success) {
-        //save_message(sentMsg);
-        this.optimize_message_inputs();
-        optimized = true;
-      } else {
-        let error = {
-          message: `Failed to send, please wait a couple of minutes.`,
-          name: 'Error',
-          hash: Date.now(),
-        };
-        optimized = false;
-        this.optimize_message_inputs(true);
-        console.log(
-          `Error: Failed to send transaction: ${result.error.toString()}`,
-        );
-        console.log('Error: ', error);
-      }
-    } else if (beam) {
-      send_beam_message(sendMsg, address);
+      console.log('Error: ', error);
+      return false;
     }
 
+    return result.transactionHash;
     //TODO save message
   }
 
@@ -482,7 +478,7 @@ export class ActiveWallet {
         JSON.stringify(payload_json),
       );
 
-      box = nacl.box(
+      box = tweetnacl.box(
         payload_json_decoded,
         nonceFromTimestamp(timestamp),
         hexToUint(messageKey),
