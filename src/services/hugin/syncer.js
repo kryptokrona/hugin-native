@@ -3,7 +3,12 @@ import {
   generateKeyDerivation,
   setStoreContacts,
 } from '@/services';
-import { saveMessage, addContact, getContacts } from '../bare/sqlite';
+import {
+  saveMessage,
+  addContact,
+  getContacts,
+  messageExists,
+} from '../bare/sqlite';
 import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';
@@ -130,6 +135,7 @@ class Syncer {
           //Check for viewtag
 
           if (await this.check_for_viewtag(thisExtra)) {
+            if (await messageExists(thisHash)) continue;
             await this.check_for_pm(thisExtra, thisHash, que);
             continue;
           }
