@@ -337,6 +337,7 @@ export async function addContact(
   name: string,
   address: string,
   messagekey: string,
+  add: boolean = false,
 ) {
   try {
     const contactExists = await getContact(address);
@@ -351,17 +352,19 @@ export async function addContact(
     );
     console.log('Added contact: ', address, messagekey, name);
 
-    await saveMessage(
-      address,
-      'Conversation started',
-      '',
-      Date.now(),
-      '123',
-      true,
-      'me',
-      false,
-      'Me',
-    );
+    if (!add) {
+      await saveMessage(
+        address,
+        'Conversation started',
+        '',
+        Date.now(),
+        '123',
+        true,
+        'me',
+        false,
+        'Me',
+      );
+    }
 
     return { address, messagekey, name };
   } catch (err) {

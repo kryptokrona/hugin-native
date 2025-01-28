@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useState } from 'react';
 
 import { FlatList, TouchableOpacity, View } from 'react-native';
 
+import Clipboard from '@react-native-clipboard/clipboard';
 import {
   useFocusEffect,
   useNavigation,
@@ -22,7 +23,6 @@ import {
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
-  joinAndSaveRoom,
   setStoreCurrentContact,
   setStoreMessages,
   useGlobalStore,
@@ -30,9 +30,8 @@ import {
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
-import {setLatestMessages, setMessages} from '../services/bare/contacts';
-import Clipboard from '@react-native-clipboard/clipboard';
-import { addContact, saveMessage } from '../services/bare/sqlite';
+import { setLatestMessages, setMessages } from '../services/bare/contacts';
+import { addContact } from '../services/bare/sqlite';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
@@ -107,10 +106,10 @@ export const MessagesScreen: React.FC<Props> = () => {
   async function onJoinpress() {
     setStoreMessages([]);
 
-    const xkrAddr = link.substring(0,99);
+    const xkrAddr = link.substring(0, 99);
     const messageKey = link.slice(-64);
-    
-    await addContact('Anon', xkrAddr, messageKey);
+
+    await addContact('Anon', xkrAddr, messageKey, true);
 
     setLatestMessages();
 
@@ -119,13 +118,15 @@ export const MessagesScreen: React.FC<Props> = () => {
     await setMessages(xkrAddr, 0);
     setStoreCurrentContact(xkrAddr);
 
-    navigation.navigate(MainScreens.MessageScreen, { name: 'Anon', roomKey: xkrAddr });
+    navigation.navigate(MainScreens.MessageScreen, {
+      name: 'Anon',
+      roomKey: xkrAddr,
+    });
     // navigation.push(MainScreens.MessageScreen, {
     //   name: 'Anon',
     //   roomKey: xkrAddr
     // });
     setLink('');
-  
   }
 
   return (
