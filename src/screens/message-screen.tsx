@@ -55,7 +55,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
-  const { name: userName } = useUserStore((state) => state.user);
+  const { name: userName, address } = useUserStore((state) => state.user);
   const contacts = useGlobalStore((state) => state.contacts);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.messages);
@@ -193,7 +193,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           Date.now(),
           hash,
           true,
-          undefined,
+          address,
         );
         if (saved) {
           updateMessage(saved);
