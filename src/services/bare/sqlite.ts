@@ -352,7 +352,7 @@ export async function addContact(
     );
     console.log('Added contact: ', address, messagekey, name);
 
-    if (!add) {
+    if (add) {
       await saveMessage(
         address,
         'Conversation started',
