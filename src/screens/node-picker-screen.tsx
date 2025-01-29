@@ -19,7 +19,8 @@ import {
   TextField,
 } from '@/components';
 import { useNavigation } from '@react-navigation/native';
-import { usePreferencesStore, useThemeStore, Wallet } from '@/services';
+import { usePreferencesStore, useThemeStore } from '@/services';
+import { Wallet } from '../services/kryptokrona';
 import { Preferences } from '@/types';
 import { sleep } from '@/utils';
 
