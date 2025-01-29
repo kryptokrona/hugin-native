@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import ReactNativeForegroundService from '@supersami/rn-foreground-service';
+import { keep_alive } from '../lib/native';
 
 class ForegroundService {
   constructor() {
