@@ -108,5 +108,11 @@
   "usePinCode": "Use a 6 digit PIN Code.",
   "send": "Send",
   "settingsTitle": "Settings",
-  "modify": "Room settings"
+  "modify": "Room settings",
+  "messages": "Messages",
+  "addUser": "Add contact",
+  "copyAddress": "Copy address",
+  "copy": "Copy",
+  "deleteContact": "Delete contact",
+  "changeName": "Change name"
 }
