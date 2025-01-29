@@ -109,10 +109,9 @@ export const PickNodeScreen: React.FC<Props> = () => {
 
     for (const node of shuffledNodes) {
       const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${node.port}/info`;
-
       try {
         const response = await fetchWithTimeout(nodeURL, { method: 'GET' });
-        if (response.ok) {
+        if (response?.ok) {
           setLoadingNode(false);
           chooseNode(node);
           return;
@@ -185,7 +184,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
               />
               <TextButton
                 icon={loadingNode ? <ActivityIndicator color="#000" /> : undefined}
-                onPress={randomNode}>
+                onPress={() => {randomNode(true)}}>
                 {'Random node'}
               </TextButton>
               <TextButton
