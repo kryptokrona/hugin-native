@@ -114,5 +114,6 @@
   "copyAddress": "Copy address",
   "copy": "Copy",
   "deleteContact": "Delete contact",
-  "changeName": "Change name"
+  "changeName": "Change name",
+  "noTransactions": "No transactions yet"
 }
