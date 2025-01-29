@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import { ScreenLayout, TextButton, TextField } from '@/components';
+import { ScreenLayout, TextButton, TextField, XKRLogo } from '@/components';
 import { AuthScreens } from '@/config';
 import { useThemeStore } from '@/services';
 import { AuthStackNavigationType } from '@/types';
@@ -33,9 +33,10 @@ export const WelcomeScreen: React.FC<Props> = () => {
   return (
     <ScreenLayout>
       <View style={Styles.container}>
+        <XKRLogo />
         <TextField
           size="large"
-          style={{ color: theme.foreground, marginBottom: 40 }}>
+          style={{ color: theme.foreground, marginBottom: 40, textAlign: 'center' }}>
           Welcome to Hugin Messenger!
         </TextField>
         <TextButton onPress={createAccount}>{'Create new account'}</TextButton>
@@ -49,6 +50,5 @@ const Styles = StyleSheet.create({
   container: {
     flex: 1,
     margin: 20,
-    marginTop: 100,
   },
 });
