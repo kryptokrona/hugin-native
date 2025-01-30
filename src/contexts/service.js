@@ -9,6 +9,7 @@ class ForegroundService {
   async init() {
     if (Platform.OS === 'android') {
       this.service = ReactNativeForegroundService;
+      this.addTask();
       return await this.startTask();
     } else {
       return false;

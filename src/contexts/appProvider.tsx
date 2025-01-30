@@ -46,7 +46,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     //Check if android background task is already running
 
     if (Platform.OS === 'android') {
-      Foreground.addTask();
       const err = await Foreground.init();
       if (err) {
         return;
