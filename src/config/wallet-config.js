@@ -140,11 +140,6 @@ class walletConfig {
     /**
      * Use our native func instead of JS slowness
      */
-    this.derivePublicKey = Platform.OS === 'ios' ? undefined : derivePublicKey;
-
-    /**
-     * Use our native func instead of JS slowness
-     */
     this.derivePublicKey = derivePublicKey;
     this.generateKeyDerivation = generateKeyDerivation;
     this.generateRingSignatures = generateRingSignatures;
@@ -265,9 +260,9 @@ class walletConfig {
      * detailed here: https://docs.turtlepay.io/blockapi/
      */
     this.nodeListURL =
-      'https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/master/nodes.json';
+      'https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/refs/heads/main/nodes.json';
     this.nodeListURLs = [
-      'https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/master/nodes.json',
+      'https://raw.githubusercontent.com/kryptokrona/kryptokrona-public-nodes/refs/heads/main/nodes.json',
       'https://kryptokrona.se/nodes.json',
     ];
 
