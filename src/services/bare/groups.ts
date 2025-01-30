@@ -43,6 +43,9 @@ let current = '';
 async function onAppStateChange(state: string) {
   if (state === 'inactive') {
     console.log('Inactive state');
+    send_idle_status(true);
+    current = getCurrentRoom();
+    setStoreCurrentRoom('');
     //I think this is for iPhone only
   } else if (state === 'background') {
     send_idle_status(true);
