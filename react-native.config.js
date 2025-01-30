@@ -5,7 +5,11 @@ module.exports = {
   },
   assets: ['./src/assets/fonts'],
   dependencies: {
-    
+    'react-native-vector-icons': {
+      platforms: {
+        ios: null, // Disable auto-linking for iOS
+      },
+    },
     'react-native-background-fetch': {
       platforms: {
         android: null,
