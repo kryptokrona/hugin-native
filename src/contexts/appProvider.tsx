@@ -19,6 +19,7 @@ import { Foreground } from './service';
 
 import {
   joinRooms,
+  leaveRooms,
   setLatestMessages,
   setLatestRoomMessages,
 } from '../services/bare';
@@ -32,6 +33,9 @@ interface AppProviderProps {
   children: React.ReactNode;
 }
 
+let started = false;
+let joining = false;
+
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
   const authenticated = useGlobalStore((state) => state.authenticated);
@@ -44,7 +48,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (Platform.OS === 'android') {
       Foreground.addTask();
       const err = await Foreground.init();
-      console.log('err?', err);
       if (err) {
         return;
       }
@@ -85,6 +88,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await bare(user);
     await sleep(100);
     await joinRooms();
+    started = true;
   }
 
   useEffect(() => {
@@ -115,16 +119,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   });
 
   AppState.addEventListener('change', onAppStateChange);
-
   async function onAppStateChange(state: string) {
     if (state === 'inactive') {
       console.log('Inactive state');
+      if (Platform.OS === 'ios') {
+        await leaveRooms();
+      }
       //I think this is for iPhone only
     } else if (state === 'background') {
       console.log('Start timer');
       Timeout.start();
       //Start background timer to shut off foreground task?
     } else if (state === 'active') {
+      if (started && !joining) {
+        joining = true;
+        if (Platform.OS === 'ios') {
+          await joinRooms();
+        }
+        joining = false;
+      }
       console.log('Reset timer');
       Timeout.reset();
     }

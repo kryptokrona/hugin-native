@@ -187,7 +187,6 @@ export const leaveRooms = async () => {
   for (const r of rooms) {
     end_swarm(r.key);
   }
-  await sleep(200);
   return;
 };
 

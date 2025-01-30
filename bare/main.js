@@ -94,6 +94,8 @@ const newSwarm = async (hashkey, key, admin) => {
 const endSwarm = async (key) => {
   const swarm = getRoom(key);
   if (!swarm) return;
+  const rooms = Hugin.rooms.filter((a) => a.key !== key);
+  Hugin.rooms = rooms;
   await end_swarm(swarm.topic);
 };
 
