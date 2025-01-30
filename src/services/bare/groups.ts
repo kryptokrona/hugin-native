@@ -43,9 +43,9 @@ let current = '';
 async function onAppStateChange(state: string) {
   if (state === 'inactive') {
     console.log('Inactive state');
-    send_idle_status(true);
-    current = getCurrentRoom();
-    setStoreCurrentRoom('');
+    // send_idle_status(true);
+    // current = getCurrentRoom();
+    // setStoreCurrentRoom('');
     //I think this is for iPhone only
   } else if (state === 'background') {
     send_idle_status(true);
@@ -53,9 +53,13 @@ async function onAppStateChange(state: string) {
     setStoreCurrentRoom('');
     //Start background timer to shut off foreground task?
   } else if (state === 'active') {
-    send_idle_status(false);
-    setStoreCurrentRoom(current);
-    current = '';
+
+    if (Platform.OS == 'android') 
+      {
+        send_idle_status(false);
+        setStoreCurrentRoom(current);
+        current = '';
+      }      
 
     //Reset timer?
   }
