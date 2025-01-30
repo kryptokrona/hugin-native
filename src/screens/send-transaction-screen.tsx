@@ -10,7 +10,8 @@ import {
     useNavigation,
   } from '@react-navigation/native';
 
-import { useThemeStore, Wallet } from '@/services';
+import { useThemeStore } from '@/services';
+import { Wallet } from '../services/kryptokrona';
 import Toast from 'react-native-toast-message';
 
 interface Props {}
