@@ -1,6 +1,6 @@
 import { WalletBackend, Daemon } from 'kryptokrona-wallet-backend-js';
 import { WalletConfig } from 'config/wallet-config';
-import { saveWallet, loadWallet } from '../../services/bare/sqlite';
+import { saveWallet, loadWallet, saveRoomToDatabase } from '../../services/bare/sqlite';
 import {
   processBlockOutputs,
   makePostRequest,
@@ -16,13 +16,16 @@ import {
   setStoreAddress,
   setTransactions,
   setSyncStatus,
+  setStoreCurrentRoom,
 } from '@/services';
 import Toast from 'react-native-toast-message';
 import naclUtil from 'tweetnacl-util';
 import * as NaclSealed from 'tweetnacl-sealed-box';
 import tweetnacl from 'tweetnacl';
-import { nonceFromTimestamp, keychain } from '../bare/crypto';
+import { nonceFromTimestamp, keychain, randomKey } from '../bare/crypto';
 import { MessageSync } from '../hugin/syncer';
+
+import { joinAndSaveRoom, saveRoomMessageAndUpdate, setRoomMessages } from '../bare'; 
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -43,11 +46,29 @@ export class ActiveWallet {
     return true;
   }
 
+  async joinBetaRoom() {
+    const key = '8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc';
+    await saveRoomToDatabase('Hugin Beta Testers', key, undefined);
+    await saveRoomMessageAndUpdate(
+      this.address,
+      'Joined room',
+      key,
+      '',
+      Date.now(),
+      'Anon',
+      randomKey(),
+      true,
+    );
+    setRoomMessages(key, 0);
+    setStoreCurrentRoom(key);
+  }
+
   async create(node) {
     this.setDaemon(node);
     this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
     this.address = this.addresses()[0];
     this.loaded = true;
+    await this.joinBetaRoom()
     // await this.start();
     await this.save();
   }
@@ -118,6 +139,7 @@ export class ActiveWallet {
     this.loaded = true;
     await this.save();
     await this.start();
+    await this.joinBetaRoom()
     return true;
   }
 
