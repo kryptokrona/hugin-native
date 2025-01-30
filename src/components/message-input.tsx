@@ -224,7 +224,7 @@ export const MessageInput: React.FC<Props> = ({
           onBlur={onBlur}
           ref={textInputRef}
           onFocus={onFocus}
-          placeholder="  Aa..."
+          placeholder=" "
           placeholderTextColor={theme.mutedForeground}
           multiline
           autoCapitalize="sentences"
@@ -295,6 +295,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flex: 1,
     marginHorizontal: 6,
-    minHeight: 40
+    minHeight: 40,
+    fontFamily: 'Montserrat',
+    lineHeight: 25,
+    paddingHorizontal: 10,
+    fontSize: 15
   },
 });
