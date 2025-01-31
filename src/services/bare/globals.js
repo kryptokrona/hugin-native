@@ -1,5 +1,6 @@
 import NetInfo from '@react-native-community/netinfo';
-import { close_all_connections } from 'lib/native';
+import { joinRooms, leaveRooms } from './groups';
+import { sleep } from '@/utils';
 
 class FilesCache {
   constructor() {
@@ -53,9 +54,11 @@ class ConnectionType {
 
   async restart(type) {
     if (this.type() !== '') {
-      // close_all_connections();
+      this.reset = true;
+      await leaveRooms();
+      await sleep(200);
+      await joinRooms();
     }
-    this.reset = true;
     this.update(type);
     this.done();
   }
