@@ -1,23 +1,33 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { AppState, Platform, SafeAreaView } from 'react-native';
 
-import { bare, keep_alive, send_idle_status } from 'lib/native';
+import { bare, send_idle_status } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
   getCurrentRoom,
+  getThisRoom,
   setStoreCurrentRoom,
+  updateUser,
   useGlobalStore,
   usePreferencesStore,
+  useRoomStore,
   useThemeStore,
   useUserStore,
 } from '@/services';
 import { sleep } from '@/utils';
 
-import { joinRooms, setLatestRoomMessages } from '../services/bare';
+import { Foreground } from './service';
+
+import {
+  joinRooms,
+  leaveRooms,
+  setLatestMessages,
+  setLatestRoomMessages,
+} from '../services/bare';
 import { keychain } from '../services/bare/crypto';
-import { initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
@@ -31,62 +41,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
+  const { setThisRoom } = useRoomStore();
 
-  let ReactNativeForegroundService: any;
-
-  useEffect(() => {
-    const loadForegroundService = async () => {
-      if (Platform.OS === 'android') {
-        const { default: Service } = await import(
-          '@supersami/rn-foreground-service'
-        );
-        ReactNativeForegroundService = Service;
-      }
-    };
-    loadForegroundService();
-  }, []);
-
-  const addTask = async () => {
-    if (Platform.OS === 'android') {
-      ReactNativeForegroundService?.add_task(() => keep_alive(), {
-        delay: 10000,
-        onError: (e) => console.error('Error starting task', e),
-        onLoop: true,
-        taskId: 'hugin',
-      });
-    }
-  };
-
-  const startTask = async () => {
-    try {
-      await ReactNativeForegroundService.start({
-        ServiceType: 'dataSync',
-        button: false,
-        button2: false,
-        button2Text: 'Stop',
-        buttonOnPress: 'cray',
-        buttonText: 'Close',
-        color: '#000000',
-        icon: 'ic_launcher',
-        id: 1244,
-        message: 'Syncing messages...',
-        setOnlyAlertOnce: 'true',
-        title: 'Hugin',
-        visibility: 'public',
-      });
-    } catch (error) {
-      console.error('Failed to start foreground service', error);
-    }
-  };
+  const started = useRef(false);
+  const joining = useRef(false);
 
   async function init() {
     if (Platform.OS === 'android') {
-      await addTask();
-      await startTask();
+      const err = await Foreground.init();
+      if (err) {
+        return;
+      }
     }
 
     await initDB();
     await setLatestRoomMessages();
+    await setLatestMessages();
 
     const node = preferences?.node
       ? {
@@ -98,21 +68,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Connection.listen();
     await Wallet.init(node);
 
+    const contacts = await getContacts();
+    const knownKeys = contacts.map((contact) => contact.messagekey);
     const keys = Wallet.privateKeys();
-    const contacts = [
-      'ec5bc96b9e2431fbe146d23de585acc9cad32ac1adaf412f830dc68985fa6d27',
-      '7368d6437260c59e5cc2609d8baa2b038bea03c14fd77db8e026678aaa63624b',
-    ]; // KNOWN pub keys from db
-    MessageSync.init(node, contacts, keys);
+    MessageSync.init(node, knownKeys, keys);
 
-    console.log('huginAddress');
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
+
+    await updateUser({ huginAddress });
 
     Files.update(await loadSavedFiles());
     await bare(user);
     await sleep(100);
     await joinRooms();
+    started.current = true;
   }
 
   useEffect(() => {
@@ -122,18 +92,35 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   }, [authenticated, user?.address]);
 
-  useEffect(() => {
-    const Timeout = new Timer(() => {
-      console.log('Stop task after inactivity');
-      if (Platform.OS === 'android') {
-        ReactNativeForegroundService?.stopAll();
-      }
+  if (Platform.OS === 'android') {
+    AppState.addEventListener('blur', () => {
+      console.log('App not in focus.');
     });
+  }
 
+  const stopTasks = () => {
+    Foreground?.service?.stopAll();
+  };
+
+  const Timeout = new Timer(() => {
+    console.log('Stop task!');
+
+    if (Platform.OS === 'android') {
+      stopTasks();
+    }
+  });
+
+  useEffect(() => {
     const onAppStateChange = async (state: string) => {
       if (state === 'inactive') {
         console.log('Inactive state');
         setStoreCurrentRoom(getCurrentRoom());
+
+        if (Platform.OS === 'ios') {
+          const thisRoom = getCurrentRoom();
+          setThisRoom(thisRoom);
+          await leaveRooms();
+        }
       } else if (state === 'background') {
         console.log('Start timer');
         Timeout.start();
@@ -142,8 +129,23 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       } else if (state === 'active') {
         console.log('App active');
         Timeout.reset();
+        send_idle_status(false);
+
+        if (!started.current) {
+          started.current = true;
+        }
+
+        if (!joining.current) {
+          joining.current = true;
+          if (Platform.OS === 'ios') {
+            const currentRoom = getThisRoom();
+            setStoreCurrentRoom(currentRoom);
+            await joinRooms();
+          }
+          joining.current = false;
+        }
+
         if (Platform.OS === 'android') {
-          send_idle_status(false);
           setStoreCurrentRoom(getCurrentRoom());
         }
       }
