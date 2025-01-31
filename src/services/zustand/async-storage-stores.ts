@@ -1,18 +1,15 @@
-import { Platform } from 'react-native';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNFS from 'react-native-fs';
-import { create } from 'zustand';
+import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
 import {
   createJSONStorage,
   persist,
   subscribeWithSelector,
 } from 'zustand/middleware';
-
 import { defaultTheme, themes } from '@/styles';
-import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
 
 import { ASYNC_STORAGE_KEYS } from './async-storage-keys';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNFS from 'react-native-fs';
+import { create } from 'zustand';
 import { setAuthenticated } from './global-store';
 
 interface UserStore {
@@ -39,8 +36,8 @@ interface RoomStore {
 export const useRoomStore = create<RoomStore>()(
   persist(
     (set) => ({
-      thisRoom: defaultRoom,
       setThisRoom: (room) => set({ thisRoom: room }),
+      thisRoom: defaultRoom,
     }),
     {
       name: ASYNC_STORAGE_KEYS.CURRENT_ROOM,
@@ -62,17 +59,17 @@ export const defaultRoom = 'lobby';
 export const useAppStoreState = create<AppStoreState>()((set) => ({
   _hasHydrated: {
     preferences: false,
+    room: '',
     theme: false,
     user: false,
-    room: ''
   },
   resetHydration: () =>
     set(() => ({
       _hasHydrated: {
         preferences: false,
+        room: '',
         theme: false,
         user: false,
-        room: ''
       },
     })),
   setHasHydrated: (key) =>
@@ -187,11 +184,12 @@ export const defaultPreferences: Preferences = {
 export const defaultUser: User = {
   address: '',
   downloadDir: RNFS.CachesDirectoryPath,
+  huginAddress: '',
+
   keys: {},
   // TODO test this properly
   name: 'Anon',
   room: 'lobby',
-  huginAddress: ''
 };
 
 export const getAuthMethod = () => {

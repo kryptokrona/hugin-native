@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from 'react';
+import React from 'react';
 
 import { View, Alert } from 'react-native';
 
@@ -21,9 +21,6 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<MainStackNavigationType>();
   const pincode = usePreferencesStore((state) => state.preferences?.pincode);
-  useLayoutEffect(() => {
-    navigation.setOptions({ title: '' });
-  }, [navigation]);
 
   const finishProcess = () => {
     setAuthenticated(true);
@@ -34,9 +31,9 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
     }
   };
 
-  const handleForgotPin = () => {
-    navigation.navigate(AuthScreens.ForgotPinScreen);
-  };
+  // const handleForgotPin = () => {
+  //   navigation.navigate(AuthScreens.ForgotPinScreen);
+  // };
 
   const verifyPin = (inputPin: string) => {
     if (pincode === inputPin) {

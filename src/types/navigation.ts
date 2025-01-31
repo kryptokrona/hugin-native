@@ -1,7 +1,7 @@
-import { NavigatorScreenParams } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-
 import { AuthScreens, MainScreens, Stacks } from '@/config';
+
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type MainNavigationParamList = {
   [MainScreens.SettingsScreen]: undefined;
@@ -49,7 +49,14 @@ export type AuthStackParamList = {
     | { finishFunction?: (nav?: MainStackNavigationType) => void }
     | undefined;
   [AuthScreens.SplashScreen]: undefined;
-  [AuthScreens.CreateAccountScreen]: undefined;
+  [AuthScreens.CreateAccountScreen]:
+    | {
+        selectedValues: {
+          blockHeight: number;
+          seedWords: string[];
+        };
+      }
+    | undefined;
   [AuthScreens.WelcomeScreen]: undefined;
   [AuthScreens.RestoreAccountScreen]: undefined;
 };

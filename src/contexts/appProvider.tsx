@@ -1,10 +1,7 @@
-import { useEffect, useRef } from 'react';
-
 import { AppState, Platform, SafeAreaView } from 'react-native';
-
-import { bare, send_idle_status } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
-
+import { bare, send_idle_status } from 'lib/native';
+import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import {
   getCurrentRoom,
   getThisRoom,
@@ -16,21 +13,20 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { sleep } from '@/utils';
-
-import { Foreground } from './service';
-
 import {
   joinRooms,
   leaveRooms,
   setLatestMessages,
   setLatestRoomMessages,
 } from '../services/bare';
-import { keychain } from '../services/bare/crypto';
-import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { useEffect, useRef } from 'react';
+
+import { Foreground } from './service';
 import { MessageSync } from '../services/hugin/syncer';
-import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
+import { Wallet } from '../services/kryptokrona/wallet';
+import { keychain } from '../services/bare/crypto';
+import { sleep } from '@/utils';
 
 interface AppProviderProps {
   children: React.ReactNode;

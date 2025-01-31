@@ -1,14 +1,3 @@
-import { useEffect, useMemo, useState } from 'react';
-
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
-import { useThemeStore } from '@/services';
-import { AuthStackNavigationType, Message } from '@/types';
-import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
-
 import {
   Avatar,
   CopyButton,
@@ -18,8 +7,15 @@ import {
   TextField,
   Tip,
 } from './_elements';
-import { ModalBottom } from './_layout';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
+import { useEffect, useMemo, useState } from 'react';
+
 import { EmojiPicker } from './emoji-picker';
+import { Message } from '@/types';
+import { ModalBottom } from './_layout';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -29,6 +25,7 @@ interface Props extends Partial<Message> {
   onEmojiReactionPress: (val: string, val2: string) => void;
   onShowImagePress: (path: string | undefined) => void;
   onTipPress: (address: string) => void;
+  dm?: boolean;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -45,9 +42,11 @@ export const GroupMessageItem: React.FC<Props> = ({
   onTipPress,
   replyto,
   tip,
-  dm=false
+  dm = false,
 }) => {
-  try {tip = JSON.parse(tip)} catch {}
+  try {
+    tip = JSON.parse(tip);
+  } catch {}
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
@@ -56,8 +55,6 @@ export const GroupMessageItem: React.FC<Props> = ({
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
   const name = nickname ?? 'Anon';
-
-  const navigation = useNavigation<AuthStackNavigationType>();
 
   // Parse the message to see if it's JSON with a "path" property
   const imageDetails = useMemo(() => {
@@ -90,7 +87,9 @@ export const GroupMessageItem: React.FC<Props> = ({
   }, [replyto]);
 
   function handleLongPress() {
-    if(dm) return false;
+    if (dm) {
+      return false;
+    }
     setActionsModal(true);
   }
 
@@ -196,9 +195,9 @@ export const GroupMessageItem: React.FC<Props> = ({
 
         <View style={styles.messageContainer}>
           <View style={styles.avatar}>
-            {userAddress.length > 15 &&
-            <Avatar base64={getAvatar(userAddress)} size={24} />
-          }
+            {userAddress.length > 15 && (
+              <Avatar base64={getAvatar(userAddress)} size={24} />
+            )}
           </View>
           <View>
             <View style={styles.info}>
@@ -222,9 +221,11 @@ export const GroupMessageItem: React.FC<Props> = ({
                 {message ?? ''}
               </TextField>
             )}
-            {tip && 
-            <View><Tip tip={tip} /></View>
-            }
+            {tip && (
+              <View>
+                <Tip tip={tip} />
+              </View>
+            )}
             <Reactions items={reactions} onReact={onPressReaction} />
           </View>
         </View>

@@ -1,23 +1,22 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
-
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
+import {
+  AuthMethods,
+  AuthStackNavigationType,
+  AuthStackParamList,
+} from '@/types';
+import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
   Avatar,
   Card,
   Container,
   CustomIcon,
-  Header,
   InputField,
   Pincode,
   ScreenLayout,
   TextButton,
   TextField,
 } from '@/components';
-import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   updateUser,
   useGlobalStore,
@@ -25,35 +24,33 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { AuthMethods, AuthStackNavigationType } from '@/types';
+import { useEffect, useState } from 'react';
 
-import { initDB } from '../../services/bare/sqlite';
 import { Wallet } from '../../services/kryptokrona/wallet';
+import { initDB } from '../../services/bare/sqlite';
 import { pickAvatar } from '../../utils/avatar';
+import { useTranslation } from 'react-i18next';
 
-export const CreateAccScreen: React.FC = () => {
+interface Props {
+  route: RouteProp<AuthStackParamList, typeof AuthScreens.CreateAccountScreen>;
+}
+export const CreateAccScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<any>();
-  const route = useRoute();
-
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.accentForeground;
   const borderColor = theme.border;
-
   const [name, setName] = useState<string>('');
   const [avatar, setAvatar] = useState<string>('');
-
   const [authMethod, setAuthMethod] = useState<AuthMethods>(
     AuthMethods.reckless,
   );
   const [pincode, setPincode] = useState<string>('');
-
   const [loading, setLoading] = useState<boolean>(false);
-
   const [seedWords, setSeedWords] = useState<string[]>([]);
   const [blockHeight, setBlockHeight] = useState<number>(0);
-  // Access navigation parameters and set state
+
   useEffect(() => {
     if (route.params?.selectedValues) {
       setSeedWords(route.params.selectedValues.seedWords);
@@ -64,12 +61,6 @@ export const CreateAccScreen: React.FC = () => {
   const nameError = !name || name.length === 0;
 
   const pinError = authMethod === 'pincode' && pincode.length < 6;
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      header: () => <Header backButton title={t('createProfile')} />,
-    });
-  }, [t]);
 
   function onNameInput(value: string) {
     setName(value);
@@ -87,10 +78,10 @@ export const CreateAccScreen: React.FC = () => {
     console.log('seedWords', seedWords);
     if (seedWords?.length === 25) {
       console.log('Importing');
-      await Wallet.import(blockHeight, seedWords.join(' '), node);
+      await Wallet.import(blockHeight, seedWords.join(' '), node, name);
     } else {
       console.log('Creating');
-      await Wallet.create(node);
+      await Wallet.create(node, name);
     }
 
     const [address] = Wallet.addresses();
@@ -270,7 +261,6 @@ const styles = StyleSheet.create({
   },
   radioButton: {
     flexDirection: 'row',
-    // alignItems: 'center',
     marginBottom: 10,
   },
   radioGroup: {
@@ -283,9 +273,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     width: 20,
   },
-  radioText: {
-    fontSize: 16,
-  },
+
   radioUnselected: {
     borderColor: '#999',
     borderRadius: 10,

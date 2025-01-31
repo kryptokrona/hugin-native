@@ -150,3 +150,24 @@ Changing react-native-vector-icons to v 10.0.0. Carefully update this package in
 Duplicate symbols fix: pod 'Flipper-DoubleConversion', :podspec => '<https://github.com/facebook/flipper.git>' (?)
 Duplicate symbols fix: gem "cocoapods-fix-react-native" (?)
 **Duplicate symbols fix: Remove link to GDASYNC in pods -> TcpSockets -> Build phases -> Compile sources (Need to be done every time you run pod install) Awaiting permanent fix.**
+
+Fix issue with iOS: node_modules/@supersami
+
+let eventEmitter
+if (Platform.OS === 'android') {
+eventEmitter = new NativeEventEmitter(ForegroundServiceModule);
+}
+export function setupServiceErrorListener({onServiceFailToStart, alert}) {
+// const listener = eventEmitter.addListener('onServiceError', message => {
+// alert && Alert.alert('Service Error', message);
+// if (onServiceFailToStart) {
+// onServiceFailToStart();
+// }
+// stop();
+// });
+
+// return () => {
+// listener.remove();
+// };
+return false;
+}

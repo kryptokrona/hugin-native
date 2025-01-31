@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { View, Alert } from 'react-native';
 
@@ -9,11 +9,7 @@ import ReactNativeBiometrics from 'react-native-biometrics';
 import { ScreenLayout } from '@/components';
 import { AuthScreens, Stacks } from '@/config';
 import { setAuthenticated } from '@/services';
-import type {
-  AuthStackParamList,
-  AuthStackNavigationType,
-  MainStackNavigationType,
-} from '@/types';
+import type { AuthStackParamList, MainStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<
@@ -23,7 +19,7 @@ interface Props {
 }
 
 export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
-  const navigation = useNavigation<AuthStackNavigationType>();
+  // const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<MainStackNavigationType>();
 
   const finishProcess = () => {
@@ -35,9 +31,9 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
     }
   };
 
-  const handleForgotPin = () => {
-    navigation.navigate(AuthScreens.ForgotPinScreen);
-  };
+  // const handleForgotPin = () => {
+  //   navigation.navigate(AuthScreens.ForgotPinScreen);
+  // };
 
   const authenticateFingerprint = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
@@ -65,7 +61,7 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   };
 
   // Run fingerprint authentication on mount
-  React.useEffect(() => {
+  useEffect(() => {
     authenticateFingerprint();
   }, []);
 

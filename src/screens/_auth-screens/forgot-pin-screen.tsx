@@ -1,13 +1,12 @@
-import React from 'react';
-
-import { View } from 'react-native';
-
-import { RouteProp, useNavigation } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 
+import type { AuthStackNavigationType, AuthStackParamList } from '@/types';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { ScreenLayout, TextButton, TextField } from '@/components';
-import { AuthScreens, globals } from '@/config';
-import type { AuthStackParamList, AuthStackNavigationType } from '@/types';
+
+import { AuthScreens } from '@/config';
+import React from 'react';
+import { View } from 'react-native';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.ForgotPinScreen>;
@@ -21,7 +20,6 @@ export const ForgotPinScreen: React.FC<Props> = () => {
   };
 
   const onPress = async () => {
-    globals.reset();
     await resetPinCode();
 
     navigation.navigate(AuthScreens.SplashScreen);

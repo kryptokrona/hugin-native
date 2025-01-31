@@ -1,37 +1,35 @@
+import React from 'react';
+
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { t } from 'i18next';
+
+import { AuthScreens } from '@/config';
 import {
   WelcomeScreen,
   CreateAccScreen,
   RequestFingerprintScreen,
   RequestPinScreen,
-  RestoreAccountScreen
+  RestoreAccountScreen,
 } from '@/screens';
-
-import { AuthScreens } from '@/config';
-import {
-  AuthMethods,
-  AuthStackNavigationType,
-  type AuthStackParamList,
-} from '@/types';
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { usePreferencesStore, useUserStore } from '@/services';
+import { AuthMethods, type AuthStackParamList } from '@/types';
+
 import { Header } from '../header';
-import { useNavigation } from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthNavigator = () => {
-  const navigation = useNavigation<AuthStackNavigationType>();
+  // const navigation = useNavigation<AuthStackNavigationType>();
   const user = useUserStore((state) => state.user);
   const authMethod = usePreferencesStore(
     (state) => state.preferences.authMethod,
   );
-  const setAuthMethod = usePreferencesStore((state) => state.setAuthMethod);
+  // const setAuthMethod = usePreferencesStore((state) => state.setAuthMethod);
 
-  function onRequestPinBackPress() {
-    setAuthMethod(null);
-    navigation.navigate(AuthScreens.CreateAccountScreen);
-  }
+  // function onRequestPinBackPress() {
+  //   setAuthMethod(null);
+  //   navigation.navigate(AuthScreens.CreateAccountScreen);
+  // }
 
   let initialRouteName = AuthScreens.CreateAccountScreen;
 
@@ -55,23 +53,22 @@ export const AuthNavigator = () => {
         name={AuthScreens.RequestPinScreen}
         component={RequestPinScreen}
         options={() => ({
-          header: (_props) => (
-            <Header backButton onBackPress={onRequestPinBackPress} />
-          ),
+          header: (_props) => <Header title={t('Request pin')} />,
         })}
       />
       <Stack.Screen
         name={AuthScreens.RequestFingerPrintScreen}
         component={RequestFingerprintScreen}
         options={() => ({
-          header: (_props) => (
-            <Header backButton onBackPress={onRequestPinBackPress} />
-          ),
+          header: (_props) => <Header title={t('Request fingerprint')} />,
         })}
       />
       <Stack.Screen
         name={AuthScreens.CreateAccountScreen}
         component={CreateAccScreen}
+        options={() => ({
+          header: (_props) => <Header title={t('createProfile')} />,
+        })}
       />
       <Stack.Screen
         name={AuthScreens.WelcomeScreen}
@@ -80,6 +77,9 @@ export const AuthNavigator = () => {
       <Stack.Screen
         name={AuthScreens.RestoreAccountScreen}
         component={RestoreAccountScreen}
+        options={() => ({
+          header: (_props) => <Header title={t('Restore account')} />,
+        })}
       />
     </Stack.Navigator>
   );
