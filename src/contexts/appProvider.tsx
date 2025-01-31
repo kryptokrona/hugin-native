@@ -14,7 +14,7 @@ import {
   useThemeStore,
   useUserStore,
   useRoomStore,
-  getThisRoom
+  getThisRoom,
 } from '@/services';
 import { sleep } from '@/utils';
 
@@ -126,9 +126,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (state === 'inactive') {
       console.log('Inactive state');
       if (Platform.OS === 'ios') {
-        await leaveRooms();
         const thisRoom = getCurrentRoom();
         setThisRoom(thisRoom);
+        await leaveRooms();
       }
       //I think this is for iPhone only
     } else if (state === 'background') {
