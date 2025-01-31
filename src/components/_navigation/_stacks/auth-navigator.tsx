@@ -53,14 +53,14 @@ export const AuthNavigator = () => {
         name={AuthScreens.RequestPinScreen}
         component={RequestPinScreen}
         options={() => ({
-          header: (_props) => <Header title={t('Request pin')} />,
+          header: (_props) => <Header title={t('requestPin')} />,
         })}
       />
       <Stack.Screen
         name={AuthScreens.RequestFingerPrintScreen}
         component={RequestFingerprintScreen}
         options={() => ({
-          header: (_props) => <Header title={t('Request fingerprint')} />,
+          header: (_props) => <Header title={t('requestFingerPrint')} />,
         })}
       />
       <Stack.Screen
@@ -78,7 +78,7 @@ export const AuthNavigator = () => {
         name={AuthScreens.RestoreAccountScreen}
         component={RestoreAccountScreen}
         options={() => ({
-          header: (_props) => <Header title={t('Restore account')} />,
+          header: (_props) => <Header title={t('restoreAccount')} />,
         })}
       />
     </Stack.Navigator>

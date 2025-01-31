@@ -150,7 +150,7 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
     <ScreenLayout>
       <View>
         <TextField type="muted" size="small">
-          {'Avatar'}
+          {t('avatar')}
         </TextField>
         <TouchableOpacity
           onPress={onUpdateAvatar}
@@ -172,14 +172,14 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
           onChange={onNameInput}
           maxLength={nameMaxLength}
           error={nameError}
-          errorText="Name is required"
+          errorText={t('inputNameRequired')}
         />
       </View>
 
       <Card>
         {/* // TODO translation */}
 
-        <TextField size="small">{'Auth method'}</TextField>
+        <TextField size="small">{t('authMethod')}</TextField>
         <View style={styles.radioGroup}>
           <TouchableOpacity
             style={styles.radioButton}

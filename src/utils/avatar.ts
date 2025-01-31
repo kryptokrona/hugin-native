@@ -3,9 +3,9 @@ import {
   ImageLibraryOptions,
   launchImageLibrary,
 } from 'react-native-image-picker';
-import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
+import Toast from 'react-native-toast-message';
 
 function hashCode(str: string) {
   let hash = 0;
@@ -115,7 +115,7 @@ export const pickAvatar = async () => {
     const maxSizeKB = (273000 / 1024).toFixed(2);
     Toast.show({
       text1: `Avatar size exceeds the maximum size of ${maxSizeKB} KB`,
-      type: 'info',
+      type: 'error',
     });
     return null;
   }

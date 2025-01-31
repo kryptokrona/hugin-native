@@ -1,8 +1,10 @@
 import React from 'react';
 
-import { View, Alert } from 'react-native';
+import { View } from 'react-native';
 
 import { type RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
 
 import { TextButton, Pincode, ScreenLayout } from '@/components';
 import { AuthScreens, Stacks } from '@/config';
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export const RequestPinScreen: React.FC<Props> = ({ route }) => {
+  const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<MainStackNavigationType>();
   const pincode = usePreferencesStore((state) => state.preferences?.pincode);
@@ -40,7 +43,11 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
       console.log({ inputPin, pincode });
       finishProcess();
     } else {
-      Alert.alert('Invalid PIN', 'The PIN you entered is incorrect.');
+      Toast.show({
+        text1: t('invalidPin'),
+        text2: t('invalidPinMessage'),
+        type: 'error',
+      });
     }
   };
 

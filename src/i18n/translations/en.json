@@ -116,5 +116,17 @@
   "deleteContact": "Delete contact",
   "changeName": "Change name",
   "noTransactions": "No transactions yet.",
-  "addUserDescr": "Add another user"
+  "addUserDescr": "Add another user",
+  "inputNameRequired": "Name is required",
+  "avatar": "Avatar",
+  "authMethod": "Authentication method",
+  "requestPin": "Request PIN",
+  "requestFingerPrint": "Request fingerprint",
+  "restoreAccount": "Restore account",
+  "invalidPin": "Invalid PIN",
+  "invalidPinMessage": "The PIN you entered is invalid.",
+  "transactionFailed": "Transaction failed",
+  "transactionSuccess": "Transaction sent ✅",
+  "amount": "Amount",
+  "address": "Address"
 }
