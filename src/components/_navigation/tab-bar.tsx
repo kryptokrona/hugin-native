@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 
-import { TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native';
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+  Keyboard,
+  View,
+} from 'react-native';
 
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
@@ -88,9 +94,10 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             type: 'tabLongPress',
           });
         };
+
         return (
           <TouchableOpacity
-            key={`TabBar-${index}`}
+            key={`TabBar-${route.name}`}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}
@@ -104,10 +111,19 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
                 style={{ bottom: 10, right: 20 }}
               />
             )}
-            <CustomIcon
-              name={icon?.iconName}
-              type={icon.iconType as IconType}
-            />
+            <View
+              style={[
+                isFocused && {
+                  borderBottomWidth: 1,
+                  borderColor: theme.primary,
+                  padding: 5,
+                },
+              ]}>
+              <CustomIcon
+                name={icon?.iconName}
+                type={icon.iconType as IconType}
+              />
+            </View>
           </TouchableOpacity>
         );
       })}

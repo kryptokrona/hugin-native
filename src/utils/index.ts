@@ -5,3 +5,4 @@ export * from './date';
 export * from './emoji';
 export * from './file';
 export * from './utils';
+export * from './toast';

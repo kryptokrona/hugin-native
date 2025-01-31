@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 
 import { FlatList, TouchableOpacity, View } from 'react-native';
 
@@ -28,14 +28,14 @@ import {
   useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
-import {joinAndSaveRoom, setRoomMessages} from '../services/bare/groups';
+
+import { joinAndSaveRoom, setRoomMessages } from '../services/bare/groups';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
 }
 
 export const GroupsScreen: React.FC<Props> = () => {
-  //TODO** rename Groups -> Rooms
   const { t } = useTranslation();
   const user = useUserStore((state) => state.user);
   const navigation = useNavigation<MainStackNavigationType>();
@@ -89,7 +89,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   }
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       // This effect runs when the screen is focused
       setStoreCurrentRoom('null');
 

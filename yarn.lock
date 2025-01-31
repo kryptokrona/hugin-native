@@ -7480,6 +7480,17 @@ https-proxy-agent@^5.0.0, https-proxy-agent@^5.0.1:
     agent-base "6"
     debug "4"
 
+hugin-crypto@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.npmjs.org/hugin-crypto/-/hugin-crypto-0.0.2.tgz"
+  integrity sha512-0C+xmBWUqjATTBwGctY9rN1cjOXPu+ZqYSdjw86YWj4TNRiHtUtzOUH3l6CL4eOhGIu0FgDPCf8FKBh5RavXhg==
+  dependencies:
+    kryptokrona-utils "^1.3.4"
+    moment "^2.29.1"
+    tweetnacl "^1.0.3"
+    tweetnacl-sealed-box "^1.0.5"
+    tweetnacl-util "^0.15.1"
+
 huginbeam@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/huginbeam/-/huginbeam-1.0.0.tgz"
@@ -8913,7 +8924,7 @@ kryptokrona-crypto@^1.0.2, kryptokrona-crypto@^1.0.3:
     nan "^2.14.1"
     prebuild-install "^5.3.5"
 
-kryptokrona-utils@^1.3.8:
+kryptokrona-utils@^1.3.4, kryptokrona-utils@^1.3.8:
   version "1.3.8"
   resolved "https://registry.npmjs.org/kryptokrona-utils/-/kryptokrona-utils-1.3.8.tgz"
   integrity sha512-rGRUgg1BawzYDJOIXRfLHHpoCPkBBjmagFn4Xun4mPIfgxJFyhDTftnLXJnQlV7VhWdu/4A/xXXX90wr5Gx4UA==
@@ -9679,7 +9690,7 @@ module-details-from-path@^1.0.3:
   resolved "https://registry.npmjs.org/module-details-from-path/-/module-details-from-path-1.0.3.tgz"
   integrity sha512-ySViT69/76t8VhE1xXHK6Ch4NcDd26gx0MzKXLO+F7NOtnqH68d9zF94nT8ZWSxXh8ELOERsnJO/sWt1xZYw5A==
 
-moment@^2.20.1, moment@^2.29.0, moment@^2.30.1:
+moment@^2.20.1, moment@^2.29.0, moment@^2.29.1, moment@^2.30.1:
   version "2.30.1"
   resolved "https://registry.npmjs.org/moment/-/moment-2.30.1.tgz"
   integrity sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==
@@ -11046,6 +11057,11 @@ react-native-month-selector@^1.4.0:
     prop-types "^15.6.0"
     react-native-swipe-gestures "^1.0.3"
 
+react-native-permissions@^5.2.4:
+  version "5.2.4"
+  resolved "https://registry.npmjs.org/react-native-permissions/-/react-native-permissions-5.2.4.tgz"
+  integrity sha512-WmFY3mDBwj0eO93ziEi8r+6uuZo6XrcEIdQ66AfzC8CeNXXclDwypTnewBj51K0mn4QVRJxM6PSgIlj0ii5qig==
+
 react-native-progress@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/react-native-progress/-/react-native-progress-5.0.1.tgz"
@@ -11148,7 +11164,7 @@ react-native-vector-icons@10.0.0:
     prop-types "^15.7.2"
     yargs "^16.1.1"
 
-react-native-windows@*, "react-native-windows@^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0":
+react-native-windows@*, "react-native-windows@^0.61.0 || ^0.62.0 || ^0.63.0 || ^0.64.0 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0", react-native-windows@>=0.70.0:
   version "0.73.15"
   resolved "https://registry.npmjs.org/react-native-windows/-/react-native-windows-0.73.15.tgz"
   integrity sha512-kKBkjro9MN2ZcDEUG1lLL+2X99SzJ5qk78gJpqyWLHY505GnSjoldwdYh3l1LZsaLEvzNdndya0wYin//Nmj8g==
@@ -11195,7 +11211,7 @@ react-native-windows@*, "react-native-windows@^0.61.0 || ^0.62.0 || ^0.63.0 || ^
     ws "^6.2.2"
     yargs "^17.6.2"
 
-react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", "react-native@^0.61.5 || ^0.62.3 || ^0.63.2 || ^0.64.2 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0", react-native@^0.73.0, react-native@>=0.14.0, react-native@>=0.33, react-native@>=0.58.4, react-native@>=0.59, react-native@>=0.59.0, react-native@>=0.60.0, react-native@>=0.63.4, react-native@>=0.65.0, react-native@0.73.6:
+react-native@*, "react-native@^0.0.0-0 || >=0.60 <1.0", "react-native@^0.61.5 || ^0.62.3 || ^0.63.2 || ^0.64.2 || ^0.65.0 || ^0.66.0 || ^0.67.0 || ^0.68.0 || ^0.69.0 || ^0.70.0 || ^0.71.0 || ^0.72.0 || ^0.73.0", react-native@^0.73.0, react-native@>=0.14.0, react-native@>=0.33, react-native@>=0.58.4, react-native@>=0.59, react-native@>=0.59.0, react-native@>=0.60.0, react-native@>=0.63.4, react-native@>=0.65.0, react-native@>=0.70.0, react-native@0.73.6:
   version "0.73.6"
   resolved "https://registry.npmjs.org/react-native/-/react-native-0.73.6.tgz"
   integrity sha512-oqmZe8D2/VolIzSPZw+oUd6j/bEmeRHwsLn1xLA5wllEYsZ5zNuMsDus235ONOnCRwexqof/J3aztyQswSmiaA==
@@ -11266,7 +11282,7 @@ react-test-renderer@18.2.0:
     react-shallow-renderer "^16.15.0"
     scheduler "^0.23.0"
 
-react@*, "react@^16.0 || ^17.0.0 || ^18.0.0", "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", react@^18.2.0, "react@>= 16.8.0", react@>=16.6.3, react@>=16.8, react@>=17.0.0, "react@16.9.0 || 16.11.0 || 16.13.1 || 17.0.1 || 17.0.2 || 18.0.0 || 18.1.0 || 18.2.0", react@18.2.0:
+react@*, "react@^16.0 || ^17.0.0 || ^18.0.0", "react@^16.0.0 || ^17.0.0 || ^18.0.0", "react@^16.8.0 || ^17.0.0 || ^18.0.0", react@^18.2.0, "react@>= 16.8.0", react@>=16.6.3, react@>=16.8, react@>=17.0.0, react@>=18.1.0, "react@16.9.0 || 16.11.0 || 16.13.1 || 17.0.1 || 17.0.2 || 18.0.0 || 18.1.0 || 18.2.0", react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==

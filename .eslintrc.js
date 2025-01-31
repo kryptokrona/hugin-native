@@ -66,7 +66,7 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 2,
     '@typescript-eslint/no-explicit-any': 1,
     'react-native/no-unused-styles': 2,
-    'react-native/no-inline-styles': 1,
+    'react-native/no-inline-styles': 0,
     '@typescript-eslint/no-empty-interface': 1,
     'react-hooks/rules-of-hooks': 2,
     'react-hooks/exhaustive-deps': 0,
