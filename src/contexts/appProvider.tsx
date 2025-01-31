@@ -6,12 +6,15 @@ import { bare } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
+  getCurrentRoom,
+  setStoreCurrentRoom,
   updateUser,
   useGlobalStore,
   usePreferencesStore,
   useThemeStore,
   useUserStore,
-  // keychain
+  useRoomStore,
+  getThisRoom
 } from '@/services';
 import { sleep } from '@/utils';
 
@@ -41,6 +44,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
+  const { setThisRoom } = useRoomStore();
 
   async function init() {
     //Check if android background task is already running
@@ -124,6 +128,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.log('Inactive state');
       if (Platform.OS === 'ios') {
         await leaveRooms();
+        const thisRoom = getCurrentRoom();
+        setThisRoom(thisRoom);
       }
       //I think this is for iPhone only
     } else if (state === 'background') {
@@ -134,6 +140,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       if (started && !joining) {
         joining = true;
         if (Platform.OS === 'ios') {
+          const currentRoom = getThisRoom();
+          setStoreCurrentRoom(currentRoom);
           await joinRooms();
         }
         joining = false;

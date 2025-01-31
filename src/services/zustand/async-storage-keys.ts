@@ -2,4 +2,5 @@ export const ASYNC_STORAGE_KEYS = {
   PREFERENCES: 'PREFERENCES',
   THEME: 'THEME',
   USER: 'USER',
+  CURRENT_ROOM: 'CURRENT_ROOM',
 } as const;

@@ -25,10 +25,38 @@ interface AppStoreState {
     theme: boolean;
     preferences: boolean;
     user: boolean;
+    room: string;
   };
   setHasHydrated: (key: keyof AppStoreState['_hasHydrated']) => void;
   resetHydration: () => void;
 }
+
+interface RoomStore {
+  thisRoom: string;
+  setThisRoom: (room: string) => void;
+}
+
+export const useRoomStore = create<RoomStore>()(
+  persist(
+    (set) => ({
+      thisRoom: defaultRoom,
+      setThisRoom: (room) => set({ thisRoom: room }),
+    }),
+    {
+      name: ASYNC_STORAGE_KEYS.CURRENT_ROOM,
+      onRehydrateStorage: () => () => {
+        useAppStoreState.getState().setHasHydrated('room');
+      },
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);
+
+export const getThisRoom = () => {
+  return useRoomStore.getState().thisRoom;
+};
+
+export const defaultRoom = 'lobby';
 
 // Store for tracking hydration status, just for intial load of the app since async storage is... async.
 export const useAppStoreState = create<AppStoreState>()((set) => ({
@@ -36,6 +64,7 @@ export const useAppStoreState = create<AppStoreState>()((set) => ({
     preferences: false,
     theme: false,
     user: false,
+    room: ''
   },
   resetHydration: () =>
     set(() => ({
@@ -43,6 +72,7 @@ export const useAppStoreState = create<AppStoreState>()((set) => ({
         preferences: false,
         theme: false,
         user: false,
+        room: ''
       },
     })),
   setHasHydrated: (key) =>
