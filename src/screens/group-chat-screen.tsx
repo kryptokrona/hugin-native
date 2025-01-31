@@ -29,7 +29,6 @@ import {
 import { MainScreens } from '@/config';
 import {
   useGlobalStore,
-  useUserStore,
   setStoreCurrentRoom,
   useThemeStore,
   Wallet,
@@ -42,9 +41,12 @@ import type {
   Message,
 } from '@/types';
 
-import {onSendGroupMessage, saveRoomMessageAndUpdate, onSendGroupMessageWithFile} from '../services/bare/groups'
-
 import { Header } from '../components/_navigation/header';
+import {
+  onSendGroupMessage,
+  saveRoomMessageAndUpdate,
+  onSendGroupMessageWithFile,
+} from '../services/bare/groups';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -56,7 +58,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
-  const { name: userName } = useUserStore((state) => state.user);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
   // Use getRoomMessages with a page index (0 is default) to load more messages
@@ -88,7 +89,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
   };
 
-  const showBigImage = (path: string) => {
+  const showBigImage = (path?: string) => {
+    if (!path) {
+      return;
+    }
     setImagePath(path);
     setShowImage(true);
   };
@@ -166,8 +170,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   async function onSend(
     text: string,
     file: SelectedFile | null,
-    reply: string,
-    emoji: boolean | undefined,
+    reply?: string,
+    emoji?: boolean | undefined,
     tip?: JSON | undefined,
   ) {
     if (file) {
@@ -247,7 +251,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               onSubmitEditing={sendTip}
             />
             <TextButton onPress={sendTip}>{t('send')}</TextButton>
-            <View style={styles.divider} />
+            {/* <View style={styles.divider} /> */}
             <TextButton onPress={() => setTipping(false)}>
               {t('close')}
             </TextButton>

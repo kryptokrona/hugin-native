@@ -1,20 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { AppState, Platform, SafeAreaView } from 'react-native';
 
-import { bare } from 'lib/native';
+import { bare, send_idle_status } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
   getCurrentRoom,
+  getThisRoom,
   setStoreCurrentRoom,
   updateUser,
   useGlobalStore,
   usePreferencesStore,
+  useRoomStore,
   useThemeStore,
   useUserStore,
-  useRoomStore,
-  getThisRoom,
 } from '@/services';
 import { sleep } from '@/utils';
 
@@ -36,9 +36,6 @@ interface AppProviderProps {
   children: React.ReactNode;
 }
 
-let started = false;
-let joining = false;
-
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
   const authenticated = useGlobalStore((state) => state.authenticated);
@@ -46,9 +43,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
 
-  async function init() {
-    //Check if android background task is already running
+  const started = useRef(false);
+  const joining = useRef(false);
 
+  async function init() {
     if (Platform.OS === 'android') {
       const err = await Foreground.init();
       if (err) {
@@ -60,29 +58,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await setLatestRoomMessages();
     await setLatestMessages();
 
-    let node = {};
-    if (preferences?.node === undefined) {
-      node = { port: 80, url: 'node.xkr.network' };
-    } else {
-      node = {
-        port: parseInt(preferences.node.split(':')[1]),
-        url: preferences.node.split(':')[0],
-      };
-    }
+    const node = preferences?.node
+      ? {
+          port: parseInt(preferences.node.split(':')[1]),
+          url: preferences.node.split(':')[0],
+        }
+      : { port: 80, url: 'node.xkr.network' };
+
     Connection.listen();
     await Wallet.init(node);
 
     const contacts = await getContacts();
-    const knownKeys = [];
-    for (const contact of contacts) {
-      knownKeys.push(contact.messagekey);
-    }
+    const knownKeys = contacts.map((contact) => contact.messagekey);
     const keys = Wallet.privateKeys();
     MessageSync.init(node, knownKeys, keys);
 
-    //Set this somewhere in a state?
     const huginAddress = Wallet.address + keychain.getMsgKey();
-
     console.log('huginAddress', huginAddress);
 
     await updateUser({ huginAddress });
@@ -91,7 +82,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await bare(user);
     await sleep(100);
     await joinRooms();
-    started = true;
+    started.current = true;
   }
 
   useEffect(() => {
@@ -103,17 +94,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   if (Platform.OS === 'android') {
     AppState.addEventListener('blur', () => {
-      // do something when the app closed
       console.log('App not in focus.');
     });
   }
 
   const stopTasks = () => {
-    Foreground.service.stopAll();
+    Foreground?.service?.stopAll();
   };
 
   const Timeout = new Timer(() => {
-    //Stop bg tasks after 1hour of inactivity.
     console.log('Stop task!');
 
     if (Platform.OS === 'android') {
@@ -121,34 +110,53 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   });
 
-  AppState.addEventListener('change', onAppStateChange);
-  async function onAppStateChange(state: string) {
-    if (state === 'inactive') {
-      console.log('Inactive state');
-      if (Platform.OS === 'ios') {
-        const thisRoom = getCurrentRoom();
-        setThisRoom(thisRoom);
-        await leaveRooms();
-      }
-      //I think this is for iPhone only
-    } else if (state === 'background') {
-      console.log('Start timer');
-      Timeout.start();
-      //Start background timer to shut off foreground task?
-    } else if (state === 'active') {
-      if (started && !joining) {
-        joining = true;
+  useEffect(() => {
+    const onAppStateChange = async (state: string) => {
+      if (state === 'inactive') {
+        console.log('Inactive state');
+        setStoreCurrentRoom(getCurrentRoom());
+
         if (Platform.OS === 'ios') {
-          const currentRoom = getThisRoom();
-          setStoreCurrentRoom(currentRoom);
-          await joinRooms();
+          const thisRoom = getCurrentRoom();
+          setThisRoom(thisRoom);
+          await leaveRooms();
         }
-        joining = false;
+      } else if (state === 'background') {
+        console.log('Start timer');
+        Timeout.start();
+        send_idle_status(true);
+        setStoreCurrentRoom(getCurrentRoom());
+      } else if (state === 'active') {
+        console.log('App active');
+        Timeout.reset();
+        send_idle_status(false);
+
+        if (!started.current) {
+          started.current = true;
+        }
+
+        if (!joining.current) {
+          joining.current = true;
+          if (Platform.OS === 'ios') {
+            const currentRoom = getThisRoom();
+            setStoreCurrentRoom(currentRoom);
+            await joinRooms();
+          }
+          joining.current = false;
+        }
+
+        if (Platform.OS === 'android') {
+          setStoreCurrentRoom(getCurrentRoom());
+        }
       }
-      console.log('Reset timer');
-      Timeout.reset();
-    }
-  }
+    };
+
+    const subscription = AppState.addEventListener('change', onAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   return (
     <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>

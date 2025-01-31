@@ -1,12 +1,9 @@
-import { AppState, Platform } from 'react-native';
-
 import Toast from 'react-native-toast-message';
 
 import {
   begin_send_file,
   end_swarm,
   group_random_key,
-  send_idle_status,
   send_swarm_msg,
   swarm,
 } from 'lib/native';
@@ -37,33 +34,31 @@ import {
   useUserStore,
 } from '../zustand';
 
-AppState.addEventListener('change', onAppStateChange);
+// AppState.addEventListener('change', onAppStateChange);
 
-let current = '';
-async function onAppStateChange(state: string) {
-  if (state === 'inactive') {
-    console.log('Inactive state');
-    // send_idle_status(true);
-    // current = getCurrentRoom();
-    // setStoreCurrentRoom('');
-    //I think this is for iPhone only
-  } else if (state === 'background') {
-    send_idle_status(true);
-    current = getCurrentRoom();
-    setStoreCurrentRoom('');
-    //Start background timer to shut off foreground task?
-  } else if (state === 'active') {
+// let current = '';
+// async function onAppStateChange(state: string) {
+//   if (state === 'inactive') {
+//     console.log('Inactive state');
+//     // send_idle_status(true);
+//     // current = getCurrentRoom();
+//     // setStoreCurrentRoom('');
+//     //I think this is for iPhone only
+//   } else if (state === 'background') {
+//     send_idle_status(true);
+//     current = getCurrentRoom();
+//     setStoreCurrentRoom('');
+//     //Start background timer to shut off foreground task?
+//   } else if (state === 'active') {
+//     if (Platform.OS == 'android') {
+//       send_idle_status(false);
+//       setStoreCurrentRoom(current);
+//       current = '';
+//     }
 
-    if (Platform.OS == 'android') 
-      {
-        send_idle_status(false);
-        setStoreCurrentRoom(current);
-        current = '';
-      }      
-
-    //Reset timer?
-  }
-}
+//     //Reset timer?
+//   }
+// }
 
 export const setLatestRoomMessages = async () => {
   const latestRooms = await getLatestRoomMessages();
@@ -97,17 +92,20 @@ export const setLatestRoomMessages = async () => {
 export const updateMessages = async (message: Message, history = false) => {
   const thisRoom = getCurrentRoom();
   const inRoom = thisRoom === message.room;
+  const current = getCurrentRoom();
+
   if (inRoom || current) {
     const messages = getRoomsMessages();
 
-    //Update reply
     if (message.reply?.length === 64) {
       if (containsOnlyEmojis(message.message) && message.message.length < 9) {
         const updatedMessage = messages.map((msg) => {
           if (msg.hash === message.reply) {
             return {
               ...msg,
-              reactions: [...(msg.reactions || []), message.message],
+              reactions: [
+                ...new Set([...(msg.reactions || []), message.message]),
+              ],
             };
           }
           return msg;
@@ -115,16 +113,20 @@ export const updateMessages = async (message: Message, history = false) => {
         setStoreRoomMessages(updatedMessage);
         return;
       }
-      //Add original message to this reply
+
       const reply = messages.find((a) => a.hash === message.reply);
       if (reply !== undefined) {
         message.replyto = [reply];
       }
     }
-    const updatedMessages = [...messages, message].sort(
-      (a, b) => a.timestamp - b.timestamp,
-    );
-    setStoreRoomMessages(updatedMessages);
+
+    const messageExists = messages.some((msg) => msg.hash === message.hash);
+    if (!messageExists) {
+      const updatedMessages = [...messages, message].sort(
+        (a, b) => a.timestamp - b.timestamp,
+      );
+      setStoreRoomMessages(updatedMessages);
+    }
   }
 
   if (!history && !inRoom) {
@@ -285,7 +287,7 @@ export const saveRoomMessageAndUpdate = async (
     if (isFile) {
       newMessage.file = file;
     }
-    updateMessages(newMessage);
+    await updateMessages(newMessage);
   }
 
   if (!history) {

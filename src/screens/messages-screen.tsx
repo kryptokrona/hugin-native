@@ -34,7 +34,7 @@ import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import { addContact } from '../services/bare/sqlite';
 
 interface Props {
-  route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.MessagesScreen>;
 }
 
 export const MessagesScreen: React.FC<Props> = () => {
@@ -85,6 +85,9 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   function onCreateRoom() {
     // setStoreMessages([]);
+    if (!user.huginAddress) {
+      return;
+    }
     Clipboard.setString(user.huginAddress);
     setModalVisible(false);
 
@@ -123,7 +126,10 @@ export const MessagesScreen: React.FC<Props> = () => {
     await setMessages(xkrAddr, 0);
     setStoreCurrentContact(xkrAddr);
 
-    navigation.navigate(MainScreens.MessageScreen, { name: name, roomKey: xkrAddr });
+    navigation.navigate(MainScreens.MessageScreen, {
+      name: name,
+      roomKey: xkrAddr,
+    });
     // navigation.push(MainScreens.MessageScreen, {
     //   name: 'Anon',
     //   roomKey: xkrAddr

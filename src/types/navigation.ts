@@ -3,8 +3,6 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { AuthScreens, MainScreens, Stacks } from '@/config';
 
-import type { HuginUser, MessageUser } from './p2p';
-
 export type MainNavigationParamList = {
   [MainScreens.SettingsScreen]: undefined;
   [MainScreens.SettingsScreen]: undefined;
@@ -12,8 +10,8 @@ export type MainNavigationParamList = {
   [MainScreens.ChangeLanguageScreen]: undefined;
   [MainScreens.UpdateProfileScreen]: undefined;
   [MainScreens.ChangeThemeScreen]: undefined;
-  [MainScreens.MessagesScreen]: { user: MessageUser };
-  [MainScreens.MessageScreen]: { user: HuginUser };
+  [MainScreens.MessagesScreen]: undefined;
+  [MainScreens.MessageScreen]: { name: string; roomKey: string };
   [MainScreens.GroupsScreen]: undefined;
   [MainScreens.GroupChatScreen]: {
     roomKey: string;
@@ -30,6 +28,7 @@ export type MainNavigationParamList = {
   [MainScreens.DashboardScreen]: undefined;
   [MainScreens.SendTransactionScreen]: undefined;
   [MainScreens.WalletStatusScreen]: undefined;
+  [MainScreens.ModifyContactScreen]: { name: string; roomKey: string };
 };
 
 export type MainStackNavigationType =
