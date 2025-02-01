@@ -28,7 +28,7 @@
   "recklessMode": "Riskitila",
   "pincode": "PIN-koodi",
   "bioMetric": "Biometrinen",
-  "createAcount": "Luo tili",
+  "createAccount": "Luo tili",
   "chooseNickname": "Valitse lempinimi",
   "enterPin": "Syötä PIN-koodisi",
   "logout": "Kirjaudu ulos",
