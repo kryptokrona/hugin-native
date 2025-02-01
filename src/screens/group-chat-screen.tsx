@@ -30,12 +30,7 @@ import {
   ModalCenter,
 } from '@/components';
 import { MainScreens } from '@/config';
-import {
-  useGlobalStore,
-  setStoreCurrentRoom,
-  useThemeStore,
-  getCurrentRoom,
-} from '@/services';
+import { useGlobalStore, setStoreCurrentRoom, useThemeStore } from '@/services';
 import type {
   SelectedFile,
   MainStackNavigationType,
@@ -128,10 +123,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     }
   }
 
-  const online = useMemo(() => {
-    return Peers.connected(getCurrentRoom());
-  }, [Peers, getCurrentRoom()]);
-
   useFocusEffect(
     React.useCallback(() => {
       setStoreCurrentRoom(roomKey);
@@ -140,8 +131,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   );
 
   useLayoutEffect(() => {
-    const isAdmin = true; // TODO
-    const icon = isAdmin ? 'user-cog' : 'users';
+    const online = Peers.connected(roomKey);
     navigation.setOptions({
       header: () => (
         <Header
@@ -159,7 +149,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                   color={`${online ? 'green' : 'grey'}`}
                 />
               </View>
-              <CustomIcon type="FA5" name={icon} />
+              <CustomIcon type="MI" name={'groups-3'} />
             </TouchableOpacity>
           }
         />
@@ -286,8 +276,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       <KeyboardAvoidingView
         style={[styles.inputWrapper, { backgroundColor }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-      >
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
         <MessageInput
           onSend={onSend}
           replyToName={replyToName}

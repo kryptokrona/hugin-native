@@ -28,7 +28,6 @@ import { useTranslation } from 'react-i18next';
 export const DashboardScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<MainStackNavigationType>();
-  const online = true;
   const status = useGlobalStore((state) => state.syncStatus);
   const [synced, setSynced] = useState(status[0] == status[2]);
 
