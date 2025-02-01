@@ -35,8 +35,8 @@ export const WelcomeScreen: React.FC<Props> = () => {
           }}>
           {t('welcomeToHugin')}
         </TextField>
-        <TextButton onPress={createAccount}>{'createAccount'}</TextButton>
-        <TextButton onPress={restoreAccount}>{'restoreAccount'}</TextButton>
+        <TextButton onPress={createAccount}>{t('createAccount')}</TextButton>
+        <TextButton onPress={restoreAccount}>{t('restoreAccount')}</TextButton>
       </View>
     </ScreenLayout>
   );
