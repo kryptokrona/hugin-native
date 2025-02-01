@@ -68,7 +68,7 @@ export const MessageInput: React.FC<Props> = ({
           }
           const fileInfo: SelectedFile = {
             fileName: fileName,
-            path: originalPath?.slice(7, originalPath.length),
+            path: Platform.OS == 'ios' ? uri?.slice(7, uri.length) : originalPath?.slice(7, originalPath.length),
             size: fileSize,
             time: new Date().getTime(),
             type: type ?? 'image',
