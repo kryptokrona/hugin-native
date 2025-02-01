@@ -89,5 +89,7 @@
   "fee": "费用",
   "receivingAddress": "接收地址",
   "maxAvatarSize": "头像大小超过最大限制 600 KB",
-  "unconfirmed": "未确认"
+  "unconfirmed": "未确认",
+  "walletStatus": "钱包状态",
+  "wallet": "钱包"
 }

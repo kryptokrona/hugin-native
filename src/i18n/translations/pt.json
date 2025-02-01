@@ -89,5 +89,7 @@
   "fee": "Taxa",
   "receivingAddress": "Endereço do destinatário",
   "maxAvatarSize": "O tamanho do avatar excede o limite máximo de 600 KB",
-  "unconfirmed": "Não confirmado"
+  "unconfirmed": "Não confirmado",
+  "walletStatus": "Status da carteira",
+  "wallet": "Carteira"
 }

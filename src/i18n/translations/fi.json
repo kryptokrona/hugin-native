@@ -89,5 +89,7 @@
   "fee": "Maksu",
   "receivingAddress": "Vastaanottajan osoite",
   "maxAvatarSize": "Avatarin koko ylittää enimmäiskoon 600 KB",
-  "unconfirmed": "Vahvistamaton"
+  "unconfirmed": "Vahvistamaton",
+  "walletStatus": "Lompakon tila",
+  "wallet": "Lompakko"
 }

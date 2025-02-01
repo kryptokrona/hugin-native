@@ -89,5 +89,7 @@
   "fee": "ફી",
   "receivingAddress": "પ્રાપ્ત થતું સરનામું",
   "maxAvatarSize": "અવતાર માપ મહત્તમ 600 KB થી વધારે છે",
-  "unconfirmed": "અપુષ્ટ"
+  "unconfirmed": "અપુષ્ટ",
+  "walletStatus": "વૉલેટ સ્થિતિ",
+  "wallet": "વૉલેટ"
 }

@@ -91,22 +91,21 @@ const WalletStack = () => {
       <NativeStack.Screen
         name={MainScreens.DashboardScreen}
         component={DashboardScreen}
-        options={{
-          header: (_props) => <Header title={'Wallet'} />,
-        }}
       />
       <NativeStack.Screen
         name={MainScreens.SendTransactionScreen}
         component={SendTransactionScreen}
         options={{
-          header: (_props) => <Header title={'Send transaction'} backButton />,
+          header: (_props) => (
+            <Header title={t('sendTransaction')} backButton />
+          ),
         }}
       />
       <NativeStack.Screen
         name={MainScreens.WalletStatusScreen}
         component={WalletStatusScreen}
         options={{
-          header: (_props) => <Header title={'Wallet status'} backButton />,
+          header: (_props) => <Header title={t('walletStatus')} backButton />,
         }}
       />
     </NativeStack.Navigator>
@@ -118,31 +117,25 @@ export const MainNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarHideOnKeyboard: true,
-        headerShown: false, // Headers managed within the navigators themselves
+        // headerShown: false,
+        tabBarHideOnKeyboard: true, // Headers managed within the navigators themselves
       }}
       tabBar={(props) => <MyTabBar {...props} />}>
       {/* Groups Tab */}
       <Tab.Screen
         name={MainScreens.GroupsScreen}
         component={GroupsStack}
-        options={{
-          tabBarLabel: t('rooms'), // Display "Rooms" in the tab bar
-        }}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name={MainScreens.MessagesScreen}
         component={MessagesStack}
-        options={{
-          tabBarLabel: t('messages'),
-        }}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name={MainScreens.DashboardScreen}
         component={WalletStack}
-        options={{
-          tabBarLabel: 'Wallet', // Display "Rooms" in the tab bar
-        }}
+        options={{ headerShown: false }}
       />
       {/* Independent Screens */}
       <Tab.Screen

@@ -89,5 +89,7 @@
   "fee": "Frais",
   "receivingAddress": "Adresse de réception",
   "maxAvatarSize": "La taille de l'avatar dépasse la limite maximale de 600 KB",
-  "unconfirmed": "Non confirmé"
+  "unconfirmed": "Non confirmé",
+  "walletStatus": "Statut du portefeuille",
+  "wallet": "Portefeuille"
 }

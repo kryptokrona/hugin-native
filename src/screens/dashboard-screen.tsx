@@ -1,4 +1,5 @@
 import {
+  Card,
   CopyButton,
   CustomIcon,
   Header,
@@ -19,6 +20,7 @@ import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { MainScreens } from '@/config';
 import type { MainStackNavigationType } from '@/types';
 import { Transaction } from 'kryptokrona-wallet-backend-js';
+import { formatHashString } from '@/utils';
 import { useGlobalStore } from '@/services';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -85,12 +87,16 @@ export const DashboardScreen: React.FC = () => {
   return (
     <ScreenLayout>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <TextField style={{ margin: 10 }} size="large" bold>
-          {balanceText}
-        </TextField>
+        <Card style={styles.balance}>
+          <TextField style={{ margin: 10 }} size="large" bold>
+            {balanceText}
+          </TextField>
+        </Card>
 
-        <View style={styles.separator}>
-          <TextField maxLength={25}>{address}</TextField>
+        <View style={[styles.container]}>
+          <TextField style={{ paddingBottom: 10 }} centered>
+            {formatHashString(address)}
+          </TextField>
           <CopyButton
             onPress={() => ''}
             text={t('copyAddress')}
@@ -117,8 +123,13 @@ export const DashboardScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  separator: {
-    marginTop: 15,
+  balance: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  container: {
+    marginVertical: 15,
     padding: 5,
   },
 });

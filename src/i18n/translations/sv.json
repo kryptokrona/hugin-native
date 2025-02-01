@@ -89,5 +89,7 @@
   "fee": "Avgift",
   "receivingAddress": "Mottagaradress",
   "maxAvatarSize": "Avatarstorleken överstiger maxgränsen på 600 KB",
-  "unconfirmed": "Obekräftad"
+  "unconfirmed": "Obekräftad",
+  "walletStatus": "Plånboksstatus",
+  "wallet": "Plånbok"
 }

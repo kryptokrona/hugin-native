@@ -90,5 +90,6 @@
   "receivingAddress": "Receiving address",
   "maxAvatarSize": "Avatar size exceeds the maximum size of 600 KB",
   "unconfirmed": "Unconfirmed",
-  "wallet ": "Wallet" // en only
+  "walletStatus": "Wallet status", // en only
+  "wallet": "Wallet" // en only
 }

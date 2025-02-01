@@ -31,3 +31,7 @@ export const isLatin = (text: string) => {
   }
   return true;
 };
+
+export const formatHashString = (hash: string) => {
+  return hash.substring(0, 8) + '...' + hash.substring(91, 99);
+};
