@@ -108,6 +108,7 @@ const create_swarm = async (hashkey, key) => {
     search: false,
     buffer: [],
     peers: [],
+    requests: 0,
   };
 
   active_swarms.push(active);
