@@ -11,7 +11,8 @@ Todo:
     ☐ Delete account function
     ✔ Border bottom on active tab @done(25-01-31 10:31)
     ✔ Change max avatar size to 600kb @done(25-02-01 15:33)
-    ☐ requestFingerPrint to use biometric text
+    ☐ requestFingerprint in i81n to use biometric text
+    ☐ Link directly to room or message in notifications
 
 
 Todo wallet:
