@@ -26,6 +26,7 @@ import {
 } from '@/services';
 import { useEffect, useState } from 'react';
 
+import Toast from 'react-native-toast-message';
 import { Wallet } from '../../services/kryptokrona/wallet';
 import { initDB } from '../../services/bare/sqlite';
 import { pickAvatar } from '../../utils/avatar';
@@ -139,6 +140,11 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
     if (base64) {
       await updateUser({ avatar: base64 });
       setAvatar(base64);
+    } else {
+      Toast.show({
+        text1: t('maxAvatarSize'),
+        type: 'error',
+      });
     }
   }
 

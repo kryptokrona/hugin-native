@@ -29,6 +29,11 @@ export type MainNavigationParamList = {
   [MainScreens.SendTransactionScreen]: { address: string } | undefined;
   [MainScreens.WalletStatusScreen]: undefined;
   [MainScreens.ModifyContactScreen]: { name: string; roomKey: string };
+
+  [MainScreens.MessageStack]: undefined;
+  [MainScreens.GroupStack]: undefined;
+  [MainScreens.SettingsStack]: undefined;
+  [MainScreens.WalletStack]: undefined;
 };
 
 export type MainStackNavigationType =

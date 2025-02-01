@@ -53,6 +53,13 @@ const GroupsStack = () => {
           header: (_props) => <Header backButton title={t('modify')} />,
         }}
       />
+      <NativeStack.Screen
+        name={MainScreens.AddGroupScreen}
+        component={AddGroupScreen}
+        options={{
+          header: (_props) => <Header backButton title={t('addRoom')} />,
+        }}
+      />
     </NativeStack.Navigator>
   );
 };
@@ -108,6 +115,55 @@ const WalletStack = () => {
           header: (_props) => <Header title={t('walletStatus')} backButton />,
         }}
       />
+      <NativeStack.Screen
+        name={MainScreens.PickNodeScreen}
+        component={PickNodeScreen}
+        options={{
+          header: (_props) => <Header title={t('nodePicker')} backButton />,
+        }}
+      />
+    </NativeStack.Navigator>
+  );
+};
+
+const SettingsStack = () => {
+  return (
+    <NativeStack.Navigator>
+      <NativeStack.Screen
+        name={MainScreens.SettingsScreen}
+        component={SettingsScreen}
+        options={{
+          header: (_props) => <Header title={t('settingsTitle')} />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.ChangeLanguageScreen}
+        component={ChangeLanguageScreen}
+        options={{
+          header: (_props) => <Header title={t('changeLanguage')} backButton />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.UpdateProfileScreen}
+        component={UpdateProfileScreen}
+        options={{
+          header: (_props) => <Header title={t('updateProfile')} backButton />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.ChangeThemeScreen}
+        component={ChangeThemeScreen}
+        options={{
+          header: (_props) => <Header title={t('changeTheme')} backButton />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.PickNodeScreen}
+        component={PickNodeScreen}
+        options={{
+          header: (_props) => <Header title={t('nodePicker')} backButton />,
+        }}
+      />
     </NativeStack.Navigator>
   );
 };
@@ -123,63 +179,26 @@ export const MainNavigator = () => {
       tabBar={(props) => <MyTabBar {...props} />}>
       {/* Groups Tab */}
       <Tab.Screen
-        name={MainScreens.GroupsScreen}
+        name={MainScreens.GroupStack}
         component={GroupsStack}
         options={{ headerShown: false }}
       />
       <Tab.Screen
-        name={MainScreens.MessagesScreen}
+        name={MainScreens.MessageStack}
         component={MessagesStack}
         options={{ headerShown: false }}
       />
       <Tab.Screen
-        name={MainScreens.DashboardScreen}
+        name={MainScreens.WalletStack}
         component={WalletStack}
         options={{ headerShown: false }}
       />
+      <Tab.Screen
+        name={MainScreens.SettingsStack}
+        component={SettingsStack}
+        options={{ headerShown: false }}
+      />
       {/* Independent Screens */}
-      <Tab.Screen
-        name={MainScreens.AddGroupScreen}
-        component={AddGroupScreen}
-        options={{
-          header: (_props) => <Header backButton title={t('addRoom')} />,
-        }}
-      />
-      <Tab.Screen
-        name={MainScreens.SettingsScreen}
-        component={SettingsScreen}
-        options={{
-          header: (_props) => <Header title={t('settingsTitle')} />,
-        }}
-      />
-      <Tab.Screen
-        name={MainScreens.ChangeLanguageScreen}
-        component={ChangeLanguageScreen}
-        options={{
-          header: (_props) => <Header title={t('changeLanguage')} backButton />,
-        }}
-      />
-      <Tab.Screen
-        name={MainScreens.UpdateProfileScreen}
-        component={UpdateProfileScreen}
-        options={{
-          header: (_props) => <Header title={t('updateProfile')} backButton />,
-        }}
-      />
-      <Tab.Screen
-        name={MainScreens.ChangeThemeScreen}
-        component={ChangeThemeScreen}
-        options={{
-          header: (_props) => <Header title={t('changeTheme')} backButton />,
-        }}
-      />
-      <Tab.Screen
-        name={MainScreens.PickNodeScreen}
-        component={PickNodeScreen}
-        options={{
-          header: (_props) => <Header title={t('nodePicker')} backButton />,
-        }}
-      />
     </Tab.Navigator>
   );
 };

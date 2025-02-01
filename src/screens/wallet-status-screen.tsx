@@ -16,9 +16,6 @@ interface Props {}
 export const WalletStatusScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const preferences = usePreferencesStore((state) => state.preferences);
-  const [selectedNode, _setSelectedNode] = useState<string | null>(
-    preferences.node,
-  );
 
   const navigation = useNavigation<MainStackNavigationType>();
   const theme = useThemeStore((state) => state.theme);
@@ -27,7 +24,7 @@ export const WalletStatusScreen: React.FC<Props> = () => {
   const [resyncHeight, setResyncHeight] = useState(status[2]);
 
   const goToNodePicker = () => {
-    navigation.navigate(MainScreens.PickNodeScreen);
+    navigation.push(MainScreens.PickNodeScreen);
   };
 
   const resyncWallet = () => {
@@ -56,7 +53,7 @@ export const WalletStatusScreen: React.FC<Props> = () => {
       <TextField type="muted" size="xsmall">
         {t('currentNode')}
       </TextField>
-      <TextField>{selectedNode?.toString() || ''}</TextField>
+      <TextField>{preferences.node?.toString() || ''}</TextField>
       <TextButton onPress={goToNodePicker}>{t('changeNode')}</TextButton>
       <TextField type="muted" size="xsmall">
         {t('syncStatus')}

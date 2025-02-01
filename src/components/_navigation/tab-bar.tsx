@@ -12,15 +12,15 @@ import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { MainScreens, TabBar } from '@/config';
 import { useGlobalStore, useThemeStore } from '@/services';
-import type { IconType } from '@/types';
+import { IconType } from '@/types';
 
 import { CustomIcon, Unreads } from '../_elements';
 
 const tabbarButtons = [
-  MainScreens.DashboardScreen,
-  MainScreens.GroupsScreen,
-  MainScreens.MessagesScreen,
-  MainScreens.SettingsScreen,
+  MainScreens.GroupStack,
+  MainScreens.MessageStack,
+  MainScreens.WalletStack,
+  MainScreens.SettingsStack,
 ];
 
 export const MyTabBar: React.FC<BottomTabBarProps> = ({
@@ -105,7 +105,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             onPress={onPress}
             onLongPress={onLongPress}
             style={[styles.tab]}>
-            {route.name === MainScreens.GroupsScreen && (
+            {route.name === MainScreens.GroupStack && (
               <Unreads
                 unreads={totalUnreads}
                 style={{ bottom: 10, right: 20 }}

@@ -276,24 +276,13 @@ export class ActiveWallet {
         name: 'Transaction sent',
         hash: parseInt(Date.now()),
         key: tx.to,
+        success: true,
       };
-      console.log('Success:', sent);
-      Toast.show({
-        type: 'success',
-        text1: t('transactionSuccess'),
-      });
-      //   this.emit('sentTx', sent);
-      //Notify
+
       return result;
     } else {
       console.log(`Failed to send transaction: ${result.error.toString()}`);
-      Toast.show({
-        type: 'error',
-        text1: t('transactionFailed'),
-      });
       return result;
-      //Notify
-      //   this.emit('failedTx');
     }
   }
 

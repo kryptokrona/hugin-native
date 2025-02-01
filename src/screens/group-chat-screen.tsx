@@ -15,6 +15,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { t } from 'i18next';
+import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
 
@@ -33,7 +34,6 @@ import {
   useGlobalStore,
   setStoreCurrentRoom,
   useThemeStore,
-  Wallet,
   getCurrentRoom,
 } from '@/services';
 import type {
@@ -49,6 +49,7 @@ import {
   saveRoomMessageAndUpdate,
   onSendGroupMessageWithFile,
 } from '../services/bare/groups';
+import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -102,13 +103,27 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       amount: amount,
       to: tipAddress,
     });
+
     setTipping(false);
     if (sent.success) {
-      const to = messages.find((a) => a.address === tipAddress);
+      const to = messages
+        .slice()
+        .reverse()
+        .find((a) => a.address === tipAddress);
+
       onSend('', null, '', false, {
         amount, // TODO fix this
         hash: sent.transactionHash,
         receiver: to?.nickname,
+      });
+      Toast.show({
+        text1: t('transactionSuccess'),
+        type: 'success',
+      });
+    } else {
+      Toast.show({
+        text1: t('transactionFailed'),
+        type: 'error',
       });
     }
   }
@@ -230,9 +245,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           value={tipAmount}
           onChange={setTipAmount}
           onSubmitEditing={sendTip}
+          keyboardType="number-pad"
         />
-        <TextButton onPress={sendTip}>{t('send')}</TextButton>
-        <TextButton onPress={() => setTipping(false)}>{t('close')}</TextButton>
+        <TextButton disabled={tipAmount === '0'} onPress={sendTip}>
+          {t('send')}
+        </TextButton>
+        <TextButton type="secondary" onPress={() => setTipping(false)}>
+          {t('close')}
+        </TextButton>
       </ModalCenter>
       <FlatList
         inverted

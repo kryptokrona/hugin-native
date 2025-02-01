@@ -59,7 +59,6 @@ export const ModalCenter: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   inner: {
-    // alignItems: 'center',
     borderRadius: Styles.borderRadius.large,
     borderWidth: 1,
     justifyContent: 'center',
@@ -74,5 +73,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     flex: 1,
     justifyContent: 'center',
+    paddingHorizontal: 20,
+    width: '100%',
   },
 });

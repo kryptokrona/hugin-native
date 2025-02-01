@@ -5,8 +5,7 @@ import { FlatList } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 
 import { ScreenLayout, SettingsItem } from '@/components';
-import { MainScreens, Stacks } from '@/config';
-import { useGlobalStore } from '@/services';
+import { MainScreens } from '@/config';
 import type {
   CustomIconProps,
   MainStackNavigationType,
@@ -82,10 +81,10 @@ export const SettingsScreen: React.FC<Props> = () => {
     );
   };
 
-  async function onLogoutPress() {
-    useGlobalStore.setState({ authenticated: false });
-    authNavigation.navigate(Stacks.AuthStack);
-  }
+  // async function onLogoutPress() {
+  //   useGlobalStore.setState({ authenticated: false });
+  //   authNavigation.navigate(Stacks.AuthStack);
+  // }
 
   return (
     <ScreenLayout>

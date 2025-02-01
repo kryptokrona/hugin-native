@@ -1,20 +1,21 @@
+import { Animated, StyleSheet, View } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 
-import { Animated, StyleSheet, View } from 'react-native';
-
-import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
-
-import { useThemeStore } from '@/services';
-import { textType } from '@/styles';
-
 import { TextField } from './text-field';
+import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
+import { textType } from '@/styles';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
-  tip: JSON;
+  tip: {
+    amount: number;
+    receiver: string;
+  };
 }
 
-export const Tip: React.FC<Props> = (tip) => {
-  tip = tip.tip;
+export const Tip: React.FC<Props> = ({ tip }) => {
+  const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.primary;
   const color = theme[textType.primary];
@@ -49,14 +50,17 @@ export const Tip: React.FC<Props> = (tip) => {
     transform: [{ rotateX }],
   };
 
+  const message = t('tipSent', {
+    amount: prettyPrintAmount(tip.amount),
+    receiver: tip.receiver,
+  });
+
   return (
     <Animated.View
       style={[styles.cardContainer, animatedStyle, { backgroundColor }]}>
       <View style={[styles.insetBorder, { borderColor: color }]}>
-        <TextField
-          size="small"
-          style={{ color, fontFamily: 'Montserrat-Medium' }}>
-          Sent {prettyPrintAmount(tip.amount)} to {tip.receiver}! 💸
+        <TextField type="primary" maxLength={40} size="xsmall">
+          {`💸  ${message}`}
         </TextField>
       </View>
     </Animated.View>
@@ -69,15 +73,12 @@ const styles = StyleSheet.create({
     marginTop: -20,
     opacity: 0,
     padding: 5,
-    // Space to inset the border
     width: '100%',
   },
   insetBorder: {
-    // Ensures the inner View fills the container
     borderRadius: 8,
-    // Matches the outer container's border radius
     borderWidth: 1,
     flex: 1,
-    padding: 12, // Space inside the dashed border
+    padding: 12,
   },
 });

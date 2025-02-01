@@ -6,11 +6,12 @@ Todo:
     ☐ Add calls
     ✔ Add amount to tips @done(24-12-30 21:20)
     ☐ Add dms
-    ☐ Fix styling for tips
+    ✔ Fix styling for tips @done(25-02-01 21:25)
     ☐ Fix tip notification
     ☐ Delete account function
     ✔ Border bottom on active tab @done(25-01-31 10:31)
     ✔ Change max avatar size to 600kb @done(25-02-01 15:33)
+    ☐ requestFingerPrint to use biometric text
 
 
 Todo wallet:

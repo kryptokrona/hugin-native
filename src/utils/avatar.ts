@@ -5,8 +5,6 @@ import {
 } from 'react-native-image-picker';
 
 import { Peers } from 'lib/connections';
-import Toast from 'react-native-toast-message';
-import { t } from 'i18next';
 
 function hashCode(str: string) {
   let hash = 0;
@@ -113,10 +111,6 @@ export const pickAvatar = async () => {
   const result = await launchImageLibrary(options);
   const base64 = result.assets?.[0].base64;
   if (base64 && base64.length > 273000) {
-    Toast.show({
-      text1: t('maxAvatarSize'),
-      type: 'error',
-    });
     return null;
   }
   return base64 ?? null;

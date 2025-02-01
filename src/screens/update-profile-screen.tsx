@@ -25,6 +25,7 @@ import {
 import { useMemo, useState } from 'react';
 
 import { Peers } from 'lib/connections';
+import Toast from 'react-native-toast-message';
 import { pickAvatar } from '../utils/avatar';
 import { update_bare_user } from 'lib/native';
 import { useTranslation } from 'react-i18next';
@@ -79,6 +80,11 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     const base64 = await pickAvatar();
     if (base64) {
       await updateUser({ avatar: base64 });
+    } else {
+      Toast.show({
+        text1: t('maxAvatarSize'),
+        type: 'error',
+      });
     }
   }
 

@@ -42,7 +42,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   const rooms = useGlobalStore((state) => state.rooms);
   const [modalVisible, setModalVisible] = useState(false);
   const [joining, setJoinVisible] = useState(false);
-  const [link, setLink] = useState('');
+  const [link, setLink] = useState<string | null>(null);
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -99,6 +99,9 @@ export const GroupsScreen: React.FC<Props> = () => {
 
   function onJoinpress() {
     setStoreRoomMessages([]);
+    if (!link) {
+      return;
+    }
     const inviteKey = link.slice(-128);
     const parse = link.split('hugin://')[1];
     const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
@@ -119,15 +122,17 @@ export const GroupsScreen: React.FC<Props> = () => {
     <ScreenLayout>
       <ModalCenter visible={modalVisible} closeModal={onCloseModal}>
         {joining && (
-          <View style={styles.inviteContainer}>
+          <>
             <InputField
               label={t('inviteLink')}
               value={link}
               onChange={onInputChange}
               onSubmitEditing={onJoinpress}
             />
-            <TextButton onPress={onJoinpress}>{t('joinRoom')}</TextButton>
-          </View>
+            <TextButton disabled={link === null} onPress={onJoinpress}>
+              {t('joinRoom')}
+            </TextButton>
+          </>
         )}
 
         {!joining && (
@@ -159,6 +164,13 @@ const styles = {
     marginVertical: 10,
   },
   inviteContainer: {
-    // backgroundColor: 'red',
+    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    // Set a fixed width
+    maxWidth: 300,
+    // Prevent expansion
+    padding: 10,
+    width: 300,
   },
 };

@@ -9,30 +9,6 @@ export enum AuthScreens {
   DashboardScreen = 'DashboardScreen',
 }
 
-export const TabBar = {
-  DashboardScreen: {
-    iconName: 'wallet-outline',
-    iconType: 'MCI',
-    tabName: 'SettingsTab',
-  },
-
-  GroupsScreen: {
-    iconName: 'comment-text-multiple-outline',
-    iconType: 'MCI',
-    tabName: 'GroupsTab',
-  },
-  MessagesScreen: {
-    iconName: 'comment-text-outline',
-    iconType: 'MCI',
-    tabName: 'MessagesTab',
-  },
-  SettingsScreen: {
-    iconName: 'sliders',
-    iconType: 'FA',
-    tabName: 'SettingsTab',
-  },
-} as const;
-
 export enum Stacks {
   MainStack = 'MainStack',
   AuthStack = 'AuthStack',
@@ -54,5 +30,33 @@ export enum MainScreens {
   DashboardScreen = 'DashboardScreen',
   SendTransactionScreen = 'SendTransactionScreen',
   WalletStatusScreen = 'WalletStatusScreen',
-  ModifyContactScreen = 'ModifyContactScreen'
+  ModifyContactScreen = 'ModifyContactScreen',
+  GroupStack = 'GroupStack',
+  MessageStack = 'MessageStack',
+  SettingsStack = 'SettingsStack',
+  WalletStack = 'WalletStack',
 }
+
+export const TabBar = {
+  [MainScreens.WalletStack]: {
+    iconName: 'wallet-outline',
+    iconType: 'MCI',
+    tabName: MainScreens.WalletStack,
+  },
+
+  [MainScreens.GroupStack]: {
+    iconName: 'comment-text-multiple-outline',
+    iconType: 'MCI',
+    tabName: MainScreens.GroupStack,
+  },
+  [MainScreens.MessageStack]: {
+    iconName: 'comment-text-outline',
+    iconType: 'MCI',
+    tabName: MainScreens.MessageStack,
+  },
+  [MainScreens.SettingsStack]: {
+    iconName: 'sliders',
+    iconType: 'FA',
+    tabName: MainScreens.SettingsStack,
+  },
+} as const;
