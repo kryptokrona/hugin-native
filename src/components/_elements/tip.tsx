@@ -60,7 +60,7 @@ export const Tip: React.FC<Props> = ({ tip }) => {
       style={[styles.cardContainer, animatedStyle, { backgroundColor }]}>
       <View style={[styles.insetBorder, { borderColor: color }]}>
         <TextField type="primary" maxLength={40} size="xsmall">
-          {`💸  ${message}`}
+          {message}
         </TextField>
       </View>
     </Animated.View>
