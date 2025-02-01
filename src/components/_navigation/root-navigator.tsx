@@ -1,7 +1,7 @@
 import { AuthNavigator, MainNavigator } from './_stacks';
 import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
 import { MainScreens, Stacks } from '@/config';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   useAppStoreState,
   useGlobalStore,
@@ -36,15 +36,23 @@ export const RootNavigator = () => {
   const authMethod = usePreferencesStore(
     (state) => state.preferences?.authMethod,
   );
+  const [displaySplash, setDisplaySplash] = useState(true);
   useEffect(() => {
     const handleDeepLink = (e: { url: string }) => {
       // console.log('Linking', e.url); // TODO
     };
 
+    setTimeout(() => {
+      setDisplaySplash(false);
+    }, 1000);
+
     Linking.addEventListener('url', handleDeepLink);
   }, []);
 
-  if (!hydrated.preferences || !hydrated.user || !hydrated.theme) {
+  if (
+    (!hydrated.preferences || !hydrated.user || !hydrated.theme) &&
+    displaySplash
+  ) {
     return (
       <NavigationContainer>
         <SplashScreen />

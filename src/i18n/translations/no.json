@@ -89,5 +89,7 @@
   "fee": "Gebyr",
   "receivingAddress": "Mottaksadresse",
   "maxAvatarSize": "Avatarstørrelsen overskrider maksgrensen på 600 KB",
-  "unconfirmed": "Ubekreftet"
+  "unconfirmed": "Ubekreftet",
+  "walletStatus": "Lommebokstatus",
+  "wallet": "Lommebok"
 }

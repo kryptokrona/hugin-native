@@ -89,5 +89,7 @@
   "fee": "Kosten",
   "receivingAddress": "Ontvangstadres",
   "maxAvatarSize": "De avatar grootte overschrijdt de maximale limiet van 600 KB",
-  "unconfirmed": "Onbevestigd"
+  "unconfirmed": "Onbevestigd",
+  "walletStatus": "Walletstatus",
+  "wallet": "Wallet"
 }

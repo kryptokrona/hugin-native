@@ -89,5 +89,7 @@
   "fee": "ఫీజు",
   "receivingAddress": "గ్రహీత చిరునామా",
   "maxAvatarSize": "అవతార్ పరిమాణం గరిష్ట పరిమితి 600 KB ను మించిపోయింది",
-  "unconfirmed": "అనిర్దిష్టం"
+  "unconfirmed": "అనిర్దిష్టం",
+  "walletStatus": "వాలెట్ స్థితి",
+  "wallet": "వాలెట్"
 }

@@ -89,5 +89,7 @@
   "fee": "Biaya",
   "receivingAddress": "Alamat penerima",
   "maxAvatarSize": "Ukuran avatar melebihi batas maksimum 600 KB",
-  "unconfirmed": "Belum dikonfirmasi"
+  "unconfirmed": "Belum dikonfirmasi",
+  "walletStatus": "Status dompet",
+  "wallet": "Dompet"
 }

@@ -89,5 +89,7 @@
   "fee": "शुल्क",
   "receivingAddress": "प्राप्त करनिहारक पता",
   "maxAvatarSize": "अवतार आकार अधिकतम 600 KB स बेसी अछि",
-  "unconfirmed": "अपुष्ट"
+  "unconfirmed": "अपुष्ट",
+  "walletStatus": "वॉलेट स्थिति",
+  "wallet": "वॉलेट"
 }

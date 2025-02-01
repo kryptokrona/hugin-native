@@ -21,11 +21,8 @@ export const WalletStatusScreen: React.FC<Props> = () => {
   );
 
   const navigation = useNavigation<MainStackNavigationType>();
-
   const theme = useThemeStore((state) => state.theme);
-
   const color = theme.accentForeground;
-
   const status = useGlobalStore((state) => state.syncStatus);
   const [resyncHeight, setResyncHeight] = useState(status[2]);
 

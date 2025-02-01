@@ -89,5 +89,7 @@
   "fee": "Ücret",
   "receivingAddress": "Alıcı adresi",
   "maxAvatarSize": "Avatar boyutu maksimum 600 KB sınırını aşıyor",
-  "unconfirmed": "Onaylanmamış"
+  "unconfirmed": "Onaylanmamış",
+  "walletStatus": "Cüzdan durumu",
+  "wallet": "Cüzdan"
 }

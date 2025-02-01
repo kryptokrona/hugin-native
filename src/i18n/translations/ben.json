@@ -89,5 +89,7 @@
   "fee": "ফি",
   "receivingAddress": "প্রাপ্তির ঠিকানা",
   "maxAvatarSize": "অ্যাভাটারের আকার সর্বোচ্চ ৬০০ কেবি অতিক্রম করেছে",
-  "unconfirmed": "অনিশ্চিত"
+  "unconfirmed": "অনিশ্চিত",
+  "walletStatus": "ওয়ালেটের অবস্থা",
+  "wallet": "ওয়ালেট"
 }

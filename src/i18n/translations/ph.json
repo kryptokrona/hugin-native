@@ -89,5 +89,7 @@
   "fee": "Bayad",
   "receivingAddress": "Address ng tatanggap",
   "maxAvatarSize": "Ang laki ng avatar ay lumampas sa maximum na limitasyon na 600 KB",
-  "unconfirmed": "Hindi pa kumpirmado"
+  "unconfirmed": "Hindi pa kumpirmado",
+  "walletStatus": "Katayuan ng pitaka",
+  "wallet": "Pitaka"
 }

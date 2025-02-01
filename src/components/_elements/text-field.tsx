@@ -13,6 +13,7 @@ interface Props {
   maxLength?: number | null;
   bold?: boolean;
   style?: any;
+  centered?: boolean;
 }
 
 export const TextField: React.FC<Props> = ({
@@ -22,6 +23,7 @@ export const TextField: React.FC<Props> = ({
   maxLength,
   bold,
   style,
+  centered,
 }) => {
   const theme = useThemeStore((state) => state.theme);
   const color = theme[textType[type]];
@@ -37,7 +39,11 @@ export const TextField: React.FC<Props> = ({
     <Text
       textBreakStrategy="highQuality"
       ellipsizeMode="clip"
-      style={[styles.text, { color, fontSize, fontWeight, ...style }]}>
+      style={[
+        styles.text,
+        { color, fontSize, fontWeight, ...style },
+        centered && { textAlign: 'center' },
+      ]}>
       {truncatedText}
     </Text>
   );

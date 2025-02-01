@@ -89,5 +89,7 @@
   "fee": "Gebühr",
   "receivingAddress": "Empfangsadresse",
   "maxAvatarSize": "Die Avatargröße überschreitet das maximale Limit von 600 KB",
-  "unconfirmed": "Unbestätigt"
+  "unconfirmed": "Unbestätigt",
+  "walletStatus": "Wallet-Status",
+  "wallet": "Wallet"
 }

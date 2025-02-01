@@ -89,5 +89,7 @@
   "fee": "Fees",
   "receivingAddress": "Prapt hone wala pata",
   "maxAvatarSize": "Avatar size 600 KB se adhik baa",
-  "unconfirmed": "Abhi tak confirm naahi baa"
+  "unconfirmed": "Abhi tak confirm naahi baa",
+  "walletStatus": "वॉलेट की स्थिति",
+  "wallet": "वॉलेट"
 }

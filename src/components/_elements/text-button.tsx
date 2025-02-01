@@ -32,7 +32,7 @@ export const TextButton: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const type: ElementType = disabled ? 'muted' : mType;
   const backgroundColor = theme[backgroundType[type]];
-  const borderColor = theme[textType[type]];
+  const borderColor = mType === 'destructive' ? 'none' : theme[textType[type]];
   const borderWidth = theme.mode === 'dark' || type === 'secondary' ? 1 : 0;
   const color = theme[textType[type]];
 

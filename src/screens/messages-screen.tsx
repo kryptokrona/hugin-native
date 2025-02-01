@@ -11,7 +11,6 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import {
-  Container,
   CustomIcon,
   Header,
   InputField,
@@ -130,10 +129,6 @@ export const MessagesScreen: React.FC<Props> = () => {
       name: name,
       roomKey: xkrAddr,
     });
-    // navigation.push(MainScreens.MessageScreen, {
-    //   name: 'Anon',
-    //   roomKey: xkrAddr
-    // });
     setLink('');
   }
 
@@ -141,7 +136,7 @@ export const MessagesScreen: React.FC<Props> = () => {
     <ScreenLayout>
       <ModalCenter visible={modalVisible} closeModal={onCloseModal}>
         {joining && (
-          <View style={styles.inviteContainer}>
+          <View>
             <InputField
               label={t('nickname')}
               value={name}
@@ -168,9 +163,11 @@ export const MessagesScreen: React.FC<Props> = () => {
         )}
       </ModalCenter>
       {contacts.length === 0 && (
-        <Container>
-          <TextField size="large">{t('emptyAddressBook')}</TextField>
-        </Container>
+        <View style={styles.emptyAddressBook}>
+          <TextField centered type="muted" size="large">
+            {t('emptyAddressBook')}
+          </TextField>
+        </View>
       )}
       <FlatList
         data={contacts}
@@ -185,7 +182,9 @@ const styles = {
   divider: {
     marginVertical: 10,
   },
-  inviteContainer: {
-    // backgroundColor: 'red',
+  emptyAddressBook: {
+    alignItems: 'center' as const,
+    marginTop: 100,
+    width: 300,
   },
 };

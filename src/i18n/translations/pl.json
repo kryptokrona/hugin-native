@@ -89,5 +89,7 @@
   "fee": "Opłata",
   "receivingAddress": "Adres odbiorcy",
   "maxAvatarSize": "Rozmiar awatara przekracza maksymalny limit 600 KB",
-  "unconfirmed": "Niepotwierdzone"
+  "unconfirmed": "Niepotwierdzone",
+  "walletStatus": "Status portfela",
+  "wallet": "Portfel"
 }

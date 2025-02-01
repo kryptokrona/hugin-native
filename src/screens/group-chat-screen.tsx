@@ -126,7 +126,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   useLayoutEffect(() => {
     const isAdmin = true; // TODO
-    const icon = isAdmin ? 'users-cog' : 'users';
+    const icon = isAdmin ? 'user-cog' : 'users';
     navigation.setOptions({
       header: () => (
         <Header

@@ -89,5 +89,7 @@
   "fee": "فیس",
   "receivingAddress": "وصول کنندہ کا پتہ",
   "maxAvatarSize": "اوتار کا سائز زیادہ سے زیادہ 600 KB ہونا چاہیے",
-  "unconfirmed": "غیر تصدیق شدہ"
+  "unconfirmed": "غیر تصدیق شدہ",
+  "walletStatus": "والٹ کی حیثیت",
+  "wallet": "والٹ"
 }
