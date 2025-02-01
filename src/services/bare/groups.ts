@@ -130,7 +130,7 @@ export const updateMessages = async (message: Message, history = false) => {
   }
 
   if (!history && !inRoom) {
-    if (current.length === 0) {
+    if (current?.length === 0) {
       Toast.show({
         text1: message.nickname,
         text2: message.message,
