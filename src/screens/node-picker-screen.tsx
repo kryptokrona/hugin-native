@@ -1,56 +1,49 @@
-import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
+  ActivityIndicator,
   FlatList,
   StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import {
-  Container,
-  InputField,
-  ScreenLayout,
-  TextButton,
-  TextField,
-} from '@/components';
-import { useNavigation } from '@react-navigation/native';
+import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
+import React, { useEffect, useState } from 'react';
 import { usePreferencesStore, useThemeStore } from '@/services';
-import { Wallet } from '../services/kryptokrona';
+
 import { Preferences } from '@/types';
-import { sleep } from '@/utils';
-
+import { Wallet } from '../services/kryptokrona';
 import { WalletConfig } from 'config/wallet-config';
-
 import offline_node_list from '../config/nodes.json';
+import { useNavigation } from '@react-navigation/native';
 
+interface Props {
+  route: any;
+}
 
 export const PickNodeScreen: React.FC<Props> = () => {
   const preferences = usePreferencesStore((state) => state.preferences);
   const [nodeInput, setNodeInput] = useState(preferences.node || ''); // Initialize with preferences.node
   const [nodeList, setNodeList] = useState([]);
-  const [selectedNode, setSelectedNode] = useState<Preferences | null>(preferences.node);
+  const [selectedNode, setSelectedNode] = useState<Preferences | null>(
+    preferences.node,
+  );
   const [loadingNode, setLoadingNode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCheck, setCheckLoading] = useState(false);
 
   const theme = useThemeStore((state) => state.theme);
 
-  const color = theme.foreground;
+  // const color = theme.foreground;
 
   const borderColor = theme.input;
-  
 
   async function fetchWithTimeout(url, options, timeout = 1000) {
     return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeout))
+      fetch(url, options),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), timeout),
+      ),
     ]);
-}
+  }
 
   const navigation = useNavigation();
 
@@ -58,15 +51,10 @@ export const PickNodeScreen: React.FC<Props> = () => {
     const fetchNodes = async () => {
       let response;
       for (const url of WalletConfig.nodeListURLs) {
-
         try {
-          response = await fetchWithTimeout(
-          url, {}
-        );
+          response = await fetchWithTimeout(url, {});
           break;
-        } catch (err) {
-        }
-
+        } catch (err) {}
       }
 
       let data;
@@ -76,7 +64,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
       } else {
         data = await response.json();
       }
-      
+
       setNodeList(data.nodes);
     };
 
@@ -87,21 +75,22 @@ export const PickNodeScreen: React.FC<Props> = () => {
     setCheckLoading(true);
     const updatedNodeList = await Promise.all(
       nodeList.map(async (node) => {
-        const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${node.port}/info`;
-  
+        const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${
+          node.port
+        }/info`;
+
         try {
           await fetchWithTimeout(nodeURL, { method: 'GET' });
           return { ...node, online: true }; // Mark node as online
         } catch (error) {
           return { ...node, online: false }; // Mark node as offline
         }
-      })
+      }),
     );
-  
+
     setNodeList(updatedNodeList); // Update the state with the new node list
     setCheckLoading(false);
   };
-  
 
   const randomNode = async (ssl = true) => {
     setLoadingNode(true);
@@ -109,7 +98,9 @@ export const PickNodeScreen: React.FC<Props> = () => {
     const shuffledNodes = filteredNodes.sort(() => Math.random() - 0.5);
 
     for (const node of shuffledNodes) {
-      const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${node.port}/info`;
+      const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${
+        node.port
+      }/info`;
       try {
         const response = await fetchWithTimeout(nodeURL, { method: 'GET' });
         if (response?.ok) {
@@ -135,9 +126,9 @@ export const PickNodeScreen: React.FC<Props> = () => {
     const [url, port] = inputWithoutProtocol.split(':');
 
     const selectedNodeDetails = {
-      url,
       port: parseInt(port) || '',
       ssl: isSSL,
+      url,
     };
 
     setSelectedNode(selectedNodeDetails);
@@ -160,10 +151,10 @@ export const PickNodeScreen: React.FC<Props> = () => {
       style={[
         styles.nodeCard,
         selectedNode === index && styles.selectedNodeCard,
-        {borderColor: borderColor}
+        { borderColor: borderColor },
       ]}
       onPress={() => chooseNode(item)}>
-      <Text style={{color}}>{item.name}</Text>
+      <TextField>{item.name}</TextField>
       <View
         style={[
           styles.statusIndicator,
@@ -175,91 +166,72 @@ export const PickNodeScreen: React.FC<Props> = () => {
 
   return (
     <ScreenLayout>
-          <View style={{flex: 1}}>
-            <Text style={[styles.title, {color}]}>Pick a Node</Text>
-            <View>
-              <InputField
-                label={'Enter node URL'}
-                value={nodeInput}
-                onChange={setNodeInput}
-              />
-              <TextButton
-                icon={loadingNode ? <ActivityIndicator color="#000" /> : undefined}
-                onPress={() => {randomNode(true)}}>
-                {'Random node'}
-              </TextButton>
-              <TextButton
-                icon={loading ? <ActivityIndicator color="#000" /> : undefined}
-                onPress={connectToNode}>
-                {'Connect to node'}
-              </TextButton>
-              <TextButton
-                icon={loadingCheck ? <ActivityIndicator color="#000" /> : undefined}
-                onPress={checkNodes}>
-                {'Check nodes'}
-              </TextButton>
-            </View>
-            <FlatList
-              initialNumToRender={999}
-              maxToRenderPerBatch={999}
-              data={nodeList}
-              keyExtractor={(item) => item.url + ':' + item.port}
-              renderItem={renderNode}
-              contentContainerStyle={styles.nodeList}
-            />
-            </View>
+      <View style={{ flex: 1 }}>
+        {/* // TODO i18n */}
+        <TextField size="large">Pick a Node</TextField>
+        <View>
+          <InputField
+            label={'Enter node URL'}
+            value={nodeInput}
+            onChange={setNodeInput}
+          />
+          <TextButton
+            icon={loadingNode ? <ActivityIndicator color="#000" /> : undefined}
+            onPress={() => {
+              randomNode(true);
+            }}>
+            {'Random node'}
+          </TextButton>
+          <TextButton
+            icon={loading ? <ActivityIndicator color="#000" /> : undefined}
+            onPress={connectToNode}>
+            {'Connect to node'}
+          </TextButton>
+          <TextButton
+            icon={loadingCheck ? <ActivityIndicator color="#000" /> : undefined}
+            onPress={checkNodes}>
+            {'Check nodes'}
+          </TextButton>
+        </View>
+        <FlatList
+          initialNumToRender={999}
+          maxToRenderPerBatch={999}
+          data={nodeList}
+          keyExtractor={(item) => item.url + ':' + item.port}
+          renderItem={renderNode}
+          contentContainerStyle={styles.nodeList}
+        />
+      </View>
     </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  input: {
+  nodeCard: {
+    alignItems: 'center',
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 8,
-    marginRight: 8,
-  },
-  button: {
-    backgroundColor: '#252525',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 4,
+    padding: 12,
   },
   nodeList: {
     marginTop: 16,
-    paddingBottom: 16
+    paddingBottom: 16,
   },
-  nodeCard: {
-    padding: 12,
-    marginVertical: 4,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
+  offline: {
+    backgroundColor: 'red',
+  },
+  online: {
+    backgroundColor: 'green',
   },
   selectedNodeCard: {
     borderColor: '#4caf50',
   },
   statusIndicator: {
-    width: 10,
-    height: 10,
     borderRadius: 5,
-  },
-  online: {
-    backgroundColor: 'green',
-  },
-  offline: {
-    backgroundColor: 'red',
+    height: 10,
+    width: 10,
   },
 });

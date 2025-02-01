@@ -61,18 +61,12 @@ export const RestoreAccountScreen: React.FC = () => {
             inputRefs.current[index].current.setNativeProps({ text: word });
           }
         });
-        ToastAndroid.show(
-          t('Seed words pasted successfully!'),
-          ToastAndroid.SHORT,
-        );
+        ToastAndroid.show(t('seedPasteSuccess'), ToastAndroid.SHORT);
       } else {
-        ToastAndroid.show(
-          t('Invalid seed phrase length. Must be 25 words.'),
-          ToastAndroid.SHORT,
-        );
+        ToastAndroid.show(t('invalidSeedLength'), ToastAndroid.SHORT);
       }
     } catch (error) {
-      ToastAndroid.show(t('Failed to read clipboard.'), ToastAndroid.SHORT);
+      ToastAndroid.show(t('clipboardReadFailed'), ToastAndroid.SHORT);
     }
   };
 
@@ -80,10 +74,7 @@ export const RestoreAccountScreen: React.FC = () => {
     if (validateSeedWords()) {
       setStep(2);
     } else {
-      ToastAndroid.show(
-        t('Please fill all seed words correctly.'),
-        ToastAndroid.SHORT,
-      );
+      ToastAndroid.show(t('invalidSeedInput'), ToastAndroid.SHORT);
     }
   };
 
@@ -103,7 +94,7 @@ export const RestoreAccountScreen: React.FC = () => {
   if (step === 1) {
     return (
       <ScreenLayout>
-        <TextField size="large">{t('Enter Seed Words')}</TextField>
+        <TextField size="large">{t('enterSeedWords')}</TextField>
         <View style={styles.listContainer}>
           <FlatList
             numColumns={3}
@@ -138,8 +129,8 @@ export const RestoreAccountScreen: React.FC = () => {
           />
         </View>
 
-        <TextButton onPress={handlePaste}>{t('Paste Seed Words')}</TextButton>
-        <TextButton onPress={handleSubmit}>{t('Restore account')}</TextButton>
+        <TextButton onPress={handlePaste}>{t('enterSeedWords')}</TextButton>
+        <TextButton onPress={handleSubmit}>{t('restoreAccount')}</TextButton>
       </ScreenLayout>
     );
   } else if (step === 2) {
@@ -147,17 +138,17 @@ export const RestoreAccountScreen: React.FC = () => {
       <ScreenLayout>
         <View>
           <InputField
-            label={t('Enter block height')}
+            label={t('enterBlockHeight')}
             value={blockHeightInput}
             onChange={onSetBlockHeight}
             keyboardType="number-pad"
           />
           <View>
             <TextButton onPress={() => goToCreate(blockHeightInput)}>
-              {t('Choose selected blockheight')}
+              {t('chooseSelectedBlockHeight')}
             </TextButton>
             <TextButton type="secondary" onPress={() => goToCreate(0)}>
-              {t("I don't know")}
+              {t('iDontKnow')}
             </TextButton>
           </View>
         </View>

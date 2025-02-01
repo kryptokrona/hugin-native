@@ -3,6 +3,7 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -25,6 +26,7 @@ import {
   FullScreenImageViewer,
   InputField,
   TextButton,
+  ModalCenter,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -60,9 +62,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
-  // Use getRoomMessages with a page index (0 is default) to load more messages
-  //getRoomMessages(key, page) -> [alreadyloaded, ...more]
-
   const [showImage, setShowImage] = useState<boolean>(false);
   const [showImagePath, setImagePath] = useState<string>(false);
   const [tipping, setTipping] = useState(false);
@@ -118,8 +117,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     return Peers.connected(getCurrentRoom());
   }, [Peers, getCurrentRoom()]);
 
-  // scrollToBottom();
-
   useFocusEffect(
     React.useCallback(() => {
       setStoreCurrentRoom(roomKey);
@@ -154,18 +151,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       ),
     });
   }, [roomKey, name]);
-
-  // useLayoutEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     if (flatListRef.current && mockMessages && mockMessages.length > 0) {
-  //       flatListRef.current.scrollToEnd({ animated: true });
-  //     }
-  //   }, 1000);
-
-  //   return () => {
-  //     clearTimeout(timeout);
-  //   };
-  // }, []);
 
   async function onSend(
     text: string,
@@ -239,25 +224,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           onClose={() => setShowImage(false)}
         />
       )}
-      {tipping && (
-        <TouchableOpacity
-          style={[styles.modal, { backgroundColor }]}
-          onPress={() => setTipping(false)}>
-          <View style={styles.tipContainer}>
-            <InputField
-              label={''}
-              value={tipAmount}
-              onChange={setTipAmount}
-              onSubmitEditing={sendTip}
-            />
-            <TextButton onPress={sendTip}>{t('send')}</TextButton>
-            {/* <View style={styles.divider} /> */}
-            <TextButton onPress={() => setTipping(false)}>
-              {t('close')}
-            </TextButton>
-          </View>
-        </TouchableOpacity>
-      )}
+      <ModalCenter visible={tipping} closeModal={() => setTipping(false)}>
+        <InputField
+          label={t('amount')}
+          value={tipAmount}
+          onChange={setTipAmount}
+          onSubmitEditing={sendTip}
+        />
+        <TextButton onPress={sendTip}>{t('send')}</TextButton>
+        <TextButton onPress={() => setTipping(false)}>{t('close')}</TextButton>
+      </ModalCenter>
       <FlatList
         inverted
         ref={flatListRef}
@@ -287,7 +263,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         maxToRenderPerBatch={messages.length}
       />
 
-      <KeyboardAvoidingView style={[styles.inputWrapper, { backgroundColor }]}>
+      <KeyboardAvoidingView
+        style={[styles.inputWrapper, { backgroundColor }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        // keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
         <MessageInput
           onSend={onSend}
           replyToName={replyToName}
@@ -304,24 +284,10 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   inputWrapper: {
-    bottom: 0,
+    bottom: 4,
     left: 0,
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
-  },
-  modal: {
-    alignSelf: 'center',
-    borderRadius: 20,
-    position: 'absolute',
-    top: '10%',
-    width: '50%',
-    zIndex: 5,
-  },
-  tipContainer: {
-    height: '100vh',
-    padding: 20,
-    // backgroundColor: 'red',
-    zIndex: 5,
   },
 });

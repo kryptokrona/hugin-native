@@ -1,35 +1,35 @@
+import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
+import { MainNavigationParamList, MainStackNavigationType } from '@/types';
 import React, { useState } from 'react';
-
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { StyleSheet, View } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
-import { InputField, ScreenLayout, TextButton } from '@/components';
-import { backgroundType } from '@/styles';
-
+import { MainScreens } from '@/config';
+import Toast from 'react-native-toast-message';
+import { Wallet } from '../services/kryptokrona';
 import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
-import { useNavigation } from '@react-navigation/native';
-
+import { t } from 'i18next';
 import { useThemeStore } from '@/services';
 
-import { Wallet } from '../services/kryptokrona';
-
-import Toast from 'react-native-toast-message';
-import { t } from 'i18next';
-
-interface Props {}
+interface Props {
+  route: RouteProp<
+    MainNavigationParamList,
+    typeof MainScreens.SendTransactionScreen
+  >;
+}
 
 export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
-  // Form states
-  const [address, setAddress] = useState(route.params?.address || '');
+  const mAddress = route.params?.address;
+  const [address, setAddress] = useState(mAddress || '');
   const [paymentId, setPaymentId] = useState('');
   const [amount, setAmount] = useState('');
-  const [preparedTx, setPreparedTx] = useState({});
+  const [preparedTx, setPreparedTx] = useState<{
+    success?: boolean;
+    transactionHash?: string;
+    fee?: number;
+    destinations?: any;
+  } | null>(null);
   const [sendAll, setSendAll] = useState(false);
 
   const navigation = useNavigation<MainStackNavigationType>();
@@ -48,22 +48,22 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   };
 
   // Placeholder function for generating payment ID
-  const generatePaymentId = async () => {
-    Wallet.generate;
-    setPaymentId('GeneratedPaymentId123');
-  };
+  // const generatePaymentId = async () => {
+  //   Wallet.generate;
+  //   setPaymentId('GeneratedPaymentId123');
+  // };
 
   // Placeholder function for max amount
-  const sendMaxAmount = () => {
-    setAmount('1.2345');
-    setSendAll(true);
-  };
+  // const sendMaxAmount = () => {
+  //   setAmount('1.2345');
+  //   setSendAll(true);
+  // };
 
   const prepareTransaction = async () => {
-    const result = await Wallet.active.sendTransactionAdvanced(
+    const result = await Wallet?.active?.sendTransactionAdvanced(
       [[address, parseInt(parseFloat(amount).toFixed(5) * 100000)]],
       3,
-      { isFixedFee: true, fixedFee: 10000 },
+      { fixedFee: 10000, isFixedFee: true },
       paymentId,
       undefined,
       undefined,
@@ -72,22 +72,23 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
       undefined,
     );
 
-    if (result.success) {
+    if (result?.success) {
       setPreparedTx(result);
     } else {
       Toast.show({
-        type: 'error',
         text1: t('transactionFailed'),
+        type: 'error',
       });
     }
   };
 
   const sendPreparedTx = async () => {
-    const result = await Wallet.active.sendPreparedTransaction(
+    const result = await Wallet?.active?.sendPreparedTransaction(
       preparedTx.transactionHash,
+    );
 
-    if (result.success) {
-      if (route.address) {
+    if (result?.success) {
+      if (mAddress) {
         console.log('Pop 2');
         navigation.pop(2);
       } else {
@@ -95,13 +96,13 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
       }
 
       Toast.show({
-        type: 'success',
         text1: t('transactionSuccess'),
+        type: 'success',
       });
     } else {
       Toast.show({
-        type: 'error',
         text1: t('transactionFailed'),
+        type: 'error',
       });
     }
   };
@@ -109,77 +110,58 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   return (
     <ScreenLayout>
       <View>
-        {/* Form */}
         <View>
           <InputField
-            style={styles.input}
+            // style={styles.input}
             label={t('address')}
             value={address}
             onChange={setAddress}
             maxLength={101}
           />
           <TextButton style={styles.button} onPress={pasteAddress}>
-            Paste
+            {t('paste')}
           </TextButton>
         </View>
-        {/* <View>
-          <InputField
-            style={styles.input}
-            placeholder="Payment ID (optional)"
-            placeholderTextColor="#888"
-            value={paymentId}
-            onChange={setPaymentId}
-          />
-          <TextButton style={styles.button} onPress={generatePaymentId}>Generate</TextButton>
-        </View> */}
+
         <View>
           <InputField
-            style={[styles.input, { flex: 1 }]}
             label={t('amount')}
             value={amount}
             onChange={setAmount}
-            keyboardType="decimal-pad"
+            keyboardType="number-pad"
           />
-          {/* {<TextButton style={styles.button} onPress={sendMaxAmount}>Send max</TextButton>} */}
         </View>
 
-        <TextButton onPress={prepareTransaction}>Send transaction</TextButton>
+        <TextButton onPress={prepareTransaction}>
+          {t('sendTransaction')}
+        </TextButton>
 
-        {/* Transaction Details */}
-        {preparedTx.success ? (
+        {preparedTx?.success ? (
           <View style={[styles.transactionBox, { borderColor }]}>
-            <Text style={[styles.heading, { color: borderColor }]}>
-              Receiving Address
-            </Text>
-            <Text style={[styles.detail, { color }]}>
-              {preparedTx.destinations.userDestinations[0].address.slice(0, 24)}
-              ...
-              {preparedTx.destinations.userDestinations[0].address.slice(-24)}
-            </Text>
-
-            {/* {            <Text style={styles.heading}>Payment ID</Text>
-            <Text style={styles.detail}>
-              {preparedTx.paymentID ? preparedTx.paymentID : 'Not Applicable'}
-            </Text>} */}
+            <TextField style={[styles.heading, { color: borderColor }]}>
+              {t('receivingAddress')}
+            </TextField>
+            <TextField style={[styles.detail, { color }]}>
+              {`${preparedTx.destinations.userDestinations[0].address.slice(
+                0,
+                24,
+              )}...${preparedTx.destinations.userDestinations[0].address.slice(
+                -24,
+              )}`}
+            </TextField>
 
             <View style={styles.row}>
               <View style={styles.column}>
-                <Text style={[styles.heading, { color: borderColor }]}>
-                  Total Amount
-                </Text>
-                <Text style={[styles.detail, { color }]}>
+                <TextField>{t('totalAmount')}</TextField>
+                <TextField>
                   {prettyPrintAmount(
                     preparedTx.destinations.userDestinations[0].amount,
                   )}
-                </Text>
+                </TextField>
               </View>
               <View style={styles.column}>
-                <Text style={[styles.heading, { color: borderColor }]}>
-                  Fee
-                </Text>
-                <Text style={[styles.detail, { color }]}>
-                  {prettyPrintAmount(preparedTx.fee)}
-                </Text>
+                <TextField size="large">{t('fee')}</TextField>
+                <TextField>{prettyPrintAmount(preparedTx?.fee || 0)}</TextField>
               </View>
             </View>
 
@@ -187,10 +169,10 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
               <TextButton
                 style={styles.button}
                 onPress={() => setPreparedTx({})}>
-                Cancel
+                {t('cancel')}
               </TextButton>
               <TextButton style={styles.button} onPress={sendPreparedTx}>
-                Send
+                {t('send')}
               </TextButton>
             </View>
           </View>
@@ -203,63 +185,40 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  field: {
+  actions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  wrapper: {
-    padding: 16,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
-    width: '100%',
+    justifyContent: 'space-between',
+    marginTop: 16,
   },
   button: {
-    margin: 0
-  },
-  input: {
-    margin: 0
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  noTransaction: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  transactionBox: {
-    padding: 16,
-    borderRadius: 8,
-    width: '100%',
-    borderWidth: 1
-  },
-  detail: {
-    fontSize: 14,
-    color: '#00ffcc',
-    marginBottom: 16,
-    fontFamily: 'Montserrat-Medium',
-  },
-  heading: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: 'white',
-    marginTop: 8,
-    fontFamily: 'Montserrat-SemiBold',
+    margin: 0,
   },
   column: {
     flex: 1,
+  },
+  detail: {
+    color: '#00ffcc',
+    fontFamily: 'Montserrat-Medium',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+
+  heading: {
+    color: 'white',
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
   },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
+  transactionBox: {
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
+    width: '100%',
   },
 });

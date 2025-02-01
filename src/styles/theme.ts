@@ -6,8 +6,8 @@ const neutral: ThemeBase = {
     accentForeground: '#fafafa',
     background: '#0a0a0a',
     border: '#262626',
-    card: '#0a0a0a',
-    cardForeground: '#fafafa',
+    card: '#141414',
+    cardForeground: '#a3a3a3',
     destructive: '#fafafa',
     destructiveForeground: '#dc2626',
     foreground: '#fafafa',
@@ -142,6 +142,7 @@ const aesir: ThemeBase = {
 };
 
 export const textType = {
+  accent: 'accentForeground',
   destructive: 'destructiveForeground',
   muted: 'mutedForeground',
   primary: 'primaryForeground',

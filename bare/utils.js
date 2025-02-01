@@ -98,7 +98,8 @@ const sanitize_join_swarm_data = (data) => {
     if (!base64.test(avatar)) {
       return false;
     }
-    if (avatar.length > 273000) {
+    if (avatar.length > 614400) {
+      // 600kb
       console.log('Avatar too big');
       return false;
     }

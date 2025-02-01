@@ -24,6 +24,22 @@ export const getToastConfig = (theme: Theme) => {
       />
     ),
 
+    info: (props: ToastProps) => (
+      <BaseToast
+        {...props}
+        style={{
+          backgroundColor: theme.background,
+          borderLeftColor: theme.primary,
+        }}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
+        text1Style={{
+          color: theme.primary,
+          fontFamily: 'Montserrat-Medium',
+          fontSize: 16,
+        }}
+      />
+    ),
+
     success: (props: ToastProps) => (
       <BaseToast
         {...props}

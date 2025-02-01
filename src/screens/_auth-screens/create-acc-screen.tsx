@@ -177,8 +177,6 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
       </View>
 
       <Card>
-        {/* // TODO translation */}
-
         <TextField size="small">{t('authMethod')}</TextField>
         <View style={styles.radioGroup}>
           <TouchableOpacity
@@ -241,7 +239,7 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
         <TextButton
           onPress={onCreateProfile}
           disabled={loading || nameError || pinError}>
-          {t('createProfile')}
+          {t('createAcount')}
         </TextButton>
       </Container>
     </ScreenLayout>

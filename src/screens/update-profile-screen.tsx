@@ -1,13 +1,8 @@
-import { useMemo, useState } from 'react';
-
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
-import { Peers } from 'lib/connections';
-import { update_bare_user } from 'lib/native';
-
+import {
+  AuthMethods,
+  MainNavigationParamList,
+  MainStackNavigationType,
+} from '@/types';
 import {
   Avatar,
   Container,
@@ -19,19 +14,20 @@ import {
   TextField,
 } from '@/components';
 import { MainScreens, nameMaxLength } from '@/config';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   updateUser,
   usePreferencesStore,
   useThemeStore,
   useUserStore,
 } from '@/services';
-import {
-  AuthMethods,
-  MainNavigationParamList,
-  MainStackNavigationType,
-} from '@/types';
+import { useMemo, useState } from 'react';
 
+import { Peers } from 'lib/connections';
 import { pickAvatar } from '../utils/avatar';
+import { update_bare_user } from 'lib/native';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<
@@ -115,7 +111,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
       <View>
         <View>
           <TextField type="muted" size="small">
-            {'Avatar'}
+            {t('avatar')}
           </TextField>
           <TouchableOpacity
             onPress={onUpdateAvatar}
@@ -138,9 +134,8 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
             maxLength={nameMaxLength}
           />
         </View>
-        {/* // TODO translation */}
         <Container>
-          <TextField size="small">{'Auth method'}</TextField>
+          <TextField size="small">{t('authMethod')}</TextField>
 
           <View style={styles.radioGroup}>
             <TouchableOpacity

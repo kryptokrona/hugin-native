@@ -1,25 +1,26 @@
-import React from 'react';
 import {
   AddGroupScreen,
   ChangeLanguageScreen,
   ChangeThemeScreen,
+  DashboardScreen,
   GroupChatScreen,
   GroupsScreen,
+  MessageScreen,
+  MessagesScreen,
+  ModifyContactScreen,
   ModifyGroupScreen,
+  PickNodeScreen,
+  SendTransactionScreen,
   SettingsScreen,
   UpdateProfileScreen,
-  DashboardScreen,
-  SendTransactionScreen,
-  PickNodeScreen,
   WalletStatusScreen,
-  MessagesScreen,
-  MessageScreen,
-  ModifyContactScreen
 } from '@/screens';
-import { MainScreens } from '@/config';
+
 import { Header } from '../header';
 import { MainNavigationParamList } from '@/types';
+import { MainScreens } from '@/config';
 import { MyTabBar } from '../tab-bar';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'i18next';
@@ -42,12 +43,7 @@ const GroupsStack = () => {
         name={MainScreens.GroupChatScreen}
         component={GroupChatScreen}
         options={{
-          header: (_props) => (
-            <Header
-              title={'Untitled'}
-              backButton
-            />
-          ),
+          header: (_props) => <Header title={'Untitled'} backButton />,
         }}
       />
       <NativeStack.Screen
@@ -75,12 +71,7 @@ const MessagesStack = () => {
         name={MainScreens.MessageScreen}
         component={MessageScreen}
         options={{
-          header: (_props) => (
-            <Header
-              title={'Untitled'}
-              backButton
-            />
-          ),
+          header: (_props) => <Header title={'Untitled'} backButton />,
         }}
       />
       <NativeStack.Screen
@@ -108,24 +99,14 @@ const WalletStack = () => {
         name={MainScreens.SendTransactionScreen}
         component={SendTransactionScreen}
         options={{
-          header: (_props) => (
-            <Header
-              title={'Send transaction'}
-              backButton
-            />
-          ),
+          header: (_props) => <Header title={'Send transaction'} backButton />,
         }}
       />
       <NativeStack.Screen
         name={MainScreens.WalletStatusScreen}
         component={WalletStatusScreen}
         options={{
-          header: (_props) => (
-            <Header
-              title={'Wallet status'}
-              backButton
-            />
-          ),
+          header: (_props) => <Header title={'Wallet status'} backButton />,
         }}
       />
     </NativeStack.Navigator>
@@ -140,8 +121,7 @@ export const MainNavigator = () => {
         tabBarHideOnKeyboard: true,
         headerShown: false, // Headers managed within the navigators themselves
       }}
-      tabBar={(props) => <MyTabBar {...props} />}
-    >
+      tabBar={(props) => <MyTabBar {...props} />}>
       {/* Groups Tab */}
       <Tab.Screen
         name={MainScreens.GroupsScreen}
@@ -169,7 +149,7 @@ export const MainNavigator = () => {
         name={MainScreens.AddGroupScreen}
         component={AddGroupScreen}
         options={{
-          header: (_props) => <Header backButton title={t('subscribe')} />,
+          header: (_props) => <Header backButton title={t('addRoom')} />,
         }}
       />
       <Tab.Screen
@@ -200,7 +180,7 @@ export const MainNavigator = () => {
           header: (_props) => <Header title={t('changeTheme')} backButton />,
         }}
       />
-        <Tab.Screen
+      <Tab.Screen
         name={MainScreens.PickNodeScreen}
         component={PickNodeScreen}
         options={{

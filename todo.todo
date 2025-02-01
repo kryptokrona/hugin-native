@@ -2,7 +2,7 @@ Todo:
     ✔ Fix tips @done(24-12-27 22:22)
     ✔ Fix header status icon (green/grey) @done(24-12-30 21:20)
     ✔ Style toasts @done(25-01-31 10:31)
-    ☐ Include all translations
+    ✔ Include all translations @done(25-02-01 15:45)
     ☐ Add calls
     ✔ Add amount to tips @done(24-12-30 21:20)
     ☐ Add dms
@@ -10,6 +10,7 @@ Todo:
     ☐ Fix tip notification
     ☐ Delete account function
     ✔ Border bottom on active tab @done(25-01-31 10:31)
+    ✔ Change max avatar size to 600kb @done(25-02-01 15:33)
 
 
 Todo wallet:
@@ -35,3 +36,4 @@ Bugs:
 
 Maintenenance:
     ☐ Upgrade packages, RN version. Note, when upgrade RN version all the react native packages must align
+    ☐ Accesibility

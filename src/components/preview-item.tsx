@@ -1,9 +1,8 @@
+import { Avatar, TextField, Unreads } from './_elements';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { useThemeStore } from '@/services';
 import { getAvatar } from '@/utils';
-
-import { Avatar, TextField, Unreads } from './_elements';
+import { useThemeStore } from '@/services';
 
 interface Props {
   name: string;
@@ -22,18 +21,13 @@ export const PreviewItem: React.FC<Props> = ({
   onPress,
   unreads = 0,
 }) => {
-  roomKey = roomKey ? roomKey : address;
-  // const [isPressed, setIsPressed] = useState(false);
+  const mRoomKey: string = roomKey ? roomKey : (address as string);
   const theme = useThemeStore((state) => state.theme);
   const isNew = false; // dummy
   const borderColor = isNew ? theme.foreground : theme.border;
 
-  // function handleLongPress() {
-  // setIsPressed(true);
-  // }
-
   function handlePress() {
-    onPress(roomKey, name);
+    onPress(mRoomKey, name);
   }
 
   return (
@@ -44,14 +38,12 @@ export const PreviewItem: React.FC<Props> = ({
         {
           borderColor,
         },
-      ]}
-      // onLongPress={handleLongPress}
-      // onPressOut={() => setIsPressed(false)}
-    >
+      ]}>
       <View style={styles.avatarContainer}>
         <Unreads unreads={unreads} />
-        {roomKey?.length > 15 && <Avatar size={50} base64={getAvatar(roomKey)} />}
-        
+        {mRoomKey?.length > 15 && (
+          <Avatar size={50} base64={getAvatar(mRoomKey)} />
+        )}
       </View>
       <View style={styles.content}>
         <TextField bold={isNew} maxLength={22} size="large">

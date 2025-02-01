@@ -26,7 +26,7 @@ export type MainNavigationParamList = {
     | undefined;
   [MainScreens.PickNodeScreen]: undefined;
   [MainScreens.DashboardScreen]: undefined;
-  [MainScreens.SendTransactionScreen]: undefined;
+  [MainScreens.SendTransactionScreen]: { address: string } | undefined;
   [MainScreens.WalletStatusScreen]: undefined;
   [MainScreens.ModifyContactScreen]: { name: string; roomKey: string };
 };

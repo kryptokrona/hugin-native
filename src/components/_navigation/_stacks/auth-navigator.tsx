@@ -67,12 +67,13 @@ export const AuthNavigator = () => {
         name={AuthScreens.CreateAccountScreen}
         component={CreateAccScreen}
         options={() => ({
-          header: (_props) => <Header title={t('createProfile')} />,
+          header: (_props) => <Header title={t('createAcount')} />,
         })}
       />
       <Stack.Screen
         name={AuthScreens.WelcomeScreen}
         component={WelcomeScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name={AuthScreens.RestoreAccountScreen}

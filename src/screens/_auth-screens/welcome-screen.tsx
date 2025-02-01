@@ -1,17 +1,16 @@
-import { useLayoutEffect } from 'react';
-
+import { ScreenLayout, TextButton, TextField, XKRLogo } from '@/components';
 import { StyleSheet, View } from 'react-native';
 
-import { useNavigation } from '@react-navigation/native';
-
-import { ScreenLayout, TextButton, TextField, XKRLogo } from '@/components';
 import { AuthScreens } from '@/config';
-import { useThemeStore } from '@/services';
 import { AuthStackNavigationType } from '@/types';
+import { useNavigation } from '@react-navigation/native';
+import { useThemeStore } from '@/services';
+import { useTranslation } from 'react-i18next';
 
 interface Props {}
 
 export const WelcomeScreen: React.FC<Props> = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
   const theme = useThemeStore((state) => state.theme);
 
@@ -23,24 +22,21 @@ export const WelcomeScreen: React.FC<Props> = () => {
     navigation.push(AuthScreens.RestoreAccountScreen);
   };
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      header: () => <></>,
-    });
-  }, []);
-
-  // TODO fix translation
   return (
     <ScreenLayout>
       <View style={Styles.container}>
         <XKRLogo />
         <TextField
           size="large"
-          style={{ color: theme.foreground, marginBottom: 40, textAlign: 'center' }}>
-          Welcome to Hugin Messenger!
+          style={{
+            color: theme.foreground,
+            marginBottom: 40,
+            textAlign: 'center',
+          }}>
+          {t('welcomeToHugin')}
         </TextField>
-        <TextButton onPress={createAccount}>{'Create new account'}</TextButton>
-        <TextButton onPress={restoreAccount}>{'Restore account'}</TextButton>
+        <TextButton onPress={createAccount}>{'createAccount'}</TextButton>
+        <TextButton onPress={restoreAccount}>{'restoreAccount'}</TextButton>
       </View>
     </ScreenLayout>
   );

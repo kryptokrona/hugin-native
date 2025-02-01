@@ -30,13 +30,12 @@ export const TextButton: React.FC<Props> = ({
   small,
 }) => {
   const theme = useThemeStore((state) => state.theme);
-  const type = disabled ? 'muted' : mType;
+  const type: ElementType = disabled ? 'muted' : mType;
   const backgroundColor = theme[backgroundType[type]];
   const borderColor = theme[textType[type]];
   const borderWidth = theme.mode === 'dark' || type === 'secondary' ? 1 : 0;
   const color = theme[textType[type]];
 
-  // TODO Fix disabled color
   const smallButtonStyle = small
     ? {
         borderRadius: Styles.borderRadius.small,

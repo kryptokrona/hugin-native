@@ -7,12 +7,14 @@ import { ScreenLayout, TextButton, TextField } from '@/components';
 import { AuthScreens } from '@/config';
 import React from 'react';
 import { View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.ForgotPinScreen>;
 }
 
 export const ForgotPinScreen: React.FC<Props> = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation<AuthStackNavigationType>();
 
   const resetPinCode = async () => {
@@ -43,16 +45,11 @@ export const ForgotPinScreen: React.FC<Props> = () => {
           justifyContent: 'flex-start',
           marginTop: 60,
         }}>
-        <TextField size="large">
-          Your account is encrypted with your pin, so unfortunately, if you have
-          forgotten your pin, it cannot be recovered.
-        </TextField>
-        <TextField size="large">
-          However, you can delete your account if you wish to create a new one.
-        </TextField>
+        <TextField size="large">{t('forgotPinText1')}</TextField>
+        <TextField size="large">{t('forgotPinText2')}</TextField>
       </View>
       <TextButton onPress={onPress} type="destructive">
-        Delete Account
+        {t('deleteAccount')}
       </TextButton>
     </ScreenLayout>
   );

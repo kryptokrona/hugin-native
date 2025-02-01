@@ -1,19 +1,3 @@
-import React, { useLayoutEffect, useMemo } from 'react';
-
-import {
-  FlatList,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
-
-import {
-  RouteProp,
-  useFocusEffect,
-  useNavigation,
-} from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
-
 import {
   Card,
   CopyButton,
@@ -23,13 +7,27 @@ import {
   TextField,
   UserItem,
 } from '@/components';
-import { MainScreens } from '@/config';
-import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore } from '@/services';
+import {
+  FlatList,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import {
   MainNavigationParamList,
   MainStackNavigationType,
   User,
 } from '@/types';
+import React, { useLayoutEffect, useMemo } from 'react';
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore } from '@/services';
+
+import { MainScreens } from '@/config';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<
@@ -42,16 +40,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
   const navigation = useNavigation<MainStackNavigationType>();
-  // const theme = useThemeStore((state) => state.theme);
-  // const [avatar, setAvatar] = useState<string | null>(null);
-  // const [groupName, setGroupName] = useState<string>(name); // route.params.name
-  // const tempAvatar = createAvatar();
-  // const isAdmin = false; // TBD
-  // const theme = useThemeStore((state) => state.theme);
-  // const [avatar, setAvatar] = useState<string | null>(null);
-  // const [groupName, setGroupName] = useState<string>(name); // route.params.name
-  // const tempAvatar = createAvatar();
-  // const isAdmin = false; // TBD
   const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room === roomKey,
   );
@@ -83,21 +71,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
       return () => {};
     }, [roomKey]),
   );
-
-  // function onNameInput(value: string) {
-  //   setGroupName(value);
-  // }
-
-  // async function onUploadAvatar() {
-  //   const base64 = await pickAvatar();
-  //   if (base64) {
-  //     // TODO
-  //   }
-  // }
-
-  // async function onSave() {
-  //   // TODO
-  // }
 
   function OnlineUserMapper({ item }: { item: User }) {
     return <UserItem {...item} />;

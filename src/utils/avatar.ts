@@ -6,6 +6,7 @@ import {
 
 import { Peers } from 'lib/connections';
 import Toast from 'react-native-toast-message';
+import { t } from 'i18next';
 
 function hashCode(str: string) {
   let hash = 0;
@@ -112,9 +113,8 @@ export const pickAvatar = async () => {
   const result = await launchImageLibrary(options);
   const base64 = result.assets?.[0].base64;
   if (base64 && base64.length > 273000) {
-    const maxSizeKB = (273000 / 1024).toFixed(2);
     Toast.show({
-      text1: `Avatar size exceeds the maximum size of ${maxSizeKB} KB`,
+      text1: t('maxAvatarSize'),
       type: 'error',
     });
     return null;

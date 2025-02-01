@@ -159,7 +159,7 @@ export const MessagesScreen: React.FC<Props> = () => {
 
         {!joining && (
           <View>
-            <TextField size="small">{t('copyAddress')}</TextField>
+            <TextField size="small">{t('copyYourAddress')}</TextField>
             <TextButton onPress={onCreateRoom}>{t('copy')}</TextButton>
             <View style={styles.divider} />
             <TextField size="small">{t('addUserDescr')}</TextField>

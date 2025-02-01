@@ -1,17 +1,15 @@
 import Clipboard from '@react-native-clipboard/clipboard';
-
-import { useThemeStore } from '@/services';
-import type { ElementType } from '@/types';
-
 import { CustomIcon } from './custom-icon';
+import type { ElementType } from '@/types';
 import { TextButton } from './text-button';
+import { useThemeStore } from '@/services';
 
 interface CopyButtonProps {
   data: string;
   text: string;
   type?: ElementType;
   small?: boolean;
-  onPress: () => void;
+  onPress?: () => void;
 }
 
 export const CopyButton: React.FC<CopyButtonProps> = ({
@@ -29,7 +27,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
 
   const handleCopy = () => {
     Clipboard.setString(data);
-    onPress();
+    onPress?.();
     // toast.show(`${t('copied')}`);
     // toastPopUp(`${t('copied')}`);
   };

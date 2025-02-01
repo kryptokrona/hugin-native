@@ -1,6 +1,11 @@
 export type ImageType = 'logoWhiteText';
 
-export type ElementType = 'primary' | 'secondary' | 'destructive' | 'muted';
+export type ElementType =
+  | 'primary'
+  | 'secondary'
+  | 'destructive'
+  | 'muted'
+  | 'accent';
 
 export interface Emoji {
   emoji: string;

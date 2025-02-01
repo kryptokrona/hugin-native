@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { View, Alert } from 'react-native';
 
 import { type RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics from 'react-native-biometrics';
 
@@ -19,7 +20,7 @@ interface Props {
 }
 
 export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
-  // const navigation = useNavigation<AuthStackNavigationType>();
+  const { t } = useTranslation();
   const mainNavigation = useNavigation<MainStackNavigationType>();
 
   const finishProcess = () => {
@@ -40,23 +41,20 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
 
     try {
       const { success } = await rnBiometrics.simplePrompt({
-        cancelButtonText: 'Cancel',
-        promptMessage: 'Authenticate with Fingerprint',
+        cancelButtonText: t('cancel'),
+        promptMessage: t('authenticateFingerprint'),
       });
 
       if (success) {
         finishProcess();
       } else {
         Alert.alert(
-          'Authentication Failed',
-          'Fingerprint authentication was not successful.',
+          t('authenticationFailed'),
+          t('authenticationFingerprintFailed'),
         );
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Biometric authentication is not available on this device.',
-      );
+      Alert.alert(t('error'), t('authenticationFingerprintNA'));
     }
   };
 

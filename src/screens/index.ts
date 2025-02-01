@@ -4,7 +4,6 @@ export * from './change-language-screen';
 export * from './change-theme-screen';
 export * from './group-chat-screen';
 export * from './groups-screen';
-export * from './import-screen';
 export * from './main-screen';
 export * from './message-screen';
 export * from './messages-screen';

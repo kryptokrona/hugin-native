@@ -9,11 +9,7 @@ import Toast from 'react-native-toast-message';
 import { TextButton, Pincode, ScreenLayout } from '@/components';
 import { AuthScreens, Stacks } from '@/config';
 import { setAuthenticated, usePreferencesStore } from '@/services';
-import type {
-  AuthStackParamList,
-  AuthStackNavigationType,
-  MainStackNavigationType,
-} from '@/types';
+import type { AuthStackParamList, MainStackNavigationType } from '@/types';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.RequestPinScreen>;
@@ -21,7 +17,6 @@ interface Props {
 
 export const RequestPinScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
-  const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<MainStackNavigationType>();
   const pincode = usePreferencesStore((state) => state.preferences?.pincode);
 
@@ -56,7 +51,7 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
       <View style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
         <Pincode onFinish={verifyPin} />
         <TextButton onPress={() => verifyPin(pincode ?? '')}>
-          Authenticate
+          {t('authenticate')}
         </TextButton>
 
         {/* <TextButton type="secondary" onPress={handleForgotPin}>

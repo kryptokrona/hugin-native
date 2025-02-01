@@ -92,8 +92,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
   };
 
-  const showBigImage = (path: string) => {
-    setImagePath(path);
+  const showBigImage = (path: string | undefined) => {
+    if (path) {
+      setImagePath(path);
+    }
     setShowImage(true);
   };
 

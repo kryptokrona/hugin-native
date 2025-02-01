@@ -187,7 +187,6 @@ export const defaultUser: User = {
   huginAddress: '',
 
   keys: {},
-  // TODO test this properly
   name: 'Anon',
   room: 'lobby',
 };
