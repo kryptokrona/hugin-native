@@ -35,9 +35,6 @@ const GroupsStack = () => {
       <NativeStack.Screen
         name={MainScreens.GroupsScreen}
         component={GroupsScreen}
-        options={{
-          header: (_props) => <Header title={t('rooms')} />,
-        }}
       />
       <NativeStack.Screen
         name={MainScreens.GroupChatScreen}

@@ -44,11 +44,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     (a) => a.room === roomKey,
   );
 
-  const online = useMemo(() => {
-    return roomUsers;
-  }, [roomUsers]);
-
-  console.log('online', roomUsers.length);
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -93,7 +88,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           <FlatList
             nestedScrollEnabled={true}
             numColumns={2}
-            data={online}
+            data={roomUsers}
             renderItem={OnlineUserMapper}
             keyExtractor={(item, i) => `${item.name}-${i}`}
           />
@@ -110,27 +105,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           data={inviteText}
         />
 
-        {/* <TouchableOpacity
-          onPress={onUploadAvatar}
-          style={styles.avatarContainer}>
-          <Avatar base64={avatar ?? getAvatar(roomKey)} />
-          <View style={styles.avatarButton}>
-            <CustomIcon
-              type="MI"
-              name="mode-edit"
-              size={20}
-              color={theme.accentForeground}
-            />
-          </View>
-        </TouchableOpacity> */}
-
-        {/* <InputField
-          label={t('name')}
-          value={groupName}
-          onChange={onNameInput}
-          maxLength={nameMaxLength}
-        /> */}
-        {/* <TextButton onPress={onSave}>{t('save')}</TextButton> */}
         <View style={styles.leaveContainer}>
           <TextButton onPress={onLeave} type="destructive">
             {t('leaveGroup')}
@@ -142,15 +116,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-  // avatarButton: {
-  //   bottom: 12,
-  //   position: 'absolute',
-  //   right: 10,
-  // },
-  // avatarContainer: {
-  //   alignSelf: 'flex-start',
-  //   position: 'relative',
-  // },
   flatListContainer: {
     marginBottom: 12,
   },

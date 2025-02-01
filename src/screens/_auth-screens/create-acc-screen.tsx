@@ -240,14 +240,15 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
           </View>
         )}
       </Card>
-
-      <Container bottom>
-        <TextButton
-          onPress={onCreateProfile}
-          disabled={loading || nameError || pinError}>
-          {t('createAccount')}
-        </TextButton>
-      </Container>
+      <View>
+        <Container bottom>
+          <TextButton
+            onPress={onCreateProfile}
+            disabled={loading || nameError || pinError}>
+            {t('createAccount')}
+          </TextButton>
+        </Container>
+      </View>
     </ScreenLayout>
   );
 };
