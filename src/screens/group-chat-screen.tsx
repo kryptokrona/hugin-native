@@ -266,7 +266,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       <KeyboardAvoidingView
         style={[styles.inputWrapper, { backgroundColor }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        // keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       >
         <MessageInput
           onSend={onSend}
