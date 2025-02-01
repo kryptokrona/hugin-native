@@ -239,7 +239,7 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
         <TextButton
           onPress={onCreateProfile}
           disabled={loading || nameError || pinError}>
-          {t('createAcount')}
+          {t('createAccount')}
         </TextButton>
       </Container>
     </ScreenLayout>
