@@ -1,3 +1,17 @@
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+
+import {
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { useNavigation } from '@react-navigation/native';
+import { Transaction } from 'kryptokrona-wallet-backend-js';
+import { useTranslation } from 'react-i18next';
+
 import {
   Card,
   CopyButton,
@@ -8,22 +22,10 @@ import {
   TextField,
   TransactionItem,
 } from '@/components';
-import {
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-
 import { MainScreens } from '@/config';
-import type { MainStackNavigationType } from '@/types';
-import { Transaction } from 'kryptokrona-wallet-backend-js';
-import { formatHashString } from '@/utils';
 import { useGlobalStore } from '@/services';
-import { useNavigation } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+import type { MainStackNavigationType } from '@/types';
+import { formatHashString } from '@/utils';
 
 export const DashboardScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -113,7 +115,7 @@ export const DashboardScreen: React.FC = () => {
               keyExtractor={(item, i) => `${item.hash}-${i}`}
             />
           ) : (
-            <TextField type="secondary">{t('noTransactions')}</TextField>
+            <TextField type="muted">{t('noTransactions')}</TextField>
           )}
         </View>
       </ScrollView>

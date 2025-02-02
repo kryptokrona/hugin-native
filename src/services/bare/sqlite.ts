@@ -1,4 +1,3 @@
-import { FileInfo, Message } from '@/types';
 import {
   ResultSet,
   SQLiteDatabase,
@@ -6,8 +5,11 @@ import {
   openDatabase,
 } from 'react-native-sqlite-storage';
 
-import { Files } from './globals';
+import { FileInfo, Message, TipType } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
+
+import { Files } from './globals';
+
 import { useUserStore } from '../zustand';
 
 enablePromise(true);
@@ -690,7 +692,7 @@ export async function saveRoomMessage(
   nickname: string,
   hash: string,
   sent: boolean,
-  tip: JSON | false = false,
+  tip: TipType | false = false,
 ) {
   if ((!message || message?.length === 0) && !tip) {
     return false;
@@ -738,7 +740,7 @@ export async function saveMessage(
   hash: string,
   sent: boolean,
   myaddress: string,
-  tip: JSON | false = false,
+  tip: TipType | false = false,
   nickname: string | undefined,
 ) {
   console.log('Saving message: ', message);
@@ -784,14 +786,14 @@ export async function saveMessage(
 }
 
 // TODO if remove acc maybe remove delete storage stuff ?
-const deleteAllData = async () => {
-  try {
-    const results = await db.executeSql('DELETE FROM rooms');
-    console.log(results);
-  } catch (err) {
-    console.log(err);
-  }
-};
+// const deleteAllData = async () => {
+//   try {
+//     const results = await db.executeSql('DELETE FROM rooms');
+//     console.log(results);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
 
 const toMessage = (res: any) => {
   const message: Message = {

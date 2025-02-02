@@ -37,7 +37,7 @@ export interface Message {
   file?: FileInfo;
   replyto?: Message[] | undefined;
   replies?: Message[] | undefined;
-  tip?: JSON | false;
+  tip?: TipType | false;
 }
 
 export interface File {
@@ -81,8 +81,9 @@ export interface FileInfo {
 }
 
 export interface TipType {
-  receiver: string;
+  receiver?: string;
   amount: number;
+  hash: string;
 }
 
 export interface EmojiType {

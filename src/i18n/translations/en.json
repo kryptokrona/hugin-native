@@ -94,5 +94,7 @@
   "wallet": "Wallet",
   "nodePicker": "Node picker",
 
-  "tipSent": "💸 Sent {{amount}} to {{receiver}}! "
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ", // en only
+  "messageUser": "Message user", // en only
+  "onlineRoomMembers": "Online users" // en only
 }

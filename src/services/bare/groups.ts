@@ -8,7 +8,13 @@ import {
   swarm,
 } from 'lib/native';
 
-import type { FileInfo, FileInput, Message, SelectedFile } from '@/types';
+import type {
+  FileInfo,
+  FileInput,
+  Message,
+  SelectedFile,
+  TipType,
+} from '@/types';
 import { containsOnlyEmojis, sleep } from '@/utils';
 
 import { naclHash, newKeyPair, randomKey } from './crypto';
@@ -157,7 +163,7 @@ export const onSendGroupMessage = async (
   key: string,
   message: string,
   reply: string | null,
-  tip: JSON | false,
+  tip: TipType | false,
 ) => {
   return await send_swarm_msg(key, message, reply, tip);
 };
@@ -263,7 +269,7 @@ export const saveRoomMessageAndUpdate = async (
   sent: boolean,
   history: boolean | undefined = false,
   file?: FileInfo | undefined,
-  tip?: JSON | undefined,
+  tip?: TipType | undefined,
 ) => {
   let isFile = false;
   if (typeof file === 'object') {

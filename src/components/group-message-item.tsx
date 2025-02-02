@@ -1,3 +1,13 @@
+import { useEffect, useMemo, useState } from 'react';
+
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { useTranslation } from 'react-i18next';
+
+import { useGlobalStore, useThemeStore } from '@/services';
+import { Message, TipType } from '@/types';
+import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
+
 import {
   Avatar,
   CopyButton,
@@ -7,15 +17,8 @@ import {
   TextField,
   Tip,
 } from './_elements';
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Message, TipType } from '@/types';
-import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
-import { useEffect, useMemo, useState } from 'react';
-import { useGlobalStore, useThemeStore } from '@/services';
-
-import { EmojiPicker } from './emoji-picker';
 import { ModalBottom } from './_layout';
-import { useTranslation } from 'react-i18next';
+import { EmojiPicker } from './emoji-picker';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -117,6 +120,12 @@ export const GroupMessageItem: React.FC<Props> = ({
     setActionsModal(false);
   }
 
+  function onDmUser() {
+    setActionsModal(false);
+    //TODO: DM USER
+    // navigation.navigate(MainScreens.MessageScreen, { roomKey, name });
+  }
+
   function onPressReaction(emoji: string) {
     onReaction(emoji!);
   }
@@ -155,6 +164,16 @@ export const GroupMessageItem: React.FC<Props> = ({
               text={t('copyText')}
               onPress={onPressCopyText}
             />
+            {/* //TODO DM USER */}
+            {/* <TextButton
+              small
+              type="secondary"
+              onPress={onDmUser}
+              icon={
+                <CustomIcon name="comment-text-outline" type="MCI" size={16} />
+              }>
+              {t('messageUser')}
+            </TextButton> */}
             <TextButton
               small
               type="secondary"

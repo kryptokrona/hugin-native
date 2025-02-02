@@ -36,6 +36,7 @@ import type {
   MainStackNavigationType,
   MainNavigationParamList,
   Message,
+  TipType,
 } from '@/types';
 
 import { Header } from '../components/_navigation/header';
@@ -91,7 +92,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   };
 
   async function sendTip() {
-    const amount = parseInt(tipAmount * 100000);
+    const normalizedTipAmount = tipAmount.replace(/,/g, '');
+    const amount = Math.round(parseFloat(normalizedTipAmount) * 100000);
+
     const sent = await Wallet.send({
       amount: amount,
       to: tipAddress,
@@ -106,8 +109,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
       onSend('', null, '', false, {
         amount, // TODO fix this
-        hash: sent.transactionHash,
-        receiver: to?.nickname,
+        hash: sent.transactionHash!,
+        receiver: to?.nickname ?? 'Anon',
       });
       Toast.show({
         text1: t('transactionSuccess'),
@@ -160,7 +163,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     file: SelectedFile | null,
     reply?: string,
     emoji?: boolean | undefined,
-    tip?: JSON | undefined,
+    tip?: TipType | undefined,
   ) {
     if (file) {
       text = file.fileName;
@@ -218,6 +221,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAddress(address);
   }
 
+  function onCloseTipping() {
+    setTipping(false);
+    setTipAmount('0');
+  }
+
   return (
     <ScreenLayout>
       {/* Full-Screen Image Viewer */}
@@ -227,7 +235,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           onClose={() => setImagePath(null)}
         />
       )}
-      <ModalCenter visible={tipping} closeModal={() => setTipping(false)}>
+      <ModalCenter visible={tipping} closeModal={onCloseTipping}>
         <InputField
           label={t('amount')}
           value={tipAmount}
@@ -288,7 +296,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   flatListContent: {
     flexDirection: 'column-reverse',
-    paddingTop: 60
+    paddingTop: 60,
   },
   inputWrapper: {
     bottom: 4,
