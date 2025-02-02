@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
 import { create } from 'zustand';
 import { setAuthenticated } from './global-store';
+import { Platform } from 'react-native';
 
 interface UserStore {
   user: User;
@@ -183,7 +184,7 @@ export const defaultPreferences: Preferences = {
 
 export const defaultUser: User = {
   address: '',
-  downloadDir: RNFS.CachesDirectoryPath,
+  downloadDir: Platform.OS == 'ios' ? RNFS.LibraryDirectoryPath : RNFS.DownloadDirectoryPath,
   huginAddress: '',
 
   keys: {},

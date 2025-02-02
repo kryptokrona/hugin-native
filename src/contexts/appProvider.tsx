@@ -32,15 +32,15 @@ interface AppProviderProps {
   children: React.ReactNode;
 }
 
+let started = false;
+let joining = false;
+
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
-
-  const started = useRef(false);
-  const joining = useRef(false);
 
   async function init() {
     if (Platform.OS === 'android') {
@@ -78,7 +78,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await bare(user);
     await sleep(100);
     await joinRooms();
-    started.current = true;
+    started = true;
   }
 
   useEffect(() => {
@@ -109,6 +109,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const onAppStateChange = async (state: string) => {
       if (state === 'inactive') {
+        if (!started) return;
         console.log('Inactive state');
         setStoreCurrentRoom(getCurrentRoom());
 
@@ -116,6 +117,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           const thisRoom = getCurrentRoom();
           setThisRoom(thisRoom);
           await leaveRooms();
+          console.log('Successfully left rooms');
         }
       } else if (state === 'background') {
         console.log('Start timer');
@@ -127,18 +129,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         Timeout.reset();
         send_idle_status(false);
 
-        if (!started.current) {
-          started.current = true;
-        }
-
-        if (!joining.current) {
-          joining.current = true;
+        if (started && !joining) {
+          joining = true;
           if (Platform.OS === 'ios') {
             const currentRoom = getThisRoom();
             setStoreCurrentRoom(currentRoom);
             await joinRooms();
+            console.log('Successfully joined rooms after inactivity');
           }
-          joining.current = false;
+          joining = false;
         }
 
         if (Platform.OS === 'android') {
