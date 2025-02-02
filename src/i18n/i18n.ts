@@ -2,6 +2,7 @@ import RNLanguageDetector from '@os-team/i18next-react-native-language-detector'
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import ar from './translations/ar.json';
 import ben from './translations/ben.json';
 import bho from './translations/bho.json';
 import de from './translations/de.json';
@@ -33,6 +34,9 @@ i18next
     debug: true,
     fallbackLng: 'en',
     resources: {
+      ar: {
+        translation: ar,
+      },
       ben: {
         translation: ben,
       },
