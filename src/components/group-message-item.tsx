@@ -8,13 +8,13 @@ import {
   Tip,
 } from './_elements';
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Message, TipType } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 import { useEffect, useMemo, useState } from 'react';
+import { useGlobalStore, useThemeStore } from '@/services';
 
 import { EmojiPicker } from './emoji-picker';
-import { Message } from '@/types';
 import { ModalBottom } from './_layout';
-import { useThemeStore } from '@/services';
 import { useTranslation } from 'react-i18next';
 
 interface Props extends Partial<Message> {
@@ -48,6 +48,7 @@ export const GroupMessageItem: React.FC<Props> = ({
     tip = JSON.parse(tip);
   } catch {}
   const { t } = useTranslation();
+  const myUserAddress = useGlobalStore((state) => state.address);
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
   const [actions, setActions] = useState(true);
@@ -223,7 +224,7 @@ export const GroupMessageItem: React.FC<Props> = ({
             )}
             {tip && (
               <View>
-                <Tip tip={tip} />
+                <Tip tip={tip as unknown as TipType} />
               </View>
             )}
             <Reactions items={reactions} onReact={onPressReaction} />

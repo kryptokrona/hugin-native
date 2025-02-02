@@ -1,11 +1,9 @@
-import { useMemo } from 'react';
-
 import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
-import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
-
 import { TextField } from './text-field';
+import { useMemo } from 'react';
+import { useThemeStore } from '@/services';
 
 interface Props {
   items: string[];
@@ -38,9 +36,9 @@ export const Reactions: React.FC<Props> = ({ items, onReact }) => {
       onReact(item.emoji);
     }
 
-    const byMe = Math.floor(Math.random() * 2) === 1;
-    const borderColor = byMe ? theme.primary : theme.input;
-
+    // const byMe = Math.floor(Math.random() * 2) === 1;
+    // const borderColor = byMe ? theme.primary : theme.input;
+    const borderColor = theme.mutedForeground;
     return (
       <TouchableOpacity
         style={[

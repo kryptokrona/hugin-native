@@ -1,3 +1,4 @@
+import { FileInfo, Message } from '@/types';
 import {
   ResultSet,
   SQLiteDatabase,
@@ -5,11 +6,8 @@ import {
   openDatabase,
 } from 'react-native-sqlite-storage';
 
-import { FileInfo, Message } from '@/types';
-import { containsOnlyEmojis } from '@/utils';
-
 import { Files } from './globals';
-
+import { containsOnlyEmojis } from '@/utils';
 import { useUserStore } from '../zustand';
 
 enablePromise(true);
@@ -372,12 +370,8 @@ export async function addContact(
   }
 }
 
-export async function updateContact(
-  name: string,
-  address: string
-) {
+export async function updateContact(name: string, address: string) {
   try {
-
     const result = await db.executeSql(
       'UPDATE contacts SET name = ? WHERE address = ?',
       [name, address],
@@ -774,7 +768,7 @@ export async function saveMessage(
       address: sent ? myaddress : conversation,
       hash: hash,
       message: message,
-      nickname: nickname,
+      nickname: nickname || 'Anon',
       reactions: [],
       reply: reply,
       room: conversation,

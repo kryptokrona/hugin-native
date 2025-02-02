@@ -2,16 +2,14 @@ import { Animated, StyleSheet, View } from 'react-native';
 import React, { useEffect, useRef } from 'react';
 
 import { TextField } from './text-field';
+import { TipType } from '@/types';
 import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
 import { textType } from '@/styles';
 import { useThemeStore } from '@/services';
 import { useTranslation } from 'react-i18next';
 
 interface Props {
-  tip: {
-    amount: number;
-    receiver: string;
-  };
+  tip: TipType;
 }
 
 export const Tip: React.FC<Props> = ({ tip }) => {

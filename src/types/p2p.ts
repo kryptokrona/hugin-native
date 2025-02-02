@@ -79,3 +79,13 @@ export interface FileInfo {
   hash: string;
   image: boolean;
 }
+
+export interface TipType {
+  receiver: string;
+  amount: number;
+}
+
+export interface EmojiType {
+  emoji: string;
+  userAddress: string;
+}

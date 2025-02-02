@@ -58,8 +58,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);
-  const [showImage, setShowImage] = useState<boolean>(false);
-  const [showImagePath, setImagePath] = useState<string>(false);
+  const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
@@ -89,7 +88,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       return;
     }
     setImagePath(path);
-    setShowImage(true);
   };
 
   async function sendTip() {
@@ -223,10 +221,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   return (
     <ScreenLayout>
       {/* Full-Screen Image Viewer */}
-      {showImage && (
+      {imagePath && (
         <FullScreenImageViewer
-          imagePath={showImagePath}
-          onClose={() => setShowImage(false)}
+          imagePath={imagePath}
+          onClose={() => setImagePath(null)}
         />
       )}
       <ModalCenter visible={tipping} closeModal={() => setTipping(false)}>
