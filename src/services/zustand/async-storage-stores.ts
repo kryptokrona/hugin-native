@@ -183,7 +183,7 @@ export const defaultPreferences: Preferences = {
 
 export const defaultUser: User = {
   address: '',
-  downloadDir: RNFS.CachesDirectoryPath,
+  downloadDir: RNFS.DocumentDirectoryPath,
   huginAddress: '',
 
   keys: {},
