@@ -93,5 +93,5 @@
     "walletStatus": "Estado de la billetera",
     "wallet": "Billetera",
     "nodePicker": "Selector de nodo",
-    "tipSent": "💸 ¡Se enviaron {{cantidad}} a {{receptor}}! "
+    "tipSent": "💸 ¡Se enviaron {{amount}} a {{receiver}}! "
 }
