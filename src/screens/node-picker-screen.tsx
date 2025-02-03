@@ -173,8 +173,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
   return (
     <ScreenLayout>
       <View style={{ flex: 1 }}>
-        {/* // TODO i18n */}
-        <TextField size="large">Pick a Node</TextField>
+        <TextField size="large">{t('pickANode')}</TextField>
         <View>
           <InputField
             label={t('inputNodeUrl')}
