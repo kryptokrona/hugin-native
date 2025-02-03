@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from 'react';
+
 import {
   ActivityIndicator,
   FlatList,
@@ -5,21 +7,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
-import React, { useEffect, useState } from 'react';
-import { usePreferencesStore, useThemeStore } from '@/services';
 
-import { Preferences } from '@/types';
-import { Wallet } from '../services/kryptokrona';
-import { WalletConfig } from 'config/wallet-config';
-import offline_node_list from '../config/nodes.json';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
+import { WalletConfig } from 'config/wallet-config';
+
+import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
+import { usePreferencesStore, useThemeStore } from '@/services';
+import { Preferences } from '@/types';
+
+import offline_node_list from '../config/nodes.json';
+import { Wallet } from '../services/kryptokrona';
 
 interface Props {
   route: any;
 }
 
 export const PickNodeScreen: React.FC<Props> = () => {
+  const { t } = useTranslation();
   const preferences = usePreferencesStore((state) => state.preferences);
   const [nodeInput, setNodeInput] = useState(preferences.node || ''); // Initialize with preferences.node
   const [nodeList, setNodeList] = useState([]);
@@ -171,7 +177,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
         <TextField size="large">Pick a Node</TextField>
         <View>
           <InputField
-            label={'Enter node URL'}
+            label={t('inputNodeUrl')}
             value={nodeInput}
             onChange={setNodeInput}
           />
@@ -180,17 +186,17 @@ export const PickNodeScreen: React.FC<Props> = () => {
             onPress={() => {
               randomNode(true);
             }}>
-            {'Random node'}
+            {t('randomNode')}
           </TextButton>
           <TextButton
             icon={loading ? <ActivityIndicator color="#000" /> : undefined}
             onPress={connectToNode}>
-            {'Connect to node'}
+            {t('connectToNode')}
           </TextButton>
           <TextButton
             icon={loadingCheck ? <ActivityIndicator color="#000" /> : undefined}
             onPress={checkNodes}>
-            {'Check nodes'}
+            {'checkNodes'}
           </TextButton>
         </View>
         <FlatList

@@ -91,5 +91,14 @@
   "maxAvatarSize": "अवतार आकार 600 KB च्या जास्तीत जास्त मर्यादेपेक्षा मोठा आहे",
   "unconfirmed": "अप्रमाणित",
   "walletStatus": "वॉलेट स्थिती",
-  "wallet": "वॉलेट"
+  "wallet": "वॉलेट",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

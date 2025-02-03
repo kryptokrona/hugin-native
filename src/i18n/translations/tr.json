@@ -91,5 +91,14 @@
   "maxAvatarSize": "Avatar boyutu maksimum 600 KB sınırını aşıyor",
   "unconfirmed": "Onaylanmamış",
   "walletStatus": "Cüzdan durumu",
-  "wallet": "Cüzdan"
+  "wallet": "Cüzdan",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

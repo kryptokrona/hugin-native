@@ -93,5 +93,13 @@
   "walletStatus": "Stato portafoglio",
   "wallet": "Portafoglio",
   "nodePicker": "Selettore nodo",
-  "tipSent": "💸 Inviato {{amount}} a {{receiver}}! "
+  "tipSent": "💸 Inviato {{amount}} a {{receiver}}! ",
+
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

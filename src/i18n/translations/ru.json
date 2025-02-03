@@ -91,5 +91,14 @@
   "maxAvatarSize": "Размер аватара превышает максимальный лимит в 600 КБ",
   "unconfirmed": "Не подтверждено",
   "walletStatus": "Статус кошелька",
-  "wallet": "Кошелек"
+  "wallet": "Кошелек",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

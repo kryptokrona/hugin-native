@@ -91,5 +91,14 @@
   "maxAvatarSize": "Avatarstorleken överstiger maxgränsen på 600 KB",
   "unconfirmed": "Obekräftad",
   "walletStatus": "Plånboksstatus",
-  "wallet": "Plånbok"
+  "wallet": "Plånbok",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

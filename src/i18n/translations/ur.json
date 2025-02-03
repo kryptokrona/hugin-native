@@ -91,5 +91,14 @@
   "maxAvatarSize": "اوتار کا سائز زیادہ سے زیادہ 600 KB ہونا چاہیے",
   "unconfirmed": "غیر تصدیق شدہ",
   "walletStatus": "والٹ کی حیثیت",
-  "wallet": "والٹ"
+  "wallet": "والٹ",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

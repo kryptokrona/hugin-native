@@ -91,5 +91,14 @@
   "maxAvatarSize": "Розмір аватара перевищує максимальний розмір 600 KB",
   "unconfirmed": "Непідтверджено",
   "walletStatus": "Статус гаманця",
-  "wallet": "Гаманець"
+  "wallet": "Гаманець",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

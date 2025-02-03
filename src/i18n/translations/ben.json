@@ -91,5 +91,14 @@
   "maxAvatarSize": "অ্যাভাটারের আকার সর্বোচ্চ ৬০০ কেবি অতিক্রম করেছে",
   "unconfirmed": "অনিশ্চিত",
   "walletStatus": "ওয়ালেটের অবস্থা",
-  "wallet": "ওয়ালেট"
+  "wallet": "ওয়ালেট",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

@@ -91,5 +91,14 @@
   "maxAvatarSize": "Ang laki ng avatar ay lumampas sa maximum na limitasyon na 600 KB",
   "unconfirmed": "Hindi pa kumpirmado",
   "walletStatus": "Katayuan ng pitaka",
-  "wallet": "Pitaka"
+  "wallet": "Pitaka",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

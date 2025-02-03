@@ -63,7 +63,7 @@ export const SettingsScreen: React.FC<Props> = () => {
       function: toggleSync,
       icon: { name: syncActivatedIcon, type: 'MCI' },
       screen: MainScreens.PickNodeScreen,
-      title: 'Activate wallet sync',
+      title: 'activateWalletSync',
     },
   ];
 

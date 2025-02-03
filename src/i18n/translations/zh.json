@@ -91,5 +91,14 @@
   "maxAvatarSize": "头像大小超过最大限制 600 KB",
   "unconfirmed": "未确认",
   "walletStatus": "钱包状态",
-  "wallet": "钱包"
+  "wallet": "钱包",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

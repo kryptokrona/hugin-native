@@ -91,5 +91,14 @@
   "maxAvatarSize": "De avatar grootte overschrijdt de maximale limiet van 600 KB",
   "unconfirmed": "Onbevestigd",
   "walletStatus": "Walletstatus",
-  "wallet": "Wallet"
+  "wallet": "Wallet",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

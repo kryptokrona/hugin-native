@@ -96,5 +96,10 @@
 
   "tipSent": "💸 Sent {{amount}} to {{receiver}}! ", // en only
   "messageUser": "Message user", // en only
-  "onlineRoomMembers": "Online users" // en only
+  "onlineRoomMembers": "Online users", // en only
+  "activateWalletSync": "Activate wallet sync", // en only
+  "inputNodeUrl": "Enter node URL", // en only
+  "randomNode": "Random node", // en only
+  "connectToNode": "Connect to node", // en only
+  "checkNodes": "Check nodes" // en only
 }

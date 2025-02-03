@@ -91,5 +91,14 @@
   "maxAvatarSize": "Rozmiar awatara przekracza maksymalny limit 600 KB",
   "unconfirmed": "Niepotwierdzone",
   "walletStatus": "Status portfela",
-  "wallet": "Portfel"
+  "wallet": "Portfel",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }
