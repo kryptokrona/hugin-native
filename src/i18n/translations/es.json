@@ -93,5 +93,13 @@
     "walletStatus": "Estado de la billetera",
     "wallet": "Billetera",
     "nodePicker": "Selector de nodo",
-    "tipSent": "💸 ¡Se enviaron {{amount}} a {{receiver}}! "
+    "tipSent": "💸 ¡Se enviaron {{amount}} a {{receiver}}! ",
+    
+    "messageUser": "Enviar mensaje a un usuario",
+    "onlineRoomMembers": "Usuarios en línea",
+    "activateWalletSync": "Activar sincronización de billetera",
+    "inputNodeUrl": "Ingresar URL del nodo",
+    "randomNode": "Nodo aleatorio",
+    "connectToNode": "Conectar al nodo",
+    "checkNodes": "Verificar nodos"
 }
