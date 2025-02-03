@@ -93,7 +93,7 @@
   "walletStatus": "钱包状态",
   "wallet": "钱包",
   "nodePicker": "手动输入节点",
-  "tipSent": "💸 {{receiver}} 打赏 {{amount}} ?? ",
+  "tipSent": "💸 {{receiver}} 打赏 {{amount}} !",
   "messageUser": "Message user",
   "onlineRoomMembers": "在线用户",
   "activateWalletSync": "实时同步钱包",
