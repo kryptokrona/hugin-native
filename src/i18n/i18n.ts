@@ -103,6 +103,7 @@ i18next
       },
       es: {
         translation: es,
+      },
       it: {
         translation: it,
       },
