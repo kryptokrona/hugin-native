@@ -148,7 +148,7 @@ export const MessagesScreen: React.FC<Props> = () => {
               onChange={onInputChange}
               onSubmitEditing={onJoinpress}
             />
-            <TextButton onPress={onJoinpress}>{t('addUser')}</TextButton>
+            <TextButton disabled={link?.length != 163} onPress={onJoinpress}>{t('addUser')}</TextButton>
           </View>
         )}
 
