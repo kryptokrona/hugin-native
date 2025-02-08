@@ -183,7 +183,9 @@ const styles = {
     marginVertical: 10,
   },
   emptyAddressBook: {
-    alignItems: 'center' as const,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    fontFamily: 'Montserrat',
     marginTop: 100,
     width: 300,
   },
