@@ -128,11 +128,11 @@ const create_swarm = async (hashkey, key) => {
 
 const new_connection = (connection, topic, key, dht_keys, peer) => {
   console.log('New connection incoming');
-  const active = get_active_topic(topic);
+  let active = get_active_topic(topic);
 
   if (!active) {
     console.log('no longer active in topic');
-    connection_closed(connection, topic);
+    connection_closed(connection, topic, 'New connection error');
     return;
   }
 
@@ -156,12 +156,12 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
 
   connection.on('close', () => {
     console.log('Got close signal');
-    connection_closed(connection, topic);
+    connection_closed(connection, topic, 'Connection on close');
   });
 
-  connection.on('error', () => {
-    console.log('Got error connection signal');
-    connection_closed(connection, topic);
+  connection.on('error', (e) => {
+    console.log('Got error connection signal', e);
+    connection_closed(connection, topic, 'Connection on error');
   });
 };
 
@@ -262,11 +262,11 @@ const incoming_message = async (data, topic, connection, peer) => {
   if (check === 'Ban') {
     console.log('Banned connection');
     peer.ban(true);
-    connection_closed(connection, topic);
+    connection_closed(connection, topic, 'Connection banned');
     return;
   }
   if (check === 'Error') {
-    connection_closed(connection, topic);
+    connection_closed(connection, topic, 'Connection Error check');
     return;
   }
   if (check) {
@@ -299,7 +299,7 @@ const check_data_message = async (data, connection, topic, peer) => {
   //If the connections send us disconnect message, return. **todo double check closed connection
   if ('type' in data) {
     if (data.type === 'disconnected') {
-      connection_closed(connection, active.topic);
+      connection_closed(connection, active.topic, 'Disconnected');
       return true;
     }
   }
@@ -378,8 +378,6 @@ const check_data_message = async (data, connection, topic, peer) => {
 
       if (!verified) return 'Ban';
 
-      // if (!verified) return 'Error';
-
       con.joined = true;
       con.address = joined.address;
       con.name = joined.name;
@@ -388,7 +386,6 @@ const check_data_message = async (data, connection, topic, peer) => {
       con.video = joined.video;
       joined.key = active.key;
       con.request = true;
-      console.log('peer.publicKey', peer.publicKey);
       active.peers.push(peer.publicKey.toString('hex'));
       let uniq = {};
       const peers = active.peers.filter(
@@ -416,7 +413,7 @@ const check_data_message = async (data, connection, topic, peer) => {
       //     }
 
       Hugin.send('peer-connected', { joined });
-      console.log('Connection updated: Joined:', con.joined.name);
+      console.log('Connection updated: Joined:', con.name);
       return true;
     }
   }
@@ -475,7 +472,6 @@ const check_data_message = async (data, connection, topic, peer) => {
         }
         if (INC_PEERS && active.peers !== data?.peers) {
           if (data.peers?.length > 100) return 'Ban';
-          console.log('Looking for missing peers **--**-->');
           find_missing_peers(active, data?.peers);
         }
         const missing = await check_missed_messages(
@@ -801,7 +797,8 @@ const ban_connection = (conn, topic) => {
   connection_closed(conn, topic);
 };
 
-const connection_closed = (conn, topic) => {
+const connection_closed = (conn, topic, trace) => {
+  console.log('Reason:', trace);
   console.log('Closing connection...');
   const active = get_active_topic(topic);
   if (!active) {
@@ -970,7 +967,7 @@ const ban_user = async (address, topic) => {
   if (conn) return;
   conn.peer.ban(true);
   await sleep(200);
-  connection_closed(conn.connection, topic);
+  connection_closed(conn.connection, topic, 'Ban user');
 };
 
 const error_message = (message) => {

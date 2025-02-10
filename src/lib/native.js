@@ -54,7 +54,7 @@ rpc.register(2, {
         return JSON.stringify(exists);
       case 'get-room-message':
         const message = await getRoomReplyMessage(request.hash, true);
-        return JSON.stringify(message);
+        return JSON.stringify(message[0]);
       case 'get-priv-key':
         //Temporary until we sign all messages with xkr address
         const key = Wallet.spendKey();
@@ -103,7 +103,7 @@ export const send_swarm_msg = async (key, message, reply, tip) => {
     key,
     message,
     reply,
-    tip
+    tip,
   });
   return await mainRPC.request(data);
 };

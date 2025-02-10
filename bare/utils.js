@@ -146,7 +146,7 @@ const sanitize_group_message = (data) => {
   let txHash = sanitizeHtml(data.hash);
   if (txHash?.length > 64 || data.hash === undefined) return false;
   let tip = false;
-  if (data.tip) {
+  if (data.tip && data.tip !== 'false') {
     if (typeof data.tip.amount !== 'number') return false;
     if (typeof data.tip.receiver !== 'string') return false;
     tip = {
