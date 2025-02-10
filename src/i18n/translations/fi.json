@@ -91,5 +91,14 @@
   "maxAvatarSize": "Avatarin koko ylittää enimmäiskoon 600 KB",
   "unconfirmed": "Vahvistamaton",
   "walletStatus": "Lompakon tila",
-  "wallet": "Lompakko"
+  "wallet": "Lompakko",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

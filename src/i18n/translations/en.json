@@ -94,7 +94,13 @@
   "wallet": "Wallet",
   "nodePicker": "Node picker",
 
-  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ", // en only
-  "messageUser": "Message user", // en only
-  "onlineRoomMembers": "Online users" // en only
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes",
+  "pickANode": "Pick a node" // en only
 }

@@ -91,5 +91,14 @@
   "maxAvatarSize": "అవతార్ పరిమాణం గరిష్ట పరిమితి 600 KB ను మించిపోయింది",
   "unconfirmed": "అనిర్దిష్టం",
   "walletStatus": "వాలెట్ స్థితి",
-  "wallet": "వాలెట్"
+  "wallet": "వాలెట్",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

@@ -14,6 +14,8 @@ import type {
 
 import { Wallet } from '../services/kryptokrona';
 
+import { Linking } from 'react-native';
+
 interface Item {
   title: string;
   icon: CustomIconProps;
@@ -24,6 +26,11 @@ interface Item {
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.SettingsScreen>;
 }
+
+const openURL = () => {
+  Linking.openURL('https://github.com/kryptokrona/hugin-native/issues/new?template=bug_report.md').catch((err) => console.error('Failed to open URL:', err))
+}
+
 export const SettingsScreen: React.FC<Props> = () => {
   // const { t } = useTranslation();
   const navigation = useNavigation<MainStackNavigationType>();
@@ -63,7 +70,12 @@ export const SettingsScreen: React.FC<Props> = () => {
       function: toggleSync,
       icon: { name: syncActivatedIcon, type: 'MCI' },
       screen: MainScreens.PickNodeScreen,
-      title: 'Activate wallet sync',
+      title: 'activateWalletSync',
+    },
+    {
+      function: openURL,
+      icon: { name: 'bug', type: 'FA5' },
+      title: 'reportBug',
     },
   ];
 

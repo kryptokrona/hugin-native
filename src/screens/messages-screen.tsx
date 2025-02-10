@@ -148,7 +148,7 @@ export const MessagesScreen: React.FC<Props> = () => {
               onChange={onInputChange}
               onSubmitEditing={onJoinpress}
             />
-            <TextButton onPress={onJoinpress}>{t('addUser')}</TextButton>
+            <TextButton disabled={link?.length != 163} onPress={onJoinpress}>{t('addUser')}</TextButton>
           </View>
         )}
 
@@ -183,7 +183,9 @@ const styles = {
     marginVertical: 10,
   },
   emptyAddressBook: {
-    alignItems: 'center' as const,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    fontFamily: 'Montserrat',
     marginTop: 100,
     width: 300,
   },

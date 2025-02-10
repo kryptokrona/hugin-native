@@ -79,6 +79,7 @@ export const setLatestRoomMessages = async () => {
 
     const isFromUser = latestRoom.address === userAddress;
 
+
     const newUnreads =
       existingRoom &&
       latestRoom.timestamp > (existingRoom.timestamp || 0) &&
@@ -88,7 +89,7 @@ export const setLatestRoomMessages = async () => {
 
     return {
       ...latestRoom,
-      unreads: currentRoom === latestRoom.RoomKey ? 0 : newUnreads, // Reset unreads if in room
+      unreads: currentRoom === latestRoom.roomKey ? 0 : newUnreads, // Reset unreads if in room
     };
   });
 

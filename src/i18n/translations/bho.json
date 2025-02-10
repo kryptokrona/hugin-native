@@ -91,5 +91,14 @@
   "maxAvatarSize": "Avatar size 600 KB se adhik baa",
   "unconfirmed": "Abhi tak confirm naahi baa",
   "walletStatus": "वॉलेट की स्थिति",
-  "wallet": "वॉलेट"
+  "wallet": "वॉलेट",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

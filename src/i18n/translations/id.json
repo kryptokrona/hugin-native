@@ -91,5 +91,14 @@
   "maxAvatarSize": "Ukuran avatar melebihi batas maksimum 600 KB",
   "unconfirmed": "Belum dikonfirmasi",
   "walletStatus": "Status dompet",
-  "wallet": "Dompet"
+  "wallet": "Dompet",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

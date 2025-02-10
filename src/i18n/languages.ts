@@ -22,4 +22,5 @@ export const languages = [
   { code: 'uk', name: 'Ukrainian' },
   { code: 'ur', name: 'Urdu' },
   { code: 'zh', name: 'Chinese' },
+  { code: 'es', name: 'Spanish' },
 ];

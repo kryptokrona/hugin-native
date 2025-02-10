@@ -91,5 +91,14 @@
   "maxAvatarSize": "La taille de l'avatar dépasse la limite maximale de 600 KB",
   "unconfirmed": "Non confirmé",
   "walletStatus": "Statut du portefeuille",
-  "wallet": "Portefeuille"
+  "wallet": "Portefeuille",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }

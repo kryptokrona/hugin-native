@@ -91,5 +91,14 @@
   "maxAvatarSize": "અવતાર માપ મહત્તમ 600 KB થી વધારે છે",
   "unconfirmed": "અપુષ્ટ",
   "walletStatus": "વૉલેટ સ્થિતિ",
-  "wallet": "વૉલેટ"
+  "wallet": "વૉલેટ",
+
+  "tipSent": "💸 Sent {{amount}} to {{receiver}}! ",
+  "messageUser": "Message user",
+  "onlineRoomMembers": "Online users",
+  "activateWalletSync": "Activate wallet sync",
+  "inputNodeUrl": "Enter node URL",
+  "randomNode": "Random node",
+  "connectToNode": "Connect to node",
+  "checkNodes": "Check nodes"
 }
