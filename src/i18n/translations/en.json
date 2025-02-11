@@ -101,6 +101,6 @@
   "inputNodeUrl": "Enter node URL",
   "randomNode": "Random node",
   "connectToNode": "Connect to node",
-  "checkNodes": "Check nodes",
+  "checkNode": "Check nodes",
   "pickANode": "Pick a node" // en only
 }
