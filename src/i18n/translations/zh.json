@@ -40,7 +40,7 @@
   "addUser": "添加好友",
   "nickname": "昵称",
   "huginAddress": "好友地址",
-  "deleteContact": "删除联系人",
+  "deleteContact": "删除好友",
   "changeName": "更改姓名",
   "authenticateFingerprint": "使用指纹验证",
   "authenticationFingerprintFailed": "指纹验证失败",
