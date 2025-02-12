@@ -14,7 +14,8 @@ Todo:
     ☐ requestFingerprint in i81n to use biometric text
     ☐ Link directly to room or message in notifications
     ☐ Sync accounts between devices/restore account and stuff
-    ☐ Add error message if wrong DM input
+    ✔ Add error message if wrong DM input @done(25-02-08 19:38)
+    ☐ Add QR codes for messages and rooms
 
 
 Todo wallet:
@@ -34,9 +35,10 @@ Todo node picker:
     ☐ Invoke when creating/importing wallet
 
 Bugs:
-    ☐ Make sure new accounts don't get stuck on 0
+    ✔ Make sure new accounts don't get stuck on 0 @done(25-02-08 19:39)
     ☐ Pick best random node for new account (no hard coded)
     ☐ Fix multiple rerenders issue with messages
+    ✔ Unread counter not resetting properly @done(25-02-08 20:10)
 
 Maintenenance:
     ☐ Upgrade packages, RN version. Note, when upgrade RN version all the react native packages must align
