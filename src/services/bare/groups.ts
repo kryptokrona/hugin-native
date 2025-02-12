@@ -1,3 +1,5 @@
+import { AppState, Platform } from 'react-native';
+
 import Toast from 'react-native-toast-message';
 
 import {
@@ -40,31 +42,22 @@ import {
   useUserStore,
 } from '../zustand';
 
-// AppState.addEventListener('change', onAppStateChange);
+AppState.addEventListener('change', onAppStateChange);
 
-// let current = '';
-// async function onAppStateChange(state: string) {
-//   if (state === 'inactive') {
-//     console.log('Inactive state');
-//     // send_idle_status(true);
-//     // current = getCurrentRoom();
-//     // setStoreCurrentRoom('');
-//     //I think this is for iPhone only
-//   } else if (state === 'background') {
-//     send_idle_status(true);
-//     current = getCurrentRoom();
-//     setStoreCurrentRoom('');
-//     //Start background timer to shut off foreground task?
-//   } else if (state === 'active') {
-//     if (Platform.OS == 'android') {
-//       send_idle_status(false);
-//       setStoreCurrentRoom(current);
-//       current = '';
-//     }
-
-//     //Reset timer?
-//   }
-// }
+let current = '';
+async function onAppStateChange(state: string) {
+  if (state === 'background') {
+    if (Platform.OS === 'android') {
+      current = getCurrentRoom();
+      setStoreCurrentRoom('');
+    }
+  } else if (state === 'active') {
+    if (Platform.OS === 'android') {
+      setStoreCurrentRoom(current);
+      current = '';
+    }
+  }
+}
 
 export const setLatestRoomMessages = async () => {
   const latestRooms = await getLatestRoomMessages();
@@ -78,7 +71,6 @@ export const setLatestRoomMessages = async () => {
     );
 
     const isFromUser = latestRoom.address === userAddress;
-
 
     const newUnreads =
       existingRoom &&
@@ -99,9 +91,8 @@ export const setLatestRoomMessages = async () => {
 export const updateMessages = async (message: Message, history = false) => {
   const thisRoom = getCurrentRoom();
   const inRoom = thisRoom === message.room;
-  const current = getCurrentRoom();
 
-  if (inRoom || current) {
+  if (inRoom || current === message.room) {
     const messages = getRoomsMessages();
 
     if (message.reply?.length === 64) {
