@@ -195,7 +195,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
           <TextButton
             icon={loadingCheck ? <ActivityIndicator color="#000" /> : undefined}
             onPress={checkNodes}>
-            {'checkNodes'}
+            {t('checkNodes')}
           </TextButton>
         </View>
         <FlatList
