@@ -2,6 +2,7 @@ import {
   Card,
   CopyButton,
   Header,
+  ModalCenter,
   ScreenLayout,
   TextButton,
   TextField,
@@ -18,7 +19,7 @@ import {
   MainStackNavigationType,
   User,
 } from '@/types';
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useLayoutEffect, useMemo, useState } from 'react';
 import {
   RouteProp,
   useFocusEffect,
@@ -28,6 +29,7 @@ import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore } from '@/services';
 
 import { MainScreens } from '@/config';
 import { useTranslation } from 'react-i18next';
+import QRCode from 'react-native-qrcode-svg';
 
 interface Props {
   route: RouteProp<
@@ -43,6 +45,11 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room === roomKey,
   );
+  const [showQR, setShowQR] = useState(false);
+
+  function onCloseModal() {
+    setShowQR(false);
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -108,12 +115,24 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           data={inviteText}
         />
 
+        <TextButton onPress={() => setShowQR(true)}>{t('showQR')}</TextButton>
+
         <View style={styles.leaveContainer}>
           <TextButton onPress={onLeave} type="destructive">
             {t('leaveGroup')}
           </TextButton>
         </View>
       </View>
+
+      <ModalCenter visible={showQR} closeModal={onCloseModal}>
+        <View>
+          <QRCode
+            value={inviteText}
+            size={300}
+          />
+        </View>
+      </ModalCenter>
+
     </ScreenLayout>
   );
 };

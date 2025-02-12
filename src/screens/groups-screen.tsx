@@ -1,6 +1,6 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { FlatList, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, TouchableOpacity, View } from 'react-native';
 
 import {
   useFocusEffect,
@@ -29,6 +29,13 @@ import {
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
+import {
+  Camera,
+  CameraRuntimeError,
+  useCameraDevice,
+  useCodeScanner,
+} from 'react-native-vision-camera';
+
 import { joinAndSaveRoom, setRoomMessages } from '../services/bare/groups';
 
 interface Props {
@@ -41,8 +48,39 @@ export const GroupsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<MainStackNavigationType>();
   const rooms = useGlobalStore((state) => state.rooms);
   const [modalVisible, setModalVisible] = useState(false);
+  const [qrScanner, setQrScanner] = useState(false);
   const [joining, setJoinVisible] = useState(false);
   const [link, setLink] = useState<string | null>(null);
+
+  const device = useCameraDevice('back');
+  const camera = useRef<Camera>(null);
+
+ if (device == null) {
+    Alert.alert('Error!', 'Camera could not be started');
+  }
+
+const onError = (error: CameraRuntimeError) => {
+    Alert.alert('Error!', error.message);
+  }
+
+const codeScanner = useCodeScanner({
+    codeTypes: ['qr'],
+    onCodeScanned: codes => {
+      console.log('Got qr:', codes);
+      if (codes.length > 0) {
+        if (codes[0].value) {
+          setTimeout(() => gotQRCode(codes[0].value), 500);
+        }
+      }
+      return;
+    },
+  });
+
+  function gotQRCode(code) {
+    setLink(code);
+    setQrScanner(false);
+  }
+
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -57,6 +95,7 @@ export const GroupsScreen: React.FC<Props> = () => {
       ),
     });
   }, [navigation]);
+  
 
   function onAddGroupPress() {
     setModalVisible(true);
@@ -71,6 +110,13 @@ export const GroupsScreen: React.FC<Props> = () => {
   function onCloseModal() {
     setModalVisible(false);
     setJoinVisible(false);
+    setQrScanner(false);
+    setLink('');
+  }
+
+  function finishQrScanner() {
+    console.log('qrscanner finsihed');
+    // setQrScanner(false);
     setLink('');
   }
 
@@ -97,6 +143,10 @@ export const GroupsScreen: React.FC<Props> = () => {
     }, []),
   );
 
+  const onScanPress = () => {
+    setQrScanner(true);
+  }
+
   function onJoinpress() {
     setStoreRoomMessages([]);
     if (!link) {
@@ -121,7 +171,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   return (
     <ScreenLayout>
       <ModalCenter visible={modalVisible} closeModal={onCloseModal}>
-        {joining && (
+        {joining && !qrScanner && (
           <>
             <InputField
               label={t('inviteLink')}
@@ -129,10 +179,26 @@ export const GroupsScreen: React.FC<Props> = () => {
               onChange={onInputChange}
               onSubmitEditing={onJoinpress}
             />
+            <TextButton onPress={onScanPress}>{t('scanQR')}</TextButton>
             <TextButton disabled={link === null} onPress={onJoinpress}>
               {t('joinRoom')}
             </TextButton>
           </>
+        )}
+
+        {joining && qrScanner && (
+          <View style={{width: 300, height: 300, margin: -30, borderRadius: 10, overflow: 'hidden'}}>
+          <Camera
+          ref={camera}
+          onError={onError}
+          photo={false}
+          style={styles.fullScreenCamera}
+          device={device}
+          codeScanner={codeScanner}
+          isActive={qrScanner}
+        />
+        </View>
+        
         )}
 
         {!joining && (
@@ -155,6 +221,7 @@ export const GroupsScreen: React.FC<Props> = () => {
         keyExtractor={(item, i) => `${item.roomKey}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
+
     </ScreenLayout>
   );
 };
@@ -172,5 +239,12 @@ const styles = {
     // Prevent expansion
     padding: 10,
     width: 300,
+  },
+  fullScreenCamera: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    flex: 1,
+    zIndex: 100,
   },
 };

@@ -102,5 +102,9 @@
   "randomNode": "Random node",
   "connectToNode": "Connect to node",
   "checkNodes": "Check nodes",
-  "pickANode": "Pick a node" // en only
+  "pickANode": "Pick a node",
+  "huginAddress": "Hugin address",
+  "reportBug": "Report a bug",
+  "scanQR": "Scan QR",
+  "showQR": "Show QR",
 }

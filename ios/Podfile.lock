@@ -1122,6 +1122,12 @@ PODS:
     - React
   - TurtleCoinModule (1.0.0):
     - React-Core
+  - VisionCamera (4.6.3):
+    - VisionCamera/Core (= 4.6.3)
+    - VisionCamera/React (= 4.6.3)
+  - VisionCamera/Core (4.6.3)
+  - VisionCamera/React (4.6.3):
+    - React-Core
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -1202,6 +1208,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - TcpSockets (from `../node_modules/react-native-tcp`)
   - TurtleCoinModule (from `./crypto`)
+  - VisionCamera (from `../node_modules/react-native-vision-camera`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1361,6 +1368,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-tcp"
   TurtleCoinModule:
     :path: "./crypto"
+  VisionCamera:
+    :path: "../node_modules/react-native-vision-camera"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -1443,6 +1452,7 @@ SPEC CHECKSUMS:
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   TcpSockets: 4ef55305239923b343ed0a378b1fac188b1373b0
   TurtleCoinModule: d8b60e51ae1681f43c36311474a598913d256770
+  VisionCamera: 598ab83c6bf4d65f5c32ec54361eed866505d388
   Yoga: 805bf71192903b20fc14babe48080582fee65a80
 
 PODFILE CHECKSUM: bb06a7cbc4dd2433f4369d0c3b168ca829bc4d2d

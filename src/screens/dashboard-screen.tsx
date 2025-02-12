@@ -17,6 +17,7 @@ import {
   CopyButton,
   CustomIcon,
   Header,
+  ModalCenter,
   ScreenLayout,
   TextButton,
   TextField,
@@ -26,12 +27,18 @@ import { MainScreens } from '@/config';
 import { useGlobalStore } from '@/services';
 import type { MainStackNavigationType } from '@/types';
 import { formatHashString } from '@/utils';
+import QRCode from 'react-native-qrcode-svg';
 
 export const DashboardScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<MainStackNavigationType>();
   const status = useGlobalStore((state) => state.syncStatus);
   const [synced, setSynced] = useState(status[0] == status[2]);
+  const [showQR, setShowQR] = useState(false);
+
+  function onCloseModal() {
+    setShowQR(false);
+  }
 
   useEffect(() => {
     console.log(status[0], status[2]);
@@ -103,6 +110,7 @@ export const DashboardScreen: React.FC = () => {
             text={t('copyAddress')}
             data={address}
           />
+          <TextButton onPress={() => setShowQR(true)}>{t('showQR')}</TextButton>
           <TextButton onPress={onSendButton}>{t('sendTransaction')}</TextButton>
         </View>
         <View>
@@ -119,6 +127,14 @@ export const DashboardScreen: React.FC = () => {
           )}
         </View>
       </ScrollView>
+      <ModalCenter visible={showQR} closeModal={onCloseModal}>
+        <View>
+          <QRCode
+            value={address}
+            size={300}
+          />
+        </View>
+      </ModalCenter>
     </ScreenLayout>
   );
 };

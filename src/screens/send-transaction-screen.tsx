@@ -1,8 +1,8 @@
-import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
+import { InputField, ModalCenter, ScreenLayout, TextButton, TextField } from '@/components';
 import { MainNavigationParamList, MainStackNavigationType } from '@/types';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { RouteProp, useNavigation } from '@react-navigation/native';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import { MainScreens } from '@/config';
@@ -11,6 +11,12 @@ import { Wallet } from '../services/kryptokrona';
 import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
 import { t } from 'i18next';
 import { useThemeStore } from '@/services';
+import {
+  Camera,
+  CameraRuntimeError,
+  useCameraDevice,
+  useCodeScanner,
+} from 'react-native-vision-camera';
 
 interface Props {
   route: RouteProp<
@@ -39,6 +45,45 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   const borderColor = theme.foreground;
 
   const color = theme.mutedForeground;
+
+  const [qrScanner, setQrScanner] = useState(false);
+  
+    const device = useCameraDevice('back');
+    const camera = useRef<Camera>(null);
+  
+      if (device == null) {
+        Alert.alert('Error!', 'Camera could not be started');
+      }
+  
+    const onError = (error: CameraRuntimeError) => {
+        Alert.alert('Error!', error.message);
+      }
+  
+    const codeScanner = useCodeScanner({
+        codeTypes: ['qr'],
+        onCodeScanned: codes => {
+          console.log('Got qr:', codes);
+          if (codes.length > 0) {
+            if (codes[0].value) {
+              setTimeout(() => gotQRCode(codes[0].value), 500);
+            }
+          }
+          return;
+        },
+      });
+    
+      function gotQRCode(code) {
+        setAddress(code);
+        setQrScanner(false);
+      }
+
+  const onScanPress = () => {
+    setQrScanner(true);
+  }
+
+  function onCloseModal() {
+    setQrScanner(false);
+  }
 
   // Placeholder function for address paste
   const pasteAddress = async () => {
@@ -121,6 +166,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
           <TextButton style={styles.button} onPress={pasteAddress}>
             {t('paste')}
           </TextButton>
+          <TextButton onPress={onScanPress}>{t('scanQR')}</TextButton>
         </View>
 
         <View>
@@ -180,6 +226,19 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
           <></>
         )}
       </View>
+      <ModalCenter visible={qrScanner} closeModal={onCloseModal}>
+       <View style={{width: 300, height: 300, margin: -30, borderRadius: 10, overflow: 'hidden'}}>
+          <Camera
+          ref={camera}
+          onError={onError}
+          photo={false}
+          style={styles.fullScreenCamera}
+          device={device}
+          codeScanner={codeScanner}
+          isActive={qrScanner}
+        />
+        </View>
+      </ModalCenter>
     </ScreenLayout>
   );
 };
@@ -220,5 +279,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 16,
     width: '100%',
+  },
+  fullScreenCamera: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    flex: 1,
+    zIndex: 100,
   },
 });
