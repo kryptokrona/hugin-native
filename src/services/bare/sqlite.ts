@@ -358,7 +358,7 @@ export async function addContact(
         'Conversation started',
         '',
         Date.now(),
-        '123',
+        Date.now().toString(),
         true,
         'me',
         false,
@@ -428,9 +428,10 @@ export async function getLatestMessages() {
     );
 
     for (const result of results) {
-      const latestmessagedb = result.rows.item(0);
+      let latestmessagedb = result.rows.item(0);
+      console.log('Got result,', latestmessagedb);
       if (latestmessagedb === undefined) {
-        return;
+        latestmessagedb = {message: 'Conversation started', timestamp: Date.now()}
       }
       contactsList.unshift({
         address: contact.address,
