@@ -1,6 +1,14 @@
 import { useEffect } from 'react';
 
-import { AppState, Platform, SafeAreaView, StyleSheet } from 'react-native';
+import {
+  AppState,
+  BackHandler,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
+
+import { useNavigationContainerRef } from '@react-navigation/native';
 
 import { bare, send_idle_status } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
@@ -41,6 +49,8 @@ let joining = false;
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
+  const navigationRef = useNavigationContainerRef();
+
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
@@ -158,6 +168,23 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       subscription.remove();
     };
   }, []);
+
+  useEffect(() => {
+    // Prevent app closing when navigation history is empty. E.g after press switch product.
+    const backAction = () => {
+      if (!navigationRef.canGoBack()) {
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    );
+
+    return () => backHandler.remove();
+  }, [navigationRef]);
 
   return (
     <SafeAreaView

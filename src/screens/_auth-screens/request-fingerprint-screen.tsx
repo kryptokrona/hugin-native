@@ -2,7 +2,11 @@ import React, { useEffect } from 'react';
 
 import { View, Alert } from 'react-native';
 
-import { type RouteProp, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  type RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics from 'react-native-biometrics';
@@ -28,7 +32,12 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
     if (route.params?.finishFunction) {
       route.params.finishFunction();
     } else {
-      mainNavigation.navigate(Stacks.MainStack); // TODO fix type
+      mainNavigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: Stacks.MainStack }],
+        }),
+      );
     }
   };
 
