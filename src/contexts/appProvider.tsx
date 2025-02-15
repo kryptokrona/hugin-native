@@ -1,7 +1,10 @@
-import { AppState, Platform, SafeAreaView } from 'react-native';
-import { Connection, Files } from 'services/bare/globals';
+import { useEffect } from 'react';
+
+import { AppState, Platform, SafeAreaView, StyleSheet } from 'react-native';
+
 import { bare, send_idle_status } from 'lib/native';
-import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { Connection, Files } from 'services/bare/globals';
+
 import {
   getCurrentRoom,
   getThisRoom,
@@ -13,20 +16,21 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
+import { sleep } from '@/utils';
+
+import { Foreground } from './service';
+
 import {
   joinRooms,
   leaveRooms,
   setLatestMessages,
   setLatestRoomMessages,
 } from '../services/bare';
-import { useEffect, useRef } from 'react';
-
-import { Foreground } from './service';
-import { MessageSync } from '../services/hugin/syncer';
-import { Timer } from '../services/utils';
-import { Wallet } from '../services/kryptokrona/wallet';
 import { keychain } from '../services/bare/crypto';
-import { sleep } from '@/utils';
+import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { MessageSync } from '../services/hugin/syncer';
+import { Wallet } from '../services/kryptokrona/wallet';
+import { Timer } from '../services/utils';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -109,7 +113,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const onAppStateChange = async (state: string) => {
       if (state === 'inactive') {
-        if (!started) return;
+        if (!started) {
+          return;
+        }
         console.log('Inactive state');
         setStoreCurrentRoom(getCurrentRoom());
 
@@ -154,8 +160,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SafeAreaView style={{ backgroundColor: theme.background, flex: 1 }}>
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: theme.background }]}>
       {children}
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    paddingVertical: Platform.OS === 'ios' ? 40 : 0,
+  },
+});

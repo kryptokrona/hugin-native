@@ -1,29 +1,39 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Platform,
+} from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 import DocumentPicker, { types } from 'react-native-document-picker';
-import { CameraOptions, launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import {
+  CameraOptions,
+  launchCamera,
+  launchImageLibrary,
+} from 'react-native-image-picker';
 
 import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
 import type { SelectedFile } from '@/types';
 
 import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
-import { Platform } from 'react-native';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
   replyToName: string | null;
   onCloseReplyPress: () => void;
+  dm?: boolean;
 }
 
 export const MessageInput: React.FC<Props> = ({
   onSend,
   replyToName,
   onCloseReplyPress,
-  dm = false
+  dm = false,
 }) => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
@@ -68,7 +78,10 @@ export const MessageInput: React.FC<Props> = ({
           }
           const fileInfo: SelectedFile = {
             fileName: fileName,
-            path: Platform.OS == 'ios' ? uri?.slice(7, uri.length) : originalPath?.slice(7, originalPath.length),
+            path:
+              Platform.OS == 'ios'
+                ? uri?.slice(7, uri.length)
+                : originalPath?.slice(7, originalPath.length),
             size: fileSize,
             time: new Date().getTime(),
             type: type ?? 'image',
@@ -87,12 +100,12 @@ export const MessageInput: React.FC<Props> = ({
           copyTo: 'documentDirectory',
           type: [types.allFiles],
         });
-  
+
         const { size, name, uri, type, fileCopyUri } = res;
         if (!uri || !name || !size) {
           return;
         }
-  
+
         const fileInfo: SelectedFile = {
           fileName: name,
           path: fileCopyUri?.slice(7, fileCopyUri.length),
@@ -101,7 +114,7 @@ export const MessageInput: React.FC<Props> = ({
           type,
           uri: uri,
         };
-  
+
         setSelectedFile(fileInfo);
       } catch (err) {
         if (DocumentPicker.isCancel(err)) {
@@ -111,13 +124,12 @@ export const MessageInput: React.FC<Props> = ({
         }
       }
     } else {
-
       const options: CameraOptions = {
         mediaType: 'photo',
         quality: 0.5,
         saveToPhotos: true,
       };
-  
+
       launchImageLibrary(options, (response) => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
@@ -143,7 +155,6 @@ export const MessageInput: React.FC<Props> = ({
         }
       });
     }
-    
   }
 
   function handleSend() {
@@ -212,7 +223,8 @@ export const MessageInput: React.FC<Props> = ({
             />
           </TouchableOpacity>
         )}
-        {displayActions && !dm &&
+        {displayActions &&
+          !dm &&
           Actions(onCameraPress, onFilePress, theme.primary, styles)}
         <TextInput
           style={[
@@ -294,11 +306,12 @@ const styles = StyleSheet.create({
     borderRadius: Styles.borderRadius.medium,
     borderWidth: 1,
     flex: 1,
+    fontFamily: 'Montserrat',
+    fontSize: 15,
+    lineHeight: 25,
     marginHorizontal: 6,
     minHeight: 40,
-    fontFamily: 'Montserrat',
-    lineHeight: 25,
     paddingHorizontal: 10,
-    fontSize: 15
+    textAlignVertical: 'center',
   },
 });

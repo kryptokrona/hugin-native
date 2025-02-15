@@ -250,6 +250,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           {t('close')}
         </TextButton>
       </ModalCenter>
+
       <FlatList
         inverted
         ref={flatListRef}
@@ -299,8 +300,9 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   inputWrapper: {
-    bottom: 4,
+    bottom: 6,
     left: 0,
+    // marginBottom: 10,
     paddingBottom: 10,
     position: 'absolute',
     right: 0,

@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
-import { FlatList, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import {
@@ -9,6 +9,13 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import QRCode from 'react-native-qrcode-svg';
+import {
+  Camera,
+  CameraRuntimeError,
+  useCameraDevice,
+  useCodeScanner,
+} from 'react-native-vision-camera';
 
 import {
   CustomIcon,
@@ -31,26 +38,18 @@ import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import { addContact } from '../services/bare/sqlite';
-import {
-  Camera,
-  CameraRuntimeError,
-  useCameraDevice,
-  useCodeScanner,
-} from 'react-native-vision-camera';
+
 import 'text-encoding';
-import QRCode from 'react-native-qrcode-svg';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessagesScreen>;
 }
 
 export const MessagesScreen: React.FC<Props> = () => {
-  //TODO** rename Groups -> Rooms
   const { t } = useTranslation();
   const user = useUserStore((state) => state.user);
   const navigation = useNavigation<MainStackNavigationType>();
   const contacts = useGlobalStore((state) => state.contacts);
-  console.log('contacts', contacts);
   const [modalVisible, setModalVisible] = useState(false);
   const [joining, setJoinVisible] = useState(false);
   const [link, setLink] = useState('');
@@ -61,32 +60,31 @@ export const MessagesScreen: React.FC<Props> = () => {
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
 
-    if (device == null) {
-      Alert.alert('Error!', 'Camera could not be started');
-    }
+  if (device == null) {
+    Alert.alert('Error!', 'Camera could not be started');
+  }
 
   const onError = (error: CameraRuntimeError) => {
-      Alert.alert('Error!', error.message);
-    }
+    Alert.alert('Error!', error.message);
+  };
 
   const codeScanner = useCodeScanner({
-      codeTypes: ['qr'],
-      onCodeScanned: codes => {
-        console.log('Got qr:', codes);
-        if (codes.length > 0) {
-          if (codes[0].value) {
-            setTimeout(() => gotQRCode(codes[0].value), 500);
-          }
+    codeTypes: ['qr'],
+    onCodeScanned: (codes) => {
+      console.log('Got qr:', codes);
+      if (codes.length > 0) {
+        if (codes[0].value) {
+          setTimeout(() => gotQRCode(codes[0].value), 500);
         }
-        return;
-      },
-    });
-  
-    function gotQRCode(code) {
-      setLink(code);
-      setQrScanner(false);
-    }
-  
+      }
+      return;
+    },
+  });
+
+  function gotQRCode(code) {
+    setLink(code);
+    setQrScanner(false);
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -123,7 +121,7 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   const onScanPress = () => {
     setQrScanner(true);
-  }
+  };
 
   function onJoinPress() {
     setJoinVisible(true);
@@ -196,41 +194,49 @@ export const MessagesScreen: React.FC<Props> = () => {
               onSubmitEditing={onJoinpress}
             />
             <TextButton onPress={onScanPress}>{t('scanQR')}</TextButton>
-            <TextButton disabled={link?.length != 163} onPress={onJoinpress}>{t('addUser')}</TextButton>
+            <TextButton disabled={link?.length !== 163} onPress={onJoinpress}>
+              {t('addUser')}
+            </TextButton>
           </View>
         )}
 
         {joining && qrScanner && (
-          <View style={{width: 300, height: 300, margin: -30, borderRadius: 10, overflow: 'hidden'}}>
-          <Camera
-          ref={camera}
-          onError={onError}
-          photo={false}
-          style={styles.fullScreenCamera}
-          device={device}
-          codeScanner={codeScanner}
-          isActive={qrScanner}
-        />
-        </View>
+          <View
+            style={{
+              borderRadius: 10,
+              height: 300,
+              margin: -30,
+              overflow: 'hidden',
+              width: 300,
+            }}>
+            <Camera
+              ref={camera}
+              onError={onError}
+              photo={false}
+              style={styles.fullScreenCamera}
+              device={device}
+              codeScanner={codeScanner}
+              isActive={qrScanner}
+            />
+          </View>
         )}
 
         {!joining && !showQR && (
           <View>
             <TextField size="small">{t('copyYourAddress')}</TextField>
             <TextButton onPress={onCreateRoom}>{t('copy')}</TextButton>
-            <TextButton onPress={() => setShowQR(true)}>{t('showQR')}</TextButton>
+            <TextButton onPress={() => setShowQR(true)}>
+              {t('showQR')}
+            </TextButton>
             <View style={styles.divider} />
             <TextField size="small">{t('addUserDescr')}</TextField>
             <TextButton onPress={onJoinPress}>{t('addUser')}</TextButton>
           </View>
         )}
         {!joining && showQR && (
-        <View>
-          <QRCode
-            value={user.huginAddress}
-            size={300}
-          />
-        </View>
+          <View>
+            <QRCode value={user.huginAddress} size={300} />
+          </View>
         )}
       </ModalCenter>
       {contacts.length === 0 && (
@@ -256,15 +262,14 @@ const styles = {
   emptyAddressBook: {
     marginLeft: 'auto',
     marginRight: 'auto',
-    fontFamily: 'Montserrat',
     marginTop: 100,
     width: 300,
   },
   fullScreenCamera: {
+    flex: 1,
+    height: '100%',
     position: 'absolute',
     width: '100%',
-    height: '100%',
-    flex: 1,
     zIndex: 100,
   },
 };

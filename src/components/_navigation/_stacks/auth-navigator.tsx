@@ -60,7 +60,7 @@ export const AuthNavigator = () => {
         name={AuthScreens.RequestFingerPrintScreen}
         component={RequestFingerprintScreen}
         options={() => ({
-          header: (_props) => <Header title={t('requestFingerPrint')} />,
+          header: (_props) => <Header title={t('requestBiometric')} />,
         })}
       />
       <Stack.Screen

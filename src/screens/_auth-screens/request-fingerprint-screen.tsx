@@ -36,13 +36,13 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   //   navigation.navigate(AuthScreens.ForgotPinScreen);
   // };
 
-  const authenticateFingerprint = async () => {
+  const authenticateBiometric = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
 
     try {
       const { success } = await rnBiometrics.simplePrompt({
         cancelButtonText: t('cancel'),
-        promptMessage: t('authenticateFingerprint'),
+        promptMessage: t('authenticateBiometric'),
       });
 
       if (success) {
@@ -50,17 +50,17 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
       } else {
         Alert.alert(
           t('authenticationFailed'),
-          t('authenticationFingerprintFailed'),
+          t('authenticationBiometricFailed'),
         );
       }
     } catch (error) {
-      Alert.alert(t('error'), t('authenticationFingerprintNA'));
+      Alert.alert(t('error'), t('authenticationBiometricNA'));
     }
   };
 
   // Run fingerprint authentication on mount
   useEffect(() => {
-    authenticateFingerprint();
+    authenticateBiometric();
   }, []);
 
   return (

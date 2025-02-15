@@ -29,10 +29,6 @@
   "invalidPin": "Invalid PIN",
   "invalidPinMessage": "The PIN you entered is invalid.",
   "authenticationFailed": "Authentication failed",
-  "requestFingerPrint": "Request fingerprint",
-  "authenticateFingerprint": "Authenticate with Fingerprint",
-  "authenticationFingerprintFailed": "Authentication with fingerprint failed",
-  "authenticationFingerprintNA": "Biometric authentication is not available on this device.",
   "rooms": "Rooms",
   "createRoomDescr": "Create a new room",
   "createRoom": "Create room",
@@ -104,6 +100,15 @@
   "randomNode": "Random node",
   "connectToNode": "Connect to node",
   "checkNodes": "Check nodes",
-  "activateWalletSync": "Activate wallet sync",
-  "reportBug": "Report a bug"
+
+  // Exists but needs update
+  "requestBiometric": "Request biometric", // free to translate
+  "authenticateBiometric": "Authenticate with biometric", // free to translate
+  "authenticationBiometricFailed": "Authentication with biometric failed", // free to translate
+  "authenticationBiometricNA": "Biometric authentication is not available on this device.", // free to translate
+
+  // New
+  "activateWalletSync": "Activate wallet sync", // free to translate
+  "reportBug": "Report a bug", // free to translate
+  "noFunds": "Insufficient funds" // free to translate
 }

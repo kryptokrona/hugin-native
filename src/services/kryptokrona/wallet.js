@@ -409,7 +409,7 @@ export class ActiveWallet {
     let balance = await this.check_balance();
     if (!balance) {
       console.log('Error: No balance to send with');
-      return;
+      return { error: 'balance' };
     }
 
     let payload_hex;

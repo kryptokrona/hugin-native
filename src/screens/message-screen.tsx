@@ -3,6 +3,7 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -14,6 +15,7 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { t } from 'i18next';
+import Toast from 'react-native-toast-message';
 
 import {
   GroupMessageItem,
@@ -188,6 +190,13 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     } else {
       const hash = await Wallet.send_message(text, huginAddress);
 
+      if (hash?.error === 'balance') {
+        Toast.show({
+          text1: t('noFunds'),
+          type: 'error',
+        });
+        return;
+      }
       if (hash) {
         const saved = await saveMessage(
           roomKey,
@@ -289,7 +298,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         maxToRenderPerBatch={messages.length}
       />
 
-      <KeyboardAvoidingView style={[styles.inputWrapper, { backgroundColor }]}>
+      <KeyboardAvoidingView
+        style={[styles.inputWrapper, { backgroundColor }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
         <MessageInput
           onSend={onSend}
           replyToName={replyToName}
@@ -307,9 +319,10 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   inputWrapper: {
-    bottom: 0,
+    bottom: 6,
     left: 0,
-    paddingBottom: 10,
+    // marginBottom: 10,
+    // paddingBottom: 10,
     position: 'absolute',
     right: 0,
   },
@@ -322,9 +335,7 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   tipContainer: {
-    height: '100vh',
     padding: 20,
-    // backgroundColor: 'red',
     zIndex: 5,
   },
 });
