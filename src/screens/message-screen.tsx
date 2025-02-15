@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     bottom: 6,
     left: 0,
     // marginBottom: 10,
-    // paddingBottom: 10,
+    paddingBottom: 10,
     position: 'absolute',
     right: 0,
   },
