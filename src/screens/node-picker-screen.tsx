@@ -15,7 +15,6 @@ import { WalletConfig } from 'config/wallet-config';
 
 import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
 import { usePreferencesStore, useThemeStore } from '@/services';
-import { Preferences } from '@/types';
 
 import offline_node_list from '../config/nodes.json';
 import { Wallet } from '../services/kryptokrona';
@@ -29,7 +28,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
   const preferences = usePreferencesStore((state) => state.preferences);
   const [nodeInput, setNodeInput] = useState(preferences.node || ''); // Initialize with preferences.node
   const [nodeList, setNodeList] = useState([]);
-  const [selectedNode, setSelectedNode] = useState<Preferences | null>(
+  const [selectedNode, setSelectedNode] = useState<string | null>(
     preferences.node,
   );
   const [loadingNode, setLoadingNode] = useState(false);

@@ -48,3 +48,4 @@ Maintenenance:
 Bug reports:
     ☐ Add friend did not work in DM (Android)
     ☐ Send DM did not work (Android)
+    ✔ Pick avatar reports toast error even when cancelled @done(25-02-15 18:38)

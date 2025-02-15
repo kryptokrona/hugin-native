@@ -111,7 +111,9 @@ export const pickAvatar = async () => {
   const result = await launchImageLibrary(options);
   const base64 = result.assets?.[0].base64;
   if (base64 && base64.length > 273000) {
-    return null;
+    return { error: 'maxAvatarSize' };
+  } else if (base64) {
+    return { base64 };
   }
-  return base64 ?? null;
+  return null;
 };
