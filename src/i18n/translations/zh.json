@@ -105,5 +105,6 @@
   "connectToNode": "连接节点",
   "checkNodes": "刷新节点状态",
   "activateWalletSync": "实时同步钱包",
-  "reportBug": "意见反馈"
+  "reportBug": "意见反馈",
+  "noFunds": "余额不足"
 }
