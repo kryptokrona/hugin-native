@@ -292,6 +292,9 @@ export class ActiveWallet {
     const picked = { url: nodeUrl, port: nodePort };
     this.setDaemon(picked);
     this.active.swapNode(this.daemon);
+    this.nodeUrl = nodeUrl;
+    this.nodePort = nodePort;
+    MessageSync.set_node(picked);
   }
 
   getAndSetSyncStatus() {
