@@ -38,6 +38,10 @@ class Syncer {
     }
   }
 
+  set_node(node) {
+    this.node = node;
+  }
+
   async get_pool() {
     const lastChecked = this.lastChecked;
     this.lastChecked = Math.floor(Date.now() / 1000);

@@ -1,8 +1,14 @@
-import {
-  AuthMethods,
-  MainNavigationParamList,
-  MainStackNavigationType,
-} from '@/types';
+import { useMemo, useState } from 'react';
+
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
+
+import { Peers } from 'lib/connections';
+import { update_bare_user } from 'lib/native';
+
 import {
   Avatar,
   Container,
@@ -14,21 +20,19 @@ import {
   TextField,
 } from '@/components';
 import { MainScreens, nameMaxLength } from '@/config';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   updateUser,
   usePreferencesStore,
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { useMemo, useState } from 'react';
+import {
+  AuthMethods,
+  MainNavigationParamList,
+  MainStackNavigationType,
+} from '@/types';
 
-import { Peers } from 'lib/connections';
-import Toast from 'react-native-toast-message';
 import { pickAvatar } from '../utils/avatar';
-import { update_bare_user } from 'lib/native';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<
@@ -76,11 +80,12 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     }));
     navigation.goBack();
   };
+
   async function onUpdateAvatar() {
-    const base64 = await pickAvatar();
-    if (base64) {
-      await updateUser({ avatar: base64 });
-    } else {
+    const res = await pickAvatar();
+    if (res?.base64) {
+      await updateUser({ avatar: res.base64 });
+    } else if (res?.error === 'maxAvatarSize') {
       Toast.show({
         text1: t('maxAvatarSize'),
         type: 'error',

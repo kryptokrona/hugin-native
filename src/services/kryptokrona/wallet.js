@@ -292,6 +292,9 @@ export class ActiveWallet {
     const picked = { url: nodeUrl, port: nodePort };
     this.setDaemon(picked);
     this.active.swapNode(this.daemon);
+    this.nodeUrl = nodeUrl;
+    this.nodePort = nodePort;
+    MessageSync.set_node(picked);
   }
 
   getAndSetSyncStatus() {
@@ -409,7 +412,7 @@ export class ActiveWallet {
     let balance = await this.check_balance();
     if (!balance) {
       console.log('Error: No balance to send with');
-      return;
+      return { error: 'balance' };
     }
 
     let payload_hex;

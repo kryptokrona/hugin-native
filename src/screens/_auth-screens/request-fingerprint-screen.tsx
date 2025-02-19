@@ -2,7 +2,11 @@ import React, { useEffect } from 'react';
 
 import { View, Alert } from 'react-native';
 
-import { type RouteProp, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  type RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Animatable from 'react-native-animatable';
 import ReactNativeBiometrics from 'react-native-biometrics';
@@ -28,7 +32,12 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
     if (route.params?.finishFunction) {
       route.params.finishFunction();
     } else {
-      mainNavigation.navigate(Stacks.MainStack); // TODO fix type
+      mainNavigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: Stacks.MainStack }],
+        }),
+      );
     }
   };
 
@@ -36,13 +45,13 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   //   navigation.navigate(AuthScreens.ForgotPinScreen);
   // };
 
-  const authenticateFingerprint = async () => {
+  const authenticateBiometric = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
 
     try {
       const { success } = await rnBiometrics.simplePrompt({
         cancelButtonText: t('cancel'),
-        promptMessage: t('authenticateFingerprint'),
+        promptMessage: t('authenticateBiometric'),
       });
 
       if (success) {
@@ -50,17 +59,17 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
       } else {
         Alert.alert(
           t('authenticationFailed'),
-          t('authenticationFingerprintFailed'),
+          t('authenticationBiometricFailed'),
         );
       }
     } catch (error) {
-      Alert.alert(t('error'), t('authenticationFingerprintNA'));
+      Alert.alert(t('error'), t('authenticationBiometricNA'));
     }
   };
 
   // Run fingerprint authentication on mount
   useEffect(() => {
-    authenticateFingerprint();
+    authenticateBiometric();
   }, []);
 
   return (

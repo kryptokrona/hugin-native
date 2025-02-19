@@ -15,7 +15,7 @@ Todo:
     ☐ Link directly to room or message in notifications
     ☐ Sync accounts between devices/restore account and stuff
     ✔ Add error message if wrong DM input @done(25-02-08 19:38)
-    ☐ Add QR codes for messages and rooms
+    ✔ Add QR codes for messages and rooms @done(25-02-15 20:04)
 
 
 Todo wallet:
@@ -38,7 +38,7 @@ Todo node picker:
 Bugs:
     ✔ Make sure new accounts don't get stuck on 0 @done(25-02-08 19:39)
     ☐ Pick best random node for new account (no hard coded)
-    ☐ Fix multiple rerenders issue with messages
+    ✔ Fix multiple rerenders issue with messages @done(25-02-15 20:04)
     ✔ Unread counter not resetting properly @done(25-02-08 20:10)
 
 Maintenenance:
@@ -47,5 +47,7 @@ Maintenenance:
 
 
 Bug reports:
-    ☐ Add friend did not work in DM (Android)
-    ☐ Send DM did not work (Android)
+    ✔ Add friend did not work in DM (Android) @done(25-02-15 20:04)
+    ✔ Send DM did not work (Android) @done(25-02-15 20:04)
+    ✔ Pick avatar reports toast error even when cancelled @done(25-02-15 18:38)
+    ☐ Icon on hugin in app store (iOS) white borders

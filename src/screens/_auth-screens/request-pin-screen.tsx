@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { type RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const mainNavigation = useNavigation<MainStackNavigationType>();
   const pincode = usePreferencesStore((state) => state.preferences?.pincode);
+  const [pinOK, setPinOk] = useState(false);
 
   const finishProcess = () => {
     setAuthenticated(true);
@@ -29,15 +30,13 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
     }
   };
 
-  // const handleForgotPin = () => {
-  //   navigation.navigate(AuthScreens.ForgotPinScreen);
-  // };
-
   const verifyPin = (inputPin: string) => {
     if (pincode === inputPin) {
       console.log({ inputPin, pincode });
+      setPinOk(true);
       finishProcess();
     } else {
+      setPinOk(false);
       Toast.show({
         text1: t('invalidPin'),
         text2: t('invalidPinMessage'),
@@ -48,16 +47,26 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <View style={{ alignItems: 'center', flex: 1, justifyContent: 'center' }}>
-        <Pincode onFinish={verifyPin} />
-        <TextButton onPress={() => verifyPin(pincode ?? '')}>
+      <View style={styles.container}>
+        <Pincode focusMode onFinish={verifyPin} />
+        <TextButton
+          style={styles.btn}
+          disabled={!pinOK}
+          onPress={finishProcess}>
           {t('authenticate')}
         </TextButton>
-
-        {/* <TextButton type="secondary" onPress={handleForgotPin}>
-          Forgot PIN?
-        </TextButton> */}
       </View>
     </ScreenLayout>
   );
 };
+
+const styles = StyleSheet.create({
+  btn: {
+    marginTop: 20,
+  },
+  container: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+});

@@ -12,9 +12,14 @@ import { TextField } from './text-field';
 interface PINInputProps {
   onFinish: (pin: string) => void;
   onPartPin?: (pin: string) => void;
+  focusMode?: boolean;
 }
 
-export const Pincode: React.FC<PINInputProps> = ({ onFinish, onPartPin }) => {
+export const Pincode: React.FC<PINInputProps> = ({
+  onFinish,
+  onPartPin,
+  focusMode,
+}) => {
   const { t } = useTranslation();
 
   const [focus, setFocus] = useState(false);
@@ -60,6 +65,7 @@ export const Pincode: React.FC<PINInputProps> = ({ onFinish, onPartPin }) => {
       </TextField>
       <View style={styles.inputContainer}>
         <TextInput
+          autoFocus={focusMode}
           secureTextEntry
           returnKeyLabel={t('done')}
           returnKeyType={'done'}

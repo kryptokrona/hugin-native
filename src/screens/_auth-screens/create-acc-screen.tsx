@@ -1,9 +1,11 @@
-import {
-  AuthMethods,
-  AuthStackNavigationType,
-  AuthStackParamList,
-} from '@/types';
-import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
+import { useEffect, useState } from 'react';
+
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
+
 import {
   Avatar,
   Card,
@@ -15,8 +17,7 @@ import {
   TextButton,
   TextField,
 } from '@/components';
-import { RouteProp, useNavigation } from '@react-navigation/native';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {
   updateUser,
   useGlobalStore,
@@ -24,13 +25,15 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { useEffect, useState } from 'react';
+import {
+  AuthMethods,
+  AuthStackNavigationType,
+  AuthStackParamList,
+} from '@/types';
 
-import Toast from 'react-native-toast-message';
-import { Wallet } from '../../services/kryptokrona/wallet';
 import { initDB } from '../../services/bare/sqlite';
+import { Wallet } from '../../services/kryptokrona/wallet';
 import { pickAvatar } from '../../utils/avatar';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.CreateAccountScreen>;
@@ -136,11 +139,11 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
   }
 
   async function onUpdateAvatar() {
-    const base64 = await pickAvatar();
-    if (base64) {
-      await updateUser({ avatar: base64 });
-      setAvatar(base64);
-    } else {
+    const res = await pickAvatar();
+    if (res?.base64) {
+      await updateUser({ avatar: res.base64 });
+      setAvatar(res.base64);
+    } else if (res?.error === 'maxAvatarSize') {
       Toast.show({
         text1: t('maxAvatarSize'),
         type: 'error',
