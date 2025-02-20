@@ -7,17 +7,6 @@ Make sure you have installed on your system:
 - `CMake` >= 3.25.
 - For Android, installing Android Studio is recommended (you can follow [React Native docs](https://reactnative.dev/docs/0.72/environment-setup?platform=android)), also make sure Android NDK version `25.1.8937393` is installed and set the `ANDROID_HOME` environment variable (see `Configure the ANDROID_HOME environment variable` section on React Native docs).
 
-# Install Bare
-
-Clone this repo follow these steps:
-
-```sh
-git submodule update --init --recursive
-```
-
-> [!NOTE]
-> From now on, you should run `npx bare-dev vendor sync` after updating `bare` git submodule.
-
 ## Install node modules:
 
 ```sh
@@ -27,13 +16,6 @@ npm install
 ```sh
 npm link
 ```
-
-> [!IMPORTANT]
-> The first time you build bare, you need to append the `--configure` flag:
->
-> ```sh
-> npx hello-pear --configure
-> ```
 
 ## Patch node modules:
 
@@ -49,36 +31,11 @@ npm run getnodes
 
 ### Good to know
 
-After linking assets with **npx react-native-asset** you need to run npx hello-pear configure again.
-As well as when updating anything regarding bare.
+# Bundle
 
-### iOS simulator only
-
-npx hello-pear --configure --ios-sim
-
-### iOS simulator only with x64 architecture
-
-npx hello-pear --configure --ios-sim x64
-
-### iOS and iOS simulator
-
-npx hello-pear --configure --ios --ios-sim arm64
-
-### Android only arm archs
-
-npx hello-pear --configure --android arm64 arm
-
-### Android only arm64
-
-npx hello-pear --configure --android arm64
-
-### Android only x86 archs
-
-npx hello-pear --configure --android x64 ia32
-
-### help
-
-hello-pear --help
+> [!NOTE]
+> From now on, you should run `npx bundle <--release-android | --release-ios` after updating any files in `/bare` folder.
+> TODO: Add more options in bin/bundle.js
 
 > **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
 
