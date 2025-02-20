@@ -1,7 +1,7 @@
 require('./runtime');
 
 // Tell app we're ready
-HelloBare.onReady();
+Bare.onReady();
 const { group_key } = require('./utils');
 const RPC = require('tiny-buffer-rpc');
 const ce = require('compact-encoding');
@@ -13,72 +13,74 @@ const {
   close_all_connections,
 } = require('./swarm');
 const { Hugin } = require('./account');
+const { IPC } = BareKit;
 
-const rpc = new RPC(HelloBare.sendMessage);
-HelloBare.onMessage = rpc.recv.bind(rpc);
+//Not sure if this is the right way to do this yet.
+//We would like many channels? And/Or request stream like tiny-buffer-rpc
+//Investigate if we can add the IPC to .send() .recv()
+IPC.on('data', (data) => {
+  const parsed = JSON.parse(data);
+  if ('type' in parsed) {
+    onrequest(parsed);
+  }
+
+  if ('response' in parsed) {
+    console.log('Got response from request');
+  }
+});
 console.log('Bare main init');
-
-const reqest = rpc.register(2, {
-  request: ce.string,
-  response: ce.string,
-});
-
-//Send
-
-const stream = rpc.register(1, {
-  request: ce.string,
-  response: ce.string,
-});
-const sender = stream.createRequestStream();
 
 //Recv
 
-rpc.register(0, {
-  request: ce.string,
-  response: ce.string,
-  onrequest: async (data) => {
-    console.log('Got request data', data);
-    const p = JSON.parse(data);
-    switch (p.type) {
-      case 'init_bare':
-        initBareMain(p.user);
-      case 'update_bare_user':
-        updateBareUser(p.user);
-        break;
-      case 'new_swarm':
-        await newSwarm(p.hashkey, p.key, p.admin);
-        break;
-      case 'end_swarm':
-        endSwarm(p.key);
-        break;
-      case 'send_room_msg':
-        return sendRoomMessage(p.message, p.key, p.reply, p.tip);
-      case 'group_random_key':
-        return getRandomGroupKey();
-      case 'begin_send_file':
-        sendFileInfo(p.json_file_data);
-        break;
-      case 'request_download':
-        request_download(p.file);
-        break;
-      case 'keep_alive':
-        break;
-      case 'idle_status':
-        Hugin.sleep(p.mode);
-        break;
-      case 'close_connections':
-        close_all_connections();
-        break;
-      default:
-        console.log('Unknown RPC type:', p.type);
-    }
-    return 'success';
+const onrequest = async (p) => {
+  console.log('Got request data', p);
+  switch (p.type) {
+    case 'init_bare':
+      initBareMain(p.user);
+    case 'update_bare_user':
+      updateBareUser(p.user);
+      break;
+    case 'new_swarm':
+      await newSwarm(p.hashkey, p.key, p.admin);
+      break;
+    case 'end_swarm':
+      endSwarm(p.key);
+      break;
+    case 'send_room_msg':
+      return sendRoomMessage(p.message, p.key, p.reply, p.tip);
+    case 'group_random_key':
+      return getRandomGroupKey();
+    case 'begin_send_file':
+      sendFileInfo(p.json_file_data);
+      break;
+    case 'request_download':
+      request_download(p.file);
+      break;
+    case 'keep_alive':
+      break;
+    case 'idle_status':
+      Hugin.sleep(p.mode);
+      break;
+    case 'close_connections':
+      close_all_connections();
+      break;
+    default:
+      console.log('Unknown RPC type:', p.type);
+  }
+  return 'success';
+};
+
+//TODO*****************
+const requester = {
+  request() {
+    console.log('Request data from REACT **');
   },
-});
+};
 
 // Function implementations
 const initBareMain = async (user) => {
-  Hugin.init(user, sender, reqest);
+  //userdata, sender ipc, unknown request rpc** todo
+  Hugin.init(user, IPC, requester);
 };
 
 const updateBareUser = (user) => {
@@ -86,6 +88,8 @@ const updateBareUser = (user) => {
 };
 
 const newSwarm = async (hashkey, key, admin) => {
+  //DISABLED THIS UNTIL ALL REQUEST/SEND FUNCS ARE READY
+  if (hashkey) return;
   if (Hugin.rooms.some((a) => a.key === key)) return;
   const topic = await create_swarm(hashkey, key);
   Hugin.rooms.push({ key, topic, admin });
