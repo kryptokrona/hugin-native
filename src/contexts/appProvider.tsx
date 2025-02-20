@@ -10,7 +10,7 @@ import {
 
 import { useNavigationContainerRef } from '@react-navigation/native';
 
-import { bare, send_idle_status } from 'lib/native';
+import { bare, send_idle_status, start_bare } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
@@ -39,7 +39,6 @@ import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
-
 interface AppProviderProps {
   children: React.ReactNode;
 }
@@ -63,7 +62,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         return;
       }
     }
-
+    start_bare();
     await initDB();
     await setLatestRoomMessages();
     await setLatestMessages();

@@ -13,9 +13,10 @@ import bundle from '../../app.bundle';
 const worklet = new Worklet();
 const { IPC } = worklet;
 // // RPC FROM FRONT END
-export const startBare = () => {
+export const start_bare = () => {
   worklet.start('../../app.bundle', bundle);
   IPC.setEncoding('utf8');
+  //Testing stuff here
   IPC.write('Hello from React Native!');
 };
 
@@ -27,8 +28,8 @@ IPC.on('data', async (data) => {
     //We got a request from bare, answer with some data.
     const answer = await onrequest(data.message);
     //Not sure if we can change this request/response
-    const send = { data: answer, type: 'response' };
-    IPC.write(JSON.stringify(send));
+    const response = { data: answer, type: 'response' };
+    IPC.write(JSON.stringify(response));
   } else {
     rpc_message(data);
   }
