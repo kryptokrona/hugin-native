@@ -81,6 +81,7 @@ bare/bundle.js.h
 bare/bundle.js.h.d
 bare-libs/
 bin/hello-pear.js
+app.bundle.js
 
 vendor/bare
 vendor/concurrentqueue
