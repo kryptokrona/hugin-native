@@ -1,4 +1,3 @@
-const Console = require('bare-console');
 const process = require('bare-process');
 
 // globals
@@ -35,10 +34,11 @@ process.on('unhandledRejection', (ex) => {
 });
 
 // console redirection to react-native side
+// Bare.sendLog is not active anymore
 
-const consoleProxy = new Console({
-  colors: false,
-  stdout: HelloBare.sendLog,
-  stderr: HelloBare.sendLog,
-});
-globalThis.console = consoleProxy;
+// const consoleProxy = new Console({
+//   colors: false,
+//   stdout: Bare.sendLog,
+//   stderr: Bare.sendLog,
+// });
+// globalThis.console = consoleProxy;
