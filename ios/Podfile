@@ -31,7 +31,7 @@ setup_permissions([
   'FaceID',
   # 'LocationAccuracy',
   # 'LocationAlways',
-  'LocationWhenInUse',
+  # 'LocationWhenInUse',
   # 'MediaLibrary',
   'Microphone',
   # 'Motion',
