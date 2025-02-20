@@ -1,9 +1,0 @@
-{
-  "platforms": ["ios", "android", "web"],
-  "ios": {
-    "modules": ["HelloBareModule"]
-  },
-  "android": {
-    "modules": ["to.holepunch.hellopear.HelloBareModule"]
-  }
-}
