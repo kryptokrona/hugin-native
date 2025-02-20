@@ -274,6 +274,7 @@ const incoming_message = async (data, topic, connection, peer) => {
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
+  if (!message) return;
   Hugin.send('swarm-message', { message, topic });
 };
 
