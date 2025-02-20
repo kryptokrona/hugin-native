@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "bin": {
-    "hello-pear": "./bin/hello-pear.js"
+    "bundle": "./bin/bundle.js"
   },
   "scripts": {
     "android": "react-native run-android --active-arch-only",
@@ -32,23 +32,25 @@
     "@tradle/react-native-http": "^2.0.0",
     "assert": "^1.1.1",
     "b4a": "^1.6.6",
-    "bare-console": "4.1.0",
-    "bare-fs": "2.3.1",
-    "bare-process": "1.3.2",
+    "bare-console": "6.0.1",
+    "bare-fs": "4.0.1",
+    "bare-hrtime": "^2.0.10",
+    "bare-pack": "^1.2.4",
+    "bare-path": "^3.0.0",
+    "bare-process": "4.0.0",
+    "bare-rpc": "^0.1.4",
     "base-64": "^1.0.0",
     "browserify-zlib": "~0.1.4",
     "buffer": "^4.9.1",
     "commander": "^12.1.0",
     "compact-encoding": "^2.15.0",
     "console-browserify": "^1.1.0",
-    "expo": "^50.0.0",
     "fs": "^0.0.1-security",
     "https-browserify": "~0.0.0",
     "hugin-crypto": "^0.0.2",
     "huginbeam": "^1.0.0",
     "hyperbeam": "3.0.2",
     "hyperbee": "^2.19.6",
-    "hypercore": "^10.37.7",
     "hyperdht": "6.15.1",
     "hyperswarm": "4.7.14",
     "hyperswarm-hugin": "^1.0.1",
@@ -70,6 +72,7 @@
     "react-native": "0.73.6",
     "react-native-animatable": "^1.4.0",
     "react-native-background-fetch": "^4.2.6",
+    "react-native-bare-kit": "^0.4.8",
     "react-native-biometrics": "^3.0.1",
     "react-native-crypto": "^2.1.0",
     "react-native-device-info": "^10.13.2",
@@ -97,13 +100,14 @@
     "react-native-vision-camera": "^4.6.3",
     "readable-stream": "1.0.33",
     "request-promise-native": "^1.0.9",
-    "sodium-native": "^4.1.1",
+    "sodium-native": "^4.3.2",
     "stream-browserify": "^1.0.0",
     "text-encoding": "^0.7.0",
     "tiny-buffer-rpc": "^2.1.0",
     "tweetnacl": "^1.0.3",
     "tweetnacl-sealed-box": "^1.0.5",
     "tweetnacl-util": "^0.15.1",
+    "udx-native": "^1.17.4",
     "unicode-emoji-json": "^0.6.0",
     "url": "~0.10.1",
     "vm-browserify": "0.0.4",
@@ -130,7 +134,7 @@
     "@typescript-eslint/parser": "^7.8.0",
     "babel-jest": "^29.6.3",
     "babel-plugin-module-resolver": "^5.0.2",
-    "bare-dev": "0.10.19",
+    "bare-dev": "^0.14.11",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^28.5.0",
@@ -142,6 +146,7 @@
     "jest": "^29.6.3",
     "jetifier": "^2.0.0",
     "jetify": "^1.0.2",
+    "node-gyp-build": "^4.8.4",
     "prettier": "2.8.8",
     "react-test-renderer": "18.2.0",
     "rn-nodeify": "^10.3.0",
@@ -191,6 +196,6 @@
     "tls": false
   },
   "resolutions": {
-    "expo-modules-core": "1.11.13"
+    "udx-native": "1.17.4"
   }
 }
