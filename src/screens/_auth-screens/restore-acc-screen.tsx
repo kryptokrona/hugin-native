@@ -94,8 +94,8 @@ export const RestoreAccountScreen: React.FC = () => {
   if (step === 1) {
     return (
       <ScreenLayout>
-        <TextField size="large">{t('enterSeedWords')}</TextField>
         <View style={styles.listContainer}>
+        <TextField size="large">{t('enterSeedWords')}</TextField>
           <FlatList
             numColumns={3}
             data={seedWords}
@@ -129,7 +129,7 @@ export const RestoreAccountScreen: React.FC = () => {
           />
         </View>
 
-        <TextButton onPress={handlePaste}>{t('enterSeedWords')}</TextButton>
+        <TextButton onPress={handlePaste}>{t('pasteSeedWords')}</TextButton>
         <TextButton onPress={handleSubmit}>{t('restoreAccount')}</TextButton>
       </ScreenLayout>
     );
@@ -160,5 +160,7 @@ export const RestoreAccountScreen: React.FC = () => {
 const styles = StyleSheet.create({
   listContainer: {
     flex: 1,
+    alignContent: 'center',
+    alignItems: 'center'
   },
 });
