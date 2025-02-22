@@ -7,7 +7,6 @@ import { getCurrentRoom } from '@/services/zustand';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
-import { EventEmitter } from 'react-native';
 import {
   getRoomMessages,
   roomMessageExists,
@@ -15,7 +14,7 @@ import {
   getLatestRoomHashes,
 } from '@/services/bare/sqlite';
 import { Wallet } from 'services/kryptokrona/wallet';
-class RPC extends EventEmitter {
+class RPC {
   constructor(ipc) {
     this.ipc = ipc;
     this.pendingRequests = new Map();
