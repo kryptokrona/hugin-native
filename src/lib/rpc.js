@@ -14,7 +14,7 @@ import {
   getLatestRoomHashes,
 } from '@/services/bare/sqlite';
 import { Wallet } from 'services/kryptokrona/wallet';
-class RPC {
+export class RPC {
   constructor(ipc) {
     this.ipc = ipc;
     this.pendingRequests = new Map();
@@ -192,5 +192,3 @@ class RPC {
     }
   }
 }
-
-module.exports = { RPC };
