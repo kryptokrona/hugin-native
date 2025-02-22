@@ -7,8 +7,14 @@ import { getCurrentRoom } from '@/services/zustand';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
-import { EventEmitter } from 'react-native';
-class RPC extends EventEmitter {
+import {
+  getRoomMessages,
+  roomMessageExists,
+  getRoomReplyMessage,
+  getLatestRoomHashes,
+} from '@/services/bare/sqlite';
+import { Wallet } from 'services/kryptokrona/wallet';
+export class RPC {
   constructor(ipc) {
     this.ipc = ipc;
     this.pendingRequests = new Map();
@@ -17,16 +23,10 @@ class RPC extends EventEmitter {
       const data = this.parse(response);
       if (this.pendingRequests.has(data.id)) {
         const { resolve, reject } = this.pendingRequests.get(data.id);
-        if (error) {
-          reject(new Error(error));
-        } else {
-          resolve(data.data);
-        }
+        resolve(data.data);
         this.pendingRequests.delete(data.id);
       } else {
-        if (!this.on_message('data', data)) {
-          this.emit('data', data);
-        }
+        this.on_message(data);
       }
     });
   }
@@ -148,11 +148,43 @@ class RPC extends EventEmitter {
         case 'download-file-progress':
           console.log('Downloading progress ipc message:', json.progress);
         default:
-          return false;
+          const response = await onrequest(json);
+          if (!response) return;
+          this.send(JSON.stringify({ id: json.id, data: response }));
       }
     }
-    return false;
+  }
+
+  async onrequest(request) {
+    switch (request.type) {
+      case 'get-room-history':
+        const messages = await getRoomMessages(request.data.key, 0, true);
+        return messages;
+      case 'get-latest-room-hashes':
+        const hashes = await getLatestRoomHashes(request.data.key);
+        return hashes;
+      case 'room-message-exists':
+        const exists = await roomMessageExists(request.data.hash);
+        return exists;
+      case 'get-room-message':
+        const message = await getRoomReplyMessage(request.data.hash, true);
+        return message[0];
+      case 'get-priv-key':
+        //Temporary until we sign all messages with xkr address
+        const key = Wallet.spendKey();
+        return key;
+      case 'sign-message':
+        const sig = await Wallet.sign(request.data.message);
+        return sig;
+      case 'verify-signature':
+        const verify = await Wallet.verify(
+          request.data.data.message,
+          request.data.data.address,
+          request.data.data.signature,
+        );
+        return verify;
+      default:
+        return false;
+    }
   }
 }
-
-module.exports = { RPC };
