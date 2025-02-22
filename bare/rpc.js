@@ -7,11 +7,7 @@ class RPC {
       const data = this.parse(response);
       if (this.pendingRequests.has(data.id)) {
         const { resolve, reject } = this.pendingRequests.get(data.id);
-        if (error) {
-          reject(new Error(error));
-        } else {
-          resolve(data.data);
-        }
+        resolve(data.data);
         this.pendingRequests.delete(data.id);
       } else {
         this.emit('data', data);
