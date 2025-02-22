@@ -6,7 +6,7 @@ class Account {
     this.avatar = '';
     this.rooms = [];
     this.downloadDir = '';
-    this.sender = null;
+    this.rpc = null;
     this.req = null;
     this.keys = {};
     this.bannedList = [];
@@ -14,11 +14,11 @@ class Account {
     this.sleeping = false;
   }
 
-  init(data, sender, req) {
+  init(data, rpc) {
     this.name = data.name;
     this.address = data.address;
     this.avatar = data.avatar;
-    this.sender = sender;
+    this.rpc = rpc;
     this.req = req;
     this.downloadDir = data.downloadDir;
     this.keys = data.keys;
@@ -53,16 +53,11 @@ class Account {
   }
 
   send(type, data) {
-    console.log('Send rpc data from bare');
-    const send = data;
-    send.type = type;
-    this.sender.write(JSON.stringify(send));
+    this.rpc.send(type, data);
   }
 
   async request(data) {
-    const r = await this.req.request(JSON.stringify(data));
-    const parse = JSON.parse(r);
-    return parse;
+    return await this.rpc.request(data);
   }
 
   sleep(mode) {

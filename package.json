@@ -45,6 +45,7 @@
     "commander": "^12.1.0",
     "compact-encoding": "^2.15.0",
     "console-browserify": "^1.1.0",
+    "expo": "^50.0.0",
     "fs": "^0.0.1-security",
     "https-browserify": "~0.0.0",
     "hugin-crypto": "^0.0.2",
