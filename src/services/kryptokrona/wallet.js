@@ -161,7 +161,9 @@ export class ActiveWallet {
     let [unlockedBalance, lockedBalance] = await this.active.getBalance();
     setBalance([unlockedBalance, lockedBalance]);
     const transactions = await this.active.getTransactions();
-    setTransactions(transactions);
+    const filteredTransactions = transactions.filter((transaction) => transaction.totalAmount() >= 10000);
+    setTransactions(filteredTransactions);
+
   }
 
   setDaemon(node) {

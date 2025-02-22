@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 
@@ -35,9 +36,15 @@ export const DashboardScreen: React.FC = () => {
   const status = useGlobalStore((state) => state.syncStatus);
   const [synced, setSynced] = useState(status[0] == status[2]);
   const [showQR, setShowQR] = useState(false);
+  const [showFiat, setShowFiat] = useState(false);
+  const fiatPrice = useGlobalStore((state) => state.fiatPrice);
 
   function onCloseModal() {
     setShowQR(false);
+  }
+
+  function toggleFiat() {
+    setShowFiat(!showFiat);
   }
 
   useEffect(() => {
@@ -81,7 +88,7 @@ export const DashboardScreen: React.FC = () => {
   const transactions = useGlobalStore((state) => state.transactions);
 
   const transactionsCB = ({ item }: { item: Transaction }) => {
-    return <TransactionItem item={item} />;
+    return <TransactionItem item={item} fiat={showFiat} />;
   };
 
   function onSendButton() {
@@ -92,14 +99,18 @@ export const DashboardScreen: React.FC = () => {
     (Number(balance.unlocked) + Number(balance.locked)) / 100000;
   const balanceText: string = `${calcBalance} XKR`;
 
+  const amountInFiat = (calcBalance * fiatPrice).toFixed(2);
+
   return (
     <ScreenLayout>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <TouchableOpacity onPress={toggleFiat}>
         <Card style={styles.balance}>
           <TextField style={{ margin: 10 }} size="large" bold>
-            {balanceText}
+            {showFiat ? '$'+amountInFiat : balanceText}
           </TextField>
         </Card>
+        </TouchableOpacity>
 
         <View style={[styles.container]}>
           <TextField style={{ paddingBottom: 10 }} centered>
