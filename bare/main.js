@@ -16,13 +16,13 @@ const { IPC } = BareKit;
 
 const rpc = new RPC(IPC);
 
-rpc.on('data', (data) => check(data));
+rpc.on('data', (data) => response(data));
 
-async function check(data) {
+async function response(request) {
   //return data to React Native
-  const send = await onrequest(data);
+  const send = await onrequest(request);
   if (send === undefined) return;
-  rpc.send();
+  rpc.send(JSON.stringify({ id: request.id, type: request.type, data: send }));
 }
 const onrequest = async (p) => {
   console.log('Got request data', p);
@@ -40,10 +40,10 @@ const onrequest = async (p) => {
       break;
     case 'send_room_msg':
       const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
-      return { data: message, type: p.type };
+      return message;
     case 'group_random_key':
       const key = getRandomGroupKey();
-      return { data: key, type: p.type };
+      return key;
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
       break;

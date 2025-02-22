@@ -1,11 +1,4 @@
 import { RPC } from './rpc';
-import {
-  getRoomMessages,
-  roomMessageExists,
-  getRoomReplyMessage,
-  getLatestRoomHashes,
-} from '@/services/bare/sqlite';
-import { Wallet } from 'services/kryptokrona/wallet';
 import { Worklet } from 'react-native-bare-kit';
 import bundle from '../../app.bundle';
 
@@ -18,46 +11,6 @@ export const start_bare = async () => {
   await worklet.start('/app.bundle', bundle);
   //Testing stuff here
   rpc.send('React Native started');
-};
-
-rpc.on('data', async (data) => {
-  const request = JSON.parse(data);
-  const response = await onrequest(request);
-  if (!response) return;
-  rpc.send(JSON.stringify({ id: request.id, data: response }));
-});
-
-const onrequest = async (request) => {
-  switch (request.type) {
-    case 'get-room-history':
-      const messages = await getRoomMessages(request.key, 0, true);
-      return messages;
-    case 'get-latest-room-hashes':
-      const hashes = await getLatestRoomHashes(request.key);
-      return hashes;
-    case 'room-message-exists':
-      const exists = await roomMessageExists(request.hash);
-      return exists;
-    case 'get-room-message':
-      const message = await getRoomReplyMessage(request.hash, true);
-      return message[0];
-    case 'get-priv-key':
-      //Temporary until we sign all messages with xkr address
-      const key = Wallet.spendKey();
-      return key;
-    case 'sign-message':
-      const sig = await Wallet.sign(request.message);
-      return sig;
-    case 'verify-signature':
-      const verify = await Wallet.verify(
-        request.data.message,
-        request.data.address,
-        request.data.signature,
-      );
-      return verify;
-  }
-
-  return false;
 };
 
 // Exported functions to client

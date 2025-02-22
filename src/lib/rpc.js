@@ -8,6 +8,13 @@ import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
 import { EventEmitter } from 'react-native';
+import {
+  getRoomMessages,
+  roomMessageExists,
+  getRoomReplyMessage,
+  getLatestRoomHashes,
+} from '@/services/bare/sqlite';
+import { Wallet } from 'services/kryptokrona/wallet';
 class RPC extends EventEmitter {
   constructor(ipc) {
     this.ipc = ipc;
@@ -24,9 +31,7 @@ class RPC extends EventEmitter {
         }
         this.pendingRequests.delete(data.id);
       } else {
-        if (!this.on_message('data', data)) {
-          this.emit('data', data);
-        }
+        this.on_message(data);
       }
     });
   }
@@ -148,10 +153,44 @@ class RPC extends EventEmitter {
         case 'download-file-progress':
           console.log('Downloading progress ipc message:', json.progress);
         default:
-          return false;
+          const response = await onrequest(json);
+          if (!response) return;
+          this.send(JSON.stringify({ id: json.id, data: response }));
       }
     }
-    return false;
+  }
+
+  async onrequest(request) {
+    switch (request.type) {
+      case 'get-room-history':
+        const messages = await getRoomMessages(request.data.key, 0, true);
+        return messages;
+      case 'get-latest-room-hashes':
+        const hashes = await getLatestRoomHashes(request.data.key);
+        return hashes;
+      case 'room-message-exists':
+        const exists = await roomMessageExists(request.data.hash);
+        return exists;
+      case 'get-room-message':
+        const message = await getRoomReplyMessage(request.data.hash, true);
+        return message[0];
+      case 'get-priv-key':
+        //Temporary until we sign all messages with xkr address
+        const key = Wallet.spendKey();
+        return key;
+      case 'sign-message':
+        const sig = await Wallet.sign(request.data.message);
+        return sig;
+      case 'verify-signature':
+        const verify = await Wallet.verify(
+          request.data.data.message,
+          request.data.data.address,
+          request.data.data.signature,
+        );
+        return verify;
+      default:
+        return false;
+    }
   }
 }
 
