@@ -34,6 +34,7 @@ import {
 import { initDB } from '../../services/bare/sqlite';
 import { Wallet } from '../../services/kryptokrona/wallet';
 import { pickAvatar } from '../../utils/avatar';
+import { randomNode } from '../../utils/utils';
 
 interface Props {
   route: RouteProp<AuthStackParamList, typeof AuthScreens.CreateAccountScreen>;
@@ -77,8 +78,18 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
     //Pick node screen also
     //And create / import wallet screen
     //If import Wallet.import(height, seed, node)
-
-    const node = { port: 11898, url: 'blocksum.org' };
+    const recommendedNode = await randomNode();
+    console.log('recommendedNode:', recommendedNode);
+    const node =  { port: recommendedNode.port, url: recommendedNode.url };
+    usePreferencesStore.setState((state) => ({
+      ...state,
+      preferences: {
+        ...state.preferences,
+        authMethod,
+        pincode: authMethod === 'pincode' ? pincode : null,
+        node: `${recommendedNode.url}:${recommendedNode.port}`
+      },
+    }));
     console.log('seedWords', seedWords);
     if (seedWords?.length === 25) {
       console.log('Importing');
@@ -97,15 +108,6 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
         address,
         avatar,
         name,
-      },
-    }));
-
-    usePreferencesStore.setState((state) => ({
-      ...state,
-      preferences: {
-        ...state.preferences,
-        authMethod,
-        pincode: authMethod === 'pincode' ? pincode : null,
       },
     }));
 
