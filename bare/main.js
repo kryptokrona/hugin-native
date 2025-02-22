@@ -1,10 +1,8 @@
 require('./runtime');
 
-// Tell app we're ready
-Bare.onReady();
+// // Tell app we're ready
+// Bare.onReady();
 const { group_key } = require('./utils');
-const RPC = require('tiny-buffer-rpc');
-const ce = require('compact-encoding');
 const {
   send_message,
   create_swarm,
@@ -13,25 +11,19 @@ const {
   close_all_connections,
 } = require('./swarm');
 const { Hugin } = require('./account');
+const { RPC } = require('./rpc');
 const { IPC } = BareKit;
 
-//Not sure if this is the right way to do this yet.
-//We would like many channels? And/Or request stream like tiny-buffer-rpc
-//Investigate if we can add the IPC to .send() .recv()
-IPC.on('data', (data) => {
-  const parsed = JSON.parse(data);
-  if ('type' in parsed) {
-    onrequest(parsed);
-  }
+const rpc = new RPC(IPC);
 
-  if ('response' in parsed) {
-    console.log('Got response from request');
-  }
-});
-console.log('Bare main init');
+rpc.on('data', (data) => check(data));
 
-//Recv
-
+async function check(data) {
+  //return data to React Native
+  const send = await onrequest(data);
+  if (send === undefined) return;
+  rpc.send();
+}
 const onrequest = async (p) => {
   console.log('Got request data', p);
   switch (p.type) {
@@ -47,9 +39,11 @@ const onrequest = async (p) => {
       endSwarm(p.key);
       break;
     case 'send_room_msg':
-      return sendRoomMessage(p.message, p.key, p.reply, p.tip);
+      const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
+      return { data: message, type: p.type };
     case 'group_random_key':
-      return getRandomGroupKey();
+      const key = getRandomGroupKey();
+      return { data: key, type: p.type };
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
       break;

@@ -1,5 +1,7 @@
 const process = require('bare-process');
-
+const { SystemLog } = require('bare-logger');
+const Console = require('bare-console');
+global.console = new Console(new SystemLog());
 // globals
 
 Object.defineProperty(globalThis, 'global', {
