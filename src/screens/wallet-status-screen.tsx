@@ -59,11 +59,11 @@ export const WalletStatusScreen: React.FC<Props> = () => {
         {t('syncStatus')}
       </TextField>
       <Progress.Bar
-        progress={status[2] == 0 ? 0 : status[0] / status[2]}
+        progress={status[2] == 0 ? 0 : (status[0] - 1) / status[2]}
         width={null}
         color={color}
       />
-      <TextField>{`${status[1]} / ${status[2]}`}</TextField>
+      <TextField>{`${status[1] - 1} / ${status[2]}`}</TextField>
       <InputField
         label={t('resyncHeight')}
         value={resyncHeight}
