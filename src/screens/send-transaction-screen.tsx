@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import { Wallet } from '../services/kryptokrona';
 import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
 import { t } from 'i18next';
-import { useThemeStore } from '@/services';
+import { useGlobalStore, useThemeStore } from '@/services';
 import {
   Camera,
   CameraRuntimeError,
@@ -37,6 +37,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
     destinations?: any;
   } | null>(null);
   const [sendAll, setSendAll] = useState(false);
+  const fiatPrice = useGlobalStore((state) => state.fiatPrice);
 
   const navigation = useNavigation<MainStackNavigationType>();
 
@@ -171,7 +172,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
         <View>
           <InputField
-            label={t('amount')}
+            label={t('amount') + `${amount ? ' $' + (fiatPrice * amount).toFixed(2) : ''}`}
             value={amount}
             onChange={setAmount}
             keyboardType="number-pad"
@@ -184,7 +185,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
         {preparedTx?.success ? (
           <View style={[styles.transactionBox, { borderColor }]}>
-            <TextField style={[styles.heading, { color: borderColor }]}>
+            <TextField style={[styles.heading, { borderColor }]}>
               {t('receivingAddress')}
             </TextField>
             <TextField style={[styles.detail, { color }]}>
@@ -198,7 +199,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
             <View style={styles.row}>
               <View style={styles.column}>
-                <TextField>{t('totalAmount')}</TextField>
+              <TextField style={[styles.heading, { borderColor }]}>{t('totalAmount')}</TextField>
                 <TextField>
                   {prettyPrintAmount(
                     preparedTx.destinations.userDestinations[0].amount,
@@ -206,7 +207,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
                 </TextField>
               </View>
               <View style={styles.column}>
-                <TextField size="large">{t('fee')}</TextField>
+              <TextField style={[styles.heading, { borderColor }]}>{t('fee')}</TextField>
                 <TextField>{prettyPrintAmount(preparedTx?.fee || 0)}</TextField>
               </View>
             </View>
@@ -263,7 +264,6 @@ const styles = StyleSheet.create({
   },
 
   heading: {
-    color: 'white',
     fontFamily: 'Montserrat-SemiBold',
     fontSize: 16,
     fontWeight: 'bold',

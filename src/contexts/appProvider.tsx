@@ -39,6 +39,7 @@ import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Timer } from '../services/utils';
+import { getCoinPriceFromAPI } from '../utils/fiat';
 interface AppProviderProps {
   children: React.ReactNode;
 }
@@ -66,6 +67,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await initDB();
     await setLatestRoomMessages();
     await setLatestMessages();
+
+    // Function to update the fiat price every minute
+    async function updateFiatPrice() {
+      console.log('$£$£$£$∞£$∞£$∞£$∞ - Getting fiat..')
+      const price = await getCoinPriceFromAPI();
+      useGlobalStore.setState({ fiatPrice: price });
+    }
+
+    updateFiatPrice();
+
+    // Start the interval
+    setInterval(updateFiatPrice, 60000);
 
     const node = preferences?.node
       ? {
