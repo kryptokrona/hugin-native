@@ -12,18 +12,45 @@ import {
   roomMessageExists,
   getRoomReplyMessage,
   getLatestRoomHashes,
-} from '@/services/bare/sqlite';
-import { Wallet } from 'services/kryptokrona/wallet';
+} from '../services/bare/sqlite';
+import { Wallet } from '../services/kryptokrona/wallet';
 export class RPC {
   constructor(ipc) {
     this.ipc = ipc;
     this.pendingRequests = new Map();
     this.id = 0;
     this.ipc.on('data', (response) => {
-      const data = this.parse(response);
+
+      let data = this.parse(response.toString());
+      if (!data && response.toString()[0] == '{' &&  response.toString().slice(-1) == '}') {
+
+        try {
+        
+        let sanitized = '[' + response.toString().replace(/}{/g, '},{') + ']';
+        let split_data = JSON.parse(sanitized);
+
+        for (const d in split_data) {
+          // Extremely ugly hotfix for concatenated ipc messages BUG
+          if (this.pendingRequests.has(split_data[d].id)) {
+            const { resolve, reject } = this.pendingRequests.get(split_data[d].id);
+            resolve(data);
+            this.pendingRequests.delete(split_data[d].id);
+          } else {
+            this.on_message(split_data[d]);
+          }
+        }
+
+        return;
+
+      } catch (e){
+        console.log('Hotfix failed!', e);
+      }
+
+      }
+
       if (this.pendingRequests.has(data.id)) {
         const { resolve, reject } = this.pendingRequests.get(data.id);
-        resolve(data.data);
+        resolve(data);
         this.pendingRequests.delete(data.id);
       } else {
         this.on_message(data);
@@ -31,11 +58,22 @@ export class RPC {
     });
   }
 
-  request(type, data) {
+  split_objects(data) {
+
+    let datas = [];
+
+    datas.push(data.toString().split('}{')[0] + '}');
+    datas.push('{' + data.toString().split('}{')[1]);
+
+    return datas;
+
+  }
+
+  request(data) {
     return new Promise((resolve, reject) => {
-      const id = this.id++;
-      this.pendingRequests.set(id, { resolve, reject });
-      this.ipc.write(JSON.stringify({ id, type, data }));
+      data.id = this.id++;
+      this.pendingRequests.set(data.id, { resolve, reject });
+      this.ipc.write(JSON.stringify( data ));
     });
   }
 
@@ -47,15 +85,13 @@ export class RPC {
     }
   }
 
-  send(type, data) {
-    console.log('Send rpc data from bare');
+  send(data) {
     const send = data;
-    send.type = type;
     this.ipc.write(JSON.stringify(send));
   }
 
   async on_message(m) {
-    const json = this.parse(m);
+    const json = m;
     if (!json) {
       console.log('** RPC ERROR, lib/rpc.js **');
       return;
@@ -63,6 +99,8 @@ export class RPC {
     if (json) {
       console.log('Got rpc message', json.type);
       switch (json.type) {
+        case 'log':
+          console.log(json.log);
         case 'new-swarm':
           console.log('new swarm!');
           break;
@@ -70,7 +108,6 @@ export class RPC {
           //Get history from db
           //await db response here then send it back to bare
           console.log('GET MESSAGE HISTORY ---->');
-          // send_message_history('Got history hehe', 'roomkey', 'tooadreess');
           break;
         case 'end-swarm':
           console.log('end-swarm!');
@@ -148,9 +185,8 @@ export class RPC {
         case 'download-file-progress':
           console.log('Downloading progress ipc message:', json.progress);
         default:
-          const response = await onrequest(json);
-          if (!response) return;
-          this.send(JSON.stringify({ id: json.id, data: response }));
+          const response = await this.onrequest(json);
+          this.send({ id: json.id, data: response });
       }
     }
   }
@@ -158,29 +194,29 @@ export class RPC {
   async onrequest(request) {
     switch (request.type) {
       case 'get-room-history':
-        const messages = await getRoomMessages(request.data.key, 0, true);
+        const messages = await getRoomMessages(request.key, 0, true);
         return messages;
       case 'get-latest-room-hashes':
-        const hashes = await getLatestRoomHashes(request.data.key);
+        const hashes = await getLatestRoomHashes(request.key);
         return hashes;
       case 'room-message-exists':
-        const exists = await roomMessageExists(request.data.hash);
+        const exists = await roomMessageExists(request.hash);
         return exists;
       case 'get-room-message':
-        const message = await getRoomReplyMessage(request.data.hash, true);
+        const message = await getRoomReplyMessage(request.hash, true);
         return message[0];
       case 'get-priv-key':
         //Temporary until we sign all messages with xkr address
         const key = Wallet.spendKey();
         return key;
       case 'sign-message':
-        const sig = await Wallet.sign(request.data.message);
+        const sig = await Wallet.sign(request.message);
         return sig;
       case 'verify-signature':
         const verify = await Wallet.verify(
-          request.data.data.message,
-          request.data.data.address,
-          request.data.data.signature,
+          request.data.message,
+          request.data.address,
+          request.data.signature,
         );
         return verify;
       default:

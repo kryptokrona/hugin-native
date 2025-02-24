@@ -181,7 +181,7 @@ function send_message(message, topic, reply, invite, tip = false) {
 
   const send = JSON.stringify(message_json);
   send_swarm_message(send, topic);
-  return send;
+  return message_json;
 }
 
 const is_admin = (key) => {
@@ -402,17 +402,19 @@ const check_data_message = async (data, connection, topic, peer) => {
       }
 
       //Send any buffered messages if connection was lost.
-      if (parseInt(active.time) < time && active.buffer.length) {
-        send_history(joined.address, topic, active.key);
-        active.buffer = [];
-      }
+      // if (parseInt(active.time) < time && active.buffer.length) {
+      //   send_history(joined.address, topic, active.key);
+      //   active.buffer = [];
+      // }
 
       //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
       //     const [in_voice, video] = get_local_voice_status(topic)
       //     if (con.voice && in_voice && (parseInt(active.time) > time)  ) {
       //         join_voice_channel(active.key, topic, joined.address)
       //     }
-
+      if (joined.avatar.length > 60000) {
+        joined.avatar = '';
+      }
       Hugin.send('peer-connected', { joined });
       console.log('Connection updated: Joined:', con.name);
       return true;
@@ -450,6 +452,7 @@ const check_data_message = async (data, connection, topic, peer) => {
         send_history(con.address, topic, active.key);
         return true;
       } else if (data.type === SEND_HISTORY && con.request) {
+        console.log('Got message history from some cool guise');
         process_request(data.messages, active.key);
         con.request = false;
         return true;

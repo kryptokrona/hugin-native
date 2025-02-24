@@ -1,7 +1,5 @@
 require('./runtime');
 
-// // Tell app we're ready
-// Bare.onReady();
 const { group_key } = require('./utils');
 const {
   send_message,
@@ -15,20 +13,13 @@ const { RPC } = require('./rpc');
 const { IPC } = BareKit;
 
 const rpc = new RPC(IPC);
-
-rpc.on('data', (data) => response(data));
-
-async function response(request) {
-  //return data to React Native
-  const send = await onrequest(request);
-  if (send === undefined) return;
-  rpc.send(JSON.stringify({ id: request.id, type: request.type, data: send }));
-}
 const onrequest = async (p) => {
-  console.log('Got request data', p);
   switch (p.type) {
-    case 'init_bare':
+    case 'log':
+      break;
+    case 'init_bare': 
       initBareMain(p.user);
+      break;
     case 'update_bare_user':
       updateBareUser(p.user);
       break;
@@ -59,22 +50,24 @@ const onrequest = async (p) => {
       close_all_connections();
       break;
     default:
-      console.log('Unknown RPC type:', p.type);
+      break;
   }
-  return 'success';
+  return;
 };
 
-//TODO*****************
-const requester = {
-  request() {
-    console.log('Request data from REACT **');
-  },
-};
+async function response(request) {
+  //return data to React Native
+  const send = await onrequest(request);
+  if (send === undefined) return;
+  send.id = request.id;
+  rpc.send(request.type, send);
+}
+
+rpc.on('data', (data) => response(data));
 
 // Function implementations
 const initBareMain = async (user) => {
-  //userdata, sender ipc, unknown request rpc** todo
-  Hugin.init(user, IPC, requester);
+  Hugin.init(user, rpc);
 };
 
 const updateBareUser = (user) => {
@@ -82,8 +75,6 @@ const updateBareUser = (user) => {
 };
 
 const newSwarm = async (hashkey, key, admin) => {
-  //DISABLED THIS UNTIL ALL REQUEST/SEND FUNCS ARE READY
-  if (hashkey) return;
   if (Hugin.rooms.some((a) => a.key === key)) return;
   const topic = await create_swarm(hashkey, key);
   Hugin.rooms.push({ key, topic, admin });
@@ -115,12 +106,9 @@ const sendFileInfo = (json_file_data) => {
   const file_data = JSON.parse(json_file_data);
   const room = getRoom(file_data.key);
   if (!room) {
-    console.log('');
     return;
   }
-  console.log('Begin streaming file', file_data);
+
   share_file_info(file_data, room.topic);
 };
 
-// Keep the event loop alive
-setInterval(() => {}, 2000);

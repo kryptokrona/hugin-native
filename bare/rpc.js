@@ -1,10 +1,13 @@
-class RPC {
+const EventEmitter = require('bare-events');
+
+class RPC extends EventEmitter {
   constructor(ipc) {
+    super();
     this.ipc = ipc;
     this.pendingRequests = new Map();
     this.id = 0;
     this.ipc.on('data', (response) => {
-      const data = this.parse(response);
+      let data = this.parse(response.toString());
       if (this.pendingRequests.has(data.id)) {
         const { resolve, reject } = this.pendingRequests.get(data.id);
         resolve(data.data);
@@ -15,11 +18,11 @@ class RPC {
     });
   }
 
-  request(type, data) {
+  request(data) {
+    data.id = this.id++;
+    this.ipc.write(JSON.stringify(data));
     return new Promise((resolve, reject) => {
-      const id = this.id++;
-      this.pendingRequests.set(id, { resolve, reject });
-      this.ipc.write(JSON.stringify({ id, type, data }));
+      this.pendingRequests.set(data.id, { resolve, reject });
     });
   }
 
@@ -27,16 +30,20 @@ class RPC {
     try {
       return JSON.parse(data);
     } catch (e) {
-      return {};
+      return false;
     }
   }
 
   send(type, data) {
-    console.log('Send rpc data from bare');
     const send = data;
     send.type = type;
     this.ipc.write(JSON.stringify(send));
   }
+
+  log(data) {
+    return;
+  }
+
 }
 
 module.exports = { RPC };

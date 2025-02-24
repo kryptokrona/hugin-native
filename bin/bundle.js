@@ -10,6 +10,7 @@ const bundle = 'app.bundle.js';
 const source = 'bare/main.js';
 //Options
 const ios = '--target ios';
+const iossim = '--target ios --simulator';
 const android = '--target android';
 const builtin = '--builtins bare/builtins.json';
 
@@ -24,7 +25,7 @@ const build = () => {
   console.log('---------*----------');
   console.log('------Bundling------');
   console.log('---------*----------');
-  console.log('                     ');
+  console.log('                     ', options);
 
   if (program.options.releaseIos) {
     flags.push(ios);
@@ -34,8 +35,12 @@ const build = () => {
     flags.push(android);
   }
 
+  if (options.iosSim == true) {
+    flags.push(iossim);
+  }
+
   //TODO add individual arch, simulator options etc.
-  if (!options.releaseAndroid && !options.releaseIos) {
+  if (!options.releaseAndroid && !options.releaseIos && !options.iosSim) {
     throw new Error('No available options set.');
   }
 
