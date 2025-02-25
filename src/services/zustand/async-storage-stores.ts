@@ -1,17 +1,19 @@
-import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
+import { Platform } from 'react-native';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import RNFS from 'react-native-fs';
+import { create } from 'zustand';
 import {
   createJSONStorage,
   persist,
   subscribeWithSelector,
 } from 'zustand/middleware';
+
 import { defaultTheme, themes } from '@/styles';
+import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
 
 import { ASYNC_STORAGE_KEYS } from './async-storage-keys';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNFS from 'react-native-fs';
-import { create } from 'zustand';
 import { setAuthenticated } from './global-store';
-import { Platform } from 'react-native';
 
 interface UserStore {
   user: User;
@@ -184,12 +186,19 @@ export const defaultPreferences: Preferences = {
 
 export const defaultUser: User = {
   address: '',
-  downloadDir: Platform.OS == 'ios' ? RNFS.LibraryDirectoryPath : RNFS.DownloadDirectoryPath,
+  downloadDir:
+    Platform.OS == 'ios'
+      ? RNFS.LibraryDirectoryPath
+      : RNFS.DownloadDirectoryPath,
   huginAddress: '',
 
   keys: {},
   name: 'Anon',
   room: 'lobby',
+  store:
+    Platform.OS == 'ios'
+      ? RNFS.LibraryDirectoryPath
+      : RNFS.DocumentDirectoryPath,
 };
 
 export const getAuthMethod = () => {
