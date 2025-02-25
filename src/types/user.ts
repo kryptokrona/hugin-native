@@ -27,6 +27,7 @@ export interface User {
   downloadDir?: string;
   keys?: object;
   huginAddress?: string;
+  store?: string;
 }
 
 export interface PeerUser {

@@ -1,4 +1,3 @@
-const ce = require('compact-encoding');
 class Account {
   constructor() {
     this.name = '';
@@ -12,6 +11,7 @@ class Account {
     this.bannedList = [];
     this.blockList = [];
     this.sleeping = false;
+    this.store = '';
   }
 
   init(data, rpc) {
@@ -22,6 +22,7 @@ class Account {
     this.req = req;
     this.downloadDir = data.downloadDir;
     this.keys = data.keys;
+    this.store = data.store;
   }
 
   update(data) {
