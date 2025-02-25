@@ -181,7 +181,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         reply ? reply : replyToMessageHash,
         tip ? tip : false,
       );
-      const save = JSON.parse(sent);
+      const save = sent;
 
       await saveRoomMessageAndUpdate(
         save.k,
