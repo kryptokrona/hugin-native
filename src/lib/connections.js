@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'bare-events';
 import {
   setStoreActiveRoomUsers,
   getActiveRoomUsers,

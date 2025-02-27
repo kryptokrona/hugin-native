@@ -78,6 +78,8 @@ export interface FileInfo {
   sent: boolean;
   hash: string;
   image: boolean;
+  name?: string;
+  topic?: string;
 }
 
 export interface TipType {

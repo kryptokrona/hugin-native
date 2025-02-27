@@ -107,6 +107,11 @@ export const initDB = async () => {
     )`;
     await db.executeSql(files);
 
+    query = 'ALTER TABLE files ADD topic TEXT default null';
+    try {
+      await db.executeSql(query);
+    } catch (err) {}
+
     const xkrwallet = `CREATE TABLE IF NOT EXISTS wallet (
       id INTEGER PRIMARY KEY,
       json TEXT
@@ -232,10 +237,10 @@ export async function loadAccount() {
 }
 
 export async function saveFileInfo(file: FileInfo) {
-  console.log('Saving room ', file);
+  console.log('Saving file ', file);
   try {
     await db.executeSql(
-      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image)  VALUES (?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image, topic)  VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         file.fileName,
         file.hash,
@@ -243,6 +248,7 @@ export async function saveFileInfo(file: FileInfo) {
         file.sent,
         file.path,
         file.image,
+        file.topic,
       ],
     );
   } catch (err) {
@@ -431,7 +437,10 @@ export async function getLatestMessages() {
       let latestmessagedb = result.rows.item(0);
       console.log('Got result,', latestmessagedb);
       if (latestmessagedb === undefined) {
-        latestmessagedb = {message: 'Conversation started', timestamp: Date.now()}
+        latestmessagedb = {
+          message: 'Conversation started',
+          timestamp: Date.now(),
+        };
       }
       contactsList.unshift({
         address: contact.address,

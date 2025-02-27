@@ -234,8 +234,13 @@ const sanitize_file_message = (data) => {
   const time = sanitizeHtml(data?.time);
   if (time?.length > 25) return false;
 
-  const sig = sanitizeHtml(data?.sig);
-  if (size?.length > 128) return false;
+  const sig = sanitizeHtml(data?.signature);
+  if (sig?.length > 128) return false;
+
+  const name = sanitizeHtml(data?.name);
+  if (data?.name !== undefined) {
+    if (typeof name !== 'string' || name.length > 100) return false;
+  }
 
   //Check optional
   const key = sanitizeHtml(data?.key);

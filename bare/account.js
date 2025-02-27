@@ -12,6 +12,7 @@ class Account {
     this.blockList = [];
     this.sleeping = false;
     this.store = '';
+    this.syncImages = true; /// TODO** Add switch to enable/disable
   }
 
   init(data, rpc) {

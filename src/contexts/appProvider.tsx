@@ -27,14 +27,13 @@ import {
 import { sleep } from '@/utils';
 
 import { Background } from './background';
-import { Foreground } from './service';
+// import { Foreground } from './service';
 
 import { setLatestMessages, setLatestRoomMessages } from '../services/bare';
 import { keychain } from '../services/bare/crypto';
 import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { Timer } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
 interface AppProviderProps {
   children: React.ReactNode;
@@ -122,19 +121,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   }
 
-  const stopTasks = () => {
-    Foreground?.service?.stopAll();
-  };
+  // const stopTasks = () => {
+  //   Foreground?.service?.stopAll();
+  // };
 
   /// Deactivated timer to stop foreground tasks on Android
 
-  const Timeout = new Timer(() => {
-    console.log('Stop task!');
+  // const Timeout = new Timer(() => {
+  //   console.log('Stop task!');
 
-    if (Platform.OS === 'android') {
-      stopTasks();
-    }
-  });
+  //   if (Platform.OS === 'android') {
+  //     stopTasks();
+  //   }
+  // });
 
   /////////////////////////////////////////////
 

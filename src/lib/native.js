@@ -11,9 +11,7 @@ const rpc = new RPC(IPC);
 IPC.setEncoding('utf8');
 
 export class Bare {
-  constructor() {
-    this.worklet = {};
-  }
+  constructor() {}
 
   async start() {
     await worklet.start('/app.bundle', bundle);

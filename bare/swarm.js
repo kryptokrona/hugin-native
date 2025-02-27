@@ -25,6 +25,7 @@ const {
   add_local_file,
   update_remote_file,
 } = require('./beam');
+const { Storage } = require('./storage.js');
 
 const LOCAL_VOICE_STATUS_OFFLINE = {
   voice: false,
@@ -40,6 +41,7 @@ const REQUEST_MESSAGES = 'request-messages';
 const REQUEST_HISTORY = 'request-history';
 const SEND_HISTORY = 'send-history';
 const PING_SYNC = 'Ping';
+const REQUEST_FILE = 'request-file';
 
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
@@ -60,6 +62,8 @@ class Room {
     const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
     const topic = base_keys.publicKey.toString('hex');
     const hash = Buffer.alloc(32).fill(topic);
+    await Storage.load_drive(topic);
+
     console.log('Joining room....');
     try {
       this.swarm = new HyperSwarm({}, sig, dht_keys, base_keys);
@@ -84,6 +88,7 @@ const create_swarm = async (hashkey, key) => {
   if (!connected) return;
   const admin = is_admin(key);
   if (!admin) Hugin.send('syncing-history', { key });
+  const files = await Storage.load_meta(swarm.topic);
 
   Hugin.send('peer-connected', {
     joined: {
@@ -109,6 +114,7 @@ const create_swarm = async (hashkey, key) => {
     buffer: [],
     peers: [],
     requests: 0,
+    files,
   };
 
   active_swarms.push(active);
@@ -397,7 +403,7 @@ const check_data_message = async (data, connection, topic, peer) => {
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
       if (parseInt(active.time) > time && active.requests < 3) {
-        request_history(joined.address, topic);
+        request_history(joined.address, topic, active.files);
         active.requests++;
       }
 
@@ -449,11 +455,15 @@ const check_data_message = async (data, connection, topic, peer) => {
 
       //Start-up history sync
       if (data.type === REQUEST_HISTORY && con.request) {
-        send_history(con.address, topic, active.key);
+        send_history(con.address, topic, active.key, active.files);
         return true;
       } else if (data.type === SEND_HISTORY && con.request) {
         console.log('Got message history from some cool guise');
         process_request(data.messages, active.key);
+        if ('files' in data) {
+          console.log('Got some files', data.files);
+          process_files(data, active, con, topic);
+        }
         con.request = false;
         return true;
       }
@@ -469,6 +479,10 @@ const check_data_message = async (data, connection, topic, peer) => {
       }
 
       if (data.type === PING_SYNC && active.search && INC_HASHES) {
+        if ('files' in data) {
+          process_files(data, active, con, topic);
+        }
+
         if (con.knownHashes.toString() === data.hashes.toString()) {
           //Already know all the latest messages
           con.request = false;
@@ -478,6 +492,7 @@ const check_data_message = async (data, connection, topic, peer) => {
           if (data.peers?.length > 100) return 'Ban';
           find_missing_peers(active, data?.peers);
         }
+
         const missing = await check_missed_messages(
           data.hashes,
           con.address,
@@ -499,6 +514,10 @@ const check_data_message = async (data, connection, topic, peer) => {
         active.search = false;
         con.request = false;
         process_request(data.messages, active.key, true);
+      } else if (data.type === REQUEST_FILE) {
+        const file = sanitize_file_message(data.file);
+        if (!file) return 'Error';
+        Storage.start_beam(true, file.key, file, topic, con.name, active.key);
       }
       return true;
     }
@@ -563,22 +582,65 @@ const send_missing_messages = async (hashes, address, topic) => {
   }
 };
 
-const request_history = (address, topic) => {
+const request_history = (address, topic, files) => {
   console.log('Reqeust history from another peer');
   const message = {
     type: REQUEST_HISTORY,
+    files,
   };
   send_peer_message(address, topic, message);
 };
 
-const send_history = async (address, topic, key) => {
+const send_history = async (address, topic, key, files) => {
   const messages = await Hugin.request({ type: 'get-room-history', key });
   console.log('Sending:', messages.length, 'messages');
   const history = {
     type: SEND_HISTORY,
     messages,
+    files,
   };
   send_peer_message(address, topic, history);
+};
+
+const request_file = async (address, topic, name, file, room) => {
+  //request a missing file, open a hugin beam
+  console.log('-----------------------------');
+  console.log('*** WANT TO REQUEST FILE  ***');
+  console.log('-----------------------------');
+
+  const verify = await Hugin.request({
+    type: 'verify-signature',
+    data: {
+      message:
+        file.hash + file.size.toString() + file.time.toString() + file.fileName,
+      address: file.address,
+      signature: file.signature,
+    },
+  });
+  if (!verify) return;
+  const key = random_key().toString('hex');
+  Storage.start_beam(false, key, file, topic, name, room);
+  file.key = key;
+  const message = {
+    file,
+    type: REQUEST_FILE,
+  };
+  await sleep(200);
+  send_peer_message(address, topic, message);
+};
+
+const process_files = async (data, active, con, topic) => {
+  //Check if the latest 10 files are in sync
+  console.log('PROCESS FILES');
+  if (Hugin.syncImages) {
+    if (!Array.isArray(data.files)) return 'Ban';
+    if (data.files.length > 10) return 'Ban';
+    for (const file of data.files) {
+      if (!check_hash(file.hash)) continue;
+      await sleep(50);
+      request_file(con.address, topic, con.name, file, active.key);
+    }
+  }
 };
 
 const process_request = async (messages, key, live = false) => {
@@ -631,6 +693,27 @@ const save_file_info = (data, topic, address, time, sent, name) => {
 
 const check_file_message = async (data, topic, address, name) => {
   const active = get_active_topic(topic);
+
+  //TODO** Add switch to enable/disable auto syncing images
+  if (check_if_image_or_video(data.fileName, data.size) && Hugin.syncImages) {
+    //A file is shared and we have auto sync images on.
+    //Request to download the file
+    const file = {
+      address,
+      topic,
+      name: data.name,
+      time: data.time,
+      hash: data.hash,
+      size: data.size,
+      fileName: data.fileName,
+      signature: data.sig,
+      type: data.type,
+      info: data.info,
+    };
+    request_file(address, topic, file, active.key);
+    return;
+  }
+
   if (data.info === 'file-shared') {
     const added = await add_remote_file(
       data.fileName,
@@ -686,18 +769,37 @@ const check_file_message = async (data, topic, address, name) => {
 const share_file_info = async (file, topic) => {
   // Note file includes property "message", regular text message
   const active = get_active_topic(topic);
+  const hash = random_key().toString('hex');
+  const signature = await sign(
+    hash + file.size.toString() + file.time.toString() + file.fileName,
+  );
   const fileInfo = {
     address: Hugin.address,
     fileName: file.fileName,
-    hash: random_key().toString('hex'),
+    name: Hugin.name,
+    hash,
     info: 'file-shared',
     size: file.size,
     time: file.time,
     topic: topic,
     type: 'file',
-    sig: file.sig,
+    signature,
   };
 
+  //Put the shared file in to our local storage
+  await Storage.save(
+    topic,
+    Hugin.address,
+    Hugin.name,
+    fileInfo.hash,
+    fileInfo.size,
+    fileInfo.time,
+    fileInfo.fileName,
+    fileInfo.path,
+    signature,
+    'file-shared',
+    'file',
+  );
   const image = check_if_image_or_video(file.fileName, file.size);
 
   const message = {
@@ -924,6 +1026,8 @@ const check_if_online = async (topic) => {
     //Check message state every 20seconds if idle
     if (a % 2 !== 0 && Hugin.idle()) return;
     const active = get_active_topic(topic);
+    const allFiles = await Storage.load_meta(topic);
+    active.files = allFiles.sort((a, b) => a.time - b.time).slice(-10);
     const hashes = await Hugin.request({
       type: 'get-latest-room-hashes',
       key: active.key,
@@ -940,7 +1044,7 @@ const check_if_online = async (topic) => {
         peers = active.peers;
         a++;
       }
-      const data = { type: 'Ping', peers };
+      const data = { type: 'Ping', peers, files: active.files };
       for (const conn of active.connections) {
         data.hashes = hashes;
         if (i > 4) {
