@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { View, Modal, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Modal, Image, TouchableOpacity, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 
 import { CustomIcon } from './_elements';
 
@@ -15,6 +15,7 @@ export const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
 }) => {
   return (
     <Modal transparent={true} animationType="fade" onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.overlayContainer}>
         {/* Close Button */}
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -28,6 +29,7 @@ export const FullScreenImageViewer: React.FC<FullScreenImageViewerProps> = ({
           resizeMode="contain"
         />
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

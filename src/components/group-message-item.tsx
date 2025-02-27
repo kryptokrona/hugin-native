@@ -144,6 +144,17 @@ export const GroupMessageItem: React.FC<Props> = ({
     };
   }, []);
 
+  const [imageAspectRatio, setImageAspectRatio] = useState(1);
+
+
+  useEffect(() => {
+    if (imageDetails?.imagePath) {
+      Image.getSize(imageDetails.imagePath, (width, height) => {
+        setImageAspectRatio(width / height);
+      });
+    }
+  }, [imageDetails?.imagePath]);
+
   return (
     <TouchableOpacity style={styles.container} onLongPress={handleLongPress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
@@ -203,7 +214,7 @@ export const GroupMessageItem: React.FC<Props> = ({
               <Image
                 style={styles.replyImage}
                 source={{ uri: replyImageDetails?.imagePath }}
-                resizeMode="cover"
+                resizeMode="contain"
               />
             ) : (
               <TextField size="xsmall" style={styles.replyMessage}>
@@ -231,7 +242,7 @@ export const GroupMessageItem: React.FC<Props> = ({
             {imageDetails?.isImageMessage ? (
               <TouchableOpacity onPress={handleImagePress}>
                 <Image
-                  style={styles.image}
+                  style={[{aspectRatio: imageAspectRatio}, styles.image]}
                   source={{ uri: imageDetails?.imagePath }}
                   resizeMode="cover"
                 />
@@ -272,9 +283,9 @@ const styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    height: 200,
+    height: 'auto',
     marginVertical: 8,
-    width: 200,
+    width: '92%',
   },
   info: {
     alignItems: 'center',
