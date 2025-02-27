@@ -29,7 +29,7 @@ Todo wallet:
     ☐ Fiat value
     ✔ Restore account choice on new account @done(25-01-10 20:07)
     ☐ Send all
-    ☐ Hide sent message transactions
+    ✔ Hide sent message transactions @done(25-02-27 19:04)
 
 Todo node picker:
     ✔ Handle themes @done(24-12-29 22:38)
@@ -37,7 +37,7 @@ Todo node picker:
 
 Bugs:
     ✔ Make sure new accounts don't get stuck on 0 @done(25-02-08 19:39)
-    ☐ Pick best random node for new account (no hard coded)
+    ✔ Pick best random node for new account (no hard coded) @done(25-02-27 19:05)
     ✔ Fix multiple rerenders issue with messages @done(25-02-15 20:04)
     ✔ Unread counter not resetting properly @done(25-02-08 20:10)
 
@@ -51,3 +51,8 @@ Bug reports:
     ✔ Send DM did not work (Android) @done(25-02-15 20:04)
     ✔ Pick avatar reports toast error even when cancelled @done(25-02-15 18:38)
     ☐ Icon on hugin in app store (iOS) white borders
+
+Todo file sharing:
+    ☐ Optimistic UI (show loader when a file is being transmitted)
+    ☐ Send text with images
+    ☐ Record and send audio
