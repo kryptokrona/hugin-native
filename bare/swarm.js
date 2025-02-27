@@ -607,7 +607,6 @@ const request_file = async (address, topic, file, room) => {
   console.log('-----------------------------');
   console.log('*** WANT TO REQUEST FILE  ***');
   console.log('-----------------------------');
-  
   const verify = await Hugin.request({
     type: 'verify-signature',
     data: {
@@ -629,18 +628,14 @@ const request_file = async (address, topic, file, room) => {
   send_peer_message(address, topic, message);
 };
 
-
 const process_files = async (data, active, con, topic) => {
-
   //Check if the latest 10 files are in sync
   console.log('PROCESS FILES');
   if (Hugin.syncImages) {
     if (!Array.isArray(data.files)) return 'Ban';
     if (data.files.length > 10) return 'Ban';
     for (const file of data.files) {
-      console.log('Hugin files:', Hugin.files, file.hash);
       if (Hugin.files.some((a) => a === file.hash)) continue;
-      console.log('continue to download ', file.hash)
       if (!check_hash(file.hash)) continue;
       await sleep(50);
       request_file(con.address, topic, file, active.key);
