@@ -10,7 +10,7 @@ import {
 
 import { useNavigationContainerRef } from '@react-navigation/native';
 
-import { bare, send_idle_status, start_bare } from 'lib/native';
+import { bare, P2P, send_idle_status } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
@@ -26,14 +26,10 @@ import {
 } from '@/services';
 import { sleep } from '@/utils';
 
+import { Background } from './background';
 import { Foreground } from './service';
 
-import {
-  joinRooms,
-  leaveRooms,
-  setLatestMessages,
-  setLatestRoomMessages,
-} from '../services/bare';
+import { setLatestMessages, setLatestRoomMessages } from '../services/bare';
 import { keychain } from '../services/bare/crypto';
 import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
@@ -57,20 +53,28 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const { setThisRoom } = useRoomStore();
 
   async function init() {
-    if (Platform.OS === 'android') {
-      const err = await Foreground.init();
-      if (err) {
-        return;
-      }
+    /// Activate this if we want to run foreground task running on Android
+    /// It drains alot of battery but some users might want it.
+
+    // if (Platform.OS === 'android') {
+    //   const err = await Foreground.init();
+    //   if (err) {
+    //     return;
+    //   }
+    // }
+
+    if (started) {
+      return;
     }
-    start_bare();
+
+    await P2P.start();
     await initDB();
     await setLatestRoomMessages();
     await setLatestMessages();
 
     // Function to update the fiat price every minute
     async function updateFiatPrice() {
-      console.log('$£$£$£$∞£$∞£$∞£$∞ - Getting fiat..')
+      console.log('$£$£$£$∞£$∞£$∞£$∞ - Getting fiat..');
       const price = await getCoinPriceFromAPI();
       useGlobalStore.setState({ fiatPrice: price });
     }
@@ -89,21 +93,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     Connection.listen();
     await Wallet.init(node);
+    const huginAddress = Wallet.address + keychain.getMsgKey();
+    console.log('huginAddress', huginAddress);
+
+    await updateUser({ huginAddress });
+    Files.update(await loadSavedFiles());
+    await bare(user);
+    await sleep(50);
+    P2P.join();
 
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);
     const keys = Wallet.privateKeys();
     MessageSync.init(node, knownKeys, keys);
-
-    const huginAddress = Wallet.address + keychain.getMsgKey();
-    console.log('huginAddress', huginAddress);
-
-    await updateUser({ huginAddress });
-
-    Files.update(await loadSavedFiles());
-    await bare(user);
-    await sleep(100);
-    await joinRooms();
     started = true;
   }
 
@@ -124,6 +126,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Foreground?.service?.stopAll();
   };
 
+  /// Deactivated timer to stop foreground tasks on Android
+
   const Timeout = new Timer(() => {
     console.log('Stop task!');
 
@@ -132,44 +136,48 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     }
   });
 
+  /////////////////////////////////////////////
+
   useEffect(() => {
     const onAppStateChange = async (state: string) => {
       if (state === 'inactive') {
         if (!started) {
           return;
         }
-        console.log('Inactive state');
-        setStoreCurrentRoom(getCurrentRoom());
-
+        console.log('******** INACTIVE STATE *********');
         if (Platform.OS === 'ios') {
-          const thisRoom = getCurrentRoom();
-          setThisRoom(thisRoom);
-          await leaveRooms();
-          console.log('Successfully left rooms');
+          //Idle status might be used to display "yellow symbol" instead of "disconnecting"
+          //Or display notifications during background mode
+          send_idle_status(true);
+          setStoreCurrentRoom(getCurrentRoom());
+          setThisRoom(getCurrentRoom());
+          await P2P.close();
+          if (started) {
+            await Background.init();
+          }
         }
       } else if (state === 'background') {
-        console.log('Start timer');
-        Timeout.start();
-        send_idle_status(true);
-        setStoreCurrentRoom(getCurrentRoom());
+        console.log('******** BACKGROUND ********');
+        //Idle status might be used to display "yellow symbol" instead of "disconnecting"
+        //Or display notifications during background mode
+        if (Platform.OS === 'android') {
+          send_idle_status(true);
+          setStoreCurrentRoom(getCurrentRoom());
+          setThisRoom(getCurrentRoom());
+          await P2P.close();
+          if (started) {
+            await Background.init();
+          }
+        }
       } else if (state === 'active') {
-        console.log('App active');
-        Timeout.reset();
+        console.log('********** ACTIVE STATE **********');
         send_idle_status(false);
-
         if (started && !joining) {
           joining = true;
-          if (Platform.OS === 'ios') {
-            const currentRoom = getThisRoom();
-            setStoreCurrentRoom(currentRoom);
-            await joinRooms();
-            console.log('Successfully joined rooms after inactivity');
-          }
+          setStoreCurrentRoom(getThisRoom());
+          await P2P.join();
           joining = false;
-        }
-
-        if (Platform.OS === 'android') {
-          setStoreCurrentRoom(getCurrentRoom());
+          console.log('**** Successfully joined rooms after inactivity ****');
         }
       }
     };

@@ -1,6 +1,6 @@
 import NetInfo from '@react-native-community/netinfo';
-import { joinRooms, leaveRooms } from './groups';
 import { sleep } from '@/utils';
+import { P2P } from 'lib/native';
 
 class FilesCache {
   constructor() {
@@ -55,9 +55,9 @@ class ConnectionType {
   async restart(type) {
     if (this.type() !== '') {
       this.reset = true;
-      await leaveRooms();
+      await P2P.close();
       await sleep(200);
-      await joinRooms();
+      await P2P.join();
     }
     this.update(type);
     this.done();

@@ -75,19 +75,16 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
     setLoading(true);
     await initDB();
 
-    //Pick node screen also
-    //And create / import wallet screen
-    //If import Wallet.import(height, seed, node)
     const recommendedNode = await randomNode();
     console.log('recommendedNode:', recommendedNode);
-    const node =  { port: recommendedNode.port, url: recommendedNode.url };
+    const node = { port: recommendedNode.port, url: recommendedNode.url };
     usePreferencesStore.setState((state) => ({
       ...state,
       preferences: {
         ...state.preferences,
         authMethod,
+        node: `${recommendedNode.url}:${recommendedNode.port}`,
         pincode: authMethod === 'pincode' ? pincode : null,
-        node: `${recommendedNode.url}:${recommendedNode.port}`
       },
     }));
     console.log('seedWords', seedWords);

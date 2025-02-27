@@ -20,32 +20,33 @@ export class RPC {
     this.pendingRequests = new Map();
     this.id = 0;
     this.ipc.on('data', (response) => {
-
       let data = this.parse(response.toString());
-      if (!data && response.toString()[0] == '{' &&  response.toString().slice(-1) == '}') {
-
+      if (
+        !data &&
+        response.toString()[0] == '{' &&
+        response.toString().slice(-1) == '}'
+      ) {
         try {
-        
-        let sanitized = '[' + response.toString().replace(/}{/g, '},{') + ']';
-        let split_data = JSON.parse(sanitized);
+          let sanitized = '[' + response.toString().replace(/}{/g, '},{') + ']';
+          let split_data = JSON.parse(sanitized);
 
-        for (const d in split_data) {
-          // Extremely ugly hotfix for concatenated ipc messages BUG
-          if (this.pendingRequests.has(split_data[d].id)) {
-            const { resolve, reject } = this.pendingRequests.get(split_data[d].id);
-            resolve(data);
-            this.pendingRequests.delete(split_data[d].id);
-          } else {
-            this.on_message(split_data[d]);
+          for (const d in split_data) {
+            // Extremely ugly hotfix for concatenated ipc messages BUG
+            if (this.pendingRequests.has(split_data[d].id)) {
+              const { resolve, reject } = this.pendingRequests.get(
+                split_data[d].id,
+              );
+              resolve(data);
+              this.pendingRequests.delete(split_data[d].id);
+            } else {
+              this.on_message(split_data[d]);
+            }
           }
+
+          return;
+        } catch (e) {
+          console.log('Hotfix failed!', e);
         }
-
-        return;
-
-      } catch (e){
-        console.log('Hotfix failed!', e);
-      }
-
       }
 
       if (this.pendingRequests.has(data.id)) {
@@ -59,21 +60,19 @@ export class RPC {
   }
 
   split_objects(data) {
-
     let datas = [];
 
     datas.push(data.toString().split('}{')[0] + '}');
     datas.push('{' + data.toString().split('}{')[1]);
 
     return datas;
-
   }
 
   request(data) {
     return new Promise((resolve, reject) => {
       data.id = this.id++;
       this.pendingRequests.set(data.id, { resolve, reject });
-      this.ipc.write(JSON.stringify( data ));
+      this.ipc.write(JSON.stringify(data));
     });
   }
 
@@ -87,6 +86,7 @@ export class RPC {
 
   send(data) {
     const send = data;
+    console.log('Send data from REACT rpc');
     this.ipc.write(JSON.stringify(send));
   }
 

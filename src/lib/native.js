@@ -1,16 +1,45 @@
 import { RPC } from './rpc';
 import { Worklet } from 'react-native-bare-kit';
 import bundle from '../../app.bundle';
+import { naclHash } from '../services/bare';
+import { getRooms } from '../services/bare/sqlite';
+import { sleep } from '@/utils';
 
 const worklet = new Worklet();
 const { IPC } = worklet;
 const rpc = new RPC(IPC);
 IPC.setEncoding('utf8');
 
-export const start_bare = async () => {
-  await worklet.start('/app.bundle', bundle);
-  //Testing stuff here
-};
+export class Bare {
+  constructor() {
+    this.worklet = {};
+  }
+
+  async start() {
+    await worklet.start('/app.bundle', bundle);
+  }
+
+  resume() {
+    worklet.resume();
+  }
+
+  async join() {
+    const rooms = await getRooms();
+    for (const r of rooms) {
+      await swarm(naclHash(r.key), r.key, r?.seed);
+      await sleep(50);
+    }
+  }
+
+  async close() {
+    const rooms = await getRooms();
+    for (const r of rooms) {
+      end_swarm(r.key);
+    }
+  }
+}
+
+export const P2P = new Bare();
 
 // Exported functions to client
 export const bare = async (user) => {

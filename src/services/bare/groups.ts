@@ -17,13 +17,12 @@ import type {
   SelectedFile,
   TipType,
 } from '@/types';
-import { containsOnlyEmojis, sleep } from '@/utils';
+import { containsOnlyEmojis } from '@/utils';
 
 import { naclHash, newKeyPair, randomKey } from './crypto';
 import {
   getLatestRoomMessages,
   getRoomMessages,
-  getRooms,
   removeRoomFromDatabase,
   saveAccount,
   saveFileInfo,
@@ -187,43 +186,6 @@ export const onDeleteGroup = async (key: string) => {
 
 export const onLeaveGroup = (key: string) => {
   end_swarm(key);
-};
-
-export const leaveRooms = async () => {
-  const rooms = await getRooms();
-  for (const r of rooms) {
-    end_swarm(r.key);
-  }
-  return;
-};
-
-export const joinRooms = async () => {
-  console.log('********* Joining rooms! ***********');
-  const rooms = await getRooms();
-  // for (r of rooms) {
-  //   await sleep(100);
-  //   await onDeleteGroup(r.key);
-  // }
-  const adminkeys = await loadAdminKeys();
-  for (const r of rooms) {
-    const key = adminkeys.find((a) => a.key === r.key && a.seed);
-    const admin: string = key?.seed;
-    await sleep(100);
-    console.log('Joining room -->');
-    await swarm(naclHash(r.key), r.key, admin);
-  }
-};
-
-export const loadAdminKeys = async () => {
-  const rooms = await getRooms();
-  const keys = [];
-  for (const r of rooms) {
-    if (r.seed) {
-      const admin = { key: r.key, seed: r.seed };
-      keys.push(admin);
-    }
-  }
-  return keys;
 };
 
 export const joinAndSaveRoom = async (
