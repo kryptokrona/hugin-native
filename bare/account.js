@@ -13,6 +13,7 @@ class Account {
     this.sleeping = false;
     this.store = '';
     this.syncImages = true; /// TODO** Add switch to enable/disable
+    this.files = [];
   }
 
   init(data, rpc) {
@@ -20,10 +21,10 @@ class Account {
     this.address = data.address;
     this.avatar = data.avatar;
     this.rpc = rpc;
-    this.req = req;
     this.downloadDir = data.downloadDir;
     this.keys = data.keys;
-    this.store = data.store;
+    this.store = data.store ?? data.downloadDir;
+    this.files = data.files ?? [];
   }
 
   update(data) {

@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   StyleSheet,
 } from 'react-native';
+import RNFS from 'react-native-fs';
 
 import { useNavigationContainerRef } from '@react-navigation/native';
 
@@ -70,6 +71,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await initDB();
     await setLatestRoomMessages();
     await setLatestMessages();
+    Files.update(await loadSavedFiles());
 
     // Function to update the fiat price every minute
     async function updateFiatPrice() {
@@ -95,8 +97,22 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
 
-    await updateUser({ huginAddress });
-    Files.update(await loadSavedFiles());
+
+    const files = Files.all().map((a) => {return a.hash});
+
+    await updateUser({
+      huginAddress,
+      downloadDir: 
+      Platform.OS == 'ios'
+          ? RNFS.LibraryDirectoryPath
+          : RNFS.DownloadDirectoryPath,
+      store: 
+      Platform.OS == 'ios'
+          ? RNFS.LibraryDirectoryPath
+          : RNFS.DocumentDirectoryPath,
+      files
+    });
+
     await bare(user);
     await sleep(50);
     P2P.join();

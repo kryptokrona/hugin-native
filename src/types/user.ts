@@ -28,6 +28,7 @@ export interface User {
   keys?: object;
   huginAddress?: string;
   store?: string;
+  files?: string [];
 }
 
 export interface PeerUser {

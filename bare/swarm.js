@@ -88,7 +88,7 @@ const create_swarm = async (hashkey, key) => {
   if (!connected) return;
   const admin = is_admin(key);
   if (!admin) Hugin.send('syncing-history', { key });
-  const files = await Storage.load_meta(swarm.topic);
+  const files = await Storage.load_meta(room.topic);
 
   Hugin.send('peer-connected', {
     joined: {
@@ -602,12 +602,12 @@ const send_history = async (address, topic, key, files) => {
   send_peer_message(address, topic, history);
 };
 
-const request_file = async (address, topic, name, file, room) => {
+const request_file = async (address, topic, file, room) => {
   //request a missing file, open a hugin beam
   console.log('-----------------------------');
   console.log('*** WANT TO REQUEST FILE  ***');
   console.log('-----------------------------');
-
+  
   const verify = await Hugin.request({
     type: 'verify-signature',
     data: {
@@ -619,7 +619,7 @@ const request_file = async (address, topic, name, file, room) => {
   });
   if (!verify) return;
   const key = random_key().toString('hex');
-  Storage.start_beam(false, key, file, topic, name, room);
+  Storage.start_beam(false, key, file, topic, room);
   file.key = key;
   const message = {
     file,
@@ -629,16 +629,21 @@ const request_file = async (address, topic, name, file, room) => {
   send_peer_message(address, topic, message);
 };
 
+
 const process_files = async (data, active, con, topic) => {
+
   //Check if the latest 10 files are in sync
   console.log('PROCESS FILES');
   if (Hugin.syncImages) {
     if (!Array.isArray(data.files)) return 'Ban';
     if (data.files.length > 10) return 'Ban';
     for (const file of data.files) {
+      console.log('Hugin files:', Hugin.files, file.hash);
+      if (Hugin.files.some((a) => a === file.hash)) continue;
+      console.log('continue to download ', file.hash)
       if (!check_hash(file.hash)) continue;
       await sleep(50);
-      request_file(con.address, topic, con.name, file, active.key);
+      request_file(con.address, topic, file, active.key);
     }
   }
 };
@@ -795,7 +800,7 @@ const share_file_info = async (file, topic) => {
     fileInfo.size,
     fileInfo.time,
     fileInfo.fileName,
-    fileInfo.path,
+    file.path,
     signature,
     'file-shared',
     'file',

@@ -138,6 +138,7 @@ class HyperStorage {
       return false;
     }
     console.log('Saved file');
+    return true;
   }
 
   async read(path) {
@@ -264,17 +265,18 @@ class HyperStorage {
         );
 
         if (!saved) return;
-
+        Hugin.files.push(file.hash)
         ////*******TEMP*********////
         // Wrtite file to normal download path until we fixed bridge stream from bare -> React
         // To load files from storage
         const filePath = Hugin.downloadDir + '/' + file.fileName;
         try {
           // Write buffer to file synchronously
-          fs.writeFileSync(filePath, bufferData);
+          fs.writeFileSync(filePath, buffer);
           console.log('Buffer written successfully');
         } catch (err) {
           console.error('Error writing buffer to file:', err);
+          return;
         }
         ////*********TEMP********////
 
@@ -286,7 +288,7 @@ class HyperStorage {
           address: file.address,
           room,
           timestamp: file.time,
-          nickname: file.name,
+          name: file.name,
           reply: '',
           hash: file.hash,
           sent: false,

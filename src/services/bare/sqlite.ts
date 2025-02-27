@@ -238,6 +238,7 @@ export async function loadAccount() {
 
 export async function saveFileInfo(file: FileInfo) {
   console.log('Saving file ', file);
+  Files.new(file);
   try {
     await db.executeSql(
       'REPLACE INTO files (fileName, hash, timestamp, sent, path, image, topic)  VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -255,7 +256,6 @@ export async function saveFileInfo(file: FileInfo) {
     console.log(err);
   }
 
-  Files.new(file);
 }
 
 export async function loadSavedFiles() {
@@ -485,8 +485,7 @@ export async function getLatestRoomMessages() {
 
 export async function getRoomMessages(
   room: string,
-  page: number,
-  history = false,
+  page: number
 ) {
   const limit: number = 55;
   let offset: number = 0;
@@ -497,19 +496,6 @@ export async function getRoomMessages(
     `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
     [room],
   );
-
-  if (history) {
-    const messages = [];
-    for (const result of results) {
-      for (let index = 0; index < result.rows.length; index++) {
-        const res = result.rows.item(index);
-        const r: Message = toMessage(res);
-        messages.push(r);
-      }
-    }
-
-    return messages;
-  }
 
   return await setReplies(results);
 }

@@ -199,6 +199,7 @@ export const defaultUser: User = {
     Platform.OS == 'ios'
       ? RNFS.LibraryDirectoryPath
       : RNFS.DocumentDirectoryPath,
+  files: []
 };
 
 export const getAuthMethod = () => {

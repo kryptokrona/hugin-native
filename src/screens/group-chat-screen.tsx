@@ -165,16 +165,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     emoji?: boolean | undefined,
     tip?: TipType | undefined,
   ) {
-    if (file) {
-      text = file.fileName;
-    }
 
     console.log('Sending to room:', name);
     if (file) {
       onSendGroupMessageWithFile(roomKey, file, text);
       //If we need to return something... or print something locally
       // console.log('sent file!', sentFile);
-    } else {
+    }
+    if (text.length) {
       const sent = await onSendGroupMessage(
         roomKey,
         text,
@@ -300,7 +298,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   inputWrapper: {
-    bottom: 6,
+    bottom: 0,
     left: 0,
     // marginBottom: 10,
     paddingBottom: 10,
