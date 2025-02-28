@@ -13,12 +13,12 @@ import { ModalCenter } from './_layout';
 
 type Props = User;
 
-export const UserItem: React.FC<Props> = ({ name, address }) => {
+export const UserItem: React.FC<Props> = ({ name, address, online = true, avatar = undefined }) => {
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const w = Dimensions.get('window').width;
   const width = w / 2;
-  const avatar = useMemo(() => getAvatar(address ?? ''), [address]);
+  if (!avatar) avatar = useMemo(() => getAvatar(address ?? ''), [address]);
 
   function onPress() {
     setModalVisible(true);
@@ -34,7 +34,7 @@ export const UserItem: React.FC<Props> = ({ name, address }) => {
   }
 
   return (
-    <TouchableOpacity style={[styles.onlineUser, { width }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.onlineUser, { width, opacity: online === false ? 0.3 : 1 }]} onPress={onPress}>
       <ModalCenter visible={modalVisible} closeModal={onClose}>
         <View style={styles.modalInner}>
           <Avatar size={200} base64={avatar} />

@@ -19,17 +19,19 @@ import {
   MainStackNavigationType,
   User,
 } from '@/types';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   RouteProp,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore } from '@/services';
+import { getRoomUsers } from '../services/bare/sqlite';
 
 import { MainScreens } from '@/config';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
+import { Peers } from 'lib/connections';
 
 interface Props {
   route: RouteProp<
@@ -42,14 +44,67 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
   const navigation = useNavigation<MainStackNavigationType>();
-  const roomUsers = useGlobalStore((state) => state.roomUsers).filter(
+  const globalRoomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room === roomKey,
   );
+  const [roomUsers, setRoomUsers] = useState<User[]>(globalRoomUsers);
+
+  const [change, setChange] = useState<Boolean>(false);
+
+  const [offlineUsers, setOfflineUsers] = useState<User[]>([]);
+
   const [showQR, setShowQR] = useState(false);
 
   function onCloseModal() {
     setShowQR(false);
   }
+  
+
+  useEffect(() => {
+    async function fetchOfflineUsers(){
+      const storedRoomUsers = await getRoomUsers(roomKey);
+      setOfflineUsers(storedRoomUsers);
+    }
+    fetchOfflineUsers();
+  }, [roomKey]);
+
+
+  const userList = useMemo(() => {
+
+    console.log('useMemo triggered! ');
+
+    function fetchAndMergeUsers() {
+      console.log('storedRoomUsers', offlineUsers);
+      const mergedUsers = [...globalRoomUsers, ...offlineUsers];
+      const uniqueUsers = mergedUsers.reduce((acc: User[], user) => {
+        if (!acc.some((u) => u.address === user.address)) {
+          acc.push(user);
+        }
+        return acc;
+      }, []);
+      // setRoomUsers(uniqueUsers);
+      console.log('uniqueUsers', uniqueUsers);
+      return uniqueUsers;
+    }
+
+    const userList = fetchAndMergeUsers();
+
+    return userList;
+
+  }, [offlineUsers, change]);
+
+  Peers.on('change', () => {
+    console.log('Peers changed!')
+    setChange(!change);
+  })
+
+  // useEffect(() => {
+  //   console.log('Useeffect triggered');
+  //   setRoomUsers(userList);
+    
+  // }, [userList]);
+
+
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -98,7 +153,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           <FlatList
             nestedScrollEnabled={true}
             numColumns={2}
-            data={roomUsers}
+            data={userList}
             renderItem={OnlineUserMapper}
             keyExtractor={(item, i) => `${item.name}-${i}`}
           />

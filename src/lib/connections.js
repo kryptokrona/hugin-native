@@ -12,12 +12,14 @@ class Connections extends EventEmitter {
       name: peer.name,
       room: peer.key,
       avatar: peer.avatar,
+      online: true
     };
     if (this.already(peer.address, peer.key)) return;
     const list = this.active();
     list.push(connected);
     this.update(list);
     console.log('New peer connected. Online:', list.length);
+    this.change();
   }
 
   left(peer) {
@@ -27,6 +29,7 @@ class Connections extends EventEmitter {
     );
     this.update(list);
     console.log('Peer disconnected. Still online:', list.length);
+    this.change();
   }
 
   already(address, key) {
@@ -55,6 +58,12 @@ class Connections extends EventEmitter {
     });
     this.update(list);
   }
+
+  change() {
+    this.emit('change');
+    return true;
+  }
+
 }
 
 const Peers = new Connections();

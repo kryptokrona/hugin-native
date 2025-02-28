@@ -12,6 +12,7 @@ import {
   roomMessageExists,
   getRoomReplyMessage,
   getLatestRoomHashes,
+  saveRoomUser
 } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
 export class RPC {
@@ -152,6 +153,7 @@ export class RPC {
         case 'peer-connected':
           console.log('peer-connected!', json.joined.name);
           Peers.join(json.joined);
+          saveRoomUser(json.joined.name, json.joined.address, json.joined.key, json.joined.avatar);
           break;
         case 'peer-disconnected':
           console.log('peer-disconnected!', json.address);

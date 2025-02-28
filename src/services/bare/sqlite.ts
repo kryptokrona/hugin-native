@@ -5,7 +5,7 @@ import {
   openDatabase,
 } from 'react-native-sqlite-storage';
 
-import { FileInfo, Message, TipType } from '@/types';
+import { FileInfo, Message, TipType, User } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
 import { Files } from './globals';
@@ -69,6 +69,22 @@ export const initDB = async () => {
       messagekey TEXT NOT NULL,
       latestmessage INT DEFAULT 0,
       UNIQUE (address, messagekey)
+  )`;
+
+    await db.executeSql(query);
+
+    // address: peer.address,
+    // name: peer.name,
+    // room: peer.key,
+    // avatar: peer.avatar,
+
+    query = `CREATE TABLE IF NOT EXISTS groupusers (
+      name TEXT NOT NULL,
+      address TEXT NOT NULL,
+      room TEXT NOT NULL,
+      avatar TEXT,
+      lastseen INT DEFAULT 0,
+      PRIMARY KEY (address, room)
   )`;
 
     await db.executeSql(query);
@@ -269,6 +285,60 @@ export async function loadSavedFiles() {
   }
   return files;
 }
+
+export async function saveRoomUser(
+  name: string,
+  address: string,
+  room: string,
+  avatar?: string,
+) {
+  console.log('Saving group user ', name);
+
+  try {
+    const result = await db.executeSql(
+      'REPLACE INTO groupusers (name, address, room, avatar, lastseen) VALUES (?, ?, ?, ?, ?)',
+      [name, address, room, avatar, Date.now()],
+    );
+    console.log(result);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function getRoomUsers(
+  room: string
+): Promise<User[]> {
+  console.log('Get room users for room ', room);
+
+  try {
+    const results = await db.executeSql(
+      'SELECT * FROM groupusers WHERE room = ?',
+      [room],
+    );
+    console.log(results);
+
+    const users: User[] = [];
+    for (const result of results) {
+      for (let index = 0; index < result.rows.length; index++) {
+        const row = result.rows.item(index);
+        console.log('Got user: ', row.name)
+        const user: User = {
+          address: row.address,
+          avatar: row.avatar,
+          name: row.name,
+          online: false,
+          lastseen: row.lastseen
+        };
+        users.push(user);
+      }
+    }
+    return users;
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
+}
+
 
 export async function saveRoomToDatabase(
   name: string,

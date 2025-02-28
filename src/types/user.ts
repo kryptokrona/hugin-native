@@ -29,6 +29,8 @@ export interface User {
   huginAddress?: string;
   store?: string;
   files?: string [];
+  online?: boolean;
+  lastseen?: number;
 }
 
 export interface PeerUser {
