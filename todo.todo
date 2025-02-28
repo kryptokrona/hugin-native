@@ -16,6 +16,7 @@ Todo:
     ☐ Sync accounts between devices/restore account and stuff
     ✔ Add error message if wrong DM input @done(25-02-08 19:38)
     ✔ Add QR codes for messages and rooms @done(25-02-15 20:04)
+    ☐ Show "lastseen" on user lists in rooms
 
 
 Todo wallet:
