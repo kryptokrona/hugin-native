@@ -61,7 +61,7 @@ export const MessagesScreen: React.FC<Props> = () => {
   const camera = useRef<Camera>(null);
 
   if (device == null) {
-    Alert.alert('Error!', 'Camera could not be started');
+    // Alert.alert('Error!', 'Camera could not be started');
   }
 
   const onError = (error: CameraRuntimeError) => {

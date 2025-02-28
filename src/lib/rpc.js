@@ -7,6 +7,7 @@ import { getCurrentRoom } from '@/services/zustand';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
+import b4a from 'b4a';
 import {
   getRoomMessages,
   roomMessageExists,
@@ -23,8 +24,7 @@ export class Bridge {
     this.pendingRequests = new Map();
     this.id = 0;
     this.rpc = new RPC(IPC, (req, error) => {
-      console.log('Request', req);
-      const data = this.parse(req.data.toString());
+      const data = this.parse(b4a.toString(req.data));
       if (!data) {
         console.log('**** ERRR PARSING DATA ***');
       }
