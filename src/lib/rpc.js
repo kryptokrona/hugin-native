@@ -12,6 +12,7 @@ import {
   roomMessageExists,
   getRoomReplyMessage,
   getLatestRoomHashes,
+  saveRoomUser,
 } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
 
@@ -128,6 +129,12 @@ export class Bridge {
         case 'peer-disconnected':
           console.log('peer-disconnected!', json.address);
           Peers.left(json);
+          saveRoomUser(
+            json.joined.name,
+            json.joined.address,
+            json.joined.key,
+            json.joined.avatar,
+          );
           break;
         case 'voice-channel-status':
           console.log('Voice channel status');
