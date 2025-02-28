@@ -38,6 +38,7 @@ class HyperStorage {
     const userDataDir = Hugin.store;
     const [filesPath, chatPath] = make_directory(userDataDir, topic);
     //Uss RAM instead for temp storage?
+    if (this.loaded(topic)) return;
     const fileStore = new Corestore(filesPath);
     console.log('Loaded store path');
     console.log('Loading drive');
@@ -46,8 +47,15 @@ class HyperStorage {
     await drive.ready();
   }
 
+  loaded(topic) {
+    if (this.drives.length) {
+      if (this.drives.some((a) => a.topic === topic)) return true;
+    }
+    return false;
+  }
+
   add(drive, topic) {
-    if (this.drives.some((a) => a.topic === topic)) return;
+    if (this.loaded(topic)) return;
     console.log('Drive added');
     this.drives.push({ drive, topic });
   }
@@ -265,7 +273,7 @@ class HyperStorage {
         );
 
         if (!saved) return;
-        Hugin.files.push(file.hash)
+        Hugin.files.push(file.hash);
         ////*******TEMP*********////
         // Wrtite file to normal download path until we fixed bridge stream from bare -> React
         // To load files from storage

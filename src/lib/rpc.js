@@ -12,42 +12,20 @@ import {
   roomMessageExists,
   getRoomReplyMessage,
   getLatestRoomHashes,
-  saveRoomUser
 } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
-export class RPC {
-  constructor(ipc) {
-    this.ipc = ipc;
+
+import RPC from 'bare-rpc';
+
+export class Bridge {
+  constructor(IPC) {
     this.pendingRequests = new Map();
     this.id = 0;
-    this.ipc.on('data', (response) => {
-      let data = this.parse(response.toString());
-      if (
-        !data &&
-        response.toString()[0] == '{' &&
-        response.toString().slice(-1) == '}'
-      ) {
-        try {
-          let sanitized = '[' + response.toString().replace(/}{/g, '},{') + ']';
-          let split_data = JSON.parse(sanitized);
-
-          for (const d in split_data) {
-            // Extremely ugly hotfix for concatenated ipc messages BUG
-            if (this.pendingRequests.has(split_data[d].id)) {
-              const { resolve, reject } = this.pendingRequests.get(
-                split_data[d].id,
-              );
-              resolve(data);
-              this.pendingRequests.delete(split_data[d].id);
-            } else {
-              this.on_message(split_data[d]);
-            }
-          }
-
-          return;
-        } catch (e) {
-          console.log('Hotfix failed!', e);
-        }
+    this.rpc = new RPC(IPC, (req, error) => {
+      console.log('Request', req);
+      const data = this.parse(req.data.toString());
+      if (!data) {
+        console.log('**** ERRR PARSING DATA ***');
       }
 
       if (this.pendingRequests.has(data.id)) {
@@ -60,20 +38,12 @@ export class RPC {
     });
   }
 
-  split_objects(data) {
-    let datas = [];
-
-    datas.push(data.toString().split('}{')[0] + '}');
-    datas.push('{' + data.toString().split('}{')[1]);
-
-    return datas;
-  }
-
   request(data) {
     return new Promise((resolve, reject) => {
       data.id = this.id++;
       this.pendingRequests.set(data.id, { resolve, reject });
-      this.ipc.write(JSON.stringify(data));
+      const resp = this.rpc.request('request');
+      resp.send(JSON.stringify(data));
     });
   }
 
@@ -86,9 +56,8 @@ export class RPC {
   }
 
   send(data) {
-    const send = data;
-    console.log('Send data from REACT rpc');
-    this.ipc.write(JSON.stringify(send));
+    const req = this.rpc.request('send');
+    req.send(JSON.stringify(data));
   }
 
   async on_message(m) {
@@ -98,10 +67,12 @@ export class RPC {
       return;
     }
     if (json) {
-      console.log('Got rpc message', json.type);
+      if (json.type !== 'room-message-exists') {
+        console.log('Got rpc message', json.type);
+      }
       switch (json.type) {
         case 'log':
-          console.log(json.log);
+          console.log(json);
         case 'new-swarm':
           console.log('new swarm!');
           break;
@@ -153,7 +124,6 @@ export class RPC {
         case 'peer-connected':
           console.log('peer-connected!', json.joined.name);
           Peers.join(json.joined);
-          saveRoomUser(json.joined.name, json.joined.address, json.joined.key, json.joined.avatar);
           break;
         case 'peer-disconnected':
           console.log('peer-disconnected!', json.address);

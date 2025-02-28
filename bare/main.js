@@ -9,15 +9,17 @@ const {
   close_all_connections,
 } = require('./swarm');
 const { Hugin } = require('./account');
-const { RPC } = require('./rpc');
+const { Bridge } = require('./rpc');
 const { IPC } = BareKit;
 
-const rpc = new RPC(IPC);
+const rpc = new Bridge(IPC);
+rpc.on('data', (data) => onrequest(data));
+
 const onrequest = async (p) => {
   switch (p.type) {
     case 'log':
       break;
-    case 'init_bare': 
+    case 'init_bare':
       initBareMain(p.user);
       break;
     case 'update_bare_user':
@@ -27,8 +29,7 @@ const onrequest = async (p) => {
       await newSwarm(p.hashkey, p.key, p.admin);
       break;
     case 'end_swarm':
-      endSwarm(p.key);
-      break;
+      return await endSwarm(p.keys);
     case 'send_room_msg':
       const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
       return message;
@@ -80,12 +81,14 @@ const newSwarm = async (hashkey, key, admin) => {
   Hugin.rooms.push({ key, topic, admin });
 };
 
-const endSwarm = async (key) => {
-  const swarm = getRoom(key);
-  if (!swarm) return;
-  const rooms = Hugin.rooms.filter((a) => a.key !== key);
-  Hugin.rooms = rooms;
-  await end_swarm(swarm.topic);
+const endSwarm = async (keys) => {
+  for (const key of keys) {
+    const swarm = getRoom(key);
+    if (!swarm) return;
+    const rooms = Hugin.rooms.filter((a) => a.key !== key);
+    Hugin.rooms = rooms;
+    end_swarm(swarm.topic);
+  }
 };
 
 const sendRoomMessage = (message, key, reply, tip) => {
@@ -111,4 +114,3 @@ const sendFileInfo = (json_file_data) => {
 
   share_file_info(file_data, room.topic);
 };
-

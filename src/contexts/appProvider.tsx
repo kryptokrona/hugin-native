@@ -7,15 +7,14 @@ import {
   SafeAreaView,
   StyleSheet,
 } from 'react-native';
-import RNFS from 'react-native-fs';
 
 import { useNavigationContainerRef } from '@react-navigation/native';
+import RNFS from 'react-native-fs';
 
 import { bare, P2P, send_idle_status } from 'lib/native';
 import { Connection, Files } from 'services/bare/globals';
 
 import {
-  getCurrentRoom,
   getThisRoom,
   setStoreCurrentRoom,
   updateUser,
@@ -97,24 +96,25 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
 
-
-    const files = Files.all().map((a) => {return a.hash});
+    const files = Files.all().map((a) => {
+      return a.hash;
+    });
 
     await updateUser({
-      huginAddress,
-      downloadDir: 
-      Platform.OS == 'ios'
+      downloadDir:
+        Platform.OS == 'ios'
           ? RNFS.LibraryDirectoryPath
           : RNFS.DownloadDirectoryPath,
-      store: 
-      Platform.OS == 'ios'
+      files,
+      huginAddress,
+      store:
+        Platform.OS == 'ios'
           ? RNFS.LibraryDirectoryPath
           : RNFS.DocumentDirectoryPath,
-      files
     });
 
     await bare(user);
-    await sleep(50);
+    await sleep(150);
     P2P.join();
 
     const contacts = await getContacts();
@@ -160,37 +160,37 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           return;
         }
         console.log('******** INACTIVE STATE *********');
-        if (Platform.OS === 'ios') {
-          //Idle status might be used to display "yellow symbol" instead of "disconnecting"
-          //Or display notifications during background mode
-          send_idle_status(true);
-          setStoreCurrentRoom(getCurrentRoom());
-          setThisRoom(getCurrentRoom());
-          await P2P.close();
-          if (started) {
-            await Background.init();
-          }
+        //Idle status might be used to display "yellow symbol" instead of "disconnecting"
+        //Or display notifications during background mode
+        await P2P.close();
+        send_idle_status(true);
+        setStoreCurrentRoom(getThisRoom());
+        setThisRoom(getThisRoom());
+
+        if (started) {
+          await Background.init();
         }
       } else if (state === 'background') {
         console.log('******** BACKGROUND ********');
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
-        if (Platform.OS === 'android') {
-          send_idle_status(true);
-          setStoreCurrentRoom(getCurrentRoom());
-          setThisRoom(getCurrentRoom());
-          await P2P.close();
-          if (started) {
-            await Background.init();
-          }
+        console.log('Close!');
+        await P2P.close();
+        send_idle_status(true);
+        setStoreCurrentRoom(getThisRoom());
+        setThisRoom(getThisRoom());
+
+        if (started) {
+          await Background.init();
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
         send_idle_status(false);
         if (started && !joining) {
           joining = true;
+          P2P.join();
           setStoreCurrentRoom(getThisRoom());
-          await P2P.join();
+          setThisRoom(getThisRoom());
           joining = false;
           console.log('**** Successfully joined rooms after inactivity ****');
         }

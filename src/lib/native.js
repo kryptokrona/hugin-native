@@ -1,14 +1,13 @@
-import { RPC } from './rpc';
+import { Bridge } from './rpc';
 import { Worklet } from 'react-native-bare-kit';
 import bundle from '../../app.bundle';
 import { naclHash } from '../services/bare';
 import { getRooms } from '../services/bare/sqlite';
 import { sleep } from '@/utils';
-
 const worklet = new Worklet();
 const { IPC } = worklet;
-const rpc = new RPC(IPC);
-IPC.setEncoding('utf8');
+
+const rpc = new Bridge(IPC);
 
 export class Bare {
   constructor() {}
@@ -25,15 +24,23 @@ export class Bare {
     const rooms = await getRooms();
     for (const r of rooms) {
       await swarm(naclHash(r.key), r.key, r?.seed);
-      await sleep(50);
+      await sleep(100);
     }
+  }
+
+  async restart() {
+    await this.close();
+    await sleep(100);
+    await this.join();
   }
 
   async close() {
     const rooms = await getRooms();
-    for (const r of rooms) {
-      end_swarm(r.key);
+    const keys = [];
+    for (const k of rooms) {
+      keys.push(k.key);
     }
+    await end_swarm(keys);
   }
 }
 
@@ -45,7 +52,7 @@ export const bare = async (user) => {
     type: 'init_bare',
     user,
   };
-  return rpc.send(data);
+  rpc.send(data);
 };
 
 export const update_bare_user = async (user) => {
@@ -58,8 +65,8 @@ export const swarm = async (hashkey, key, admin) => {
   rpc.send(data);
 };
 
-export const end_swarm = (key) => {
-  const data = { type: 'end_swarm', key };
+export const end_swarm = async (keys) => {
+  const data = { type: 'end_swarm', keys };
   return rpc.send(data);
 };
 

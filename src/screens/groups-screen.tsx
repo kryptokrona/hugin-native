@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
-import { Alert, FlatList, Modal, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 
 import {
   useFocusEffect,
@@ -8,6 +8,12 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import {
+  Camera,
+  CameraRuntimeError,
+  useCameraDevice,
+  useCodeScanner,
+} from 'react-native-vision-camera';
 
 import {
   Container,
@@ -25,16 +31,10 @@ import {
   setStoreCurrentRoom,
   setStoreRoomMessages,
   useGlobalStore,
+  useRoomStore,
   useUserStore,
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
-
-import {
-  Camera,
-  CameraRuntimeError,
-  useCameraDevice,
-  useCodeScanner,
-} from 'react-native-vision-camera';
 
 import { joinAndSaveRoom, setRoomMessages } from '../services/bare/groups';
 
@@ -51,21 +51,21 @@ export const GroupsScreen: React.FC<Props> = () => {
   const [qrScanner, setQrScanner] = useState(false);
   const [joining, setJoinVisible] = useState(false);
   const [link, setLink] = useState<string | null>(null);
-
+  const { setThisRoom } = useRoomStore();
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
 
- if (device == null) {
+  if (device == null) {
     Alert.alert('Error!', 'Camera could not be started');
   }
 
-const onError = (error: CameraRuntimeError) => {
+  const onError = (error: CameraRuntimeError) => {
     Alert.alert('Error!', error.message);
-  }
+  };
 
-const codeScanner = useCodeScanner({
+  const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
-    onCodeScanned: codes => {
+    onCodeScanned: (codes) => {
       console.log('Got qr:', codes);
       if (codes.length > 0) {
         if (codes[0].value) {
@@ -95,7 +95,6 @@ const codeScanner = useCodeScanner({
       ),
     });
   }, [navigation]);
-  
 
   function onAddGroupPress() {
     setModalVisible(true);
@@ -104,6 +103,7 @@ const codeScanner = useCodeScanner({
   async function onPress(roomKey: string, name: string) {
     await setRoomMessages(roomKey, 0);
     setStoreCurrentRoom(roomKey);
+    setThisRoom(roomKey);
     navigation.navigate(MainScreens.GroupChatScreen, { name, roomKey });
   }
 
@@ -145,7 +145,7 @@ const codeScanner = useCodeScanner({
 
   const onScanPress = () => {
     setQrScanner(true);
-  }
+  };
 
   function onJoinpress() {
     setStoreRoomMessages([]);
@@ -187,18 +187,24 @@ const codeScanner = useCodeScanner({
         )}
 
         {joining && qrScanner && (
-          <View style={{width: 300, height: 300, margin: -30, borderRadius: 10, overflow: 'hidden'}}>
-          <Camera
-          ref={camera}
-          onError={onError}
-          photo={false}
-          style={styles.fullScreenCamera}
-          device={device}
-          codeScanner={codeScanner}
-          isActive={qrScanner}
-        />
-        </View>
-        
+          <View
+            style={{
+              borderRadius: 10,
+              height: 300,
+              margin: -30,
+              overflow: 'hidden',
+              width: 300,
+            }}>
+            <Camera
+              ref={camera}
+              onError={onError}
+              photo={false}
+              style={styles.fullScreenCamera}
+              device={device}
+              codeScanner={codeScanner}
+              isActive={qrScanner}
+            />
+          </View>
         )}
 
         {!joining && (
@@ -221,7 +227,6 @@ const codeScanner = useCodeScanner({
         keyExtractor={(item, i) => `${item.roomKey}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
-
     </ScreenLayout>
   );
 };
@@ -229,6 +234,13 @@ const codeScanner = useCodeScanner({
 const styles = {
   divider: {
     marginVertical: 10,
+  },
+  fullScreenCamera: {
+    flex: 1,
+    height: '100%',
+    position: 'absolute',
+    width: '100%',
+    zIndex: 100,
   },
   inviteContainer: {
     alignItems: 'center',
@@ -239,12 +251,5 @@ const styles = {
     // Prevent expansion
     padding: 10,
     width: 300,
-  },
-  fullScreenCamera: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    zIndex: 100,
   },
 };
