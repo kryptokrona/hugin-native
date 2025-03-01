@@ -1,3 +1,22 @@
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+
+import {
+  FlatList,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+
+import {
+  RouteProp,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import QRCode from 'react-native-qrcode-svg';
+
+import { Peers } from 'lib/connections';
+
 import {
   Card,
   CopyButton,
@@ -8,30 +27,16 @@ import {
   TextField,
   UserItem,
 } from '@/components';
-import {
-  FlatList,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { MainScreens } from '@/config';
+import { setStoreCurrentRoom, useGlobalStore } from '@/services';
 import {
   MainNavigationParamList,
   MainStackNavigationType,
   User,
 } from '@/types';
-import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import {
-  RouteProp,
-  useFocusEffect,
-  useNavigation,
-} from '@react-navigation/native';
-import { onDeleteGroup, setStoreCurrentRoom, useGlobalStore } from '@/services';
-import { getRoomUsers } from '../services/bare/sqlite';
 
-import { MainScreens } from '@/config';
-import { useTranslation } from 'react-i18next';
-import QRCode from 'react-native-qrcode-svg';
-import { Peers } from 'lib/connections';
+import { onDeleteGroup } from '../services/bare/groups';
+import { getRoomUsers } from '../services/bare/sqlite';
 
 interface Props {
   route: RouteProp<
@@ -49,7 +54,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   );
   const [roomUsers, setRoomUsers] = useState<User[]>(globalRoomUsers);
 
-  const [change, setChange] = useState<Boolean>(false);
+  const [change, setChange] = useState<boolean>(false);
 
   const [offlineUsers, setOfflineUsers] = useState<User[]>([]);
 
@@ -58,19 +63,16 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   function onCloseModal() {
     setShowQR(false);
   }
-  
 
   useEffect(() => {
-    async function fetchOfflineUsers(){
+    async function fetchOfflineUsers() {
       const storedRoomUsers = await getRoomUsers(roomKey);
       setOfflineUsers(storedRoomUsers);
     }
     fetchOfflineUsers();
   }, [roomKey]);
 
-
   const userList = useMemo(() => {
-
     console.log('useMemo triggered! ');
 
     function fetchAndMergeUsers() {
@@ -90,21 +92,18 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     const userList = fetchAndMergeUsers();
 
     return userList;
-
   }, [offlineUsers, change]);
 
   Peers.on('change', () => {
-    console.log('Peers changed!')
+    console.log('Peers changed!');
     setChange(!change);
-  })
+  });
 
   // useEffect(() => {
   //   console.log('Useeffect triggered');
   //   setRoomUsers(userList);
-    
+
   // }, [userList]);
-
-
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -181,13 +180,9 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
       <ModalCenter visible={showQR} closeModal={onCloseModal}>
         <View>
-          <QRCode
-            value={inviteText}
-            size={300}
-          />
+          <QRCode value={inviteText} size={300} />
         </View>
       </ModalCenter>
-
     </ScreenLayout>
   );
 };

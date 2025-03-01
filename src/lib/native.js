@@ -84,7 +84,8 @@ export const send_swarm_msg = async (key, message, reply, tip) => {
 
 export const group_random_key = async () => {
   const data = { type: 'group_random_key' };
-  return await rpc.request(data);
+  const { keys } = await rpc.request(data);
+  return keys;
 };
 
 export const begin_send_file = (json_file_data) => {

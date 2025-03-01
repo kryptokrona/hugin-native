@@ -1,6 +1,6 @@
 require('./runtime');
 
-const { group_key } = require('./utils');
+const { create_room_invite } = require('./utils');
 const {
   send_message,
   create_swarm,
@@ -34,8 +34,8 @@ const onrequest = async (p) => {
       const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
       return message;
     case 'group_random_key':
-      const key = getRandomGroupKey();
-      return key;
+      const keys = create_room_invite();
+      return { keys };
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
       break;
@@ -97,10 +97,6 @@ const sendRoomMessage = (message, key, reply, tip) => {
 
 const getRoom = (key) => {
   return Hugin.rooms.find((a) => a.key === key);
-};
-
-const getRandomGroupKey = () => {
-  return group_key();
 };
 
 const sendFileInfo = (json_file_data) => {

@@ -39,14 +39,10 @@ function create_room_invite() {
   const rand = random_key();
   const admin = create_keys_from_seed(seed);
   //[invite, admin seed]
-  return JSON.stringify([
+  return [
     rand.toString('hex') + admin.get().publicKey.toString('hex'),
     seed.toString('hex'),
-  ]);
-}
-
-function group_key() {
-  return create_room_invite();
+  ];
 }
 
 async function sign(message) {
@@ -342,7 +338,6 @@ module.exports = {
   sanitize_group_message,
   sanitize_voice_status_data,
   sanitize_file_message,
-  group_key,
   random_key,
   toUintArray,
   verify_signature,
@@ -351,4 +346,5 @@ module.exports = {
   check_if_image_or_video,
   sign_joined_message,
   check_hash,
+  create_room_invite,
 };

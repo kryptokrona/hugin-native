@@ -7,11 +7,11 @@ import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { MainScreens } from '@/config';
-import {
-  useUserStore
-} from '@/services';
-import {onRequestNewGroupKey, joinAndSaveRoom } from '../services/bare/groups'
+import { useUserStore } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
+
+import { group_random_key } from '../lib/native';
+import { joinAndSaveRoom } from '../services/bare/groups';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.AddGroupScreen>;
@@ -38,8 +38,8 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
 
   async function generateKey() {
     try {
-      const keys = await onRequestNewGroupKey();
-      const [invite, seed] = JSON.parse(keys);
+      const keys = await group_random_key();
+      const [invite, seed] = keys;
 
       if (invite) {
         return { admin: seed, invite };

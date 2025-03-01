@@ -1,12 +1,6 @@
 import Toast from 'react-native-toast-message';
 
-import {
-  begin_send_file,
-  end_swarm,
-  group_random_key,
-  send_swarm_msg,
-  swarm,
-} from 'lib/native';
+import { begin_send_file, end_swarm, send_swarm_msg, swarm } from 'lib/native';
 
 import type {
   FileInfo,
@@ -154,11 +148,6 @@ export const onSendGroupMessageWithFile = (
   };
   const JSONfileData = JSON.stringify(fileData);
   begin_send_file(JSONfileData);
-};
-
-export const onRequestNewGroupKey = async () => {
-  const key = await group_random_key();
-  return key;
 };
 
 export const onDeleteGroup = async (key: string) => {
