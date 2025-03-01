@@ -1,4 +1,3 @@
-const ce = require('compact-encoding');
 const HyperSwarm = require('hyperswarm-hugin');
 const { Hugin } = require('./account');
 const {

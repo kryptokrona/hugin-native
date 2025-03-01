@@ -13,7 +13,7 @@ const { Bridge } = require('./rpc');
 const { IPC } = BareKit;
 
 const rpc = new Bridge(IPC);
-rpc.on('data', (data) => onrequest(data));
+rpc.on('data', (data) => response(data));
 
 const onrequest = async (p) => {
   switch (p.type) {
@@ -63,8 +63,6 @@ async function response(request) {
   send.id = request.id;
   rpc.send(request.type, send);
 }
-
-rpc.on('data', (data) => response(data));
 
 // Function implementations
 const initBareMain = async (user) => {

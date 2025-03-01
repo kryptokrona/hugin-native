@@ -15,7 +15,7 @@ import {
   saveRoomUser,
 } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
-
+import b4a from 'b4a';
 import RPC from 'bare-rpc';
 
 export class Bridge {
@@ -23,8 +23,7 @@ export class Bridge {
     this.pendingRequests = new Map();
     this.id = 0;
     this.rpc = new RPC(IPC, (req, error) => {
-      console.log('Request', req);
-      const data = this.parse(req.data.toString());
+      const data = this.parse(b4a.toString(req.data));
       if (!data) {
         console.log('**** ERRR PARSING DATA ***');
       }
@@ -123,18 +122,18 @@ export class Bridge {
           }
           break;
         case 'peer-connected':
-          console.log('peer-connected!', json.joined.name);
+          console.log('peer-connected!', json);
           Peers.join(json.joined);
-          break;
-        case 'peer-disconnected':
-          console.log('peer-disconnected!', json.address);
-          Peers.left(json);
           saveRoomUser(
             json.joined.name,
             json.joined.address,
             json.joined.key,
             json.joined.avatar,
           );
+          break;
+        case 'peer-disconnected':
+          console.log('peer-disconnected!', json.address);
+          Peers.left(json);
           break;
         case 'voice-channel-status':
           console.log('Voice channel status');

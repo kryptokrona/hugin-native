@@ -1,14 +1,14 @@
 const EventEmitter = require('bare-events');
 
 const RPC = require('bare-rpc');
+const b4a = require('b4a');
 class Bridge extends EventEmitter {
   constructor(IPC) {
     super();
     this.pendingRequests = new Map();
     this.id = 0;
     this.rpc = new RPC(IPC, (req, error) => {
-      console.log('Request', req);
-      const data = this.parse(req.data.toString());
+      const data = this.parse(b4a.toString(req.data));
       if (this.pendingRequests.has(data.id)) {
         const { resolve, reject } = this.pendingRequests.get(data.id);
         resolve(data.data);
@@ -36,8 +36,7 @@ class Bridge extends EventEmitter {
     }
   }
 
-  send(type, data) {
-    const send = data;
+  send(type, send) {
     send.type = type;
     const resp = this.rpc.request('send');
     resp.send(JSON.stringify(send));
