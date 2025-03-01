@@ -785,6 +785,7 @@ const share_file_info = async (file, topic) => {
     signature,
   };
 
+  Hugin.files.push(hash);
   //Put the shared file in to our local storage
   await Storage.save(
     topic,
