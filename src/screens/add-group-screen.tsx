@@ -8,10 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { MainScreens } from '@/config';
 import {
-  joinAndSaveRoom,
-  onRequestNewGroupKey,
-  useUserStore,
+  useUserStore
 } from '@/services';
+import {onRequestNewGroupKey, joinAndSaveRoom } from '../services/bare/groups'
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 interface Props {
