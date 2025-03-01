@@ -53,7 +53,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
     const camera = useRef<Camera>(null);
   
       if (device == null) {
-        Alert.alert('Error!', 'Camera could not be started');
+        // Alert.alert('Error!', 'Camera could not be started');
       }
   
     const onError = (error: CameraRuntimeError) => {

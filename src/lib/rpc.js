@@ -7,6 +7,7 @@ import { getCurrentRoom } from '@/services/zustand';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
+import b4a from 'b4a';
 import {
   getRoomMessages,
   roomMessageExists,
