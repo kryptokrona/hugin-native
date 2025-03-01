@@ -206,6 +206,13 @@ export class ActiveWallet {
     this.active.enableAutoOptimization(false);
     this.active.scanPoolTransactions(false);
 
+    this.active.on('deadnode', async () => {
+      Toast.show({
+        text1: 'Your node has gone offline',
+        type: 'success',
+      });
+    })
+
     await this.active.start();
     await this.create_message_wallet();
     this.optimize_message_inputs();
@@ -227,6 +234,7 @@ export class ActiveWallet {
       this.getAndSetBalance();
       await this.save();
     });
+
 
     //Wallet heightchange event with funtion that saves wallet only if we are synced
     this.active.on(
