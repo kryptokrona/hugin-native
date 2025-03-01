@@ -17,6 +17,7 @@ import {
 import { Wallet } from '../services/kryptokrona/wallet';
 import b4a from 'b4a';
 import RPC from 'bare-rpc';
+import { notify } from '../services/utils';
 
 export class Bridge {
   constructor(IPC) {
@@ -97,19 +98,29 @@ export class Bridge {
             json.message.history,
             json.message.file,
             json.message.tip,
+            json.message.background,
           );
           break;
         case 'history-update':
           await sleep(500);
           if (getCurrentRoom() === json.key) {
             setRoomMessages(json.key, 0);
-            if (json.history) {
+            if (json.history && !json.background) {
               Toast.show({
                 type: 'success',
                 text1: 'Synced ✅',
                 text2: `${json.i} messages in room`,
               });
             }
+          }
+          if (json.background) {
+            notify(
+              {
+                name: 'New messages',
+                text: `You have ${json.i} unread messages`,
+              },
+              'Unread',
+            );
           }
           setLatestRoomMessages();
           break;

@@ -1,5 +1,3 @@
-import { AppState, Platform } from 'react-native';
-
 import Toast from 'react-native-toast-message';
 
 import {
@@ -41,23 +39,6 @@ import {
   useUserStore,
 } from '../zustand';
 
-AppState.addEventListener('change', onAppStateChange);
-
-let current = '';
-async function onAppStateChange(state: string) {
-  if (state === 'background') {
-    if (Platform.OS === 'android') {
-      current = getCurrentRoom();
-      setStoreCurrentRoom('');
-    }
-  } else if (state === 'active') {
-    if (Platform.OS === 'android') {
-      setStoreCurrentRoom(current);
-      current = '';
-    }
-  }
-}
-
 export const setLatestRoomMessages = async () => {
   const latestRooms = await getLatestRoomMessages();
 
@@ -87,11 +68,15 @@ export const setLatestRoomMessages = async () => {
   setStoreRooms(updatedRooms?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
 };
 
-export const updateMessages = async (message: Message, history = false) => {
+export const updateMessages = async (
+  message: Message,
+  history = false,
+  background: boolean | undefined,
+) => {
   const thisRoom = getCurrentRoom();
   const inRoom = thisRoom === message.room;
 
-  if (inRoom || current === message.room) {
+  if (inRoom) {
     const messages = getRoomsMessages();
 
     if (message.reply?.length === 64) {
@@ -126,16 +111,14 @@ export const updateMessages = async (message: Message, history = false) => {
     }
   }
 
-  if (!history && !inRoom) {
-    if (current?.length === 0) {
-      Toast.show({
-        text1: message.nickname,
-        text2: message.message,
-        type: 'success',
-      });
-    } else {
-      notify({ name: message.nickname, text: message.message }, 'New message');
-    }
+  if (!history && !inRoom && !background) {
+    Toast.show({
+      text1: message.nickname,
+      text2: message.message,
+      type: 'success',
+    });
+  } else if (background && !history) {
+    notify({ name: message.nickname, text: message.message }, 'New message');
   }
 };
 
@@ -224,6 +207,7 @@ export const saveRoomMessageAndUpdate = async (
   history: boolean | undefined = false,
   file?: FileInfo | undefined,
   tip?: TipType | undefined,
+  background?: boolean | undefined,
 ) => {
   let isFile = false;
   if (typeof file === 'object') {
@@ -247,12 +231,10 @@ export const saveRoomMessageAndUpdate = async (
     if (isFile) {
       newMessage.file = file;
     }
-    await updateMessages(newMessage);
+    await updateMessages(newMessage, history, background);
   }
 
-  if (!history) {
-    setLatestRoomMessages();
-  }
+  setLatestRoomMessages();
 };
 
 export const createUserAddress = async () => {

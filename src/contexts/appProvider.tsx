@@ -29,7 +29,11 @@ import { sleep } from '@/utils';
 import { Background } from './background';
 // import { Foreground } from './service';
 
-import { setLatestMessages, setLatestRoomMessages } from '../services/bare';
+import {
+  setLatestMessages,
+  setLatestRoomMessages,
+  setRoomMessages,
+} from '../services/bare';
 import { keychain } from '../services/bare/crypto';
 import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
@@ -164,7 +168,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Or display notifications during background mode
         await P2P.close();
         send_idle_status(true);
-        setStoreCurrentRoom(getThisRoom());
+        setStoreCurrentRoom('');
         setThisRoom(getThisRoom());
 
         if (started) {
@@ -177,7 +181,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('Close!');
         await P2P.close();
         send_idle_status(true);
-        setStoreCurrentRoom(getThisRoom());
+        setStoreCurrentRoom('');
         setThisRoom(getThisRoom());
 
         if (started) {
@@ -189,8 +193,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         if (started && !joining) {
           joining = true;
           P2P.join();
-          setStoreCurrentRoom(getThisRoom());
-          setThisRoom(getThisRoom());
+          const room = getThisRoom();
+          setStoreCurrentRoom(room);
+          setThisRoom(room);
+          setRoomMessages(room, 0);
           joining = false;
           console.log('**** Successfully joined rooms after inactivity ****');
         }

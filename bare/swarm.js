@@ -512,7 +512,7 @@ const check_data_message = async (data, connection, topic, peer) => {
       ) {
         active.search = false;
         con.request = false;
-        process_request(data.messages, active.key, true);
+        process_request(data.messages, active.key);
       } else if (data.type === REQUEST_FILE) {
         const file = sanitize_file_message(data.file);
         if (!file) return 'Error';
@@ -642,7 +642,7 @@ const process_files = async (data, active, con, topic) => {
   }
 };
 
-const process_request = async (messages, key, live = false) => {
+const process_request = async (messages, key) => {
   let i = 0;
   try {
     for (const m of messages.reverse()) {
@@ -658,17 +658,18 @@ const process_request = async (messages, key, live = false) => {
         n: m?.name ? m?.name : m?.nickname,
         hash: m?.hash,
         tip: m?.tip,
+        background: Hugin.idle(),
       };
       if (await room_message_exists(inc.hash)) continue;
       const message = sanitize_group_message(inc);
       if (!message) continue;
       //Save room message in background mode ??
-      if (!live) message.history = true;
+      message.history = true;
       i++;
       Hugin.send('swarm-message', { message });
     }
     //Trigger update when all messages are synced? here.
-    Hugin.send('history-update', { key, i });
+    Hugin.send('history-update', { key, i, background: Hugin.idle() });
   } catch (e) {
     console.log('error processing history', e);
   }
