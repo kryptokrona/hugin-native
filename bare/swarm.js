@@ -820,7 +820,6 @@ const share_file_info = async (file, topic) => {
       hash: fileInfo.hash,
       sent: true,
       image,
-      uri: file.uri,
     },
   };
 
