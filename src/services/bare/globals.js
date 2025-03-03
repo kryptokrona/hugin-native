@@ -55,9 +55,7 @@ class ConnectionType {
   async restart(type) {
     if (this.type() !== '') {
       this.reset = true;
-      await P2P.close();
-      await sleep(200);
-      await P2P.join();
+      await P2P.restart();
     }
     this.update(type);
     this.done();
