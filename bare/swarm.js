@@ -86,7 +86,6 @@ const create_swarm = async (hashkey, key) => {
   const connected = await room.join(hashkey);
   if (!connected) return;
   const admin = is_admin(key);
-  if (!admin) Hugin.send('syncing-history', { key });
   const files = await Storage.load_meta(room.topic);
 
   Hugin.send('peer-connected', {
@@ -402,7 +401,7 @@ const check_data_message = async (data, connection, topic, peer) => {
 
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
-      if (parseInt(active.time) > time && active.requests < 3) {
+      if (parseInt(active.time) > time && active.requests < 1) {
         request_history(joined.address, topic, active.files);
         active.requests++;
       }
