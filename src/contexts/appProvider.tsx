@@ -38,6 +38,7 @@ import { keychain } from '../services/bare/crypto';
 import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
+import { Notify } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
 interface AppProviderProps {
   children: React.ReactNode;
@@ -193,6 +194,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         if (started && !joining) {
           joining = true;
           P2P.restart();
+          if (Platform.OS === 'ios') {
+            Notify.wakeup();
+          }
           const room = getThisRoom();
           setStoreCurrentRoom(room);
           setThisRoom(room);
