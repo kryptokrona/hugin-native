@@ -192,7 +192,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         send_idle_status(false);
         if (started && !joining) {
           joining = true;
-          P2P.join();
+          P2P.restart();
           const room = getThisRoom();
           setStoreCurrentRoom(room);
           setThisRoom(room);

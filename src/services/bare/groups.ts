@@ -112,10 +112,7 @@ export const updateMessages = async (
       type: 'success',
     });
   } else if (background && !history) {
-    Notify.new(
-      { name: message.nickname, text: message.message },
-      'New message',
-    );
+    Notify.new({ name: message.nickname, text: message.message }, background);
   }
 };
 

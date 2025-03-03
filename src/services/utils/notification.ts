@@ -2,14 +2,40 @@ import { Platform } from 'react-native';
 
 import notifee, { AndroidImportance } from '@notifee/react-native';
 
-class Notifee {
-  constructor() {}
+type Notification = {
+  name: string;
+  text: string;
+};
 
-  async new({ text, name }, type) {
+class Notifee {
+  private pending: Notification[];
+  constructor() {
+    this.pending = [];
+  }
+
+  async new({ text, name }: Notification, background: boolean) {
     // Request permissions (required for iOS)
     if (Platform.OS === 'ios') {
       await notifee.requestPermission();
+
+      if (background) {
+        this.pending.push({ name, text });
+        return;
+      }
     }
+
+    this.display(name, text);
+  }
+
+  wakeup() {
+    if (this.pending.length === 0) {
+      return;
+    }
+    const text = `You have ${this.pending.length} unread messages`;
+    this.display('New messages', text);
+  }
+
+  async display(name: string, text: string) {
     // Create a channel (required for Android)
     const channelId = await notifee.createChannel({
       id: 'hugin_notifiy',
@@ -19,7 +45,6 @@ class Notifee {
       vibrationPattern: [200, 400],
     });
 
-    // Display a notification
     await notifee.displayNotification({
       android: {
         channelId: channelId,
