@@ -70,5 +70,20 @@ class ConnectionType {
   }
 }
 
+class CameraOptions {
+  constructor() {
+    this.active = false;
+  }
+
+  on() {
+    this.active = true;
+  }
+
+  off() {
+    this.active = false;
+  }
+}
+
 export const Connection = new ConnectionType();
 export const Files = new FilesCache();
+export const Camera = new CameraOptions();

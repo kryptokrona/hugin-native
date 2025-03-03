@@ -12,7 +12,6 @@ import { useNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 
 import { bare, P2P, send_idle_status } from 'lib/native';
-import { Connection, Files } from 'services/bare/globals';
 
 import {
   getThisRoom,
@@ -35,6 +34,7 @@ import {
   setRoomMessages,
 } from '../services/bare';
 import { keychain } from '../services/bare/crypto';
+import { Camera, Connection, Files } from '../services/bare/globals';
 import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
@@ -193,7 +193,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         send_idle_status(false);
         if (started && !joining) {
           joining = true;
-          P2P.restart();
+          if (!Camera.active) {
+            P2P.restart();
+          }
           if (Platform.OS === 'ios') {
             Notify.wakeup();
           }

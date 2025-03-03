@@ -17,9 +17,12 @@ import {
 } from 'react-native-image-picker';
 import { useCameraPermission } from 'react-native-vision-camera';
 
+import { Camera } from 'services/bare/globals';
+
 import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
 import type { SelectedFile } from '@/types';
+import { sleep } from '@/utils';
 
 import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
 
@@ -54,6 +57,7 @@ export const MessageInput: React.FC<Props> = ({
   }, [replyToName]);
 
   const focusInput = () => {
+    Camera.off();
     if (textInputRef.current) {
       setTimeout(() => textInputRef.current.focus(), 100);
     }
@@ -64,13 +68,16 @@ export const MessageInput: React.FC<Props> = ({
       quality: 0.5,
       saveToPhotos: true,
     };
+    Camera.on();
     if (!hasPermission) {
       await requestPermission();
     }
 
-    launchCamera(options, (response) => {
+    launchCamera(options, async (response) => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
+        await sleep(300);
+        Camera.off();
       } else if (response.errorCode) {
         console.error('ImagePicker Error: ', response);
       } else {
@@ -98,7 +105,8 @@ export const MessageInput: React.FC<Props> = ({
   }
 
   async function onFilePress() {
-    if (Platform.OS == 'android') {
+    if (Platform.OS === 'android') {
+      Camera.on();
       try {
         const res = await DocumentPicker.pickSingle({
           copyTo: 'documentDirectory',
@@ -120,9 +128,14 @@ export const MessageInput: React.FC<Props> = ({
         };
 
         setSelectedFile(fileInfo);
+
+        await sleep(300);
+        Camera.off();
       } catch (err) {
         if (DocumentPicker.isCancel(err)) {
           console.log('User cancelled file picker');
+          await sleep(300);
+          Camera.off();
         } else {
           console.error('DocumentPicker Error: ', err);
         }
@@ -134,9 +147,11 @@ export const MessageInput: React.FC<Props> = ({
         saveToPhotos: true,
       };
 
-      launchImageLibrary(options, (response) => {
+      launchImageLibrary(options, async (response) => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
+          await sleep(300);
+          Camera.off();
         } else if (response.errorCode) {
           console.error('ImagePicker Error: ', response.errorMessage);
         } else {
@@ -155,6 +170,8 @@ export const MessageInput: React.FC<Props> = ({
               uri: uri,
             };
             setSelectedFile(fileInfo);
+            await sleep(300);
+            Camera.off();
           }
         }
       });
@@ -168,6 +185,7 @@ export const MessageInput: React.FC<Props> = ({
       setHeight(40);
       setText('');
       setSelectedFile(null);
+      Camera.off();
     }
   }
 
@@ -191,6 +209,7 @@ export const MessageInput: React.FC<Props> = ({
 
   function onRemoveFile() {
     setSelectedFile(null);
+    Camera.off();
   }
 
   function onCloseReply() {
