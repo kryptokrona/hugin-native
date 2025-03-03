@@ -47,7 +47,7 @@ export const Header: React.FC<Props> = ({
     <View style={[styles.container, { backgroundColor, borderColor }]}>
       <View style={styles.side}>
         {backButton && (
-          <TouchableOpacity onPress={onPress}>
+          <TouchableOpacity hitSlop={{ bottom: 16, left: 16, right: 16, top: 16 }} onPress={onPress}>
             <CustomIcon name={'arrow-back-ios'} type={'MI'} />
           </TouchableOpacity>
         )}
@@ -57,7 +57,7 @@ export const Header: React.FC<Props> = ({
               <Avatar base64={getAvatar(address)} address={address} size={30} />
             )}
 
-            {avatar?.length > 0 && <Avatar base64={avatar} size={30} />}
+            {avatar?.length > 15 && <Avatar base64={avatar} size={30} />}
             {/* <HuginSvg style={styles.logo} /> */}
           </>
         )}
