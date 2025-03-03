@@ -30,7 +30,7 @@ export class Bare {
 
   async restart() {
     await this.close();
-    await sleep(100);
+    await sleep(1000);
     await this.join();
   }
 
