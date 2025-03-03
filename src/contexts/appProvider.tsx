@@ -166,7 +166,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('******** INACTIVE STATE *********');
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
-        await P2P.close();
+        // await P2P.close();
         send_idle_status(true);
         setStoreCurrentRoom('');
         setThisRoom(getThisRoom());
@@ -179,7 +179,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
-        await P2P.close();
+        // await P2P.close();
         send_idle_status(true);
         setStoreCurrentRoom('');
         setThisRoom(getThisRoom());
@@ -192,7 +192,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         send_idle_status(false);
         if (started && !joining) {
           joining = true;
-          P2P.join();
+          // P2P.restart();
           const room = getThisRoom();
           setStoreCurrentRoom(room);
           setThisRoom(room);

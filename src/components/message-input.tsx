@@ -15,6 +15,7 @@ import {
   launchCamera,
   launchImageLibrary,
 } from 'react-native-image-picker';
+import { useCameraPermission } from 'react-native-vision-camera';
 
 import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
@@ -45,7 +46,7 @@ export const MessageInput: React.FC<Props> = ({
   const backgroundColor = theme.background;
   const [height, setHeight] = useState(40);
   const textInputRef = useRef<TextInput>(null);
-
+  const { hasPermission, requestPermission } = useCameraPermission();
   useEffect(() => {
     if (replyToName?.length) {
       focusInput();
@@ -63,6 +64,9 @@ export const MessageInput: React.FC<Props> = ({
       quality: 0.5,
       saveToPhotos: true,
     };
+    if (!hasPermission) {
+      await requestPermission();
+    }
 
     launchCamera(options, (response) => {
       if (response.didCancel) {

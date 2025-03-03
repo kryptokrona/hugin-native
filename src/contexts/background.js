@@ -7,8 +7,7 @@ class BackgroundTask {
 
   async sync() {
     return new Promise(async (resolve, reject) => {
-      P2P.resume();
-      P2P.join();
+      await P2P.restart();
       console.log('---------------------------------------');
       console.log('*********** BACKGROUND P2P ************');
       console.log('---------------------------------------');

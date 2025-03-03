@@ -172,6 +172,7 @@ dependencies {
     implementation project(':react-native-fs')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-document-picker')
+    implementation("androidx.activity:activity:1.9.+")
     
     implementation project(':react-native-background-fetch')
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";

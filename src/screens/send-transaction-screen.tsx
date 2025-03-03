@@ -1,22 +1,32 @@
-import { InputField, ModalCenter, ScreenLayout, TextButton, TextField } from '@/components';
-import { MainNavigationParamList, MainStackNavigationType } from '@/types';
 import React, { useRef, useState } from 'react';
-import { RouteProp, useNavigation } from '@react-navigation/native';
+
 import { Alert, StyleSheet, View } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
-import { MainScreens } from '@/config';
-import Toast from 'react-native-toast-message';
-import { Wallet } from '../services/kryptokrona';
-import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { t } from 'i18next';
-import { useGlobalStore, useThemeStore } from '@/services';
+import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';
+import Toast from 'react-native-toast-message';
 import {
   Camera,
   CameraRuntimeError,
   useCameraDevice,
+  useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
+
+import {
+  InputField,
+  ModalCenter,
+  ScreenLayout,
+  TextButton,
+  TextField,
+} from '@/components';
+import { MainScreens } from '@/config';
+import { useGlobalStore, useThemeStore } from '@/services';
+import { MainNavigationParamList, MainStackNavigationType } from '@/types';
+
+import { Wallet } from '../services/kryptokrona';
 
 interface Props {
   route: RouteProp<
@@ -39,6 +49,8 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   const [sendAll, setSendAll] = useState(false);
   const fiatPrice = useGlobalStore((state) => state.fiatPrice);
 
+  const { hasPermission, requestPermission } = useCameraPermission();
+
   const navigation = useNavigation<MainStackNavigationType>();
 
   const theme = useThemeStore((state) => state.theme);
@@ -48,39 +60,42 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   const color = theme.mutedForeground;
 
   const [qrScanner, setQrScanner] = useState(false);
-  
-    const device = useCameraDevice('back');
-    const camera = useRef<Camera>(null);
-  
-      if (device == null) {
-        // Alert.alert('Error!', 'Camera could not be started');
-      }
-  
-    const onError = (error: CameraRuntimeError) => {
-        Alert.alert('Error!', error.message);
-      }
-  
-    const codeScanner = useCodeScanner({
-        codeTypes: ['qr'],
-        onCodeScanned: codes => {
-          console.log('Got qr:', codes);
-          if (codes.length > 0) {
-            if (codes[0].value) {
-              setTimeout(() => gotQRCode(codes[0].value), 500);
-            }
-          }
-          return;
-        },
-      });
-    
-      function gotQRCode(code) {
-        setAddress(code);
-        setQrScanner(false);
-      }
 
-  const onScanPress = () => {
-    setQrScanner(true);
+  const device = useCameraDevice('back');
+  const camera = useRef<Camera>(null);
+
+  if (device == null) {
+    // Alert.alert('Error!', 'Camera could not be started');
   }
+
+  const onError = (error: CameraRuntimeError) => {
+    Alert.alert('Error!', error.message);
+  };
+
+  const codeScanner = useCodeScanner({
+    codeTypes: ['qr'],
+    onCodeScanned: (codes) => {
+      console.log('Got qr:', codes);
+      if (codes.length > 0) {
+        if (codes[0].value) {
+          setTimeout(() => gotQRCode(codes[0].value), 500);
+        }
+      }
+      return;
+    },
+  });
+
+  function gotQRCode(code) {
+    setAddress(code);
+    setQrScanner(false);
+  }
+
+  const onScanPress = async () => {
+    if (!hasPermission) {
+      await requestPermission();
+    }
+    setQrScanner(true);
+  };
 
   function onCloseModal() {
     setQrScanner(false);
@@ -172,7 +187,10 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
         <View>
           <InputField
-            label={t('amount') + `${amount ? ' $' + (fiatPrice * amount).toFixed(2) : ''}`}
+            label={
+              t('amount') +
+              `${amount ? ' $' + (fiatPrice * amount).toFixed(2) : ''}`
+            }
             value={amount}
             onChange={setAmount}
             keyboardType="number-pad"
@@ -199,7 +217,9 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
             <View style={styles.row}>
               <View style={styles.column}>
-              <TextField style={[styles.heading, { borderColor }]}>{t('totalAmount')}</TextField>
+                <TextField style={[styles.heading, { borderColor }]}>
+                  {t('totalAmount')}
+                </TextField>
                 <TextField>
                   {prettyPrintAmount(
                     preparedTx.destinations.userDestinations[0].amount,
@@ -207,7 +227,9 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
                 </TextField>
               </View>
               <View style={styles.column}>
-              <TextField style={[styles.heading, { borderColor }]}>{t('fee')}</TextField>
+                <TextField style={[styles.heading, { borderColor }]}>
+                  {t('fee')}
+                </TextField>
                 <TextField>{prettyPrintAmount(preparedTx?.fee || 0)}</TextField>
               </View>
             </View>
@@ -228,63 +250,25 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
         )}
       </View>
       <ModalCenter visible={qrScanner} closeModal={onCloseModal}>
-       <View style={{width: 300, height: 300, margin: -30, borderRadius: 10, overflow: 'hidden'}}>
+        <View
+          style={{
+            borderRadius: 10,
+            height: 300,
+            margin: -30,
+            overflow: 'hidden',
+            width: 300,
+          }}>
           <Camera
-          ref={camera}
-          onError={onError}
-          photo={false}
-          style={styles.fullScreenCamera}
-          device={device}
-          codeScanner={codeScanner}
-          isActive={qrScanner}
-        />
+            ref={camera}
+            onError={onError}
+            photo={false}
+            style={styles.fullScreenCamera}
+            device={device}
+            codeScanner={codeScanner}
+            isActive={qrScanner}
+          />
         </View>
       </ModalCenter>
     </ScreenLayout>
   );
 };
-
-const styles = StyleSheet.create({
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  button: {
-    margin: 0,
-  },
-  column: {
-    flex: 1,
-  },
-  detail: {
-    color: '#00ffcc',
-    fontFamily: 'Montserrat-Medium',
-    fontSize: 14,
-    marginBottom: 16,
-  },
-
-  heading: {
-    fontFamily: 'Montserrat-SemiBold',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  transactionBox: {
-    borderRadius: 8,
-    borderWidth: 1,
-    padding: 16,
-    width: '100%',
-  },
-  fullScreenCamera: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    flex: 1,
-    zIndex: 100,
-  },
-});

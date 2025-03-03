@@ -22,7 +22,7 @@ import {
   saveRoomToDatabase,
 } from './sqlite';
 
-import { notify } from '../utils';
+import { Notify } from '../../services/utils';
 import {
   getCurrentRoom,
   getRoomsMessages,
@@ -112,7 +112,10 @@ export const updateMessages = async (
       type: 'success',
     });
   } else if (background && !history) {
-    notify({ name: message.nickname, text: message.message }, 'New message');
+    Notify.new(
+      { name: message.nickname, text: message.message },
+      'New message',
+    );
   }
 };
 

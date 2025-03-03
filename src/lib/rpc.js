@@ -17,7 +17,7 @@ import {
 import { Wallet } from '../services/kryptokrona/wallet';
 import b4a from 'b4a';
 import RPC from 'bare-rpc';
-import { notify } from '../services/utils';
+import { Notify, notify } from '../services/utils';
 
 export class Bridge {
   constructor(IPC) {
@@ -113,8 +113,8 @@ export class Bridge {
               });
             }
           }
-          if (json.background) {
-            notify(
+          if (json.background && json.i > 0) {
+            Notify.new(
               {
                 name: 'New messages',
                 text: `You have ${json.i} unread messages`,

@@ -14,6 +14,7 @@ import {
   Camera,
   CameraRuntimeError,
   useCameraDevice,
+  useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
 
@@ -56,7 +57,7 @@ export const MessagesScreen: React.FC<Props> = () => {
   const [name, setName] = useState('Anon');
   const [qrScanner, setQrScanner] = useState(false);
   const [showQR, setShowQR] = useState(false);
-
+  const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
 
@@ -119,7 +120,10 @@ export const MessagesScreen: React.FC<Props> = () => {
     setLink('');
   }
 
-  const onScanPress = () => {
+  const onScanPress = async () => {
+    if (!hasPermission) {
+      await requestPermission();
+    }
     setQrScanner(true);
   };
 

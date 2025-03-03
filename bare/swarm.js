@@ -280,6 +280,7 @@ const incoming_message = async (data, topic, connection, peer) => {
   }
   const message = sanitize_group_message(JSON.parse(str));
   if (!message) return;
+  message.background = Hugin.idle();
   Hugin.send('swarm-message', { message, topic });
 };
 
@@ -796,7 +797,7 @@ const share_file_info = async (file, topic) => {
     fileInfo.size,
     fileInfo.time,
     fileInfo.fileName,
-    file.path,
+    'storage',
     signature,
     'file-shared',
     'file',
@@ -820,6 +821,7 @@ const share_file_info = async (file, topic) => {
       hash: fileInfo.hash,
       sent: true,
       image,
+      uri: file.uri,
     },
   };
 

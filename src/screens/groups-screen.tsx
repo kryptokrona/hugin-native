@@ -12,6 +12,7 @@ import {
   Camera,
   CameraRuntimeError,
   useCameraDevice,
+  useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
 
@@ -54,7 +55,7 @@ export const GroupsScreen: React.FC<Props> = () => {
   const { setThisRoom } = useRoomStore();
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
-
+  const { hasPermission, requestPermission } = useCameraPermission();
   if (device == null) {
     // Alert.alert('Error!', 'Camera could not be started');
   }
@@ -143,7 +144,10 @@ export const GroupsScreen: React.FC<Props> = () => {
     }, []),
   );
 
-  const onScanPress = () => {
+  const onScanPress = async () => {
+    if (!hasPermission) {
+      await requestPermission();
+    }
     setQrScanner(true);
   };
 
