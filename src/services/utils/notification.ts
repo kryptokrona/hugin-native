@@ -33,6 +33,7 @@ class Notifee {
     }
     const text = `You have ${this.pending.length} unread messages`;
     this.display('New messages', text);
+    this.pending = [];
   }
 
   async display(name: string, text: string) {
