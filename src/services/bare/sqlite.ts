@@ -295,15 +295,30 @@ export async function saveRoomUser(
   console.log('Saving group user ', name);
 
   try {
+    if (avatar === '') {
+      const existingUser = await db.executeSql(
+        'SELECT avatar FROM groupusers WHERE address = ? AND room = ?',
+        [address, room]
+      );
+
+      const currentAvatar = existingUser[0]?.rows?.length > 0 ? existingUser[0].rows.item(0).avatar : null;
+
+      if (currentAvatar) {
+        console.log('Avatar already exists and is not empty, skipping update');
+        return;
+      }
+    }
+
     const result = await db.executeSql(
       'REPLACE INTO groupusers (name, address, room, avatar, lastseen) VALUES (?, ?, ?, ?, ?)',
-      [name, address, room, avatar, Date.now()],
+      [name, address, room, avatar, Date.now()]
     );
     console.log(result);
   } catch (err) {
     console.log(err);
   }
 }
+
 
 export async function getRoomUsers(
   room: string
