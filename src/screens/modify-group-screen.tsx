@@ -76,16 +76,19 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     console.log('useMemo triggered! ');
 
     function fetchAndMergeUsers() {
-      console.log('storedRoomUsers', offlineUsers);
       const mergedUsers = [...globalRoomUsers, ...offlineUsers];
       const uniqueUsers = mergedUsers.reduce((acc: User[], user) => {
-        if (!acc.some((u) => u.address === user.address)) {
+        const existingUserIndex = acc.findIndex(
+          (u) => u.address === user.address,
+        );
+        if (existingUserIndex === -1) {
           acc.push(user);
+        } else if (user.online) {
+          acc[existingUserIndex] = user;
         }
         return acc;
       }, []);
-      // setRoomUsers(uniqueUsers);
-      console.log('uniqueUsers', uniqueUsers);
+
       return uniqueUsers;
     }
 
