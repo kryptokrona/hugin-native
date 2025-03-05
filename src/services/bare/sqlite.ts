@@ -262,7 +262,7 @@ export async function saveFileInfo(file: FileInfo) {
   Files.new(file);
   try {
     await db.executeSql(
-      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image, topic)  VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image, topic, type)  VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         file.fileName,
         file.hash,
