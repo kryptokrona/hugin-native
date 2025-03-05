@@ -129,11 +129,15 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     React.useCallback(() => {
       setStoreCurrentRoom(roomKey);
       return () => {};
-    }, [roomKey, change]),
+    }, [roomKey]),
   );
 
   const onlineUsers = useMemo(() => {
-    return Peers.active().length;
+    return Peers.active().filter((a) => a.room === roomKey).length;
+  }, [change]);
+
+  const online = useMemo(() => {
+    return Peers.connected(roomKey);
   }, [change]);
 
   Peers.on('change', () => {
@@ -141,7 +145,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   });
 
   useLayoutEffect(() => {
-    const online = Peers.connected(roomKey);
     navigation.setOptions({
       header: () => (
         <Header
@@ -170,7 +173,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         />
       ),
     });
-  }, [roomKey, name]);
+  }, [roomKey, name, onlineUsers]);
 
   async function onSend(
     text: string,
