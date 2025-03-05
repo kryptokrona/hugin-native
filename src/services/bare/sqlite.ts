@@ -262,7 +262,7 @@ export async function saveFileInfo(file: FileInfo) {
   Files.new(file);
   try {
     await db.executeSql(
-      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image, topic)  VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO files (fileName, hash, timestamp, sent, path, image, topic)  VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         file.fileName,
         file.hash,
@@ -271,6 +271,7 @@ export async function saveFileInfo(file: FileInfo) {
         file.path,
         file.image,
         file.topic,
+        file.type,
       ],
     );
   } catch (err) {
@@ -302,10 +303,13 @@ export async function saveRoomUser(
     if (avatar === '') {
       const existingUser = await db.executeSql(
         'SELECT avatar FROM groupusers WHERE address = ? AND room = ?',
-        [address, room]
+        [address, room],
       );
 
-      const currentAvatar = existingUser[0]?.rows?.length > 0 ? existingUser[0].rows.item(0).avatar : null;
+      const currentAvatar =
+        existingUser[0]?.rows?.length > 0
+          ? existingUser[0].rows.item(0).avatar
+          : null;
 
       if (currentAvatar) {
         console.log('Avatar already exists and is not empty, skipping update');
@@ -315,7 +319,7 @@ export async function saveRoomUser(
 
     const result = await db.executeSql(
       'REPLACE INTO groupusers (name, address, room, avatar, lastseen) VALUES (?, ?, ?, ?, ?)',
-      [name, address, room, avatar, Date.now()]
+      [name, address, room, avatar, Date.now()],
     );
     console.log(result);
   } catch (err) {
