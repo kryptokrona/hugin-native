@@ -202,7 +202,7 @@ export const MessageInput: React.FC<Props> = ({
     waveformRef.current
       ?.startRecord({
         updateFrequency: UpdateFrequency.high,
-        sampleRate: 144,
+        sampleRate: 8000,
         bitRate: 24000,
 
       })
@@ -389,7 +389,7 @@ function Actions(
         <CustomIcon name="camera" type="IO" size={24} color={color} />
       </TouchableOpacity>
       <TouchableOpacity onPressIn={onRecordAudio} onPressOut={onStopRecordAudio} style={styles.btn}>
-        <CustomIcon name="microphone" type="FA5" size={24} color={color} />
+        <CustomIcon name="microphone" type="FA6" size={24} color={color} />
       </TouchableOpacity>
       <TouchableOpacity onPress={onFilePress} style={styles.btn}>
         <CustomIcon
