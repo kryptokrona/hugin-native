@@ -84,7 +84,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isImageMessage: boolean = false;
       let imagePath = '';
 
-      if (file?.path && file?.image && file?.path.split('.').at(-1) != 'm4a') {
+      if (file?.path && file?.image && file?.type == 'image') {
         isImageMessage = true;
         imagePath = 'file://' + file.path;
       }
@@ -99,7 +99,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let imagePath = '';
 
       const parsedMessage = replyto?.[0].file;
-      if (parsedMessage?.path && parsedMessage?.image && file?.path.split('.').at(-1) != 'm4a') {
+      if (parsedMessage?.path && parsedMessage?.image && file?.type == 'image') {
         isImageMessage = true;
         imagePath = 'file://' + parsedMessage.path;
       }
@@ -113,7 +113,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isAudioMessage: boolean = false;
       let audioPath = '';
 
-      if (file?.path && file?.path.split('.').at(-1) == 'm4a') {
+      if (file?.path && file?.type == 'audio') {
         isAudioMessage = true;
         audioPath = 'file://' + file.path;
       }
