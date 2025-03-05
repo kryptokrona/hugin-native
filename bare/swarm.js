@@ -796,7 +796,7 @@ const share_file_info = async (file, topic) => {
     fileInfo.size,
     fileInfo.time,
     fileInfo.fileName,
-    'storage',
+    file.path,
     signature,
     'file-shared',
     'file',
