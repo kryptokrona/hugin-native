@@ -28,6 +28,7 @@ import {
   InputField,
   TextButton,
   ModalCenter,
+  Unreads,
 } from '@/components';
 import { MainScreens } from '@/config';
 import { useGlobalStore, setStoreCurrentRoom, useThemeStore } from '@/services';
@@ -63,7 +64,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
-
+  const [change, setChange] = useState<boolean>(false);
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
       return '';
@@ -128,8 +129,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     React.useCallback(() => {
       setStoreCurrentRoom(roomKey);
       return () => {};
-    }, [roomKey]),
+    }, [roomKey, change]),
   );
+
+  const onlineUsers = useMemo(() => {
+    return Peers.active().length;
+  }, [change]);
+
+  Peers.on('change', () => {
+    setChange(!change);
+  });
 
   useLayoutEffect(() => {
     const online = Peers.connected(roomKey);
@@ -143,14 +152,19 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               style={{ flexDirection: 'row' }}
               onPress={onCustomizeGroupPress}>
               <View style={{ marginRight: 5, marginTop: 4 }}>
-                <CustomIcon
-                  name={'lens'}
-                  size={14}
-                  type={'MI'}
+                <Unreads
+                  unreads={onlineUsers}
                   color={`${online ? 'green' : 'grey'}`}
                 />
               </View>
+
               <CustomIcon type="MI" name={'groups-3'} />
+              <CustomIcon
+                name={'lens'}
+                size={10}
+                type={'MI'}
+                color={`${online ? 'green' : 'grey'}`}
+              />
             </TouchableOpacity>
           }
         />
@@ -165,7 +179,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     emoji?: boolean | undefined,
     tip?: TipType | undefined,
   ) {
-
     console.log('Sending to room:', name);
     if (file) {
       onSendGroupMessageWithFile(roomKey, file, text);
