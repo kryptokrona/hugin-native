@@ -14,7 +14,6 @@ import RNFS from 'react-native-fs';
 import { bare, P2P, send_idle_status } from 'lib/native';
 
 import {
-  getCurrentRoom,
   getThisRoom,
   setStoreCurrentRoom,
   updateUser,
@@ -170,8 +169,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Or display notifications during background mode
         // await P2P.close();
         send_idle_status(true);
-        setThisRoom(getCurrentRoom());
-        setStoreCurrentRoom('');
+        setThisRoom(getThisRoom());
         Wallet.active?.stop();
 
         if (started) {
@@ -184,8 +182,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('Close!');
         // await P2P.close();
         send_idle_status(true);
-        setThisRoom(getCurrentRoom());
-        setStoreCurrentRoom('');
+        setThisRoom(getThisRoom());
         Wallet.active?.stop();
         if (started) {
           await Background.init();
