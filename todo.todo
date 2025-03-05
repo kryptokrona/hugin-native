@@ -36,6 +36,9 @@ Todo node picker:
     ✔ Handle themes @done(24-12-29 22:38)
     ☐ Invoke when creating/importing wallet
 
+Todo DMs:
+    ☐ Fix sending/sent/failed for each message sent.
+
 Bugs:
     ✔ Make sure new accounts don't get stuck on 0 @done(25-02-08 19:39)
     ✔ Pick best random node for new account (no hard coded) @done(25-02-27 19:05)

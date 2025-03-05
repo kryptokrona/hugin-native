@@ -86,6 +86,12 @@ export class Bridge {
           console.log('end-swarm!');
           break;
         case 'swarm-message':
+          saveRoomUser(
+            json.message.name,
+            json.message.address,
+            json.message.room,
+            ''
+          );
           saveRoomMessageAndUpdate(
             json.message.address,
             json.message.message,

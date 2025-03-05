@@ -150,7 +150,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
       <View style={styles.scrollViewContainer}>
         <View style={styles.flatListContainer}>
           <TextField size={'xsmall'} type="muted">
-            {t('onlineRoomMembers')}
+            {`${t('onlineRoomMembers')} (${globalRoomUsers?.length})`}
           </TextField>
           <FlatList
             nestedScrollEnabled={true}
@@ -193,6 +193,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   flatListContainer: {
     marginVertical: 12,
+    maxHeight: 390
   },
   leaveContainer: {
     flex: 1,
