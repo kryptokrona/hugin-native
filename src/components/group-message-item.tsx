@@ -300,13 +300,13 @@ export const GroupMessageItem: React.FC<Props> = ({
                   style={styles.playBackControlPressable}>
                     {playerState !== PlayerState.playing
                           ? <CustomIcon
-                          type="FA5"
+                          type="FA6"
                           name="play"
                           color={color}
                           size={20}
                         />
                           : <CustomIcon
-                          type="FA5"
+                          type="FA6"
                           name="pause"
                           color={color}
                           size={20}
