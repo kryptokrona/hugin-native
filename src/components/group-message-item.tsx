@@ -1,12 +1,25 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore, useThemeStore } from '@/services';
 import { Message, TipType } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
+
+import {
+  FinishMode,
+  IWaveformRef,
+  PermissionStatus,
+  PlaybackSpeedType,
+  PlayerState,
+  RecorderState,
+  UpdateFrequency,
+  Waveform,
+  useAudioPermission,
+  useAudioPlayer,
+} from '@simform_solutions/react-native-audio-waveform';
 
 import {
   Avatar,
@@ -55,6 +68,11 @@ export const GroupMessageItem: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const [actionsModal, setActionsModal] = useState(false);
   const [actions, setActions] = useState(true);
+  const ref = useRef<IWaveformRef>(null);
+  const [playerState, setPlayerState] = useState(PlayerState.stopped);
+  const [isLoading, setIsLoading] = useState(true);
+
+
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
@@ -66,7 +84,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isImageMessage: boolean = false;
       let imagePath = '';
 
-      if (file?.path && file?.image) {
+      if (file?.path && file?.image && file?.path.split('.').at(-1) != 'm4a') {
         isImageMessage = true;
         imagePath = 'file://' + file.path;
       }
@@ -81,7 +99,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let imagePath = '';
 
       const parsedMessage = replyto?.[0].file;
-      if (parsedMessage?.path && parsedMessage?.image) {
+      if (parsedMessage?.path && parsedMessage?.image && file?.path.split('.').at(-1) != 'm4a') {
         isImageMessage = true;
         imagePath = 'file://' + parsedMessage.path;
       }
@@ -89,6 +107,33 @@ export const GroupMessageItem: React.FC<Props> = ({
       return { imagePath, isImageMessage };
     } catch (e) {}
   }, [replyto]);
+
+  const audioDetails = useMemo(() => {
+    try {
+      let isAudioMessage: boolean = false;
+      let audioPath = '';
+
+      if (file?.path && file?.path.split('.').at(-1) == 'm4a') {
+        isAudioMessage = true;
+        audioPath = 'file://' + file.path;
+      }
+      // setIsLoading(false);
+      return { audioPath, isAudioMessage };
+    } catch (e) {}
+  }, [message]);
+
+  setTimeout(() => {setIsLoading(false)}, 100)
+
+  const handlePlayPauseAction = async () => {
+
+      if (ref.current?.currentState === PlayerState.paused) {
+        await ref.current?.resumePlayer();
+      } else if (ref.current?.currentState === PlayerState.playing) {
+        await ref.current?.pausePlayer();
+      } else {
+        await ref.current?.startPlayer();
+      }
+    };
 
   function handleLongPress() {
     if (dm) {
@@ -239,7 +284,7 @@ export const GroupMessageItem: React.FC<Props> = ({
                 {dateString}
               </TextField>
             </View>
-            {imageDetails?.isImageMessage ? (
+            {imageDetails?.isImageMessage && (
               <TouchableOpacity onPress={handleImagePress}>
                 <Image
                   style={[{aspectRatio: imageAspectRatio}, styles.image]}
@@ -247,8 +292,59 @@ export const GroupMessageItem: React.FC<Props> = ({
                   resizeMode="cover"
                 />
               </TouchableOpacity>
-            ) : (
-              <TextField size="small" style={styles.message}>
+            )}
+            {!isLoading && audioDetails?.isAudioMessage && (
+              <View style={styles.waveFormWrapper}>
+                <Pressable
+                  onPress={handlePlayPauseAction}
+                  style={styles.playBackControlPressable}>
+                    {playerState !== PlayerState.playing
+                          ? <CustomIcon
+                          type="FA5"
+                          name="play"
+                          color={color}
+                          size={20}
+                        />
+                          : <CustomIcon
+                          type="FA5"
+                          name="pause"
+                          color={color}
+                          size={20}
+                        />}
+                          
+                </Pressable>
+              <Waveform
+              containerStyle={styles.staticWaveformView}
+              mode="static"
+              key={audioDetails?.audioPath}
+              playbackSpeed={1}
+              ref={ref}
+              path={audioDetails?.audioPath}
+              candleSpace={2}
+              candleWidth={4}
+              scrubColor={'#fff'}
+              waveColor={color}
+              candleHeightScale={4}
+              onPlayerStateChange={setPlayerState}
+              onChangeWaveformLoadState={state => {
+                console.log('waveform loading: ', state)
+                // setIsLoading(state);
+              }}
+              onError={error => {
+                console.log('Error in static player:', error);
+              }}
+              onCurrentProgressChange={(_currentProgress, _songDuration) => {
+                // console.log(
+                  //   `currentProgress ${currentProgress}, songDuration ${songDuration}`
+                  // );
+                  if (_currentProgress === _songDuration) ref.current?.stopPlayer();
+                }}
+                />
+                
+                </View>
+            )}
+            {!audioDetails?.isAudioMessage && !imageDetails?.isImageMessage && (
+            <TextField size="small" style={styles.message}>
                 {message ?? ''}
               </TextField>
             )}
@@ -266,6 +362,18 @@ export const GroupMessageItem: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
+  waveFormWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignContent: 'center',
+    justifyContent: 'center',
+    verticalAlign: 'middle',
+    alignItems: 'center',
+    textAlignVertical: 'center',
+    gap: 10,
+    width: '100%',
+  alignSelf: 'stretch',
+  },
   avatar: { marginRight: 10 },
   container: {
     flexDirection: 'row',
@@ -321,4 +429,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     paddingRight: 10,
   },
+  staticWaveformView: {
+    flex: 1,
+  }
 });
