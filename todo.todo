@@ -58,5 +58,5 @@ Bug reports:
 
 Todo file sharing:
     ☐ Optimistic UI (show loader when a file is being transmitted)
-    ☐ Send text with images
-    ☐ Record and send audio
+    ✔ Send text with images @done(25-03-04 22:57)
+    ✔ Record and send audio @done(25-03-05 04:23)
