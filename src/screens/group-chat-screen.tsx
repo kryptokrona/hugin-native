@@ -1,4 +1,10 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   FlatList,
@@ -140,9 +146,15 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     return Peers.connected(roomKey);
   }, [change]);
 
-  Peers.on('change', () => {
-    setChange(!change);
-  });
+  useEffect(() => {
+    const subscription = Peers.on('change', () => {
+      setChange(!change);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
