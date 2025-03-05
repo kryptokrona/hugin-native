@@ -79,7 +79,8 @@ export interface FileInfo {
   hash: string;
   image: boolean;
   name?: string;
-  topic?: string;
+  topic?: string | null;
+  type?: string | null;
 }
 
 export interface TipType {

@@ -10,7 +10,7 @@ const {
   verify_signature,
   sign_admin_message,
   sanitize_file_message,
-  check_if_image_or_video,
+  check_if_media,
   sign_joined_message,
   check_hash,
   room_message_exists,
@@ -693,9 +693,9 @@ const save_file_info = (data, topic, address, time, sent, name) => {
 
 const check_file_message = async (data, topic, address, name) => {
   const active = get_active_topic(topic);
-
+  const [media, type] = check_if_media(data.fileName, data.size);
   //TODO** Add switch to enable/disable auto syncing images
-  if (check_if_image_or_video(data.fileName, data.size) && Hugin.syncImages) {
+  if (media && Hugin.syncImages) {
     //A file is shared and we have auto sync images on.
     //Request to download the file
     const file = {
@@ -727,7 +727,7 @@ const check_file_message = async (data, topic, address, name) => {
     );
 
     //Enable / disable auto downloading of image video audio here
-    if (check_if_image_or_video(data.fileName, data.size)) {
+    if (media) {
       const file = {
         chat: address,
         fileName: data.fileName,
@@ -801,7 +801,7 @@ const share_file_info = async (file, topic) => {
     'file-shared',
     'file',
   );
-  const image = check_if_image_or_video(file.fileName, file.size);
+  const [media, type] = check_if_media(file.fileName, file.size);
 
   const message = {
     address: Hugin.address,
@@ -819,7 +819,8 @@ const share_file_info = async (file, topic) => {
       timestamp: file.time,
       hash: fileInfo.hash,
       sent: true,
-      image,
+      image: media,
+      type: type,
     },
   };
 

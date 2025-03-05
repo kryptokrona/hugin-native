@@ -2,19 +2,22 @@ const Corestore = require('corestore');
 const Hyperdrive = require('hyperdrive');
 const fs = require('bare-fs');
 const MEDIA_TYPES = [
-  '.png',
-  '.jpg',
-  '.gif',
-  '.jpeg',
-  '.jfif',
-  '.mp4',
-  '.webm',
-  '.avi',
-  '.webp',
-  '.mov',
-  '.wmv',
-  '.mkv',
-  '.mpeg',
+  { file: '.png', type: 'image' },
+  { file: '.jpg', type: 'image' },
+  { file: '.gif', type: 'image' },
+  { file: '.jfif', type: 'image' },
+  { file: '.jpeg', type: 'image' },
+  { file: '.mp4', type: 'video' },
+  { file: '.webm', type: 'video' },
+  { file: '.avi', type: 'video' },
+  { file: '.webp', type: 'video' },
+  { file: '.mov', type: 'video' },
+  { file: '.wmv', type: 'video' },
+  { file: '.mkv', type: 'video' },
+  { file: '.mpeg', type: 'video' },
+  { file: '.m4a', type: 'audio' },
+  { file: '.mp3', type: 'audio' },
+  { file: '.wav', type: 'audio' },
 ];
 const { get_new_peer_keys, sleep } = require('./utils.js');
 const Huginbeam = require('huginbeam');
@@ -116,7 +119,8 @@ class HyperStorage {
     console.log('****Save file to drive****');
     if (this.saved > this.limit) return false;
     if (downloaded) {
-      if (!this.check(size, downloaded, fileName)) return false;
+      const [media, fileType] = this.check(size, downloaded, fileName);
+      if (!media) return false;
     }
     this.saved = this.saved + size;
     console.log('Saved thus far:', this.saved);
@@ -163,11 +167,11 @@ class HyperStorage {
     if (buf.length > size) return false;
     if (size > this.limit) return false;
     for (const a of MEDIA_TYPES) {
-      if (name.toLowerCase().endsWith(a)) {
-        return true;
+      if (name.toLowerCase().endsWith(a.file)) {
+        return [true, a.type];
       }
     }
-    return false;
+    return [false];
   }
 
   async start_beam(upload, key, file, topic, room) {
@@ -273,6 +277,7 @@ class HyperStorage {
         );
 
         if (!saved) return;
+        const [media, fileType] = this.check(file.size, buffer, file.fileName);
         Hugin.files.push(file.hash);
         ////*******TEMP*********////
         // Wrtite file to normal download path until we fixed bridge stream from bare -> React
@@ -306,9 +311,10 @@ class HyperStorage {
             address: file.address,
             hash: file.hash,
             timestamp: file.time,
-            image: true,
+            image: media,
             path: filePath,
             topic,
+            type: fileType,
           }, //FileInfo type
           tip: false,
         };

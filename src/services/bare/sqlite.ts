@@ -128,6 +128,11 @@ export const initDB = async () => {
       await db.executeSql(query);
     } catch (err) {}
 
+    query = 'ALTER TABLE files ADD type TEXT default null';
+    try {
+      await db.executeSql(query);
+    } catch (err) {}
+
     const xkrwallet = `CREATE TABLE IF NOT EXISTS wallet (
       id INTEGER PRIMARY KEY,
       json TEXT
@@ -271,7 +276,6 @@ export async function saveFileInfo(file: FileInfo) {
   } catch (err) {
     console.log(err);
   }
-
 }
 
 export async function loadSavedFiles() {
@@ -305,9 +309,7 @@ export async function saveRoomUser(
   }
 }
 
-export async function getRoomUsers(
-  room: string
-): Promise<User[]> {
+export async function getRoomUsers(room: string): Promise<User[]> {
   console.log('Get room users for room ', room);
 
   try {
@@ -321,13 +323,13 @@ export async function getRoomUsers(
     for (const result of results) {
       for (let index = 0; index < result.rows.length; index++) {
         const row = result.rows.item(index);
-        console.log('Got user: ', row.name)
+        console.log('Got user: ', row.name);
         const user: User = {
           address: row.address,
           avatar: row.avatar,
+          lastseen: row.lastseen,
           name: row.name,
           online: false,
-          lastseen: row.lastseen
         };
         users.push(user);
       }
@@ -338,7 +340,6 @@ export async function getRoomUsers(
     return [];
   }
 }
-
 
 export async function saveRoomToDatabase(
   name: string,
@@ -553,10 +554,7 @@ export async function getLatestRoomMessages() {
   return roomsList;
 }
 
-export async function getRoomMessages(
-  room: string,
-  page: number
-) {
+export async function getRoomMessages(room: string, page: number) {
   const limit: number = 55;
   let offset: number = 0;
   if (page !== 0) {

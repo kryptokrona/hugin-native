@@ -3,7 +3,7 @@ const Huginbeam = require('huginbeam');
 const {
   sleep,
   random_key,
-  check_if_image_or_video,
+  check_if_media,
   get_new_peer_keys,
 } = require('./utils');
 const { Hugin } = require('./account');
@@ -322,7 +322,8 @@ const download_file = async (fileName, size, chat, key, room = false) => {
     });
     active.beam.pipe(stream);
     active.beam.on('end', (a) => {
-      if (check_if_image_or_video(fileName, size)) {
+      const [media, type] = check_if_media(fileName, size);
+      if (media) {
         //Only images etc here
         const message = {
           address: chat,
@@ -342,6 +343,7 @@ const download_file = async (fileName, size, chat, key, room = false) => {
             hash: file.hash,
             sent: false,
             image: true,
+            type,
           },
         };
         Hugin.send('swarm-message', { message });
@@ -464,8 +466,9 @@ const add_group_file = async (
   size,
 ) => {
   Hugin.send('room-remote-file-added', { chat, room, remoteFiles });
+  const [media, type] = check_if_media(fileName, size);
   //If its not a image/video type or size out of bounds, return some message info about file.
-  if (!check_if_image_or_video(fileName, size)) {
+  if (!media) {
     const message = {
       address: chat,
       channel: 'Room',

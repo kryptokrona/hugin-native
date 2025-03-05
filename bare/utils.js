@@ -273,30 +273,33 @@ const sanitizeHtml = (data) => {
 };
 
 //Check if it is an image or video with allowed type
-function check_if_image_or_video(path, size) {
+function check_if_media(path, size) {
   if (path === undefined) return false;
   if (size >= 10000000) return false;
   const types = [
-    '.png',
-    '.jpg',
-    '.gif',
-    '.jfif',
-    '.jpeg',
-    '.mp4',
-    '.webm',
-    '.avi',
-    '.webp',
-    '.mov',
-    '.wmv',
-    '.mkv',
-    '.mpeg',
+    { file: '.png', type: 'image' },
+    { file: '.jpg', type: 'image' },
+    { file: '.gif', type: 'image' },
+    { file: '.jfif', type: 'image' },
+    { file: '.jpeg', type: 'image' },
+    { file: '.mp4', type: 'video' },
+    { file: '.webm', type: 'video' },
+    { file: '.avi', type: 'video' },
+    { file: '.webp', type: 'video' },
+    { file: '.mov', type: 'video' },
+    { file: '.wmv', type: 'video' },
+    { file: '.mkv', type: 'video' },
+    { file: '.mpeg', type: 'video' },
+    { file: '.m4a', type: 'audio' },
+    { file: '.mp3', type: 'audio' },
+    { file: '.wav', type: 'audio' },
   ];
-  for (a in types) {
-    if (path.toLowerCase().endsWith(types[a])) {
-      return true;
+  for (const a of types) {
+    if (path.toLowerCase().endsWith(a.file)) {
+      return [true, a.type];
     }
   }
-  return false;
+  return [false];
 }
 
 const toUintArray = (val) => {
@@ -343,7 +346,7 @@ module.exports = {
   verify_signature,
   sign_admin_message,
   sleep,
-  check_if_image_or_video,
+  check_if_media,
   sign_joined_message,
   check_hash,
   create_room_invite,
