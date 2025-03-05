@@ -323,14 +323,7 @@ export async function saveRoomUser(
   }
 }
 
-<<<<<<< HEAD
 export async function getRoomUsers(room: string): Promise<User[]> {
-=======
-
-export async function getRoomUsers(
-  room: string
-): Promise<User[]> {
->>>>>>> f90ad61b0be1bd1ae2247b87b4c9fde233859a18
   console.log('Get room users for room ', room);
 
   try {
