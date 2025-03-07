@@ -83,7 +83,10 @@ class Room {
 function idle() {
   for (const room of active_swarms) {
     if (Hugin.idle()) room.swarm.suspend();
-    else room.swarm.resume();
+    else {
+      room.swarm.resume();
+      room.discovery.refresh({ client: true, server: true });
+    }
   }
 }
 const create_swarm = async (hashkey, key) => {
