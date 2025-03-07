@@ -130,7 +130,7 @@ const beam_event = (beam, chat, key) => {
 
   beam.on('connected', function () {
     console.log('Beam connected to peer');
-    check_if_online(addr);
+    check_if_online(chat);
     Hugin.send('beam-connected', { chat, topic });
   });
 
@@ -143,11 +143,11 @@ const beam_event = (beam, chat, key) => {
     if (str === 'Ping') {
       return;
     }
-    if (check_data_message(str, addr)) {
+    if (check_data_message(str, chat)) {
       return;
     }
     const hash = str.substring(0, 64);
-    Hugin.send('beam-message', { message, hash });
+    Hugin.send('beam-message', { message: str.substring(65), hash });
   });
 
   beam.on('end', () => {
@@ -157,7 +157,7 @@ const beam_event = (beam, chat, key) => {
   beam.on('error', function (e) {
     console.log('error', e);
     console.log('Beam error');
-    end_beam(addr);
+    end_beam(chat);
   });
 
   process.once('SIGINT', () => {

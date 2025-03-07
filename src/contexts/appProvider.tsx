@@ -170,7 +170,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Or display notifications during background mode
         // await Rooms.close();
         Rooms.idle(true);
-        Rooms.pause();
+        // Rooms.pause();
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
 
@@ -184,7 +184,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('Close!');
         // await Rooms.close();
         Rooms.idle(true);
-        Rooms.pause();
+        // Rooms.pause();
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
         if (started) {
@@ -193,7 +193,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
         Rooms.idle(false);
-        Rooms.resume();
+        // Rooms.resume();
         if (started && !joining) {
           joining = true;
           if (!Camera.active) {

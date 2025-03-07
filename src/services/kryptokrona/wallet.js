@@ -35,7 +35,7 @@ import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
 import naclUtil from 'tweetnacl-util';
 import tweetnacl from 'tweetnacl';
-import { Beam } from '../lib/native';
+import { Beam } from '../../lib/native';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
