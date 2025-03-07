@@ -140,7 +140,7 @@ class Syncer {
 
           if (await this.check_for_viewtag(thisExtra)) {
             if (await messageExists(thisHash)) continue;
-            await this.check_for_pm(thisExtra, thisHash, que);
+            await this.check_for_pm(thisExtra, thisHash);
             continue;
           }
           //Check for private message //TODO remove this when viewtags are active
@@ -155,26 +155,26 @@ class Syncer {
     }
   }
 
-  async check_for_pm(thisExtra, thisHash, que = false) {
+  async check_for_pm(thisExtra, thisHash) {
     const [privateSpendKey, privateViewKey] = this.keys;
     const keys = { privateSpendKey, privateViewKey };
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
     if (!message) return false;
     console.log('FOUND A MESSAGE WOOHP ------->');
-    console.log('', message);
+    const [text, addr, key, timestamp, sent] = this.sanitize_pm(message);
+    if (!text) return;
     if (message.type === 'sealedbox' || 'box') {
-      message.sent = false;
-      if (que) {
-        this.incoming_pm_que.push(message);
-        return true;
+      if (!this.known_keys.some((a) => a === key)) {
+        const added = await addContact('Anon', addr, key);
+        if (added) {
+          this.known_keys.push(added.messagekey);
+        }
       }
-
-      const added = await addContact(message.from, message.from, message.k);
       const saved = await saveMessage(
-        message.from,
-        message.msg,
-        message.r,
-        message.t,
+        addr,
+        text,
+        '', //Todo reply
+        timestamp,
         thisHash,
         false,
         undefined,
@@ -182,12 +182,10 @@ class Syncer {
       if (saved) {
         updateMessage(saved);
       }
-      if (added) {
-        this.known_keys.push(added.messagekey);
-      }
       setLatestMessages();
       return true;
     }
+    return;
   }
 
   async check_for_viewtag(extra) {
@@ -245,6 +243,21 @@ class Syncer {
       ///TODO ** SAVE here
     }
     this.incoming_pm_que = [];
+  }
+
+  sanitize_pm(msg) {
+    let sent = msg.sent;
+    let addr = msg.from;
+    let timestamp = msg.t;
+    let key = msg.k;
+    let message = msg.msg;
+    if (message?.length > 777 || msg.msg === undefined) return [false];
+    if (addr?.length > 99 || addr === undefined) return [false];
+    if (typeof sent !== 'boolean') return [false];
+    if (timestamp?.length > 25) return [false];
+    if (key?.length > 64) return [false];
+
+    return [message, addr, key, timestamp, sent];
   }
 }
 

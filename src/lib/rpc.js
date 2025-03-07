@@ -18,7 +18,7 @@ import { Wallet } from '../services/kryptokrona/wallet';
 import b4a from 'b4a';
 import RPC from 'bare-rpc';
 import { Notify, notify } from '../services/utils';
-
+import { MessageSync } from '../services/hugin/syncer';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -79,6 +79,7 @@ export class Bridge {
           break;
         case 'beam-message':
           console.log('string? decrypt this! -->', json.message);
+          MessageSync.check_for_pm(json.message, json.hash);
           break;
         case 'get-history':
           //Get history from db
