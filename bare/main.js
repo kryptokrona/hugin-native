@@ -7,6 +7,7 @@ const {
   end_swarm,
   share_file_info,
   close_all_connections,
+  idle,
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
@@ -53,6 +54,7 @@ const onrequest = async (p) => {
       break;
     case 'idle_status':
       Hugin.sleep(p.mode);
+      idle();
       break;
     case 'close_connections':
       close_all_connections();

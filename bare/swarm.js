@@ -80,6 +80,12 @@ class Room {
   }
 }
 
+function idle() {
+  for (const room of active_swarms) {
+    if (Hugin.idle()) room.swarm.suspend();
+    else room.swarm.resume();
+  }
+}
 const create_swarm = async (hashkey, key) => {
   console.log('Creating swarm!');
   const room = new Room();
@@ -1097,4 +1103,5 @@ module.exports = {
   share_file_info,
   request_download,
   close_all_connections,
+  idle,
 };
