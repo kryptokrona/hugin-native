@@ -130,7 +130,7 @@ export const GroupMessageItem: React.FC<Props> = ({
         await ref.current?.resumePlayer();
       } else if (ref.current?.currentState === PlayerState.playing) {
         await ref.current?.pausePlayer();
-      } else {
+      } else if (ref.current?.currentState === PlayerState.stopped) {
         await ref.current?.startPlayer();
       }
     };
@@ -300,13 +300,13 @@ export const GroupMessageItem: React.FC<Props> = ({
                   style={styles.playBackControlPressable}>
                     {playerState !== PlayerState.playing
                           ? <CustomIcon
-                          type="FA6"
+                          type="FI"
                           name="play"
                           color={color}
                           size={20}
                         />
                           : <CustomIcon
-                          type="FA6"
+                          type="FI"
                           name="pause"
                           color={color}
                           size={20}
@@ -335,9 +335,9 @@ export const GroupMessageItem: React.FC<Props> = ({
               }}
               onCurrentProgressChange={(_currentProgress, _songDuration) => {
                 // console.log(
-                  //   `currentProgress ${currentProgress}, songDuration ${songDuration}`
-                  // );
-                  if (_currentProgress === _songDuration) ref.current?.stopPlayer();
+                //     `currentProgress ${_currentProgress}, songDuration ${_songDuration}`
+                //   );
+                  // if (_currentProgress === _songDuration) ref.current?.stopPlayer();
                 }}
                 />
                 
