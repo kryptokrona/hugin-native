@@ -10,7 +10,7 @@ const {
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
-const { new_beam } = require('./beam');
+const { new_beam, send_beam_message } = require('./beam');
 const { IPC } = BareKit;
 
 const rpc = new Bridge(IPC);
@@ -28,6 +28,9 @@ const onrequest = async (p) => {
       break;
     case 'new_beam':
       await new_beam(p.key, p.huginAddress, p.send);
+      break;
+    case 'beam_message':
+      send_beam_message(p.payload, p.to);
       break;
     case 'new_swarm':
       await newSwarm(p.hashkey, p.key, p.admin);

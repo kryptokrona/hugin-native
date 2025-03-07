@@ -8,37 +8,32 @@ import {
   Platform,
 } from 'react-native';
 
+import {
+  IWaveformRef,
+  PermissionStatus,
+  RecorderState,
+  UpdateFrequency,
+  Waveform,
+  useAudioPermission,
+} from '@simform_solutions/react-native-audio-waveform';
 import { useTranslation } from 'react-i18next';
 import DocumentPicker, { types } from 'react-native-document-picker';
+import RNFS from 'react-native-fs';
 import {
   CameraOptions,
   launchCamera,
   launchImageLibrary,
 } from 'react-native-image-picker';
-import RNFS from 'react-native-fs';
 import { useCameraPermission } from 'react-native-vision-camera';
 
 import { Camera } from 'services/bare/globals';
 
 import { useThemeStore } from '@/services';
 import { Styles, commonInputProps } from '@/styles';
-import type { SelectedFile, SelectedRecording } from '@/types';
+import type { SelectedFile } from '@/types';
 import { sleep } from '@/utils';
 
 import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
-
-import {
-  FinishMode,
-  IWaveformRef,
-  PermissionStatus,
-  PlaybackSpeedType,
-  PlayerState,
-  RecorderState,
-  UpdateFrequency,
-  Waveform,
-  useAudioPermission,
-  useAudioPlayer,
-} from '@simform_solutions/react-native-audio-waveform';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
@@ -69,8 +64,8 @@ export const MessageInput: React.FC<Props> = ({
   const [recorderState, setRecorderState] = useState(RecorderState.stopped);
   const { checkHasAudioRecorderPermission, getAudioRecorderPermission } =
     useAudioPermission();
-  const [selectedRecording, setselectedRecording] = useState<SelectedFile | null>(null);
-
+  const [selectedRecording, setselectedRecording] =
+    useState<SelectedFile | null>(null);
 
   useEffect(() => {
     if (replyToName?.length) {
@@ -198,22 +193,22 @@ export const MessageInput: React.FC<Props> = ({
   }
 
   const startRecording = () => {
-    console.log('Starting recording..')
+    console.log('Starting recording..');
     waveformRef.current
       ?.startRecord({
-        updateFrequency: UpdateFrequency.high,
-        sampleRate: 8000,
         bitRate: 24000,
-
+        sampleRate: 8000,
+        updateFrequency: UpdateFrequency.high,
       })
       .then((recording) => {
         console.log('Recording..', recording);
       })
-      .catch((e) => {console.log('Audio error: ', e)});
+      .catch((e) => {
+        console.log('Audio error: ', e);
+      });
   };
 
   async function onRecordAudio() {
-
     setIsRecording(true);
 
     const hasPermission = await checkHasAudioRecorderPermission();
@@ -236,7 +231,6 @@ export const MessageInput: React.FC<Props> = ({
     console.log('Recording complete: ', recording);
     const path = recording?.slice(7, recording.length);
     const file = await RNFS.stat(path);
-    
 
     const fileInfo: SelectedFile = {
       fileName: recording?.split('/').at(-1),
@@ -248,7 +242,6 @@ export const MessageInput: React.FC<Props> = ({
     };
 
     setSelectedFile(fileInfo);
-
   }
 
   function handleSend() {
@@ -321,48 +314,51 @@ export const MessageInput: React.FC<Props> = ({
         )}
         {displayActions &&
           !dm &&
-          Actions(onCameraPress, onFilePress, onRecordAudio, onStopRecordAudio, theme.primary, styles)}
-          {!isRecording ? 
-        (<TextInput
-        style={[
-          styles.inputField,
-          { borderColor: theme.input, color, height: Math.min(height, 60) },
-        ]}
-        value={text}
-        onChangeText={onChange}
-        onBlur={onBlur}
-        ref={textInputRef}
-        onFocus={onFocus}
-        placeholder=" "
-        placeholderTextColor={theme.mutedForeground}
-        multiline
-        autoCapitalize="sentences"
-        autoCorrect
-        returnKeyLabel={t('send')}
-        returnKeyType="send"
-        onContentSizeChange={(event) => {
-          setHeight(event.nativeEvent.contentSize.height);
-        }}
-        {...commonInputProps}
-        />)
-        : 
-
-        (        
+          Actions(
+            onCameraPress,
+            onFilePress,
+            onRecordAudio,
+            onStopRecordAudio,
+            theme.primary,
+            styles,
+          )}
+        {!isRecording ? (
+          <TextInput
+            style={[
+              styles.inputField,
+              { borderColor: theme.input, color, height: Math.min(height, 60) },
+            ]}
+            value={text}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            ref={textInputRef}
+            onFocus={onFocus}
+            placeholder=" "
+            placeholderTextColor={theme.mutedForeground}
+            multiline
+            autoCapitalize="sentences"
+            autoCorrect
+            returnKeyLabel={t('send')}
+            returnKeyType="send"
+            onContentSizeChange={(event) => {
+              setHeight(event.nativeEvent.contentSize.height);
+            }}
+            {...commonInputProps}
+          />
+        ) : (
           <Waveform
-          mode="live"
-          containerStyle={styles.liveWaveformView}
-          ref={waveformRef}
-          candleSpace={2}
-          candleWidth={4}
-          waveColor={color}
-          // onRecorderStateChange={setRecorderState}
-          onRecorderStateChange={recorderState => console.log('recorderState', recorderState)}
-
-        />
-      )
-
-        
-        }
+            mode="live"
+            containerStyle={styles.liveWaveformView}
+            ref={waveformRef}
+            candleSpace={2}
+            candleWidth={4}
+            waveColor={color}
+            // onRecorderStateChange={setRecorderState}
+            onRecorderStateChange={(recorderState) =>
+              console.log('recorderState', recorderState)
+            }
+          />
+        )}
 
         <TouchableOpacity
           onPress={handleSend}
@@ -388,7 +384,10 @@ function Actions(
       <TouchableOpacity onPress={onCameraPress} style={styles.btn}>
         <CustomIcon name="camera" type="IO" size={24} color={color} />
       </TouchableOpacity>
-      <TouchableOpacity onPressIn={onRecordAudio} onPressOut={onStopRecordAudio} style={styles.btn}>
+      <TouchableOpacity
+        onPressIn={onRecordAudio}
+        onPressOut={onStopRecordAudio}
+        style={styles.btn}>
         <CustomIcon name="microphone" type="FA6" size={24} color={color} />
       </TouchableOpacity>
       <TouchableOpacity onPress={onFilePress} style={styles.btn}>
@@ -404,11 +403,6 @@ function Actions(
 }
 
 const styles = StyleSheet.create({
-  liveWaveformView: {
-    flex: 1,
-    height: 40,
-    padding: 10,
-  },
   btn: {
     paddingHorizontal: 10,
   },
@@ -438,5 +432,10 @@ const styles = StyleSheet.create({
     minHeight: 40,
     paddingHorizontal: 10,
     textAlignVertical: 'center',
+  },
+  liveWaveformView: {
+    flex: 1,
+    height: 40,
+    padding: 10,
   },
 });

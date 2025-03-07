@@ -188,9 +188,15 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       //If we need to return something... or print something locally
       // console.log('sent file!', sentFile);
     } else {
-      const hash = await Wallet.send_message(text, huginAddress);
+      ///
+      const beam = false; //// *** check if connected to this user in beam.
+      const { hash, succes, error } = await Wallet.send_message(
+        text,
+        huginAddress,
+        beam,
+      );
 
-      if (hash?.error === 'balance') {
+      if (error === 'balance') {
         Toast.show({
           text1: t('noFunds'),
           type: 'error',

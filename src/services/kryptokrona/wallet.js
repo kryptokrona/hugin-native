@@ -35,6 +35,7 @@ import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
 import naclUtil from 'tweetnacl-util';
 import tweetnacl from 'tweetnacl';
+import { Beam } from '../lib/native';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -408,11 +409,11 @@ export class ActiveWallet {
     //Assert address length
     if (receiver.length !== 163) {
       console.log('Error: Address too long/short');
-      return;
+      return { error: 'address', success: false, hash: '' };
     }
     if (message.length === 0) {
       console.log('Error: No message to send');
-      return;
+      return { error: 'message', success: false, hash: '' };
     }
 
     //Split address and check history
@@ -422,7 +423,7 @@ export class ActiveWallet {
     let balance = await this.check_balance();
     if (!balance) {
       console.log('Error: No balance to send with');
-      return { error: 'balance' };
+      return { error: 'balance', success: false, hash: '' };
     }
 
     let payload_hex;
@@ -434,6 +435,13 @@ export class ActiveWallet {
       seal,
       address,
     );
+
+    if (beam) {
+      const hash = randomKey();
+      const send = hash + payload_hex;
+      Beam.message(receiver, send);
+      return { hash, success: true, error: 'success' };
+    }
     //Choose subwallet with message inputs
     let messageSubWallet = this.addresses()[1];
     let result = await this.active.sendTransactionAdvanced(
@@ -463,10 +471,10 @@ export class ActiveWallet {
         `Error: Failed to send transaction: ${result.error.toString()}`,
       );
       console.log('Error: ', error);
-      return false;
+      return { hash: '', success: false, error: 'failed' };
     }
 
-    return result.transactionHash;
+    return { hash: result.transactionHash, success: true, error: 'success' };
     //TODO save message
   }
 

@@ -2,7 +2,7 @@ import { Bridge } from './rpc';
 import { Worklet } from 'react-native-bare-kit';
 import bundle from '../../app.bundle';
 import { naclHash } from '../services/bare';
-import { getRooms } from '../services/bare/sqlite';
+import { getLatestMessages, getRooms } from '../services/bare/sqlite';
 import { sleep } from '@/utils';
 import { Wallet } from '../services/kryptokrona';
 const worklet = new Worklet();
@@ -100,6 +100,11 @@ class Beams {
       const hash = await Wallet.key_derivation_hash(c.chat);
       this.connect(hash, c.address + c.messagekey, false);
     }
+  }
+
+  message(to, payload) {
+    const data = { type: 'beam_message', to, payload };
+    rpc.send(data);
   }
 }
 

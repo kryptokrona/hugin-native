@@ -81,6 +81,20 @@ export class Bridge {
           console.log('string? decrypt this! -->', json.message);
           MessageSync.check_for_pm(json.message, json.hash);
           break;
+        case 'beam-connected':
+          console.log('****** GOT BEAM CONNECTION *******');
+          console.log('Address:', json.chat);
+          console.log('Topic:', json.topic);
+          //Change state to -> "connected"
+          break;
+        case 'new-beam':
+          console.log('*********************************');
+          console.log('******* Started a new beam! *****');
+          console.log('*********************************');
+          console.log('Address:', json.chat);
+          console.log('Topic:', json.topic);
+          //Set some state 'started, not connected'
+          break;
         case 'get-history':
           //Get history from db
           //await db response here then send it back to bare

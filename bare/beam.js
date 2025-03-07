@@ -114,9 +114,9 @@ const file_beam = (
 };
 
 const beam_event = (beam, chat, key) => {
-  const addr = chat.substring(0, 99);
-  active_beams.push({ beam, chat: addr, key });
-  Hugin.send('new-beam', { chat: addr, key });
+  active_beams.push({ beam, chat, key });
+  const topic = beam.topic;
+  Hugin.send('new-beam', { chat, topic });
   beam.on('remote-address', function ({ host, port }) {
     if (!host) {
       console.log('Could not find the host');
@@ -131,7 +131,7 @@ const beam_event = (beam, chat, key) => {
   beam.on('connected', function () {
     console.log('Beam connected to peer');
     check_if_online(addr);
-    Hugin.send('beam-connected', [addr, beam.key]);
+    Hugin.send('beam-connected', { chat, topic });
   });
 
   //Incoming message
