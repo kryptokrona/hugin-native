@@ -357,10 +357,10 @@ const check_data_message = async (data, connection, topic, peer) => {
         return 'Ban';
       }
 
-      if (con.joined) {
-        //Connection is already joined
-        return true;
-      }
+      // if (con.joined) {
+      //   //Connection is already joined
+      //   return true;
+      // }
 
       if (Hugin.banned(data.address, topic)) {
         if (active.admin) admin_ban_user(data.address, active.key);
