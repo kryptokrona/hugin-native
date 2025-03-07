@@ -161,9 +161,10 @@ export class ActiveWallet {
     let [unlockedBalance, lockedBalance] = await this.active.getBalance();
     setBalance([unlockedBalance, lockedBalance]);
     const transactions = await this.active.getTransactions();
-    const filteredTransactions = transactions.filter((transaction) => transaction.totalAmount() >= 10000);
+    const filteredTransactions = transactions.filter(
+      (transaction) => transaction.totalAmount() >= 10000,
+    );
     setTransactions(filteredTransactions);
-
   }
 
   setDaemon(node) {
@@ -211,7 +212,7 @@ export class ActiveWallet {
         text1: 'Your node has gone offline',
         type: 'success',
       });
-    })
+    });
 
     await this.active.start();
     await this.create_message_wallet();
@@ -234,7 +235,6 @@ export class ActiveWallet {
       this.getAndSetBalance();
       await this.save();
     });
-
 
     //Wallet heightchange event with funtion that saves wallet only if we are synced
     this.active.on(
@@ -550,6 +550,14 @@ export class ActiveWallet {
       return false;
     }
     return true;
+  }
+
+  async key_derivation_hash(chat) {
+    const [privateSpendKey, privateViewKey] = this.privateKeys();
+    const recvAddr = await Address.fromAddress(chat);
+    const recvPubKey = recvAddr.m_keys.m_viewKeys.m_publicKey;
+    const derivation = await generateKeyDerivation(recvPubKey, privateViewKey);
+    return await cnFastHash(derivation);
   }
 }
 

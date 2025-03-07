@@ -1,13 +1,13 @@
 import BackgroundFetch from 'react-native-background-fetch';
 import { sleep } from '@/utils';
-import { P2P } from '../lib/native';
+import { Beam, Rooms } from '../lib/native';
 
 class BackgroundTask {
   constructor() {}
 
   async sync() {
     return new Promise(async (resolve, reject) => {
-      await P2P.restart();
+      await Rooms.restart();
       console.log('---------------------------------------');
       console.log('*********** BACKGROUND P2P ************');
       console.log('---------------------------------------');
@@ -25,7 +25,7 @@ class BackgroundTask {
     };
 
     const timeout = async (taskId) => {
-      await P2P.close();
+      await Rooms.close();
       console.log('******** BACKGROUND TASK TIMEOUT ********');
       BackgroundFetch.finish(taskId);
     };

@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
-import { update_bare_user } from 'lib/native';
+import { Rooms } from 'lib/native';
 
 import {
   Avatar,
@@ -67,7 +67,7 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
     await updateUser({ name: value });
     Peers.name(address, value);
     let mPincode = null;
-    update_bare_user({ address, avatar, name: value });
+    Rooms.update({ address, avatar, name: value });
     if (authMethod === AuthMethods.pincode) {
       mPincode = pincode ? pincode : preferences.pincode;
     } else if (authMethod === AuthMethods.reckless) {

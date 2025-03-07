@@ -11,7 +11,7 @@ import {
 import { useNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 
-import { bare, P2P, send_idle_status } from 'lib/native';
+import { Rooms, Beam } from 'lib/native';
 
 import {
   getThisRoom,
@@ -71,7 +71,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       return;
     }
 
-    await P2P.start();
+    await Rooms.start();
     await initDB();
     await setLatestRoomMessages();
     await setLatestMessages();
@@ -118,9 +118,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           : RNFS.DocumentDirectoryPath,
     });
 
-    await bare(user);
+    Rooms.init(user);
     await sleep(150);
-    P2P.join();
+    Rooms.join();
+    Beam.join();
 
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);
@@ -167,8 +168,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('******** INACTIVE STATE *********');
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
-        // await P2P.close();
-        send_idle_status(true);
+        // await Rooms.close();
+        Rooms.idle(true);
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
 
@@ -180,8 +181,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
-        // await P2P.close();
-        send_idle_status(true);
+        // await Rooms.close();
+        Rooms.idle(true);
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
         if (started) {
@@ -189,11 +190,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
-        send_idle_status(false);
+        Rooms.idle(false);
         if (started && !joining) {
           joining = true;
           if (!Camera.active) {
-            P2P.restart();
+            // Rooms.restart();
           }
           if (Platform.OS === 'ios') {
             Notify.wakeup();

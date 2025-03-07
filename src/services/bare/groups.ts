@@ -1,6 +1,6 @@
 import Toast from 'react-native-toast-message';
 
-import { begin_send_file, end_swarm, send_swarm_msg, swarm } from 'lib/native';
+import { Rooms } from 'lib/native';
 
 import type {
   FileInfo,
@@ -133,7 +133,7 @@ export const onSendGroupMessage = async (
   reply: string | null,
   tip: TipType | false,
 ) => {
-  return await send_swarm_msg(key, message, reply, tip);
+  return await Rooms.message(key, message, reply, tip);
 };
 
 export const onSendGroupMessageWithFile = (
@@ -147,7 +147,7 @@ export const onSendGroupMessageWithFile = (
     message,
   };
   const JSONfileData = JSON.stringify(fileData);
-  begin_send_file(JSONfileData);
+  Rooms.file(JSONfileData);
 };
 
 export const onDeleteGroup = async (key: string) => {
@@ -157,7 +157,7 @@ export const onDeleteGroup = async (key: string) => {
 };
 
 export const onLeaveGroup = (key: string) => {
-  end_swarm(key);
+  Rooms.leave(key);
 };
 
 export const joinAndSaveRoom = async (
@@ -167,7 +167,7 @@ export const joinAndSaveRoom = async (
   userName: string,
   admin?: string,
 ) => {
-  await swarm(naclHash(key), key, admin);
+  Rooms.new(naclHash(key), key, admin);
   console.log('Swarm launched');
   await saveRoomToDatabase(name, key, admin);
   await saveRoomMessageAndUpdate(

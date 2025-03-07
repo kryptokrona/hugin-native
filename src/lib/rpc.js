@@ -77,6 +77,9 @@ export class Bridge {
         case 'new-swarm':
           console.log('new swarm!');
           break;
+        case 'beam-message':
+          console.log('string? decrypt this! -->', json.message);
+          break;
         case 'get-history':
           //Get history from db
           //await db response here then send it back to bare
@@ -90,7 +93,7 @@ export class Bridge {
             json.message.name,
             json.message.address,
             json.message.room,
-            ''
+            '',
           );
           saveRoomMessageAndUpdate(
             json.message.address,

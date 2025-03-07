@@ -146,6 +146,8 @@ const beam_event = (beam, chat, key) => {
     if (check_data_message(str, addr)) {
       return;
     }
+
+    Hugin.send('beam-message', { message });
   });
 
   beam.on('end', () => {

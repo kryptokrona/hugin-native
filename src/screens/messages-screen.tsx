@@ -41,6 +41,8 @@ import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import { addContact } from '../services/bare/sqlite';
 
 import 'text-encoding';
+import { Beam } from '../lib/native';
+import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessagesScreen>;
@@ -166,6 +168,12 @@ export const MessagesScreen: React.FC<Props> = () => {
     const messageKey = link.slice(-64);
 
     await addContact(name, xkrAddr, messageKey, true);
+
+    Beam.connect(
+      Wallet.key_derivation_hash(xkrAddr),
+      xkrAddr + messageKey,
+      false,
+    );
 
     setLatestMessages();
 

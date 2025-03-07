@@ -10,6 +10,7 @@ const {
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
+const { new_beam } = require('./beam');
 const { IPC } = BareKit;
 
 const rpc = new Bridge(IPC);
@@ -25,11 +26,14 @@ const onrequest = async (p) => {
     case 'update_bare_user':
       updateBareUser(p.user);
       break;
+    case 'new_beam':
+      await new_beam(p.key, p.huginAddress, p.send);
+      break;
     case 'new_swarm':
       await newSwarm(p.hashkey, p.key, p.admin);
       break;
     case 'end_swarm':
-      return await endSwarm(p.keys);
+      return await endSwarm(p.key);
     case 'send_room_msg':
       const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
       return message;
@@ -79,14 +83,12 @@ const newSwarm = async (hashkey, key, admin) => {
   Hugin.rooms.push({ key, topic, admin });
 };
 
-const endSwarm = async (keys) => {
-  for (const key of keys) {
-    const swarm = getRoom(key);
-    if (!swarm) return;
-    const rooms = Hugin.rooms.filter((a) => a.key !== key);
-    Hugin.rooms = rooms;
-    end_swarm(swarm.topic);
-  }
+const endSwarm = async (key) => {
+  const swarm = getRoom(key);
+  if (!swarm) return;
+  const rooms = Hugin.rooms.filter((a) => a.key !== key);
+  Hugin.rooms = rooms;
+  end_swarm(swarm.topic);
 };
 
 const sendRoomMessage = (message, key, reply, tip) => {
