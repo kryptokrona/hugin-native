@@ -62,8 +62,8 @@ target 'Hugin' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  pod 'HelloBare', :path => '../modules/hello-bare/ios'
   pod 'TurtleCoinModule', :path => './crypto'
+  pod 'react-native-audio-waveform', :path => '../node_modules/@simform_solutions/react-native-audio-waveform' 
 
   target 'HuginTests' do
     inherit! :complete

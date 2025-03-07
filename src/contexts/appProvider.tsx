@@ -121,7 +121,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Rooms.init(user);
     await sleep(150);
     Rooms.join();
-    Beam.join();
+    // Beam.join();
 
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);

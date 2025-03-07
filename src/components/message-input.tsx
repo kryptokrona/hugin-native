@@ -196,8 +196,8 @@ export const MessageInput: React.FC<Props> = ({
     console.log('Starting recording..');
     waveformRef.current
       ?.startRecord({
-        bitRate: 24000,
-        sampleRate: 8000,
+        bitRate: 55000,
+        sampleRate: 44100,
         updateFrequency: UpdateFrequency.high,
       })
       .then((recording) => {
