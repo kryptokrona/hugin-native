@@ -912,11 +912,13 @@ const connection_closed = (conn, topic, trace) => {
   if (!active) {
     return;
   }
-  try {
-    conn.end();
-    conn.destroy();
-  } catch (e) {
-    console.log('failed close connection');
+  if (trace !== 'Connection on error') {
+    try {
+      conn.end();
+      conn.destroy();
+    } catch (e) {
+      console.log('failed close connection');
+    }
   }
   const user = active.connections.find((a) => a.connection === conn);
   if (!user) {
