@@ -18,6 +18,14 @@ export class Swarm {
     await worklet.start('/app.bundle', bundle);
   }
 
+  resume() {
+    worklet.resume();
+  }
+
+  pause() {
+    worklet.suspend();
+  }
+
   async message(key, message, reply, tip) {
     const data = {
       type: 'send_room_msg',
@@ -97,7 +105,7 @@ class Beams {
   async join() {
     const contacts = await getLatestMessages();
     for (const c of contacts) {
-      const hash = await Wallet.key_derivation_hash(c.chat);
+      const hash = await Wallet.key_derivation_hash(c.address);
       this.connect(hash, c.address + c.messagekey, false);
     }
   }
