@@ -32,7 +32,7 @@ class BackgroundTask {
     };
 
     await BackgroundFetch.configure(
-      { minimumFetchInterval: 15 },
+      { minimumFetchInterval: 15, forceAlarmManager: true },
       event,
       timeout,
     );
