@@ -34,7 +34,7 @@ export const RestoreAccountScreen: React.FC = () => {
 
   const handleWordInput = (text: string, index: number) => {
     const updatedWords = [...seedWords];
-    updatedWords[index] = text;
+    updatedWords[index] = text.toLowerCase();
     setSeedWords(updatedWords);
 
     const updatedValidWords = [...validWords];
@@ -43,8 +43,13 @@ export const RestoreAccountScreen: React.FC = () => {
 
     if (wordlist.includes(text) && index < 24) {
       inputRefs.current[index + 1]?.current?.focus();
+      console.log('Focus next');
     } else if (!text && index > 0) {
+      console.log('Focus previous');
       inputRefs.current[index - 1]?.current?.focus();
+    } else {
+      console.log('Do nothing')
+      inputRefs.current[index]?.current?.focus();
     }
   };
 
@@ -99,33 +104,33 @@ export const RestoreAccountScreen: React.FC = () => {
           <FlatList
             numColumns={3}
             data={seedWords}
-            keyExtractor={(word: any, i) => `${word}-${i}`}
-            renderItem={({ item, index }) => {
-              return (
-                <TextInput
-                  key={index}
-                  ref={inputRefs.current[index]}
-                  style={[
-                    {
-                      backgroundColor: theme.accent,
-                      borderColor: theme.accentForeground,
-                      borderRadius: 5,
-                      borderWidth: 1,
-                      color: theme.accentForeground,
-                      height: 40,
-                      margin: 5,
-                      textAlign: 'center',
-                      width: 100,
-                    },
-                    validWords[index] && { borderColor: 'green' },
-                  ]}
-                  value={item}
-                  onChangeText={(text) => handleWordInput(text, index)}
-                  placeholder={`${index + 1}`}
-                  placeholderTextColor="gray"
-                />
-              );
-            }}
+            extraData={validWords}
+            keyExtractor={(_, index) => `${index}`}
+            renderItem={({ item, index }) => (
+              <TextInput
+                key={index}
+                ref={inputRefs.current[index]}
+                style={[
+                  {
+                    backgroundColor: theme.accent,
+                    borderColor: theme.accentForeground,
+                    borderRadius: 5,
+                    borderWidth: 1,
+                    color: theme.accentForeground,
+                    height: 40,
+                    margin: 5,
+                    textAlign: 'center',
+                    width: 100,
+                  },
+                  validWords[index] && { borderColor: 'green' },
+                ]}
+                value={item}
+                onChangeText={(text) => handleWordInput(text, index)}
+                placeholder={`${index + 1}`}
+                placeholderTextColor="gray"
+                blurOnSubmit={false}
+              />
+            )}
           />
         </View>
 
