@@ -8,31 +8,35 @@ class BackgroundTask {
 
   async sync() {
     return new Promise(async (resolve, reject) => {
-      Rooms.restart();
+      Rooms.idle(false, true);
       console.log('---------------------------------------');
       console.log('*********** BACKGROUND P2P ************');
       console.log('---------------------------------------');
-      await sleep(9000);
-      Notify.wakeup();
+      await sleep(5000);
       resolve();
     });
   }
 
   async init() {
+    console.log('**** INIT BACKGROUND ****');
     const event = async (taskId) => {
       console.log('[BackgroundFetch] task: ', taskId);
       await this.sync();
       console.log('******** BACKGROUND TASK COMPLETED ********');
+      Notify.wakeup();
+      Rooms.idle(true);
       BackgroundFetch.finish(taskId);
     };
 
     const timeout = async (taskId) => {
       console.log('******** BACKGROUND TASK TIMEOUT ********');
+      Rooms.idle(true);
+      Notify.wakeup();
       BackgroundFetch.finish(taskId);
     };
 
     await BackgroundFetch.configure(
-      { minimumFetchInterval: 15, forceAlarmManager: true },
+      { minimumFetchInterval: 15 },
       event,
       timeout,
     );

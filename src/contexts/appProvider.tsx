@@ -193,12 +193,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
-        Rooms.idle(false);
         // Rooms.resume();
         if (started && !joining) {
           joining = true;
           if (!Camera.active) {
-            // Rooms.restart();
+            Rooms.idle(false, false);
           }
           if (Platform.OS === 'ios') {
             Notify.wakeup();

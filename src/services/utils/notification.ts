@@ -53,11 +53,6 @@ class Notifee {
   }
 
   async display(name: string, text: string) {
-    // Create a channel (required for Android)
-    // if (background) {
-    //   this.pending.push({ name, text });
-    //   return;
-    // }
     await notifee.displayNotification({
       android: {
         category: AndroidCategory.MESSAGE,

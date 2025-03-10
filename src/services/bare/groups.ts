@@ -111,7 +111,7 @@ export const updateMessages = async (
       text2: message.message,
       type: 'success',
     });
-  } else if (background && !history) {
+  } else if (background) {
     Notify.new({ name: message.nickname, text: message.message }, background);
   }
 };
@@ -216,7 +216,7 @@ export const saveRoomMessageAndUpdate = async (
     tip,
   );
 
-  if (newMessage && !history) {
+  if ((newMessage && !history) || (newMessage && history && background)) {
     if (isFile) {
       newMessage.file = file;
     }

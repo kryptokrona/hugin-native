@@ -288,7 +288,7 @@ const incoming_message = async (data, topic, connection, peer) => {
   }
   const message = sanitize_group_message(JSON.parse(str));
   if (!message) return;
-  message.background = Hugin.idle();
+  message.background = Hugin.background;
   Hugin.send('swarm-message', { message, topic });
 };
 
@@ -667,18 +667,18 @@ const process_request = async (messages, key) => {
         n: m?.name ? m?.name : m?.nickname,
         hash: m?.hash,
         tip: m?.tip,
-        background: Hugin.idle(),
       };
       if (await room_message_exists(inc.hash)) continue;
       const message = sanitize_group_message(inc);
       if (!message) continue;
       //Save room message in background mode ??
       message.history = true;
+      message.background = Hugin.background;
       i++;
       Hugin.send('swarm-message', { message });
     }
     //Trigger update when all messages are synced? here.
-    Hugin.send('history-update', { key, i, background: Hugin.idle() });
+    Hugin.send('history-update', { key, i, background: Hugin.background });
   } catch (e) {
     console.log('error processing history', e);
   }

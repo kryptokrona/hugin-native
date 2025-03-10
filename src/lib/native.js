@@ -86,8 +86,8 @@ export class Swarm {
     return rpc.send(data);
   }
 
-  idle(status) {
-    const data = { type: 'idle_status', mode: status };
+  idle(mode, background = false) {
+    const data = { type: 'idle_status', mode, background };
     rpc.send(data);
   }
 }
