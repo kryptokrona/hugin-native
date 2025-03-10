@@ -9,7 +9,7 @@ export const getToastConfig = (theme: Theme) => {
         {...props}
         style={{
           backgroundColor: theme.destructiveForeground,
-          borderLeftColor: theme.destructive,
+          borderLeftColor: 'transparent',
         }}
         text1Style={{
           color: theme.primary,
@@ -25,11 +25,11 @@ export const getToastConfig = (theme: Theme) => {
     ),
 
     info: (props: ToastProps) => (
-      <BaseToast
+      <BaseToast 
         {...props}
         style={{
           backgroundColor: theme.background,
-          borderLeftColor: theme.primary,
+          borderLeftColor: theme.border,
         }}
         contentContainerStyle={{ paddingHorizontal: 15 }}
         text1Style={{
@@ -45,7 +45,10 @@ export const getToastConfig = (theme: Theme) => {
         {...props}
         style={{
           backgroundColor: theme.background,
-          borderLeftColor: theme.primary,
+          borderLeftColor: theme.border,
+          borderWidth: 1,
+          borderLeftWidth: 1,
+          borderColor: theme.border
         }}
         contentContainerStyle={{ paddingHorizontal: 15 }}
         text1Style={{
