@@ -152,13 +152,17 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
           <TextField size={'xsmall'} type="muted">
             {`${t('onlineRoomMembers')} (${globalRoomUsers?.length})`}
           </TextField>
+          <View style={styles.flatListWrapper}>
+
           <FlatList
             nestedScrollEnabled={true}
             numColumns={2}
             data={userList}
             renderItem={OnlineUserMapper}
             keyExtractor={(item, i) => `${item.name}-${i}`}
+            style={{ flex: 1 }}
           />
+          </View>
         </View>
         <TouchableWithoutFeedback>
           <Card>
@@ -193,14 +197,18 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 const styles = StyleSheet.create({
   flatListContainer: {
     marginVertical: 12,
-    maxHeight: 390
+    flex: 1,
+  },
+  flatListWrapper: {
+    flex: 1,
   },
   leaveContainer: {
-    flex: 1,
     justifyContent: 'flex-end',
+    paddingBottom: 20,
+    flexShrink: 0,
   },
   scrollViewContainer: {
     flexGrow: 1,
-    paddingBottom: 20,
+    justifyContent: 'space-between',
   },
 });
