@@ -1,6 +1,10 @@
 import { Platform } from 'react-native';
 
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee, {
+  AndroidCategory,
+  AndroidImportance,
+  AndroidVisibility,
+} from '@notifee/react-native';
 
 type Notification = {
   name: string;
@@ -9,22 +13,34 @@ type Notification = {
 
 class Notifee {
   private pending: Notification[];
+  private channel: string;
   constructor() {
     this.pending = [];
+    this.channel = '';
   }
 
   async new({ text, name }: Notification, background: boolean) {
-    // Request permissions (required for iOS)
+    if (background) {
+      this.pending.push({ name, text });
+      return;
+    }
+    this.display(name, text);
+  }
+
+  async setup() {
+    const channelId = await notifee.createChannel({
+      id: 'hugin_notifiy',
+      name: 'Hugin',
+      sound: 'roommessage',
+      vibration: true,
+      vibrationPattern: [200, 400],
+    });
+
     if (Platform.OS === 'ios') {
       await notifee.requestPermission();
-
-      if (background) {
-        this.pending.push({ name, text });
-        return;
-      }
     }
 
-    this.display(name, text);
+    this.channel = channelId;
   }
 
   wakeup() {
@@ -37,25 +53,19 @@ class Notifee {
   }
 
   async display(name: string, text: string) {
-    // Create a channel (required for Android)
-    const channelId = await notifee.createChannel({
-      id: 'hugin_notifiy',
-      name: 'Hugin',
-      sound: 'roommessage',
-      vibration: true,
-      vibrationPattern: [200, 400],
-    });
-
     await notifee.displayNotification({
       android: {
-        channelId: channelId,
+        category: AndroidCategory.MESSAGE,
+        channelId: this.channel,
         importance: AndroidImportance.HIGH,
         // optional, defaults to 'ic_launcher'.
         // pressAction is needed if you want the notification to open the app when pressed
         pressAction: {
           id: 'default',
         },
+
         smallIcon: '@mipmap/ic_launcher',
+        visibility: AndroidVisibility.PUBLIC,
       },
 
       body: text,

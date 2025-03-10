@@ -14,6 +14,7 @@ class Account {
     this.store = '';
     this.syncImages = true; /// TODO** Add switch to enable/disable
     this.files = [];
+    this.background = false;
   }
 
   init(data, rpc) {
@@ -63,8 +64,9 @@ class Account {
     return await this.rpc.request(data);
   }
 
-  sleep(mode) {
+  sleep(mode, bg) {
     this.sleeping = mode;
+    this.background = bg;
   }
 
   idle() {

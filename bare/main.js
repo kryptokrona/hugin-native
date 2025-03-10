@@ -53,7 +53,7 @@ const onrequest = async (p) => {
     case 'keep_alive':
       break;
     case 'idle_status':
-      Hugin.sleep(p.mode);
+      Hugin.sleep(p.mode, p.background);
       idle();
       break;
     case 'close_connections':

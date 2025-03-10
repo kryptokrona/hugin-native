@@ -137,16 +137,6 @@ export class Bridge {
               });
             }
           }
-          if (json.background && json.i > 0) {
-            Notify.new(
-              {
-                name: 'New messages',
-                text: `You have ${json.i} unread messages`,
-              },
-              'Unread',
-            );
-          }
-          setLatestRoomMessages();
           break;
         case 'syncing-history':
           if (getCurrentRoom() === json.key) {

@@ -11,7 +11,7 @@ import {
 import { useNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 
-import { Rooms, Beam } from 'lib/native';
+import { Rooms } from 'lib/native';
 
 import {
   getThisRoom,
@@ -97,6 +97,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       : { port: 80, url: 'node.xkr.network' };
 
     Connection.listen();
+    Notify.setup();
     await Wallet.init(node);
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
@@ -119,7 +120,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
 
     Rooms.init(user);
-    await sleep(150);
+    await sleep(300);
     Rooms.join();
     // Beam.join();
 
@@ -192,12 +193,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
-        Rooms.idle(false);
         // Rooms.resume();
         if (started && !joining) {
           joining = true;
           if (!Camera.active) {
-            // Rooms.restart();
+            Rooms.idle(false, false);
           }
           if (Platform.OS === 'ios') {
             Notify.wakeup();
