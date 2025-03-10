@@ -46,6 +46,7 @@ export class ActiveWallet {
     this.nodeUrl = undefined;
     this.nodePort = undefined;
     this.started = false;
+    this.deadNodeEmitted = false;
   }
 
   async init(node) {
@@ -209,10 +210,13 @@ export class ActiveWallet {
     this.active.scanPoolTransactions(false);
 
     this.active.on('deadnode', async () => {
-      Toast.show({
-        text1: 'Your node has gone offline',
-        type: 'success',
-      });
+      if (!this.deadNodeEmitted) {
+        this.deadNodeEmitted = true;
+        Toast.show({
+          text1: 'Your node has gone offline',
+          type: 'success',
+        });
+      }
     });
 
     await this.active.start();
@@ -241,6 +245,7 @@ export class ActiveWallet {
     this.active.on(
       'heightchange',
       async (walletBlockCount, localDaemonBlockCount, networkBlockCount) => {
+        this.deadNodeEmitted = false;
         let synced = networkBlockCount - walletBlockCount <= 2;
         if (walletBlockCount % 100 === 0) {
           this.getAndSetSyncStatus();
