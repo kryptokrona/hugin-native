@@ -68,7 +68,7 @@ export const updateLanguage = async (language: string) => {
   }));
 };
 
-export const updateUser = async (value: Partial<User>) => {
+export const updateUser = (value: Partial<User>) => {
   useUserStore.setState((state) => ({
     ...state,
     user: {

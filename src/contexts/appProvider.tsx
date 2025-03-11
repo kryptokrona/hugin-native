@@ -100,17 +100,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       return a.hash;
     });
 
-    await updateUser({
-      downloadDir:
-        Platform.OS == 'ios'
-          ? RNFS.LibraryDirectoryPath
-          : RNFS.DownloadDirectoryPath,
+    updateUser({
       files,
       huginAddress,
-      store:
-        Platform.OS == 'ios'
-          ? RNFS.LibraryDirectoryPath
-          : RNFS.DocumentDirectoryPath,
     });
 
     const contacts = await getContacts();
@@ -120,7 +112,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     Rooms.init(user);
     Rooms.join();
-
     started = true;
 
     updateFiatPrice();
@@ -130,6 +121,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   useEffect(() => {
+    updateUser({
+      downloadDir:
+        Platform.OS == 'ios'
+          ? RNFS.LibraryDirectoryPath
+          : RNFS.DownloadDirectoryPath,
+      store:
+        Platform.OS == 'ios'
+          ? RNFS.LibraryDirectoryPath
+          : RNFS.DocumentDirectoryPath
+    });
     if (authenticated && user?.address) {
       console.log('running authenticated');
       init();
