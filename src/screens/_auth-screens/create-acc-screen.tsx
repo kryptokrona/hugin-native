@@ -110,31 +110,9 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
 
     useGlobalStore.getState().setAuthenticated(true);
 
-    if (authMethod === AuthMethods.pincode) {
-      navigation.navigate(AuthScreens.RequestPinScreen, {
-        finishFunction: () => {
-          mainNavigation.navigate(Stacks.MainStack, {
-            screen: MainScreens.GroupsScreen,
-          });
-        },
-      });
-    }
-
-    if (authMethod === AuthMethods.bioMetric) {
-      navigation.navigate(AuthScreens.RequestFingerPrintScreen, {
-        finishFunction: () => {
-          mainNavigation.navigate(Stacks.MainStack, {
-            screen: MainScreens.GroupsScreen,
-          });
-        },
-      });
-    }
-
-    if (authMethod === AuthMethods.reckless) {
-      mainNavigation.navigate(Stacks.MainStack, {
-        screen: MainScreens.GroupsScreen,
-      });
-    }
+    mainNavigation.navigate(Stacks.MainStack, {
+      screen: MainScreens.GroupsScreen,
+    });
   }
 
   async function onUpdateAvatar() {
