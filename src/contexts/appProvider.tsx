@@ -11,8 +11,6 @@ import {
 import { useNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 
-import { Rooms } from 'lib/native';
-
 import {
   getThisRoom,
   setStoreCurrentRoom,
@@ -23,9 +21,10 @@ import {
   useThemeStore,
   useUserStore,
 } from '@/services';
-import { sleep } from '@/utils';
 
 import { Background } from './background';
+
+import { Rooms } from '../lib/native';
 // import { Foreground } from './service';
 
 import {
@@ -84,11 +83,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       useGlobalStore.setState({ fiatPrice: price });
     }
 
-    updateFiatPrice();
-
-    // Start the interval
-    setInterval(updateFiatPrice, 60000);
-
     const node = preferences?.node
       ? {
           port: parseInt(preferences.node.split(':')[1]),
@@ -119,16 +113,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           : RNFS.DocumentDirectoryPath,
     });
 
-    Rooms.init(user);
-    await sleep(300);
-    Rooms.join();
-    // Beam.join();
-
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);
     const keys = Wallet.privateKeys();
     MessageSync.init(node, knownKeys, keys);
+
+    Rooms.init(user);
+    Rooms.join();
+
     started = true;
+
+    updateFiatPrice();
+
+    // Start the interval
+    setInterval(updateFiatPrice, 60000);
   }
 
   useEffect(() => {
@@ -198,9 +196,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           joining = true;
           if (!Camera.active) {
             Rooms.idle(false, false);
-          }
-          if (Platform.OS === 'ios') {
-            Notify.wakeup();
           }
           const room = getThisRoom();
           setStoreCurrentRoom(room);
