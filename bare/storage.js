@@ -231,7 +231,9 @@ class HyperStorage {
     const stream = Readable.from(send);
     stream.on('data', (data) => {
       console.log('Sending data ------>', data);
-      beam.write(data);
+      try {
+        beam.write(data);
+      } catch (e) {}
     });
   }
 
