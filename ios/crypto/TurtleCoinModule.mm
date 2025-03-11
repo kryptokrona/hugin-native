@@ -69,7 +69,7 @@ RCT_EXPORT_METHOD(getWalletSyncData:(NSArray<NSString *> *)blockHashCheckpoints
 
     // Configure session
     NSURLSessionConfiguration *config = [NSURLSessionConfiguration defaultSessionConfiguration];
-    config.timeoutIntervalForRequest = 10; // 10 seconds timeout
+    config.timeoutIntervalForRequest = 4; // 4 seconds timeout
     NSURLSession *session = [NSURLSession sessionWithConfiguration:config];
 
     // Send request
