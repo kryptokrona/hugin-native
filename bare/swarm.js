@@ -913,6 +913,53 @@ const upload_ready = async (file, topic, address) => {
   return beam_key;
 };
 
+const send_voice_channel_status = async (joined, status, update = false) => {
+  const active = active_swarms.find((a) => a.key === status.key);
+  if (!active) return;
+  const msg = active.topic;
+  const sig = await sign(msg);
+  const data = JSON.stringify({
+    address: Hugin.address,
+    avatar: Hugin.avatar,
+    signature: sig,
+    message: msg,
+    voice: joined,
+    topic: active.topic,
+    name: Hugin.nickname,
+    video: status.video,
+    audioMute: status.audioMute,
+    videoMute: status.videoMute,
+    screenshare: status.screenshare,
+  });
+  update_local_voice_channel_status({
+    topic: active.topic,
+    voice: joined,
+    audioMute: status.audioMute,
+    videoMute: status.videoMute,
+    screenshare: status.screenshare,
+    video: status.video,
+  });
+
+  //Send voice channel status to others in the group
+  send_swarm_message(data, active.topic);
+
+  if (update) return;
+  //If we joined the voice channel, make a call to those already announced their joined_voice_status
+  if (joined) {
+    //If no others active in the voice channel, return
+    if (!active.connections.some((a) => a.voice === true)) return;
+    //Check whos active and call them individually
+    let active_voice = active.connections.filter(
+      (a) => a.voice === true && a.address,
+    );
+    active_voice.forEach(async function (user) {
+      await sleep(100);
+      //Call to VoiceChannel.svelte
+      join_voice_channel(status.key, active.topic, user.address);
+    });
+  }
+};
+
 const join_voice_channel = (key, topic, address) => {
   Hugin.send('join-voice-channel', { key, topic, address });
 };
