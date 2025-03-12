@@ -90,6 +90,17 @@ export class Swarm {
     const data = { type: 'idle_status', mode, background };
     rpc.send(data);
   }
+
+  voice(status, update) {
+    const data = { type: 'voice_status', status, update };
+    rpc.send(data);
+  }
+
+  sdp(data) {
+    const data_to_send = { type: 'send_sdp', data};
+    rpc.send(data_to_send);
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////

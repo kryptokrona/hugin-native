@@ -110,5 +110,7 @@
   // New
   "activateWalletSync": "Activate wallet sync", // free to translate
   "reportBug": "Report a bug", // free to translate
-  "noFunds": "Insufficient funds" // free to translate
+  "noFunds": "Insufficient funds", // free to translate
+  "joinCall": "Join call",
+  "endCall": "End call",
 }

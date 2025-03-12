@@ -31,6 +31,10 @@ export interface User {
   files?: string [];
   online?: boolean;
   lastseen?: number;
+  voice?: boolean;
+  video?: boolean;
+  screenshare?: boolean;
+  muted?: boolean;
 }
 
 export interface PeerUser {

@@ -4,3 +4,4 @@ export * from './bare';
 export * from './kryptokrona';
 export * from './NativeTest';
 export * from './hugin';
+export * from './calls';

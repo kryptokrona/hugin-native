@@ -5,6 +5,7 @@ import {
 } from '../services/zustand';
 
 class Connections extends EventEmitter {
+
   join(peer) {
     console.log('New connection incoming');
     const connected = {
@@ -12,13 +13,32 @@ class Connections extends EventEmitter {
       name: peer.name,
       room: peer.key,
       avatar: peer.avatar,
-      online: true
+      online: true,
+      voice: peer.voice,
+      video: peer.video,
+      screenshare: peer.screenshare,
+      muted: peer.audioMute,
     };
     if (this.already(peer.address, peer.key)) return;
     const list = this.active();
     list.push(connected);
     this.update(list);
     console.log('New peer connected. Online:', list.length);
+    this.change();
+  }
+
+  voicestatus(peer) {
+    console.log('Voice status changed');
+    let list = this.active();
+    list.some((a) => {
+      if (a.address === peer.address) {
+        a.voice = peer.voice;
+        a.video = peer.video;
+        a.screenshare = peer.screenshare;
+        a.muted = peer.audioMute;
+      }
+    });
+    this.update(list);
     this.change();
   }
 
