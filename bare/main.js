@@ -8,6 +8,7 @@ const {
   share_file_info,
   close_all_connections,
   idle,
+  send_voice_channel_status
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
@@ -58,6 +59,9 @@ const onrequest = async (p) => {
       break;
     case 'close_connections':
       close_all_connections();
+      break;
+    case 'voice_status':
+      send_voice_channel_status(p.status.voice, p.status, p.update);
       break;
     default:
       break;

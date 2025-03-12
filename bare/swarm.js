@@ -925,7 +925,7 @@ const send_voice_channel_status = async (joined, status, update = false) => {
     message: msg,
     voice: joined,
     topic: active.topic,
-    name: Hugin.nickname,
+    name: Hugin.name,
     video: status.video,
     audioMute: status.audioMute,
     videoMute: status.videoMute,
@@ -1187,4 +1187,5 @@ module.exports = {
   request_download,
   close_all_connections,
   idle,
+  send_voice_channel_status
 };
