@@ -913,6 +913,10 @@ const upload_ready = async (file, topic, address) => {
   return beam_key;
 };
 
+const join_voice_channel = (key, topic, address) => {
+  Hugin.send('join-voice-channel', { key, topic, address });
+};
+
 const answer_call = (data) => {
   console.log('Answer here!', data);
   Hugin.send('answer-call', { data });
