@@ -913,6 +913,45 @@ const upload_ready = async (file, topic, address) => {
   return beam_key;
 };
 
+async function send_voice_channel_sdp(data) {
+  const active = active_swarms.find((a) => a.topic === data.topic);
+  if (!active) return;
+  const con = active.connections.find((a) => a.address === data.address);
+  if (!con) return;
+  //We switch data address because in this case, it is from, we can change this
+  data.address = Hugin.address;
+  try {
+    con.connection.write(JSON.stringify(data));
+  } catch (e) {}
+}
+
+function send_sdp(data) {
+  let offer = true;
+  let reconnect = false;
+
+  if ('retry' in data) {
+    if (data.retry === true) reconnect = true;
+  }
+
+  if (data.type == 'answer') {
+    offer = false;
+  }
+
+  if ('renegotiate' in data.data) {
+    offer = false;
+  }
+
+  let sendMessage = {
+    data: data.data,
+    offer: offer,
+    address: data.address,
+    topic: data.topic,
+    retry: reconnect,
+  };
+
+  send_voice_channel_sdp(sendMessage);
+}
+
 const send_voice_channel_status = async (joined, status, update = false) => {
   const active = active_swarms.find((a) => a.key === status.key);
   if (!active) return;
@@ -1187,5 +1226,6 @@ module.exports = {
   request_download,
   close_all_connections,
   idle,
-  send_voice_channel_status
+  send_voice_channel_status,
+  send_sdp,
 };
