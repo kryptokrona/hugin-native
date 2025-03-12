@@ -11,7 +11,6 @@ const {
   sign_admin_message,
   sanitize_file_message,
   check_if_media,
-  sign_joined_message,
   check_hash,
   room_message_exists,
   sign,
@@ -46,11 +45,12 @@ let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
 class Room {
-  constructor(key) {
+  constructor(beam) {
     this.swarm = {};
     this.time = Date.now();
     this.topic = null;
     this.discovery = null;
+    this.beam = beam;
   }
 
   async join(hashkey) {
@@ -62,10 +62,16 @@ class Room {
     const topic = base_keys.publicKey.toString('hex');
     const hash = Buffer.alloc(32).fill(topic);
     await Storage.load_drive(topic);
+    const peers = this.beam ? 1 : 100;
 
     console.log('Joining room....');
     try {
-      this.swarm = new HyperSwarm({}, sig, dht_keys, base_keys);
+      this.swarm = new HyperSwarm(
+        { maxPeers: peers },
+        sig,
+        dht_keys,
+        base_keys,
+      );
     } catch (e) {
       error_message('Error starting swarm');
       return;
@@ -80,18 +86,18 @@ class Room {
   }
 }
 
-function idle() {
+async function idle() {
   for (const room of active_swarms) {
-    if (Hugin.idle()) room.swarm.suspend();
+    if (Hugin.idle()) await room.swarm.suspend();
     else {
-      room.swarm.resume();
+      await room.swarm.resume();
       room.discovery.refresh({ client: true, server: true });
     }
   }
 }
-const create_swarm = async (hashkey, key) => {
+const create_swarm = async (hashkey, key, beam = false, chat = false) => {
   console.log('Creating swarm!');
-  const room = new Room();
+  const room = new Room(beam);
   const connected = await room.join(hashkey);
   if (!connected) return;
   const admin = is_admin(key);
@@ -122,10 +128,14 @@ const create_swarm = async (hashkey, key) => {
     peers: [],
     requests: 0,
     files,
+    beam,
+    chat,
   };
 
   active_swarms.push(active);
-  Hugin.send('new-swarm', { connected, key, admin });
+
+  Hugin.send('new-swarm', { connected, key, admin, chat, beam });
+
   check_if_online(room.topic);
 
   process.once('SIGINT', function () {
@@ -256,12 +266,12 @@ const send_swarm_message = (message, topic) => {
   for (const chat of active.connections) {
     try {
       console.log('Writing to channel');
+      if (!chat.joined) continue;
       chat.connection.write(message);
     } catch (e) {
       continue;
     }
   }
-
   console.log('Swarm msg sent!');
 };
 
@@ -284,6 +294,13 @@ const incoming_message = async (data, topic, connection, peer) => {
   }
   if (check) {
     peer.priority = 3;
+    return;
+  }
+  const active = get_active_topic(topic);
+
+  if (active.beam) {
+    const hash = str.substring(0, 64);
+    Hugin.send('beam-message', { message: str, hash, chat: active.chat });
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
@@ -327,36 +344,40 @@ const check_data_message = async (data, connection, topic, peer) => {
     return true;
   }
 
-  // //Double check if connection is joined voice?
-  // if ('offer' in data) {
-  //     //Check if this connection has voice status activated.
-  //     if (active.connections.some(a => a.connection === connection && a.voice === true)) {
-  //         const [voice, video] = get_local_voice_status(topic)
-  //         if ((!voice && !video) || !voice) {
-  //             //We are not connected to a voice channel
-  //             //Return true bc we do not need to check it again
-  //             return true
-  //         }
+  //Double check if connection is joined voice?
+  if ('offer' in data) {
+    //Check if this connection has voice status activated.
+    if (
+      active.connections.some(
+        (a) => a.connection === connection && a.voice === true,
+      )
+    ) {
+      const [voice, video] = get_local_voice_status(topic);
+      if ((!voice && !video) || !voice) {
+        //We are not connected to a voice channel
+        //Return true bc we do not need to check it again
+        return true;
+      }
 
-  //         //There are too many in the voice call
-  //         const users = active.connections.filter(a => a.voice === true)
-  //         if (users.length > 9) return true
+      //There are too many in the voice call
+      const users = active.connections.filter((a) => a.voice === true);
+      if (users.length > 9) return true;
 
-  //             //Joining == offer
-  //         if (data.offer === true) {
-  //             if ('retry' in data) {
-  //                 if (data.retry === true) {
-  //                     Hugin.send('got-expanded-voice-channel', [data.data, data.address])
-  //                     return
-  //                 }
-  //             }
-  //             answer_call(data)
-  //         } else {
-  //             got_answer(data)
-  //         }
-  //     }
-  //     return true
-  // }
+      //Joining == offer
+      if (data.offer === true) {
+        if ('retry' in data) {
+          if (data.retry === true) {
+            Hugin.send('got-expanded-voice-channel', { data });
+            return;
+          }
+        }
+        answer_call(data);
+      } else {
+        got_answer(data);
+      }
+    }
+    return true;
+  }
 
   if (typeof data === 'object') {
     if ('joined' in data) {
@@ -421,15 +442,13 @@ const check_data_message = async (data, connection, topic, peer) => {
       //   active.buffer = [];
       // }
 
-      //     //If our new connection is also in voice, check who was connected first to decide who creates the offer
-      //     const [in_voice, video] = get_local_voice_status(topic)
-      //     if (con.voice && in_voice && (parseInt(active.time) > time)  ) {
-      //         join_voice_channel(active.key, topic, joined.address)
-      //     }
-      if (joined.avatar.length > 60000) {
-        joined.avatar = '';
+      //If our new connection is also in voice, check who was connected first to decide who creates the offer
+      const [in_voice, video] = get_local_voice_status(topic);
+      if (con.voice && in_voice && parseInt(active.time) > time) {
+        join_voice_channel(active.key, topic, joined.address);
       }
-      Hugin.send('peer-connected', { joined });
+
+      Hugin.send('peer-connected', { joined, beam: active.beam });
       console.log('Connection updated: Joined:', con.name);
       return true;
     }
@@ -892,6 +911,16 @@ const upload_ready = async (file, topic, address) => {
   };
   send_peer_message(address, topic, info);
   return beam_key;
+};
+
+const answer_call = (data) => {
+  console.log('Answer here!', data);
+  Hugin.send('answer-call', { data });
+};
+
+const got_answer = (data) => {
+  console.log('Got answer!');
+  Hugin.send('got-answer', { data });
 };
 
 const send_peer_message = (address, topic, message) => {
