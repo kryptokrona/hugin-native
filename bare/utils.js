@@ -282,6 +282,7 @@ function check_if_media(path, size) {
     { file: '.gif', type: 'image' },
     { file: '.jfif', type: 'image' },
     { file: '.jpeg', type: 'image' },
+    { file: '.webp', type: 'image' },
     { file: '.mp4', type: 'video' },
     { file: '.webm', type: 'video' },
     { file: '.avi', type: 'video' },
