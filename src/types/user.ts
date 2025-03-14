@@ -35,6 +35,7 @@ export interface User {
   video?: boolean;
   screenshare?: boolean;
   muted?: boolean;
+  talking?: boolean;
 }
 
 export interface PeerUser {

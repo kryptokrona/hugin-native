@@ -2,7 +2,7 @@ import type { Transaction } from 'kryptokrona-wallet-backend-js';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { Balance, Message, Room, User, Contact } from '@/types';
+import type { Balance, Message, Room, User, Contact, Call } from '@/types';
 
 type GlobalStore = {
   balance: Balance;
@@ -18,6 +18,7 @@ type GlobalStore = {
   transactions: Transaction[];
   syncStatus: number[];
   fiatPrice: number;
+  currentCall: Call;
   setRoomMessages: (payload: Message[]) => void;
   setMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
@@ -29,6 +30,7 @@ type GlobalStore = {
   setBalance: (payload: Balance) => void;
   setSyncStatus: (payload: number[]) => void;
   setFiatPrice: (payload: number) => void;
+  setCurrentCall: (payload: Call) => void;
 };
 
 export const useGlobalStore = create<
@@ -45,6 +47,7 @@ export const useGlobalStore = create<
     roomUsers: [],
     rooms: [],
     fiatPrice: 0,
+    currentCall: {room: '', users: []},
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -91,6 +94,10 @@ export const useGlobalStore = create<
     transactions: [],
     setFiatPrice: (fiatPrice: number) => {
       set({fiatPrice})
+    },
+    setCurrentCall: (currentCall: Call) => {
+      console.log('Setting current call:', currentCall); // Add this
+      set({currentCall})
     }
   })),
 );

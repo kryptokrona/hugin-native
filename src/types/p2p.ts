@@ -1,3 +1,5 @@
+import {User} from './user.ts';
+
 export interface MessageUser {
   key: string;
   name: string;
@@ -92,4 +94,10 @@ export interface TipType {
 export interface EmojiType {
   emoji: string;
   userAddress: string;
+}
+
+export interface Call {
+  room: string;
+  users: User[];
+  time: number;
 }
