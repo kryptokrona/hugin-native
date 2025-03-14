@@ -93,16 +93,24 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const myUserAddress = useGlobalStore((state) => state.address);
   const currentCall = useGlobalStore((state) => state.currentCall);
   const inCall = currentCall.room === roomKey;
-  console.log('currentCall', currentCall);
+  // console.log('currentCall', currentCall);
   const inCallUsers = 0;
-  const globalRoomUsers = useGlobalStore((state) => state.roomUsers).filter(
-    (a) => a.room === roomKey && a.voice === true,
+
+  const voiceUsers = useGlobalStore(
+    useCallback((state) => state.roomUsers.filter((a) => a.room === roomKey && a.voice === true), [roomKey])
   );
 
+  const roomUsers = useGlobalStore(
+    useCallback((state) => state.roomUsers.filter((a) => a.room === roomKey), [roomKey])
+  );
+  
   const userList = useMemo(() => {
-    console.log('useMemo triggered! ', globalRoomUsers);
-    return globalRoomUsers;
-  }, [change]);
+    return voiceUsers;
+  }, [voiceUsers]);
+
+  const online = useMemo(() => {
+    return roomUsers;
+  }, [roomUsers]);
 
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
@@ -142,13 +150,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       video: false,
       voice: true,
     };
-    Peers.voicestatus(peer);
-    // setInCall(true);
-    setChange(!change);
-    const call = { room: roomKey, time: Date.now(), users: userList };
-    console.log('call: ', call);
-    // useGlobalStore.setState({ currentCall: call });
+    const me = roomUsers.filter(a => a.address === myUserAddress)[0];
+    me.voice = true;
+    const call = { room: roomKey, time: Date.now(), users: [...userList, me] };
     useGlobalStore.getState().setCurrentCall(call);
+    Peers.voicestatus(peer);
   }
 
   function onEndCall() {
@@ -246,10 +252,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   const onlineUsers = useMemo(() => {
     return Peers.active().filter((a) => a.room === roomKey).length;
-  }, [change]);
-
-  const online = useMemo(() => {
-    return Peers.connected(roomKey);
   }, [change]);
 
   Peers.on('change', () => {
@@ -468,7 +470,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             <View style={{ flex: 1, width: '100%' }}>
               <View style={styles.flatListContainer}>
                 <TextField size={'xsmall'} type="muted">
-                  {`${t('onlineRoomMembers')} (${globalRoomUsers?.length})`}
+                  {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
                 </TextField>
                 <View style={styles.flatListWrapper}>
                   <FlatList

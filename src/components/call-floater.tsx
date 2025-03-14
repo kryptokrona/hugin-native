@@ -21,13 +21,11 @@ import { Call } from '@/types';
 
 import { CustomIcon } from './_elements/custom-icon';
 
+import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
+
 interface Props {
   currentCall: Call;
 }
-
-const getAvatar = (userAddress: string) => {
-  return `data:image/png;base64,${userAddress}`;
-};
 
 export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   const translateX = useSharedValue(0);
@@ -132,7 +130,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
             <Avatar
               key={user.address}
               base64={
-                user.avatar !== '' ? user.avatar : getAvatar(user.address)
+                user.avatar !== '' ? user.avatar : getAvatar(user.address, 32)
               }
               size={24}
             />
