@@ -14,7 +14,7 @@ import {
   getLatestRoomHashes,
   saveRoomUser,
 } from '../services/bare/sqlite';
-import {add_answer, connect_to_peer} from '../services/calls/webrtc';
+import { WebRTC } from '../services/calls/webrtc';
 import { Wallet } from '../services/kryptokrona/wallet';
 import b4a from 'b4a';
 import RPC from 'bare-rpc';
@@ -164,13 +164,18 @@ export class Bridge {
         case 'voice-channel-status':
           console.log('Voice channel status', json);
           Peers.voicestatus(json.data)
+          break;
         case 'join-voice-channel':
           console.log('join-voice-channel called');
-          connect_to_peer(json.key, json.topic, json.address);
+          WebRTC.connectToPeer(json.key, json.topic, json.address);
           break;
         case 'got-answer':
           console.log('Got answer: ', json)
-          add_answer(json.data);          
+          WebRTC.addAnswer(json.data);          
+          break;
+        case 'answer-call':
+          console.log('Got call: ', json)
+          WebRTC.answerToPeer(json.data);          
           break;
 
         case 'error-message':

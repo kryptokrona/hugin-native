@@ -1,161 +1,179 @@
 import {
     mediaDevices,
     RTCPeerConnection,
-    RTCView,
-    RTCIceCandidate,
     RTCSessionDescription,
     processCandidates
-  } from 'react-native-webrtc';
-
-const active_connections = [];
+} from 'react-native-webrtc';
 
 import { Rooms } from 'lib/native';
 
-export async function add_answer(data) {
-
-    const address = data.address;
-
-    const peerConnection = active_connections.find(a => a.address === address);
-
-    console.log('peerConnection to add answer to:', peerConnection);
-
-    const offerDescription = new RTCSessionDescription( data.data );
-	await peerConnection.peerConnection.setRemoteDescription( offerDescription );
-
-    processCandidates();
-
-}
-
-export async function connect_to_peer(key, topic, address) {
-
-let mediaConstraints = {
-    audio: true,
-    video: false
-};
-
-let localMediaStream;
-let remoteMediaStream;
-let isVoiceOnly = true;
-
-let sessionConstraints = {
-    mandatory: {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true,
-        VoiceActivityDetection: true
+class PeerConnectionManager {
+    constructor() {
+        this.activeConnections = [];
     }
-};
 
-try {
-    const mediaStream = await mediaDevices.getUserMedia( mediaConstraints );
+    async endCall() {
 
-    console.log('mediaStream', mediaStream);
-
-    if ( isVoiceOnly ) {
-        // let videoTrack = await mediaStream.getVideoTracks()[ 0 ];
-        // videoTrack.enabled = false;
-    };
-
-    localMediaStream = mediaStream;
-} catch( err ) {
-    // Handle Error
-    console.log('Error getting media: ', err);
-};
-
-let peerConstraints = {
-    iceServers: [
-        {
-            urls: 'stun:stun.l.google.com:19302'
+        for (const con in this.activeConnections) {
+            this.activeConnections[con].peerConnection.close();
         }
-    ]
-};
 
-let peerConnection = new RTCPeerConnection( peerConstraints );
+    }
 
-active_connections.push({address, topic, peerConnection});
+    async addAnswer(data) {
+        const { address, data: sessionData } = data;
+        const connection = this.activeConnections.find(conn => conn.address === address);
 
-peerConnection.addEventListener( 'connectionstatechange', event => {
-    console.log('connectionstatechange',peerConnection.connectionState)
-    switch( peerConnection.connectionState ) {
-        case 'closed':
-            // You can handle the call being disconnected here.
+        if (connection) {
+            console.log('Adding answer to connection:', connection);
+            const remoteDescription = new RTCSessionDescription(sessionData);
+            await connection.peerConnection.setRemoteDescription(remoteDescription);
+            // processCandidates();
+        } else {
+            console.log('No connection found for address:', address);
+        }
+    }
 
-            break;
-    };
-} );
-
-peerConnection.addEventListener( 'icecandidate', async event => {
-    // When you find a null candidate then there are no more candidates.
-    // Gathering of candidates has finished.
-    console.log('Ice candidate happened yo');
-    if ( !event.candidate ) {
-
-        try {
-            const offerDescription = await peerConnection.createOffer( sessionConstraints );
-            await peerConnection.setLocalDescription( offerDescription );
-        
-            console.log('offerDescription', offerDescription);
-        
-            Rooms.sdp({type: 'offer', key, topic, address, data: offerDescription});
-        
-            // Send the offerDescription to the other participant.
-        } catch( err ) {
-            // Handle Errors
+    async connectToPeer(key, topic, address) {
+        const mediaConstraints = { audio: true, video: false };
+        const sessionConstraints = {
+            mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true,
+                VoiceActivityDetection: true
+            }
         };
 
-        return;
+        let localMediaStream;
+        let remoteMediaStream;
 
+        try {
+            localMediaStream = await mediaDevices.getUserMedia(mediaConstraints);
+            console.log('Local media stream:', localMediaStream);
+        } catch (error) {
+            console.error('Error getting media:', error);
+            return;
+        }
 
-    };
+        const peerConstraints = {
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        };
 
-    // Send the event.candidate onto the person you're calling.
-    // Keeping to Trickle ICE Standards, you should send the candidates immediately.
-} );
+        const peerConnection = new RTCPeerConnection(peerConstraints);
+        this.activeConnections.push({ address, topic, peerConnection });
 
-peerConnection.addEventListener( 'icecandidateerror', event => {
-    // You can ignore some candidate errors.
-    // Connections can still be made even when errors occur.
-} );
+        this.setupPeerConnectionListeners(peerConnection, key, topic, address, sessionConstraints, remoteMediaStream, 'offer');
 
-peerConnection.addEventListener( 'iceconnectionstatechange', event => {
-    switch( peerConnection.iceConnectionState ) {
-        case 'connected':
-        case 'completed':
-            // You can handle the call being connected here.
-            // Like setting the video streams to visible.
+        localMediaStream.getTracks().forEach(track => peerConnection.addTrack(track, localMediaStream));
 
-            break;
-    };
-} );
+        const offerDescription = await peerConnection.createOffer(sessionConstraints);
+        await peerConnection.setLocalDescription(offerDescription);
+    }
 
-peerConnection.addEventListener( 'negotiationneeded', event => {
-    // You can start the offer stages here.
-    // Be careful as this event can be called multiple times.
-} );
+    async answerToPeer(offer) {
 
-peerConnection.addEventListener( 'signalingstatechange', event => {
-    switch( peerConnection.signalingState ) {
-        case 'closed':
-            // You can handle the call being disconnected here.
+        const { key, topic, address, data } = offer;
 
-            break;
-    };
-} );
+        const mediaConstraints = { audio: true, video: false };
+        const sessionConstraints = {
+            mandatory: {
+                OfferToReceiveAudio: true,
+                OfferToReceiveVideo: true,
+                VoiceActivityDetection: true
+            }
+        };
 
-peerConnection.addEventListener( 'track', event => {
-    // Grab the remote track from the connected participant.
-    remoteMediaStream = remoteMediaStream || new MediaStream();
-    remoteMediaStream.addTrack( event.track, remoteMediaStream );
-} );
+        let localMediaStream;
+        let remoteMediaStream;
 
-// Add our stream to the peer connection.
-localMediaStream.getTracks().forEach( 
-    track => peerConnection.addTrack( track, localMediaStream )
-);
+        try {
+            localMediaStream = await mediaDevices.getUserMedia(mediaConstraints);
+            console.log('Local media stream:', localMediaStream);
+        } catch (error) {
+            console.error('Error getting media:', error);
+            return;
+        }
 
+        const peerConstraints = {
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        };
 
+        const peerConnection = new RTCPeerConnection(peerConstraints);
+        this.activeConnections.push({ address, topic, peerConnection });
 
-const offerDescription = await peerConnection.createOffer( sessionConstraints );
-await peerConnection.setLocalDescription( offerDescription );
+        this.setupPeerConnectionListeners(peerConnection, key, topic, address, sessionConstraints, remoteMediaStream, 'answer');
 
+        localMediaStream.getTracks().forEach(track => peerConnection.addTrack(track, localMediaStream));
 
+        const remoteDescription = new RTCSessionDescription(data);
+        await peerConnection.setRemoteDescription(remoteDescription);
+        try {
+
+            const offerDescription = await peerConnection.createAnswer(sessionConstraints);
+            await peerConnection.setLocalDescription(offerDescription);
+            console.log('Sending SDP: ', offerDescription)
+            Rooms.sdp({ type: 'answer', key, topic, address, data: offerDescription });
+
+        } catch (e) {
+            console.log('Failed to create answer: ', e)
+        }
+
+    }
+
+    setupPeerConnectionListeners(peerConnection, key, topic, address, sessionConstraints, remoteMediaStream, type) {
+        peerConnection.addEventListener('connectionstatechange', () => {
+            console.log('Connection state changed:', peerConnection.connectionState);
+            if (peerConnection.connectionState === 'closed') {
+                this.cleanupConnection(address);
+            }
+        });
+
+        peerConnection.addEventListener('icecandidate', async event => {
+            if (!event.candidate) {
+                try {
+                    if (type === 'offer') {
+                        const offerDescription = await peerConnection.createOffer(sessionConstraints);
+
+                        await peerConnection.setLocalDescription(offerDescription);
+                        console.log('Sending SDP: ', offerDescription)
+                        Rooms.sdp({ type: type == 'offer' ? 'offer' : 'answer', key, topic, address, data: offerDescription });
+                    }
+                } catch (error) {
+                    console.error('Error creating offer:', error);
+                }
+            }
+        });
+
+        peerConnection.addEventListener('icecandidateerror', event => {
+            console.warn('ICE candidate error:', event);
+        });
+
+        peerConnection.addEventListener('iceconnectionstatechange', () => {
+            if (['connected', 'completed'].includes(peerConnection.iceConnectionState)) {
+                console.log('ICE connection established');
+            }
+        });
+
+        peerConnection.addEventListener('signalingstatechange', () => {
+            console.log('Signaling state changed: ', peerConnection.signalingState);
+            if (peerConnection.signalingState === 'closed') {
+                this.cleanupConnection(address);
+            }
+        });
+
+        peerConnection.addEventListener('track', event => {
+            remoteMediaStream = remoteMediaStream || new MediaStream();
+            remoteMediaStream.addTrack(event.track);
+        });
+    }
+
+    cleanupConnection(address) {
+        const index = this.activeConnections.findIndex(conn => conn.address === address);
+        if (index !== -1) {
+            this.activeConnections.splice(index, 1);
+            console.log('Connection cleaned up for address:', address);
+        }
+    }
 }
+
+export const WebRTC = new PeerConnectionManager();
