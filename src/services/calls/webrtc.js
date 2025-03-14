@@ -18,6 +18,9 @@ class VoiceChannel {
           ],
         },
       ],
+      iceTransportPolicy: "all",
+      sdpSemantics: 'unified-plan',
+      trickle: false
     };
     this.settings = {
       mandatory: {
@@ -37,6 +40,18 @@ class VoiceChannel {
       }
     }
   }
+
+  forceOpus(sdp) {
+    return sdp.replace(/a=rtpmap:\d+ AAC\/\d+\r\n/g, '') // Remove AAC
+              .replace(/a=rtpmap:\d+ G722\/\d+\r\n/g, '') // Remove G.722 if present
+              .replace(/a=rtpmap:\d+ PCMU\/\d+\r\n/g, '') // Remove G.711 if needed
+              .replace(/a=rtpmap:\d+ PCMA\/\d+\r\n/g, '') // Remove PCMA
+              .replace(/a=rtpmap:\d+ red\/\d+\/\d+\r\n/g, '') // Remove red
+              .replace(/a=fmtp:\d+ .*\r\n/g, '') // Remove fmtp lines for removed codecs
+              .replace(/a=rtpmap:\d+ ILBC\/\d+\r\n/g, '') // Remove PCMA
+              .replace(/a=rtpmap:\d+ CN\/\d+\r\n/g, '') // Remove PCMA
+              .replace(/^a=ice-options:.*\r\n/m, '');
+}
 
   close(address) {
     const conn = this.active(address);
@@ -59,7 +74,8 @@ class VoiceChannel {
     if (connection) {
       console.log('Adding answer to connection:', connection);
       const remote = new RTCSessionDescription(data);
-      await connection.peerConnection.setRemoteDescription(remote);
+      console.log('data: ', data)
+      await connection.peerConnection.setRemoteDescription(data);
       // processCandidates();
     } else {
       console.log('No connection found for address:', address);
@@ -87,6 +103,8 @@ class VoiceChannel {
       .forEach((track) => peerConnection.addTrack(track, localMediaStream));
 
     this.events(peerConnection, key, topic, address, 'offer');
+
+    await peerConnection.createDataChannel('HuginDataChannel');
 
     const offer = await peerConnection.createOffer(this.settings);
     await peerConnection.setLocalDescription(offer);
@@ -143,7 +161,8 @@ class VoiceChannel {
       if (!event.candidate) {
         try {
           if (type === 'offer') {
-            const offer = await peerConnection.createOffer(this.settings);
+            let offer = await peerConnection.createOffer(this.settings);
+            offer = new RTCSessionDescription({type: 'offer', sdp: this.forceOpus(offer.sdp)});   
             await peerConnection.setLocalDescription(offer);
             console.log('Sending SDP: ', offer);
 
