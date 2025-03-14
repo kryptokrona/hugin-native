@@ -1,6 +1,5 @@
 import React, {
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -16,20 +15,18 @@ import {
   View,
 } from 'react-native';
 
-import { textType } from '@/styles';
-
-// import Animated, { useSharedValue } from 'react-native-reanimated';
-
-
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   type RouteProp,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 import { t } from 'i18next';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
+import { Rooms } from 'lib/native';
 
 import {
   CustomIcon,
@@ -44,8 +41,17 @@ import {
   TextField,
   UserItem,
 } from '@/components';
+
+// import Animated, { useSharedValue } from 'react-native-reanimated';
+
 import { MainScreens } from '@/config';
-import { useGlobalStore, setStoreCurrentRoom, useThemeStore, WebRTC } from '@/services';
+import {
+  useGlobalStore,
+  setStoreCurrentRoom,
+  useThemeStore,
+  WebRTC,
+} from '@/services';
+import { textType } from '@/styles';
 import type {
   SelectedFile,
   MainStackNavigationType,
@@ -62,9 +68,6 @@ import {
   onSendGroupMessageWithFile,
 } from '../services/bare/groups';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { Rooms } from 'lib/native';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -90,74 +93,89 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const myUserAddress = useGlobalStore((state) => state.address);
   const currentCall = useGlobalStore((state) => state.currentCall);
   const inCall = currentCall.room === roomKey;
-  console.log('currentCall', currentCall)
+  console.log('currentCall', currentCall);
   const inCallUsers = 0;
   const globalRoomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room === roomKey && a.voice === true,
   );
 
   const userList = useMemo(() => {
-      console.log('useMemo triggered! ', globalRoomUsers);
-      return globalRoomUsers;
-    }, [change]);
-  
+    console.log('useMemo triggered! ', globalRoomUsers);
+    return globalRoomUsers;
+  }, [change]);
+
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
       return '';
-    }    
-    
+    }
+
     const message = messages.find((m) => m.hash === replyToMessageHash);
     return message ? message.nickname : '';
   }, [replyToMessageHash, messages]);
 
   const snapPoints = useMemo(() => ['50%'], []);
 
-  
-  function onShowCall () {
+  function onShowCall() {
     console.log('Clicked');
     bottomSheetRef?.current?.snapToIndex(0);
   }
 
-  function onJoinCall () {
-
+  function onJoinCall() {
     console.log('Joining call!');
 
-    Rooms.voice({key: roomKey, voice: true, video: false, screenshare: false, audioMute: false, videoMute: false}, false);
+    Rooms.voice(
+      {
+        audioMute: false,
+        key: roomKey,
+        screenshare: false,
+        video: false,
+        videoMute: false,
+        voice: true,
+      },
+      false,
+    );
 
     const peer = {
       address: myUserAddress,
-      voice: true,
-      video: false,
+      audioMute: false,
       screenshare: false,
-      audioMute: false
-    }
+      video: false,
+      voice: true,
+    };
     Peers.voicestatus(peer);
     // setInCall(true);
     setChange(!change);
-    const call = {room: roomKey, users: userList, time: Date.now()};
-    console.log('call: ', call)
+    const call = { room: roomKey, time: Date.now(), users: userList };
+    console.log('call: ', call);
     // useGlobalStore.setState({ currentCall: call });
     useGlobalStore.getState().setCurrentCall(call);
-    
   }
 
-  function onEndCall () {
-
-    Rooms.voice({key: roomKey, voice: false, video: false, screenshare: false, audioMute: false, videoMute: false}, false);
+  function onEndCall() {
+    Rooms.voice(
+      {
+        audioMute: false,
+        key: roomKey,
+        screenshare: false,
+        video: false,
+        videoMute: false,
+        voice: false,
+      },
+      false,
+    );
 
     const peer = {
       address: myUserAddress,
-      voice: false,
-      video: false,
+      audioMute: false,
       screenshare: false,
-      audioMute: false
-    }
+      video: false,
+      voice: false,
+    };
 
     Peers.voicestatus(peer);
     setChange(!change);
-    useGlobalStore.getState().setCurrentCall({room: '', users: []});
-    WebRTC.endCall();
-
+    useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
+    WebRTC.exit();
   }
 
   function OnlineUserMapper({ item }: { item: User }) {
@@ -256,41 +274,38 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           backButton
           title={name}
           right={
-            <View style={{flexDirection: 'row', gap: 10, marginLeft: -5}}>
+            <View style={{ flexDirection: 'row', gap: 10, marginLeft: -5 }}>
               <TouchableOpacity
-              style={{ flexDirection: 'row' }}
-              onPress={onShowCall}>
-              <View style={{ marginRight: 5, marginTop: 4 }}>
-                <Unreads
-                  unreads={inCallUsers}
-                  color={`${inCall ? 'green' : 'grey'}`}
-                />
-              </View>
-
-              <CustomIcon type="MCI" name={'phone'} />
-              <View style={{marginLeft: -5}}>
-
-                <CustomIcon
-                  name={'lens'}
-                  size={10}
-                  type={'MI'}
-                  color={`${inCall ? 'green' : 'grey'}`}
+                style={{ flexDirection: 'row' }}
+                onPress={onShowCall}>
+                <View style={{ marginRight: 5, marginTop: 4 }}>
+                  <Unreads
+                    unreads={inCallUsers}
+                    color={`${inCall ? 'green' : 'grey'}`}
                   />
+                </View>
 
-              </View>
-            </TouchableOpacity>
+                <CustomIcon type="MCI" name={'phone'} />
+                <View style={{ marginLeft: -5 }}>
+                  <CustomIcon
+                    name={'lens'}
+                    size={10}
+                    type={'MI'}
+                    color={`${inCall ? 'green' : 'grey'}`}
+                  />
+                </View>
+              </TouchableOpacity>
               <TouchableOpacity
                 style={{ flexDirection: 'row' }}
                 onPress={onCustomizeGroupPress}>
-
                 <CustomIcon type="MI" name={'groups-3'} />
                 <CustomIcon
                   name={'lens'}
                   size={10}
                   type={'MI'}
                   color={`${online ? 'green' : 'grey'}`}
-                  />
-                  {/* <View style={{ marginTop: 16, transform: [{ scale: 0.8 }] }}>
+                />
+                {/* <View style={{ marginTop: 16, transform: [{ scale: 0.8 }] }}>
                     <Unreads
                       unreads={onlineUsers}
                       color={`${online ? 'green' : 'grey'}`}
@@ -372,135 +387,153 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   return (
     <ScreenLayout>
       <GestureHandlerRootView>
-      {/* Full-Screen Image Viewer */}
-      {imagePath && (
-        <FullScreenImageViewer
-          imagePath={imagePath}
-          onClose={() => setImagePath(null)}
-        />
-      )}
-      <ModalCenter visible={tipping} closeModal={onCloseTipping}>
-        <InputField
-          label={t('amount')}
-          value={tipAmount}
-          onChange={setTipAmount}
-          onSubmitEditing={sendTip}
-          keyboardType="number-pad"
-        />
-        <TextButton disabled={tipAmount === '0'} onPress={sendTip}>
-          {t('send')}
-        </TextButton>
-        <TextButton type="secondary" onPress={() => setTipping(false)}>
-          {t('close')}
-        </TextButton>
-      </ModalCenter>
+        {/* Full-Screen Image Viewer */}
+        {imagePath && (
+          <FullScreenImageViewer
+            imagePath={imagePath}
+            onClose={() => setImagePath(null)}
+          />
+        )}
+        <ModalCenter visible={tipping} closeModal={onCloseTipping}>
+          <InputField
+            label={t('amount')}
+            value={tipAmount}
+            onChange={setTipAmount}
+            onSubmitEditing={sendTip}
+            keyboardType="number-pad"
+          />
+          <TextButton disabled={tipAmount === '0'} onPress={sendTip}>
+            {t('send')}
+          </TextButton>
+          <TextButton type="secondary" onPress={() => setTipping(false)}>
+            {t('close')}
+          </TextButton>
+        </ModalCenter>
 
-      <FlatList
-        inverted
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item: Message, i) => `${item.address}-${i}`}
-        renderItem={({ item }) => {
-          return (
-            <GroupMessageItem
-              message={item.message}
-              timestamp={item.timestamp}
-              nickname={item.nickname}
-              userAddress={item.address}
-              onReplyToMessagePress={onReplyToMessagePress}
-              onEmojiReactionPress={onEmojiReactionPress}
-              onTipPress={onTip}
-              replyHash={item.hash}
-              reactions={item.reactions!}
-              replyto={item.replyto}
-              file={item.file!}
-              onShowImagePress={showBigImage}
-              tip={item.tip}
-            />
-          );
-        }}
-        contentContainerStyle={styles.flatListContent}
-        initialNumToRender={messages.length}
-        maxToRenderPerBatch={messages.length}
-      />
-
-      <KeyboardAvoidingView
-        style={[styles.inputWrapper, { backgroundColor }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
-        <MessageInput
-          onSend={onSend}
-          replyToName={replyToName}
-          onCloseReplyPress={onCloseReplyPress}
+        <FlatList
+          inverted
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item: Message, i) => `${item.address}-${i}`}
+          renderItem={({ item }) => {
+            return (
+              <GroupMessageItem
+                message={item.message}
+                timestamp={item.timestamp}
+                nickname={item.nickname}
+                userAddress={item.address}
+                onReplyToMessagePress={onReplyToMessagePress}
+                onEmojiReactionPress={onEmojiReactionPress}
+                onTipPress={onTip}
+                replyHash={item.hash}
+                reactions={item.reactions!}
+                replyto={item.replyto}
+                file={item.file!}
+                onShowImagePress={showBigImage}
+                tip={item.tip}
+              />
+            );
+          }}
+          contentContainerStyle={styles.flatListContent}
+          initialNumToRender={messages.length}
+          maxToRenderPerBatch={messages.length}
         />
-      </KeyboardAvoidingView>
 
-      
+        <KeyboardAvoidingView
+          style={[styles.inputWrapper, { backgroundColor }]}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
+          <MessageInput
+            onSend={onSend}
+            replyToName={replyToName}
+            onCloseReplyPress={onCloseReplyPress}
+          />
+        </KeyboardAvoidingView>
+
         <BottomSheet
           ref={bottomSheetRef}
           onChange={handleSheetChanges}
           snapPoints={snapPoints}
           index={-1}
           enablePanDownToClose={true}
-          handleStyle={{backgroundColor, borderTopLeftRadius: 10, borderTopRightRadius: 10}}
-          handleIndicatorStyle={{backgroundColor: color}}
-        >
-          <BottomSheetView style={[{backgroundColor, borderColor}, styles.contentContainer]}>
+          handleStyle={{
+            backgroundColor,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+          handleIndicatorStyle={{ backgroundColor: color }}>
+          <BottomSheetView
+            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
             {/* <TextField>Awesome 🎉</TextField> */}
-            <View style={{flex: 1, width: '100%'}}>
-
+            <View style={{ flex: 1, width: '100%' }}>
               <View style={styles.flatListContainer}>
-                        <TextField size={'xsmall'} type="muted">
-                          {`${t('onlineRoomMembers')} (${globalRoomUsers?.length})`}
-                        </TextField>
-                        <View style={styles.flatListWrapper}>
-              
-                        <FlatList
-                          nestedScrollEnabled={true}
-                          numColumns={2}
-                          data={userList}
-                          renderItem={OnlineUserMapper}
-                          keyExtractor={(item, i) => `${item.name}-${i}`}
-                          style={{ flex: 1 }}
-                        />
-                        </View>
-                      </View>
+                <TextField size={'xsmall'} type="muted">
+                  {`${t('onlineRoomMembers')} (${globalRoomUsers?.length})`}
+                </TextField>
+                <View style={styles.flatListWrapper}>
+                  <FlatList
+                    nestedScrollEnabled={true}
+                    numColumns={2}
+                    data={userList}
+                    renderItem={OnlineUserMapper}
+                    keyExtractor={(item, i) => `${item.name}-${i}`}
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              </View>
 
               {!inCall ? (
-
                 <TextButton
-                small
-                type="secondary"
-                onPress={onJoinCall}
-                icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                {t('joinCall')}
+                  small
+                  type="secondary"
+                  onPress={onJoinCall}
+                  icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+                  {t('joinCall')}
                 </TextButton>
-
               ) : (
-
-              <TextButton
-                small
-                type="destructive"
-                onPress={onEndCall}
-                icon={<CustomIcon color={theme[textType['destructive']]} name="phone-hangup" type="MCI" size={16} />}>
-                {t('endCall')}
-              </TextButton>
-
+                <TextButton
+                  small
+                  type="destructive"
+                  onPress={onEndCall}
+                  icon={
+                    <CustomIcon
+                      color={theme[textType.destructive]}
+                      name="phone-hangup"
+                      type="MCI"
+                      size={16}
+                    />
+                  }>
+                  {t('endCall')}
+                </TextButton>
               )}
-
             </View>
           </BottomSheetView>
         </BottomSheet>
       </GestureHandlerRootView>
-
     </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: 'grey',
+    flex: 1,
+  },
+  contentContainer: {
+    alignItems: 'center',
+    flex: 1,
+    padding: 36,
+  },
+  flatListContainer: {
+    flex: 1,
+    marginVertical: 12,
+  },
   flatListContent: {
     flexDirection: 'column-reverse',
     paddingTop: 60,
+  },
+  flatListWrapper: {
+    flex: 1,
   },
   inputWrapper: {
     bottom: 0,
@@ -509,21 +542,5 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: 'grey',
-  },
-  contentContainer: {
-    flex: 1,
-    padding: 36,
-    alignItems: 'center'
-  },
-  flatListContainer: {
-    marginVertical: 12,
-    flex: 1,
-  },
-  flatListWrapper: {
-    flex: 1,
   },
 });

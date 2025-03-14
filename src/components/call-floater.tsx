@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+
 import { StyleSheet, View, Text } from 'react-native';
+
+import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -8,19 +11,15 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { Peers } from 'lib/connections';
+import { Rooms } from 'lib/native';
+
+import { Avatar } from '@/components';
+import { useGlobalStore, WebRTC, useThemeStore } from '@/services';
+import { textType } from '@/styles';
 import { Call } from '@/types';
 
-import { useGlobalStore, WebRTC } from '@/services';
-
 import { CustomIcon } from './_elements/custom-icon';
-
-import { useThemeStore } from '@/services';
-
-import { textType } from '@/styles';
-import { TouchableOpacity } from '@gorhom/bottom-sheet';
-import { Rooms } from 'lib/native';
-import { Peers } from 'lib/connections';
-import { Avatar } from '@/components';
 
 interface Props {
   currentCall: Call;
@@ -50,7 +49,10 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
       const elapsed = Math.floor((now - startTime) / 1000);
 
       const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-      const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+      const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(
+        2,
+        '0',
+      );
       const seconds = String(elapsed % 60).padStart(2, '0');
 
       setCallDuration(`${hours}:${minutes}:${seconds}`);
@@ -63,10 +65,6 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   }, [currentCall.time]);
 
   const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx: any) => {
-      ctx.startX = translateX.value;
-      ctx.startY = translateY.value;
-    },
     onActive: (event, ctx: any) => {
       translateX.value = ctx.startX + event.translationX;
       translateY.value = ctx.startY + event.translationY;
@@ -74,6 +72,10 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
     onEnd: () => {
       translateX.value = withSpring(translateX.value);
       translateY.value = withSpring(translateY.value);
+    },
+    onStart: (_, ctx: any) => {
+      ctx.startX = translateX.value;
+      ctx.startY = translateY.value;
     },
   });
 
@@ -85,37 +87,65 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   }));
 
   function endCall() {
-    Rooms.voice({ key: currentCall.room, voice: false, video: false, screenshare: false, audioMute: false, videoMute: false }, false);
+    Rooms.voice(
+      {
+        audioMute: false,
+        key: currentCall.room,
+        screenshare: false,
+        video: false,
+        videoMute: false,
+        voice: false,
+      },
+      false,
+    );
 
     const peer = {
       address: myUserAddress,
-      voice: false,
-      video: false,
+      audioMute: false,
       screenshare: false,
-      audioMute: false
+      video: false,
+      voice: false,
     };
 
     Peers.voicestatus(peer);
 
     useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
-    WebRTC.endCall();
+    WebRTC.exit();
   }
 
   return (
     <PanGestureHandler onGestureEvent={gestureHandler}>
-      <Animated.View style={[styles.overlayContainer, animatedStyle, { borderColor, borderWidth: 1, color, backgroundColor, borderRadius: 20 }]}>
+      <Animated.View
+        style={[
+          styles.overlayContainer,
+          animatedStyle,
+          {
+            backgroundColor,
+            borderColor,
+            borderRadius: 20,
+            borderWidth: 1,
+            color,
+          },
+        ]}>
         <View style={styles.avatarsContainer}>
           {currentCall.users.map((user) => (
             <Avatar
               key={user.address}
-              base64={user.avatar !== '' ? user.avatar : getAvatar(user.address)}
+              base64={
+                user.avatar !== '' ? user.avatar : getAvatar(user.address)
+              }
               size={24}
             />
           ))}
         </View>
         <Text style={{ color }}>{callDuration}</Text>
         <TouchableOpacity onPress={endCall}>
-          <CustomIcon color={theme[textType['destructive']]} name="phone-hangup" type="MCI" size={24} />
+          <CustomIcon
+            color={theme[textType.destructive]}
+            name="phone-hangup"
+            type="MCI"
+            size={24}
+          />
         </TouchableOpacity>
       </Animated.View>
     </PanGestureHandler>
@@ -123,25 +153,25 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  overlayContainer: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-    backgroundColor: 'green',
-    height: 42,
-    width: '80%',
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: '20%',
-    left: '10%',
-  },
   avatarsContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: 8,
     marginBottom: 8,
+  },
+  container: {
+    flex: 1,
+  },
+  overlayContainer: {
+    alignItems: 'center',
+    backgroundColor: 'green',
+    bottom: '20%',
+    flexDirection: 'row',
+    gap: 10,
+    height: 42,
+    justifyContent: 'center',
+    left: '10%',
+    position: 'absolute',
+    width: '80%',
   },
 });
