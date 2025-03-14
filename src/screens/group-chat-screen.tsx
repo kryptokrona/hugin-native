@@ -45,7 +45,7 @@ import {
   UserItem,
 } from '@/components';
 import { MainScreens } from '@/config';
-import { useGlobalStore, setStoreCurrentRoom, useThemeStore } from '@/services';
+import { useGlobalStore, setStoreCurrentRoom, useThemeStore, WebRTC } from '@/services';
 import type {
   SelectedFile,
   MainStackNavigationType,
@@ -85,8 +85,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
   const [change, setChange] = useState<boolean>(false);
-  const [inCall, setInCall] = useState<boolean>(false);
+  // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const myUserAddress = useGlobalStore((state) => state.address);
+  const currentCall = useGlobalStore((state) => state.currentCall);
+  const inCall = currentCall.room === roomKey;
+  console.log('currentCall', currentCall)
   const inCallUsers = 0;
   const globalRoomUsers = useGlobalStore((state) => state.roomUsers).filter(
     (a) => a.room === roomKey && a.voice === true,
@@ -119,10 +123,40 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     console.log('Joining call!');
 
     Rooms.voice({key: roomKey, voice: true, video: false, screenshare: false, audioMute: false, videoMute: false}, false);
+
+    const peer = {
+      address: myUserAddress,
+      voice: true,
+      video: false,
+      screenshare: false,
+      audioMute: false
+    }
+    Peers.voicestatus(peer);
+    // setInCall(true);
+    setChange(!change);
+    const call = {room: roomKey, users: userList, time: Date.now()};
+    console.log('call: ', call)
+    // useGlobalStore.setState({ currentCall: call });
+    useGlobalStore.getState().setCurrentCall(call);
     
   }
 
   function onEndCall () {
+
+    Rooms.voice({key: roomKey, voice: false, video: false, screenshare: false, audioMute: false, videoMute: false}, false);
+
+    const peer = {
+      address: myUserAddress,
+      voice: false,
+      video: false,
+      screenshare: false,
+      audioMute: false
+    }
+
+    Peers.voicestatus(peer);
+    setChange(!change);
+    useGlobalStore.getState().setCurrentCall({room: '', users: []});
+    WebRTC.endCall();
 
   }
 
@@ -268,7 +302,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         />
       ),
     });
-  }, [roomKey, name, onlineUsers]);
+  }, [roomKey, name, onlineUsers, inCall]);
 
   async function onSend(
     text: string,
