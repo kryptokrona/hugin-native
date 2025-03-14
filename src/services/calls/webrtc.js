@@ -74,7 +74,6 @@ class VoiceChannel {
     if (connection) {
       console.log('Adding answer to connection:', connection);
       const remote = new RTCSessionDescription(data);
-      console.log('data: ', data)
       await connection.peerConnection.setRemoteDescription(data);
       // processCandidates();
     } else {
@@ -140,7 +139,6 @@ class VoiceChannel {
     try {
       const answer = await peerConnection.createAnswer(this.settings);
       await peerConnection.setLocalDescription(answer);
-      console.log('Sending SDP: ', answer);
       Rooms.sdp({ type: 'answer', key, topic, address, data: answer });
     } catch (e) {
       console.log('Failed to create answer: ', e);
@@ -164,7 +162,6 @@ class VoiceChannel {
             let offer = await peerConnection.createOffer(this.settings);
             offer = new RTCSessionDescription({type: 'offer', sdp: this.forceOpus(offer.sdp)});   
             await peerConnection.setLocalDescription(offer);
-            console.log('Sending SDP: ', offer);
 
             //Send to backend
             Rooms.sdp({
