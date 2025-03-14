@@ -4,7 +4,13 @@ import {
   RTCSessionDescription,
 } from 'react-native-webrtc';
 
+import {
+    useGlobalStore
+  } from '../zustand';
+
 import { Rooms } from 'lib/native';
+
+import InCallManager from 'react-native-incall-manager';
 
 class VoiceChannel {
   constructor() {
@@ -29,9 +35,28 @@ class VoiceChannel {
         VoiceActivityDetection: true,
       },
     };
+    this.localMediaStream = null;
+  }
+
+  async init(video=false) {
+     //TODO***
+    //If we have active video during the call, if someone joins, we should set vidoe = true
+    const mediaConstraints = { audio: true, video };
+
+    try {
+      this.localMediaStream = await mediaDevices.getUserMedia(mediaConstraints);
+    } catch (error) {
+      console.error('Error getting media:', error);
+      return;
+    }
+    InCallManager.stop();
+    InCallManager.start({ media: 'audio/video', auto: true});
+    InCallManager.setSpeakerphoneOn(true);
+
   }
 
   async exit() {
+    InCallManager.stop();
     for (const con of this.connections) {
       try {
         con.peerConnection.close();
@@ -83,23 +108,14 @@ class VoiceChannel {
 
   async call(key, topic, address) {
     //Always join voice as video : false
-    const mediaConstraints = { audio: true, video: false };
-    let localMediaStream;
-
-    try {
-      localMediaStream = await mediaDevices.getUserMedia(mediaConstraints);
-      console.log('Local media stream:', localMediaStream);
-    } catch (error) {
-      console.error('Error getting media:', error);
-      return;
-    }
+    if (!this.localMediaStream) await this.init();
 
     const peerConnection = new RTCPeerConnection(this.stunServers);
     this.connections.push({ address, topic, peerConnection });
 
-    localMediaStream
+    this.localMediaStream
       .getTracks()
-      .forEach((track) => peerConnection.addTrack(track, localMediaStream));
+      .forEach((track) => peerConnection.addTrack(track, this.localMediaStream));
 
     this.events(peerConnection, key, topic, address, 'offer');
 
@@ -111,26 +127,15 @@ class VoiceChannel {
 
   async answer(offer) {
     const { key, topic, address, data } = offer;
-    //TODO***
-    //If we have active video during the call, if someone joins, we should set vidoe = true
-    const mediaConstraints = { audio: true, video: false };
-
-    let localMediaStream;
-
-    try {
-      localMediaStream = await mediaDevices.getUserMedia(mediaConstraints);
-      console.log('Local media stream:', localMediaStream);
-    } catch (error) {
-      console.error('Error getting media:', error);
-      return;
-    }
+   
+    if (!this.localMediaStream) await this.init();
 
     const peerConnection = new RTCPeerConnection(this.stunServers);
     this.connections.push({ address, topic, peerConnection });
 
-    localMediaStream
+    this.localMediaStream
       .getTracks()
-      .forEach((track) => peerConnection.addTrack(track, localMediaStream));
+      .forEach((track) => peerConnection.addTrack(track, this.localMediaStream));
 
     this.events(peerConnection, key, topic, address, 'answer');
 
@@ -153,6 +158,7 @@ class VoiceChannel {
       if (peerConnection.connectionState === 'closed') {
         this.remove(address);
       }
+      if (peerConnection.connectionState === 'connected') this.peervolume(address);
     });
 
     peerConnection.addEventListener('icecandidate', async (event) => {
@@ -209,6 +215,63 @@ class VoiceChannel {
     this.connections = filter;
     console.log('Still connected in call:', this.connections.length);
   }
+
+  peervolume(address) {
+
+    let interval;
+        let array = new Array(3);
+        let peer = this.active(address);
+
+        const sensitivity = 0.01;
+
+        interval = setInterval(getAudioLevel, 300);
+
+        const getRemoteAudioLevel = async (peerConnection) => {
+
+            if (!peerConnection) return;
+          
+            const senders = peerConnection.getSenders();
+            const receivers = peerConnection.getReceivers();
+          
+            for (const receiver of receivers) {
+              const track = receiver.track;
+              
+              if (track && track.kind === 'audio') {
+                try {
+                  const stats = await peerConnection.getStats(track);
+                  
+                  stats.forEach(report => {
+                    if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+                      array.push(report.audioLevel);
+                    return report.audioLevel;
+                    }
+                  });
+          
+                } catch (error) {
+                  console.error('Error getting stats:', error);
+                }
+              }
+            }
+          };
+        
+        async function getAudioLevel() {
+            const currentCall = useGlobalStore.getState().currentCall;
+            if (currentCall.users.some((a) => a.address == address)) {
+                await getRemoteAudioLevel(peer.peerConnection);
+                
+                const talking = array.some((volume) => volume > sensitivity);
+
+                useGlobalStore.getState().setCurrentCall({...currentCall});
+
+                currentCall.users.find(a => a.address === address).talking = talking;
+                
+                array.shift()
+            } else {
+                clearInterval(interval)
+            }
+  }
+  }    
+
 }
 
 export const WebRTC = new VoiceChannel();

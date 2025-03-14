@@ -23,6 +23,8 @@ import { CustomIcon } from './_elements/custom-icon';
 
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
+import InCallManager from 'react-native-incall-manager';
+
 interface Props {
   currentCall: Call;
 }
@@ -33,12 +35,13 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
 
   const myUserAddress = useGlobalStore((state) => state.address);
   const theme = useThemeStore((state) => state.theme);
+  const [speaker, setSpeaker] = useState(false);
 
   const backgroundColor = theme.background;
   const borderColor = theme.border;
   const color = theme.foreground;
 
-  const [callDuration, setCallDuration] = useState('00:00:00');
+  const [callDuration, setCallDuration] = useState('00 00 00'.split(' ').join('\n'));
 
   useEffect(() => {
     const updateTimer = () => {
@@ -53,7 +56,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
       );
       const seconds = String(elapsed % 60).padStart(2, '0');
 
-      setCallDuration(`${hours}:${minutes}:${seconds}`);
+      setCallDuration(`${hours} ${minutes} ${seconds}`.split(' ').join('\n'));
     };
 
     const timer = setInterval(updateTimer, 1000);
@@ -83,6 +86,11 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
       { translateY: translateY.value },
     ],
   }));
+
+  function toggleSpeaker() {
+    InCallManager.setSpeakerphoneOn(!speaker);
+    setSpeaker(!speaker);
+  }
 
   function endCall() {
     Rooms.voice(
@@ -127,6 +135,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
         ]}>
         <View style={styles.avatarsContainer}>
           {currentCall.users.map((user) => (
+            <View style={{borderRadius: 5, borderWidth: 2, borderColor: user.talking ? 'green' : 'transparent'}}>
             <Avatar
               key={user.address}
               base64={
@@ -134,12 +143,35 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
               }
               size={24}
             />
+            </View>
           ))}
         </View>
-        <Text style={{ color }}>{callDuration}</Text>
+        {/* <Text style={{ color }}>{callDuration}</Text> */}
+        <TouchableOpacity onPress={toggleSpeaker}>
+          {speaker ?
+            (
+              <CustomIcon
+                color={color}
+                name="volume-up"
+                type="MI"
+                size={24}
+              />
+            ) :
+            (
+              <CustomIcon
+                color={color}
+                name="volume-mute"
+                type="MI"
+                size={24}
+              />
+            )
+          
+          }
+          
+        </TouchableOpacity>
         <TouchableOpacity onPress={endCall}>
           <CustomIcon
-            color={theme[textType.destructive]}
+            color="#dc2626"
             name="phone-hangup"
             type="MCI"
             size={24}
@@ -153,7 +185,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
 const styles = StyleSheet.create({
   avatarsContainer: {
     alignItems: 'center',
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 8,
     marginBottom: 8,
   },
@@ -163,13 +195,13 @@ const styles = StyleSheet.create({
   overlayContainer: {
     alignItems: 'center',
     backgroundColor: 'green',
-    bottom: '20%',
-    flexDirection: 'row',
+    bottom: '60%',
+    flexDirection: 'column',
     gap: 10,
-    height: 42,
     justifyContent: 'center',
-    left: '10%',
+    right: 10,
     position: 'absolute',
-    width: '80%',
+    width: 60,
+    padding: 10
   },
 });

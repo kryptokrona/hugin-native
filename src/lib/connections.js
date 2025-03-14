@@ -2,6 +2,7 @@ import { EventEmitter } from 'bare-events';
 import {
   setStoreActiveRoomUsers,
   getActiveRoomUsers,
+  useGlobalStore
 } from '../services/zustand';
 
 class Connections extends EventEmitter {
@@ -28,7 +29,7 @@ class Connections extends EventEmitter {
   }
 
   voicestatus(peer) {
-    console.log('Voice status changed');
+    console.log('Voice status changed for ', peer );
     let list = this.active();
     list.some((a) => {
       if (a.address === peer.address) {
@@ -36,6 +37,7 @@ class Connections extends EventEmitter {
         a.video = peer.video;
         a.screenshare = peer.screenshare;
         a.muted = peer.audioMute;
+        console.log('Updated peer: ', a)
       }
     });
     this.update(list);
@@ -61,6 +63,10 @@ class Connections extends EventEmitter {
   }
 
   update(list) {
+    const currentCall = useGlobalStore.getState().currentCall;
+    console.log('Currentcall connections', currentCall);
+    currentCall.users = list.filter(a => a.room === currentCall.room && a.voice === true);
+    useGlobalStore.getState().setCurrentCall({...currentCall});
     setStoreActiveRoomUsers(list);
   }
 
