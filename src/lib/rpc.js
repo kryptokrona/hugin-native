@@ -148,7 +148,7 @@ export class Bridge {
           }
           break;
         case 'peer-connected':
-          console.log('peer-connected!', json);
+          // console.log('peer-connected!', json);
           Peers.join(json.joined);
           saveRoomUser(
             json.joined.name,
@@ -162,7 +162,7 @@ export class Bridge {
           Peers.left(json);
           break;
         case 'voice-channel-status':
-          console.log('Voice channel status', json);
+          // console.log('Voice channel status', json);
           Peers.voicestatus(json.data);
           break;
         case 'join-voice-channel':
@@ -170,11 +170,11 @@ export class Bridge {
           WebRTC.call(json.key, json.topic, json.address);
           break;
         case 'got-answer':
-          console.log('Got answer: ', json);
+          // console.log('Got answer: ', json);
           WebRTC.callback(json.data);
           break;
         case 'answer-call':
-          console.log('Got call: ', json);
+          // console.log('Got call: ', json);
           WebRTC.answer(json.data);
           break;
 
