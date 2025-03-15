@@ -105,7 +105,7 @@ export const GroupsScreen: React.FC<Props> = () => {
     await setRoomMessages(roomKey, 0);
     setStoreCurrentRoom(roomKey);
     setThisRoom(roomKey);
-    navigation.navigate(MainScreens.GroupChatScreen, { name, roomKey });
+    navigation.push(MainScreens.GroupChatScreen, {name, roomKey});
   }
 
   function onCloseModal() {
