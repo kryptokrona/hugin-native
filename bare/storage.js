@@ -1,6 +1,7 @@
 const Corestore = require('corestore');
 const Hyperdrive = require('hyperdrive');
 const fs = require('bare-fs');
+const HyperSwarm = require('hyperswarm-hugin');
 const MEDIA_TYPES = [
   { file: '.png', type: 'image' },
   { file: '.jpg', type: 'image' },
@@ -21,7 +22,6 @@ const MEDIA_TYPES = [
   { file: '.wav', type: 'audio' },
 ];
 const { get_new_peer_keys, sleep } = require('./utils.js');
-const Huginbeam = require('huginbeam');
 const { Readable } = require('streamx');
 const { Hugin } = require('./account.js');
 
@@ -175,55 +175,57 @@ class HyperStorage {
     return [false];
   }
 
-  async start_beam(upload, key, file, topic, room) {
+  async start_beam(upload, key, file, topic, room, dm = false) {
     console.log('----::::::::::----');
     console.log('::::START BEAM::::');
     console.log('----::::::::::----');
-    console.log('');
+    console.log('Key', key);
     const [base_keys, dht_keys, sig] = get_new_peer_keys(key);
-    const options = { upload, dht_keys, base_keys, sig };
+    const topicHash = base_keys.publicKey.toString('hex');
+    let beam;
     try {
-      const beam = new Huginbeam(key, options);
-      this.beam_started(beam, upload, key, topic, file, room);
-      beam.write('Start');
-      return true;
+      beam = new HyperSwarm({ maxPeers: 1 }, sig, dht_keys, base_keys);
+      const announce = Buffer.alloc(32).fill(topicHash);
+      const disc = beam.join(announce, { server: true, client: true });
+      console.log('----::::::::::----');
+      console.log(':::BEAM STARTED:::');
+      console.log('----::::::::::----');
+      beam.on('connection', async (conn, info) => {
+        console.log('----:::::::::::::::::::----');
+        console.log('------BEAM CONNECTED------');
+        console.log('----:::::::::::::::::::----');
+        if (upload) {
+          this.upload(conn, file, topic);
+        } else {
+          const done = this.download(conn, file, topic, room, dm);
+          if (done) close();
+        }
+      });
+
+      const close = async () => {
+        console.log('XXXXXXXXXXXXXXX');
+        console.log('--BEAM CLOSED--');
+        console.log('XXXXXXXXXXXXXXX');
+        await beam.leave(Buffer.from(topic));
+        await beam.destroy();
+      };
+
+      beam.on('close', () => {
+        console.log('** Beam closed **');
+      });
+      beam.on('error', (e) => {
+        console.log('Beam error', e);
+        close();
+      });
+
+      process.once('SIGINT', () => {
+        close();
+      });
+
+      await disc.flushed();
     } catch (e) {
       console.log('Beam err', e);
-      return false;
     }
-  }
-
-  async beam_started(beam, upload, key, topic, file, room) {
-    console.log('----::::::::::----');
-    console.log(':::BEAM STARTED:::');
-    console.log('----::::::::::----');
-    beam.on('connected', async () => {
-      console.log('----:::::::::::::::::::----');
-      console.log('------BEAM CONNECTED------');
-      console.log('----:::::::::::::::::::----');
-      if (upload) {
-        this.upload(beam, file, topic);
-      } else {
-        this.download(beam, file, topic, room);
-      }
-    });
-
-    const close = async () => {
-      console.log('XXXXXXXXXXXXXXX');
-      console.log('--BEAM CLOSED--');
-      console.log('XXXXXXXXXXXXXXX');
-      beam.end();
-      await sleep(2000);
-      beam.destroy();
-    };
-
-    beam.on('close', () => {
-      console.log('** Beam closed **');
-    });
-    beam.on('error', (e) => {
-      console.log('Beam error', e);
-      close();
-    });
   }
 
   async upload(beam, file, topic) {
@@ -279,7 +281,7 @@ class HyperStorage {
           buffer,
         );
 
-        if (!saved) return;
+        if (!saved) return true;
         const [media, fileType] = this.check(file.size, buffer, file.fileName);
         Hugin.files.push(file.hash);
         ////*******TEMP*********////
@@ -292,7 +294,7 @@ class HyperStorage {
           console.log('Buffer written successfully');
         } catch (err) {
           console.error('Error writing buffer to file:', err);
-          return;
+          return true;
         }
         ////*********TEMP********////
 
@@ -323,6 +325,7 @@ class HyperStorage {
         };
         // Todo** test this.
         Hugin.send('swarm-message', { message });
+        return true;
       }
     });
   }
