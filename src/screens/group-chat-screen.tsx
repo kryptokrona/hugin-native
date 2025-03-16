@@ -130,7 +130,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   function onJoinCall() {
     console.log('Joining call!');
-
+    WebRTC.init();
     Rooms.voice(
       {
         audioMute: false,

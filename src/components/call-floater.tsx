@@ -36,6 +36,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   const myUserAddress = useGlobalStore((state) => state.address);
   const theme = useThemeStore((state) => state.theme);
   const [speaker, setSpeaker] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   const backgroundColor = theme.background;
   const borderColor = theme.border;
@@ -90,6 +91,22 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   function toggleSpeaker() {
     InCallManager.setSpeakerphoneOn(!speaker);
     setSpeaker(!speaker);
+  }
+
+  function toggleMuted() {
+    WebRTC.localMediaStream?.getAudioTracks().forEach((track) => (track.enabled = !track.enabled));
+    Rooms.voice(
+      {
+        audioMute: !muted,
+        key: currentCall.room,
+        screenshare: false,
+        video: false,
+        videoMute: false,
+        voice: true,
+      },
+      true,
+    );
+    setMuted(!muted);
   }
 
   function endCall() {
@@ -162,6 +179,28 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
                 color={color}
                 name="volume-mute"
                 type="MI"
+                size={24}
+              />
+            )
+          
+          }
+          
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleMuted}>
+          {muted ?
+            (
+              <CustomIcon
+                color="#dc2626"
+                name="microphone-off"
+                type="MCI"
+                size={24}
+              />
+            ) :
+            (
+              <CustomIcon
+                color={color}
+                name="microphone"
+                type="MCI"
                 size={24}
               />
             )

@@ -20,8 +20,9 @@ import {
   useRoomStore,
   useThemeStore,
   useUserStore,
+  WebRTC,
 } from '@/services';
-
+import InCallManager from 'react-native-incall-manager';
 import { Background } from './background';
 
 import { Rooms } from '../lib/native';
@@ -172,8 +173,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         // await Rooms.close();
-        Rooms.idle(true);
-        // Rooms.pause();
+        Rooms.idle(currentCall.room !== '', true);
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
 
@@ -182,11 +182,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } else if (state === 'background') {
         console.log('******** BACKGROUND ********');
+        InCallManager.start({ media: 'audio' });
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
         // await Rooms.close();
-        Rooms.idle(true);
+        Rooms.idle(currentCall.room !== '', true);
         // Rooms.pause();
         setThisRoom(getThisRoom());
         Wallet.active?.stop();

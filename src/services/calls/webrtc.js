@@ -11,6 +11,7 @@ import {
 import { Rooms } from 'lib/native';
 
 import InCallManager from 'react-native-incall-manager';
+import RNCallKeep from 'react-native-callkeep';
 
 class VoiceChannel {
   constructor() {
@@ -36,9 +37,29 @@ class VoiceChannel {
       },
     };
     this.localMediaStream = null;
+    this.options = {
+        ios: {
+          appName: 'Hugin Messenger',
+        },
+        android: {
+          alertTitle: 'Permissions required',
+          alertDescription: 'This application needs to access your phone accounts',
+          cancelButton: 'Cancel',
+          okButton: 'ok',
+          imageName: 'phone_account_icon',
+          // Required to get audio in background when using Android 11
+          foregroundService: {
+            channelId: 'org.kryptokrona.hugin',
+            channelName: 'Hugin Channel',
+            notificationTitle: 'An active call is running',
+            notificationIcon: './../../assets/hugin.svg',
+          }, 
+        }
+      };
   }
 
   async init(video=false) {
+    if (this.localMediaStream) return;
      //TODO***
     //If we have active video during the call, if someone joins, we should set vidoe = true
     const mediaConstraints = { audio: true, video };
@@ -52,6 +73,17 @@ class VoiceChannel {
     InCallManager.stop();
     InCallManager.start({ media: 'audio/video', auto: true});
     InCallManager.setSpeakerphoneOn(true);
+    InCallManager.setKeepScreenOn(true);
+
+    // RNCallKeep.setup(this.options);
+    // RNCallKeep.setup(this.options).then(accepted => {
+    //     console.log('CallKeep: ', accepted);
+    // });
+    // RNCallKeep.setAvailable(true);
+
+    // // 
+    // RNCallKeep.displayIncomingCall('3d9ba084-1ee0-48be-b468-fce6933c24db', 'dudeman');
+
 
   }
 

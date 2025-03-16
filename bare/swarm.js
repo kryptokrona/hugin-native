@@ -1133,6 +1133,8 @@ const update_voice_channel_status = (data, con) => {
     con.video,
   );
   //Send status to front-end
+  const status = get_active_topic(data.topic);
+  data.room = status.key;
   Hugin.send('voice-channel-status', { data });
   return true;
 };

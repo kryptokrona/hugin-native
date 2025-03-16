@@ -20,10 +20,10 @@ class Notifee {
   }
 
   async new({ text, name }: Notification, background: boolean) {
-    if (background) {
-      this.pending.push({ name, text });
-      return;
-    }
+    // if (background) {
+    //   this.pending.push({ name, text });
+    //   return;
+    // }
     this.display(name, text);
   }
 

@@ -4,6 +4,7 @@ import {
   getActiveRoomUsers,
   useGlobalStore
 } from '../services/zustand';
+import { Notify } from '../services/utils';
 
 class Connections extends EventEmitter {
 
@@ -33,11 +34,17 @@ class Connections extends EventEmitter {
     let list = this.active();
     list.some((a) => {
       if (a.address === peer.address) {
+        const currentCallStatus = a.voice ? true : false;
         a.voice = peer.voice;
         a.video = peer.video;
         a.screenshare = peer.screenshare;
         a.muted = peer.audioMute;
-        console.log('Updated peer: ', a)
+
+        if (peer.voice === true && a.room === peer.room && useGlobalStore.getState().address !== a.address ) {
+          const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === a.room).name;
+          const message = `Has joined the voice channel in ${roomName}`;
+          Notify.new({ name: peer.name, text: message });
+        }
       }
     });
     this.update(list);

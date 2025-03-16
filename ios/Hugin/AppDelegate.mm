@@ -1,15 +1,29 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
+#import <AVFoundation/AVFoundation.h> 
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   self.moduleName = @"Hugin";
-  // You can add your custom initial props in the dictionary below.
-  // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
+
+  NSError *audioError = nil;
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                   withOptions:AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker
+                                         error:&audioError];
+
+  if (audioError) {
+    NSLog(@"Error setting AVAudioSession category: %@", audioError.localizedDescription);
+  }
+
+  [[AVAudioSession sharedInstance] setActive:YES error:&audioError];
+
+  if (audioError) {
+    NSLog(@"Error activating AVAudioSession: %@", audioError.localizedDescription);
+  }
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
