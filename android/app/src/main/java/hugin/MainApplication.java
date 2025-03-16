@@ -19,6 +19,7 @@ import com.facebook.react.modules.network.OkHttpClientProvider;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
 import java.io.IOException;
+import com.zxcpoiu.incallmanager.InCallManagerPackage;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -37,7 +38,8 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       // Packages that cannot be autolinked yet can be added manually here
       packages.add(new TurtleCoinPackage());
-      // packages.add(new RNBackgroundFetchPackage());
+      packages.add(new RNBackgroundFetchPackage());
+      packages.add( new InCallManagerPackage(),);
       return packages;
     }
 
