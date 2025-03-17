@@ -156,10 +156,15 @@ export const GroupsScreen: React.FC<Props> = () => {
     if (!link) {
       return;
     }
-    const inviteKey = link.slice(-128);
-    const parse = link.split('hugin://')[1];
-    const roomName = parse.slice(0, parse.length - 1 - inviteKey.length);
+    const parse = link.split("/")
+    const roomName = parse[2];
     const originalName = roomName.replace(/-/g, ' ');
+    const inviteKey = parse[3];
+    if (inviteKey.length != 128) {
+      return;
+    }
+
+
     if (inviteKey && originalName && user?.address) {
       joinAndSaveRoom(inviteKey, originalName, user.address, user?.name);
 
