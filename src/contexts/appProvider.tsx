@@ -177,7 +177,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         if (WebRTC.localMediaStream === null) {
           Rooms.idle(true, false);
         } else {
-          Rooms.idle(true, true);
+          Rooms.idle(false, true);
         }
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
@@ -194,7 +194,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         if (WebRTC.localMediaStream === null) {
           Rooms.idle(true, false);
         } else {
-          Rooms.idle(true, true);
+          Rooms.idle(false, true);
         }
         // Rooms.pause();
         setThisRoom(getThisRoom());
