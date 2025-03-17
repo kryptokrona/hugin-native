@@ -1,0 +1,16 @@
+diff --git a/node_modules/bare-link/lib/run.js b/node_modules/bare-link/lib/run.js
+index 17f5ff3..0a5963d 100644
+--- a/node_modules/bare-link/lib/run.js
++++ b/node_modules/bare-link/lib/run.js
+@@ -1,6 +1,11 @@
+ const { spawn } = require('child_process')
+ 
+ module.exports = async function run(command, args, opts = {}) {
++  console.log("Command", command)
++  if (command === 'patchelf') {
++    command = "C:/Users/nilsjr/Desktop/New folder (2)/patchelf.exe"
++  }
++
+   const job = spawn(command, args, opts)
+   
+   return new Promise((resolve, reject) => {

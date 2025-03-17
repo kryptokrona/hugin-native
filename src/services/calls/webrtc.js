@@ -4,14 +4,11 @@ import {
   RTCSessionDescription,
 } from 'react-native-webrtc';
 
-import {
-    useGlobalStore
-  } from '../zustand';
+import { useGlobalStore } from '../zustand';
 
 import { Rooms } from 'lib/native';
 
 import InCallManager from 'react-native-incall-manager';
-import RNCallKeep from 'react-native-callkeep';
 
 class VoiceChannel {
   constructor() {
@@ -25,9 +22,9 @@ class VoiceChannel {
           ],
         },
       ],
-      iceTransportPolicy: "all",
+      iceTransportPolicy: 'all',
       sdpSemantics: 'unified-plan',
-      trickle: false
+      trickle: false,
     };
     this.settings = {
       mandatory: {
@@ -38,29 +35,30 @@ class VoiceChannel {
     };
     this.localMediaStream = null;
     this.options = {
-        ios: {
-          appName: 'Hugin Messenger',
+      ios: {
+        appName: 'Hugin Messenger',
+      },
+      android: {
+        alertTitle: 'Permissions required',
+        alertDescription:
+          'This application needs to access your phone accounts',
+        cancelButton: 'Cancel',
+        okButton: 'ok',
+        imageName: 'phone_account_icon',
+        // Required to get audio in background when using Android 11
+        foregroundService: {
+          channelId: 'org.kryptokrona.hugin',
+          channelName: 'Hugin Channel',
+          notificationTitle: 'An active call is running',
+          notificationIcon: './../../assets/hugin.svg',
         },
-        android: {
-          alertTitle: 'Permissions required',
-          alertDescription: 'This application needs to access your phone accounts',
-          cancelButton: 'Cancel',
-          okButton: 'ok',
-          imageName: 'phone_account_icon',
-          // Required to get audio in background when using Android 11
-          foregroundService: {
-            channelId: 'org.kryptokrona.hugin',
-            channelName: 'Hugin Channel',
-            notificationTitle: 'An active call is running',
-            notificationIcon: './../../assets/hugin.svg',
-          }, 
-        }
-      };
+      },
+    };
   }
 
-  async init(video=false) {
+  async init(video = false) {
     if (this.localMediaStream) return;
-     //TODO***
+    //TODO***
     //If we have active video during the call, if someone joins, we should set vidoe = true
     const mediaConstraints = { audio: true, video };
 
@@ -71,7 +69,7 @@ class VoiceChannel {
       return;
     }
     InCallManager.stop();
-    InCallManager.start({ media: 'audio/video', auto: true});
+    InCallManager.start({ media: 'audio/video', auto: true });
     InCallManager.setSpeakerphoneOn(true);
     InCallManager.setKeepScreenOn(true);
 
@@ -81,10 +79,8 @@ class VoiceChannel {
     // });
     // RNCallKeep.setAvailable(true);
 
-    // // 
+    // //
     // RNCallKeep.displayIncomingCall('3d9ba084-1ee0-48be-b468-fce6933c24db', 'dudeman');
-
-
   }
 
   async exit() {
@@ -96,19 +92,21 @@ class VoiceChannel {
         console.log('Error closing connection');
       }
     }
+    this.localMediaStream = null;
   }
 
   forceOpus(sdp) {
-    return sdp.replace(/a=rtpmap:\d+ AAC\/\d+\r\n/g, '') // Remove AAC
-              .replace(/a=rtpmap:\d+ G722\/\d+\r\n/g, '') // Remove G.722 if present
-              .replace(/a=rtpmap:\d+ PCMU\/\d+\r\n/g, '') // Remove G.711 if needed
-              .replace(/a=rtpmap:\d+ PCMA\/\d+\r\n/g, '') // Remove PCMA
-              .replace(/a=rtpmap:\d+ red\/\d+\/\d+\r\n/g, '') // Remove red
-              .replace(/a=fmtp:\d+ .*\r\n/g, '') // Remove fmtp lines for removed codecs
-              .replace(/a=rtpmap:\d+ ILBC\/\d+\r\n/g, '') // Remove PCMA
-              .replace(/a=rtpmap:\d+ CN\/\d+\r\n/g, '') // Remove PCMA
-              .replace(/^a=ice-options:.*\r\n/m, '');
-}
+    return sdp
+      .replace(/a=rtpmap:\d+ AAC\/\d+\r\n/g, '') // Remove AAC
+      .replace(/a=rtpmap:\d+ G722\/\d+\r\n/g, '') // Remove G.722 if present
+      .replace(/a=rtpmap:\d+ PCMU\/\d+\r\n/g, '') // Remove G.711 if needed
+      .replace(/a=rtpmap:\d+ PCMA\/\d+\r\n/g, '') // Remove PCMA
+      .replace(/a=rtpmap:\d+ red\/\d+\/\d+\r\n/g, '') // Remove red
+      .replace(/a=fmtp:\d+ .*\r\n/g, '') // Remove fmtp lines for removed codecs
+      .replace(/a=rtpmap:\d+ ILBC\/\d+\r\n/g, '') // Remove PCMA
+      .replace(/a=rtpmap:\d+ CN\/\d+\r\n/g, '') // Remove PCMA
+      .replace(/^a=ice-options:.*\r\n/m, '');
+  }
 
   close(address) {
     const conn = this.active(address);
@@ -147,7 +145,9 @@ class VoiceChannel {
 
     this.localMediaStream
       .getTracks()
-      .forEach((track) => peerConnection.addTrack(track, this.localMediaStream));
+      .forEach((track) =>
+        peerConnection.addTrack(track, this.localMediaStream),
+      );
 
     this.events(peerConnection, key, topic, address, 'offer');
 
@@ -159,7 +159,7 @@ class VoiceChannel {
 
   async answer(offer) {
     const { key, topic, address, data } = offer;
-   
+
     if (!this.localMediaStream) await this.init();
 
     const peerConnection = new RTCPeerConnection(this.stunServers);
@@ -167,7 +167,9 @@ class VoiceChannel {
 
     this.localMediaStream
       .getTracks()
-      .forEach((track) => peerConnection.addTrack(track, this.localMediaStream));
+      .forEach((track) =>
+        peerConnection.addTrack(track, this.localMediaStream),
+      );
 
     this.events(peerConnection, key, topic, address, 'answer');
 
@@ -190,7 +192,8 @@ class VoiceChannel {
       if (peerConnection.connectionState === 'closed') {
         this.remove(address);
       }
-      if (peerConnection.connectionState === 'connected') this.peervolume(address);
+      if (peerConnection.connectionState === 'connected')
+        this.peervolume(address);
     });
 
     peerConnection.addEventListener('icecandidate', async (event) => {
@@ -198,7 +201,10 @@ class VoiceChannel {
         try {
           if (type === 'offer') {
             let offer = await peerConnection.createOffer(this.settings);
-            offer = new RTCSessionDescription({type: 'offer', sdp: this.forceOpus(offer.sdp)});   
+            offer = new RTCSessionDescription({
+              type: 'offer',
+              sdp: this.forceOpus(offer.sdp),
+            });
             await peerConnection.setLocalDescription(offer);
 
             //Send to backend
@@ -249,61 +255,57 @@ class VoiceChannel {
   }
 
   peervolume(address) {
-
     let interval;
-        let array = new Array(3);
-        let peer = this.active(address);
+    let array = new Array(3);
+    let peer = this.active(address);
 
-        const sensitivity = 0.01;
+    const sensitivity = 0.01;
 
-        interval = setInterval(getAudioLevel, 300);
+    interval = setInterval(getAudioLevel, 300);
 
-        const getRemoteAudioLevel = async (peerConnection) => {
+    const getRemoteAudioLevel = async (peerConnection) => {
+      if (!peerConnection) return;
 
-            if (!peerConnection) return;
-          
-            const senders = peerConnection.getSenders();
-            const receivers = peerConnection.getReceivers();
-          
-            for (const receiver of receivers) {
-              const track = receiver.track;
-              
-              if (track && track.kind === 'audio') {
-                try {
-                  const stats = await peerConnection.getStats(track);
-                  
-                  stats.forEach(report => {
-                    if (report.type === 'inbound-rtp' && report.kind === 'audio') {
-                      array.push(report.audioLevel);
-                    return report.audioLevel;
-                    }
-                  });
-          
-                } catch (error) {
-                  console.error('Error getting stats:', error);
-                }
+      const senders = peerConnection.getSenders();
+      const receivers = peerConnection.getReceivers();
+
+      for (const receiver of receivers) {
+        const track = receiver.track;
+
+        if (track && track.kind === 'audio') {
+          try {
+            const stats = await peerConnection.getStats(track);
+
+            stats.forEach((report) => {
+              if (report.type === 'inbound-rtp' && report.kind === 'audio') {
+                array.push(report.audioLevel);
+                return report.audioLevel;
               }
-            }
-          };
-        
-        async function getAudioLevel() {
-            const currentCall = useGlobalStore.getState().currentCall;
-            if (currentCall.users.some((a) => a.address == address)) {
-                await getRemoteAudioLevel(peer.peerConnection);
-                
-                const talking = array.some((volume) => volume > sensitivity);
+            });
+          } catch (error) {
+            console.error('Error getting stats:', error);
+          }
+        }
+      }
+    };
 
-                useGlobalStore.getState().setCurrentCall({...currentCall});
+    async function getAudioLevel() {
+      const currentCall = useGlobalStore.getState().currentCall;
+      if (currentCall.users.some((a) => a.address == address)) {
+        await getRemoteAudioLevel(peer.peerConnection);
 
-                currentCall.users.find(a => a.address === address).talking = talking;
-                
-                array.shift()
-            } else {
-                clearInterval(interval)
-            }
+        const talking = array.some((volume) => volume > sensitivity);
+
+        useGlobalStore.getState().setCurrentCall({ ...currentCall });
+
+        currentCall.users.find((a) => a.address === address).talking = talking;
+
+        array.shift();
+      } else {
+        clearInterval(interval);
+      }
+    }
   }
-  }    
-
 }
 
 export const WebRTC = new VoiceChannel();

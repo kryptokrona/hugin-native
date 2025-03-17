@@ -10,7 +10,10 @@ import {
 
 import { useNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import InCallManager from 'react-native-incall-manager';
 
+import { CallFloater } from '@/components';
 import {
   getThisRoom,
   setStoreCurrentRoom,
@@ -22,7 +25,7 @@ import {
   useUserStore,
   WebRTC,
 } from '@/services';
-import InCallManager from 'react-native-incall-manager';
+
 import { Background } from './background';
 
 import { Rooms } from '../lib/native';
@@ -40,8 +43,7 @@ import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Notify } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
-import { CallFloater } from '@/components';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 interface AppProviderProps {
   children: React.ReactNode;
 }
@@ -133,7 +135,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       store:
         Platform.OS == 'ios'
           ? RNFS.LibraryDirectoryPath
-          : RNFS.DocumentDirectoryPath
+          : RNFS.DocumentDirectoryPath,
     });
     if (authenticated && user?.address) {
       console.log('running authenticated');
@@ -172,8 +174,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         console.log('******** INACTIVE STATE *********');
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
-        // await Rooms.close();
-        Rooms.idle(currentCall.room !== '', true);
+        if (WebRTC.localMediaStream === null) {
+          Rooms.idle(true, false);
+        } else {
+          Rooms.idle(true, true);
+        }
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
 
@@ -186,8 +191,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
-        // await Rooms.close();
-        Rooms.idle(currentCall.room !== '', true);
+        if (WebRTC.localMediaStream === null) {
+          Rooms.idle(true, false);
+        } else {
+          Rooms.idle(true, true);
+        }
         // Rooms.pause();
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
@@ -239,13 +247,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <SafeAreaView
-      style={[styles.safeArea, { backgroundColor: theme.background }]}>
-      {children}
-      {currentCall.room.length > 0  &&
-        <CallFloater currentCall={currentCall}></CallFloater>
-      }
-    </SafeAreaView>
+      <SafeAreaView
+        style={[styles.safeArea, { backgroundColor: theme.background }]}>
+        {children}
+        {currentCall.room.length > 0 && (
+          <CallFloater currentCall={currentCall} />
+        )}
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 };
