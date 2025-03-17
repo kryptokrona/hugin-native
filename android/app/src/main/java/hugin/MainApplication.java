@@ -39,7 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
       // Packages that cannot be autolinked yet can be added manually here
       packages.add(new TurtleCoinPackage());
       packages.add(new RNBackgroundFetchPackage());
-      packages.add( new InCallManagerPackage(),);
+      // packages.add( new InCallManagerPackage());
       return packages;
     }
 
@@ -49,6 +49,7 @@ public class MainApplication extends Application implements ReactApplication {
     }
 
   });
+
 
   @Override
   public ReactNativeHost getReactNativeHost() {
