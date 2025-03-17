@@ -36,7 +36,7 @@ const onrequest = async (p) => {
       send_beam_message(p.payload, p.to);
       break;
     case 'new_swarm':
-      await newSwarm(p.hashkey, p.key, p.admin);
+      await newSwarm(p.hashkey, p.key, p.admin, p.beam, p.chat);
       break;
     case 'end_swarm':
       return await endSwarm(p.key);
@@ -90,9 +90,9 @@ const updateBareUser = (user) => {
   Hugin.update(user);
 };
 
-const newSwarm = async (hashkey, key, admin) => {
+const newSwarm = async (hashkey, key, admin, beam, chat) => {
   if (Hugin.rooms.some((a) => a.key === key)) return;
-  const topic = await create_swarm(hashkey, key);
+  const topic = await create_swarm(hashkey, key, beam, chat);
   Hugin.rooms.push({ key, topic, admin });
 };
 
