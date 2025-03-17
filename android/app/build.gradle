@@ -2,7 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 project.ext.react = [
-    enableHermes: false,  // clean and rebuild if changing 
+    enableHermes: true,  // clean and rebuild if changing 
 ]
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
