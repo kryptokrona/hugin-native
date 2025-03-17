@@ -87,7 +87,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
-  const [change, setChange] = useState<boolean>(false);
   // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
@@ -97,13 +96,20 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const inCallUsers = 0;
 
   const voiceUsers = useGlobalStore(
-    useCallback((state) => state.roomUsers.filter((a) => a.room === roomKey && a.voice === true), [roomKey])
+    useCallback(
+      (state) =>
+        state.roomUsers.filter((a) => a.room === roomKey && a.voice === true),
+      [roomKey],
+    ),
   );
 
   const roomUsers = useGlobalStore(
-    useCallback((state) => state.roomUsers.filter((a) => a.room === roomKey), [roomKey])
+    useCallback(
+      (state) => state.roomUsers.filter((a) => a.room === roomKey),
+      [roomKey],
+    ),
   );
-  
+
   const userList = useMemo(() => {
     return voiceUsers;
   }, [voiceUsers]);
@@ -150,7 +156,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       video: false,
       voice: true,
     };
-    const me = roomUsers.filter(a => a.address === myUserAddress)[0];
+    const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
     me.voice = true;
     const call = { room: roomKey, time: Date.now(), users: [...userList, me] };
     useGlobalStore.getState().setCurrentCall(call);
@@ -179,7 +185,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     };
 
     Peers.voicestatus(peer);
-    setChange(!change);
     useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
     WebRTC.exit();
   }
@@ -249,15 +254,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       return () => {};
     }, [roomKey]),
   );
-
-  const onlineUsers = useMemo(() => {
-    return Peers.active().filter((a) => a.room === roomKey).length;
-  }, [change]);
-
-  Peers.on('change', () => {
-    console.log('Peers changed!');
-    setChange(true);
-  });
 
   // useEffect(() => {
   //   const subscription = Peers.on('change', () => {
