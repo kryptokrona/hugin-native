@@ -42,12 +42,12 @@ export const useGlobalStore = create<
     authenticated: false,
     balance: { locked: 0, unlocked: 0 },
     contacts: [],
+    currentCall: { room: '', users: [] },
+    fiatPrice: 0,
     messages: [],
     roomMessages: [],
     roomUsers: [],
     rooms: [],
-    fiatPrice: 0,
-    currentCall: {room: '', users: []},
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -69,10 +69,16 @@ export const useGlobalStore = create<
       set({ messages });
     },
 
+    setFiatPrice: (fiatPrice: number) => {
+      set({ fiatPrice });
+    },
+
     setRoomMessages: (roomMessages: Message[]) => {
       set({ roomMessages });
     },
-
+    setCurrentCall: (currentCall: Call) => {
+      set({ currentCall });
+    },
     setRoomUserList: (roomUsers: User[]) => {
       set({ roomUsers });
     },
@@ -92,13 +98,6 @@ export const useGlobalStore = create<
     thisContact: '',
     thisRoom: '',
     transactions: [],
-    setFiatPrice: (fiatPrice: number) => {
-      set({fiatPrice})
-    },
-    setCurrentCall: (currentCall: Call) => {
-      console.log('Setting current call:', currentCall); // Add this
-      set({currentCall})
-    }
   })),
 );
 
