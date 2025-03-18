@@ -113,11 +113,11 @@ export class Swarm {
 class Beams {
   constructor() {}
 
-  connect(key, address) {
+  connect(hashkey, key, address) {
     const data = {
       type: 'new_swarm',
       key,
-      key,
+      hashkey,
       admin: false,
       beam: true,
       chat: address,
@@ -139,7 +139,7 @@ class Beams {
 
   async new(address) {
     const derivation = await Wallet.key_derivation_hash(address);
-    this.connect(naclHash(hash), address);
+    this.connect(naclHash(hash), hash, address);
   }
 }
 
