@@ -67,7 +67,14 @@ export class Swarm {
   }
 
   new(hashkey, key, admin) {
-    const data = { type: 'new_swarm', key, hashkey, admin, beam: false };
+    const data = {
+      type: 'new_swarm',
+      key,
+      hashkey,
+      admin,
+      beam: false,
+      chat: false,
+    };
     rpc.send(data);
   }
 
@@ -107,14 +114,14 @@ export class Swarm {
 class Beams {
   constructor() {}
 
-  connect(key, huginAddress) {
+  connect(key, address) {
     const data = {
       type: 'new_swarm',
       key,
       key,
       admin: false,
       beam: true,
-      chat: huginAddress,
+      chat: address,
     };
     rpc.send(data);
   }
@@ -123,12 +130,12 @@ class Beams {
     const contacts = await getLatestMessages();
     for (const c of contacts) {
       const hash = await Wallet.key_derivation_hash(c.address);
-      this.connect(hash, c.address + c.messagekey);
+      this.connect(hash, c.address);
     }
   }
 
-  message(to, payload) {
-    const data = { type: 'beam_message', to, payload };
+  message(address, message) {
+    const data = { type: 'beam_message', address, message };
     rpc.send(data);
   }
 }

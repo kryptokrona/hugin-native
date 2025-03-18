@@ -10,6 +10,7 @@ const {
   idle,
   send_voice_channel_status,
   send_sdp,
+  send_dm_message,
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
@@ -33,7 +34,7 @@ const onrequest = async (p) => {
       await new_beam(p.key, p.huginAddress, p.send);
       break;
     case 'beam_message':
-      send_beam_message(p.payload, p.to);
+      send_dm_message(p.address, p.message);
       break;
     case 'new_swarm':
       await newSwarm(p.hashkey, p.key, p.admin, p.beam, p.chat);

@@ -315,7 +315,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         />
       ),
     });
-  }, [roomKey, name, onlineUsers, inCall]);
+  }, [roomKey, name, inCall]);
 
   async function onSend(
     text: string,

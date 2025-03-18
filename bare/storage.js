@@ -197,7 +197,7 @@ class HyperStorage {
         if (upload) {
           this.upload(conn, file, topic);
         } else {
-          const done = this.download(conn, file, topic, room, dm);
+          const done = await this.download(conn, file, topic, room, dm);
           if (done) close();
         }
       });
@@ -240,7 +240,7 @@ class HyperStorage {
     });
   }
 
-  async download(beam, file, topic, room) {
+  async download(beam, file, topic, room, dm) {
     console.log('Download file', file);
     beam.on('data', async (data) => {
       console.log('*********************');
@@ -324,6 +324,14 @@ class HyperStorage {
           tip: false,
         };
         // Todo** test this.
+
+        if (dm) {
+          ///Send file message to backend,
+          //Save file info
+          //
+          return;
+        }
+
         Hugin.send('swarm-message', { message });
         return true;
       }

@@ -28,7 +28,7 @@ import {
 
 import { Background } from './background';
 
-import { Rooms } from '../lib/native';
+import { Beam, Rooms } from '../lib/native';
 // import { Foreground } from './service';
 
 import {
@@ -118,6 +118,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     Rooms.init(user);
     Rooms.join();
+    Beam.join();
     started = true;
 
     updateFiatPrice();

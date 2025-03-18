@@ -77,7 +77,14 @@ class Room {
       return;
     }
     this.swarm.on('connection', (connection, information) => {
-      new_connection(connection, topic, this.key, dht_keys, information);
+      new_connection(
+        connection,
+        topic,
+        this.key,
+        dht_keys,
+        information,
+        this.beam,
+      );
     });
 
     this.discovery = this.swarm.join(hash, { client: true, server: true });
@@ -149,7 +156,7 @@ const create_swarm = async (hashkey, key, beam = false, chat = false) => {
   return room.topic;
 };
 
-const new_connection = (connection, topic, key, dht_keys, peer) => {
+const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
   console.log('New connection incoming');
   let active = get_active_topic(topic);
 
@@ -174,7 +181,7 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
   });
   send_joined_message(topic, dht_keys, connection);
   connection.on('data', async (data) => {
-    incoming_message(data, topic, connection, peer);
+    incoming_message(data, topic, connection, peer, beam);
   });
 
   connection.on('close', () => {
@@ -187,6 +194,12 @@ const new_connection = (connection, topic, key, dht_keys, peer) => {
     connection_closed(connection, topic, 'Connection on error');
   });
 };
+
+async function send_dm_message(address, payload) {
+  const active = get_beam(address);
+  if (!active) return;
+  send_peer_message(address, active.topic, payload);
+}
 
 function send_message(message, topic, reply, invite, tip = false) {
   const message_json = {
@@ -209,6 +222,13 @@ function send_message(message, topic, reply, invite, tip = false) {
 
 const is_admin = (key) => {
   return Hugin.rooms.find((a) => a.key === key && a.admin)?.admin;
+};
+
+const get_beam = (address) => {
+  for (const a of active_swarms) {
+    if (!a.beam) continue;
+    if (a.chat === address) return a;
+  }
 };
 
 const send_joined_message = async (topic, dht_keys, connection) => {
@@ -275,13 +295,13 @@ const send_swarm_message = (message, topic) => {
   console.log('Swarm msg sent!');
 };
 
-const incoming_message = async (data, topic, connection, peer) => {
+const incoming_message = async (data, topic, connection, peer, beam) => {
   const str = data.toString();
   if (str === 'Ping') {
     return;
   }
   // Check
-  const check = await check_data_message(str, connection, topic, peer);
+  const check = await check_data_message(str, connection, topic, peer, beam);
   if (check === 'Ban') {
     console.log('Banned connection');
     peer.ban(true);
@@ -296,11 +316,10 @@ const incoming_message = async (data, topic, connection, peer) => {
     peer.priority = 3;
     return;
   }
-  const active = get_active_topic(topic);
 
-  if (active.beam) {
+  if (beam) {
     const hash = str.substring(0, 64);
-    Hugin.send('beam-message', { message: str, hash, chat: active.chat });
+    Hugin.send('beam-message', { message: str, hash });
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
@@ -309,7 +328,7 @@ const incoming_message = async (data, topic, connection, peer) => {
   Hugin.send('swarm-message', { message, topic });
 };
 
-const check_data_message = async (data, connection, topic, peer) => {
+const check_data_message = async (data, connection, topic, peer, beam) => {
   try {
     data = JSON.parse(data);
   } catch (e) {
@@ -340,7 +359,7 @@ const check_data_message = async (data, connection, topic, peer) => {
     const fileData = sanitize_file_message(data);
     console.log('Got file data incoming', fileData);
     if (!fileData) return 'Ban';
-    check_file_message(fileData, topic, con.address, con.name);
+    check_file_message(fileData, topic, con.address, con.name, beam);
     return true;
   }
 
@@ -544,7 +563,15 @@ const check_data_message = async (data, connection, topic, peer) => {
       } else if (data.type === REQUEST_FILE) {
         const file = sanitize_file_message(data.file);
         if (!file) return 'Error';
-        Storage.start_beam(true, file.key, file, topic, con.name, active.key);
+        Storage.start_beam(
+          true,
+          file.key,
+          file,
+          topic,
+          con.name,
+          active.key,
+          beam,
+        );
       }
       return true;
     }
@@ -629,7 +656,7 @@ const send_history = async (address, topic, key, files) => {
   send_peer_message(address, topic, history);
 };
 
-const request_file = async (address, topic, file, room) => {
+const request_file = async (address, topic, file, room, dm = false) => {
   //request a missing file, open a hugin beam
   console.log('-----------------------------');
   console.log('*** WANT TO REQUEST FILE  ***');
@@ -645,7 +672,7 @@ const request_file = async (address, topic, file, room) => {
   });
   if (!verify) return;
   const key = random_key().toString('hex');
-  Storage.start_beam(false, key, file, topic, room);
+  Storage.start_beam(false, key, file, topic, room, dm);
   file.key = key;
   const message = {
     file,
@@ -719,7 +746,7 @@ const save_file_info = (data, topic, address, time, sent, name) => {
   Hugin.send('swarm-message', { message });
 };
 
-const check_file_message = async (data, topic, address, name) => {
+const check_file_message = async (data, topic, address, name, dm) => {
   const active = get_active_topic(topic);
   const [media, type] = check_if_media(data.fileName, data.size);
   //TODO** Add switch to enable/disable auto syncing images
@@ -738,7 +765,7 @@ const check_file_message = async (data, topic, address, name) => {
       type: data.type,
       info: data.info,
     };
-    request_file(address, topic, file, active.key);
+    request_file(address, topic, file, active.key, dm);
     return;
   }
 
@@ -1230,4 +1257,6 @@ module.exports = {
   idle,
   send_voice_channel_status,
   send_sdp,
+  send_peer_message,
+  send_dm_message,
 };
