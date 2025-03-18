@@ -48,6 +48,7 @@ import { Peers } from '../lib/connections';
 import { setLatestMessages, updateMessage } from '../services/bare/contacts';
 import { saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
+import { Beam } from 'lib/native';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessageScreen>;
@@ -198,7 +199,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
     console.log('Sending to room:', name);
     if (file) {
-      // onSendGroupMessageWithFile(address, file, text);
+      Beam.file(roomKey, file);
       //If we need to return something... or print something locally
       // console.log('sent file!', sentFile);
     } else {

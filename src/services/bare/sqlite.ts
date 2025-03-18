@@ -604,10 +604,16 @@ export async function getMessages(
   );
 
   if (history) {
+    const files = Files.all();
     const messages = [];
     for (const result of results) {
       for (let index = 0; index < result.rows.length; index++) {
         const res = result.rows.item(index);
+        const file = files.find((a) => a.hash === res.hash);
+
+        if (file) {
+          res.file = file;
+        }
         res.room = res.conversation;
         res.address = res.sent ? address : res.conversation;
         const contact = await getContact(res.address);

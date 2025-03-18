@@ -302,7 +302,7 @@ export const MessageInput: React.FC<Props> = ({
             borderColor: color,
           },
         ]}>
-        {focus && !dm && !displayActions && (
+        {focus && !displayActions && (
           <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
             <CustomIcon
               name="arrow-forward-ios"
@@ -313,7 +313,6 @@ export const MessageInput: React.FC<Props> = ({
           </TouchableOpacity>
         )}
         {displayActions &&
-          !dm &&
           Actions(
             onCameraPress,
             onFilePress,

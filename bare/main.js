@@ -11,6 +11,7 @@ const {
   send_voice_channel_status,
   send_sdp,
   send_dm_message,
+  send_dm_file
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
@@ -49,6 +50,9 @@ const onrequest = async (p) => {
       return { keys };
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
+      break;
+    case 'send_dm_file':
+      send_dm_file(p.address, p.file);
       break;
     case 'request_download':
       request_download(p.file);

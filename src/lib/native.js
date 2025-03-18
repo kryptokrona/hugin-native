@@ -141,6 +141,12 @@ class Beams {
     const hash = await Wallet.key_derivation_hash(address);
     this.connect(naclHash(hash), hash, address);
   }
+
+  async file(address, file) {
+    const data = { type: 'send_dm_file', address, file };
+    rpc.send(data);
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////

@@ -126,6 +126,9 @@ export class Bridge {
             json.message.background,
           );
           break;
+        case 'dm-file':
+          MessageSync.save_file_message(json.message);
+          break;
         case 'history-update':
           await sleep(500);
           if (getCurrentRoom() === json.key) {

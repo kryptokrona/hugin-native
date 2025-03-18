@@ -8,6 +8,7 @@ import {
   addContact,
   getContacts,
   messageExists,
+  saveFileInfo
 } from '../bare/sqlite';
 import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
@@ -187,6 +188,29 @@ class Syncer {
       return true;
     }
     return;
+  }
+
+  async save_file_message(message) {
+
+    const sent = message.conversation ? true : false;
+
+    const saved = await saveMessage(
+      sent ? message.conversation : message.address,
+      message.message,
+      '', //Todo reply
+      message.timestamp,
+      message.hash,
+      sent,
+      sent ? message.address : undefined,
+    );
+    await saveFileInfo(message.file);
+    if (saved) {
+      saved.file = message.file;
+      updateMessage(saved);
+    }
+    setLatestMessages();
+    return true;
+
   }
 
   async check_for_viewtag(extra) {

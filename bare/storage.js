@@ -323,12 +323,9 @@ class HyperStorage {
           }, //FileInfo type
           tip: false,
         };
-        // Todo** test this.
 
         if (dm) {
-          ///Send file message to backend,
-          //Save file info
-          //
+          Hugin.send('dm-file', { message });
           return;
         }
 

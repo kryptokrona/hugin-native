@@ -62,12 +62,11 @@ class Room {
     const topic = base_keys.publicKey.toString('hex');
     const hash = Buffer.alloc(32).fill(topic);
     await Storage.load_drive(topic);
-    const peers = this.beam ? 1 : 100;
 
     console.log('Joining room....');
     try {
       this.swarm = new HyperSwarm(
-        { maxPeers: peers },
+        { },
         sig,
         dht_keys,
         base_keys,
@@ -821,7 +820,13 @@ const check_file_message = async (data, topic, address, name, dm) => {
   if (data.type === 'file-removed') console.log("'file removed", data); //TODO REMOVE FROM remoteFiles
 };
 
-const share_file_info = async (file, topic) => {
+const send_dm_file = async (address, file) => {
+  const active = get_beam(address);
+  if (!active) return;
+  share_file_info(file, active.topic, true, address);
+}
+
+const share_file_info = async (file, topic, dm=false, conversation='') => {
   // Note file includes property "message", regular text message
   const active = get_active_topic(topic);
   const hash = random_key().toString('hex');
@@ -880,7 +885,12 @@ const share_file_info = async (file, topic) => {
   };
 
   //Send our file info to front end as message
-  Hugin.send('swarm-message', { message });
+  if (dm) {
+    message.conversation = conversation;
+    Hugin.send('dm-file', { message });  
+  } else {
+    Hugin.send('swarm-message', { message });
+  }
   const info = JSON.stringify(fileInfo);
   file.topic = topic;
   localFiles.push(file);
@@ -1259,4 +1269,5 @@ module.exports = {
   send_sdp,
   send_peer_message,
   send_dm_message,
+  send_dm_file
 };
