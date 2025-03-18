@@ -161,7 +161,8 @@ class Syncer {
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
     if (!message) return false;
     console.log('FOUND A MESSAGE WOOHP ------->');
-    const [text, addr, key, timestamp, sent] = this.sanitize_pm(message);
+    const [text, addr, key, timestamp] = this.sanitize_pm(message);
+    console.log('Got message?', text);
     if (!text) return;
     if (message.type === 'sealedbox' || 'box') {
       if (!this.known_keys.some((a) => a === key)) {
@@ -246,18 +247,16 @@ class Syncer {
   }
 
   sanitize_pm(msg) {
-    let sent = msg.sent;
     let addr = msg.from;
     let timestamp = msg.t;
     let key = msg.k;
     let message = msg.msg;
     if (message?.length > 777 || msg.msg === undefined) return [false];
     if (addr?.length > 99 || addr === undefined) return [false];
-    if (typeof sent !== 'boolean') return [false];
     if (timestamp?.length > 25) return [false];
     if (key?.length > 64) return [false];
 
-    return [message, addr, key, timestamp, sent];
+    return [message, addr, key, timestamp];
   }
 }
 
