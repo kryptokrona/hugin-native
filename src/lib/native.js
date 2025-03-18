@@ -9,7 +9,6 @@ const worklet = new Worklet();
 const { IPC } = worklet;
 
 const rpc = new Bridge(IPC);
-
 ////////////////////////////////////////////////////////////////
 export class Swarm {
   constructor() {}
@@ -129,14 +128,18 @@ class Beams {
   async join() {
     const contacts = await getLatestMessages();
     for (const c of contacts) {
-      const hash = await Wallet.key_derivation_hash(c.address);
-      this.connect(hash, c.address);
+      await this.new(c.address);
     }
   }
 
   message(address, message) {
     const data = { type: 'beam_message', address, message };
     rpc.send(data);
+  }
+
+  async new(address) {
+    const hash = await Wallet.key_derivation_hash(address);
+    this.connect(hash, address);
   }
 }
 

@@ -169,6 +169,8 @@ export const MessagesScreen: React.FC<Props> = () => {
 
     await addContact(name, xkrAddr, messageKey, true);
 
+    Beam.new(xkrAddr);
+
     // Beam.connect(
     //   Wallet.key_derivation_hash(xkrAddr),
     //   xkrAddr + messageKey,
