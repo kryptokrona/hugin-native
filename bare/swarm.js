@@ -332,6 +332,7 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
   try {
     data = JSON.parse(data);
   } catch (e) {
+    if (beam) return false;
     return 'Ban';
   }
 
