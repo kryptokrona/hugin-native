@@ -525,7 +525,7 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       }
 
       if (data.type === PING_SYNC && active.search && INC_HASHES) {
-        if ('files' in data) {
+        if ('files' in data && !beam) {
           process_files(data, active, con, topic);
         }
 
@@ -563,7 +563,7 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       } else if (data.type === REQUEST_FILE) {
         const file = sanitize_file_message(data.file);
         if (!file) return 'Error';
-        Storage.start_beam(
+        await Storage.start_beam(
           true,
           file.key,
           file,
@@ -672,7 +672,7 @@ const request_file = async (address, topic, file, room, dm = false) => {
   });
   if (!verify) return;
   const key = random_key().toString('hex');
-  Storage.start_beam(false, key, file, topic, room, dm);
+  await Storage.start_beam(false, key, file, topic, room, dm);
   file.key = key;
   const message = {
     file,
