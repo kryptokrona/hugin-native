@@ -198,7 +198,7 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
 async function send_dm_message(address, payload) {
   const active = get_beam(address);
   if (!active) return;
-  send_peer_message(address, active.topic, payload);
+  active.connections[0].write(payload);
 }
 
 function send_message(message, topic, reply, invite, tip = false) {
