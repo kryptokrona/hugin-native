@@ -138,8 +138,8 @@ class Beams {
   }
 
   async new(address) {
-    const hash = await Wallet.key_derivation_hash(address);
-    this.connect(hash, address);
+    const derivation = await Wallet.key_derivation_hash(address);
+    this.connect(naclHash(hash), address);
   }
 }
 
