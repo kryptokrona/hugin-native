@@ -36,6 +36,7 @@ export interface User {
   screenshare?: boolean;
   muted?: boolean;
   talking?: boolean;
+  dm?: boolean;
 }
 
 export interface PeerUser {

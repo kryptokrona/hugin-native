@@ -8,7 +8,7 @@ import { Notify } from '../services/utils';
 
 class Connections extends EventEmitter {
 
-  join(peer) {
+  join(peer, beam) {
     console.log('New connection incoming');
     const connected = {
       address: peer.address,
@@ -20,6 +20,7 @@ class Connections extends EventEmitter {
       video: peer.video,
       screenshare: peer.screenshare,
       muted: peer.audioMute,
+      dm: beam
     };
     if (this.already(peer.address, peer.key)) return;
     const list = this.active();

@@ -149,7 +149,7 @@ export class Bridge {
           break;
         case 'peer-connected':
           // console.log('peer-connected!', json);
-          Peers.join(json.joined);
+          Peers.join(json.joined, json.beam);
           saveRoomUser(
             json.joined.name,
             json.joined.address,

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import {
   FlatList,
@@ -25,6 +25,7 @@ import {
   InputField,
   TextButton,
   Avatar,
+  CustomIcon,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -74,6 +75,8 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
 
+  const roomUsers = useGlobalStore((state) => state.roomUsers);
+
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
       return '';
@@ -118,9 +121,12 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     }
   }
 
-  const online = useMemo(() => {
-    return Peers.connected(getCurrentRoom());
-  }, [Peers, getCurrentRoom()]);
+  const online = useGlobalStore(
+    useCallback(
+      (state) => state.roomUsers.some((a) => a.address === roomKey && a.dm === true),
+      [roomUsers, roomKey],
+    ),
+  );
 
   // scrollToBottom();
 
@@ -143,7 +149,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
             <TouchableOpacity
               style={{ flexDirection: 'row' }}
               onPress={onCustomizeGroupPress}>
-              <View style={{ marginRight: 5, marginTop: 4 }}>
+              <View style={{ position: 'relative', marginRight: 5, marginTop: 4 }}>
                 {roomKey && (
                   <Avatar
                     base64={getAvatar(roomKey)}
@@ -151,13 +157,21 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
                     size={30}
                   />
                 )}
+                <View style={{position: 'absolute', top: -4, right: -4}}>
+                  <CustomIcon
+                    name={'lens'}
+                    size={10}
+                    type={'MI'}
+                    color={`${online ? 'green' : 'grey'}`}
+                    />
+                </View>
               </View>
             </TouchableOpacity>
           }
         />
       ),
     });
-  }, [roomKey, name]);
+  }, [roomKey, name, online]);
 
   // useLayoutEffect(() => {
   //   const timeout = setTimeout(() => {
@@ -189,11 +203,11 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       // console.log('sent file!', sentFile);
     } else {
       ///
-      const beam = false; //// *** check if connected to this user in beam.
-      const { hash, succes, error } = await Wallet.send_message(
+      // const beam = false; //// *** check if connected to this user in beam.
+      const { hash, success, error } = await Wallet.send_message(
         text,
         huginAddress,
-        beam,
+        online,
       );
 
       if (error === 'balance') {

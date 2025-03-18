@@ -426,7 +426,7 @@ export class ActiveWallet {
     let messageKey = receiver.substring(99, 163);
     let has_history = await this.check_history(messageKey, address);
     let balance = await this.check_balance();
-    if (!balance) {
+    if (!balance && !beam) {
       console.log('Error: No balance to send with');
       return { error: 'balance', success: false, hash: '' };
     }
@@ -443,8 +443,8 @@ export class ActiveWallet {
 
     if (beam) {
       const hash = randomKey();
-      const send = hash + payload_hex;
-      Beam.message(receiver, send);
+      const send = hash + '99' + payload_hex;
+      Beam.message(address, send);
       return { hash, success: true, error: 'success' };
     }
     //Choose subwallet with message inputs

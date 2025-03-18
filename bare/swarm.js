@@ -103,7 +103,6 @@ async function idle() {
   }
 }
 const create_swarm = async (hashkey, key, beam = false, chat = false) => {
-  console.log('Creating swarm!');
   const room = new Room(beam);
   const connected = await room.join(hashkey);
   if (!connected) return;
@@ -198,7 +197,7 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
 async function send_dm_message(address, payload) {
   const active = get_beam(address);
   if (!active) return;
-  active.connections[0].write(payload);
+  send_swarm_message(payload, active.topic);
 }
 
 function send_message(message, topic, reply, invite, tip = false) {
