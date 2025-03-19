@@ -272,3 +272,49 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
     </ScreenLayout>
   );
 };
+
+
+const styles = StyleSheet.create({
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  button: {
+    margin: 0,
+  },
+  column: {
+    flex: 1,
+  },
+  detail: {
+    color: '#00ffcc',
+    fontFamily: 'Montserrat-Medium',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+
+  heading: {
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  transactionBox: {
+    borderRadius: 8,
+    borderWidth: 1,
+    padding: 16,
+    width: '100%',
+  },
+  fullScreenCamera: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    flex: 1,
+    zIndex: 100,
+  },
+});
