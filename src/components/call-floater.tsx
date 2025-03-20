@@ -11,6 +11,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 
+import { MainScreens } from '@/config';
+
 import { Peers } from 'lib/connections';
 import { Rooms } from 'lib/native';
 
@@ -18,18 +20,22 @@ import { Avatar } from '@/components';
 import { useGlobalStore, WebRTC, useThemeStore } from '@/services';
 import { textType } from '@/styles';
 import { Call } from '@/types';
+import type { MainStackNavigationType } from '@/types';
 
 import { CustomIcon } from './_elements/custom-icon';
 
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
 import InCallManager from 'react-native-incall-manager';
+import { useNavigation } from '@react-navigation/native';
 
 interface Props {
   currentCall: Call;
 }
 
 export const CallFloater: React.FC<Props> = ({ currentCall }) => {
+  const navigation = useNavigation<MainStackNavigationType>();
+  
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 
@@ -87,6 +93,10 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
       { translateY: translateY.value },
     ],
   }));
+
+  function popUp() {
+    navigation.navigate(MainScreens.CallScreen);
+  }
 
   function toggleSpeaker() {
     InCallManager.setSpeakerphoneOn(!speaker);
@@ -208,6 +218,14 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
           }
           
         </TouchableOpacity>
+        <TouchableOpacity onPress={popUp}>
+          <CustomIcon
+            color={color}
+            name="popup"
+            type="ENT"
+            size={24}
+          />
+        </TouchableOpacity>
         <TouchableOpacity onPress={endCall}>
           <CustomIcon
             color="#dc2626"
@@ -241,6 +259,7 @@ const styles = StyleSheet.create({
     right: 10,
     position: 'absolute',
     width: 60,
-    padding: 10
+    padding: 10,
+    zIndex: 9999
   },
 });

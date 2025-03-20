@@ -8,6 +8,7 @@ export * from './preview-item';
 export * from './seed';
 export * from './settings-item';
 export * from './user-item';
+export * from './call-user-item';
 export * from './full-screen-image';
 export * from './transaction';
 export * from './separator';

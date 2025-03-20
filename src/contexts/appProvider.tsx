@@ -13,7 +13,6 @@ import RNFS from 'react-native-fs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import InCallManager from 'react-native-incall-manager';
 
-import { CallFloater } from '@/components';
 import {
   getThisRoom,
   setStoreCurrentRoom,
@@ -59,7 +58,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
-  const currentCall = useGlobalStore((state) => state.currentCall);
 
   async function init() {
     /// Activate this if we want to run foreground task running on Android
@@ -247,15 +245,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, [navigationRef]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    
       <SafeAreaView
         style={[styles.safeArea, { backgroundColor: theme.background }]}>
         {children}
-        {currentCall.room.length > 0 && (
-          <CallFloater currentCall={currentCall} />
-        )}
       </SafeAreaView>
-    </GestureHandlerRootView>
   );
 };
 

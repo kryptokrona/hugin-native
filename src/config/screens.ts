@@ -16,6 +16,7 @@ export enum Stacks {
 
 export enum MainScreens {
   AddGroupScreen = 'AddGroupScreen',
+  CallScreen = 'CallScreen',
   GroupChatScreen = 'GroupChatScreen',
   GroupsScreen = 'GroupsScreen',
   ModifyGroupScreen = 'ModifyGroupScreen',

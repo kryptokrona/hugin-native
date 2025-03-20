@@ -113,4 +113,5 @@
   "noFunds": "Insufficient funds", // free to translate
   "joinCall": "Join call",
   "endCall": "End call",
+  "currentCall": "Current call",
 }

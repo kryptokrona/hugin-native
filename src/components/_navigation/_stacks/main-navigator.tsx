@@ -14,6 +14,7 @@ import {
   SettingsScreen,
   UpdateProfileScreen,
   WalletStatusScreen,
+  CallScreen
 } from '@/screens';
 
 import { Header } from '../header';
@@ -35,6 +36,13 @@ const GroupsStack = () => {
       <NativeStack.Screen
         name={MainScreens.GroupsScreen}
         component={GroupsScreen}
+      />
+      <NativeStack.Screen
+        name={MainScreens.CallScreen}
+        component={CallScreen}
+        options={{
+          header: (_props) => <Header title={t('call')} backButton />,
+        }}
       />
       <NativeStack.Screen
         name={MainScreens.GroupChatScreen}
@@ -69,6 +77,13 @@ const MessagesStack = () => {
         component={MessagesScreen}
         options={{
           header: (_props) => <Header title={t('messages')} />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.CallScreen}
+        component={CallScreen}
+        options={{
+          header: (_props) => <Header title={t('call')} backButton />,
         }}
       />
       <NativeStack.Screen

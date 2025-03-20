@@ -6,6 +6,7 @@ import IO from 'react-native-vector-icons/Ionicons';
 import MCI from 'react-native-vector-icons/MaterialCommunityIcons';
 import MI from 'react-native-vector-icons/MaterialIcons';
 import SLI from 'react-native-vector-icons/SimpleLineIcons';
+import ENT from 'react-native-vector-icons/Entypo';
 
 import { useThemeStore } from '@/services';
 import type { CustomIconProps } from '@/types';
@@ -24,6 +25,9 @@ export const CustomIcon: React.FC<CustomIconProps> = ({
   switch (type) {
     case 'MI':
       return <MI name={name} size={size} color={mColor} />;
+
+    case 'ENT':
+      return <ENT name={name} size={size} color={mColor} />;
 
     case 'FA':
       return <FA name={name} size={size} color={mColor} />;
