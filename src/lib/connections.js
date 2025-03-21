@@ -42,8 +42,8 @@ class Connections extends EventEmitter {
         a.muted = peer.audioMute;
 
         if (peer.voice === true && a.room === peer.room && useGlobalStore.getState().address !== a.address ) {
-          const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === a.room).name;
-          const message = `Has joined the voice channel in ${roomName}`;
+          const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === a.room)?.name;
+          const message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
           Notify.new({ name: peer.name, text: message });
         }
       }

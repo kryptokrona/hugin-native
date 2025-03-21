@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import {
   FlatList,
@@ -26,6 +26,9 @@ import {
   TextButton,
   Avatar,
   CustomIcon,
+  Unreads,
+  TextField,
+  UserItem,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -34,12 +37,14 @@ import {
   useThemeStore,
   getCurrentRoom,
   setStoreCurrentContact,
+  WebRTC,
 } from '@/services';
 import type {
   SelectedFile,
   MainStackNavigationType,
   MainNavigationParamList,
   Message,
+  User,
 } from '@/types';
 import { getAvatar } from '@/utils';
 
@@ -48,7 +53,10 @@ import { Peers } from '../lib/connections';
 import { setLatestMessages, updateMessage } from '../services/bare/contacts';
 import { saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { Beam } from 'lib/native';
+import { Beam, Rooms } from 'lib/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { textType } from '@/styles';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessageScreen>;
@@ -57,6 +65,8 @@ interface Props {
 export const MessageScreen: React.FC<Props> = ({ route }) => {
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.background;
+  const borderColor = theme.border;
+  const color = theme.foreground;
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
@@ -66,9 +76,6 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const messages = useGlobalStore((state) => state.messages);
   const messageKey = contacts.find((a) => a.address === roomKey)?.messagekey;
   const huginAddress = roomKey + messageKey;
-  console.log('Got hugin send to address', huginAddress);
-  // Use getRoomMessages with a page index (0 is default) to load more messages
-  //getRoomMessages(key, page) -> [alreadyloaded, ...more]
 
   const [showImage, setShowImage] = useState<boolean>(false);
   const [showImagePath, setImagePath] = useState<string>(false);
@@ -78,6 +85,42 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
   const roomUsers = useGlobalStore((state) => state.roomUsers);
 
+  const currentCall = useGlobalStore((state) => state.currentCall);
+  
+  const myUserAddress = useGlobalStore((state) => state.address);
+  const snapPoints = useMemo(() => ['50%'], []);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  
+  const keyRef = useRef(null);
+  const inCall = currentCall.room === keyRef.current;
+
+  useEffect(() => {
+    if (keyRef.current) return; // Prevent re-execution if key is already set
+
+    const deriveKey = async () => {
+      const derivedKey = await Wallet.key_derivation_hash(roomKey);
+      keyRef.current = derivedKey;
+    };
+
+    deriveKey();
+  }, [roomKey]); // Run only when `roomKey` changes
+
+  
+
+  const voiceUsers = useGlobalStore(
+    useCallback(
+      (state) =>
+        state.roomUsers.filter((a) => a.room === keyRef.current && a.voice === true),
+      [keyRef.current],
+    ),
+  );
+
+
+
+  const userList = useMemo(() => {
+    return voiceUsers;
+  }, [voiceUsers]);
+  
   const replyToName = useMemo(() => {
     if (!replyToMessageHash) {
       return '';
@@ -93,6 +136,65 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       roomKey,
     });
   }
+
+  function OnlineUserMapper({ item }: { item: User }) {
+    return <UserItem {...item} />;
+  }
+
+  async function onJoinCall() {
+      console.log('Joining call!', roomKey);
+      WebRTC.init();
+      Rooms.voice(
+        {
+          audioMute: false,
+          key: keyRef.current,
+          screenshare: false,
+          video: false,
+          videoMute: false,
+          voice: true,
+        },
+        false,
+      );
+  
+      const peer = {
+        address: myUserAddress,
+        audioMute: false,
+        screenshare: false,
+        video: false,
+        voice: true,
+      };
+      const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
+      me.voice = true;
+      const call = { room: keyRef.current, time: Date.now(), users: [...userList, me] };
+      useGlobalStore.getState().setCurrentCall(call);
+      Peers.voicestatus(peer);
+    }
+  
+    function onEndCall() {
+      Rooms.voice(
+        {
+          audioMute: false,
+          key: roomKey,
+          screenshare: false,
+          video: false,
+          videoMute: false,
+          voice: false,
+        },
+        false,
+      );
+  
+      const peer = {
+        address: myUserAddress,
+        audioMute: false,
+        screenshare: false,
+        video: false,
+        voice: false,
+      };
+  
+      Peers.voicestatus(peer);
+      useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
+      WebRTC.exit();
+    }
 
   const scrollToBottom = () => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
@@ -138,6 +240,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     }, [roomKey]),
   );
 
+  function onShowCall() {
+    bottomSheetRef?.current?.snapToIndex(0);
+  }
+
   useLayoutEffect(() => {
     const isAdmin = true; // TODO
     const icon = isAdmin ? 'users-cog' : 'users';
@@ -147,6 +253,27 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           backButton
           title={name}
           right={
+            <View style={{ flexDirection: 'row', gap: 10, marginLeft: -5 }}>
+            <TouchableOpacity
+              style={{ flexDirection: 'row' }}
+              onPress={onShowCall}>
+              <View style={{ marginRight: 5, marginTop: 4 }}>
+                <Unreads
+                  unreads={0}
+                  color={`${inCall ? 'green' : 'grey'}`}
+                />
+              </View>
+
+              <CustomIcon type="MCI" name={'phone'} />
+              <View style={{ marginLeft: -5 }}>
+                <CustomIcon
+                  name={'lens'}
+                  size={10}
+                  type={'MI'}
+                  color={`${inCall ? 'green' : 'grey'}`}
+                />
+              </View>
+            </TouchableOpacity>
             <TouchableOpacity
               style={{ flexDirection: 'row' }}
               onPress={onCustomizeGroupPress}>
@@ -168,6 +295,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
                 </View>
               </View>
             </TouchableOpacity>
+            </View>
           }
         />
       ),
@@ -263,6 +391,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
+      <GestureHandlerRootView>
       {/* Full-Screen Image Viewer */}
       {showImage && (
         <FullScreenImageViewer
@@ -330,6 +459,66 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           dm={true}
         />
       </KeyboardAvoidingView>
+      <BottomSheet
+          ref={bottomSheetRef}
+          onChange={() => {}}
+          snapPoints={snapPoints}
+          index={-1}
+          enablePanDownToClose={true}
+          handleStyle={{
+            backgroundColor,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+          }}
+          handleIndicatorStyle={{ backgroundColor: color }}>
+          <BottomSheetView
+            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
+            {/* <TextField>Awesome 🎉</TextField> */}
+            <View style={{ flex: 1, width: '100%' }}>
+              <View style={styles.flatListContainer}>
+                <TextField size={'xsmall'} type="muted">
+                  {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
+                </TextField>
+                <View style={styles.flatListWrapper}>
+                  <FlatList
+                    nestedScrollEnabled={true}
+                    numColumns={2}
+                    data={userList}
+                    renderItem={OnlineUserMapper}
+                    keyExtractor={(item, i) => `${item.name}-${i}`}
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              </View>
+
+              {!inCall ? (
+                <TextButton
+                  small
+                  type="secondary"
+                  onPress={onJoinCall}
+                  icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+                  {t('joinCall')}
+                </TextButton>
+              ) : (
+                <TextButton
+                  small
+                  type="destructive"
+                  onPress={onEndCall}
+                  icon={
+                    <CustomIcon
+                      color={theme[textType.destructive]}
+                      name="phone-hangup"
+                      type="MCI"
+                      size={16}
+                    />
+                  }>
+                  {t('endCall')}
+                </TextButton>
+              )}
+            </View>
+          </BottomSheetView>
+        </BottomSheet>
+      </GestureHandlerRootView>
     </ScreenLayout>
   );
 };
@@ -358,5 +547,17 @@ const styles = StyleSheet.create({
   tipContainer: {
     padding: 20,
     zIndex: 5,
+  },
+  contentContainer: {
+    alignItems: 'center',
+    flex: 1,
+    padding: 36,
+  },
+  flatListContainer: {
+    flex: 1,
+    marginVertical: 12,
+  },
+  flatListWrapper: {
+    flex: 1,
   },
 });
