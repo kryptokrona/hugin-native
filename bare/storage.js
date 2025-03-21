@@ -187,45 +187,47 @@ class HyperStorage {
       beam = new HyperSwarm({ maxPeers: 1 }, sig, dht_keys, base_keys);
       const announce = Buffer.alloc(32).fill(topicHash);
       const disc = beam.join(announce, { server: true, client: true });
-      console.log('----::::::::::----');
-      console.log(':::BEAM STARTED:::');
-      console.log('----::::::::::----');
+
       beam.on('connection', async (conn, info) => {
-        console.log('----:::::::::::::::::::----');
         console.log('------BEAM CONNECTED------');
-        console.log('----:::::::::::::::::::----');
+        this.beams.push({ key, beam, conn, topic });
         if (upload) {
           this.upload(conn, file, topic);
         } else {
-          const done = await this.download(conn, file, topic, room, dm);
-          if (done) close();
+          await this.download(conn, file, topic, room, dm);
         }
       });
-
-      const close = async () => {
-        console.log('XXXXXXXXXXXXXXX');
-        console.log('--BEAM CLOSED--');
-        console.log('XXXXXXXXXXXXXXX');
-        await beam.leave(Buffer.from(topic));
-        await beam.destroy();
-      };
 
       beam.on('close', () => {
         console.log('** Beam closed **');
       });
       beam.on('error', (e) => {
         console.log('Beam error', e);
-        close();
+        this.close(key);
       });
 
       process.once('SIGINT', () => {
-        close();
+        this.close(key);
       });
 
       await disc.flushed();
     } catch (e) {
       console.log('Beam err', e);
     }
+  }
+
+  async close(key) {
+    const active = this.beams.find((a) => a.key === key);
+    await sleep(500);
+    active.conn.end();
+    await sleep(500);
+    await active.beam.leave(Buffer.from(active.topic));
+    await active.beam.destroy();
+    const filter = this.beams.filter((a) => a.key !== key);
+    this.beams = filter;
+    console.log('XXXXXXXXXXXXXXX');
+    console.log('--BEAM CLOSED--');
+    console.log('XXXXXXXXXXXXXXX');
   }
 
   async upload(beam, file, topic) {
@@ -237,6 +239,12 @@ class HyperStorage {
       try {
         beam.write(data);
       } catch (e) {}
+    });
+
+    conn.on('data', (data) => {
+      if (data.toString() === 'Done') {
+        this.close(file.key);
+      }
     });
   }
 
@@ -330,7 +338,8 @@ class HyperStorage {
         }
 
         Hugin.send('swarm-message', { message });
-        return true;
+        this.close(file.key);
+        beam.write('Done');
       }
     });
   }
