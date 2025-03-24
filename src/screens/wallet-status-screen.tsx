@@ -31,6 +31,7 @@ export const WalletStatusScreen: React.FC<Props> = () => {
     console.log('Clicked');
     if (Wallet?.active) {
       Wallet.active.rewind(resyncHeight);
+      Wallet.getAndSetSyncStatus();
     }
   };
 
@@ -63,7 +64,7 @@ export const WalletStatusScreen: React.FC<Props> = () => {
         width={null}
         color={color}
       />
-      <TextField>{`${status[1] - 1} / ${status[2]}`}</TextField>
+      <TextField>{`${status[0] - 1} / ${status[2]}`}</TextField>
       <InputField
         label={t('resyncHeight')}
         value={resyncHeight}
