@@ -22,7 +22,6 @@ const MEDIA_TYPES = [
   { file: '.wav', type: 'audio' },
 ];
 const { get_new_peer_keys, sleep } = require('./utils.js');
-const { Readable } = require('streamx');
 const { Hugin } = require('./account.js');
 
 ///Storage module to keep fast access from the bare moduke
@@ -230,26 +229,49 @@ class HyperStorage {
     console.log('XXXXXXXXXXXXXXX');
   }
 
-  async upload(beam, file, topic) {
+  async upload(conn, file, topic) {
     console.log('***********SEND DATA*****************');
     const send = await this.load(file.hash, topic);
-    const stream = Readable.from(send);
-    stream.on('data', (data) => {
-      console.log('Sending data ------>', data);
+    console.log('Send this file', send);
+    const CHUNK_SIZE = 1000000;
+    const start = () => {
+      if (send.length > CHUNK_SIZE) {
+        const chunks = split(send);
+        for (const c of chunks) {
+          write(c);
+        }
+      } else write(send);
+    };
+
+    function write(chunk) {
       try {
-        beam.write(data);
-      } catch (e) {}
-    });
+        conn.write(chunk);
+      } catch (e) {
+        console.log('Error writing data.');
+      }
+    }
+
+    function split(buf, size = CHUNK_SIZE) {
+      let chunks = [];
+      for (let i = 0; i < buf.length; i += size) {
+        chunks.push(buf.slice(i, i + size));
+      }
+      return chunks;
+    }
 
     conn.on('data', (data) => {
       if (data.toString() === 'Done') {
         this.close(file.key);
       }
     });
+
+    start();
   }
 
   async download(beam, file, topic, room, dm) {
     console.log('Download file', file);
+    let downloaded = 0;
+    const buf = [];
     beam.on('data', async (data) => {
       console.log('*********************');
       console.log('****BEAM DATA INC****');
@@ -258,8 +280,7 @@ class HyperStorage {
       if (data.length < 20) {
         if (data.toString() === 'Start') return;
       }
-      const buf = [];
-      let downloaded = 0;
+
       console.log('-_-__---___--__--');
       console.log('---DOWNLOADING----');
       console.log('_-_----_---__-_--');
@@ -338,8 +359,8 @@ class HyperStorage {
         }
 
         Hugin.send('swarm-message', { message });
-        this.close(file.key);
         beam.write('Done');
+        this.close(file.key);
       }
     });
   }
