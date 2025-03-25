@@ -85,8 +85,10 @@ export const PickNodeScreen: React.FC<Props> = () => {
         }/info`;
 
         try {
-          await fetchWithTimeout(nodeURL, { method: 'GET' });
-          return { ...node, online: true }; // Mark node as online
+          const resp = await fetchWithTimeout(nodeURL, { method: 'GET' });
+          const json = await resp.json();
+          const height = json?.height;
+          return { ...node, online: true, height }; // Mark node as online
         } catch (error) {
           return { ...node, online: false }; // Mark node as offline
         }
@@ -160,6 +162,11 @@ export const PickNodeScreen: React.FC<Props> = () => {
       ]}
       onPress={() => chooseNode(item)}>
       <TextField>{item.name}</TextField>
+      {item?.height &&
+      <View style={[styles.height, {backgroundColor: theme.foreground}]}>
+        <TextField size='mediumsmall' color={theme.background}>{item.height}</TextField>
+      </View>
+      }
       <View
         style={[
           styles.statusIndicator,
@@ -219,6 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginVertical: 4,
     padding: 12,
+    position: 'relative'
   },
   nodeList: {
     marginTop: 16,
@@ -238,4 +246,13 @@ const styles = StyleSheet.create({
     height: 10,
     width: 10,
   },
+  height: {
+    fontSize: 8,
+    borderRadius: 5,
+    position: 'absolute',
+    right: 38,
+    top: 15,
+    paddingLeft: 4,
+    paddingRight: 4
+  }
 });

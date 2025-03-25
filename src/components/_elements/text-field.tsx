@@ -14,6 +14,7 @@ interface Props {
   bold?: boolean;
   style?: any;
   centered?: boolean;
+  color?: string;
 }
 
 export const TextField: React.FC<Props> = ({
@@ -24,9 +25,10 @@ export const TextField: React.FC<Props> = ({
   bold,
   style,
   centered,
+  color
 }) => {
   const theme = useThemeStore((state) => state.theme);
-  const color = theme[textType[type]];
+  if (!color) color = theme[textType[type]];
   const fontSize = Styles.fontSizes[size] ?? Styles.fontSizes.medium;
   const fontWeight = bold ? 'bold' : 'normal';
 
