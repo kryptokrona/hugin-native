@@ -18,6 +18,13 @@ Todo:
     ✔ Add QR codes for messages and rooms @done(25-02-15 20:04)
     ☐ Show "lastseen" on user lists in rooms
 
+Todo calls:
+    ✔ Display own video @done(25-03-26 23:04)
+    ✔ Display video fullscreen @done(25-03-26 22:24)
+    ☐ Add call menu to call screen
+    ☐ Fix states on call screen
+    ☐ Optimize
+
 
 Todo wallet:
     ✔ Node picker @done(24-12-28 00:41)
@@ -44,6 +51,7 @@ Bugs:
     ✔ Pick best random node for new account (no hard coded) @done(25-02-27 19:05)
     ✔ Fix multiple rerenders issue with messages @done(25-02-15 20:04)
     ✔ Unread counter not resetting properly @done(25-02-08 20:10)
+    ☐ Don't show notifications for old file shares
 
 Maintenenance:
     ☐ Upgrade packages, RN version. Note, when upgrade RN version all the react native packages must align
