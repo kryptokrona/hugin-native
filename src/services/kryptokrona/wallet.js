@@ -46,7 +46,7 @@ export class ActiveWallet {
     this.nodeUrl = undefined;
     this.nodePort = undefined;
     this.started = false;
-    this.deadNodeEmitted = false;
+    this.deadNodeEmitted = true;
   }
 
   async init(node) {
@@ -208,6 +208,10 @@ export class ActiveWallet {
     this.active.setBlockOutputProcessFunc(processBlockOutputs);
     this.active.enableAutoOptimization(false);
     this.active.scanPoolTransactions(false);
+
+    setTimeout(() => {
+      this.deadNodeEmitted = false;
+    }, 10000);
 
     this.active.on('deadnode', async () => {
       if (!this.deadNodeEmitted) {
