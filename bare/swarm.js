@@ -1154,9 +1154,9 @@ const check_peer_voice_status = (data, con) => {
 
 const update_voice_channel_status = (data, con) => {
   ////Already know this status
-  if (data.voice === con.voice) {
-    return true;
-  }
+  // if (data.voice === con.voice) {
+  //   return true;
+  // }
   //Just doublechecking the address
   if (data.address !== con.address) {
     return false;

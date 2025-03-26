@@ -122,6 +122,73 @@ class VoiceChannel {
     return this.connections.find((conn) => conn.address === address);
   }
 
+  async addTransceiver(request) {
+    const { address, data } = request;
+    const peerConnection = this.active(address).peerConnection;
+    peerConnection.addTransceiver('video'); //data.tranceiverRequest.kind
+    const offer = await peerConnection.createOffer(this.settings);
+    await peerConnection.setLocalDescription(offer);
+
+    Rooms.sdp({
+      type: 'offer',
+      key: undefined,
+      topic: this.active(address).topic,
+      address,
+      data: offer,
+      retry: true
+    });
+
+  }
+
+  async setVideo(video) {
+
+    const mediaConstraints = { audio: false, video };
+
+    let newTrack;
+
+    try {
+      newTrack = await mediaDevices.getUserMedia(mediaConstraints);
+    } catch (error) {
+      console.error('Error getting media:', error);
+      return;
+    }
+
+    newTrack
+    .getTracks()
+    .forEach(async (track) =>
+      {
+        if (track.kind == 'audio') return;
+        this.localMediaStream.addTrack(track);
+        for (const peer of this.connections) {
+          peer.peerConnection.addTrack(track, this.localMediaStream)
+          if (peer.initator) {
+            const offer = await peer.peerConnection.createOffer(this.settings);
+            await peer.peerConnection.setLocalDescription(offer);
+            Rooms.sdp({
+              type: 'offer',
+              key: undefined,
+              topic: peer.topic,
+              address: peer.address,
+              data: offer,
+              retry: true
+            });
+            // send offer
+          } else {
+            Rooms.sdp({
+              type: 'tranceiverRequest',
+              key: undefined,
+              topic: peer.topic,
+              address: peer.address,
+              data: {transceiverRequest: {kind: "video"}},
+              retry: true
+            });
+          }
+        }
+      }
+    );
+
+  }
+
   async callback(answer) {
     const { address, data } = answer;
     const connection = this.active(address);
@@ -141,7 +208,7 @@ class VoiceChannel {
     if (!this.localMediaStream) await this.init();
 
     const peerConnection = new RTCPeerConnection(this.stunServers);
-    this.connections.push({ address, topic, peerConnection });
+    this.connections.push({ address, topic, peerConnection, initator: true });
 
     this.localMediaStream
       .getTracks()
@@ -149,7 +216,7 @@ class VoiceChannel {
         peerConnection.addTrack(track, this.localMediaStream),
       );
 
-    this.events(peerConnection, key, topic, address, 'offer');
+    this.events(key, topic, address, 'offer');
 
     await peerConnection.createDataChannel('HuginDataChannel');
 
@@ -163,7 +230,7 @@ class VoiceChannel {
     if (!this.localMediaStream) await this.init();
 
     const peerConnection = new RTCPeerConnection(this.stunServers);
-    this.connections.push({ address, topic, peerConnection });
+    this.connections.push({ address, topic, peerConnection, initator: false });
 
     this.localMediaStream
       .getTracks()
@@ -171,8 +238,14 @@ class VoiceChannel {
         peerConnection.addTrack(track, this.localMediaStream),
       );
 
-    this.events(peerConnection, key, topic, address, 'answer');
+    this.events(key, topic, address, 'answer');
 
+    this.signal(key, topic, address, data);
+    
+  }
+
+  async signal(key, topic, address, data) {
+    const peerConnection = this.active(address).peerConnection;
     const remoteDescription = new RTCSessionDescription(data);
     await peerConnection.setRemoteDescription(remoteDescription);
     try {
@@ -184,8 +257,10 @@ class VoiceChannel {
     }
   }
 
-  events(peerConnection, key, topic, address, type) {
+  events(key, topic, address, type) {
     let remoteMediaStream;
+
+    const peerConnection = this.active(address).peerConnection;
 
     peerConnection.addEventListener('connectionstatechange', () => {
       console.log('Connection state changed:', peerConnection.connectionState);

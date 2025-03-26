@@ -10,6 +10,7 @@ export * from './settings-item';
 export * from './user-item';
 export * from './call-user-item';
 export * from './full-screen-image';
+export * from './full-screen-video';
 export * from './transaction';
 export * from './separator';
 export * from './loading-bar';

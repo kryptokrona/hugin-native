@@ -167,6 +167,7 @@ export class Bridge {
         case 'voice-channel-status':
           // console.log('Voice channel status', json);
           Peers.voicestatus(json.data);
+          if (!json.data.voice) WebRTC.remove(json.data.address);
           break;
         case 'join-voice-channel':
           console.log('join-voice-channel called');
@@ -174,13 +175,20 @@ export class Bridge {
           break;
         case 'got-answer':
           // console.log('Got answer: ', json);
+          if (json?.data?.data?.transceiverRequest) {
+            WebRTC.addTransceiver(json.data);
+            return;
+          }
           WebRTC.callback(json.data);
           break;
         case 'answer-call':
-          // console.log('Got call: ', json);
+          console.log('Got call: ', json);
           WebRTC.answer(json.data);
           break;
-
+        case 'got-expanded-voice-channel':
+          const { key, topic, address, data } = json.data;
+          WebRTC.signal(key, topic, address, data);
+          break;
         case 'error-message':
           console.log('ERROR', json.message);
           break;

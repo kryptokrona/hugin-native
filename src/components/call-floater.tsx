@@ -43,6 +43,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   const theme = useThemeStore((state) => state.theme);
   const [speaker, setSpeaker] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [camera, setCamera] = useState(currentCall.users.find(a => a.address === myUserAddress).video);
 
   const backgroundColor = theme.background;
   const borderColor = theme.border;
@@ -101,6 +102,39 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   function toggleSpeaker() {
     InCallManager.setSpeakerphoneOn(!speaker);
     setSpeaker(!speaker);
+  }
+
+  function toggleCamera() {
+    WebRTC.setVideo(!camera);
+    Rooms.voice(
+      {
+        audioMute: !muted,
+        key: currentCall.room,
+        screenshare: false,
+        video: !camera,
+        videoMute: false,
+        voice: true,
+      },
+      true,
+    );
+  
+    const me = currentCall.users.find(a => a.address == myUserAddress);
+    if (!me) return;
+    me.video = !camera;
+    useGlobalStore.getState().setCurrentCall({...currentCall});
+
+    setCamera(!camera);
+
+    if (camera) {
+      const videoTrack = WebRTC.localMediaStream?.getVideoTracks()[0];
+  
+      if (videoTrack) {
+        WebRTC.localMediaStream?.removeTrack(videoTrack);
+    
+        videoTrack.stop();
+      }
+    }
+
   }
 
   function toggleMuted() {
@@ -210,6 +244,28 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
               <CustomIcon
                 color={color}
                 name="microphone"
+                type="MCI"
+                size={24}
+              />
+            )
+          
+          }
+          
+        </TouchableOpacity>
+        <TouchableOpacity onPress={toggleCamera}>
+          {camera ?
+            (
+              <CustomIcon
+                color="#dc2626"
+                name="camera-off"
+                type="MCI"
+                size={24}
+              />
+            ) :
+            (
+              <CustomIcon
+                color={color}
+                name="camera"
                 type="MCI"
                 size={24}
               />

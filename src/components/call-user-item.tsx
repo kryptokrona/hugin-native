@@ -10,11 +10,17 @@ import { getAvatar } from '@/utils';
 
 import { Avatar, TextField } from './_elements';
 import { ModalCenter } from './_layout';
-import { useThemeStore } from '@/services';
+import { useGlobalStore, useThemeStore, WebRTC } from '@/services';
+
+import {
+  MediaStream,
+  RTCView
+} from 'react-native-webrtc';
+import { FullScreenVideoViewer } from './full-screen-video';
 
 type Props = User;
 
-export const CallUserItem: React.FC<Props> = ({ name, address, online = true, avatar = undefined, talking = false }) => {
+export const CallUserItem: React.FC<Props> = ({ name, address, online = true, avatar = undefined, talking = false, video = false }) => {
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -23,6 +29,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
   const borderColor = theme.border;
   const color = theme.foreground;
   const card = theme.card;
+  const myUserAddress = useGlobalStore((state) => state.address);
 
   const w = Dimensions.get('window').width;
   const width = w / 2;
@@ -36,14 +43,66 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
     setModalVisible(false);
   }
 
+  const stream = useMemo(() => {
+    if (!video) return null;
+
+    if (address === myUserAddress) {
+
+      const localVideo = WebRTC.localMediaStream.getVideoTracks()[0];
+
+      const videoStream = new MediaStream();
+      try {
+        videoStream.addTrack(localVideo);
+      } catch (e){
+        return null;
+      }
+
+      return videoStream;
+
+    }
+
+    const connection = WebRTC.active(address);
+    if (!connection || !connection.peerConnection) return null;
+
+    const videoTracks = connection.peerConnection.getReceivers()
+    .map(receiver => receiver.track)
+    .filter(track => track && track.kind === 'video');
+
+    if (videoTracks.length > 0) {
+      console.log('Video track detected')
+      const videoStream = new MediaStream();
+      videoTracks.forEach(track => videoStream.addTrack(track));
+      return videoStream;
+    }
+
+    return null;
+  }, [video, address]);
+
+
   return (
     <TouchableOpacity style={[styles.onlineUser, { borderRadius: 5, borderWidth: 2, backgroundColor: card, width, opacity: online === false ? 0.3 : 1, borderColor: talking ? 'green' : borderColor  }]} onPress={onPress}>
+      {!stream && !video &&
       <ModalCenter visible={modalVisible} closeModal={onClose}>
         <View style={styles.modalInner}>
           <Avatar size={200} base64={avatar} />
           <TextField style={{ marginVertical: 12 }}>{name}</TextField>
         </View>
       </ModalCenter>
+      }
+      {stream && video && 
+      <>
+        {modalVisible &&
+        <FullScreenVideoViewer onClose={onClose} stream={stream} />
+        }
+        {!modalVisible &&
+          <RTCView
+          streamURL={stream.toURL()}
+          style={styles.video}
+          mirror={false}
+          />
+        }
+      </>
+      }
       <View style={styles.userInfo}>
       <Avatar size={28} base64={avatar} />
       <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
@@ -55,6 +114,9 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
 };
 
 const styles = StyleSheet.create({
+  video: {
+    flex: 1
+  },
   modalInner: {
     alignItems: 'center',
     justifyContent: 'center',

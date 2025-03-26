@@ -31,17 +31,18 @@ class Connections extends EventEmitter {
   }
 
   voicestatus(peer) {
-    console.log('Voice status changed for ', peer );
+    // console.log('Voice status changed for ', peer );
     let list = this.active();
     list.some((a) => {
       if (a.address === peer.address) {
+        // console.log('Voice status changed for a: ', a );
         const currentCallStatus = a.voice ? true : false;
         a.voice = peer.voice;
         a.video = peer.video;
         a.screenshare = peer.screenshare;
         a.muted = peer.audioMute;
 
-        if (peer.voice === true && a.room === peer.room && useGlobalStore.getState().address !== a.address ) {
+        if (currentCallStatus === false && peer.voice === true && a.room === peer.room && useGlobalStore.getState().address !== a.address ) {
           const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === a.room)?.name;
           const message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
           Notify.new({ name: peer.name, text: message });
