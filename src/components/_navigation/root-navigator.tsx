@@ -35,7 +35,7 @@ const linking: LinkingOptions<RootStackParamList> = {
 export const RootNavigator = () => {
   const hydrated = useAppStoreState((state) => state._hasHydrated);
   const authenticated = useGlobalStore((state) => state.authenticated);
-  const currentCall = useGlobalStore((state) => state.currentCall);
+  const currentCallRoom = useGlobalStore((state) => state.currentCall).room;
   const user = useUserStore((state) => state.user);
   const authMethod = usePreferencesStore(
     (state) => state.preferences?.authMethod,
@@ -77,8 +77,8 @@ export const RootNavigator = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <NavigationContainer linking={linking}>
-      {currentCall.room.length > 0 && (
-        <CallFloater currentCall={currentCall} />
+      {currentCallRoom.length > 0 && (
+        <CallFloater />
       )}
       <Stack.Navigator
         initialRouteName={initialRouteName}

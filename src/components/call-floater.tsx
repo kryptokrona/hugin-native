@@ -29,11 +29,11 @@ import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 import InCallManager from 'react-native-incall-manager';
 import { useNavigation } from '@react-navigation/native';
 
-interface Props {
-  currentCall: Call;
-}
+export const CallFloater: React.FC = () => {
 
-export const CallFloater: React.FC<Props> = ({ currentCall }) => {
+  const users = useGlobalStore(state => state.currentCall.users);
+  const room = useGlobalStore(state => state.currentCall.room);
+  const talkingUsers = useGlobalStore(state => state.currentCall.talkingUsers);
   const navigation = useNavigation<MainStackNavigationType>();
   
   const translateX = useSharedValue(0);
@@ -43,7 +43,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   const theme = useThemeStore((state) => state.theme);
   const [speaker, setSpeaker] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [camera, setCamera] = useState(currentCall.users.find(a => a.address === myUserAddress)?.video);
+  const [camera, setCamera] = useState(users.find(a => a.address === myUserAddress)?.video);
 
   const backgroundColor = theme.background;
   const borderColor = theme.border;
@@ -111,7 +111,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
     Rooms.voice(
       {
         audioMute: !muted,
-        key: currentCall.room,
+        key: room,
         screenshare: false,
         video: !camera,
         videoMute: false,
@@ -119,11 +119,10 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
       },
       true,
     );
-  
-    const me = currentCall.users.find(a => a.address == myUserAddress);
+    const me = users.find(a => a.address == myUserAddress);
     if (!me) return;
     me.video = !camera;
-    useGlobalStore.getState().setCurrentCall({...currentCall});
+    useGlobalStore.getState().setUsers([...users]);
 
     setCamera(!camera);
 
@@ -144,7 +143,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
     Rooms.voice(
       {
         audioMute: !muted,
-        key: currentCall.room,
+        key: room,
         screenshare: false,
         video: false,
         videoMute: false,
@@ -159,7 +158,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
     Rooms.voice(
       {
         audioMute: false,
-        key: currentCall.room,
+        key: room,
         screenshare: false,
         video: false,
         videoMute: false,
@@ -178,7 +177,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
 
     Peers.voicestatus(peer);
 
-    useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
+    useGlobalStore.getState().resetCurrentCall();
     WebRTC.exit();
   }
 
@@ -197,8 +196,8 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
           },
         ]}>
         <View style={styles.avatarsContainer}>
-          {currentCall.users.map((user) => (
-            <View style={{borderRadius: 5, borderWidth: 2, borderColor: user.talking ? 'green' : 'transparent'}}>
+          {users.map((user) => (
+            <View style={{borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
             <Avatar
               key={user.address}
               base64={

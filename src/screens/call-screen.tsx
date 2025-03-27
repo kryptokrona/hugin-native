@@ -88,7 +88,7 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
 
   const userList = useMemo(() => {
     return currentCall.users;
-  }, [currentCall]);
+  }, [currentCall.users]);
 
   function OnlineUserMapper({ item }: { item: User }) {
     return <CallUserItem {...item} />;

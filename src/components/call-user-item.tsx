@@ -31,6 +31,8 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
   const card = theme.card;
   const myUserAddress = useGlobalStore((state) => state.address);
 
+  const talkingUsers = useGlobalStore(state => state.currentCall.talkingUsers);
+
   const w = Dimensions.get('window').width;
   const width = w / 2;
   if (!avatar) avatar = useMemo(() => getAvatar(address ?? ''), [address]);
@@ -75,7 +77,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
 
 
   return (
-    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 5, borderWidth: 2, backgroundColor: card, width, opacity: online === false ? 0.3 : 1, borderColor: talking ? 'green' : borderColor  }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 5, borderWidth: 2, backgroundColor: card, width, opacity: online === false ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : borderColor  }]} onPress={onPress}>
       {!stream && !video &&
       <ModalCenter visible={modalVisible} closeModal={onClose}>
         <View style={styles.modalInner}>

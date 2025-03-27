@@ -377,21 +377,23 @@ class VoiceChannel {
     };
 
     async function getAudioLevel() {
-      const currentCall = useGlobalStore.getState().currentCall;
-      if (currentCall.users.some((a) => a.address == address)) {
-        await getRemoteAudioLevel(peer.peerConnection);
-
-        const talking = array.some((volume) => volume > sensitivity);
-
-        useGlobalStore.getState().setCurrentCall({ ...currentCall });
-
-        currentCall.users.find((a) => a.address === address).talking = talking;
-
-        array.shift();
-      } else {
+      const { currentCall, setCurrentCall } = useGlobalStore.getState();
+    
+      if (!currentCall.users.some((a) => a.address === address)) {
         clearInterval(interval);
+        return;
       }
+    
+      await getRemoteAudioLevel(peer.peerConnection);
+    
+      const talking = array.some((volume) => volume > sensitivity);
+      array.shift();
+
+      const updatedTalkingUsers = { ...currentCall.talkingUsers, [address]: talking };
+    
+      setCurrentCall({ ...currentCall, talkingUsers: updatedTalkingUsers });
     }
+    
   }
 }
 

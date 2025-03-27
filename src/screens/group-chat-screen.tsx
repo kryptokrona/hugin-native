@@ -185,7 +185,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     };
 
     Peers.voicestatus(peer);
-    useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
+    useGlobalStore.getState().resetCurrentCall();
     WebRTC.exit();
   }
 

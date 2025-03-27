@@ -73,9 +73,17 @@ class Connections extends EventEmitter {
 
   update(list) {
     const currentCall = useGlobalStore.getState().currentCall;
-    console.log('Currentcall connections', currentCall);
-    currentCall.users = list.filter(a => a.room === currentCall.room && a.voice === true);
-    useGlobalStore.getState().setCurrentCall({...currentCall});
+
+    const filteredUsers = list.filter(a => a.room === currentCall.room && a.voice === true);
+  
+    const updatedTalkingUsers = currentCall.talkingUsers || {};
+  
+    useGlobalStore.getState().setCurrentCall({
+      ...currentCall,
+      users: filteredUsers,
+      talkingUsers: updatedTalkingUsers,
+    });
+  
     setStoreActiveRoomUsers(list);
   }
 

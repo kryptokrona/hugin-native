@@ -31,6 +31,15 @@ type GlobalStore = {
   setSyncStatus: (payload: number[]) => void;
   setFiatPrice: (payload: number) => void;
   setCurrentCall: (payload: Call) => void;
+  resetCurrentCall: () => void;
+  setUsers: (payload: User[]) => void;
+};
+
+const defaultCall: Call = { 
+  room: '', 
+  users: [], 
+  talkingUsers: {}, 
+  time: 0 
 };
 
 export const useGlobalStore = create<
@@ -42,7 +51,7 @@ export const useGlobalStore = create<
     authenticated: false,
     balance: { locked: 0, unlocked: 0 },
     contacts: [],
-    currentCall: { room: '', users: [] },
+    currentCall: { ...defaultCall },
     fiatPrice: 0,
     messages: [],
     roomMessages: [],
@@ -78,6 +87,15 @@ export const useGlobalStore = create<
     },
     setCurrentCall: (currentCall: Call) => {
       set({ currentCall });
+    },
+    resetCurrentCall: () => set({ currentCall: { ...defaultCall, time: Date.now() } }),
+    setUsers(newUsers: User[]) {
+      set((state) => ({
+        currentCall: {
+          ...state.currentCall,
+          users: newUsers,
+        },
+      }));
     },
     setRoomUserList: (roomUsers: User[]) => {
       set({ roomUsers });
