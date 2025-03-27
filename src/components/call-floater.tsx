@@ -43,7 +43,7 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
   const theme = useThemeStore((state) => state.theme);
   const [speaker, setSpeaker] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [camera, setCamera] = useState(currentCall.users.find(a => a.address === myUserAddress).video);
+  const [camera, setCamera] = useState(currentCall.users.find(a => a.address === myUserAddress)?.video);
 
   const backgroundColor = theme.background;
   const borderColor = theme.border;
@@ -51,27 +51,29 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
 
   const [callDuration, setCallDuration] = useState('00 00 00'.split(' ').join('\n'));
 
-  useEffect(() => {
-    const updateTimer = () => {
-      const startTime = currentCall.time;
-      const now = Date.now();
-      const elapsed = Math.floor((now - startTime) / 1000);
 
-      const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-      const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(
-        2,
-        '0',
-      );
-      const seconds = String(elapsed % 60).padStart(2, '0');
+  // useEffect(() => {
+  //   console.log('Update time')
+  //   const updateTimer = () => {
+  //     const startTime = currentCall.time;
+  //     const now = Date.now();
+  //     const elapsed = Math.floor((now - startTime) / 1000);
 
-      setCallDuration(`${hours} ${minutes} ${seconds}`.split(' ').join('\n'));
-    };
+  //     const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+  //     const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(
+  //       2,
+  //       '0',
+  //     );
+  //     const seconds = String(elapsed % 60).padStart(2, '0');
 
-    const timer = setInterval(updateTimer, 1000);
-    updateTimer();
+  //     setCallDuration(`${hours} ${minutes} ${seconds}`.split(' ').join('\n'));
+  //   };
 
-    return () => clearInterval(timer);
-  }, [currentCall.time]);
+  //   const timer = setInterval(updateTimer, 1000);
+  //   updateTimer();
+
+  //   return () => clearInterval(timer);
+  // }, [currentCall.time]);
 
   const gestureHandler = useAnimatedGestureHandler({
     onActive: (event, ctx: any) => {
@@ -104,8 +106,8 @@ export const CallFloater: React.FC<Props> = ({ currentCall }) => {
     setSpeaker(!speaker);
   }
 
-  function toggleCamera() {
-    WebRTC.setVideo(!camera);
+  async function toggleCamera() {
+    await WebRTC.setVideo(!camera);
     Rooms.voice(
       {
         audioMute: !muted,

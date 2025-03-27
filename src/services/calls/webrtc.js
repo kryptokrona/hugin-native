@@ -2,6 +2,7 @@ import {
   mediaDevices,
   RTCPeerConnection,
   RTCSessionDescription,
+  MediaStream
 } from 'react-native-webrtc';
 
 import { useGlobalStore } from '../zustand';
@@ -193,6 +194,11 @@ class VoiceChannel {
     const { address, data } = answer;
     const connection = this.active(address);
 
+    if (data?.renegotiate) {
+      this.addTransceiver({address});
+      return;
+    }
+
     if (connection) {
       console.log('Adding answer to connection:', connection);
       const remote = new RTCSessionDescription(data);
@@ -316,9 +322,15 @@ class VoiceChannel {
       }
     });
 
-    peerConnection.addEventListener('track', (event) => {
+    peerConnection.addEventListener('track', async (event) => {
       remoteMediaStream = remoteMediaStream || new MediaStream();
-      remoteMediaStream.addTrack(event.track);
+      await remoteMediaStream.addTrack(event.track);
+      const currentCall = useGlobalStore.getState().currentCall;
+      const user = currentCall.users.find(a => a.address === address);
+      user.video = false;
+      useGlobalStore.getState().setCurrentCall({ ...currentCall });
+      user.video = true;
+      useGlobalStore.getState().setCurrentCall({ ...currentCall });
     });
   }
 

@@ -51,11 +51,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
       const localVideo = WebRTC.localMediaStream.getVideoTracks()[0];
 
       const videoStream = new MediaStream();
-      try {
-        videoStream.addTrack(localVideo);
-      } catch (e){
-        return null;
-      }
+      videoStream.addTrack(localVideo);
 
       return videoStream;
 
@@ -69,7 +65,6 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
     .filter(track => track && track.kind === 'video');
 
     if (videoTracks.length > 0) {
-      console.log('Video track detected')
       const videoStream = new MediaStream();
       videoTracks.forEach(track => videoStream.addTrack(track));
       return videoStream;
