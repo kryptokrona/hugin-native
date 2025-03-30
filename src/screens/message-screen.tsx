@@ -465,18 +465,15 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           snapPoints={snapPoints}
           index={-1}
           enablePanDownToClose={true}
-          handleStyle={{
-            backgroundColor,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 10,
-          }}
+          backgroundStyle={{backgroundColor: 'transparent'}}
+          bottomInset={10}
           handleIndicatorStyle={{ backgroundColor: color }}>
           <BottomSheetView
             style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
             {/* <TextField>Awesome 🎉</TextField> */}
             <View style={{ flex: 1, width: '100%' }}>
               <View style={styles.flatListContainer}>
-                <TextField size={'xsmall'} type="muted">
+                <TextField size={'xsmall'} type="muted" style={styles.onlineUsersText}>
                   {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
                 </TextField>
                 <View style={styles.flatListWrapper}>
@@ -551,7 +548,16 @@ const styles = StyleSheet.create({
   contentContainer: {
     alignItems: 'center',
     flex: 1,
-    padding: 36,
+    padding: 25,
+    marginBottom: 10,
+    borderRadius: 25,
+    borderWidth: 1
+  },
+  onlineUsersText: {
+    textAlign: 'center',
+    width: '100%',
+    marginTop: -10,
+    marginBottom: 10
   },
   flatListContainer: {
     flex: 1,
