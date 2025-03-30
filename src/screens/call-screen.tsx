@@ -143,11 +143,13 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
                 <View style={styles.flatListWrapper}>
                   <FlatList
                     nestedScrollEnabled={true}
+                    columnWrapperStyle={{ gap: 10 }}
+                    contentContainerStyle={{ gap: 10 }}
                     numColumns={2}
                     data={userList}
                     renderItem={OnlineUserMapper}
                     keyExtractor={(item, i) => `${item.name}-${i}`}
-                    style={{ flex: 1 }}
+                    style={{ flex: 1, gap: 5 }}
                   />
                 </View>
               </View>

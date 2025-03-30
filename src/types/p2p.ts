@@ -100,4 +100,5 @@ export interface Call {
   room: string;
   users: User[];
   time: number;
+  talkingUsers: Record<string, boolean>;
 }

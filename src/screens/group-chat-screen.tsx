@@ -90,8 +90,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
-  const currentCall = useGlobalStore((state) => state.currentCall);
-  const inCall = currentCall.room === roomKey;
+  const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
+  const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
 
@@ -158,7 +158,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     };
     const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
     me.voice = true;
-    const call = { room: roomKey, time: Date.now(), users: [...userList, me] };
+    const call = { room: roomKey, time: Date.now(), users: [...userList, me], talkingUsers: {} };
     useGlobalStore.getState().setCurrentCall(call);
     Peers.voicestatus(peer);
   }
