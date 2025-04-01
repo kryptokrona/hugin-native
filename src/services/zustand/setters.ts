@@ -42,6 +42,11 @@ export const setStoreCurrentRoom = (thisRoom: string) => {
   useGlobalStore.setState({ thisRoom });
 };
 
+export const setStoreFeedMessages = (feedMessages: Message[]) => {
+  console.log('Setting feedmessages..', feedMessages);
+  useGlobalStore.setState({ feedMessages });
+};
+
 export const setStoreRoomMessages = (roomMessages: Message[]) => {
   useGlobalStore.setState({ roomMessages });
 };

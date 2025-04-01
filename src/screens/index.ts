@@ -19,3 +19,4 @@ export * from './send-transaction-screen';
 export * from './node-picker-screen';
 export * from './wallet-status-screen';
 export * from './call-screen';
+export * from './feed-screen';

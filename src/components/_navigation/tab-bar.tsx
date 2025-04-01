@@ -19,6 +19,7 @@ import { CustomIcon, Unreads } from '../_elements';
 const tabbarButtons = [
   MainScreens.GroupStack,
   MainScreens.MessageStack,
+  MainScreens.FeedStack,
   MainScreens.WalletStack,
   MainScreens.SettingsStack,
 ];
