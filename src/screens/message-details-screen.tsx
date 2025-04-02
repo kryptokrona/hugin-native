@@ -41,6 +41,8 @@ import {
   Unreads,
   TextField,
   UserItem,
+  Reactions,
+  Avatar,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -70,13 +72,16 @@ import {
   setFeedMessages
 } from '../services/bare/feed';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { getFeedMessages } from '../services/bare/sqlite';
+import { getFeedMessage, getFeedMessages } from '../services/bare/sqlite';
+import { lightenHexColor } from '@/services/utils/tools';
+import { getAvatar, prettyPrintDate } from '@/utils';
+import { getColors } from 'react-native-image-colors';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.FeedScreen>;
 }
 
-export const FeedScreen: React.FC<Props> = ({ route }) => {
+export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
   const theme = useThemeStore((state) => state.theme);
   const backgroundColor = theme.background;
   const borderColor = theme.border;
@@ -84,57 +89,68 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
-  // const { roomKey, name } = route.params;
-  const messages = useGlobalStore((state) => state.feedMessages);
-  console.log('feedmessages', messages);
-
-  useEffect(() => {
-    setFeedMessages(0);
-    return () => {
-      console.log('Screen unmounted');
-    };
-  }, []);
-
-  // const messages = [
-  //   {
-  //     "address": "SEKReXGS2GSG65cY9ZSPTC6RAnq1NN8ziSNA3Af4DgWmPbJmM7LbKUze5PCLAgugDmdkerZHZ2wNDJ3Eb1Ys4ZgaQfXNfFbjQSc",
-  //     "file": undefined, 
-  //     "hash": "295c0c0a896fcfd1a5a50e972a1e4c62ba6b67ea719a3ca22772e046ca40d905", 
-  //     "message": "12test", 
-  //     "nickname": "aaa", 
-  //     "reactions": [], 
-  //     "replies": [], 
-  //     "reply": "", 
-  //     "replyto": false, 
-  //     "room": "8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc",
-  //     "sent": 0,f
-  //     "timestamp": 1742700693766, 
-  //     "tip": "false"
-  //   }
-  // ]
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
+  const [message, setMessage] = useState<Message | null>(null);
+  const [userColor, setUserColor] = useState(backgroundColor);
+  const [dateString, setDateString] = useState(0);
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
   const user = useUserStore((state) => state.user);
+  const { hash } = route.params;
 
-  const replyToName = useMemo(() => {
-    if (!replyToMessageHash) {
-      return '';
+  const avatar = useMemo(() => getAvatar(message?.address ?? ''), [message?.address]);
+
+  useEffect(() => {
+
+    async function getUserColor() {
+
+      const thisUserColor = await getColors('data:image/png;base64,'+avatar, {
+        fallback: '#228B22',
+        cache: true,
+        key: avatar,
+      });
+
+      console.log('Got colors: ', thisUserColor);
+
+      setUserColor(lightenHexColor(thisUserColor?.background, 60) || thisUserColor?.vibrant);
+      
     }
 
-    const message = messages.find((m) => m.hash === replyToMessageHash);
-    return message ? message.nickname : '';
-  }, [replyToMessageHash, messages]);
+    getUserColor();
 
-  const snapPoints = useMemo(() => ['50%'], []);
 
-  function OnlineUserMapper({ item }: { item: User }) {
-    return <UserItem {...item} />;
-  }
+
+    }, [avatar]);
+
+  useEffect(() => {
+    async function getMessage() {
+
+      const thisMessage = await getFeedMessage(hash);
+
+      setMessage(thisMessage[0]);
+
+      setDateString(prettyPrintDate(thisMessage[0].timestamp ?? 0));
+
+    }
+
+    getMessage();
+
+  }, [hash]);
+  console.log('THis hash: ', hash);
+  console.log('THis message: ', message)
+
+
+  // const replyToName = useMemo(() => {
+  //   if (!replyToMessageHash) {
+  //     return '';
+  //   }
+
+  //   const message = messages.find((m) => m.hash === replyToMessageHash);
+  //   return message ? message.nickname : '';
+  // }, [replyToMessageHash, messages]);
 
   const scrollToBottom = () => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
@@ -191,11 +207,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
       header: () => (
         <Header
           title={'Feed'}
-          right={
-            <TouchableOpacity onPress={onCreatePost}>
-              <CustomIcon type="IO" name="add-outline" size={30} />
-            </TouchableOpacity>
-          }
+          backButton
         />
       ),
     });
@@ -203,22 +215,22 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
 
   async function onSend(
     text: string,
-    file: SelectedFile | null,
-    reply?: string,
-    emoji?: boolean | undefined,
-    tip?: TipType | undefined,
+    // file: SelectedFile | null,
+    // reply?: string,
+    // emoji?: boolean | undefined,
+    // tip?: TipType | undefined,
   ) {
-    console.log('Sending feed message');
-    if (file) {
-      onSendFeedMessageWithFile(file, text);
-      //If we need to return something... or print something locally
-      // console.log('sent file!', sentFile);
-    }
+    // console.log('Sending feed message');
+    // if (file) {
+    //   onSendFeedMessageWithFile(file, text);
+    //   //If we need to return something... or print something locally
+    //   // console.log('sent file!', sentFile);
+    // }
     if (text.length) {
       const sent = await Rooms.feed_message(
         text,
-        reply ? reply : replyToMessageHash,
-        tip ? tip : false,
+        hash,
+        false
       );
       const save = sent;
 
@@ -247,10 +259,10 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
       );
       setReplyToMessageHash('');
     }
-    if (!emoji) {
-      scrollToBottom();
-      bottomSheetRef.current.close()
-    }
+    // if (!emoji) {
+    //   scrollToBottom();
+    //   bottomSheetRef.current.close()
+    // }
   }
 
   function onReplyToMessagePress(hash: string) {
@@ -276,9 +288,12 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
+  function onPressReaction() {
+
+  }
+
   return (
     <ScreenLayout>
-      <GestureHandlerRootView>
         {/* Full-Screen Image Viewer */}
         {imagePath && (
           <FullScreenImageViewer
@@ -302,10 +317,57 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
           </TextButton>
         </ModalCenter>
 
+        <View style={styles.messageContainer}>
+          <View style={[styles.avatar, {backgroundColor: userColor}]}>
+            {message?.address.length > 15 && (
+              <Avatar base64={getAvatar(message?.address)} size={24} />
+            )}
+          </View>
+          <View>
+            <View style={styles.info}>
+              <TextField bold size="xsmall" style={{ color }}>
+                {message?.nickname}
+              </TextField>
+              <TextField type="muted" size="xsmall" style={styles.date}>
+                {dateString}
+              </TextField>
+            </View>
+            {/* {imageDetails?.isImageMessage && (
+              <TouchableOpacity onPress={handleImagePress}>
+                <Image
+                  style={[{aspectRatio: imageAspectRatio}, styles.image]}
+                  source={{ uri: imageDetails?.imagePath }}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            )} */}
+            <TextField size="small" style={styles.message}>
+                {message?.message ?? ''}
+            </TextField>
+            {message?.reactions && 
+            <Reactions items={message?.reactions} onReact={onPressReaction} />
+            }
+          </View>
+        </View>
+
+        <View style={{marginLeft: '-25%', width: '150%', borderColor, borderTopWidth: 1}} />
+
+        <KeyboardAvoidingView
+              style={[styles.inputWrapper, { backgroundColor }]}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
+              <MessageInput
+                onSend={onSend}
+                // replyToName={'anon'}
+                onCloseReplyPress={onCloseReplyPress}
+              />
+            </KeyboardAvoidingView>
+
+
         <FlatList
           // inverted
           ref={flatListRef}
-          data={messages}
+          data={message?.replies}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item }) => {
             return (
@@ -324,52 +386,13 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
                 file={item.file!}
                 onShowImagePress={showBigImage}
                 tip={item.tip}
-                hash={item.hash}
               />
             );
           }}
           contentContainerStyle={styles.flatListContent}
-          initialNumToRender={messages.length}
-          maxToRenderPerBatch={messages.length}
+          initialNumToRender={message?.replies.length}
+          maxToRenderPerBatch={message?.replies.length}
         />
-
-        {/* <KeyboardAvoidingView
-          style={[styles.inputWrapper, { backgroundColor }]}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
-          <MessageInput
-            onSend={onSend}
-            replyToName={replyToName}
-            onCloseReplyPress={onCloseReplyPress}
-          />
-        </KeyboardAvoidingView> */}
-        <BottomSheet
-          ref={bottomSheetRef}
-          // onChange={handleSheetChanges}
-          snapPoints={snapPoints}
-          index={-1}
-          enablePanDownToClose={true}
-          backgroundStyle={{backgroundColor: 'transparent'}}
-          bottomInset={10}
-          handleIndicatorStyle={{ backgroundColor: color }}>
-          <BottomSheetView
-            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
-            
-            <KeyboardAvoidingView
-              style={[styles.inputWrapper, { backgroundColor }]}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
-              <MessageInput
-                onSend={onSend}
-                replyToName={replyToName}
-                onCloseReplyPress={onCloseReplyPress}
-                large={true}
-              />
-            </KeyboardAvoidingView>
-            
-          </BottomSheetView>
-        </BottomSheet>
-      </GestureHandlerRootView>
     </ScreenLayout>
   );
 };
@@ -410,5 +433,81 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
+    zIndex: 999999
+    // flex: 1
   },
+  waveFormWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignContent: 'center',
+    justifyContent: 'center',
+    verticalAlign: 'middle',
+    alignItems: 'center',
+    textAlignVertical: 'center',
+    gap: 10,
+    width: '100%',
+  alignSelf: 'stretch',
+  },
+  avatar: { 
+    marginRight: 10,
+    // padding: 10,
+    height: 32,
+    width: 32,
+    borderRadius: 16,
+    alignItems: 'center', // Centers horizontally
+    justifyContent: 'center', // Centers vertically
+   },
+  content: {
+    flex: 1,
+    flexDirection: 'column',
+    overflow: 'visible',
+    width: '100%',
+  },
+  date: {
+    marginLeft: 10,
+  },
+  image: {
+    borderRadius: 10,
+    height: 'auto',
+    marginVertical: 8,
+    width: '92%',
+  },
+  info: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  message: {
+    flexShrink: 1,
+    marginBottom: 8,
+    marginRight: 8,
+    paddingRight: 20,
+  },
+  messageContainer: {
+    flexDirection: 'row',
+    overflow: 'visible',
+    padding: 15
+  },
+
+  replyContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  replyIcon: {
+    marginHorizontal: 5,
+    paddingTop: 10,
+  },
+  replyImage: {
+    borderRadius: 10,
+    height: 30,
+    marginBottom: 8,
+    marginRight: 10,
+    width: 30,
+  },
+  replyMessage: {
+    flexShrink: 1,
+    paddingRight: 10,
+  },
+  staticWaveformView: {
+    flex: 1,
+  }
 });

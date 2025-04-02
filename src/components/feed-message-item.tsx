@@ -5,7 +5,7 @@ import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-nati
 import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore, useThemeStore } from '@/services';
-import { Message, TipType } from '@/types';
+import { MainStackNavigationType, Message, TipType } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
@@ -34,6 +34,9 @@ import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
 
 import { getColors } from 'react-native-image-colors'
+import { useNavigation } from '@react-navigation/native';
+import { MainScreens } from '@/config';
+import { lightenHexColor } from '@/services/utils/tools';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -61,6 +64,7 @@ export const FeedMessageItem: React.FC<Props> = ({
   onTipPress,
   replyto,
   tip,
+  hash,
   dm = false,
 }) => {
   try {
@@ -74,6 +78,7 @@ export const FeedMessageItem: React.FC<Props> = ({
   const ref = useRef<IWaveformRef>(null);
   const [playerState, setPlayerState] = useState(PlayerState.stopped);
   const [isLoading, setIsLoading] = useState(true);
+  const navigation = useNavigation<MainStackNavigationType>();
 
   const borderColor = theme.border;
   const card = theme.card;
@@ -88,24 +93,6 @@ export const FeedMessageItem: React.FC<Props> = ({
   const color = getColorFromHash(userAddress);
   const name = nickname ?? 'Anon';
 
-  function lightenHexColor(hex, percent = 10) {
-    // Ensure hex is a valid 6-character format
-    hex = hex.replace(/^#/, '');
-    if (hex.length === 3) {
-        hex = hex.split('').map(c => c + c).join('');
-    }
-    
-    // Convert hex to RGB
-    let num = parseInt(hex, 16);
-    let r = (num >> 16) + (255 - (num >> 16)) * (percent / 100);
-    let g = ((num >> 8) & 0x00FF) + (255 - ((num >> 8) & 0x00FF)) * (percent / 100);
-    let b = (num & 0x0000FF) + (255 - (num & 0x0000FF)) * (percent / 100);
-    
-    // Clamp values to 255 and convert back to hex
-    const toHex = c => Math.min(255, Math.max(0, Math.round(c))).toString(16).padStart(2, '0');
-    
-    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
 
   useEffect(() => {
 
@@ -234,6 +221,12 @@ export const FeedMessageItem: React.FC<Props> = ({
     onShowImagePress(imageDetails?.imagePath);
   }
 
+  function handlePress() {
+      navigation.push(MainScreens.MessageDetailsScreen, {
+        hash
+      });
+  }
+
   useEffect(() => {
     return () => {
       setActions(true);
@@ -252,7 +245,7 @@ export const FeedMessageItem: React.FC<Props> = ({
   }, [imageDetails?.imagePath]);
 
   return (
-    <TouchableOpacity style={[{backgroundColor: card, borderColor, borderWidth: 1},styles.container]} onLongPress={handleLongPress}>
+    <TouchableOpacity style={[{backgroundColor: card, borderColor, borderWidth: 1},styles.container]} onLongPress={handleLongPress} onPress={handlePress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
         {actions && (

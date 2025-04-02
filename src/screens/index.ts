@@ -20,3 +20,4 @@ export * from './node-picker-screen';
 export * from './wallet-status-screen';
 export * from './call-screen';
 export * from './feed-screen';
+export * from './message-details-screen';

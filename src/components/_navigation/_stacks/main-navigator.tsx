@@ -15,7 +15,8 @@ import {
   UpdateProfileScreen,
   WalletStatusScreen,
   CallScreen,
-  FeedScreen
+  FeedScreen,
+  MessageDetailsScreen
 } from '@/screens';
 
 import { Header } from '../header';
@@ -76,6 +77,10 @@ const FeedStack = () => {
       <NativeStack.Screen
         name={MainScreens.FeedScreen}
         component={FeedScreen}
+      />
+      <NativeStack.Screen
+        name={MainScreens.MessageDetailsScreen}
+        component={MessageDetailsScreen}
       />
     </NativeStack.Navigator>
   );

@@ -830,7 +830,7 @@ async function setFeedReplies(results: [ResultSet]) {
       const replies = await getFeedRepliesToMessage(res.hash);
       //If we want all replies to one message
       const reactions = addEmoji(replies);
-      res.replies = [];
+      res.replies = replies;
       res.reactions = reactions;
       const r: Message = toMessage(res);
       messages.push(r);
@@ -866,6 +866,35 @@ export async function getFeedMessages(page: number, replies=false) {
   //   }
 
   return await setFeedReplies(results);
+
+}
+
+export async function getFeedMessage(hash: string) {
+
+  const results: [ResultSet] = await db.executeSql(
+    `SELECT * FROM feedmessages WHERE hash = ?`,
+    [hash]
+  );
+
+  // const files = Files.all();
+  // const messages = [];
+    // for (const result of results) {
+    //   for (let index = 0; index < result.rows.length; index++) {
+    //     const res = result.rows.item(index);
+    //     // const file = files.find((a) => a.hash === res.hash);
+
+    //     // if (file) {
+    //     //   res.file = file;
+    //     // }
+
+    //     const r: Message = toMessage(res);
+    //     return r;
+    //   }
+    // }
+
+    // return null;
+
+    return await setFeedReplies(results);
 
 }
 
