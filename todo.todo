@@ -17,6 +17,10 @@ Todo:
     ✔ Add error message if wrong DM input @done(25-02-08 19:38)
     ✔ Add QR codes for messages and rooms @done(25-02-15 20:04)
     ☐ Show "lastseen" on user lists in rooms
+    ☐ Add deep links to groups (i.e. group invites)
+
+Optimizations:
+    ☐ Add "type" property to messages - i.e. message, reaction, reply, tip etc.
 
 Todo calls:
     ✔ Display own video @done(25-03-26 23:04)
@@ -24,7 +28,19 @@ Todo calls:
     ☐ Add call menu to call screen
     ☐ Fix states on call screen
     ☐ Optimize
+    ☐ Add camera swapper
+    ☐ Add share screen
+    ☐ Autoswap to speaker when camera on
+    ☐ Remove proximity sensor when speaker on
 
+Todo feed:
+    ☐ Add signature check + sanitization
+    ✔ Add message screen @done(25-04-03 21:38)
+        ✔ Add reply & replies @done(25-04-03 21:38)
+    ☐ Add friend requests
+    ☐ Add avatar support
+    ☐ Add files
+    ☐ Reload message when making reply
 
 Todo wallet:
     ✔ Node picker @done(24-12-28 00:41)
