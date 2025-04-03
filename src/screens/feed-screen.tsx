@@ -277,7 +277,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   }
 
   return (
-    <ScreenLayout>
+    <ScreenLayout padding={false}>
       <GestureHandlerRootView>
         {/* Full-Screen Image Viewer */}
         {imagePath && (
@@ -305,7 +305,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
         <FlatList
           // inverted
           ref={flatListRef}
-          data={messages}
+          data={messages.reverse()}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item }) => {
             return (
@@ -329,6 +329,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             );
           }}
           contentContainerStyle={styles.flatListContent}
+          ItemSeparatorComponent={<View style={{marginLeft: '-100%', width: '250%', borderColor, borderTopWidth: 1}} />}
           initialNumToRender={messages.length}
           maxToRenderPerBatch={messages.length}
         />
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   flatListContent: {
-    flexDirection: 'column-reverse',
+    flexDirection: 'column',
     // paddingTop: 60,
   },
   flatListWrapper: {

@@ -293,7 +293,7 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
   }
 
   return (
-    <ScreenLayout>
+    <ScreenLayout padding={false}>
         {/* Full-Screen Image Viewer */}
         {imagePath && (
           <FullScreenImageViewer
@@ -386,12 +386,14 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
                 file={item.file!}
                 onShowImagePress={showBigImage}
                 tip={item.tip}
+                hash={item.hash}
               />
             );
           }}
           contentContainerStyle={styles.flatListContent}
           initialNumToRender={message?.replies.length}
           maxToRenderPerBatch={message?.replies.length}
+          ItemSeparatorComponent={<View style={{marginLeft: '-100%', width: '250%', borderColor, borderTopWidth: 1}} />}
         />
     </ScreenLayout>
   );
@@ -401,14 +403,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'grey',
     flex: 1,
-  },
-  contentContainer: {
-    alignItems: 'center',
-    flex: 1,
-    padding: 25,
-    marginBottom: 10,
-    borderRadius: 25,
-    borderWidth: 1
   },
   flatListContainer: {
     flex: 1,
@@ -420,11 +414,8 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   flatListContent: {
-    flexDirection: 'column-reverse',
-    // paddingTop: 60,
-  },
-  flatListWrapper: {
-    flex: 1,
+    flexGrow: 1, 
+    width: '100%',
   },
   inputWrapper: {
     bottom: 0,

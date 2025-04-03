@@ -33,7 +33,7 @@ export const Reactions: React.FC<Props> = ({ items, onReact }) => {
 
   function ItemMapper({ item }: { item: Item }) {
     function onPress() {
-      onReact(item.emoji);
+      if (item.emoji != '💬') onReact(item.emoji);
     }
 
     // const byMe = Math.floor(Math.random() * 2) === 1;

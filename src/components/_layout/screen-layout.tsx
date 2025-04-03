@@ -14,11 +14,13 @@ import { useThemeStore } from '@/services';
 interface Props {
   children: React.ReactNode;
   touchableWithoutFeedback?: boolean;
+  padding?: boolean;
 }
 
 export const ScreenLayout: React.FC<Props> = ({
   children,
   touchableWithoutFeedback = true,
+  padding = true
 }) => {
   const mHeight = useHeaderHeight();
   const height = mHeight + 20;
@@ -33,7 +35,7 @@ export const ScreenLayout: React.FC<Props> = ({
           style={styles.keyboardAvoidingView}
           behavior={behavior}
           keyboardVerticalOffset={height}>
-          <View style={[styles.innerView]}>{children}</View>
+          <View style={[styles.innerView, {paddingHorizontal: padding ? 12 : 0}]}>{children}</View>
         </KeyboardAvoidingView>
       </View>
     );
@@ -46,7 +48,7 @@ export const ScreenLayout: React.FC<Props> = ({
           style={styles.keyboardAvoidingView}
           behavior={behavior}
           keyboardVerticalOffset={height}>
-          <View style={styles.innerView}>{children}</View>
+          <View style={[styles.innerView, {paddingHorizontal: padding ? 12 : 0}]}>{children}</View>
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
@@ -57,7 +59,6 @@ const styles = StyleSheet.create({
   innerView: {
     flexGrow: 1,
     gap: 8,
-    paddingHorizontal: 12,
     paddingTop: 5,
     paddingVertical: 4,
   },

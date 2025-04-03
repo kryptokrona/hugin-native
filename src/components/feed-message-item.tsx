@@ -93,6 +93,14 @@ export const FeedMessageItem: React.FC<Props> = ({
   const color = getColorFromHash(userAddress);
   const name = nickname ?? 'Anon';
 
+  if (replies?.length) {
+
+    for (const reply of replies) {
+      reactions.push('💬');
+    }
+
+  }
+
 
   useEffect(() => {
 
@@ -245,7 +253,7 @@ export const FeedMessageItem: React.FC<Props> = ({
   }, [imageDetails?.imagePath]);
 
   return (
-    <TouchableOpacity style={[{backgroundColor: card, borderColor, borderWidth: 1},styles.container]} onLongPress={handleLongPress} onPress={handlePress}>
+    <TouchableOpacity style={[styles.container, {borderColor}]} onLongPress={handleLongPress} onPress={handlePress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
         {actions && (
@@ -425,7 +433,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
     marginVertical: 8,
     borderRadius: 25,
-    padding: 20
+    padding: 20,
+    flex: 1,
   },
   content: {
     flex: 1,
