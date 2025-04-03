@@ -11,7 +11,8 @@ const {
   send_voice_channel_status,
   send_sdp,
   send_dm_message,
-  send_dm_file
+  send_dm_file,
+  send_feed_message
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
@@ -45,6 +46,9 @@ const onrequest = async (p) => {
     case 'send_room_msg':
       const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
       return message;
+    case 'send_feed_msg':
+      const feed_message = await send_feed_message(p.message, p.reply, p.tip);
+      return feed_message;
     case 'group_random_key':
       const keys = create_room_invite();
       return { keys };

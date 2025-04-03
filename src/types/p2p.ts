@@ -28,12 +28,12 @@ export interface Contact {
 export interface Message {
   address: string;
   message: string;
-  room: string;
+  room?: string;
   reply: string;
   timestamp: number;
   nickname: string;
   hash: string;
-  sent: boolean;
+  sent?: boolean;
   reactions?: string[];
   joined?: boolean;
   file?: FileInfo;

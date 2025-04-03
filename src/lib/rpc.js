@@ -13,6 +13,8 @@ import {
   getRoomReplyMessage,
   getLatestRoomHashes,
   saveRoomUser,
+  saveFeedMessage,
+  getFeedMessages
 } from '../services/bare/sqlite';
 import { WebRTC } from '../services/calls/webrtc';
 import { Wallet } from '../services/kryptokrona/wallet';
@@ -20,6 +22,7 @@ import b4a from 'b4a';
 import RPC from 'bare-rpc';
 import { Notify, notify } from '../services/utils';
 import { MessageSync } from '../services/hugin/syncer';
+import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -103,6 +106,10 @@ export class Bridge {
           break;
         case 'end-swarm':
           console.log('end-swarm!');
+          break;
+        case 'feed-message':
+          console.log('Got feed data:', json);
+          saveFeedMessageAndUpdate(json.data.address, json.data.message, json.data.reply, json.data.timestamp, json.data.nickname, json.data.hash, undefined, undefined);
           break;
         case 'swarm-message':
           saveRoomUser(
@@ -226,6 +233,9 @@ export class Bridge {
       case 'get-room-history':
         const messages = await getRoomMessages(request.key, 0, true);
         return messages;
+      case 'get-feed-history':
+        const feed_messages = await getFeedMessages(0, true);
+        return feed_messages;
       case 'get-latest-room-hashes':
         const hashes = await getLatestRoomHashes(request.key);
         return hashes;

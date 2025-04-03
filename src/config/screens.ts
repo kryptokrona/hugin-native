@@ -32,10 +32,13 @@ export enum MainScreens {
   SendTransactionScreen = 'SendTransactionScreen',
   WalletStatusScreen = 'WalletStatusScreen',
   ModifyContactScreen = 'ModifyContactScreen',
+  FeedScreen = 'FeedScreen',
   GroupStack = 'GroupStack',
   MessageStack = 'MessageStack',
   SettingsStack = 'SettingsStack',
   WalletStack = 'WalletStack',
+  FeedStack = 'FeedStack',
+  MessageDetailsScreen = 'MessageDetailsScreen',
 }
 
 export const TabBar = {
@@ -59,5 +62,10 @@ export const TabBar = {
     iconName: 'sliders',
     iconType: 'FA',
     tabName: MainScreens.SettingsStack,
+  },
+  [MainScreens.FeedStack]: {
+    iconName: 'megaphone-outline',
+    iconType: 'IO',
+    tabName: MainScreens.FeedStack,
   },
 } as const;

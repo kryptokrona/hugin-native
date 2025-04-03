@@ -36,6 +36,16 @@ export class Swarm {
     return await rpc.request(data);
   }
 
+  async feed_message(message, reply, tip) {
+    const data = {
+      type: 'send_feed_msg',
+      message,
+      reply,
+      tip,
+    };
+    return await rpc.request(data);
+  }
+
   async join() {
     const rooms = await getRooms();
     for (const r of rooms) {

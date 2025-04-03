@@ -14,6 +14,7 @@ type GlobalStore = {
   thisContact: string;
   roomMessages: Message[];
   messages: Message[];
+  feedMessages: Message[];
   roomUsers: User[];
   transactions: Transaction[];
   syncStatus: number[];
@@ -21,6 +22,7 @@ type GlobalStore = {
   currentCall: Call;
   setRoomMessages: (payload: Message[]) => void;
   setMessages: (payload: Message[]) => void;
+  setFeedMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
   setCurrentContact: (payload: string) => void;
   setRoomUserList: (payload: User[]) => void;
@@ -57,6 +59,7 @@ export const useGlobalStore = create<
     roomMessages: [],
     roomUsers: [],
     rooms: [],
+    feedMessages: [],
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -81,7 +84,9 @@ export const useGlobalStore = create<
     setFiatPrice: (fiatPrice: number) => {
       set({ fiatPrice });
     },
-
+    setFeedMessages: (feedMessages: Message[]) => {
+      set({ feedMessages });
+    },
     setRoomMessages: (roomMessages: Message[]) => {
       set({ roomMessages });
     },

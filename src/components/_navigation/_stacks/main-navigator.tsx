@@ -14,7 +14,9 @@ import {
   SettingsScreen,
   UpdateProfileScreen,
   WalletStatusScreen,
-  CallScreen
+  CallScreen,
+  FeedScreen,
+  MessageDetailsScreen
 } from '@/screens';
 
 import { Header } from '../header';
@@ -64,6 +66,21 @@ const GroupsStack = () => {
         options={{
           header: (_props) => <Header backButton title={t('addRoom')} />,
         }}
+      />
+    </NativeStack.Navigator>
+  );
+};
+
+const FeedStack = () => {
+  return (
+    <NativeStack.Navigator>
+      <NativeStack.Screen
+        name={MainScreens.FeedScreen}
+        component={FeedScreen}
+      />
+      <NativeStack.Screen
+        name={MainScreens.MessageDetailsScreen}
+        component={MessageDetailsScreen}
       />
     </NativeStack.Navigator>
   );
@@ -198,6 +215,11 @@ export const MainNavigator = () => {
       <Tab.Screen
         name={MainScreens.MessageStack}
         component={MessagesStack}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name={MainScreens.FeedStack}
+        component={FeedStack}
         options={{ headerShown: false }}
       />
       <Tab.Screen

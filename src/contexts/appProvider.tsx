@@ -37,11 +37,12 @@ import {
 } from '../services/bare';
 import { keychain } from '../services/bare/crypto';
 import { Camera, Connection, Files } from '../services/bare/globals';
-import { getContacts, initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { getContacts, getFeedMessages, initDB, loadSavedFiles } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Notify } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
+import { setStoreFeedMessages } from '../services/zustand';
 
 interface AppProviderProps {
   children: React.ReactNode;

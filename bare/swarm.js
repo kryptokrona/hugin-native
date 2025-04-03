@@ -37,7 +37,9 @@ const LOCAL_VOICE_STATUS_OFFLINE = {
 const MISSING_MESSAGES = 'missing-messages';
 const REQUEST_MESSAGES = 'request-messages';
 const REQUEST_HISTORY = 'request-history';
+const REQUEST_FEED = 'request-feed';
 const SEND_HISTORY = 'send-history';
+const SEND_FEED_HISTORY = 'send-feed-history';
 const PING_SYNC = 'Ping';
 const REQUEST_FILE = 'request-file';
 
@@ -346,6 +348,14 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
     return 'Error';
   }
 
+  // If feed message
+  if ('type' in data) {
+    if (data.type === 'feed') {
+      console.log('feed data log: ', data);
+      Hugin.send('feed-message', {data});
+    }
+  }
+
   //If the connections send us disconnect message, return. **todo double check closed connection
   if ('type' in data) {
     if (data.type === 'disconnected') {
@@ -453,6 +463,7 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
         request_history(joined.address, topic, active.files);
         active.requests++;
       }
+      request_feed(joined.address, topic);
 
       //Send any buffered messages if connection was lost.
       // if (parseInt(active.time) < time && active.buffer.length) {
@@ -497,6 +508,17 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       //Dont handle requests from blocked users
       if (Hugin.blocked(con.address)) return true;
       // History requests
+
+      if (data.type === REQUEST_FEED) {
+        console.log('Got feed request');
+        send_feed_history(con.address, topic);
+        return true;
+      }
+
+      if (data.type === SEND_FEED_HISTORY) {
+        save_feed_history(data.messages, con.address, topic);
+        return true;
+      }
 
       //Start-up history sync
       if (data.type === REQUEST_HISTORY && con.request) {
@@ -644,6 +666,14 @@ const request_history = (address, topic, files) => {
   send_peer_message(address, topic, message);
 };
 
+const request_feed = (address, topic) => {
+  console.log('Requsting feed..');
+  const message = {
+    type: REQUEST_FEED
+  };
+  send_peer_message(address, topic, message);
+}
+
 const send_history = async (address, topic, key, files) => {
   const messages = await Hugin.request({ type: 'get-room-history', key });
   console.log('Sending:', messages.length, 'messages');
@@ -654,6 +684,22 @@ const send_history = async (address, topic, key, files) => {
   };
   send_peer_message(address, topic, history);
 };
+
+const send_feed_history = async (address, topic) => {
+  const messages = await Hugin.request({ type: 'get-feed-history'});
+  const history = {
+    type: SEND_FEED_HISTORY,
+    messages
+  };
+  send_peer_message(address, topic, history);
+}
+
+const save_feed_history = async (messages, address, topic) => {
+  console.log('Saving feed history: ', messages);
+  for (const data of messages) {
+    Hugin.send('feed-message', { data });
+  }
+}
 
 const request_file = async (address, topic, file, room, dm = false) => {
   //request a missing file, open a hugin beam
@@ -1176,6 +1222,18 @@ const update_voice_channel_status = (data, con) => {
   return true;
 };
 
+const send_feed_message = async (message, reply, tip) => {
+  const hash = random_key().toString('hex');
+  const signature = await sign(message+hash);
+  const payload = {type: 'feed', message, nickname: Hugin.name, address: Hugin.address, reply, tip, hash, timestamp: Date.now(), signature};
+  for (const swarm of active_swarms) {
+    for (const peer of swarm.connections) {
+      peer.connection.write(JSON.stringify(payload))
+    }
+  }
+  return payload;
+}
+
 const get_local_voice_status = (topic) => {
   const c = active_voice_channel;
   if (c.topic !== topic) return [false, false, false, false, false];
@@ -1269,5 +1327,6 @@ module.exports = {
   send_sdp,
   send_peer_message,
   send_dm_message,
-  send_dm_file
+  send_dm_file,
+  send_feed_message
 };

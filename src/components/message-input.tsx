@@ -40,6 +40,7 @@ interface Props {
   replyToName: string | null;
   onCloseReplyPress: () => void;
   dm?: boolean;
+  large?: boolean;
 }
 
 export const MessageInput: React.FC<Props> = ({
@@ -47,16 +48,17 @@ export const MessageInput: React.FC<Props> = ({
   replyToName,
   onCloseReplyPress,
   dm = false,
+  large = false
 }) => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const [text, setText] = useState('');
-  const [focus, setFocus] = useState(false);
-  const [displayActions, setDisplayActions] = useState(true);
+  const [focus, setFocus] = useState(large ? true : false);
+  const [displayActions, setDisplayActions] = useState(large ? false : true);
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const color = focus ? theme.accentForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
-  const [height, setHeight] = useState(40);
+  const [height, setHeight] = useState(large ? 200 : 40);
   const textInputRef = useRef<TextInput>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
   const waveformRef = useRef<IWaveformRef>(null);
@@ -66,6 +68,8 @@ export const MessageInput: React.FC<Props> = ({
     useAudioPermission();
   const [selectedRecording, setselectedRecording] =
     useState<SelectedFile | null>(null);
+
+    console.log('large input?', large);
 
   useEffect(() => {
     if (replyToName?.length) {
@@ -248,7 +252,7 @@ export const MessageInput: React.FC<Props> = ({
     if (text.trim() || selectedFile) {
       const trimmedText = text.trim() || '';
       onSend(trimmedText, selectedFile);
-      setHeight(40);
+      setHeight(large ? 200 : 40);
       setText('');
       setSelectedFile(null);
       Camera.off();
@@ -283,7 +287,7 @@ export const MessageInput: React.FC<Props> = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       {selectedFile && (
         <View style={[styles.indicator, { backgroundColor }]}>
           <FileSelected {...selectedFile} removeFile={onRemoveFile} />
@@ -298,6 +302,8 @@ export const MessageInput: React.FC<Props> = ({
         style={[
           styles.inputContainer,
           {
+            maxHeight: large ? undefined : 80,
+            height: large ? 300 : undefined,
             backgroundColor,
             borderColor: color,
           },
@@ -325,7 +331,7 @@ export const MessageInput: React.FC<Props> = ({
           <TextInput
             style={[
               styles.inputField,
-              { borderColor: theme.input, color, height: Math.min(height, 60) },
+              { borderColor: theme.input, color, height: large ? 200 : Math.min(height, 60) },
             ]}
             value={text}
             onChangeText={onChange}
@@ -340,6 +346,7 @@ export const MessageInput: React.FC<Props> = ({
             returnKeyLabel={t('send')}
             returnKeyType="send"
             onContentSizeChange={(event) => {
+              if (large) return;
               setHeight(event.nativeEvent.contentSize.height);
             }}
             {...commonInputProps}
@@ -406,6 +413,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   container: {
+    flex: 1,
     width: '100%',
   },
   indicator: {
@@ -415,10 +423,11 @@ const styles = StyleSheet.create({
     paddingBottom: 0,
   },
   inputContainer: {
+    flex: 1,
     alignItems: 'center',
     flexDirection: 'row',
     maxHeight: 80,
-    padding: 10,
+    padding: 10
   },
   inputField: {
     borderRadius: Styles.borderRadius.medium,

@@ -38,16 +38,30 @@ export const initDB = async () => {
     )`;
     await db.executeSql(query);
     query = `CREATE TABLE IF NOT EXISTS roomsmessages ( 
-      address TEXT,
-      message TEXT,
-      room TEXT,
-      reply TEXT,
-      timestamp INT,
-      nickname TEXT,
-      hash TEXT,
-      sent BOOLEAN,
-      UNIQUE (hash)
-  )`;
+        address TEXT,
+        message TEXT,
+        room TEXT,
+        reply TEXT,
+        timestamp INT,
+        nickname TEXT,
+        hash TEXT,
+        sent BOOLEAN,
+        UNIQUE (hash)
+    )`;
+      await db.executeSql(query);
+
+    //       query = "DROP TABLE feedmessages";
+    // await db.executeSql(query);
+
+      query = `CREATE TABLE IF NOT EXISTS feedmessages ( 
+        address TEXT,
+        message TEXT,
+        reply TEXT,
+        timestamp INT,
+        nickname TEXT,
+        hash TEXT,
+        UNIQUE (hash)
+    )`;
     await db.executeSql(query);
 
     // export interface Contact {
@@ -60,8 +74,7 @@ export const initDB = async () => {
     // query = "DROP TABLE contacts";
     // await db.executeSql(query);
 
-    // query = "DROP TABLE messages";
-    // await db.executeSql(query);
+
 
     query = `CREATE TABLE IF NOT EXISTS contacts (
       name TEXT,
@@ -743,6 +756,25 @@ export async function getRoomRepliesToMessage(hash: string) {
   return replies;
 }
 
+export async function getFeedRepliesToMessage(hash: string) {
+  const replies: Message[] = [];
+  const results = await db.executeSql(
+    'SELECT * FROM feedmessages WHERE reply = ? ORDER BY timestamp ASC',
+    [hash],
+  );
+  for (const result of results) {
+    for (let index = 0; index < result.rows.length; index++) {
+      const r = result.rows.item(index);
+      if (r === undefined) {
+        continue;
+      }
+      const res: Message = toMessage(r);
+      replies.push(res);
+    }
+  }
+  return replies;
+}
+
 export async function roomMessageExists(hash: string) {
   const groupMessageExists = `SELECT *
   FROM roomsmessages
@@ -769,6 +801,147 @@ export async function messageExists(hash: string) {
     return false;
   }
   return true;
+}
+
+async function setFeedReplies(results: [ResultSet]) {
+  const messages: Message[] = [];
+  const files = Files.all();
+  for (const result of results) {
+    for (let index = 0; index < result.rows.length; index++) {
+      const res = result.rows.item(index);
+      if (res === undefined) {
+        continue;
+      }
+      //The original message this one is replying to
+      res.replyto = [];
+      const file = files.find((a) => a.hash === res.hash);
+
+      if (file) {
+        res.file = file;
+      }
+      //This message is already displayed as a reaction on someone elses message
+      if (
+        containsOnlyEmojis(res.message) &&
+        res.message.length < 9
+      ) {
+        continue;
+      }
+
+      const replies = await getFeedRepliesToMessage(res.hash);
+      //If we want all replies to one message
+      const reactions = addEmoji(replies);
+      res.replies = replies;
+      res.reactions = reactions;
+      const r: Message = toMessage(res);
+      messages.push(r);
+    }
+  }
+  return messages.reverse();
+}
+
+export async function getFeedMessages(page: number, replies=false) {
+  const limit: number = 55;
+  let offset: number = 0;
+  if (page !== 0) {
+    offset = page * limit;
+  }
+  const results: [ResultSet] = await db.executeSql(
+    `SELECT * FROM feedmessages ${replies ? '' : 'WHERE reply = ""'} ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`
+  );
+
+  // const files = Files.all();
+  // const messages = [];
+  //   for (const result of results) {
+  //     for (let index = 0; index < result.rows.length; index++) {
+  //       const res = result.rows.item(index);
+  //       const file = files.find((a) => a.hash === res.hash);
+
+  //       if (file) {
+  //         res.file = file;
+  //       }
+
+  //       const r: Message = toMessage(res);
+  //       messages.push(r);
+  //     }
+  //   }
+
+  return await setFeedReplies(results);
+
+}
+
+export async function getFeedMessage(hash: string) {
+
+  const results: [ResultSet] = await db.executeSql(
+    `SELECT * FROM feedmessages WHERE hash = ?`,
+    [hash]
+  );
+
+  // const files = Files.all();
+  // const messages = [];
+    // for (const result of results) {
+    //   for (let index = 0; index < result.rows.length; index++) {
+    //     const res = result.rows.item(index);
+    //     // const file = files.find((a) => a.hash === res.hash);
+
+    //     // if (file) {
+    //     //   res.file = file;
+    //     // }
+
+    //     const r: Message = toMessage(res);
+    //     return r;
+    //   }
+    // }
+
+    // return null;
+
+    return await setFeedReplies(results);
+
+}
+
+export async function saveFeedMessage(
+  address: string,
+  message: string,
+  reply: string,
+  timestamp: number,
+  nickname: string,
+  hash: string,
+) {
+  if ((!message || message?.length === 0) && !tip) {
+    return false;
+  }
+  console.log('saving feed msg: ', address,
+    message,
+    reply,
+    timestamp,
+    nickname,
+    hash);
+  try {
+    await db.executeSql(
+      'REPLACE INTO feedmessages (address, message, reply, timestamp, nickname, hash) VALUES (?, ?, ?, ?, ?, ?)',
+      [
+        address,
+        message,
+        reply,
+        timestamp,
+        nickname,
+        hash,
+      ],
+    );
+
+    const newMessage: Message = {
+      address: address,
+      hash: hash,
+      message: message,
+      nickname: nickname,
+      reactions: [],
+      reply: reply,
+      timestamp: timestamp,
+    };
+    console.log('Saved message: ', newMessage);
+    return newMessage;
+  } catch (err) {
+    return false;
+  }
 }
 
 export async function saveRoomMessage(
