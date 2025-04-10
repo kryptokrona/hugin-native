@@ -130,7 +130,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
     return message ? message.nickname : '';
   }, [replyToMessageHash, messages]);
 
-  const snapPoints = useMemo(() => ['50%'], []);
+  const snapPoints = useMemo(() => ['30%'], []);
 
   function OnlineUserMapper({ item }: { item: User }) {
     return <UserItem {...item} />;
@@ -350,23 +350,25 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
           snapPoints={snapPoints}
           index={-1}
           enablePanDownToClose={true}
+          keyboardBehavior="interactive"
           backgroundStyle={{backgroundColor: 'transparent'}}
           bottomInset={10}
           handleIndicatorStyle={{ backgroundColor: color }}>
           <BottomSheetView
             style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
             
-            <KeyboardAvoidingView
-              style={[styles.inputWrapper, { backgroundColor }]}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
+            <View
+              style={[styles.inputWrapper]}
+              // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              // keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}
+              >
               <MessageInput
                 onSend={onSend}
                 replyToName={replyToName}
                 onCloseReplyPress={onCloseReplyPress}
-                large={true}
+                hideExtras={true}
               />
-            </KeyboardAvoidingView>
+            </View>
             
           </BottomSheetView>
         </BottomSheet>
@@ -386,7 +388,7 @@ const styles = StyleSheet.create({
     padding: 25,
     marginBottom: 10,
     borderRadius: 25,
-    borderWidth: 1
+    borderWidth: 1,
   },
   flatListContainer: {
     flex: 1,
@@ -405,11 +407,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputWrapper: {
-    bottom: 0,
-    left: 0,
-    // marginBottom: 10,
     paddingBottom: 10,
-    position: 'absolute',
-    right: 0,
+    flex: 1,
+    width: '100%',
+    minHeight: 60,
   },
 });

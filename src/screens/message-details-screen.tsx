@@ -94,6 +94,7 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
   const [message, setMessage] = useState<Message | null>(null);
+  const [replies, setReplies] = useState<Message[]>([]);
   const [userColor, setUserColor] = useState(backgroundColor);
   const [dateString, setDateString] = useState(0);
 
@@ -131,6 +132,7 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
       const thisMessage = await getFeedMessage(hash);
 
       setMessage(thisMessage[0]);
+      setReplies(thisMessage[0]?.replies);
 
       setDateString(prettyPrintDate(thisMessage[0].timestamp ?? 0));
 
@@ -139,18 +141,6 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
     getMessage();
 
   }, [hash]);
-  console.log('THis hash: ', hash);
-  console.log('THis message: ', message)
-
-
-  // const replyToName = useMemo(() => {
-  //   if (!replyToMessageHash) {
-  //     return '';
-  //   }
-
-  //   const message = messages.find((m) => m.hash === replyToMessageHash);
-  //   return message ? message.nickname : '';
-  // }, [replyToMessageHash, messages]);
 
   const scrollToBottom = () => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
@@ -215,37 +205,20 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
 
   async function onSend(
     text: string,
-    // file: SelectedFile | null,
-    // reply?: string,
-    // emoji?: boolean | undefined,
-    // tip?: TipType | undefined,
+    reply: string,
+    emoji?: boolean | undefined,
   ) {
-    // console.log('Sending feed message');
-    // if (file) {
-    //   onSendFeedMessageWithFile(file, text);
-    //   //If we need to return something... or print something locally
-    //   // console.log('sent file!', sentFile);
-    // }
+
+    if (!reply) {
+      reply = hash;
+    }
     if (text.length) {
       const sent = await Rooms.feed_message(
         text,
-        hash,
+        reply,
         false
       );
       const save = sent;
-
-      // {"address": "SEKReZBSm9DNB9tHwko6Go7HqmiTDc44eXrevxMenpjKFb2Jv7A2uRHggufuR1LHvY2H1G6jW4dJxSAdD4tXM3Y2CXh6dbRBTER", 
-      //   "hash": "ab7c9733d8744eaa95a46567a72279e5fb33d9c4c3722faf73a70400df8268a4", 
-      //   "id": 0,
-      //   "message": "Goated",
-      //   "nickame": "TestFreak333",
-      //   "reply": "",
-      //   "signature": "993207e4e254aad2ee5009d8af522682a2355b9f4b72289404e176206b7e040904d38b6fb2e891aec34b0afc83a5d7f45ae988007dd9511d604111c3fa9ec609",
-      //   "time": 1743457015793,
-      //   "tip": false,
-      //   "type": "send_feed_msg"}
-
-      console.log('Sent feed msg: ', sent)
 
       await saveFeedMessageAndUpdate(
         save.address,
@@ -257,21 +230,27 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
         undefined,
         undefined,
       );
-      setReplyToMessageHash('');
+      if (emoji) {
+        const thisReply = replies.find(a => a.hash == reply);
+        thisReply?.reactions?.push(text);
+        setReplies([...replies]);
+      } else {
+        save.reactions = [];
+        const newReplies = [...replies, save];
+        setReplies(newReplies);
+        setReplyToMessageHash('');
+      }
     }
-    // if (!emoji) {
-    //   scrollToBottom();
-    //   bottomSheetRef.current.close()
-    // }
+
   }
 
   function onReplyToMessagePress(hash: string) {
     setReplyToMessageHash(hash);
   }
 
-  async function onEmojiReactionPress(emoji: string, hash: string) {
+  async function onEmojiReactionPress(emoji: string, thisHash: string) {
     //Send hash because of race condition with onCloseReplyPress
-    onSend(emoji, null, hash, true);
+    onSend(emoji, thisHash, true);
   }
 
   function onCloseReplyPress() {
@@ -367,7 +346,7 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
         <FlatList
           // inverted
           ref={flatListRef}
-          data={message?.replies}
+          data={replies}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item }) => {
             return (
@@ -391,8 +370,8 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
             );
           }}
           contentContainerStyle={styles.flatListContent}
-          initialNumToRender={message?.replies.length}
-          maxToRenderPerBatch={message?.replies.length}
+          initialNumToRender={replies.length}
+          maxToRenderPerBatch={replies.length}
           ItemSeparatorComponent={<View style={{marginLeft: '-100%', width: '250%', borderColor, borderTopWidth: 1}} />}
         />
     </ScreenLayout>

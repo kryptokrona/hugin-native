@@ -41,6 +41,7 @@ interface Props {
   onCloseReplyPress: () => void;
   dm?: boolean;
   large?: boolean;
+  hideExtras?: boolean;
 }
 
 export const MessageInput: React.FC<Props> = ({
@@ -48,7 +49,8 @@ export const MessageInput: React.FC<Props> = ({
   replyToName,
   onCloseReplyPress,
   dm = false,
-  large = false
+  large = false,
+  hideExtras = false
 }) => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
@@ -318,7 +320,7 @@ export const MessageInput: React.FC<Props> = ({
             />
           </TouchableOpacity>
         )}
-        {displayActions &&
+        {displayActions && !hideExtras &&
           Actions(
             onCameraPress,
             onFilePress,
