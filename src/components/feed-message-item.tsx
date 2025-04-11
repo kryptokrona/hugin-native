@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore, useThemeStore } from '@/services';
 import { MainStackNavigationType, Message, TipType } from '@/types';
-import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
+import { containsOnlyEmojis, getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
   FinishMode,
@@ -96,6 +96,7 @@ export const FeedMessageItem: React.FC<Props> = ({
   if (replies?.length) {
 
     for (const reply of replies) {
+      if (containsOnlyEmojis(reply.message) && reply.message.length < 9) continue;
       reactions.push('💬');
     }
 

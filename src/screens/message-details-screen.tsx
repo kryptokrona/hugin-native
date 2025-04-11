@@ -72,7 +72,7 @@ import {
   setFeedMessages
 } from '../services/bare/feed';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { getFeedMessage, getFeedMessages } from '../services/bare/sqlite';
+import { addEmoji, getFeedMessage, getFeedMessages, getFeedRepliesToMessage, toMessage } from '../services/bare/sqlite';
 import { lightenHexColor } from '@/services/utils/tools';
 import { getAvatar, prettyPrintDate } from '@/utils';
 import { getColors } from 'react-native-image-colors';
@@ -132,7 +132,21 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
       const thisMessage = await getFeedMessage(hash);
 
       setMessage(thisMessage[0]);
-      setReplies(thisMessage[0]?.replies);
+
+      const newReplies = [];
+
+      for (const reply of thisMessage[0]?.replies) {
+        const thisReplies = await getFeedRepliesToMessage(reply.hash);
+        //If we want all replies to one message
+        const reactions = addEmoji(thisReplies);
+        reply.replies = thisReplies;
+        reply.reactions = reactions;
+        const r: Message = toMessage(reply);
+        newReplies.push(r);
+      }
+
+
+      setReplies(newReplies);
 
       setDateString(prettyPrintDate(thisMessage[0].timestamp ?? 0));
 
@@ -231,9 +245,20 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
         undefined,
       );
       if (emoji) {
-        const thisReply = replies.find(a => a.hash == reply);
-        thisReply?.reactions?.push(text);
-        setReplies([...replies]);
+        // const thisReply = replies.find(a => a.hash == reply);
+        // thisReply?.reactions?.push(text);
+        const updatedMessage = replies.map((msg) => {
+          if (msg.hash === reply) {
+            return {
+              ...msg,
+              reactions: [
+                ...new Set([...(msg.reactions || []), text]),
+              ],
+            };
+          }
+          return msg;
+        });
+        setReplies(updatedMessage);
       } else {
         save.reactions = [];
         const newReplies = [...replies, save];
@@ -338,6 +363,7 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
               <MessageInput
                 onSend={onSend}
                 // replyToName={'anon'}
+                hideExtras={true}
                 onCloseReplyPress={onCloseReplyPress}
               />
             </KeyboardAvoidingView>

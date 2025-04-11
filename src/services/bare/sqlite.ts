@@ -679,7 +679,7 @@ async function setReplies(results: [ResultSet]) {
   return messages.reverse();
 }
 
-function addEmoji(replies: Message[]) {
+export function addEmoji(replies: Message[]) {
   const reactions = [];
   for (const m of replies) {
     if (containsOnlyEmojis(m.message) && m.message.length < 9) {
@@ -827,9 +827,10 @@ async function setFeedReplies(results: [ResultSet]) {
         continue;
       }
 
-      const replies = await getFeedRepliesToMessage(res.hash);
+      let replies = await getFeedRepliesToMessage(res.hash);
       //If we want all replies to one message
       const reactions = addEmoji(replies);
+      replies = replies.filter(a => !(containsOnlyEmojis(a.message) && a.message.length < 9));
       res.replies = replies;
       res.reactions = reactions;
       const r: Message = toMessage(res);
@@ -1056,7 +1057,7 @@ export async function saveMessage(
 //   }
 // };
 
-const toMessage = (res: any) => {
+export const toMessage = (res: any) => {
   const message: Message = {
     address: res.address,
 
