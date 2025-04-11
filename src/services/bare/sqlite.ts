@@ -865,9 +865,20 @@ export async function getFeedMessages(page: number, replies=false) {
   //       messages.push(r);
   //     }
   //   }
+  if (!replies) {
+    return await setFeedReplies(results);
+  } else {
+    const messages = [];
 
-  return await setFeedReplies(results);
+    for (const result of results) {
+      for (let index = 0; index < result.rows.length; index++) {
+        const res = result.rows.item(index);
+        messages.push(res);
+      }
+    }
+    return messages;
 
+  }
 }
 
 export async function getFeedMessage(hash: string) {
