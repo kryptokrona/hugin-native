@@ -339,9 +339,9 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         online,
       );
 
-      if (error === 'balance') {
+      if (!success) {
         Toast.show({
-          text1: t('noFunds'),
+          text1: error,
           type: 'error',
         });
         return;

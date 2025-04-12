@@ -4,6 +4,7 @@ import { loadAccount } from './sqlite';
 
 import { hexToUint } from '../../services/utils';
 import { Wallet } from '../kryptokrona';
+import { generateDeterministicSubwalletKeys } from 'services/NativeTest';
 
 export const keychain = {
   getKeyPair() {

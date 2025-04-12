@@ -45,8 +45,8 @@ function create_room_invite() {
   ];
 }
 
-async function sign(message) {
-  return await Hugin.request({ type: 'sign-message', message });
+async function sign(message, signkey = false) {
+  return await Hugin.request({ type: 'sign-message', message, signkey });
 }
 
 function check_hash(hash) {
