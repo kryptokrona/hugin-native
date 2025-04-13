@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, View, StyleSheet } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 import {
@@ -43,12 +43,22 @@ export const SettingsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<MainStackNavigationType>();
   const authNavigation = useNavigation<any>();
   const [syncActivated, setSyncActivated] = useState(Wallet.started);
+  const [publicKey, setPublicKey] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const registerAddress =
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
-  const publicKey = Wallet.messageKeys[1];
+  
+  useEffect(() => {
+    setPublicKey(Wallet?.messageKeys[1] || '');
+  },[Wallet.messageKeys]);
+
+  useEffect(() => {
+    setSyncActivated(Wallet.started);
+  },[Wallet.started]);  
+  
   const toggleSync = async () => {
-    setSyncActivated(await Wallet.toggle());
+    await Wallet.toggle();
+    setSyncActivated(!syncActivated);
   };
 
   const copyText = (data: string) => {
