@@ -24,13 +24,13 @@ class BackgroundTask {
       await this.sync();
       console.log('******** BACKGROUND TASK COMPLETED ********');
       Notify.wakeup();
-      Rooms.idle(true);
+      Rooms.idle(true, true);
       BackgroundFetch.finish(taskId);
     };
 
     const timeout = async (taskId) => {
       console.log('******** BACKGROUND TASK TIMEOUT ********');
-      Rooms.idle(true);
+      Rooms.idle(true, true);
       Notify.wakeup();
       BackgroundFetch.finish(taskId);
     };
