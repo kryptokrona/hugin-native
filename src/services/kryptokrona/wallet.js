@@ -194,7 +194,7 @@ export class ActiveWallet {
 }
 
   async sign(message, standard) {
-    const keys = standard ? this.privateKeys() : this.messageKeyPair()
+    const keys = standard ? this.privateKeys() : await this.messageKeyPair()
     return await xkrUtils.signMessage(message, keys[0]);
   }
 
@@ -354,7 +354,6 @@ export class ActiveWallet {
         subWalletKeys.private_key,
       );
     }
-    this.subWalletKeys = subWalletKeys
     console.log(
       'this.active.subWallets.getAddresses()',
       this.active.subWallets.getAddresses(),
