@@ -17,6 +17,10 @@ import type {
 } from '@/types';
 import { Wallet } from '../services/kryptokrona';
 import { Linking } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
+import Toast from 'react-native-toast-message';
+import { t } from 'i18next';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 interface Item {
   title: string;
@@ -26,15 +30,12 @@ interface Item {
 }
 
 interface Props {
-  route: RouteProp<
-    MainNavigationParamList,
-    typeof MainScreens.SettingsScreen
-  >;
+  route: RouteProp<MainNavigationParamList, typeof MainScreens.SettingsScreen>;
 }
 
 const openURL = () => {
   Linking.openURL(
-    'https://github.com/kryptokrona/hugin-native/issues/new?template=bug_report.md'
+    'https://github.com/kryptokrona/hugin-native/issues/new?template=bug_report.md',
   ).catch((err) => console.error('Failed to open URL:', err));
 };
 
@@ -43,9 +44,21 @@ export const SettingsScreen: React.FC<Props> = () => {
   const authNavigation = useNavigation<any>();
   const [syncActivated, setSyncActivated] = useState(Wallet.started);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const registerAddress =
+    'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
+  const publicKey = Wallet.messageKeys[0];
   const toggleSync = async () => {
     setSyncActivated(await Wallet.toggle());
+  };
+
+  const copyText = (data: string) => {
+    console.log('Copied!');
+    Clipboard.setString(data);
+    Toast.show({
+      text1: t('copyText'),
+      type: 'success',
+    });
+    console.log('done');
   };
 
   const syncActivatedIcon = syncActivated
@@ -53,6 +66,11 @@ export const SettingsScreen: React.FC<Props> = () => {
     : 'checkbox-blank-outline';
 
   const items: Item[] = [
+    {
+      function: () => setModalVisible(true),
+      icon: { name: 'star-circle', type: 'MCI' },
+      title: 'Upgrade to Hugin +',
+    },
     {
       icon: { name: 'theme-light-dark', type: 'MCI' },
       screen: MainScreens.ChangeThemeScreen,
@@ -84,11 +102,6 @@ export const SettingsScreen: React.FC<Props> = () => {
       icon: { name: 'bug', type: 'FA5' },
       title: 'reportBug',
     },
-    {
-      function: () => setModalVisible(true),
-      icon: { name: 'star-circle', type: 'MCI' },
-      title: 'Upgrade to Hugin +',
-    },
   ];
 
   const itemMapper = (item: Item) => {
@@ -115,27 +128,35 @@ export const SettingsScreen: React.FC<Props> = () => {
 
       <ModalCenter
         visible={modalVisible}
-        closeModal={() => setModalVisible(false)}
-      >
+        closeModal={() => setModalVisible(false)}>
         <View style={styles.inviteContainer}>
           <TextField size="large" weight="medium">
-            Upgrade to Hugin +´
-            ✅ Send offline messages to your friends!
-            ✅ Support the project
+            Upgrade to Hugin +
+          </TextField>
+          <TextField size="medium" weight="small">
+            ✅ Send offline messages!
+          </TextField>
+          <TextField size="medium" weight="small">
+            ✅ Support the project!
           </TextField>
           <TextField size="small" style={styles.modalDescription}>
-            Cost: 99 XKR.
-            Paste this public key in the Payment ID field in the transaction
+            1. Paste this public key in the Payment ID field in the transaction
           </TextField>
           <TextField size="xsmall" selectable style={styles.address}>
-            {Wallet.messageKeyPair()[1]}
+            {publicKey}
           </TextField>
+          <TextButton onPress={() => copyText(publicKey)}>
+            {t('copyText')}
+          </TextButton>
           <TextField size="small" style={styles.modalDescription}>
-           Address:
+            2. Send 99 XKR to this Address:
           </TextField>
           <TextField size="xsmall" selectable style={styles.address}>
-            SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM
+            {registerAddress}
           </TextField>
+          <TextButton onPress={() => copyText(registerAddress)}>
+            {t('copyText')}
+          </TextButton>
           <TextButton onPress={() => setModalVisible(false)}>Close</TextButton>
         </View>
       </ModalCenter>
@@ -151,10 +172,6 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 300,
   },
-  modalLabel: {
-    alignSelf: 'flex-start',
-    marginTop: 10,
-  },
   modalDescription: {
     marginVertical: 10,
     textAlign: 'center',
@@ -162,8 +179,5 @@ const styles = StyleSheet.create({
   address: {
     fontFamily: 'monospace',
     marginBottom: 20,
-  },
-  divider: {
-    marginVertical: 10,
   },
 });

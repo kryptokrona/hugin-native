@@ -8,7 +8,7 @@ import {
   addContact,
   getContacts,
   messageExists,
-  saveFileInfo
+  saveFileInfo,
 } from '../bare/sqlite';
 import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
@@ -44,29 +44,27 @@ class Syncer {
     this.node = node;
   }
 
-
-
   async fetch() {
     const incoming = this.incoming_messages.length > 0 ? true : false;
     //If we already have pending incoming unchecked messages, return
     //So we do not update the latest checked timestmap and miss any messages.
-    if (incoming) return false
+    if (incoming) return false;
     //Latest version, fetch more messages with last checked timestamp
     const lastChecked = this.lastChecked;
-    this.lastChecked = Math.floor(Date.now() / 1000);
+    this.lastChecked = Date.now();
 
     const resp = await Nodes.sync({
-      request: true, 
-      type: 'some', 
-      timestamp: lastChecked
-  })
+      request: true,
+      type: 'some',
+      timestamp: lastChecked,
+    });
 
     if (resp.length === 0) {
-        console.log('No incoming messages...')
-        return false
+      console.log('No incoming messages...');
+      return false;
     }
-    
-    return resp
+
+    return resp;
   }
 
   async sync() {
@@ -104,12 +102,11 @@ class Syncer {
 
   async decrypt(list, que = false) {
     console.log('Checking nr of txs:', list.length);
-     for (const message of list) {
-        try {
+    for (const message of list) {
+      try {
+        const thisHash = message.hash;
+        const thisExtra = '99' + thisHash + message.cipher;
 
-        const thisHash = message.hash
-        const thisExtra = '99' + thisHash + message.cipher
-        
         if (!this.validate(thisExtra, thisHash)) continue;
         if (thisExtra !== undefined && thisExtra.length > 200) {
           //Check for viewtag
@@ -162,7 +159,6 @@ class Syncer {
   }
 
   async save_file_message(message) {
-
     const sent = message.conversation ? true : false;
 
     const saved = await saveMessage(
@@ -181,7 +177,6 @@ class Syncer {
     }
     setLatestMessages();
     return true;
-
   }
 
   async check_for_viewtag(extra) {

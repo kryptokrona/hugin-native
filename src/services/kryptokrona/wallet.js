@@ -185,16 +185,16 @@ export class ActiveWallet {
   }
 
   async messageKeyPair() {
-    const priv = this.spendKey()
-    const keys = await generateDeterministicSubwalletKeys(priv, 1)
-    const address = await Address.fromSeed(keys.private_key)
-    const pub = address.m_keys.m_spendKeys.m_publicKey
-    const signKey = address.m_keys.m_spendKeys.m_privateKey
-    return [signKey, pub]
-}
+    const priv = this.spendKey();
+    const keys = await generateDeterministicSubwalletKeys(priv, 1);
+    const address = await Address.fromSeed(keys.private_key);
+    const pub = address.m_keys.m_spendKeys.m_publicKey;
+    const signKey = address.m_keys.m_spendKeys.m_privateKey;
+    return [signKey, pub];
+  }
 
   async sign(message, standard) {
-    const keys = standard ? this.privateKeys() : await this.messageKeyPair()
+    const keys = standard ? this.privateKeys() : await this.messageKeyPair();
     return await xkrUtils.signMessage(message, keys[0]);
   }
 
@@ -235,6 +235,7 @@ export class ActiveWallet {
 
     await this.active.start();
     await this.create_message_wallet();
+    this.messageKeys = await this.messageKeyPair();
     this.optimize_message_inputs();
     this.getAndSetBalance();
     this.getAndSetSyncStatus();
@@ -361,7 +362,7 @@ export class ActiveWallet {
   }
 
   async optimize_message_inputs(force = false) {
-    return
+    return;
   }
 
   async send_message(message, receiver, beam = false) {
@@ -389,27 +390,24 @@ export class ActiveWallet {
       seal,
       address,
     );
-    
-    const hash = randomKey();
-    
-    if (beam) {
 
+    const hash = randomKey();
+
+    if (beam) {
       const send = hash + '99' + payload_hex;
       Beam.message(address, send);
-
     } else {
-
-      const sent = await Nodes.message(payload_hex, hash)
-
+      const sent = await Nodes.message(payload_hex, hash);
+      console.log('Sent!', sent);
       if (!sent.success) {
-        if (typeof sent.reason !== 'string') return
-        if (sent.reason.length > 40) return
-        console.log("Error sending message", sent.reason)
-        return {success: false, error: sent.reason, hash: ''}
+        if (typeof sent.reason !== 'string') return;
+        if (sent.reason.length > 40) return;
+        console.log('Error sending message', sent.reason);
+        return { success: false, error: sent.reason, hash: '' };
       }
     }
-    
-    return {success: true, error: 'success', hash}
+
+    return { success: true, error: 'success', hash };
   }
 
   async encrypt_hugin_message(message, messageKey, sealed = false, toAddr) {

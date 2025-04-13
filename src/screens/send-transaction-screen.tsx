@@ -174,6 +174,13 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
         <View>
           <InputField
             // style={styles.input}
+            label={'Paymend ID'}
+            value={paymentId}
+            onChange={setPaymentId}
+            maxLength={101}
+          />
+          <InputField
+            // style={styles.input}
             label={t('address')}
             value={address}
             onChange={setAddress}
@@ -272,7 +279,6 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
     </ScreenLayout>
   );
 };
-
 
 const styles = StyleSheet.create({
   actions: {
