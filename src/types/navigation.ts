@@ -12,7 +12,10 @@ export type MainNavigationParamList = {
   [MainScreens.ChangeThemeScreen]: undefined;
   [MainScreens.MessagesScreen]: undefined;
   [MainScreens.MessageScreen]: { name: string; roomKey: string };
-  [MainScreens.GroupsScreen]: undefined;
+  [MainScreens.GroupsScreen]: {
+    joining?: boolean;
+    link?: string;
+  };
   [MainScreens.GroupChatScreen]: {
     roomKey: string;
     name: string;
