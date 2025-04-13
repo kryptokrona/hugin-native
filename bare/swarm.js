@@ -193,7 +193,8 @@ async message(payload, hash) {
     pub,
     timestamp,
     hash,
-    signature
+    signature,
+    id: timestamp
     }
 
   }
