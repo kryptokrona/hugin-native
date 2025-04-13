@@ -1,5 +1,5 @@
 import { AuthNavigator, MainNavigator } from './_stacks';
-import { LinkingOptions, NavigationContainer } from '@react-navigation/native';
+import { LinkingOptions, NavigationContainer, useNavigation } from '@react-navigation/native';
 import { MainScreens, Stacks } from '@/config';
 import React, { useEffect, useState } from 'react';
 import {
@@ -10,7 +10,6 @@ import {
 } from '@/services';
 
 import { CallFloater } from '@/components';
-
 import { Linking } from 'react-native';
 import { RootStackParamList } from '@/types';
 import { SplashScreen } from '@/screens';
@@ -20,6 +19,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const Stack = createNativeStackNavigator();
 
 const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['hugin://'],
   config: {
     screens: {
       [Stacks.MainStack]: {
@@ -29,7 +29,34 @@ const linking: LinkingOptions<RootStackParamList> = {
       },
     },
   },
-  prefixes: ['hugin://'],
+};
+
+const NavigationHandler = ({ pendingLink, clearPendingLink }: { pendingLink: string | null, clearPendingLink: () => void }) => {
+  const navigation = useNavigation();
+
+  const parseDeepLink = (url: string) => {
+    const match = url.match(/hugin:\/\/([^/]+)\/([^/]+)\/([^/]+)/);
+    if (match) {
+      const [_, path, name, roomKey] = match;
+      return { path, params: { name, roomKey } };
+    }
+    return { path: '', params: null };
+  };
+
+  useEffect(() => {
+    console.log('Opening link:', pendingLink)
+    if (pendingLink) {
+
+      navigation.navigate(MainScreens.GroupsScreen, {
+        joining: true,
+        link: pendingLink,
+      });
+
+      clearPendingLink();
+    }
+  }, [pendingLink]);
+
+  return null;
 };
 
 export const RootNavigator = () => {
@@ -40,17 +67,23 @@ export const RootNavigator = () => {
   const authMethod = usePreferencesStore(
     (state) => state.preferences?.authMethod,
   );
+
   const [displaySplash, setDisplaySplash] = useState(true);
+  const [pendingLink, setPendingLink] = useState<string | null>(null);
+
   useEffect(() => {
-    const handleDeepLink = (e: { url: string }) => {
-      // console.log('Linking', e.url); // TODO
+    const handleDeepLink = ({ url }: { url: string }) => {
+      setPendingLink(url);  // Always store link, NavigationHandler will handle whether to act or wait.
     };
 
-    setTimeout(() => {
-      setDisplaySplash(false);
-    }, 1000);
+    const subscription = Linking.addEventListener('url', handleDeepLink);
 
-    Linking.addEventListener('url', handleDeepLink);
+    Linking.getInitialURL().then((url) => {
+      console.log('Initial URL:', url);
+      if (url) handleDeepLink({ url });
+    });
+
+    return () => subscription.remove();
   }, []);
 
   if (
@@ -76,25 +109,30 @@ export const RootNavigator = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-    <NavigationContainer linking={linking}>
-      {currentCallRoom.length > 0 && (
-        <CallFloater />
-      )}
-      <Stack.Navigator
-        initialRouteName={initialRouteName}
-        screenOptions={{ headerShown: false }}>
-        <Stack.Screen
-          name={Stacks.AuthStack}
-          component={AuthNavigator}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name={Stacks.MainStack}
-          component={MainNavigator}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer linking={authenticated ? linking : undefined}>
+        {currentCallRoom.length > 0 && <CallFloater />}
+        <Stack.Navigator
+          initialRouteName={initialRouteName}
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen
+            name={Stacks.AuthStack}
+            component={AuthNavigator}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name={Stacks.MainStack}
+            component={MainNavigator}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+        {authenticated && pendingLink && (
+          <NavigationHandler
+            pendingLink={pendingLink}
+            clearPendingLink={() => setPendingLink(null)}
+          />
+        )}
+      </NavigationContainer>
     </GestureHandlerRootView>
   );
 };

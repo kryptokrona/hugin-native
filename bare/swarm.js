@@ -47,9 +47,8 @@ let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
 
-class NodeConnection extends EventEmitter {
+class NodeConnection {
   constructor() {
-    super()
     this.node = null
     this.connection = null
     this.requests = new Map()
@@ -101,7 +100,7 @@ async listen() {
   }
   async node_connection(conn) {
     this.connection = conn
-    Hugin.send('hugin-node-connected')
+    Hugin.send('hugin-node-connected', {})
     conn.on('error', () => {
     console.log("Got error connection signal")
         conn.end();
@@ -147,14 +146,14 @@ async change(address, pub) {
   }
   this.node = null
   this.discovery = null
-  Hugin.send('hugin-node-disconnected')
+  Hugin.send('hugin-node-disconnected', {})
 
   this.connect(address, pub)
 }
 
 async reconnect() {
   while(this.connection === null) {
-    Hugin.send('hugin-node-disconnected')
+    Hugin.send('hugin-node-disconnected', {})
     await sleep(10000)
     console.log("Reconnecting to node...")
     this.discovery.refresh({client: true, server: false})
@@ -163,6 +162,7 @@ async reconnect() {
 }
 
 sync(data) {
+  if (!this.connection) return [];
   return new Promise((resolve, reject) => {
     data.id = data.timestamp
     this.requests.set(data.id, { resolve, reject });
@@ -180,6 +180,7 @@ parse(d) {
 }
 
 async message(payload, hash) {
+  console.log('payload, hash', payload, hash)
   return new Promise( async (resolve, reject) => {
   const timestamp = Date.now()
   this.requests.set(timestamp, { resolve, reject })

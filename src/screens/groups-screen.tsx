@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
 
@@ -43,7 +43,7 @@ interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
 }
 
-export const GroupsScreen: React.FC<Props> = () => {
+export const GroupsScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const user = useUserStore((state) => state.user);
   const navigation = useNavigation<MainStackNavigationType>();
@@ -59,6 +59,16 @@ export const GroupsScreen: React.FC<Props> = () => {
   if (device == null) {
     // Alert.alert('Error!', 'Camera could not be started');
   }
+
+  useEffect(() => {
+    if (route.params?.joining) {
+      setModalVisible(true);
+      setJoinVisible(true);
+    }
+    if (route.params?.link) {
+      setLink(route.params.link);
+    }
+  }, [route.params]);
 
   const onError = (error: CameraRuntimeError) => {
     Alert.alert('Error!', error.message);

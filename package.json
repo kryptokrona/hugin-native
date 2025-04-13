@@ -59,7 +59,7 @@
     "hyperdht": "6.15.1",
     "hyperdrive": "^11.13.4",
     "hyperswarm": "4.7.14",
-    "hyperswarm-hugin": "^1.0.2",
+    "hyperswarm-hugin": "^1.0.3",
     "i18next": "^23.11.5",
     "identicon.js": "^2.3.3",
     "int-encoder": "^1.1.1",
