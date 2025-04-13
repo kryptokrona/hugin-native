@@ -38,7 +38,7 @@ interface Props {
 export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   const mAddress = route.params?.address;
   const [address, setAddress] = useState(mAddress || '');
-  const [paymentId, setPaymentId] = useState('');
+  const [paymentId, setPaymentId] = useState(undefined);
   const [amount, setAmount] = useState('');
   const [preparedTx, setPreparedTx] = useState<{
     success?: boolean;
