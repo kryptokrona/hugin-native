@@ -14,6 +14,7 @@ import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';
 import { trimExtra } from '@/services/utils';
+import { Nodes } from 'lib/native';
 class Syncer {
   constructor() {
     this.node = {};
@@ -43,57 +44,29 @@ class Syncer {
     this.node = node;
   }
 
-  async get_pool() {
-    const lastChecked = this.lastChecked;
-    this.lastChecked = Math.floor(Date.now() / 1000);
-    const payload = {
-      method: 'POST',
-      body: JSON.stringify({ timestampBegin: lastChecked }),
-    };
-    const protocol = 'https://';
-    const input = this.node.url + ':' + this.node.port.toString() + '/get_pool';
-    try {
-      const resp = await fetch(protocol + input, payload);
-      return await resp.json();
-    } catch (e) {
-      //Try http
-      try {
-        const protocol = 'http://';
-        const resp = await fetch(protocol + input, payload);
-        return await resp.json();
-      } catch (e) {
-        //Node error
-        return false;
-      }
-    }
-  }
+
 
   async fetch() {
     const incoming = this.incoming_messages.length > 0 ? true : false;
-    let json;
-    try {
-      //If we already have pending incoming unchecked messages, return
-      //So we do not update the latest checked timestmap and miss any messages.
-      if (incoming) return false;
-      //Latest version, fetch more messages with last checked timestamp
-      json = await this.get_pool();
-      if (!json) {
-        console.log('Error syncing json from get_pool:');
-        return false;
-      }
-      const transactions = this.trim(json);
-      //Try clearing known pool txs from checked
-      if (transactions.length === 0) {
-        console.log('No incoming messages...');
-        return false;
-      }
+    //If we already have pending incoming unchecked messages, return
+    //So we do not update the latest checked timestmap and miss any messages.
+    if (incoming) return false
+    //Latest version, fetch more messages with last checked timestamp
+    const lastChecked = this.lastChecked;
+    this.lastChecked = Math.floor(Date.now() / 1000);
 
-      return transactions;
-    } catch (e) {
-      //   Hugin.send('sync', 'Error');
-      console.log('Sync error', e);
-      return false;
+    const resp = await Nodes.sync({
+      request: true, 
+      type: 'some', 
+      timestamp: lastChecked
+  })
+
+    if (resp.length === 0) {
+        console.log('No incoming messages...')
+        return false
     }
+    
+    return resp
   }
 
   async sync() {
@@ -129,12 +102,14 @@ class Syncer {
     this.decrypt(transactions, false);
   }
 
-  async decrypt(transactions, que = false) {
-    console.log('Checking nr of txs:', transactions.length);
-    for (const transaction of transactions) {
-      try {
-        const thisExtra = transaction.transactionPrefixInfo.extra;
-        const thisHash = transaction.transactionPrefixInfotxHash;
+  async decrypt(list, que = false) {
+    console.log('Checking nr of txs:', list.length);
+     for (const message of list) {
+        try {
+
+        const thisHash = message.hash
+        const thisExtra = '99' + thisHash + message.cipher
+        
         if (!this.validate(thisExtra, thisHash)) continue;
         if (thisExtra !== undefined && thisExtra.length > 200) {
           //Check for viewtag
@@ -144,10 +119,6 @@ class Syncer {
             await this.check_for_pm(thisExtra, thisHash);
             continue;
           }
-          //Check for private message //TODO remove this when viewtags are active
-          // if (await this.check_for_pm(thisExtra, que)) continue;
-          //Check for group message
-          //   if (await check_for_group_message(thisExtra, thisHash, que)) continue;
         }
       } catch (err) {
         console.log('Error decrypting...');

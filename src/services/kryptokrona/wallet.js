@@ -35,7 +35,7 @@ import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
 import naclUtil from 'tweetnacl-util';
 import tweetnacl from 'tweetnacl';
-import { Beam } from '../../lib/native';
+import { Beam, Nodes } from '../../lib/native';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -184,8 +184,18 @@ export class ActiveWallet {
     return this.active.getPrimaryAddressPrivateKeys();
   }
 
-  async sign(message) {
-    return await xkrUtils.signMessage(message, this.spendKey());
+  async messageKeyPair() {
+    const priv = this.spendKey()
+    const keys = await generateDeterministicSubwalletKeys(priv, 1)
+    const address = await Address.fromSeed(keys.private_key)
+    const pub = address.m_keys.m_spendKeys.m_publicKey
+    const signKey = address.m_keys.m_spendKeys.m_privateKey
+    return [signKey, pub]
+}
+
+  async sign(message, standard) {
+    const keys = standard ? this.privateKeys() : this.messageKeyPair()
+    return await xkrUtils.signMessage(message, keys[0]);
   }
 
   async verify(message, address, signature) {
@@ -344,6 +354,7 @@ export class ActiveWallet {
         subWalletKeys.private_key,
       );
     }
+    this.subWalletKeys = subWalletKeys
     console.log(
       'this.active.subWallets.getAddresses()',
       this.active.subWallets.getAddresses(),
@@ -351,67 +362,7 @@ export class ActiveWallet {
   }
 
   async optimize_message_inputs(force = false) {
-    let [mainWallet, messageSubWallet] = this.addresses();
-
-    const [walletHeight, localHeight, networkHeight] =
-      await this.active.getSyncStatus();
-
-    let inputs = await this.active.subWallets.getSpendableTransactionInputs(
-      [messageSubWallet],
-      networkHeight,
-    );
-
-    if (inputs.length > 25 && !force) {
-      optimized = true;
-      return;
-    }
-
-    let payments = [];
-    let i = 0;
-    /* User payment */
-    while (i <= 49) {
-      payments.push([messageSubWallet, 1000]);
-      i += 1;
-    }
-
-    let result = await this.active.sendTransactionAdvanced(
-      payments, // destinations,
-      3, // mixin
-      { fixedFee: 1000, isFixedFee: true }, // fee
-      undefined, //paymentID
-      [mainWallet], // subWalletsToTakeFrom
-      undefined, // changeAddress
-      true, // relayToNetwork
-      false, // sneedAll
-      undefined,
-    );
-
-    if (result.success) {
-      // reset_optimize(); TODO** set timer? or wait for optimize tx to return?
-
-      let optimizeMessage = {
-        message: 'Your wallet is creating message inputs, please wait',
-        name: 'Optimizing',
-        hash: parseInt(Date.now()),
-        key: mainWallet,
-        optimized: true,
-      };
-
-      // Hugin.send('sent_tx', sent);
-      console.log('Optimize completed: ', optimizeMessage);
-      return true;
-    } else {
-      optimized = false;
-
-      let error = {
-        message: 'Optimize failed',
-        name: 'Optimizing wallet failed',
-        hash: parseInt(Date.now()),
-        key: mainWallet,
-      };
-      console.log('Error:', error);
-      return false;
-    }
+    return
   }
 
   async send_message(message, receiver, beam = false) {
@@ -429,11 +380,6 @@ export class ActiveWallet {
     let address = receiver.substring(0, 99);
     let messageKey = receiver.substring(99, 163);
     let has_history = await this.check_history(messageKey, address);
-    let balance = await this.check_balance();
-    if (!balance && !beam) {
-      console.log('Error: No balance to send with');
-      return { error: 'balance', success: false, hash: '' };
-    }
 
     let payload_hex;
     const seal = has_history ? false : true;
@@ -444,47 +390,27 @@ export class ActiveWallet {
       seal,
       address,
     );
-
+    
+    const hash = randomKey();
+    
     if (beam) {
-      const hash = randomKey();
+
       const send = hash + '99' + payload_hex;
       Beam.message(address, send);
-      return { hash, success: true, error: 'success' };
-    }
-    //Choose subwallet with message inputs
-    let messageSubWallet = this.addresses()[1];
-    let result = await this.active.sendTransactionAdvanced(
-      [[messageSubWallet, 1000]], // destinations,
-      3, // mixin
-      { fixedFee: 1000, isFixedFee: true }, // fee
-      undefined, //paymentID
-      [messageSubWallet], // subWalletsToTakeFrom
-      undefined, // changeAddresss
-      true, // relayToNetwork
-      false, // sneedAll
-      Buffer.from(payload_hex, 'hex'),
-    );
-    if (result.success) {
-      //save_message(sentMsg);
-      this.optimize_message_inputs();
-      optimized = true;
-    } else {
-      let error = {
-        message: `Failed to send, please wait a couple of minutes.`,
-        name: 'Error',
-        hash: Date.now(),
-      };
-      optimized = false;
-      this.optimize_message_inputs(true);
-      console.log(
-        `Error: Failed to send transaction: ${result.error.toString()}`,
-      );
-      console.log('Error: ', error);
-      return { hash: '', success: false, error: 'failed' };
-    }
 
-    return { hash: result.transactionHash, success: true, error: 'success' };
-    //TODO save message
+    } else {
+
+      const sent = await Nodes.message(payload_hex, hash)
+
+      if (!sent.success) {
+        if (typeof sent.reason !== 'string') return
+        if (sent.reason.length > 40) return
+        console.log("Error sending message", sent.reason)
+        return {success: false, error: sent.reason, hash: ''}
+      }
+    }
+    
+    return {success: true, error: 'success', hash}
   }
 
   async encrypt_hugin_message(message, messageKey, sealed = false, toAddr) {
@@ -503,7 +429,7 @@ export class ActiveWallet {
     const viewTag = hashDerivation.substring(0, 2);
 
     if (sealed) {
-      let signature = await this.sign(message, xkr_private_key);
+      let signature = await this.sign(message, true);
       let payload_json = {
         from: my_address,
         k: Buffer.from(keychain.getKeyPair().publicKey).toString('hex'),
@@ -552,21 +478,6 @@ export class ActiveWallet {
       MessageSync.known_keys.push(messageKey);
       return false;
     }
-  }
-
-  async check_balance() {
-    try {
-      let [munlockedBalance, mlockedBalance] = await this.active.getBalance();
-
-      if (munlockedBalance < 11) {
-        console.log('Error: Not enough unlocked funds.');
-        return false;
-      }
-    } catch (err) {
-      console.log('Error:', err);
-      return false;
-    }
-    return true;
   }
 
   async key_derivation_hash(chat) {

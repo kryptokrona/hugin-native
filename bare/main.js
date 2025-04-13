@@ -12,7 +12,8 @@ const {
   send_sdp,
   send_dm_message,
   send_dm_file,
-  send_feed_message
+  send_feed_message,
+  Nodes
 } = require('./swarm');
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
@@ -49,6 +50,15 @@ const onrequest = async (p) => {
     case 'send_feed_msg':
       const feed_message = await send_feed_message(p.message, p.reply, p.tip);
       return feed_message;
+    case 'send_node_msg':
+      const sent = await Nodes.message(p.payload, p.hash);
+      return {sent};
+    case 'sync_from_node':
+      const resp = await Nodes.sync(p.request)
+      return {resp}
+    case 'connect_to_node':
+      Nodes.connect(p.address, p.pub)
+      return
     case 'group_random_key':
       const keys = create_room_invite();
       return { keys };

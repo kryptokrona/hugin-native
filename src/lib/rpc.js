@@ -250,8 +250,12 @@ export class Bridge {
         const key = Wallet.spendKey();
         return key;
       case 'sign-message':
-        const sig = await Wallet.sign(request.message);
+        const sig = await Wallet.sign(request.message, true);
         return sig;
+        case 'sign-node-message':
+          const [p, pub] = await Wallet.messageKeyPair()
+        const signature = await Wallet.sign(request.message, false);
+        return [pub, signature];
       case 'verify-signature':
         const verify = await Wallet.verify(
           request.data.message,

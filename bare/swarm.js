@@ -46,6 +46,169 @@ const REQUEST_FILE = 'request-file';
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
+
+class NodeConnection extends EventEmitter {
+  constructor() {
+    super()
+    this.node = null
+    this.connection = null
+    this.requests = new Map()
+    this.discovery = null
+    this.pending = []
+    this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
+    this.topic = ''
+  }
+
+async connect(address, pub) {
+  //If we choose the public option. We connect to the first responding node.
+  //in the public network.
+  const key = pub ? this.public : address
+  const [base_keys, dht_keys, sig] = get_new_peer_keys(key)
+  const topicHash = base_keys.publicKey.toString('hex')
+    this.node = new HyperSwarm({ maxPeers: 1,
+    firewall (remotePublicKey) {
+
+    //If we are connecting to a public node. Allow connection.
+    if (pub) return false
+    
+    //We verify if the private node has the correct public key.
+    if (remotePublicKey.toString('hex') !== address.slice(-64)) {
+      return true
+    }
+    return false
+    }}, sig, dht_keys, base_keys)
+
+  this.listen()
+  const topic = Buffer.alloc(32).fill(topicHash)
+  this.topic = topic
+  this.discovery = this.node.join(topic, {server: false, client: true})
+}
+
+async listen() {
+  this.node.on('connection', (conn, info) => {
+    if (this.connection) return
+    this.node_connection(conn)
+  })
+
+  process.once('SIGINT', function () {
+    this.node.on('close', function () {
+        process.exit();
+    });
+    this.node.destroy();
+    setTimeout(() => process.exit(), 2000);
+  });
+
+  }
+  async node_connection(conn) {
+    this.connection = conn
+    Hugin.send('hugin-node-connected')
+    conn.on('error', () => {
+    console.log("Got error connection signal")
+        conn.end();
+        conn.destroy();
+        this.connection = null
+        this.reconnect()
+   })
+
+   conn.on('data', d => {
+    const string = d.toString()
+    const data = this.parse(string)
+    if (!data) return
+      if (this.requests.has(data.id)) {
+        const { resolve, reject } = this.requests.get(data.id);
+        if ('chunk' in data) {
+          this.pending.push(data.repsonse)
+          return
+        }
+        if ('done' in data) {
+          resolve(this.pending);
+          this.requests.delete(data.id);
+          return
+        }
+
+        if ('success' in data) {
+          resolve(data)
+          this.requests.delete(data.id);
+          return
+        }
+
+        resolve(data.response);
+        this.requests.delete(data.id);
+     }
+    })
+}
+
+async change(address, pub) {
+  await this.node.leave(Buffer.from(this.topic))
+  await this.node.destroy()
+  if (this.connection !== null) {
+    this.connection.end()
+    this.connection = null
+  }
+  this.node = null
+  this.discovery = null
+  Hugin.send('hugin-node-disconnected')
+
+  this.connect(address, pub)
+}
+
+async reconnect() {
+  while(this.connection === null) {
+    Hugin.send('hugin-node-disconnected')
+    await sleep(10000)
+    console.log("Reconnecting to node...")
+    this.discovery.refresh({client: true, server: false})
+  }
+  return
+}
+
+sync(data) {
+  return new Promise((resolve, reject) => {
+    data.id = data.timestamp
+    this.requests.set(data.id, { resolve, reject });
+    this.connection.write(JSON.stringify(data));
+  });
+}
+
+
+parse(d) {
+  try{
+    return JSON.parse(d)
+  } catch(e) {
+    return false
+  }
+}
+
+async message(payload, hash) {
+  return new Promise( async (resolve, reject) => {
+  const timestamp = Date.now()
+  this.requests.set(timestamp, { resolve, reject })
+  //Create a new derived sub key pair for sending messages to nodes.
+  const [pub, signature] = await Hugin.request({type: 'sign-node-message', message: payload + hash})
+  //We sign the payload and hash to avoid denial of service attacks.
+  const data = {
+    type: 'post',
+    message: {
+    cipher: payload,
+    pub,
+    timestamp,
+    hash,
+    signature
+    }
+
+  }
+
+  if (this.connection === null) {
+    reject("No connection")
+  }
+
+  this.connection.write(JSON.stringify(data))
+  
+  })
+}
+}
+const Nodes = new NodeConnection()
+
 class Room {
   constructor(beam) {
     this.swarm = {};
@@ -1328,5 +1491,6 @@ module.exports = {
   send_peer_message,
   send_dm_message,
   send_dm_file,
-  send_feed_message
+  send_feed_message,
+  Nodes
 };

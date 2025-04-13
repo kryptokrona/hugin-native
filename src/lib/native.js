@@ -159,7 +159,32 @@ class Beams {
 
 }
 
+class NodeConnection {
+  constructor() {
+  }
+
+ async message(payload, hash) {
+  const data = { type: 'send_node_msg', payload, hash };
+  const {sent} = await rpc.request(data);
+  return sent
+ }
+
+ connect(address, pub) {
+  const data = { type: 'connect_to_node', address, pub };
+  rpc.send(data);
+ }
+
+ async sync(request) {
+  const data = { type: 'sync_from_node', request };
+  const {resp} = await rpc.request(data);
+  return resp
+ }
+ 
+}
+
 ////////////////////////////////////////////////////////////////
+
+export const Nodes = new NodeConnection();
 
 export const Rooms = new Swarm();
 
