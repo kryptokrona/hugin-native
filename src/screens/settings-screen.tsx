@@ -46,7 +46,7 @@ export const SettingsScreen: React.FC<Props> = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const registerAddress =
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
-  const publicKey = Wallet.messageKeys[0];
+  const publicKey = Wallet.messageKeys[1];
   const toggleSync = async () => {
     setSyncActivated(await Wallet.toggle());
   };
@@ -60,6 +60,21 @@ export const SettingsScreen: React.FC<Props> = () => {
     });
     console.log('done');
   };
+
+  const upgradeHugin = () => {
+
+    navigation.navigate(MainScreens.WalletStack, {
+      screen: MainScreens.SendTransactionScreen,
+      params: {
+        address: registerAddress,
+        paymentId: publicKey,
+        amount: "99"
+      }
+    });
+
+    setModalVisible(false);
+
+  }
 
   const syncActivatedIcon = syncActivated
     ? 'checkbox-marked-outline'
@@ -139,24 +154,10 @@ export const SettingsScreen: React.FC<Props> = () => {
           <TextField size="medium" weight="small">
             ✅ Support the project!
           </TextField>
-          <TextField size="small" style={styles.modalDescription}>
-            1. Paste this public key in the Payment ID field in the transaction
+          <TextField size="medium" weight="small">
+            💸 One time cost of 99 XKR
           </TextField>
-          <TextField size="xsmall" selectable style={styles.address}>
-            {publicKey}
-          </TextField>
-          <TextButton onPress={() => copyText(publicKey)}>
-            {t('copyText')}
-          </TextButton>
-          <TextField size="small" style={styles.modalDescription}>
-            2. Send 99 XKR to this Address:
-          </TextField>
-          <TextField size="xsmall" selectable style={styles.address}>
-            {registerAddress}
-          </TextField>
-          <TextButton onPress={() => copyText(registerAddress)}>
-            {t('copyText')}
-          </TextButton>
+          <TextButton onPress={upgradeHugin}>Upgrade now</TextButton>
           <TextButton onPress={() => setModalVisible(false)}>Close</TextButton>
         </View>
       </ModalCenter>
