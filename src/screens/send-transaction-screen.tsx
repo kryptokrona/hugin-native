@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import { RouteProp, useNavigation } from '@react-navigation/native';
@@ -184,7 +184,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <View>
+      <ScrollView>
         <View>
           <InputField
             // style={styles.input}
@@ -269,7 +269,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
         ) : (
           <></>
         )}
-      </View>
+      </ScrollView>
       <ModalCenter visible={qrScanner} closeModal={onCloseModal}>
         <View
           style={{
