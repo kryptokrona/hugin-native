@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     borderRadius: 5,
     position: 'absolute',
-    right: 38,
+    right: 36,
     top: 15,
     paddingLeft: 4,
     paddingRight: 4
