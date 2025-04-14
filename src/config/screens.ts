@@ -64,8 +64,8 @@ export const TabBar = {
     tabName: MainScreens.SettingsStack,
   },
   [MainScreens.FeedStack]: {
-    iconName: 'megaphone-outline',
-    iconType: 'IO',
+    iconName: 'radio',
+    iconType: 'FI',
     tabName: MainScreens.FeedStack,
   },
 } as const;
