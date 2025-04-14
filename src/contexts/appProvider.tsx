@@ -184,7 +184,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         Wallet.active?.stop();
 
         if (started) {
-          await Background.init();
+          // await Background.init();
         }
       } else if (state === 'background') {
         console.log('******** BACKGROUND ********');
@@ -201,7 +201,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
         if (started) {
-          await Background.init();
+          // await Background.init();
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');

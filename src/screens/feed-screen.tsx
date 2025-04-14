@@ -84,16 +84,35 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
+  const [refreshing, setRefreshing] = useState(false);
   // const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.feedMessages);
-  console.log('feedmessages', messages);
+
 
   useEffect(() => {
+    // const getFeedMessagesFromDB = async (page=0) => {
+    //   console.log('Get DB feeds');
+    //   const thisMessages = await getFeedMessages(page);
+    //   setMessages(thisMessages);
+    // }
+    // getFeedMessagesFromDB();
     setFeedMessages(0);
     return () => {
       console.log('Screen unmounted');
     };
   }, []);
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      // Your actual refresh logic here:
+      await setFeedMessages(0);  // or call getFeedMessages / fetch new data
+    } catch (error) {
+      console.error('Error refreshing feed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   // const messages = [
   //   {
@@ -305,7 +324,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
         <FlatList
           // inverted
           ref={flatListRef}
-          data={messages.reverse()}
+          data={messages}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item }) => {
             return (
@@ -332,6 +351,8 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
           ItemSeparatorComponent={<View style={{marginLeft: '-100%', width: '250%', borderColor, borderTopWidth: 1}} />}
           initialNumToRender={messages.length}
           maxToRenderPerBatch={messages.length}
+          // refreshing={refreshing}
+          // onRefresh={onRefresh}
         />
 
         {/* <KeyboardAvoidingView

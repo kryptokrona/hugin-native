@@ -848,7 +848,7 @@ async function setFeedReplies(results: [ResultSet]) {
       messages.push(r);
     }
   }
-  return messages.reverse();
+  return messages;
 }
 
 export async function getFeedMessages(page: number, replies=false) {
@@ -920,6 +920,22 @@ export async function getFeedMessage(hash: string) {
     return await setFeedReplies(results);
 
 }
+
+
+export async function feedMessageExists(hash: string) {
+  const feedMessageExists = `SELECT *
+  FROM feedmessages
+  WHERE hash = '${hash}'
+  `;
+
+  const results: [ResultSet] = await db.executeSql(feedMessageExists);
+  const res = results[0].rows.item(0);
+  if (res === undefined) {
+    return false;
+  }
+  return true;
+}
+
 
 export async function saveFeedMessage(
   address: string,

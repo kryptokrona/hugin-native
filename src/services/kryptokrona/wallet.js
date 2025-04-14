@@ -47,6 +47,7 @@ export class ActiveWallet {
     this.nodePort = undefined;
     this.started = false;
     this.deadNodeEmitted = true;
+    this.messageKeys = [];
   }
 
   async init(node) {
