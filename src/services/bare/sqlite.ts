@@ -175,23 +175,34 @@ function chunkString(string: string, size: number) {
 const databaseRowLimit = 1024 * 512; // 512 KB per chunk
 
 export async function saveWallet(wallet: any) {
-  // Serialize wallet into a JSON string
   const walletString = JSON.stringify(wallet);
-
-  // Split the JSON string into manageable chunks
   const chunks = chunkString(walletString, databaseRowLimit);
 
-  // Clear the wallet table
-  await db.executeSql('DELETE FROM wallet');
+  return new Promise<void>((resolve, reject) => {
+    db.transaction(tx => {
+      // Clear the wallet table
+      tx.executeSql('DELETE FROM wallet');
 
-  // Insert each chunk into the database
-  for (let i = 0; i < chunks.length; i++) {
-    await db.executeSql(
-      'INSERT INTO wallet (id, json) VALUES (?, ?)',
-      [i, chunks[i]], // Use parameterized query to safely insert data
-    );
-  }
+      // Insert each chunk
+      for (let i = 0; i < chunks.length; i++) {
+        tx.executeSql(
+          'INSERT INTO wallet (id, json) VALUES (?, ?)',
+          [i, chunks[i]],
+        );
+      }
+    },
+    error => {
+      console.error('Transaction error while saving wallet:', error);
+      reject(error);
+    },
+    () => {
+      // Transaction completed successfully
+      resolve();
+      console.log('Wallet saved successfully!');
+    });
+  });
 }
+
 
 export async function loadWallet() {
   console.log('Loading wallet from db..');
