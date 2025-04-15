@@ -21,6 +21,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import { t } from 'i18next';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Nodes } from 'lib/native';
 
 interface Item {
   title: string;
@@ -71,18 +72,54 @@ export const SettingsScreen: React.FC<Props> = () => {
     console.log('done');
   };
 
-  const upgradeHugin = () => {
+  const upgradeHugin = async () => {
 
-    navigation.navigate(MainScreens.WalletStack, {
-      screen: MainScreens.SendTransactionScreen,
-      params: {
-        address: registerAddress,
-        paymentId: publicKey,
-        amount: "99"
-      }
-    });
+    // navigation.navigate(MainScreens.WalletStack, {
+    //   screen: MainScreens.SendTransactionScreen,
+    //   params: {
+    //     address: registerAddress,
+    //     paymentId: publicKey,
+    //     amount: "99"
+    //   }
+    // });
 
-    setModalVisible(false);
+    
+
+    const destinations = [[registerAddress, parseInt(parseFloat(49).toFixed(5) * 100000)]];
+    if (Nodes?.address?.length == 99) {
+      destinations.push([Nodes.address, parseInt(parseFloat(50).toFixed(5) * 100000)]);
+    }
+    console.log('destinations',destinations);
+
+    // return;
+
+
+    const result = await Wallet?.active?.sendTransactionAdvanced(
+      destinations,
+      3,
+      { fixedFee: 10000, isFixedFee: true },
+      publicKey,
+      undefined,
+      undefined,
+      true,
+      false,
+      undefined,
+    );
+
+    if (result?.success) {
+      setModalVisible(false);
+      Toast.show({
+        text1: t('registrationSuccess'),
+        type: 'success',
+      });
+    } else {
+      console.log('result', result);
+      Toast.show({
+        text1: t('transactionFailed'),
+        type: 'error',
+      });
+    }
+
 
   }
 
