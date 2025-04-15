@@ -29,6 +29,7 @@ import {
   Unreads,
   TextField,
   UserItem,
+  ModalCenter,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -82,6 +83,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const registerAddress =
+    'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
+  const publicKey = Wallet.messageKeys[1];
 
   const roomUsers = useGlobalStore((state) => state.roomUsers);
 
@@ -114,6 +119,21 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       [keyRef.current],
     ),
   );
+
+  const upgradeHugin = () => {
+
+    navigation.navigate(MainScreens.WalletStack, {
+      screen: MainScreens.SendTransactionScreen,
+      params: {
+        address: registerAddress,
+        paymentId: publicKey,
+        amount: "99"
+      }
+    });
+
+    setModalVisible(false);
+
+  }
 
 
 
@@ -340,6 +360,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       );
 
       if (!success) {
+        setModalVisible(true);
         Toast.show({
           text1: error,
           type: 'error',
@@ -392,6 +413,27 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   return (
     <ScreenLayout>
       <GestureHandlerRootView>
+
+      <ModalCenter
+        visible={modalVisible}
+        closeModal={() => setModalVisible(false)}>
+        <View style={styles.inviteContainer}>
+          <TextField size="large" weight="medium">
+            Upgrade to Hugin +
+          </TextField>
+          <TextField size="medium" weight="small">
+            ✅ Send offline messages!
+          </TextField>
+          <TextField size="medium" weight="small">
+            ✅ Support the project!
+          </TextField>
+          <TextField size="medium" weight="small">
+            💸 One time cost of 99 XKR
+          </TextField>
+          <TextButton onPress={upgradeHugin}>Upgrade now</TextButton>
+          <TextButton onPress={() => setModalVisible(false)}>Close</TextButton>
+        </View>
+      </ModalCenter>
       {/* Full-Screen Image Viewer */}
       {showImage && (
         <FullScreenImageViewer
@@ -565,5 +607,12 @@ const styles = StyleSheet.create({
   },
   flatListWrapper: {
     flex: 1,
+  },
+  inviteContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    maxWidth: 300,
+    padding: 10,
+    width: 300,
   },
 });

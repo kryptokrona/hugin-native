@@ -46,6 +46,39 @@ const REQUEST_FILE = 'request-file';
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
+let feed_requests = [];
+let feed_requests_started = false;
+let pending_feed_requests = new Map();
+
+const feed_request_process = async () => {
+
+  feed_requests_started = true;
+
+  console.log('Starting to request feeds with ', feed_requests?.length, 'entries.')
+
+  for (const request of feed_requests) {
+    console.log('Requesting feed from', request.address);
+    if (pending_feed_requests.has(request.address)) continue;
+    pending_feed_requests.set(request.address);
+    const start_time = Date.now();
+    request_feed(request.address, request.topic);
+    while (pending_feed_requests.has(request.address) && (Date.now() - start_time < 5*1000)) {
+      await sleep(50);
+    }
+    if (Date.now() - start_time >= 5*1000) {
+      console.log('Feed request timed out!');
+    }
+    feed_requests.shift();
+    pending_feed_requests.delete(request.address);
+    console.log('Completed feed request from ', request.address, ',', feed_requests?.length, ' requests left.')
+  }
+  if (feed_requests?.length) {
+    feed_request_process()
+  } else {
+    feed_requests_started = false;
+  }
+
+}
 
 class NodeConnection {
   constructor() {
@@ -639,7 +672,14 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
         request_history(joined.address, topic, active.files);
         active.requests++;
       }
-      request_feed(joined.address, topic);
+      if (!feed_requests.some(a => a.address == joined.address)) {
+        console.log('Adding',joined.address,'to feed sync queue');
+        feed_requests.push({address: joined.address, topic });
+      }
+
+      if (!feed_requests_started) {
+        feed_request_process();
+      }
 
       //Send any buffered messages if connection was lost.
       // if (parseInt(active.time) < time && active.buffer.length) {
@@ -692,7 +732,9 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       }
 
       if (data.type === SEND_FEED_HISTORY) {
+        pending_feed_requests.delete(con.address);
         save_feed_history(data.messages, con.address, topic);
+        console.log('Saving feed history from', con.address);
         return true;
       }
 
@@ -1444,12 +1486,14 @@ const check_if_online = async (topic) => {
       active.search = true;
       let i = 0;
       let peers = [];
+      let files = [];
       //Send peer info on the first three pings. Then every 10 times.
-      if (a < 3 || a % 10 === 0) {
+      if (a < 1 || a % 10 === 0) {
+        files = active.files;
         peers = active.peers;
         a++;
       }
-      const data = { type: 'Ping', peers, files: active.files };
+      const data = { type: 'Ping', peers, files};
       for (const conn of active.connections) {
         data.hashes = hashes;
         if (i > 4) {

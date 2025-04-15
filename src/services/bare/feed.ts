@@ -13,6 +13,7 @@ import { containsOnlyEmojis } from '@/utils';
 
 import { naclHash, newKeyPair, randomKey } from './crypto';
 import {
+  feedMessageExists,
     getFeedMessages,
   getLatestRoomMessages,
   getRoomMessages,
@@ -94,7 +95,6 @@ export const updateMessages = async (
 export const setFeedMessages = async (page: number) => {
   console.log('Load message page:', page);
   const messages = await getFeedMessages(page);
-
   setStoreFeedMessages(messages);
 };
 
@@ -137,6 +137,10 @@ export const saveFeedMessageAndUpdate = async (
     timestamp,
     nickname,
     hash);
+
+  if (await feedMessageExists(hash)) {
+    return;
+  }
 
   const newMessage = await saveFeedMessage(
     address,

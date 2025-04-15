@@ -87,7 +87,6 @@ export const FeedMessageItem: React.FC<Props> = ({
 
   const avatar = useMemo(() => getAvatar(userAddress ?? ''), [userAddress]);
 
-  console.log('replies: ', replies)
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
@@ -113,7 +112,6 @@ export const FeedMessageItem: React.FC<Props> = ({
         key: avatar,
       });
 
-      console.log('Got colors: ', thisUserColor);
 
       setUserColor(lightenHexColor(thisUserColor?.background, 60) || thisUserColor?.vibrant);
       

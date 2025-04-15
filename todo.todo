@@ -18,6 +18,9 @@ Todo:
     ✔ Add QR codes for messages and rooms @done(25-02-15 20:04)
     ☐ Show "lastseen" on user lists in rooms
     ☐ Add deep links to groups (i.e. group invites)
+    ☐ Add manual explanation of Hugin Premium+ Extra
+    ☐ Update React version
+    ☐ Update react-native-bare-kit
 
 Optimizations:
     ☐ Add "type" property to messages - i.e. message, reaction, reply, tip etc.
@@ -36,7 +39,7 @@ Todo calls:
 Todo feed:
     ☐ Add signature check + sanitization
     ✔ Add message screen @done(25-04-03 21:38)
-        ✔ Add reply & replies @done(25-04-03 21:38)
+    ✔ Add reply & replies @done(25-04-03 21:38)
     ☐ Add friend requests
     ☐ Add avatar support
     ☐ Add files

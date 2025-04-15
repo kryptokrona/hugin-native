@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import { RouteProp, useNavigation } from '@react-navigation/native';
@@ -38,7 +38,7 @@ interface Props {
 export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   const mAddress = route.params?.address;
   const [address, setAddress] = useState(mAddress || '');
-  const [paymentId, setPaymentId] = useState('');
+  const [paymentId, setPaymentId] = useState(undefined);
   const [amount, setAmount] = useState('');
   const [preparedTx, setPreparedTx] = useState<{
     success?: boolean;
@@ -48,6 +48,20 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   } | null>(null);
   const [sendAll, setSendAll] = useState(false);
   const fiatPrice = useGlobalStore((state) => state.fiatPrice);
+
+  useEffect(() => {
+
+    if (route?.params?.address) {
+      setAddress(route?.params?.address);
+    }
+    if (route?.params?.paymentId){
+      setPaymentId(route?.params?.paymentId);
+    }
+    if (route?.params?.amount) {
+      setAmount((route?.params?.amount).toString());
+    }
+
+  },[route.params])
 
   const { hasPermission, requestPermission } = useCameraPermission();
 
@@ -170,7 +184,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <View>
+      <ScrollView>
         <View>
           <InputField
             // style={styles.input}
@@ -183,6 +197,13 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
             {t('paste')}
           </TextButton>
           <TextButton onPress={onScanPress}>{t('scanQR')}</TextButton>
+          <InputField
+            // style={styles.input}
+            label={'Payment ID'}
+            value={paymentId}
+            onChange={setPaymentId}
+            maxLength={101}
+          />
         </View>
 
         <View>
@@ -248,7 +269,7 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
         ) : (
           <></>
         )}
-      </View>
+      </ScrollView>
       <ModalCenter visible={qrScanner} closeModal={onCloseModal}>
         <View
           style={{
@@ -272,7 +293,6 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
     </ScreenLayout>
   );
 };
-
 
 const styles = StyleSheet.create({
   actions: {
