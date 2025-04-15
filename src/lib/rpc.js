@@ -23,6 +23,7 @@ import RPC from 'bare-rpc';
 import { Notify, notify } from '../services/utils';
 import { MessageSync } from '../services/hugin/syncer';
 import { saveFeedMessageAndUpdate } from '../services/bare/feed';
+import { Nodes } from './native';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -78,6 +79,9 @@ export class Bridge {
       switch (json.type) {
         case 'log':
           console.log(json);
+        case 'node-address':
+          Nodes.address = json.address
+          break;
         case 'new-swarm':
           console.log('new swarm!');
           break;

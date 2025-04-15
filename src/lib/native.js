@@ -161,6 +161,7 @@ class Beams {
 
 class NodeConnection {
   constructor() {
+    this.address = null
   }
 
  async message(payload, hash) {
