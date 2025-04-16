@@ -125,8 +125,8 @@ export const MessageInput: React.FC<Props> = ({
   }
 
   async function onFilePress() {
+    Camera.on(); // TODO Change to global state
     if (Platform.OS === 'android') {
-      Camera.on();
       try {
         const res = await DocumentPicker.pickSingle({
           copyTo: 'documentDirectory',

@@ -187,6 +187,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           // await Background.init();
         }
       } else if (state === 'background') {
+        if (Camera.active) {
+          return;
+        }
         console.log('******** BACKGROUND ********');
         InCallManager.start({ media: 'audio' });
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
@@ -208,9 +211,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // Rooms.resume();
         if (started && !joining) {
           joining = true;
-          if (!Camera.active) {
-            Rooms.idle(false, false);
-          }
           const room = getThisRoom();
           setStoreCurrentRoom(room);
           setThisRoom(room);
