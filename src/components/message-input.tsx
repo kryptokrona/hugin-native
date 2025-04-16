@@ -154,7 +154,7 @@ export const MessageInput: React.FC<Props> = ({
       } catch (err) {
         if (DocumentPicker.isCancel(err)) {
           console.log('User cancelled file picker');
-          await sleep(300);
+          await sleep(1000);
           Camera.off();
         } else {
           console.error('DocumentPicker Error: ', err);
@@ -168,6 +168,7 @@ export const MessageInput: React.FC<Props> = ({
       };
 
       launchImageLibrary(options, async (response) => {
+        Camera.on();
         if (response.didCancel) {
           console.log('User cancelled image picker');
           await sleep(300);
@@ -190,7 +191,7 @@ export const MessageInput: React.FC<Props> = ({
               uri: uri,
             };
             setSelectedFile(fileInfo);
-            await sleep(300);
+            await sleep(1000);
             Camera.off();
           }
         }
