@@ -132,7 +132,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       downloadDir:
         Platform.OS == 'ios'
           ? RNFS.LibraryDirectoryPath
-          : RNFS.DownloadDirectoryPath,
+          : RNFS.CachesDirectoryPath,
       store:
         Platform.OS == 'ios'
           ? RNFS.LibraryDirectoryPath
