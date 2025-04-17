@@ -5,6 +5,7 @@ import {
 } from 'react-native-image-picker';
 
 import { Peers } from 'lib/connections';
+import { useGlobalStore } from '../services/zustand';
 
 function hashCode(str: string) {
   let hash = 0;
@@ -49,14 +50,15 @@ export function getAvatar(
   format: 'png' | 'svg' = 'png',
   big = false,
 ) {
-  const found = Peers.active().find(
-    (a) => a.address === hash && a.avatar?.length !== 0,
-  );
+  const found = Object.values(useGlobalStore.getState().roomUsers)
+  .flat()
+  .find(a => a.address === hash && a.avatar?.length !== 0);
+
   if (found) {
     return found.avatar;
   }
   // Displays a fixed identicon until user adds new contact address in the input field
-  if (hash?.length < 15) {
+  if (hash?.length < 15 || !hash) {
     hash =
       'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY';
   }

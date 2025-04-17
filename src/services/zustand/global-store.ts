@@ -15,7 +15,7 @@ type GlobalStore = {
   roomMessages: Message[];
   messages: Message[];
   feedMessages: Message[];
-  roomUsers: User[];
+  roomUsers: Record<string, User[]>;
   transactions: Transaction[];
   syncStatus: number[];
   fiatPrice: number;
@@ -25,7 +25,7 @@ type GlobalStore = {
   setFeedMessages: (payload: Message[]) => void;
   setCurrentRoom: (payload: string) => void;
   setCurrentContact: (payload: string) => void;
-  setRoomUserList: (payload: User[]) => void;
+  setRoomUserList: (roomId: string, users: User[]) => void;
   setAuthenticated: (payload: boolean) => void;
   setStoreRooms: (payload: Room[]) => void;
   setStoreContacts: (payload: Contact[]) => void;
@@ -57,7 +57,7 @@ export const useGlobalStore = create<
     fiatPrice: 0,
     messages: [],
     roomMessages: [],
-    roomUsers: [],
+    roomUsers: {},
     rooms: [],
     feedMessages: [],
     setAddress: async (address: string) => {
@@ -102,9 +102,89 @@ export const useGlobalStore = create<
         },
       }));
     },
-    setRoomUserList: (roomUsers: User[]) => {
-      set({ roomUsers });
+    setRoomUserList: (roomId: string, users: User[]) => {
+      set((state) => ({
+        roomUsers: { 
+          ...state.roomUsers, 
+          [roomId]: users 
+        }
+      }));
     },
+    setNewName: (address: string, newName: string) => {
+      set((state) => {
+        const updatedRoomUsers = Object.fromEntries(
+          Object.entries(state.roomUsers).map(([roomId, users]) => {
+            const updatedUsers = users.map((user) =>
+              user.address === address ? { ...user, name: newName } : user
+            );
+            return [roomId, updatedUsers];
+          })
+        );
+        return { roomUsers: updatedRoomUsers };
+      });
+    },
+    addRoomUser: (user: User) => {
+      if (!user?.address.length || !user?.room?.length) return;
+      set((state) => {
+        const existingUsers = state.roomUsers[user.room] || [];        
+        if (existingUsers.some(a => a.address == user.address)) return state;
+        
+        return {
+          roomUsers: {
+            ...state.roomUsers,
+            [user.room]: [...existingUsers, user], // add to existing users
+          },
+        }; 
+      });
+    },
+    removeRoomUser: (user: Object) => {
+      if (!user?.address || !user?.address.length || !user?.key || !user?.key.length) {
+        console.log('Invalid user input', user);
+        return; // Exit early if data is invalid
+      }
+      set((state) => {
+        const existingUsers = state.roomUsers[user.key] || [];
+    
+        const updatedUsers = existingUsers.filter(
+          (u) => u.address !== user.address // filter out the user by address
+        );
+    
+        return {
+          roomUsers: {
+            ...state.roomUsers,
+            [user.key]: updatedUsers,
+          },
+        };
+      });
+    },
+    updateRoomUser: (user: any) => {
+      console.log('Updating room user', user?.name)
+      if (!user || !user.address || !user.room) return;
+    
+      set((state) => {
+        const existingUsers = state.roomUsers[user.room] || [];
+    
+        const updatedUsers = existingUsers.map((u) => {
+          if (u.address === user.address) {
+            return {
+              ...u,
+              voice: user.voice,
+              video: user.video,
+              screenshare: user.screenshare,
+              muted: user.audioMute,
+            };
+          }
+          return u;
+        });
+    
+        return {
+          roomUsers: {
+            ...state.roomUsers,
+            [user.room]: updatedUsers,
+          },
+        };
+      });
+    },    
     setStoreContacts: (contacts: Contact[]) => {
       set({ contacts });
     },

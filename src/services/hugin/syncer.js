@@ -14,7 +14,9 @@ import { setLatestMessages, updateMessage } from '../bare/contacts';
 import { extraDataToMessage } from 'hugin-crypto';
 import { sleep } from '@/utils';
 import { trimExtra } from '@/services/utils';
-import { Nodes } from 'lib/native';
+import { Nodes, Beam } from 'lib/native';
+import { Wallet } from '@/services';
+
 class Syncer {
   constructor() {
     this.node = {};
@@ -138,6 +140,8 @@ class Syncer {
         const added = await addContact('Anon', addr, key);
         if (added) {
           this.known_keys.push(added.messagekey);
+          const key = await Wallet.key_derivation_hash(addr);
+          Beam.connect(key, key, addr);
         }
       }
       const saved = await saveMessage(

@@ -3,16 +3,17 @@ import {
   setStoreActiveRoomUsers,
   getActiveRoomUsers,
   useGlobalStore
-} from '../services/zustand';
+} from '@/services';
 import { Notify } from '../services/utils';
+import { User } from '@/types';
 
 class Connections extends EventEmitter {
 
   join(peer, beam) {
     console.log('New connection incoming');
     const connected = {
-      address: peer.address,
-      name: peer.name,
+      address: peer.address ?? null,
+      name: peer.name || "Anonymous",
       room: peer.key,
       avatar: peer.avatar,
       online: true,
@@ -22,45 +23,29 @@ class Connections extends EventEmitter {
       muted: peer.audioMute,
       dm: beam
     };
-    if (this.already(peer.address, peer.key)) return;
-    const list = this.active();
-    list.push(connected);
-    this.update(list);
-    console.log('New peer connected. Online:', list.length);
+    useGlobalStore.getState().addRoomUser(connected);
     this.change();
   }
 
   voicestatus(peer) {
-    // console.log('Voice status changed for ', peer );
-    let list = this.active();
-    list.some((a) => {
-      if (a.address === peer.address) {
-        // console.log('Voice status changed for a: ', a );
-        const currentCallStatus = a.voice ? true : false;
-        a.voice = peer.voice;
-        a.video = peer.video;
-        a.screenshare = peer.screenshare;
-        a.muted = peer.audioMute;
+    console.log('Voice status changed for ', peer );
+    const thisRoomUsers = this.active()[peer.room];
+    console.log('thisRoomUsers',thisRoomUsers);
+    useGlobalStore.getState().updateRoomUser(peer)
 
-        if (currentCallStatus === false && peer.voice === true && a.room === peer.room && useGlobalStore.getState().address !== a.address ) {
-          const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === a.room)?.name;
-          const message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
-          Notify.new({ name: peer.name, text: message });
-        }
-      }
-    });
-    this.update(list);
-    this.change();
+    const peerPreviousCallStatus = thisRoomUsers.find(a => a.address == peer.address).voice;
+
+    if (peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address ) {
+      const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === peer.room)?.name;
+      const message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
+      Notify.new({ name: peer.name, text: message });
+    }
+
   }
 
   left(peer) {
     console.log('Peer disconnected', peer);
-    const list = this.active().filter(
-      (a) => !(a.address === peer.address && a.room === peer.key),
-    );
-    this.update(list);
-    console.log('Peer disconnected. Still online:', list.length);
-    this.change();
+    useGlobalStore.getState().removeRoomUser(peer);
   }
 
   already(address, key) {
@@ -74,13 +59,15 @@ class Connections extends EventEmitter {
   update(list) {
     const currentCall = useGlobalStore.getState().currentCall;
 
-    const filteredUsers = list.filter(a => a.room === currentCall.room && a.voice === true);
+    const thisRoomUsers = list[currentCall.room];
+
+    const voiceUsers = thisRoomUsers.filter(a => a.voice === true);
   
     const updatedTalkingUsers = currentCall.talkingUsers || {};
   
     useGlobalStore.getState().setCurrentCall({
       ...currentCall,
-      users: filteredUsers,
+      users: voiceUsers,
       talkingUsers: updatedTalkingUsers,
     });
   
@@ -94,16 +81,10 @@ class Connections extends EventEmitter {
 
   name(address, name) {
     let list = this.active();
-    list.some((a) => {
-      if (a.address === address) {
-        a.name = name;
-      }
-    });
-    this.update(list);
+    useGlobalStore.getState().setNewName(address, name);
   }
 
   change() {
-    this.emit('change');
     return true;
   }
 

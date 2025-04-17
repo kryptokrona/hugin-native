@@ -1,5 +1,6 @@
 import React, {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -87,28 +88,21 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
+  const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
   // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
   const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
   const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
+  const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
 
-  const voiceUsers = useGlobalStore(
-    useCallback(
-      (state) =>
-        state.roomUsers.filter((a) => a.room === roomKey && a.voice === true),
-      [roomKey],
-    ),
-  );
 
-  const roomUsers = useGlobalStore(
-    useCallback(
-      (state) => state.roomUsers.filter((a) => a.room === roomKey),
-      [roomKey],
-    ),
-  );
+  useEffect(() => {
+    if (!roomUsers) return;
+    setVoiceUsers(roomUsers.filter((a) => a.voice === true));
+  }, [roomUsers])
 
   const userList = useMemo(() => {
     return voiceUsers;
@@ -155,6 +149,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       screenshare: false,
       video: false,
       voice: true,
+      room: roomKey
     };
     const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
     me.voice = true;
@@ -182,6 +177,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       screenshare: false,
       video: false,
       voice: false,
+      room: roomKey
     };
 
     Peers.voicestatus(peer);

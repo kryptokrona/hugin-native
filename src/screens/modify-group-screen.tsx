@@ -15,8 +15,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import QRCode from 'react-native-qrcode-svg';
 
-import { Peers } from 'lib/connections';
-
 import {
   Card,
   CopyButton,
@@ -49,10 +47,8 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const { name, roomKey } = route.params;
   const navigation = useNavigation<MainStackNavigationType>();
-  const globalRoomUsers = useGlobalStore((state) => state.roomUsers).filter(
-    (a) => a.room === roomKey,
-  );
-  const [roomUsers, setRoomUsers] = useState<User[]>(globalRoomUsers);
+  const onlineUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
+  const [userList, setUserList] = useState<User[]>([]);
 
   const [change, setChange] = useState<boolean>(false);
 
@@ -65,18 +61,9 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   useEffect(() => {
-    async function fetchOfflineUsers() {
-      const storedRoomUsers = await getRoomUsers(roomKey);
-      setOfflineUsers(storedRoomUsers);
-    }
-    fetchOfflineUsers();
-  }, [roomKey]);
-
-  const userList = useMemo(() => {
-    console.log('useMemo triggered! ');
 
     function fetchAndMergeUsers() {
-      const mergedUsers = [...globalRoomUsers, ...offlineUsers];
+      const mergedUsers = [...onlineUsers, ...offlineUsers];
       const uniqueUsers = mergedUsers.reduce((acc: User[], user) => {
         const existingUserIndex = acc.findIndex(
           (u) => u.address === user.address,
@@ -89,24 +76,21 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         return acc;
       }, []);
 
-      return uniqueUsers;
+      setUserList(uniqueUsers)
     }
 
-    const userList = fetchAndMergeUsers();
+    fetchAndMergeUsers();
 
-    return userList;
-  }, [offlineUsers, change]);
+  }, [onlineUsers, offlineUsers]);
 
-  Peers.on('change', () => {
-    console.log('Peers changed!');
-    setChange(!change);
-  });
+  useEffect(() => {
+    async function fetchOfflineUsers() {
+      const storedRoomUsers = await getRoomUsers(roomKey);
+      setOfflineUsers(storedRoomUsers);
+    }
+    fetchOfflineUsers();
+  }, []);
 
-  // useEffect(() => {
-  //   console.log('Useeffect triggered');
-  //   setRoomUsers(userList);
-
-  // }, [userList]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -150,7 +134,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
       <View style={styles.scrollViewContainer}>
         <View style={styles.flatListContainer}>
           <TextField size={'xsmall'} type="muted">
-            {`${t('onlineRoomMembers')} (${globalRoomUsers?.length})`}
+            {`${t('onlineRoomMembers')} (${onlineUsers?.length})`}
           </TextField>
           <View style={styles.flatListWrapper}>
 

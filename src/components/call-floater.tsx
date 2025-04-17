@@ -173,6 +173,7 @@ export const CallFloater: React.FC = () => {
       screenshare: false,
       video: false,
       voice: false,
+      room
     };
 
     Peers.voicestatus(peer);
@@ -197,9 +198,8 @@ export const CallFloater: React.FC = () => {
         ]}>
         <View style={styles.avatarsContainer}>
           {users.map((user) => (
-            <View style={{borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
+            <View key={user.address} style={{borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
             <Avatar
-              key={user.address}
               base64={
                 user.avatar !== '' ? user.avatar : getAvatar(user.address, 32)
               }

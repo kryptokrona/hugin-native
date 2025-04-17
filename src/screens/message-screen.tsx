@@ -88,7 +88,9 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
   const publicKey = Wallet.messageKeys[1];
 
-  const roomUsers = useGlobalStore((state) => state.roomUsers);
+  const allRoomUsers = useGlobalStore((state) => state.roomUsers);
+  const [roomUsers, setRoomUsers] = useState<User[]>([]);
+  const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
 
   const currentCall = useGlobalStore((state) => state.currentCall);
   
@@ -105,20 +107,30 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     const deriveKey = async () => {
       const derivedKey = await Wallet.key_derivation_hash(roomKey);
       keyRef.current = derivedKey;
+      setRoomUsers(allRoomUsers[derivedKey])
     };
 
     deriveKey();
   }, [roomKey]); // Run only when `roomKey` changes
 
-  
+  useEffect(() => {
+    if (keyRef.current) return; // Prevent re-execution if key is already set
 
-  const voiceUsers = useGlobalStore(
-    useCallback(
-      (state) =>
-        state.roomUsers.filter((a) => a.room === keyRef.current && a.voice === true),
-      [keyRef.current],
-    ),
-  );
+    const deriveKey = async () => {
+      const derivedKey = await Wallet.key_derivation_hash(roomKey);
+      keyRef.current = derivedKey;
+      setRoomUsers(allRoomUsers[derivedKey])
+    };
+
+    deriveKey();
+  }, [roomKey]); // Run only when `roomKey` changes
+
+  useEffect(() => {
+    if (!keyRef.current) return; // Don't run when key isnt set yet
+    const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current]
+    setRoomUsers(currentRoomUsers)
+    setVoiceUsers(currentRoomUsers.filter(a => a.voice == true))
+  }, [allRoomUsers]);
 
   const upgradeHugin = () => {
 
@@ -182,10 +194,11 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         screenshare: false,
         video: false,
         voice: true,
+        room: keyRef.current
       };
       const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
       me.voice = true;
-      const call = { room: keyRef.current, time: Date.now(), users: [...userList, me] };
+      const call = { room: keyRef.current, time: Date.now(), users: [...userList, me], talkingUsers: {} };
       useGlobalStore.getState().setCurrentCall(call);
       Peers.voicestatus(peer);
     }
@@ -209,6 +222,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         screenshare: false,
         video: false,
         voice: false,
+        room: keyRef.current
       };
   
       Peers.voicestatus(peer);
@@ -244,12 +258,11 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     }
   }
 
-  const online = useGlobalStore(
-    useCallback(
-      (state) => state.roomUsers.some((a) => a.address === roomKey && a.dm === true),
-      [roomUsers, roomKey],
-    ),
-  );
+  const online = useGlobalStore((state) => {
+    if (!keyRef.current) return false;
+    const users = state.roomUsers[keyRef.current] || [];
+    return users.some((a) => a.address === roomKey);
+  });
 
   // scrollToBottom();
 
