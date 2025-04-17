@@ -112,8 +112,9 @@ export const FeedMessageItem: React.FC<Props> = ({
         key: avatar,
       });
 
+      const useColor = thisUserColor?.background || thisUserColor?.dominant;
 
-      setUserColor(lightenHexColor(thisUserColor?.background, 60) || thisUserColor?.vibrant);
+      setUserColor(lightenHexColor(useColor, 60));
       
     }
 

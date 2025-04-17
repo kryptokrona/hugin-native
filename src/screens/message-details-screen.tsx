@@ -114,9 +114,9 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
         key: avatar,
       });
 
-      console.log('Got colors: ', thisUserColor);
+      const useColor = thisUserColor?.background || thisUserColor?.dominant;
 
-      setUserColor(lightenHexColor(thisUserColor?.background, 60) || thisUserColor?.vibrant);
+      setUserColor(lightenHexColor(useColor, 60));
       
     }
 
