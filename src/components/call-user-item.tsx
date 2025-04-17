@@ -125,14 +125,25 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
           }
         </>
         }
-        <View style={styles.avatar}>
-        <Avatar size={48} base64={avatar} />
+        {video ? (
+        <View style={styles.inlineContainer}>
+          <Avatar size={24} base64={avatar} />
+          <TextField size="xsmall" maxLength={nameMaxLength} style={styles.inlineName}>
+            {name}
+          </TextField>
         </View>
-        <View style={styles.userInfo}>
-        <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
-          {name}
-        </TextField>
-        </View>
+      ) : (
+        <>
+          <View style={styles.avatar}>
+            <Avatar size={48} base64={avatar} />
+          </View>
+          <View style={styles.userInfo}>
+            <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
+              {name}
+            </TextField>
+          </View>
+        </>
+      )}
       </View>
     </TouchableOpacity>
   );
@@ -167,5 +178,24 @@ const styles = StyleSheet.create({
     top: '50%',
     left: '50%',
     transform: [{ translateX: -24 }, { translateY: -24 }],
+  },
+  avatarvideo: {
+    position: 'absolute',
+    left: 5,
+    bottom: 5
+
+  },
+  inlineContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    left: 5,
+    bottom: 5,
+    width: '100%',
+    justifyContent: 'center',
+    marginLeft: -10
+  },
+  inlineName: {
+    marginLeft: 8,
+    flexShrink: 1
   }
 });
