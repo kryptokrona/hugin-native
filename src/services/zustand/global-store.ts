@@ -20,6 +20,7 @@ type GlobalStore = {
   syncStatus: number[];
   fiatPrice: number;
   currentCall: Call;
+  isRegistered: boolean;
   setRoomMessages: (payload: Message[]) => void;
   setMessages: (payload: Message[]) => void;
   setFeedMessages: (payload: Message[]) => void;
@@ -35,6 +36,7 @@ type GlobalStore = {
   setCurrentCall: (payload: Call) => void;
   resetCurrentCall: () => void;
   setUsers: (payload: User[]) => void;
+  setIsRegistered: (payload: boolean) => void;
 };
 
 const defaultCall: Call = { 
@@ -60,6 +62,7 @@ export const useGlobalStore = create<
     roomUsers: {},
     rooms: [],
     feedMessages: [],
+    isRegistered: false,
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -69,7 +72,9 @@ export const useGlobalStore = create<
     setBalance: async (balance: Balance) => {
       set({ balance });
     },
-
+    setIsRegistered: async (isRegistered: boolean) => {
+      set({ isRegistered });
+    },
     setCurrentContact: (thisContact: string) => {
       set({ thisContact });
     },

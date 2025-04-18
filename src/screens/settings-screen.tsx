@@ -22,6 +22,7 @@ import Toast from 'react-native-toast-message';
 import { t } from 'i18next';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { Nodes } from 'lib/native';
+import { useGlobalStore } from '@/services';
 
 interface Item {
   title: string;
@@ -41,6 +42,7 @@ const openURL = () => {
 };
 
 export const SettingsScreen: React.FC<Props> = () => {
+  const isRegistered = useGlobalStore((state) => state.isRegistered);
   const navigation = useNavigation<MainStackNavigationType>();
   const authNavigation = useNavigation<any>();
   const [syncActivated, setSyncActivated] = useState(Wallet.started);
@@ -112,6 +114,8 @@ export const SettingsScreen: React.FC<Props> = () => {
         text1: t('registrationSuccess'),
         type: 'success',
       });
+      useGlobalStore.setState({ isRegistered: true });
+      items.pop();
     } else {
       console.log('result', result);
       Toast.show({
@@ -128,11 +132,6 @@ export const SettingsScreen: React.FC<Props> = () => {
     : 'checkbox-blank-outline';
 
   const items: Item[] = [
-    {
-      function: () => setModalVisible(true),
-      icon: { name: 'star-circle', type: 'MCI' },
-      title: 'Upgrade to Hugin +',
-    },
     {
       icon: { name: 'theme-light-dark', type: 'MCI' },
       screen: MainScreens.ChangeThemeScreen,
@@ -165,6 +164,14 @@ export const SettingsScreen: React.FC<Props> = () => {
       title: 'reportBug',
     },
   ];
+
+  if (!isRegistered) {
+    items.push({
+      function: () => setModalVisible(true),
+      icon: { name: 'star-circle', type: 'MCI' },
+      title: 'Upgrade to Hugin +',
+    });
+  }
 
   const itemMapper = (item: Item) => {
     async function onPress() {
