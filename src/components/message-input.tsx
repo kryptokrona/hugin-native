@@ -236,7 +236,10 @@ export const MessageInput: React.FC<Props> = ({
     setIsRecording(false);
     const recording = await waveformRef.current?.stopRecord();
     console.log('Recording complete: ', recording);
-    const path = recording?.slice(7, recording.length);
+    let path = recording;
+    if (Platform.OS == 'ios') {
+      path = recording?.slice(7, recording.length);
+    }
     const file = await RNFS.stat(path);
 
     const fileInfo: SelectedFile = {

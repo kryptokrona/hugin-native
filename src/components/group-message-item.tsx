@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -115,7 +115,11 @@ export const GroupMessageItem: React.FC<Props> = ({
 
       if (file?.path && file?.type == 'audio') {
         isAudioMessage = true;
-        audioPath = 'file://' + file.path;
+        if (Platform.OS == 'ios') {
+          audioPath = 'file://' + file.path;
+        } else {
+          audioPath = file.path;
+        }
       }
       // setIsLoading(false);
       return { audioPath, isAudioMessage };
