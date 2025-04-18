@@ -191,7 +191,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           return;
         }
         console.log('******** BACKGROUND ********');
-        InCallManager.start({ media: 'audio' });
+        
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
@@ -199,6 +199,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           Rooms.idle(true, false);
         } else {
           Rooms.idle(false, true);
+          InCallManager.start({ media: 'audio' });
         }
         // Rooms.pause();
         setThisRoom(getThisRoom());
