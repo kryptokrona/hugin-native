@@ -91,6 +91,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const allRoomUsers = useGlobalStore((state) => state.roomUsers);
   const [roomUsers, setRoomUsers] = useState<User[]>([]);
   const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
+  const [online, setOnline] = useState(false);
 
   const currentCall = useGlobalStore((state) => state.currentCall);
   
@@ -129,8 +130,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     if (!keyRef.current) return; // Don't run when key isnt set yet
     const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current]
     setRoomUsers(currentRoomUsers)
+    setOnline(currentRoomUsers.some((a) => a.address === roomKey));
     setVoiceUsers(currentRoomUsers.filter(a => a.voice == true))
   }, [allRoomUsers]);
+  
 
   const upgradeHugin = () => {
 
@@ -257,12 +260,6 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       });
     }
   }
-
-  const online = useGlobalStore((state) => {
-    if (!keyRef.current) return false;
-    const users = state.roomUsers[keyRef.current] || [];
-    return users.some((a) => a.address === roomKey);
-  });
 
   // scrollToBottom();
 
