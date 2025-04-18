@@ -15,6 +15,7 @@ import { WalletConfig } from 'config/wallet-config';
 
 import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
 import { usePreferencesStore, useThemeStore } from '@/services';
+import { randomNode } from '@/utils';
 
 import offline_node_list from '../config/nodes.json';
 import { Wallet } from '../services/kryptokrona';
@@ -99,32 +100,12 @@ export const PickNodeScreen: React.FC<Props> = () => {
     setCheckLoading(false);
   };
 
-  const randomNode = async (ssl = true) => {
+  const handleRandomNode = async () => {
     setLoadingNode(true);
-    const filteredNodes = nodeList.filter((node) => node.ssl === ssl);
-    const shuffledNodes = filteredNodes.sort(() => Math.random() - 0.5);
-
-    for (const node of shuffledNodes) {
-      const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${
-        node.port
-      }/info`;
-      try {
-        const response = await fetchWithTimeout(nodeURL, { method: 'GET' });
-        if (response?.ok) {
-          setLoadingNode(false);
-          chooseNode(node);
-          return;
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
+    const node = await randomNode(true);
+    chooseNode(node);
     setLoadingNode(false);
-    if (ssl) {
-      randomNode(false); // Retry with non-SSL nodes
-    }
-  };
+  }
 
   const connectToNode = () => {
     setLoading(true);
@@ -188,9 +169,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
           />
           <TextButton
             icon={loadingNode ? <ActivityIndicator color="#000" /> : undefined}
-            onPress={() => {
-              randomNode(true);
-            }}>
+            onPress={handleRandomNode}>
             {t('randomNode')}
           </TextButton>
           <TextButton

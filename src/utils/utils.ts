@@ -92,4 +92,8 @@ export const randomNode = async (ssl = true) => {
   if (ssl) {
     randomNode(false); // Retry with non-SSL nodes
   }
+
+  console.log('No nodes online..');
+  return nodeList[Math.floor(Math.random() * nodeList.length)];
+
 };
