@@ -114,5 +114,6 @@
   "joinCall": "Join call",
   "endCall": "End call",
   "currentCall": "Current call",
-  "registrationSuccess": "Registration successful! ✅"
+  "registrationSuccess": "Registration successful! ✅",
+  "saveComplete": "Download successful ✅"
 }
