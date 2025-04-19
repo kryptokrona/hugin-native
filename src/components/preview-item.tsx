@@ -1,8 +1,9 @@
-import { Avatar, TextField, Unreads } from './_elements';
+import { Avatar, CustomIcon, TextField, Unreads } from './_elements';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { getAvatar } from '@/utils';
-import { useThemeStore } from '@/services';
+import { useGlobalStore, useThemeStore } from '@/services';
+import { useEffect, useState } from 'react';
 
 interface Props {
   name: string;
@@ -25,6 +26,17 @@ export const PreviewItem: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const isNew = false; // dummy
   const borderColor = isNew ? theme.foreground : theme.border;
+  const [voiceOnline, setVoiceOnline] = useState(false);
+
+  const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
+
+    useEffect(() => {
+      if (roomUsers?.some(a => a.voice == true)) {
+        setVoiceOnline(true);
+      } else {
+        setVoiceOnline(false);
+      }
+    }, [roomUsers]);
 
   function handlePress() {
     onPress(mRoomKey, name);
@@ -40,6 +52,17 @@ export const PreviewItem: React.FC<Props> = ({
         },
       ]}>
       <View style={styles.avatarContainer}>
+        {voiceOnline &&
+
+            <View
+              style={[
+                styles.counter,
+                { backgroundColor: theme.accent }
+              ]}>
+                <CustomIcon size={12} type="MCI" name={'phone'} />
+            </View>
+
+        }
         <Unreads unreads={unreads} />
         {mRoomKey?.length > 15 && (
           <Avatar size={50} base64={getAvatar(mRoomKey)} />
@@ -69,5 +92,19 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginLeft: 16,
+  },
+  counter: {
+    borderRadius: 50,
+    top: -2,
+    elevation: 10,
+    justifyContent: 'center',
+    minHeight: 20,
+    minWidth: 20,
+    padding: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    position: 'absolute',
+    right: 0,
+    zIndex: 10,
   },
 });
