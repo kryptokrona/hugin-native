@@ -197,7 +197,7 @@ export const CallFloater: React.FC = () => {
           },
         ]}>
         <View style={styles.avatarsContainer}>
-          {users.map((user) => (
+          {users?.slice(0, 3)?.map((user) => (
             <View key={user.address} style={{borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
             <Avatar
               base64={
@@ -207,6 +207,12 @@ export const CallFloater: React.FC = () => {
             />
             </View>
           ))}
+          {users?.length > 3 &&
+            <View style={{borderRadius: 5, borderWidth: 2}}>
+              <Text style={{color}}>+{users?.length - 3}</Text>
+            </View>
+          
+          }
         </View>
         {/* <Text style={{ color }}>{callDuration}</Text> */}
         <TouchableOpacity onPress={toggleSpeaker}>
