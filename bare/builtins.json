@@ -1,9 +1,6 @@
 [
   { "addon": "bare-logger" },
-  { "addon": "bare-fs" },
   { "addon": "bare-process" },
-  { "addon": "bare-path" },
   { "addon": "bare-console" },
-  { "addon": "bare-os" },
-  { "addon": "sodium-native" }
+  { "addon": "bare-os" }
 ]

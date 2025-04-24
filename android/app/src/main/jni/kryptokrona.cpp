@@ -3,10 +3,10 @@
 //
 // Please see the included LICENSE file for more information.
 
-#include <StringTools.h>
+#include "StringTools.h"
 #include <string.h>
-#include <kryptokrona.h>
-#include <multisig.h>
+#include "kryptokrona.h"
+#include "multisig.h"
 
 namespace Core
 {

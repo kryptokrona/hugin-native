@@ -443,63 +443,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView>
-
-        <BottomSheet
-          ref={bottomSheetRef}
-          onChange={handleSheetChanges}
-          snapPoints={snapPoints}
-          index={-1}
-          enablePanDownToClose={true}
-          backgroundStyle={{backgroundColor: 'transparent'}}
-          bottomInset={10}
-          handleIndicatorStyle={{ backgroundColor: color }}>
-          <BottomSheetView
-            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
-            {/* <TextField>Awesome 🎉</TextField> */}
-            <View style={{ flex: 1, width: '100%' }}>
-              <View style={styles.flatListContainer}>
-                <TextField size={'xsmall'} type="muted" style={styles.onlineUsersText}>
-                  {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-                </TextField>
-                <View style={styles.flatListWrapper}>
-                  <FlatList
-                    nestedScrollEnabled={true}
-                    numColumns={2}
-                    data={userList}
-                    renderItem={OnlineUserMapper}
-                    keyExtractor={(item, i) => `${item.name}-${i}`}
-                    style={{ flex: 1 }}
-                  />
-                </View>
-              </View>
-
-              {!inCall ? (
-                <TextButton
-                  small
-                  type="secondary"
-                  onPress={onJoinCall}
-                  icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                  {t('joinCall')}
-                </TextButton>
-              ) : (
-                <TextButton
-                  small
-                  type="destructive"
-                  onPress={onEndCall}
-                  icon={
-                    <CustomIcon
-                      color={theme[textType.destructive]}
-                      name="phone-hangup"
-                      type="MCI"
-                      size={16}
-                    />
-                  }>
-                  {t('endCall')}
-                </TextButton>
-              )}
-            </View>
-          </BottomSheetView>
-        </BottomSheet>
+      
       </GestureHandlerRootView>
     </ScreenLayout>
   );

@@ -14,7 +14,8 @@ export class Swarm {
   constructor() {}
 
   async start() {
-    await worklet.start('/app.bundle', bundle);
+    worklet.start('/app.bundle', bundle);
+    console.log("Bundler started..............................")
   }
 
   resume() {

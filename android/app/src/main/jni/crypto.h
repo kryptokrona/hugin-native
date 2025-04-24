@@ -9,7 +9,7 @@
 
 #include "hash.h"
 
-#include <CryptoTypes.h>
+#include "CryptoTypes.h"
 #include <cstddef>
 #include <limits>
 #include <mutex>

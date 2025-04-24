@@ -3,7 +3,7 @@
 
 #include "crypto.h"
 #include "Java.h"
-#include <StringTools.h>
+#include "StringTools.h"
 #include "hash.h"
 #include "kryptokrona.h"
 

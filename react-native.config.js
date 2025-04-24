@@ -16,12 +16,10 @@ module.exports = {
         ios: null,
       },
     },
+    'react-native-bare-kit': {
+      platforms: {
+        android: null,
+      },
+    },
   },
-  // dependencies: {
-  //     'react-native-flipper': {
-  //         platforms: {
-  //             ios: null,
-  //         },
-  //     },
-  // }
 };

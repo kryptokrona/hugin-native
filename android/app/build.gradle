@@ -1,8 +1,13 @@
-apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
+
+ plugins {
+    id("com.facebook.react")
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android") // if using Kotlin
+}
+
 project.ext.react = [
-    enableHermes: true,  // clean and rebuild if changing 
+    enableHermes: false,  // clean and rebuild if changing 
+     enableVmCleanup: false,
 ]
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
@@ -10,11 +15,21 @@ def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
+
 react {
+     autolinkLibrariesWithApp()
+
+         //   The root of your project, i.e. where "package.json" lives. Default is '../..'
+     root = file("../../")
+    //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
+     reactNativeDir = file("../../node_modules/react-native")
+    //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
+    codegenDir = file("../../node_modules/@react-native/codegen")
+    //   The cli.js file which is the React Native CLI entrypoint. Default is ../../node_modules/react-native/cli.js
+     cliFile = file("../../node_modules/react-native/cli.js")
     // entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
-    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
-    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+   
+   
 
     // Use Expo CLI to bundle the app, this ensures the Metro config
     // works correctly with Expo projects.
@@ -61,9 +76,7 @@ react {
     // hermesFlags = ["-O", "-output-source-map"]
     //
     // Added by install-expo-modules
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", rootDir.getAbsoluteFile().getParentFile().getAbsolutePath(), "android", "absolute"].execute(null, rootDir).text.trim())
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli')"].execute(null, rootDir).text.trim())
-    bundleCommand = "export:embed"
+   entryFile = file(new File(rootDir, "../index.js"))
 }
 
 /**
@@ -89,8 +102,8 @@ android {
 
     namespace 'com.huginmessenger'
     defaultConfig {
-        buildToolsVersion '34'
-        targetSdkVersion '33'
+        buildToolsVersion '35'
+        targetSdkVersion '35'
         compileSdk 34
         applicationId 'com.huginmessenger'
         minSdkVersion rootProject.ext.minSdkVersion
@@ -104,13 +117,32 @@ android {
             moduleName "TurtleCoin_jni"
             stl "stlport_static"
         }
-    }
 
-    externalNativeBuild {
-        ndkBuild {
-            path "src/main/jni/Android.mk"
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17 -O3 -fexceptions"
+            }
         }
-    }
+
+        if (project.hasProperty("reactNativeNewArchitectureEnabled") && project.reactNativeNewArchitectureEnabled.toBoolean()) {
+        // For the new architecture (TurboModules and Fabric)
+        buildFeatures {
+            androidResources = true
+            }
+         }
+
+         buildConfigField "boolean", "IS_NEW_ARCHITECTURE", "true"
+    }   
+
+         externalNativeBuild {
+            cmake {
+                path "src/main/jni/CMakeLists.txt"
+            }
+        }
+
+
+
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -129,7 +161,8 @@ android {
             signingConfig signingConfigs.debug
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
             minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
     packagingOptions {
@@ -139,9 +172,7 @@ android {
         pickFirst '**/x86_64/libc++_shared.so'
         pickFirst '**/x86/libjsc.so'
         pickFirst '**/armeabi-v7a/libjsc.so'
-        jniLibs {
-            useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
-        }
+       
     }
 }
 
@@ -165,16 +196,20 @@ android {
     }
 }
 
+
 dependencies {
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation project(':react-native-bare-kit')
     implementation project(':react-native-fs')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-document-picker')
     implementation("androidx.activity:activity:1.9.+")
     implementation 'com.google.mlkit:barcode-scanning:17.2.0'
     implementation project(':react-native-incall-manager')
+    
     
     implementation project(':react-native-background-fetch')
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
@@ -199,11 +234,11 @@ dependencies {
         
         println "Hermes"
         implementation("com.facebook.react:hermes-android")
+         debugImplementation("com.facebook.react:hermes-android")
     } else {
          println "jscFlavor"
         implementation jscFlavor
     }
 }
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
-apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
-applyNativeModulesAppBuildGradle(project)
+
