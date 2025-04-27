@@ -1,6 +1,3 @@
 [
-  { "addon": "bare-logger" },
-  { "addon": "bare-process" },
-  { "addon": "bare-console" },
-  { "addon": "bare-os" }
+
 ]

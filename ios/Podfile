@@ -1,10 +1,6 @@
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 # Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+
 
 def node_require(script)
     # Resolve script with node to allow for hoisting
@@ -18,7 +14,7 @@ end
 node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
-platform :ios, '14.0'
+platform :ios, '15.1'
 prepare_react_native_project!
 
 setup_permissions([
@@ -55,6 +51,8 @@ target 'Hugin' do
     end
   end
   config = use_native_modules!
+
+  ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 
   use_react_native!(
     :path => config[:reactNativePath],

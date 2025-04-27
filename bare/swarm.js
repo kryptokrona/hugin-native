@@ -50,6 +50,8 @@ let feed_requests = [];
 let feed_requests_started = false;
 let pending_feed_requests = new Map();
 
+let last_activity = Date.now();
+
 const feed_request_process = async () => {
 
   feed_requests_started = true;
@@ -304,12 +306,12 @@ class Room {
 }
 
 async function idle() {
+  if (Hugin.idle()) return;
+  if (Date.now() - last_activity < 2000) return;
   for (const room of active_swarms) {
-    if (Hugin.idle()) await room.swarm.suspend();
-    else {
-      await room.swarm.resume();
-      room.discovery.refresh({ client: true, server: true });
-    }
+    await room.swarm.suspend();
+    console.log('Refreshing..', room);
+    await room.swarm.resume();
   }
 }
 const create_swarm = async (hashkey, key, beam = false, chat = false) => {
@@ -400,7 +402,7 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
 
   connection.on('error', (e) => {
     console.log('Got error connection signal', e);
-    connection_closed(connection, topic, 'Connection on error');
+    // connection_closed(connection, topic, 'Connection on error');
   });
 };
 
@@ -505,6 +507,7 @@ const send_swarm_message = (message, topic) => {
 };
 
 const incoming_message = async (data, topic, connection, peer, beam) => {
+  last_activity = Date.now();
   const str = data.toString();
   if (str === 'Ping') {
     return;
@@ -518,7 +521,7 @@ const incoming_message = async (data, topic, connection, peer, beam) => {
     return;
   }
   if (check === 'Error') {
-    connection_closed(connection, topic, 'Connection Error check');
+    // connection_closed(connection, topic, 'Connection Error check');
     return;
   }
   if (check) {

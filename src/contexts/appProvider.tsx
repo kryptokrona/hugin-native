@@ -80,6 +80,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await setLatestRoomMessages();
     await setLatestMessages();
     Files.update(await loadSavedFiles());
+    // await Background.init();
 
     // Function to update the fiat price every minute
     async function updateFiatPrice() {
@@ -169,39 +170,40 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   useEffect(() => {
     const onAppStateChange = async (state: string) => {
       if (state === 'inactive') {
-        if (!started) {
-          return;
-        }
-        console.log('******** INACTIVE STATE *********');
-        //Idle status might be used to display "yellow symbol" instead of "disconnecting"
-        //Or display notifications during background mode
-        if (WebRTC.localMediaStream === null) {
-          Rooms.idle(true, false);
-        } else {
-          Rooms.idle(false, true);
-        }
-        setThisRoom(getThisRoom());
-        Wallet.active?.stop();
+        // if (!started) {
+        //   return;
+        // }
+        // Rooms.pause();
+        // console.log('******** INACTIVE STATE *********');
+        // //Idle status might be used to display "yellow symbol" instead of "disconnecting"
+        // //Or display notifications during background mode
+        // if (WebRTC.localMediaStream === null) {
+        Rooms.idle(true, true);
+        // } else {
+        //   Rooms.idle(false, true);
+        // }
+        // setThisRoom(getThisRoom());
+        // Wallet.active?.stop();
 
-        if (started) {
-          // await Background.init();
-        }
+        // if (started) {
+        //   // await Background.init();
+        // }
       } else if (state === 'background') {
         if (Camera.active) {
           return;
         }
         console.log('******** BACKGROUND ********');
+
+        // Rooms.pause();
         
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
-        if (WebRTC.localMediaStream === null) {
-          Rooms.idle(true, false);
-        } else {
-          Rooms.idle(false, true);
+        Rooms.idle(true, true);
+        if (WebRTC.localMediaStream !== null) {
           InCallManager.start({ media: 'audio' });
         }
-        // Rooms.pause();
+
         setThisRoom(getThisRoom());
         Wallet.active?.stop();
         if (started) {
@@ -209,9 +211,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
-        // Rooms.resume();
         if (started && !joining) {
           joining = true;
+          Rooms.idle(false, false);
           const room = getThisRoom();
           setStoreCurrentRoom(room);
           setThisRoom(room);
