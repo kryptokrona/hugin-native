@@ -80,7 +80,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     await setLatestRoomMessages();
     await setLatestMessages();
     Files.update(await loadSavedFiles());
-    // await Background.init();
+    await Background.init();
 
     // Function to update the fiat price every minute
     async function updateFiatPrice() {

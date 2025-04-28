@@ -2,6 +2,7 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <AVFoundation/AVFoundation.h> 
+#import <TSBackgroundFetch/TSBackgroundFetch.h>
 
 @implementation AppDelegate
 
@@ -24,6 +25,8 @@
   if (audioError) {
     NSLog(@"Error activating AVAudioSession: %@", audioError.localizedDescription);
   }
+
+  [[TSBackgroundFetch sharedInstance] didFinishLaunching];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
