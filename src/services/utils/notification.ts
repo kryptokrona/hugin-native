@@ -4,7 +4,10 @@ import notifee, {
   AndroidCategory,
   AndroidImportance,
   AndroidVisibility,
+  EventType,
 } from '@notifee/react-native';
+import { navigationRef } from '@/contexts';
+import { setRoomMessages } from '@/services';
 
 type Notification = {
   name: string;
@@ -19,12 +22,42 @@ class Notifee {
     this.channel = '';
   }
 
-  async new({ text, name }: Notification, background: boolean) {
+  async new({ text, name }: Notification, background: boolean, data: object) {
     // if (background) {
     //   this.pending.push({ name, text });
     //   return;
     // }
-    this.display(name, text);
+    this.display(name, text, data);
+  }
+
+  async handleNotificationPress(data: any) {
+
+    if (data.type == 'room') {
+
+      await setRoomMessages(data.roomKey, 0);
+
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('GroupChatScreen', {
+          name: data.name,
+          roomKey: data.roomKey,
+        });
+
+    }
+  } 
+    
+    if (data.type == 'roomcall') {
+
+      await setRoomMessages(data.roomKey, 0);
+
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('GroupChatScreen', {
+          name: data.name,
+          roomKey: data.roomKey,
+          call: true
+        });
+
+    }
+  }
   }
 
   async setup() {
@@ -40,6 +73,19 @@ class Notifee {
       await notifee.requestPermission();
     }
 
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        this.handleNotificationPress(detail.notification?.data);
+      }
+    });
+
+    notifee.onForegroundEvent(({ type, detail }) => {
+      if (type === EventType.PRESS) {
+        this.handleNotificationPress(detail.notification?.data);
+      }
+    });
+    
+
     this.channel = channelId;
   }
 
@@ -52,7 +98,7 @@ class Notifee {
     this.pending = [];
   }
 
-  async display(name: string, text: string) {
+  async display(name: string, text: string, data: object) {
     await notifee.displayNotification({
       android: {
         category: AndroidCategory.MESSAGE,
@@ -74,6 +120,7 @@ class Notifee {
         sound: 'roommessage.wav',
       },
       title: name,
+      data: data
     });
   }
 }

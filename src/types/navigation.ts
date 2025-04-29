@@ -19,6 +19,7 @@ export type MainNavigationParamList = {
   [MainScreens.GroupChatScreen]: {
     roomKey: string;
     name: string;
+    call?: boolean;
   };
   [MainScreens.ModifyGroupScreen]: { roomKey: string; name: string };
   [MainScreens.AddGroupScreen]:

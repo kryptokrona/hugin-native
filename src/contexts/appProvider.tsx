@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 
-import { useNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainerRef, createNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import InCallManager from 'react-native-incall-manager';
@@ -51,9 +51,10 @@ interface AppProviderProps {
 let started = false;
 let joining = false;
 
+export const navigationRef = createNavigationContainerRef();
+
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
-  const navigationRef = useNavigationContainerRef();
 
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
@@ -182,7 +183,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // } else {
         //   Rooms.idle(false, true);
         // }
-        // setThisRoom(getThisRoom());
+        setThisRoom(getThisRoom());
         // Wallet.active?.stop();
 
         // if (started) {

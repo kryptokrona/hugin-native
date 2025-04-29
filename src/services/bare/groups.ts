@@ -112,7 +112,8 @@ export const updateMessages = async (
       type: 'success',
     });
   } else if (background) {
-    Notify.new({ name: message.nickname, text: message.message }, background);
+    const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === message.room)?.name;
+    Notify.new({ name: message.nickname + " in " + roomName, text: message.message }, background, {roomKey: message.room, type: 'room', name: roomName});
   }
 };
 

@@ -365,7 +365,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView> */}
-        {/* <BottomSheet
+        <BottomSheet
           ref={bottomSheetRef}
           // onChange={handleSheetChanges}
           snapPoints={snapPoints}
@@ -392,7 +392,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             </View>
             
           </BottomSheetView>
-        </BottomSheet> */}
+        </BottomSheet>
       </GestureHandlerRootView>
     </ScreenLayout>
   );

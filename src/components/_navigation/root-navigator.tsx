@@ -15,6 +15,7 @@ import { RootStackParamList } from '@/types';
 import { SplashScreen } from '@/screens';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { navigationRef } from '@/contexts';
 
 const Stack = createNativeStackNavigator();
 
@@ -109,7 +110,7 @@ export const RootNavigator = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer linking={authenticated ? linking : undefined}>
+      <NavigationContainer ref={navigationRef} linking={authenticated ? linking : undefined}>
         {currentCallRoom.length > 0 && <CallFloater />}
         <Stack.Navigator
           initialRouteName={initialRouteName}
