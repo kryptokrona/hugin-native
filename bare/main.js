@@ -75,7 +75,7 @@ const onrequest = async (p) => {
       break;
     case 'idle_status':
       Hugin.sleep(p.mode, p.background);
-      idle();
+      idle(p.background, p.force);
       break;
     case 'close_connections':
       close_all_connections();

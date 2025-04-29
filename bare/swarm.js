@@ -49,6 +49,7 @@ let localFiles = [];
 let feed_requests = [];
 let feed_requests_started = false;
 let pending_feed_requests = new Map();
+let idletimer = null;
 
 let last_activity = Date.now();
 
@@ -305,14 +306,46 @@ class Room {
   }
 }
 
-async function idle() {
-  if (Hugin.idle()) return;
-  if (Date.now() - last_activity < 2000) return;
-  for (const room of active_swarms) {
-    await room.swarm.suspend();
-    console.log('Refreshing..', room);
-    await room.swarm.resume();
+async function idle(background, force) {
+
+  if (force) {
+    close_all_connections();
+    for (const room of active_swarms) {
+      room.swarm.suspend();
+    }
+    Nodes.node.suspend();
+    return;
   }
+  if (Hugin.idle() && background) {
+
+    if (idletimer) return;
+    idletimer = setTimeout(() => {
+
+      close_all_connections();
+      for (const room of active_swarms) {
+        room.swarm.suspend();
+      }  
+      Nodes.node.suspend();
+      idletimer = null;
+    }, 10*1000)
+    return;
+  };
+
+  if (Hugin.idle()) return;
+  if (idletimer) {
+    clearTimeout(idletimer);
+    idletimer = null;
+  }
+  if (Date.now() - last_activity < 2000) return;
+  if (Date.now() - last_activity > 2000) {
+    for (const room of active_swarms) {
+      // room.swarm.suspend();
+      await room.swarm.resume();
+      room.discovery.refresh({client: true, server: true});
+    }  
+    Nodes.node.resume();
+    Nodes.reconnect();
+  };
 }
 const create_swarm = async (hashkey, key, beam = false, chat = false) => {
   const room = new Room(beam);

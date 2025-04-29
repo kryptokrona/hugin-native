@@ -28,7 +28,7 @@ import it from './translations/it.json';
 
 i18next
   // .use(languageDetector)
-  .use(RNLanguageDetector)
+  // .use(RNLanguageDetector)
   .use(initReactI18next)
   .init({
     compatibilityJSON: 'v3',

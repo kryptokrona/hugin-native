@@ -38,7 +38,7 @@ class Connections extends EventEmitter {
     if (peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address ) {
       const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === peer.room)?.name;
       const message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
-      Notify.new({ name: peer.name, text: message });
+      Notify.new({ name: peer.name, text: message }, true, {roomKey: peer.room, type: 'roomcall', name: roomName});
     }
 
   }
