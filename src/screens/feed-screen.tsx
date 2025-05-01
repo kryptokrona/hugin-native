@@ -42,6 +42,7 @@ import {
   Unreads,
   TextField,
   UserItem,
+  ModalBottom,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -86,23 +87,11 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
-  // const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.feedMessages);
-
-  const [isBottomSheetReady, setBottomSheetReady] = useState(false);
-  useEffect(() => {
-    InteractionManager.runAfterInteractions(() => {
-      setBottomSheetReady(true);
-    });
-  }, []);
+  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
+  const closeBottomSheet = () => setBottomSheetVisible(false);
 
   useEffect(() => {
-    // const getFeedMessagesFromDB = async (page=0) => {
-    //   console.log('Get DB feeds');
-    //   const thisMessages = await getFeedMessages(page);
-    //   setMessages(thisMessages);
-    // }
-    // getFeedMessagesFromDB();
     setFeedMessages(0);
     return () => {
       console.log('Screen unmounted');
@@ -121,23 +110,6 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
     }
   };
 
-  // const messages = [
-  //   {
-  //     "address": "SEKReXGS2GSG65cY9ZSPTC6RAnq1NN8ziSNA3Af4DgWmPbJmM7LbKUze5PCLAgugDmdkerZHZ2wNDJ3Eb1Ys4ZgaQfXNfFbjQSc",
-  //     "file": undefined, 
-  //     "hash": "295c0c0a896fcfd1a5a50e972a1e4c62ba6b67ea719a3ca22772e046ca40d905", 
-  //     "message": "12test", 
-  //     "nickname": "aaa", 
-  //     "reactions": [], 
-  //     "replies": [], 
-  //     "reply": "", 
-  //     "replyto": false, 
-  //     "room": "8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc",
-  //     "sent": 0,f
-  //     "timestamp": 1742700693766, 
-  //     "tip": "false"
-  //   }
-  // ]
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
@@ -207,7 +179,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   }
 
   function onCreatePost() {
-    
+    setBottomSheetVisible(true)
       bottomSheetRef?.current?.snapToIndex(0);
 
   }
@@ -372,36 +344,44 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView> */}
-        {isBottomSheetReady && (
-        <BottomSheet
-          ref={bottomSheetRef}
-          // onChange={handleSheetChanges}
-          snapPoints={snapPoints}
-          index={-1}
-          enablePanDownToClose={true}
-          keyboardBehavior="interactive"
-          backgroundStyle={{backgroundColor: 'transparent'}}
-          bottomInset={10}
-          handleIndicatorStyle={{ backgroundColor: color }}>
-          <BottomSheetView
-            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
-            
-            <View
-              style={[styles.inputWrapper]}
-              // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              // keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}
-              >
-              <MessageInput
-                onSend={onSend}
-                replyToName={replyToName}
-                onCloseReplyPress={onCloseReplyPress}
-                hideExtras={true}
-              />
-            </View>
-            
-          </BottomSheetView>
-        </BottomSheet>
-        )}
+       {Platform.OS === 'ios' ? (
+  <BottomSheet
+    ref={bottomSheetRef}
+    snapPoints={snapPoints}
+    index={-1}
+    enablePanDownToClose={true}
+    keyboardBehavior="interactive"
+    backgroundStyle={{ backgroundColor: 'transparent' }}
+    bottomInset={10}
+    handleIndicatorStyle={{ backgroundColor: color }}
+  >
+    <BottomSheetView
+      style={[{ backgroundColor, borderColor }, styles.contentContainer]}
+    >
+      <View style={styles.inputWrapper}>
+        <MessageInput
+          onSend={onSend}
+          replyToName={replyToName}
+          onCloseReplyPress={onCloseReplyPress}
+          hideExtras={true}
+        />
+      </View>
+    </BottomSheetView>
+  </BottomSheet>
+) : (
+  <ModalBottom visible={isBottomSheetVisible} closeModal={closeBottomSheet}>
+    <View
+     style={[{ backgroundColor, borderColor }, styles.contentContainer]}
+    >
+      <MessageInput
+        onSend={onSend}
+        replyToName={replyToName}
+        onCloseReplyPress={onCloseReplyPress}
+        hideExtras={true}
+      />
+    </View>
+  </ModalBottom>
+)}
       </GestureHandlerRootView>
     </ScreenLayout>
   );
