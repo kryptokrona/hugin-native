@@ -19,6 +19,7 @@ import {
   RTCView
 } from 'react-native-webrtc';
 import { FullScreenVideoViewer } from './full-screen-video';
+import { lightenHexColor } from '@/services/utils';
 
 type Props = User;
 
@@ -32,13 +33,17 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
   const color = theme.foreground;
   const card = theme.card;
   const [userColor, setUserColor] = useState(theme.card);
+  let hadAvatar = true;
   const myUserAddress = useGlobalStore((state) => state.address);
 
   const talkingUsers = useGlobalStore(state => state.currentCall.talkingUsers);
 
   const w = Dimensions.get('window').width;
   const width = w / 2;
-  if (!avatar) avatar = useMemo(() => getAvatar(address ?? ''), [address]);
+  if (!avatar) {
+    hadAvatar = false;
+    avatar = useMemo(() => getAvatar(address ?? ''), [address]);
+  }
 
   useEffect(() => {
 
@@ -49,8 +54,12 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
         cache: true,
         key: avatar,
       });
+      let backgroundColor = thisUserColor?.background || thisUserColor?.dominant;
+      if (!hadAvatar) {
+        backgroundColor = lightenHexColor(backgroundColor, 60)
 
-      setUserColor(thisUserColor?.primary || thisUserColor?.vibrant);
+      }
+      setUserColor(backgroundColor);
       
     }
 
@@ -125,7 +134,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
           }
         </>
         }
-        {video ? (
+        {video && stream ? (
         <View style={styles.inlineContainer}>
           <Avatar size={24} base64={avatar} />
           <TextField size="xsmall" maxLength={nameMaxLength} style={styles.inlineName}>

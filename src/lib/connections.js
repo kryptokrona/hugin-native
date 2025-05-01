@@ -41,6 +41,9 @@ class Connections extends EventEmitter {
       Notify.new({ name: peer.name, text: message }, true, {roomKey: peer.room, type: 'roomcall', name: roomName});
     }
 
+    let list = this.active();
+    this.update(list);
+
   }
 
   left(peer) {

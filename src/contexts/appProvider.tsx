@@ -178,9 +178,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // console.log('******** INACTIVE STATE *********');
         // //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         // //Or display notifications during background mode
-        // if (WebRTC.localMediaStream === null) {
+        if (WebRTC.localMediaStream === null) {
         Rooms.idle(true, true);
-        // } else {
+        } //else {
         //   Rooms.idle(false, true);
         // }
         setThisRoom(getThisRoom());
@@ -200,9 +200,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         //Or display notifications during background mode
         console.log('Close!');
-        Rooms.idle(true, true);
+        if (WebRTC.localMediaStream === null) {
+          Rooms.idle(true, true);
+        }
         if (WebRTC.localMediaStream !== null) {
           InCallManager.start({ media: 'audio' });
+          Rooms.idle(false, true);
         }
 
         setThisRoom(getThisRoom());
