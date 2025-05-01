@@ -9,6 +9,7 @@ import React, {
 
 import {
   FlatList,
+  InteractionManager,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -98,6 +99,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
 
+  const [isBottomSheetReady, setBottomSheetReady] = useState(false);
+    useEffect(() => {
+      InteractionManager.runAfterInteractions(() => {
+        setBottomSheetReady(true);
+      });
+    }, []);
 
   useEffect(() => {
     if (!roomUsers) return;
@@ -451,7 +458,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView>
-
+        {isBottomSheetReady && (
         <BottomSheet
           ref={bottomSheetRef}
           onChange={handleSheetChanges}
@@ -508,6 +515,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             </View>
           </BottomSheetView>
         </BottomSheet>
+        )}
       
       </GestureHandlerRootView>
     </ScreenLayout>

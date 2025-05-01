@@ -9,6 +9,7 @@ import React, {
 
 import {
   FlatList,
+  InteractionManager,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -88,6 +89,12 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   // const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.feedMessages);
 
+  const [isBottomSheetReady, setBottomSheetReady] = useState(false);
+  useEffect(() => {
+    InteractionManager.runAfterInteractions(() => {
+      setBottomSheetReady(true);
+    });
+  }, []);
 
   useEffect(() => {
     // const getFeedMessagesFromDB = async (page=0) => {
@@ -365,6 +372,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView> */}
+        {isBottomSheetReady && (
         <BottomSheet
           ref={bottomSheetRef}
           // onChange={handleSheetChanges}
@@ -393,6 +401,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             
           </BottomSheetView>
         </BottomSheet>
+        )}
       </GestureHandlerRootView>
     </ScreenLayout>
   );

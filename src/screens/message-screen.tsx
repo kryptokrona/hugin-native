@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 
 import {
   FlatList,
+  InteractionManager,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -101,6 +102,13 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   
   const keyRef = useRef(null);
   const inCall = currentCall.room === keyRef.current;
+
+   const [isBottomSheetReady, setBottomSheetReady] = useState(false);
+  useEffect(() => {
+      InteractionManager.runAfterInteractions(() => {
+        setBottomSheetReady(true);
+      });
+    }, []);
 
   useEffect(() => {
     if (keyRef.current) return; // Prevent re-execution if key is already set
@@ -511,6 +519,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
           dm={true}
         />
       </KeyboardAvoidingView>
+      {isBottomSheetReady && (
       <BottomSheet
           ref={bottomSheetRef}
           onChange={() => {}}
@@ -567,6 +576,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
             </View>
           </BottomSheetView>
         </BottomSheet>
+      )}
       </GestureHandlerRootView>
     </ScreenLayout>
   );
