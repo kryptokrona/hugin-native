@@ -9,7 +9,6 @@ import React, {
 
 import {
   FlatList,
-  InteractionManager,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -42,7 +41,6 @@ import {
   Unreads,
   TextField,
   UserItem,
-  ModalBottom,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -91,15 +89,15 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
   const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
+  // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
   const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
   const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
   const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
+  // console.log('currentCall', currentCall);
   const inCallUsers = 0;
-  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const closeBottomSheet = () => setBottomSheetVisible(false);
- 
+
 
   useEffect(() => {
     if (!roomUsers) return;
@@ -126,8 +124,16 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const snapPoints = useMemo(() => ['50%'], []);
 
   function onShowCall() {
-    setBottomSheetVisible(true)
-    bottomSheetRef?.current?.expand();
+    console.log('Clicked');
+    if (Platform.OS == 'ios') {
+      bottomSheetRef?.current?.snapToIndex(0);
+    } else {
+      if (inCall) {
+        onEndCall()
+      } else {
+        onJoinCall();
+      }
+    }
   }
 
   useEffect(() => {
@@ -388,54 +394,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
-  const SheetContent = () => (
-    <View style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
-      <View style={styles.flatListContainer}>
-        <TextField size="xsmall" type="muted" style={styles.onlineUsersText}>
-          {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-        </TextField>
-        <View style={styles.flatListWrapper}>
-          <FlatList
-            nestedScrollEnabled
-            numColumns={2}
-            data={userList}
-            renderItem={OnlineUserMapper}
-            keyExtractor={(item, i) => `${item.name}-${i}`}
-            style={{ flex: 1 }}
-          />
-        </View>
-      </View>
-  
-      {!inCall ? (
-        <TextButton
-          small
-          type="secondary"
-          onPress={onJoinCall}
-          icon={<CustomIcon name="phone" type="MCI" size={16} />}
-        >
-          {t('joinCall')}
-        </TextButton>
-      ) : (
-        <TextButton
-          small
-          type="destructive"
-          onPress={onEndCall}
-          icon={
-            <CustomIcon
-              color={theme[textType.destructive]}
-              name="phone-hangup"
-              type="MCI"
-              size={16}
-            />
-          }
-        >
-          {t('endCall')}
-        </TextButton>
-      )}
-    </View>
-  );
-  
-
   return (
     <ScreenLayout>
       <GestureHandlerRootView>
@@ -501,27 +459,67 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView>
-        {Platform.OS === 'ios' ? (
-      <BottomSheet
-        ref={bottomSheetRef}
-        onChange={handleSheetChanges}
-        snapPoints={snapPoints}
-        index={-1}
-        enablePanDownToClose
-        backgroundStyle={{ backgroundColor: 'transparent' }}
-        bottomInset={10}
-        handleIndicatorStyle={{ backgroundColor: color }}
-      >
-        <BottomSheetView style={{ flex: 1 }}>
-          <SheetContent />
-        </BottomSheetView>
-      </BottomSheet>
-    ) : (
-      <ModalBottom visible={isBottomSheetVisible} closeModal={closeBottomSheet}>
-        <SheetContent />
-      </ModalBottom>
-    )}
 
+        {Platform.OS == "ios" &&
+
+        <BottomSheet
+          ref={bottomSheetRef}
+          onChange={handleSheetChanges}
+          snapPoints={snapPoints}
+          index={-1}
+          enablePanDownToClose={true}
+          backgroundStyle={{backgroundColor: 'transparent'}}
+          bottomInset={10}
+          handleIndicatorStyle={{ backgroundColor: color }}>
+          <BottomSheetView
+            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
+            {/* <TextField>Awesome 🎉</TextField> */}
+            <View style={{ flex: 1, width: '100%' }}>
+              <View style={styles.flatListContainer}>
+                <TextField size={'xsmall'} type="muted" style={styles.onlineUsersText}>
+                  {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
+                </TextField>
+                <View style={styles.flatListWrapper}>
+                  <FlatList
+                    nestedScrollEnabled={true}
+                    numColumns={2}
+                    data={userList}
+                    renderItem={OnlineUserMapper}
+                    keyExtractor={(item, i) => `${item.name}-${i}`}
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              </View>
+
+              {!inCall ? (
+                <TextButton
+                  small
+                  type="secondary"
+                  onPress={onJoinCall}
+                  icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+                  {t('joinCall')}
+                </TextButton>
+              ) : (
+                <TextButton
+                  small
+                  type="destructive"
+                  onPress={onEndCall}
+                  icon={
+                    <CustomIcon
+                      color={theme[textType.destructive]}
+                      name="phone-hangup"
+                      type="MCI"
+                      size={16}
+                    />
+                  }>
+                  {t('endCall')}
+                </TextButton>
+              )}
+            </View>
+          </BottomSheetView>
+        </BottomSheet>
+      
+        }
 
       </GestureHandlerRootView>
     </ScreenLayout>

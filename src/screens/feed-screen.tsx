@@ -344,7 +344,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView> */}
-       {Platform.OS === 'ios' ? (
+       {Platform.OS === 'android' ? (
   <BottomSheet
     ref={bottomSheetRef}
     snapPoints={snapPoints}
@@ -369,18 +369,20 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
     </BottomSheetView>
   </BottomSheet>
 ) : (
-  <ModalBottom visible={isBottomSheetVisible} closeModal={closeBottomSheet}>
-    <View
-     style={[{ backgroundColor, borderColor }, styles.contentContainer]}
-    >
-      <MessageInput
-        onSend={onSend}
-        replyToName={replyToName}
-        onCloseReplyPress={onCloseReplyPress}
-        hideExtras={true}
-      />
-    </View>
-  </ModalBottom>
+
+      <KeyboardAvoidingView
+        style={[styles.inputWrapper, { backgroundColor }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
+        <MessageInput
+          onSend={onSend}
+          hideExtras={true}
+          replyToName={replyToName}
+          onCloseReplyPress={onCloseReplyPress}
+          dm={true}
+        />
+      </KeyboardAvoidingView>
+
 )}
       </GestureHandlerRootView>
     </ScreenLayout>
