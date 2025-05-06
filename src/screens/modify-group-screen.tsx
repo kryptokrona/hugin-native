@@ -62,6 +62,8 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
   useEffect(() => {
 
+    if (!onlineUsers) return;
+
     function fetchAndMergeUsers() {
       const mergedUsers = [...onlineUsers, ...offlineUsers];
       const uniqueUsers = mergedUsers.reduce((acc: User[], user) => {
