@@ -105,7 +105,7 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
         />
       ),
     });
-  }, [navigation]);
+  }, [navigation, t]);
 
   function onAddGroupPress() {
     setModalVisible(true);

@@ -137,6 +137,7 @@ export const useThemeStore = create<ThemeStore>()(
 );
 
 interface PreferencesStore {
+  setLanguage: (language: string) => void;
   preferences: Preferences;
   setPreferences: (preferences: Preferences) => void;
   setAuthMethod: (authMethod: AuthMethods | null) => void;
@@ -151,6 +152,10 @@ export const usePreferencesStore = create<PreferencesStore>()(
           preferences: { ...state.preferences, authMethod },
         })),
       setPreferences: (preferences) => set({ preferences }),
+      setLanguage: (language: string) =>
+        set((state) => ({
+          preferences: { ...state.preferences, language },
+        })),
     }),
     {
       merge: (persistedState: unknown, currentState: PreferencesStore) => {
@@ -164,6 +169,9 @@ export const usePreferencesStore = create<PreferencesStore>()(
       name: ASYNC_STORAGE_KEYS.PREFERENCES,
       onRehydrateStorage: () => () => {
         const authMethod = getAuthMethod();
+        console.log('✅ Rehydrated preferences state:', usePreferencesStore.getState().preferences);
+
+
 
         if (authMethod === AuthMethods.reckless) {
           setAuthenticated(true);

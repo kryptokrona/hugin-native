@@ -43,6 +43,7 @@ import { Wallet } from '../services/kryptokrona/wallet';
 import { Notify } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
 import { setStoreFeedMessages } from '../services/zustand';
+import { useTranslation } from 'react-i18next';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -55,11 +56,17 @@ export const navigationRef = createNavigationContainerRef();
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
-
+  const { i18n } = useTranslation();
   const authenticated = useGlobalStore((state) => state.authenticated);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
+
+  useEffect(() => {
+    if (preferences) {
+      i18n.changeLanguage(preferences.language);
+    }
+  }, [preferences]);
 
   async function init() {
     /// Activate this if we want to run foreground task running on Android
