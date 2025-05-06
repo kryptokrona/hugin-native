@@ -79,9 +79,7 @@ export const updateMessages = async (
           if (msg.hash === message.reply) {
             return {
               ...msg,
-              reactions: [
-                ...new Set([...(msg.reactions || []), message.message]),
-              ],
+              reactions: [...(msg.reactions || []), message.message]
             };
           }
           return msg;

@@ -48,28 +48,26 @@ export const updateMessages = async (
 
     console.log('Get feed messages from db: ', messages);
 
-    if (message.reply?.length === 64) {
-      if (containsOnlyEmojis(message.message) && message.message.length < 9) {
-        const updatedMessage = messages.map((msg) => {
-          if (msg.hash === message.reply) {
-            return {
-              ...msg,
-              reactions: [
-                ...new Set([...(msg.reactions || []), message.message]),
-              ],
-            };
-          }
-          return msg;
-        });
-        setStoreFeedMessages(updatedMessage);
-        return;
-      }
+    // if (message.reply?.length === 64) {
+    //   if (containsOnlyEmojis(message.message) && message.message.length < 9) {
+    //     const updatedMessage = messages.map((msg) => {
+    //       if (msg.hash === message.reply) {
+    //         return {
+    //           ...msg,
+    //           reactions: [...(msg.reactions || []), message.message]
+    //         };
+    //       }
+    //       return msg;
+    //     });
+    //     setStoreFeedMessages(updatedMessage);
+    //     return;
+    //   }
 
-      const reply = messages.find((a) => a.hash === message.reply);
-      if (reply !== undefined) {
-        message.replyto = [reply];
-      }
-    }
+    //   const reply = messages.find((a) => a.hash === message.reply);
+    //   if (reply !== undefined) {
+    //     message.replyto = [reply];
+    //   }
+    // }
 
     // const messageExists = messages.some((msg) => msg.hash === message.hash);
     // console.log('messageExists? ', messageExists);

@@ -247,7 +247,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
     }
     if (!emoji) {
       scrollToBottom();
-      bottomSheetRef.current.close()
+      bottomSheetRef?.current?.close()
     }
   }
 
@@ -344,7 +344,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView> */}
-       {Platform.OS === 'android' ? (
+       {Platform.OS === 'ios' ? (
   <BottomSheet
     ref={bottomSheetRef}
     snapPoints={snapPoints}
