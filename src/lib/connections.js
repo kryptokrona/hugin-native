@@ -10,7 +10,7 @@ import { User } from '@/types';
 class Connections extends EventEmitter {
 
   join(peer, beam) {
-    console.log('New connection incoming');
+    // console.log('New connection incoming', peer.name);
     const connected = {
       address: peer.address ?? null,
       name: peer.name || "Anonymous",
@@ -30,7 +30,6 @@ class Connections extends EventEmitter {
   voicestatus(peer) {
     console.log('Voice status changed for ', peer );
     const thisRoomUsers = this.active()[peer.room];
-    console.log('thisRoomUsers',thisRoomUsers);
     useGlobalStore.getState().updateRoomUser(peer)
 
     const peerPreviousCallStatus = thisRoomUsers.find(a => a.address == peer.address).voice;
@@ -47,7 +46,7 @@ class Connections extends EventEmitter {
   }
 
   left(peer) {
-    console.log('Peer disconnected', peer);
+    // console.log('Peer disconnected', peer.name);
     useGlobalStore.getState().removeRoomUser(peer);
   }
 

@@ -125,7 +125,7 @@ export class ActiveWallet {
     this.active = loadedWallet;
     this.address = this.addresses()[0];
 
-    console.log('Loaded wallet:', this.active);
+    console.log('Loaded wallet:');
     console.log('--------------->');
     console.log('Wallet address:', this.address);
 
@@ -214,7 +214,7 @@ export class ActiveWallet {
   }
 
   async start() {
-    console.log('Start this wallet ->', this.active);
+    console.log('Start this wallet ->', this.address);
     setStoreAddress(this.address);
     this.active.setBlockOutputProcessFunc(processBlockOutputs);
     this.active.enableAutoOptimization(false);

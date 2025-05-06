@@ -169,7 +169,6 @@ export const usePreferencesStore = create<PreferencesStore>()(
       name: ASYNC_STORAGE_KEYS.PREFERENCES,
       onRehydrateStorage: () => () => {
         const authMethod = getAuthMethod();
-        console.log('✅ Rehydrated preferences state:', usePreferencesStore.getState().preferences);
 
 
 

@@ -63,13 +63,11 @@ export const SettingsScreen: React.FC<Props> = () => {
   };
 
   const copyText = (data: string) => {
-    console.log('Copied!');
     Clipboard.setString(data);
     Toast.show({
       text1: t('copyText'),
       type: 'success',
     });
-    console.log('done');
   };
 
   const upgradeHugin = async () => {
@@ -113,7 +111,6 @@ export const SettingsScreen: React.FC<Props> = () => {
         type: 'success',
       });
     } else {
-      console.log('result', result);
       Toast.show({
         text1: t('transactionFailed'),
         type: 'error',
@@ -163,6 +160,11 @@ export const SettingsScreen: React.FC<Props> = () => {
       function: openURL,
       icon: { name: 'bug', type: 'FA5' },
       title: 'reportBug',
+    },
+    {
+      icon: { name: 'terminal', type: 'FA6' },
+      screen: MainScreens.LoggerScreen,
+      title: 'debugLog',
     },
   ];
 

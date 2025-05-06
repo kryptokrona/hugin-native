@@ -74,7 +74,6 @@ export const MessagesScreen: React.FC<Props> = () => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      console.log('Got qr:', codes);
       if (codes.length > 0) {
         if (codes[0].value) {
           setTimeout(() => gotQRCode(codes[0].value), 500);

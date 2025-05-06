@@ -25,6 +25,8 @@ import {
   WebRTC,
 } from '@/services';
 
+import { getLogs, clearLogs } from '@/utils';
+
 import { Background } from './background';
 
 import { Beam, Nodes, Rooms } from '../lib/native';
@@ -92,7 +94,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     // Function to update the fiat price every minute
     async function updateFiatPrice() {
-      console.log('$£$£$£$∞£$∞£$∞£$∞ - Getting fiat..');
       const price = await getCoinPriceFromAPI();
       useGlobalStore.setState({ fiatPrice: price });
     }

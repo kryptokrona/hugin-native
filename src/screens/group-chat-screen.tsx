@@ -124,7 +124,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const snapPoints = useMemo(() => ['50%'], []);
 
   function onShowCall() {
-    console.log('Clicked');
     if (Platform.OS == 'ios') {
       bottomSheetRef?.current?.snapToIndex(0);
     } else {
@@ -145,7 +144,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }, [bottomSheetRef])
 
   function onJoinCall() {
-    console.log('Joining call!');
     WebRTC.init();
     Rooms.voice(
       {
@@ -206,7 +204,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
   }, []);
 
   function onCustomizeGroupPress() {
@@ -336,7 +333,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     emoji?: boolean | undefined,
     tip?: TipType | undefined,
   ) {
-    console.log('Sending to room:', name);
     if (file) {
       onSendGroupMessageWithFile(roomKey, file, text);
       //If we need to return something... or print something locally

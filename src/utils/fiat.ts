@@ -112,7 +112,6 @@ export async function getCoinPriceFromAPI() {
 
     while (!fiatPrice && i < WalletConfig.priceApiLinks.length) {
         const uri = WalletConfig.priceApiLinks[i].url; 
-        console.log('Testing fiat solver..', uri);
 
         try {
             const response = await fetch(uri, {
@@ -127,8 +126,6 @@ export async function getCoinPriceFromAPI() {
             const data = await response.json();
             let currentLevel = data;
 
-            console.log('data', data);
-
             for (const path of WalletConfig.priceApiLinks[i].path) {
                 if (currentLevel[path] === undefined) {
                     throw new Error(`Invalid path: ${path}`);
@@ -137,7 +134,6 @@ export async function getCoinPriceFromAPI() {
             }
 
             const coinData = currentLevel;
-            console.log('Updated coin price from API', coinData);
 
             if (coinData) {
                 return coinData;

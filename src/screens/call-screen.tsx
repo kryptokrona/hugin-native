@@ -94,9 +94,9 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
     return <CallUserItem {...item} />;
   }
 
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
-  }, []);
+  // const handleSheetChanges = useCallback((index: number) => {
+  //   console.log('handleSheetChanges', index);
+  // }, []);
 
   const scrollToBottom = () => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });

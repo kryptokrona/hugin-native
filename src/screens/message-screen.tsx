@@ -177,7 +177,6 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   }
 
   async function onJoinCall() {
-      console.log('Joining call!', roomKey);
       WebRTC.init();
       Rooms.voice(
         {
@@ -271,7 +270,6 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   );
 
   function onShowCall() {
-    console.log('Clicked');
     if (Platform.OS == 'ios') {
       bottomSheetRef?.current?.snapToIndex(0);
     } else {
@@ -364,7 +362,6 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
       text = file.fileName;
     }
 
-    console.log('Sending to room:', name);
     if (file) {
       Beam.file(roomKey, file);
       //If we need to return something... or print something locally

@@ -94,7 +94,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   useEffect(() => {
     setFeedMessages(0);
     return () => {
-      console.log('Screen unmounted');
+      
     };
   }, []);
 

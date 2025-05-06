@@ -372,7 +372,6 @@ export const FeedMessageItem: React.FC<Props> = ({
               candleHeightScale={4}
               onPlayerStateChange={setPlayerState}
               onChangeWaveformLoadState={state => {
-                console.log('waveform loading: ', state)
                 // setIsLoading(state);
               }}
               onError={error => {

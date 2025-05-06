@@ -74,7 +74,7 @@ export class Bridge {
     }
     if (json) {
       if (json.type !== 'room-message-exists') {
-        console.log('Got rpc message', json.type);
+        // console.log('Got rpc message', json.type);
       }
       switch (json.type) {
         case 'log':
@@ -83,36 +83,23 @@ export class Bridge {
           Nodes.address = json.address
           break;
         case 'new-swarm':
-          console.log('new swarm!');
           break;
         case 'beam-message':
-          console.log('string? decrypt this! -->', json.message);
           MessageSync.check_for_pm(json.message, json.hash);
           break;
         case 'beam-connected':
-          console.log('****** GOT BEAM CONNECTION *******');
-          console.log('Address:', json.chat);
-          console.log('Topic:', json.topic);
           //Change state to -> "connected"
           break;
         case 'new-beam':
-          console.log('*********************************');
-          console.log('******* Started a new beam! *****');
-          console.log('*********************************');
-          console.log('Address:', json.chat);
-          console.log('Topic:', json.topic);
           //Set some state 'started, not connected'
           break;
         case 'get-history':
           //Get history from db
           //await db response here then send it back to bare
-          console.log('GET MESSAGE HISTORY ---->');
           break;
         case 'end-swarm':
-          console.log('end-swarm!');
           break;
         case 'feed-message':
-          console.log('Got feed data:', json);
           saveFeedMessageAndUpdate(json.data.address, json.data.message, json.data.reply, json.data.timestamp, json.data.nickname, json.data.hash, undefined, undefined);
           break;
         case 'swarm-message':
@@ -172,7 +159,7 @@ export class Bridge {
           );
           break;
         case 'peer-disconnected':
-          console.log('peer-disconnected!', json.address);
+          // console.log('peer-disconnected!', json.address);
           Peers.left(json);
           break;
         case 'voice-channel-status':
@@ -193,7 +180,6 @@ export class Bridge {
           WebRTC.callback(json.data);
           break;
         case 'answer-call':
-          console.log('Got call: ', json);
           WebRTC.answer(json.data);
           break;
         case 'got-expanded-voice-channel':
@@ -201,30 +187,20 @@ export class Bridge {
           WebRTC.signal(key, topic, address, data);
           break;
         case 'error-message':
-          console.log('ERROR', json.message);
           break;
         case 'save-file-info':
-          console.log('Save file info:', json.message);
           break;
         case 'room-remote-file-added':
-          console.log('Remote file added --> ', json.remoteFiles);
-          console.log('From:', json.chat);
-          console.log('In room:', json.room);
           //Maybe add a global state for remote files?
           //Update remote file list. We need to replace the message in the chat-window with a download button.
           //That message is a normal swarm-message with the correct Message format.
           //Both have the same hash as identifier.
           break;
         case 'download-complete':
-          console.log('Download completed!', json.fileName);
         //path, chat, hash, filename
         case 'local-files':
-          console.log('local files:', json.localFiles);
         case 'upload-file-progress':
-          console.log('Uploading progress ipc message:', json.progress);
-          console.log('File:', json);
         case 'download-file-progress':
-          console.log('Downloading progress ipc message:', json.progress);
         default:
           const response = await this.onrequest(json);
           this.send({ id: json.id, data: response });

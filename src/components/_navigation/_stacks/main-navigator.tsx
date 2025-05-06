@@ -16,7 +16,8 @@ import {
   WalletStatusScreen,
   CallScreen,
   FeedScreen,
-  MessageDetailsScreen
+  MessageDetailsScreen,
+  LoggerScreen
 } from '@/screens';
 
 import { Header } from '../header';
@@ -191,6 +192,13 @@ const SettingsStack = () => {
         component={PickNodeScreen}
         options={{
           header: (_props) => <Header title={t('nodePicker')} backButton />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.LoggerScreen}
+        component={LoggerScreen}
+        options={{
+          header: (_props) => <Header title={t('loggerScreen')} backButton />,
         }}
       />
     </NativeStack.Navigator>

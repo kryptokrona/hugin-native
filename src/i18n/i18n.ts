@@ -32,7 +32,7 @@ i18next
   .use(initReactI18next)
   .init({
     compatibilityJSON: 'v3',
-    debug: true,
+    debug: false,
     fallbackLng: 'en',
     resources: {
       ben: {

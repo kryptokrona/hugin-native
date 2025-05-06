@@ -158,7 +158,6 @@ export const useGlobalStore = create<
       });
     },
     updateRoomUser: (user: any) => {
-      console.log('Updating room user', user?.name)
       if (!user || !user.address || !user.room) return;
     
       set((state) => {

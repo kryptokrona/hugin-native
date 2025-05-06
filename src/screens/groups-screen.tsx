@@ -77,7 +77,6 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      console.log('Got qr:', codes);
       if (codes.length > 0) {
         if (codes[0].value) {
           setTimeout(() => gotQRCode(codes[0].value), 500);
@@ -126,7 +125,6 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
   }
 
   function finishQrScanner() {
-    console.log('qrscanner finsihed');
     // setQrScanner(false);
     setLink('');
   }

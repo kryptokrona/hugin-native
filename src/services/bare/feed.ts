@@ -42,11 +42,11 @@ export const updateMessages = async (
   background: boolean | undefined,
 ) => {
   
-  console.log('Updating feed messages..')
+  // console.log('Updating feed messages..')
 
     const messages = await getFeedMessages(0);
 
-    console.log('Get feed messages from db: ', messages);
+    // console.log('Get feed messages from db: ', messages);
 
     // if (message.reply?.length === 64) {
     //   if (containsOnlyEmojis(message.message) && message.message.length < 9) {
@@ -128,13 +128,6 @@ export const saveFeedMessageAndUpdate = async (
     isFile = true;
     await saveFileInfo(file);
   }
-
-  console.log('Trying to save feed msg:', address,
-    message,
-    reply,
-    timestamp,
-    nickname,
-    hash);
 
   if (await feedMessageExists(hash)) {
     return;

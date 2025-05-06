@@ -89,7 +89,6 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: (codes) => {
-      console.log('Got qr:', codes);
       if (codes.length > 0) {
         if (codes[0].value) {
           setTimeout(() => gotQRCode(codes[0].value), 500);
@@ -118,7 +117,6 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
   // Placeholder function for address paste
   const pasteAddress = async () => {
     const content = await Clipboard.getString();
-    console.log('Wallet', Wallet);
     setAddress(content);
   };
 
@@ -164,7 +162,6 @@ export const SendTransactionScreen: React.FC<Props> = ({ route }) => {
 
     if (result?.success) {
       if (mAddress) {
-        console.log('Pop 2');
         navigation.pop(2);
       } else {
         navigation.pop();

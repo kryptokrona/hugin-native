@@ -39,6 +39,7 @@ export enum MainScreens {
   WalletStack = 'WalletStack',
   FeedStack = 'FeedStack',
   MessageDetailsScreen = 'MessageDetailsScreen',
+  LoggerScreen = 'LoggerScreen',
 }
 
 export const TabBar = {

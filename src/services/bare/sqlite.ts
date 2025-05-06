@@ -282,7 +282,7 @@ export async function loadAccount() {
 }
 
 export async function saveFileInfo(file: FileInfo) {
-  console.log('Saving file ', file);
+  // console.log('Saving file ', file);
   Files.new(file);
   try {
     await db.executeSql(
@@ -321,7 +321,7 @@ export async function saveRoomUser(
   room: string,
   avatar?: string,
 ) {
-  console.log('Saving group user ', name);
+  // console.log('Saving group user ', name);
 
   try {
     if (avatar === '') {
@@ -345,7 +345,7 @@ export async function saveRoomUser(
       'REPLACE INTO groupusers (name, address, room, avatar, lastseen) VALUES (?, ?, ?, ?, ?)',
       [name, address, room, avatar, Date.now()],
     );
-    console.log(result);
+    // console.log(result);
   } catch (err) {
     console.log(err);
   }
@@ -948,12 +948,12 @@ export async function saveFeedMessage(
   if ((!message || message?.length === 0) && !tip) {
     return false;
   }
-  console.log('saving feed msg: ', address,
-    message,
-    reply,
-    timestamp,
-    nickname,
-    hash);
+  // console.log('saving feed msg: ', address,
+  //   message,
+  //   reply,
+  //   timestamp,
+  //   nickname,
+  //   hash);
   try {
     await db.executeSql(
       'REPLACE INTO feedmessages (address, message, reply, timestamp, nickname, hash) VALUES (?, ?, ?, ?, ?, ?)',
@@ -976,7 +976,7 @@ export async function saveFeedMessage(
       reply: reply,
       timestamp: timestamp,
     };
-    console.log('Saved message: ', newMessage);
+    // console.log('Saved message: ', newMessage);
     return newMessage;
   } catch (err) {
     return false;
@@ -1025,7 +1025,7 @@ export async function saveRoomMessage(
       timestamp: timestamp,
       tip,
     };
-    console.log('Saved message: ', newMessage);
+    // console.log('Saved message: ', newMessage);
     return newMessage;
   } catch (err) {
     return false;

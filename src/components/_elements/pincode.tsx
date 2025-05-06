@@ -39,7 +39,6 @@ export const Pincode: React.FC<PINInputProps> = ({
   }
 
   const onChange = (text: string) => {
-    console.log({ length, text });
     if (onPartPin) {
       onPartPin(text);
     }

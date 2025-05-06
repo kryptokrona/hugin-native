@@ -62,7 +62,6 @@ class Syncer {
     });
 
     if (resp.length === 0) {
-      console.log('No incoming messages...');
       return false;
     }
 
@@ -70,7 +69,6 @@ class Syncer {
   }
 
   async sync() {
-    console.log('Background syncing...');
     const incoming = this.incoming_messages.length > 0 ? true : false;
     //First start, set known pool txs
     const transactions = await this.fetch();

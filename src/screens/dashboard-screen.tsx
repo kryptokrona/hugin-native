@@ -48,12 +48,10 @@ export const DashboardScreen: React.FC = () => {
   }
 
   useEffect(() => {
-    console.log(status[0], status[2]);
     setSynced(status[2] - status[0] < 2);
   }, [status]);
 
   const goToStatusPage = () => {
-    console.log('Clicked');
     navigation.push(MainScreens.WalletStatusScreen);
   };
 

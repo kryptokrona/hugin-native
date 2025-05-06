@@ -87,7 +87,6 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
         pincode: authMethod === 'pincode' ? pincode : null,
       },
     }));
-    console.log('seedWords', seedWords);
     if (seedWords?.length === 25) {
       console.log('Importing');
       await Wallet.import(blockHeight, seedWords.join(' '), node, name);
