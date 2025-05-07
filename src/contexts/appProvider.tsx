@@ -6,6 +6,7 @@ import {
   Platform,
   SafeAreaView,
   StyleSheet,
+  View,
 } from 'react-native';
 
 import { NavigationContainerRef, createNavigationContainerRef } from '@react-navigation/native';
@@ -63,6 +64,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
+  const showFooterMask = useThemeStore((s) => s.showFooterMask);
+
 
   useEffect(() => {
     if (preferences) {
@@ -266,6 +269,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       <SafeAreaView
         style={[styles.safeArea, { backgroundColor: theme.background }]}>
         {children}
+        {showFooterMask && <View style={styles.footerMask} />}
       </SafeAreaView>
   );
 };
@@ -273,6 +277,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingVertical: Platform.OS === 'ios' ? 40 : 0,
+    paddingVertical: Platform.OS === 'ios' ? 40 : 0
+  },
+  footerMask: {
+    height: 40, // or however tall the cropped part is
+    backgroundColor: '#231f20', // match your background
+    marginBottom: -40
   },
 });

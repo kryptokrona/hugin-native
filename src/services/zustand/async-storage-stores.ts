@@ -111,6 +111,8 @@ export const useUserStore = create<UserStore>()(
 interface ThemeStore {
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  showFooterMask: boolean;
+  setShowFooterMask: (show: boolean) => void;
 }
 
 export const useThemeStore = create<ThemeStore>()(
@@ -118,6 +120,8 @@ export const useThemeStore = create<ThemeStore>()(
     (set) => ({
       setTheme: (theme) => set({ theme }),
       theme: defaultTheme,
+      showFooterMask: false,
+      setShowFooterMask: (show) => set({ showFooterMask: show }),
     }),
     {
       name: ASYNC_STORAGE_KEYS.THEME,
