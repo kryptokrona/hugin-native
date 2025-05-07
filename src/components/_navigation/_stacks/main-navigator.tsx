@@ -28,6 +28,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'i18next';
+import { Platform } from 'react-native';
 
 const Tab = createBottomTabNavigator<MainNavigationParamList>();
 const NativeStack = createNativeStackNavigator<MainNavigationParamList>();
@@ -230,11 +231,13 @@ export const MainNavigator = () => {
         component={FeedStack}
         options={{ headerShown: false }}
       />
+      {Platform.OS == 'android' && 
       <Tab.Screen
-        name={MainScreens.WalletStack}
-        component={WalletStack}
-        options={{ headerShown: false }}
+      name={MainScreens.WalletStack}
+      component={WalletStack}
+      options={{ headerShown: false }}
       />
+       }
       <Tab.Screen
         name={MainScreens.SettingsStack}
         component={SettingsStack}

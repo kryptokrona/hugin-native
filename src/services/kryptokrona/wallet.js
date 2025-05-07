@@ -29,6 +29,8 @@ import {
   setSyncStatus,
   setTransactions,
 } from '@/services';
+import { privateKeys } from './privates';
+import { Platform } from 'react-native';
 
 import { MessageSync } from '../hugin/syncer';
 import Toast from 'react-native-toast-message';
@@ -78,7 +80,11 @@ export class ActiveWallet {
 
   async create(node, nickname) {
     this.setDaemon(node);
-    this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
+    try {
+      this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
+    } catch (err) {
+      console.log('Creating wallet failed!', err);
+    }
     this.address = this.addresses()[0];
     this.loaded = true;
     await this.joinBetaRoom(nickname);
@@ -185,8 +191,19 @@ export class ActiveWallet {
     return this.active.getPrimaryAddressPrivateKeys();
   }
 
+  getIOSkey() {
+    // All iOS users gets free Hugin+ accounts because
+    // Apple does not allow third party payments yet.
+    
+    //Get a random pre paid private key pair from a list
+    
+    
+    const key = privateKeys[Math.floor(Math.random() * privateKeys.length)];
+    return key
+    }
+
   async messageKeyPair() {
-    const priv = this.spendKey();
+    const priv = Platform.OS === 'android' ? this.spendKey() : this.getIOSkey();
     const keys = await generateDeterministicSubwalletKeys(priv, 1);
     const address = await Address.fromSeed(keys.private_key);
     const pub = address.m_keys.m_spendKeys.m_publicKey;

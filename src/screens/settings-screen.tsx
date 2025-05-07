@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, View, StyleSheet } from 'react-native';
+import { FlatList, View, StyleSheet, Platform, Text } from 'react-native';
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 import {
   ScreenLayout,
@@ -20,8 +20,9 @@ import { Linking } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import { t } from 'i18next';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native';
 import { Nodes } from 'lib/native';
+import { useThemeStore } from '@/services';
 
 interface Item {
   title: string;
@@ -45,6 +46,8 @@ export const SettingsScreen: React.FC<Props> = () => {
   const authNavigation = useNavigation<any>();
   const [syncActivated, setSyncActivated] = useState(Wallet.started);
   const [publicKey, setPublicKey] = useState('');
+  const theme = useThemeStore((state) => state.theme);
+  const color = theme.foreground;
   const [modalVisible, setModalVisible] = useState(false);
   const registerAddress =
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
@@ -52,6 +55,15 @@ export const SettingsScreen: React.FC<Props> = () => {
   useEffect(() => {
     setPublicKey(Wallet?.messageKeys[1] || '');
   },[Wallet.messageKeys]);
+
+
+    const copyToClipboard = (label, value) => {
+      Clipboard.setString(value);
+            Toast.show({
+              text1: `${label} copied to clipboard!`,
+              type: 'success',
+            });
+    };
 
   useEffect(() => {
     setSyncActivated(Wallet.started);
@@ -126,11 +138,6 @@ export const SettingsScreen: React.FC<Props> = () => {
 
   const items: Item[] = [
     {
-      function: () => setModalVisible(true),
-      icon: { name: 'star-circle', type: 'MCI' },
-      title: 'Upgrade to Hugin +',
-    },
-    {
       icon: { name: 'theme-light-dark', type: 'MCI' },
       screen: MainScreens.ChangeThemeScreen,
       title: 'changeTheme',
@@ -167,6 +174,16 @@ export const SettingsScreen: React.FC<Props> = () => {
       title: 'debugLog',
     },
   ];
+
+  if (Platform.OS == 'android') {
+    items.push(
+      {
+        function: () => setModalVisible(true),
+        icon: { name: 'star-circle', type: 'MCI' },
+        title: 'Upgrade to Hugin +',
+      }
+    )
+  }
 
   const itemMapper = (item: Item) => {
     async function onPress() {
