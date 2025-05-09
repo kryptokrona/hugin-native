@@ -43,6 +43,8 @@ const SEND_FEED_HISTORY = 'send-feed-history';
 const PING_SYNC = 'Ping';
 const REQUEST_FILE = 'request-file';
 
+const ONE_DAY = 24 * 60 * 60 * 1000
+
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
 let localFiles = [];
@@ -983,11 +985,12 @@ const request_file = async (address, topic, file, room, dm = false) => {
 
 const process_files = async (data, active, con, topic) => {
   //Check if the latest 10 files are in sync
-  console.log('PROCESS FILES');
   if (Hugin.syncImages) {
     if (!Array.isArray(data.files)) return 'Ban';
     if (data.files.length > 10) return 'Ban';
     for (const file of data.files) {
+      const old = (Date.now() - file.time) > ONE_DAY
+      if (old) continue
       if (Hugin.files.some((a) => a === file.hash)) continue;
       if (!check_hash(file.hash)) continue;
       await sleep(50);
