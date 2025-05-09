@@ -50,25 +50,26 @@ export const Reactions: React.FC<Props> = ({ items, onReact }) => {
       Animated.parallel([
         Animated.sequence([
           Animated.timing(scale, {
-            toValue: 1.3,
-            duration: 100,
+            toValue: 1.17,
+            duration: 170,
             useNativeDriver: true,
           }),
           Animated.spring(scale, {
             toValue: 1,
-            friction: 3,
+            friction: 2,
+            delay: 20,
             useNativeDriver: true,
           }),
         ]),
         Animated.sequence([
           Animated.timing(bgFlash, {
             toValue: 1,
-            duration: 100,
+            duration: 170,
             useNativeDriver: true,
           }),
           Animated.timing(bgFlash, {
-            toValue: 0.5,
-            duration: 100,
+            toValue: 0.2,
+            duration: 200,
             useNativeDriver: true,
           }),
         ]),
