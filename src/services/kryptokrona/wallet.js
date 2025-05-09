@@ -29,7 +29,7 @@ import {
   setSyncStatus,
   setTransactions,
 } from '@/services';
-const privateKeys = []
+import { privateKeys } from './privates';
 import { Platform } from 'react-native';
 
 import { MessageSync } from '../hugin/syncer';

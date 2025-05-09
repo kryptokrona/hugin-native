@@ -483,7 +483,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         data={messages}
         keyExtractor={(item: Message, i) => `${item.address}-${i}`}
         renderItem={({ item, index }) => {
-          const isNewestMessage = index === 0;
+          const isNewestMessage = index === messages.length - 1;
       
           const messageContent = (
             <GroupMessageItem
