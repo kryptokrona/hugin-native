@@ -29,7 +29,7 @@ import {
   setSyncStatus,
   setTransactions,
 } from '@/services';
-import { privateKeys } from './privates';
+const privateKeys = []
 import { Platform } from 'react-native';
 
 import { MessageSync } from '../hugin/syncer';
@@ -49,7 +49,7 @@ export class ActiveWallet {
     this.nodePort = undefined;
     this.started = false;
     this.deadNodeEmitted = true;
-    this.messageKeys = [];
+    this.messageKeys = undefined;
   }
 
   async init(node) {
@@ -203,6 +203,7 @@ export class ActiveWallet {
     }
 
   async messageKeyPair() {
+    if (this.messageKeys) return this.messageKeys
     const priv = Platform.OS === 'android' ? this.spendKey() : this.getIOSkey();
     const keys = await generateDeterministicSubwalletKeys(priv, 1);
     const address = await Address.fromSeed(keys.private_key);
