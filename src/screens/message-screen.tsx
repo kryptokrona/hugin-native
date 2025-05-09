@@ -58,6 +58,7 @@ import { Beam, Rooms } from 'lib/native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { textType } from '@/styles';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { GlideInItem } from '../components/glider';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessageScreen>;
@@ -481,8 +482,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
         ref={flatListRef}
         data={messages}
         keyExtractor={(item: Message, i) => `${item.address}-${i}`}
-        renderItem={({ item }) => {
-          return (
+        renderItem={({ item, index }) => {
+          const isNewestMessage = index === 0;
+      
+          const messageContent = (
             <GroupMessageItem
               dm={true}
               message={item.message}
@@ -499,6 +502,12 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
               onShowImagePress={showBigImage}
               tip={item.tip}
             />
+          );
+      
+          return isNewestMessage ? (
+            <GlideInItem>{messageContent}</GlideInItem>
+          ) : (
+            messageContent
           );
         }}
         contentContainerStyle={styles.flatListContent}

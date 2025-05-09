@@ -14,6 +14,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Animated,
 } from 'react-native';
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -69,6 +70,7 @@ import {
   onSendGroupMessageWithFile,
 } from '../services/bare/groups';
 import { Wallet } from '../services/kryptokrona/wallet';
+import { GlideInItem } from '../components/glider';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -390,6 +392,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
+
   return (
     <ScreenLayout>
       <GestureHandlerRootView>
@@ -421,8 +424,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           ref={flatListRef}
           data={messages}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
-          renderItem={({ item }) => {
-            return (
+          renderItem={({ item, index }) => {
+            const isNewestMessage = index === messages.length - 1
+            const content = (
               <GroupMessageItem
                 message={item.message}
                 timestamp={item.timestamp}
@@ -439,11 +443,19 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 tip={item.tip}
               />
             );
+        
+            return isNewestMessage ? (
+              <GlideInItem>{content}</GlideInItem>
+            ) : (
+              content
+            );
           }}
           contentContainerStyle={styles.flatListContent}
           initialNumToRender={messages.length}
           maxToRenderPerBatch={messages.length}
         />
+  
+           
 
         <KeyboardAvoidingView
           style={[styles.inputWrapper, { backgroundColor }]}
