@@ -1,8 +1,15 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React, { useMemo, useRef } from 'react';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Animated,
+  View,
+} from 'react-native';
 
 import { Styles } from '@/styles';
 import { TextField } from './text-field';
-import { useMemo } from 'react';
 import { useThemeStore } from '@/services';
 
 interface Props {
@@ -14,15 +21,17 @@ interface Item {
   emoji: string;
   count: number;
 }
+
 export const Reactions: React.FC<Props> = ({ items, onReact }) => {
   const theme = useThemeStore((state) => state.theme);
+
   const sortedItems: Item[] = useMemo(() => {
     const emojiCountMap: { [key: string]: number } = items.reduce(
       (acc: { [key: string]: number }, emoji: string) => {
         acc[emoji] = (acc[emoji] || 0) + 1;
         return acc;
       },
-      {},
+      {}
     );
 
     return Object.entries(emojiCountMap).map(([emoji, count]) => ({
@@ -31,23 +40,63 @@ export const Reactions: React.FC<Props> = ({ items, onReact }) => {
     }));
   }, [items]);
 
-  function ItemMapper({ item }: { item: Item }) {
-    function onPress() {
-      if (item.emoji != '💬') onReact(item.emoji);
-    }
+  function AnimatedReactionItem({ item }: { item: Item }) {
+    const scale = useRef(new Animated.Value(1)).current;
+    const bgFlash = useRef(new Animated.Value(0)).current;
 
-    // const byMe = Math.floor(Math.random() * 2) === 1;
-    // const borderColor = byMe ? theme.primary : theme.input;
+    const handlePress = () => {
+      if (item.emoji !== '💬') onReact(item.emoji);
+
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(scale, {
+            toValue: 1.3,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scale, {
+            toValue: 1,
+            friction: 3,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(bgFlash, {
+            toValue: 1,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bgFlash, {
+            toValue: 0.5,
+            duration: 100,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start();
+    };
+
+    const animatedBg = bgFlash.interpolate({
+      inputRange: [0, 1],
+      outputRange: [theme.background,'rgb(37, 102, 231)'],
+    });
+
     const borderColor = theme.mutedForeground;
+
     return (
-      <TouchableOpacity
-        style={[
-          styles.item,
-          { backgroundColor: theme.background, borderColor },
-        ]}
-        onPress={onPress}>
-        <Text style={styles.emojiText}>{item.emoji}</Text>
-        <TextField size="small">{item.count.toString()}</TextField>
+      <TouchableOpacity onPress={handlePress}>
+        <Animated.View
+          style={[
+            styles.item,
+            {
+              transform: [{ scale }],
+              backgroundColor: animatedBg,
+              borderColor,
+            },
+          ]}
+        >
+          <Text style={styles.emojiText}>{item.emoji}</Text>
+          <TextField size="small">{item.count.toString()}</TextField>
+        </Animated.View>
       </TouchableOpacity>
     );
   }
@@ -56,7 +105,7 @@ export const Reactions: React.FC<Props> = ({ items, onReact }) => {
     <FlatList
       numColumns={8}
       data={sortedItems}
-      renderItem={ItemMapper}
+      renderItem={({ item }) => <AnimatedReactionItem item={item} />}
       keyExtractor={(item) => item.emoji}
     />
   );
@@ -78,5 +127,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     marginRight: 4,
     paddingHorizontal: 6,
+    paddingVertical: 2,
   },
 });
