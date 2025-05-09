@@ -1,4 +1,4 @@
-package com.huginmessenger;
+package com.hugin;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;

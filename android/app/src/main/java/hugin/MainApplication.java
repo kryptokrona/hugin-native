@@ -1,9 +1,9 @@
-package com.huginmessenger;
+package com.hugin;
 import android.content.res.Configuration;
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
 
-import com.huginmessenger.BuildConfig;
+import com.hugin.BuildConfig;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import android.app.Application;
 import android.content.Intent;

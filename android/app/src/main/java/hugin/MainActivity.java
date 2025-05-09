@@ -1,4 +1,4 @@
-package com.huginmessenger;
+package com.hugin;
 
 import expo.modules.ReactActivityDelegateWrapper;
 import com.facebook.react.ReactActivityDelegate;

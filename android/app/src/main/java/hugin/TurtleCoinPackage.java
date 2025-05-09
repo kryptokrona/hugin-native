@@ -1,4 +1,4 @@
-package com.huginmessenger;
+package com.hugin;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;

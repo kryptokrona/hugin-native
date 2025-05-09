@@ -1,4 +1,4 @@
-package com.huginmessenger;
+package com.hugin;
 
 import android.content.Context;
 import android.content.Intent;
@@ -6,7 +6,7 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.huginmessenger.BuildConfig;
+import com.hugin.BuildConfig;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -28,7 +28,7 @@ import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import com.huginmessenger.KeyPair;
+import com.hugin.KeyPair;
 
 public class TurtleCoinModule extends ReactContextBaseJavaModule {
     static {
