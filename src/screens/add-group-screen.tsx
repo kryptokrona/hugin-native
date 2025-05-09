@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { InputField, ScreenLayout, TextButton } from '@/components';
 import { MainScreens } from '@/config';
-import { useUserStore } from '@/services';
+import { setStoreCurrentRoom, useRoomStore, useUserStore } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 import { group_random_key } from '../lib/native';
@@ -22,12 +22,15 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const [name, setName] = useState<string | null>(null);
   const { name: userName, address } = useUserStore((state) => state.user);
+  const { setThisRoom } = useRoomStore();
 
   async function onCreatePress() {
     const generated = await generateKey();
     const admin = generated?.admin;
 
     if (generated?.invite && name && address && admin) {
+      setStoreCurrentRoom(generated.invite);
+      setThisRoom(generated.invite)
       joinAndSaveRoom(generated.invite, name, address, userName, admin);
       navigation.navigate(MainScreens.GroupChatScreen, {
         name,

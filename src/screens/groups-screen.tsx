@@ -171,7 +171,8 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
     if (inviteKey.length != 128) {
       return;
     }
-
+    setStoreCurrentRoom(inviteKey);
+    setThisRoom(inviteKey);
 
     if (inviteKey && originalName && user?.address) {
       joinAndSaveRoom(inviteKey, originalName, user.address, user?.name);
