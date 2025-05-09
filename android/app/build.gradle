@@ -6,8 +6,7 @@
 }
 
 project.ext.react = [
-    enableHermes: false,  // clean and rebuild if changing 
-     enableVmCleanup: false,
+    enableHermes: false,
 ]
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
@@ -100,15 +99,15 @@ def hermesEnabled = true
 android {
     ndkVersion rootProject.ext.ndkVersion
 
-    namespace 'com.huginmessenger'
+    namespace 'com.hugin'
     defaultConfig {
         buildToolsVersion '35'
         targetSdkVersion '35'
         compileSdk 34
-        applicationId 'com.huginmessenger'
+        applicationId 'com.hugin'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 103
         versionName "1.0.0"
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
 

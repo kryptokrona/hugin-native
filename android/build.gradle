@@ -33,9 +33,6 @@ buildscript {
 }
 
 
-plugins {
-    id("com.facebook.react") version("0.76.9") apply false
-}
 
 subprojects {
     afterEvaluate { project ->
@@ -57,16 +54,8 @@ allprojects {
         mavenCentral()
         
     }
-    // Suppress the Compose-Compiler <=> Kotlin version check
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-    kotlinOptions {
-        freeCompilerArgs += [
-        // This flag comes from Jetpack Compose docs
-        "-P",
-        "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=1.9.25"
-        ]
-    }
-    }
+   
+
 }
 
 apply plugin: "com.facebook.react.rootproject"
