@@ -52,24 +52,24 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
         return -1;
     }
 
-    KEY_OUTPUT = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/KeyOutput"));
+    KEY_OUTPUT = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/KeyOutput"));
     KEY_OUTPUT_CONST = env->GetMethodID(KEY_OUTPUT, "<init>", "(Ljava/lang/String;JJ)V");
     KEY_OUTPUT_KEY = env->GetFieldID(KEY_OUTPUT, "key", "Ljava/lang/String;");
     KEY_OUTPUT_AMOUNT = env->GetFieldID(KEY_OUTPUT, "amount", "J");
     KEY_OUTPUT_GLOBAL_INDEX = env->GetFieldID(KEY_OUTPUT, "globalIndex", "J");
 
-    RAW_TRANSACTION = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/RawTransaction"));
-    RAW_TRANSACTION_CONST = env->GetMethodID(RAW_TRANSACTION, "<init>", "([Lcom/huginmessenger/KeyOutput;Ljava/lang/String;Ljava/lang/String;)V");
-    RAW_TRANSACTION_KEY_OUTPUTS = env->GetFieldID(RAW_TRANSACTION, "keyOutputs", "[Lcom/huginmessenger/KeyOutput;");
+    RAW_TRANSACTION = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/RawTransaction"));
+    RAW_TRANSACTION_CONST = env->GetMethodID(RAW_TRANSACTION, "<init>", "([Lcom/hugin/KeyOutput;Ljava/lang/String;Ljava/lang/String;)V");
+    RAW_TRANSACTION_KEY_OUTPUTS = env->GetFieldID(RAW_TRANSACTION, "keyOutputs", "[Lcom/hugin/KeyOutput;");
     RAW_TRANSACTION_HASH = env->GetFieldID(RAW_TRANSACTION, "hash", "Ljava/lang/String;");
     RAW_TRANSACTION_TRANSACTION_PUBLIC_KEY = env->GetFieldID(RAW_TRANSACTION, "transactionPublicKey", "Ljava/lang/String;");
 
-    WALLET_BLOCK_INFO = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/WalletBlockInfo"));
-    WALLET_BLOCK_INFO_CONST = env->GetMethodID(WALLET_BLOCK_INFO, "<init>", "(Lcom/huginmessenger/RawTransaction;[Lcom/huginmessenger/RawTransaction;)V");
-    WALLET_BLOCK_INFO_COINBASE_TRANSACTION = env->GetFieldID(WALLET_BLOCK_INFO, "coinbaseTransaction", "Lcom/huginmessenger/RawTransaction;");
-    WALLET_BLOCK_INFO_TRANSACTIONS = env->GetFieldID(WALLET_BLOCK_INFO, "transactions", "[Lcom/huginmessenger/RawTransaction;");
+    WALLET_BLOCK_INFO = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/WalletBlockInfo"));
+    WALLET_BLOCK_INFO_CONST = env->GetMethodID(WALLET_BLOCK_INFO, "<init>", "(Lcom/hugin/RawTransaction;[Lcom/hugin/RawTransaction;)V");
+    WALLET_BLOCK_INFO_COINBASE_TRANSACTION = env->GetFieldID(WALLET_BLOCK_INFO, "coinbaseTransaction", "Lcom/hugin/RawTransaction;");
+    WALLET_BLOCK_INFO_TRANSACTIONS = env->GetFieldID(WALLET_BLOCK_INFO, "transactions", "[Lcom/hugin/RawTransaction;");
 
-    TRANSACTION_INPUT = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/TransactionInput"));
+    TRANSACTION_INPUT = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/TransactionInput"));
     TRANSACTION_INPUT_CONST = env->GetMethodID(TRANSACTION_INPUT, "<init>", "(Ljava/lang/String;JJJLjava/lang/String;Ljava/lang/String;)V");
     TRANSACTION_INPUT_KEY_IMAGE = env->GetFieldID(TRANSACTION_INPUT, "keyImage", "Ljava/lang/String;");
     TRANSACTION_INPUT_AMOUNT = env->GetFieldID(TRANSACTION_INPUT, "amount", "J");
@@ -77,15 +77,15 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
     TRANSACTION_INPUT_GLOBAL_OUTPUT_INDEX = env->GetFieldID(TRANSACTION_INPUT, "globalOutputIndex", "J");
     TRANSACTION_INPUT_KEY = env->GetFieldID(TRANSACTION_INPUT, "key", "Ljava/lang/String;");
 
-    SPEND_KEY = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/SpendKey"));
+    SPEND_KEY = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/SpendKey"));
     SPEND_KEY_CONST = env->GetMethodID(SPEND_KEY, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
     SPEND_KEY_PUBLIC_KEY = env->GetFieldID(SPEND_KEY, "publicKey", "Ljava/lang/String;");
     SPEND_KEY_PRIVATE_KEY = env->GetFieldID(SPEND_KEY, "privateKey", "Ljava/lang/String;");
 
-    INPUT_MAP = (jclass)env->NewGlobalRef(env->FindClass("com/huginmessenger/InputMap"));
-    INPUT_MAP_CONST = env->GetMethodID(INPUT_MAP, "<init>", "(Ljava/lang/String;Lcom/huginmessenger/TransactionInput;)V");
+    INPUT_MAP = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/InputMap"));
+    INPUT_MAP_CONST = env->GetMethodID(INPUT_MAP, "<init>", "(Ljava/lang/String;Lcom/hugin/TransactionInput;)V");
     INPUT_MAP_PUBLIC_SPEND_KEY = env->GetFieldID(INPUT_MAP, "publicSpendKey", "Ljava/lang/String;");
-    INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/huginmessenger/TransactionInput;");
+    INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/hugin/TransactionInput;");
 
     JAVA_STRING = (jclass)env->NewGlobalRef(env->FindClass("java/lang/String"));
 
@@ -93,7 +93,7 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
 }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_com_huginmessenger_TurtleCoinModule_generateDeterministicSubwalletKeysJNI(
+Java_com_hugin_TurtleCoinModule_generateDeterministicSubwalletKeysJNI(
     JNIEnv *env,
     jobject instance,
     jstring basePrivateKey,
@@ -113,7 +113,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateDeterministicSubwalletKeysJNI(
         return nullptr;
     }
 
-    jclass keyPairClass = env->FindClass("com/huginmessenger/KeyPair");
+    jclass keyPairClass = env->FindClass("com/hugin/KeyPair");
     jmethodID constructor = env->GetMethodID(keyPairClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
 
     jstring jPublicKey = env->NewStringUTF(publicKey.c_str());
@@ -127,14 +127,14 @@ Java_com_huginmessenger_TurtleCoinModule_generateDeterministicSubwalletKeysJNI(
 }
 
 extern "C" JNIEXPORT jobject JNICALL
-Java_com_huginmessenger_TurtleCoinModule_generateKeysJNI(
+Java_com_hugin_TurtleCoinModule_generateKeysJNI(
     JNIEnv *env,
     jobject instance)
 {
     std::string publicKey;
     std::string privateKey;
     Core::Cryptography::generateKeys(privateKey, publicKey);
-    jclass keyPairClass = env->FindClass("com/huginmessenger/KeyPair");
+    jclass keyPairClass = env->FindClass("com/hugin/KeyPair");
     jmethodID constructor = env->GetMethodID(keyPairClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
 
     jstring jPublicKey = env->NewStringUTF(publicKey.c_str());
@@ -149,7 +149,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateKeysJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_underivePublicKeyJNI(
+Java_com_hugin_TurtleCoinModule_underivePublicKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring derivation,
@@ -170,7 +170,7 @@ Java_com_huginmessenger_TurtleCoinModule_underivePublicKeyJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_hashToScalarJNI(
+Java_com_hugin_TurtleCoinModule_hashToScalarJNI(
     JNIEnv *env,
     jobject instance,
     jstring hash)
@@ -181,7 +181,7 @@ Java_com_huginmessenger_TurtleCoinModule_hashToScalarJNI(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_huginmessenger_TurtleCoinModule_checkSignatureJNI(
+Java_com_hugin_TurtleCoinModule_checkSignatureJNI(
     JNIEnv *env,
     jobject instance,
     jstring message,
@@ -196,7 +196,7 @@ Java_com_huginmessenger_TurtleCoinModule_checkSignatureJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_generateSignatureJNI(
+Java_com_hugin_TurtleCoinModule_generateSignatureJNI(
     JNIEnv *env,
     jobject instance,
     jstring message,
@@ -211,7 +211,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateSignatureJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_hashToEllipticCurveJNI(
+Java_com_hugin_TurtleCoinModule_hashToEllipticCurveJNI(
     JNIEnv *env,
     jobject instance,
     jstring hash)
@@ -222,7 +222,7 @@ Java_com_huginmessenger_TurtleCoinModule_hashToEllipticCurveJNI(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_huginmessenger_TurtleCoinModule_checkKeyJNI(
+Java_com_hugin_TurtleCoinModule_checkKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring key)
@@ -232,7 +232,7 @@ Java_com_huginmessenger_TurtleCoinModule_checkKeyJNI(
     return static_cast<jboolean>(checked);
 }
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_scReduce32JNI(
+Java_com_hugin_TurtleCoinModule_scReduce32JNI(
     JNIEnv *env,
     jobject instance,
     jstring scalar)
@@ -243,7 +243,7 @@ Java_com_huginmessenger_TurtleCoinModule_scReduce32JNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_secretKeyToPublicKeyJNI(
+Java_com_hugin_TurtleCoinModule_secretKeyToPublicKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jSecretKey)
@@ -255,7 +255,7 @@ Java_com_huginmessenger_TurtleCoinModule_secretKeyToPublicKeyJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_cnFastHashJNI(
+Java_com_hugin_TurtleCoinModule_cnFastHashJNI(
     JNIEnv *env,
     jobject instance,
     jstring jHash)
@@ -267,7 +267,7 @@ Java_com_huginmessenger_TurtleCoinModule_cnFastHashJNI(
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_huginmessenger_TurtleCoinModule_processBlockOutputsJNI(
+Java_com_hugin_TurtleCoinModule_processBlockOutputsJNI(
     JNIEnv *env,
     jobject instance,
     jobject jWalletBlockInfo,
@@ -288,7 +288,7 @@ Java_com_huginmessenger_TurtleCoinModule_processBlockOutputsJNI(
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_huginmessenger_TurtleCoinModule_generateRingSignaturesJNI(
+Java_com_hugin_TurtleCoinModule_generateRingSignaturesJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,
@@ -311,7 +311,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateRingSignaturesJNI(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_huginmessenger_TurtleCoinModule_checkRingSignaturesJNI(
+Java_com_hugin_TurtleCoinModule_checkRingSignaturesJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPrefixHash,
@@ -331,7 +331,7 @@ Java_com_huginmessenger_TurtleCoinModule_checkRingSignaturesJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_generateKeyDerivationJNI(
+Java_com_hugin_TurtleCoinModule_generateKeyDerivationJNI(
     JNIEnv *env,
     jobject instance,
     jstring jTransactionPublicKey,
@@ -348,7 +348,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateKeyDerivationJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_generateKeyImageJNI(
+Java_com_hugin_TurtleCoinModule_generateKeyImageJNI(
     JNIEnv *env,
     jobject instance,
     jstring jPublicEphemeral,
@@ -365,7 +365,7 @@ Java_com_huginmessenger_TurtleCoinModule_generateKeyImageJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_deriveSecretKeyJNI(
+Java_com_hugin_TurtleCoinModule_deriveSecretKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
@@ -383,7 +383,7 @@ Java_com_huginmessenger_TurtleCoinModule_deriveSecretKeyJNI(
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_huginmessenger_TurtleCoinModule_derivePublicKeyJNI(
+Java_com_hugin_TurtleCoinModule_derivePublicKeyJNI(
     JNIEnv *env,
     jobject instance,
     jstring jDerivation,
