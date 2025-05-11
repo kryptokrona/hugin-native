@@ -3,7 +3,7 @@ Todo:
     ✔ Fix header status icon (green/grey) @done(24-12-30 21:20)
     ✔ Style toasts @done(25-01-31 10:31)
     ✔ Include all translations @done(25-02-01 15:45)
-    ☐ Add calls
+    ✔ Add calls @done(25-05-11 20:48)
     ✔ Add amount to tips @done(24-12-30 21:20)
     ✔ Add dms @done(25-02-02 18:01)
     ✔ Fix styling for tips @done(25-02-01 21:25)
@@ -18,9 +18,9 @@ Todo:
     ✔ Add QR codes for messages and rooms @done(25-02-15 20:04)
     ☐ Show "lastseen" on user lists in rooms
     ☐ Add deep links to groups (i.e. group invites)
-    ☐ Add manual explanation of Hugin Premium+ Extra
-    ☐ Update React version
-    ☐ Update react-native-bare-kit
+    ✔ Add manual explanation of Hugin Premium+ Extra @done(25-05-11 20:48)
+    ✔ Update React version @done(25-05-11 20:48)
+    ✔ Update react-native-bare-kit @done(25-05-11 20:48)
 
 Optimizations:
     ☐ Add "type" property to messages - i.e. message, reaction, reply, tip etc.
@@ -29,12 +29,13 @@ Todo calls:
     ✔ Display own video @done(25-03-26 23:04)
     ✔ Display video fullscreen @done(25-03-26 22:24)
     ☐ Add call menu to call screen
-    ☐ Fix states on call screen
+    ✔ Fix states on call screen @done(25-05-01 14:37)
     ☐ Optimize
     ☐ Add camera swapper
     ☐ Add share screen
     ☐ Autoswap to speaker when camera on
     ☐ Remove proximity sensor when speaker on
+    ☐ Add mute/video/screenshare icons
 
 Todo feed:
     ☐ Add signature check + sanitization
@@ -60,10 +61,11 @@ Todo wallet:
 
 Todo node picker:
     ✔ Handle themes @done(24-12-29 22:38)
-    ☐ Invoke when creating/importing wallet
+    ✔ Invoke when creating/importing wallet @done(25-05-11 20:49)
 
 Todo DMs:
-    ☐ Fix sending/sent/failed for each message sent.
+    ☐ Fix sending/sent/failed for each message sent
+    ☐ Add hold and press menu
 
 Bugs:
     ✔ Make sure new accounts don't get stuck on 0 @done(25-02-08 19:39)
@@ -73,7 +75,7 @@ Bugs:
     ☐ Don't show notifications for old file shares
 
 Maintenenance:
-    ☐ Upgrade packages, RN version. Note, when upgrade RN version all the react native packages must align
+    ✔ Upgrade packages, RN version. Note, when upgrade RN version all the react native packages must align @done(25-05-11 20:49)
     ☐ Accesibility
 
 
