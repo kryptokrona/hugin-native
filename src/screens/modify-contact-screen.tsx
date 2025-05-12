@@ -45,18 +45,6 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   const huginAddress = roomKey + messageKey;
   const [modalVisible, setModalVisible] = useState(false);
   const [newName, setNewName] = useState(name);
-  const keyRef = useRef('null');
-
-    useEffect(() => {
-  
-      const deriveKey = async () => {
-        const derivedKey = await Wallet.key_derivation_hash(roomKey);
-          console.log("huginAddress", huginAddress)
-          keyRef.current = derivedKey
-      };
-  
-      deriveKey();
-    }, [roomKey]); // Run only when `roomKey` changes
 
   const onCloseModal = () => {
     setModalVisible(false);
@@ -108,8 +96,7 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       // This effect runs when the screen is focused
-      if (keyRef.current === 'null') return
-        setStoreCurrentContact(keyRef.current);
+        setStoreCurrentContact(roomKey);
       return () => {};
     }, [roomKey]),
   );

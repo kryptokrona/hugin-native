@@ -254,8 +254,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (keyRef.current === 'null') return
-      setStoreCurrentContact(keyRef.current);
+      setStoreCurrentContact(roomKey);
       return () => {};
     }, [roomKey]),
   );
