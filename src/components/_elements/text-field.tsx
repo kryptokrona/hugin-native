@@ -4,7 +4,7 @@ import { Styles, textType } from '@/styles';
 import type { ElementType } from '@/types';
 import { useThemeStore } from '@/services';
 
-type SizeType = 'xsmall' | 'small' | 'medium' | 'large';
+type SizeType = 'xxsmall' |'xsmall' | 'small' | 'medium' | 'large';
 
 interface Props {
   children: string;
@@ -15,12 +15,14 @@ interface Props {
   style?: any;
   centered?: boolean;
   color?: string;
+  margin?: boolean;
 }
 
 export const TextField: React.FC<Props> = ({
   children,
   type = 'secondary',
   size = 'medium',
+  margin = true,
   maxLength,
   bold,
   style,
@@ -43,6 +45,9 @@ export const TextField: React.FC<Props> = ({
       ellipsizeMode="clip"
       style={[
         styles.text,
+        margin && {
+          marginVertical: 2
+        },
         { color, fontSize, fontWeight, ...style },
         centered && { textAlign: 'center' },
       ]}>
@@ -54,6 +59,5 @@ export const TextField: React.FC<Props> = ({
 const styles = StyleSheet.create({
   text: {
     fontFamily: 'Montserrat-Medium',
-    marginVertical: 2,
   },
 });

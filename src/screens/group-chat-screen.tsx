@@ -40,6 +40,7 @@ import {
   TextButton,
   ModalCenter,
   Unreads,
+  OnlineUsers,
   TextField,
   UserItem,
 } from '@/components';
@@ -97,6 +98,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
   const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
   const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
+
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
 
@@ -104,7 +106,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   useEffect(() => {
     if (!roomUsers) return;
     setVoiceUsers(roomUsers.filter((a) => a.voice === true));
-  }, [roomUsers])
+  }, [roomUsers, inCall])
 
   const userList = useMemo(() => {
     return voiceUsers;
@@ -302,31 +304,44 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                     type={'MI'}
                     color={`${inCall ? 'green' : 'grey'}`}
                   />
+                    {voiceUsers &&
+                      <View style={{ marginLeft: 15, marginTop: 15 }}>
+                        <OnlineUsers
+                            online={voiceUsers.length}
+                            // color={`${online ? 'green' : 'grey'}`}
+                            />
+                      </View>
+                      }
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flexDirection: 'row' }}
+                style={{ flexDirection: 'row', paddingRight: 5 }}
                 onPress={onCustomizeGroupPress}>
                 <CustomIcon type="MI" name={'groups-3'} />
+                <View style={{zIndex: 9999}}>
+
                 <CustomIcon
                   name={'lens'}
                   size={10}
                   type={'MI'}
-                  color={`${online ? 'green' : 'grey'}`}
-                />
-                {/* <View style={{ marginTop: 16, transform: [{ scale: 0.8 }] }}>
-                    <Unreads
-                      unreads={onlineUsers}
-                      color={`${online ? 'green' : 'grey'}`}
+                  color={`${roomUsers?.length > 0 ? 'green' : 'grey'}`}
+                  />
+                  </View>
+                {roomUsers &&
+
+                  <OnlineUsers
+                      online={roomUsers.length}
+                      // color={`${online ? 'green' : 'grey'}`}
                       />
-                </View> */}
+
+                    }
               </TouchableOpacity>
             </View>
           }
         />
       ),
     });
-  }, [roomKey, name, inCall]);
+  }, [roomKey, name, inCall, roomUsers, voiceUsers]);
 
   async function onSend(
     text: string,

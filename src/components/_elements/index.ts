@@ -10,4 +10,5 @@ export * from './text-button';
 export * from './text-field';
 export * from './tip';
 export * from './unreads';
+export * from './onlineusers';
 export * from './xkr-logo';
