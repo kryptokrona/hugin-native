@@ -203,9 +203,9 @@ async change(address, pub) {
 async reconnect() {
   while(this.connection === null) {
     Hugin.send('hugin-node-disconnected', {})
-    await sleep(10000)
     console.log("Reconnecting to node...")
     this.discovery.refresh({client: true, server: false})
+    await sleep(10000)
   }
   return
 }
@@ -226,6 +226,11 @@ parse(d) {
   } catch(e) {
     return false
   }
+}
+
+close() {
+  this.connection.end();
+  this.connection = null
 }
 
 async message(payload, hash) {
@@ -315,6 +320,7 @@ async function idle(background, force) {
     for (const room of active_swarms) {
       room.swarm.suspend();
     }
+    Nodes.close();
     Nodes.node.suspend();
     return;
   }
@@ -327,6 +333,7 @@ async function idle(background, force) {
       for (const room of active_swarms) {
         room.swarm.suspend();
       }  
+      Nodes.close();
       Nodes.node.suspend();
       idletimer = null;
     }, 10*1000)
