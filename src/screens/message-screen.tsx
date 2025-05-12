@@ -104,7 +104,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const inCall = currentCall.room === keyRef.current;
 
   useEffect(() => {
-    if (keyRef.current === 'null') return; // Prevent re-execution if key is already set
+    if (keyRef.current) return; // Prevent re-execution if key is already set
 
     const deriveKey = async () => {
       const derivedKey = await Wallet.key_derivation_hash(roomKey);
