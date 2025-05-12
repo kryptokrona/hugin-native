@@ -109,7 +109,8 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   async function onPress(roomKey: string, name: string) {
     await setMessages(roomKey, 0);
-    setStoreCurrentContact(roomKey);
+    const derivedKey = await Wallet.key_derivation_hash(roomKey);
+    setStoreCurrentContact(derivedKey);
     navigation.navigate(MainScreens.MessageScreen, { name, roomKey });
   }
 
@@ -181,7 +182,8 @@ export const MessagesScreen: React.FC<Props> = () => {
     setModalVisible(false);
 
     await setMessages(xkrAddr, 0);
-    setStoreCurrentContact(xkrAddr);
+    const derivedKey = await Wallet.key_derivation_hash(xkrAddr);
+    setStoreCurrentContact(derivedKey);
 
     navigation.navigate(MainScreens.MessageScreen, {
       name: name,

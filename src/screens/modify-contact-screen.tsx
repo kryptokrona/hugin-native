@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
 
@@ -27,6 +27,7 @@ import { MainNavigationParamList, MainStackNavigationType } from '@/types';
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import { deleteContact, updateContact } from '../services/bare/sqlite';
 import { getAvatar } from '../utils/avatar';
+import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {
   route: RouteProp<
@@ -44,16 +45,18 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   const huginAddress = roomKey + messageKey;
   const [modalVisible, setModalVisible] = useState(false);
   const [newName, setNewName] = useState(name);
-  // const theme = useThemeStore((state) => state.theme);
-  // const [avatar, setAvatar] = useState<string | null>(null);
-  // const [groupName, setGroupName] = useState<string>(name); // route.params.name
-  // const tempAvatar = createAvatar();
-  // const isAdmin = false; // TBD
-  // const theme = useThemeStore((state) => state.theme);
-  // const [avatar, setAvatar] = useState<string | null>(null);
-  // const [groupName, setGroupName] = useState<string>(name); // route.params.name
-  // const tempAvatar = createAvatar();
-  // const isAdmin = false; // TBD
+  const keyRef = useRef('null');
+
+    useEffect(() => {
+  
+      const deriveKey = async () => {
+        const derivedKey = await Wallet.key_derivation_hash(roomKey);
+          console.log("huginAddress", huginAddress)
+          keyRef.current = derivedKey
+      };
+  
+      deriveKey();
+    }, [roomKey]); // Run only when `roomKey` changes
 
   const onCloseModal = () => {
     setModalVisible(false);
@@ -105,8 +108,8 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       // This effect runs when the screen is focused
-      setStoreCurrentContact(roomKey);
-
+      if (!keyRef.current) return
+        setStoreCurrentContact(keyRef.current);
       return () => {};
     }, [roomKey]),
   );

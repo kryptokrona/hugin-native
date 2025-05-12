@@ -100,7 +100,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const snapPoints = useMemo(() => ['50%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   
-  const keyRef = useRef(null);
+  const keyRef = useRef('null');
   const inCall = currentCall.room === keyRef.current;
 
   useEffect(() => {
@@ -265,7 +265,8 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      setStoreCurrentContact(roomKey);
+      if (!keyRef.current) return
+      setStoreCurrentContact(keyRef.current);
       return () => {};
     }, [roomKey]),
   );
