@@ -212,7 +212,7 @@ export const MainNavigator = () => {
     <Tab.Navigator
       screenOptions={{
         // headerShown: false,
-        tabBarHideOnKeyboard: true, // Headers managed within the navigators themselves
+        tabBarHideOnKeyboard: false, // Headers managed within the navigators themselves
       }}
       tabBar={(props) => <MyTabBar {...props} />}>
       {/* Groups Tab */}

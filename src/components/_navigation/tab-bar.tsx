@@ -134,7 +134,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
 
 const styles = StyleSheet.create({
   hideTabNavigation: {
-    display: 'none',
+    // display: 'none',
   },
   tab: {
     alignItems: 'center',
