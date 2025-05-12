@@ -108,7 +108,7 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       // This effect runs when the screen is focused
-      if (!keyRef.current) return
+      if (keyRef.current === 'null') return
         setStoreCurrentContact(keyRef.current);
       return () => {};
     }, [roomKey]),

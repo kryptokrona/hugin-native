@@ -104,7 +104,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const inCall = currentCall.room === keyRef.current;
 
   useEffect(() => {
-    if (keyRef.current) return; // Prevent re-execution if key is already set
+    if (keyRef.current === 'null') return; // Prevent re-execution if key is already set
 
     const deriveKey = async () => {
       const derivedKey = await Wallet.key_derivation_hash(roomKey);
@@ -115,20 +115,9 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     deriveKey();
   }, [roomKey]); // Run only when `roomKey` changes
 
-  useEffect(() => {
-    if (keyRef.current) return; // Prevent re-execution if key is already set
-
-    const deriveKey = async () => {
-      const derivedKey = await Wallet.key_derivation_hash(roomKey);
-      keyRef.current = derivedKey;
-      setRoomUsers(allRoomUsers[derivedKey])
-    };
-
-    deriveKey();
-  }, [roomKey]); // Run only when `roomKey` changes
 
   useEffect(() => {
-    if (!keyRef.current) return; // Don't run when key isnt set yet
+    if (keyRef.current === 'null') return; // Don't run when key isnt set yet
     const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current]
     setRoomUsers(currentRoomUsers)
     setOnline(currentRoomUsers.some((a) => a.address === roomKey));
@@ -265,7 +254,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (!keyRef.current) return
+      if (keyRef.current === 'null') return
       setStoreCurrentContact(keyRef.current);
       return () => {};
     }, [roomKey]),
