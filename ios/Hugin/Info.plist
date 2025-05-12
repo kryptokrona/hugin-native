@@ -51,15 +51,15 @@
 			<true/>
 		</dict>
 		<key>NSCameraUsageDescription</key>
-		<string>We need access to your camera to take photos.</string>
+		<string>We need access to your camera so you can take and share photos in chats, join video calls, and scan QR codes.</string>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Authenticate user</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string></string>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>We need access to your microphone to record video.</string>
+		<string>We need access to your microphone to record audio for chat messages, and voice chat.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>We need access to your photo library to select photos.</string>
+		<string>We need access to your photo library to select photos to share in chats.</string>
 		<key>UIAppFonts</key>
 		<array>
 			<string>Montserrat-Black.ttf</string>
