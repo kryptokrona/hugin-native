@@ -305,7 +305,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                     color={`${inCall ? 'green' : 'grey'}`}
                   />
                     {voiceUsers &&
-                      <View style={{ marginLeft: 15, marginTop: 15 }}>
+                      <View style={{ marginLeft: 5, marginTop: 15 }}>
                         <OnlineUsers
                             online={voiceUsers.length}
                             // color={`${online ? 'green' : 'grey'}`}
@@ -315,7 +315,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ flexDirection: 'row', paddingRight: 5 }}
+                style={{ flexDirection: 'row', marginRight: 15 }}
                 onPress={onCustomizeGroupPress}>
                 <CustomIcon type="MI" name={'groups-3'} />
                 <View style={{zIndex: 9999}}>
