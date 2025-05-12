@@ -44,7 +44,7 @@ const openURL = () => {
 export const SettingsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<MainStackNavigationType>();
   const authNavigation = useNavigation<any>();
-  const [syncActivated, setSyncActivated] = useState(Wallet.started);
+  const [syncActivated, setSyncActivated] = useState(true);
   const [publicKey, setPublicKey] = useState('');
   const theme = useThemeStore((state) => state.theme);
   const color = theme.foreground;
@@ -53,6 +53,7 @@ export const SettingsScreen: React.FC<Props> = () => {
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
   
   useEffect(() => {
+    if (!Wallet?.messageKeys) return;
     setPublicKey(Wallet?.messageKeys[1] || '');
   },[Wallet.messageKeys]);
 
