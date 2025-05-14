@@ -7,6 +7,7 @@ import {
 import { Peers } from 'lib/connections';
 import { useGlobalStore } from '../services/zustand';
 import ImageResizer from 'react-native-image-resizer';
+import { getUserAvatar } from '../services/bare/sqlite';
 
 
 function hashCode(str: string) {
@@ -52,28 +53,43 @@ export function getAvatar(
   format: 'png' | 'svg' = 'png',
   big = false,
 ) {
-  const found = Object.values(useGlobalStore.getState().roomUsers)
-  .flat()
-  .find(a => a.address === hash && a.avatar?.length !== 0);
+  const store = useGlobalStore.getState();
+
+  // 1. Check roomUsers first
+  const found = Object.values(store.roomUsers)
+    .flat()
+    .find((a) => a.address === hash && a.avatar?.length !== 0);
 
   if (found) {
-    return found.avatar;
+    return found.avatar!;
   }
-  // Displays a fixed identicon until user adds new contact address in the input field
-  if (hash?.length < 15 || !hash) {
+
+  // 2. Check avatars cache
+  const cachedAvatar = store.avatars[hash];
+  if (cachedAvatar) {
+    return cachedAvatar;
+  }
+
+  // 3. Trigger async lookup without awaiting (no rerender issues)
+  (async () => {
+    const savedAvatar = await getUserAvatar(hash);
+    if (savedAvatar) {
+      useGlobalStore.getState().setAvatar(hash, savedAvatar);
+      return savedAvatar;
+
+    }
+  })();
+
+  // 4. Fallback to identicon
+  if (!hash || hash.length < 15) {
     hash =
       'SEKReYanL2qEQF2HA8tu9wTpKBqoCA8TNb2mNRL5ZDyeFpxsoGNgBto3s3KJtt5PPrRH36tF7DBEJdjUn5v8eaESN2T5DPgRLVY';
   }
 
-  if (big) {
-    size = 200;
-  }
+  if (big) size = 200;
 
   const rgb = intToRGB(hashCode(hash));
-
-  // Options for avatar
   const options: IdenticonOptions = {
-    // rgba black
     background: [
       Math.floor(rgb.red / 10),
       Math.floor(rgb.green / 10),
@@ -81,14 +97,15 @@ export function getAvatar(
       0,
     ],
     foreground: [rgb.red, rgb.green, rgb.blue, 255],
-    format: format,
+    format,
     margin: 0.2,
-    size, // use SVG instead of PNG
+    size,
   };
 
-  // create a base64 encoded PNG
   return new Identicon(hash, options).toString();
 }
+
+
 
 const generateRandomHash = (length: number): string => {
   const characters =
