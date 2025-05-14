@@ -42,7 +42,7 @@ export const PreviewItem: React.FC<Props> = ({
       <View style={styles.avatarContainer}>
         <Unreads unreads={unreads} />
         {mRoomKey?.length > 15 && (
-          <Avatar size={50} base64={getAvatar(mRoomKey)} />
+          <Avatar size={50} address={mRoomKey} base64={getAvatar(mRoomKey)} />
         )}
       </View>
       <View style={styles.content}>
