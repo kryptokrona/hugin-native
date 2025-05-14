@@ -6,6 +6,8 @@ import {
 
 import { Peers } from 'lib/connections';
 import { useGlobalStore } from '../services/zustand';
+import ImageResizer from 'react-native-image-resizer';
+
 
 function hashCode(str: string) {
   let hash = 0;
@@ -106,16 +108,48 @@ export const createAvatar = () => {
 
 export const pickAvatar = async () => {
   const options: ImageLibraryOptions = {
-    includeBase64: true,
+    includeBase64: false, // base64 will be retrieved after resize
     mediaType: 'photo',
     quality: 1,
   };
+
   const result = await launchImageLibrary(options);
-  const base64 = result.assets?.[0].base64;
-  if (base64 && base64.length > 273000) {
-    return { error: 'maxAvatarSize' };
-  } else if (base64) {
+  const uri = result.assets?.[0]?.uri;
+
+  if (!uri) return null;
+
+  try {
+    const resized = await ImageResizer.createResizedImage(
+      uri,
+      64,
+      64,
+      'PNG',
+      100,
+      0,
+      undefined,
+      false,
+      {
+        mode: 'contain',
+      }
+    );
+
+    // Read base64 from the resized image
+    const base64 = await fetch(resized.uri)
+      .then(res => res.blob())
+      .then(blob => new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }));
+
+    if (base64.length > 273000) {
+      return { error: 'maxAvatarSize' };
+    }
+
     return { base64 };
+  } catch (error) {
+    console.error('Image resize failed:', error);
+    return { error: 'resizeFailed' };
   }
-  return null;
 };
