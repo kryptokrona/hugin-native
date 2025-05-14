@@ -109,7 +109,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
 
   return (
     <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: online === false ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : 'transparent'  }]} onPress={onPress}>
-      <View style={[{backgroundColor: userColor, borderWidth: 3, borderColor: backgroundColor, borderRadius: 22}, styles.onlineUser]}>
+      <View style={[{backgroundColor: video ? 'transparent' : userColor, borderWidth: 3, borderColor: backgroundColor, borderRadius: 22}, styles.onlineUser]}>
         {!stream && !video &&
         <ModalCenter visible={modalVisible} closeModal={onClose}>
           <View style={styles.modalInner}>
@@ -158,7 +158,8 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
 
 const styles = StyleSheet.create({
   video: {
-    flex: 1
+    flex: 1,
+    borderRadius: 22
   },
   modalInner: {
     alignItems: 'center',
