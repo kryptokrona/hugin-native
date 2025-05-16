@@ -3,8 +3,6 @@ import * as Progress from 'react-native-progress';
 import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
 import React, { useState } from 'react';
 import { useGlobalStore, usePreferencesStore, useThemeStore } from '@/services';
-
-import Clipboard from '@react-native-clipboard/clipboard';
 import { MainScreens } from '@/config';
 import { MainStackNavigationType } from '@/types';
 import { Wallet } from '../services/kryptokrona/wallet';
@@ -32,16 +30,6 @@ export const WalletStatusScreen: React.FC<Props> = () => {
     if (Wallet?.active) {
       Wallet.active.rewind(resyncHeight);
       Wallet.getAndSetSyncStatus();
-    }
-  };
-
-  const copyMnemonic = async () => {
-    if (Wallet.active) {
-      const mnemonic = await Wallet.active.getMnemonicSeed();
-
-      if (mnemonic[0]) {
-        Clipboard.setString(mnemonic[0]);
-      }
     }
   };
 
@@ -73,7 +61,7 @@ export const WalletStatusScreen: React.FC<Props> = () => {
         keyboardType="number-pad"
       />
       <TextButton onPress={resyncWallet}>{t('resyncWallet')}</TextButton>
-      <TextButton onPress={copyMnemonic}>{t('backupWallet')}</TextButton>
+      <TextButton onPress={() => Wallet.copyMnemonic()}>{t('backupWallet')}</TextButton>
     </ScreenLayout>
   );
 };

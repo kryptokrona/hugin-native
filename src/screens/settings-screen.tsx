@@ -174,6 +174,11 @@ export const SettingsScreen: React.FC<Props> = () => {
       screen: MainScreens.LoggerScreen,
       title: 'debugLog',
     },
+    {
+      function: () => Wallet.copyMnemonic(),
+      icon: { name: 'backup-restore', type: 'MCI' },
+      title: 'copyMnemonic',
+    },
   ];
 
   if (Platform.OS == 'android') {

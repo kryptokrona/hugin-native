@@ -31,13 +31,14 @@ import {
 } from '@/services';
 import { privateKeys } from './privates';
 import { Platform } from 'react-native';
-
+import { t } from 'i18next';
 import { MessageSync } from '../hugin/syncer';
 import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
 import naclUtil from 'tweetnacl-util';
 import tweetnacl from 'tweetnacl';
 import { Beam, Nodes } from '../../lib/native';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -81,11 +82,13 @@ export class ActiveWallet {
   async create(node, nickname) {
     this.setDaemon(node);
     try {
+      console.log('Creating wallet with online wallet backend:', WalletBackend != undefined);
       this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
     } catch (err) {
       console.log('Creating wallet failed!', err);
     }
     this.address = this.addresses()[0];
+    console.log('Created wallet with address:', this.address);
     this.loaded = true;
     await this.joinBetaRoom(nickname);
     // await this.start();
@@ -97,7 +100,9 @@ export class ActiveWallet {
     try {
       console.log('Saving wallet!');
       console.log('--------------->');
-      await saveWallet(this.active.toJSONString());
+      const walletJSON = this.active.toJSONString();
+      console.log('Saving wallet with size:', JSON.stringify(walletJSON).length);
+      await saveWallet(walletJSON);
     } catch (err) {
       console.log(err);
     }
@@ -503,6 +508,30 @@ export class ActiveWallet {
     const derivation = await generateKeyDerivation(recvPubKey, privateViewKey);
     return await cnFastHash(derivation);
   }
+
+  async copyMnemonic() {
+  if (this.active) {
+    const mnemonic = await this.active.getMnemonicSeed();
+    if (mnemonic[0]) {
+      Clipboard.setString(mnemonic[0]);
+      Toast.show({
+          type: 'success',
+          text1: t('mnemonicCopied'),
+        });
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: t('noMnemonicError'),
+      });
+    }
+  } else {
+    Toast.show({
+      type: 'error',
+      text1: t('walletOfflineError'),
+    });
+  }
+};
+
 }
 
 export const Wallet = new ActiveWallet();
