@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -230,6 +230,7 @@ export const GroupMessageItem: React.FC<Props> = ({
               }>
               {t('messageUser')}
             </TextButton> */}
+            {Platform.OS == 'android' && 
             <TextButton
               small
               type="secondary"
@@ -237,6 +238,7 @@ export const GroupMessageItem: React.FC<Props> = ({
               icon={<CustomIcon name="attach-money" type="MI" size={16} />}>
               {t('tipUser')}
             </TextButton>
+            }
           </View>
         )}
       </ModalBottom>

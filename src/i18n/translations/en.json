@@ -114,5 +114,10 @@
   "joinCall": "Join call",
   "endCall": "End call",
   "currentCall": "Current call",
-  "registrationSuccess": "Registration successful! ✅"
+  "registrationSuccess": "Registration successful! ✅",
+  "copyMnemonic": "Backup account",
+  "mnemonicCopied": "Mnemonic copied ✅",
+  "debugLog": "Debug log",
+  "noMnemonicError": "Wallet failed to provide mnemonic",
+  "walletOfflineError": "Wallet not started"
 }

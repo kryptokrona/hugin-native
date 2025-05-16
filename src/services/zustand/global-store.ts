@@ -16,6 +16,7 @@ type GlobalStore = {
   messages: Message[];
   feedMessages: Message[];
   roomUsers: Record<string, User[]>;
+  avatars: Record<string, string>;
   transactions: Transaction[];
   syncStatus: number[];
   fiatPrice: number;
@@ -35,6 +36,7 @@ type GlobalStore = {
   setCurrentCall: (payload: Call) => void;
   resetCurrentCall: () => void;
   setUsers: (payload: User[]) => void;
+  setAvatar: (address: string, avatar: string) => void;
 };
 
 const defaultCall: Call = { 
@@ -60,6 +62,7 @@ export const useGlobalStore = create<
     roomUsers: {},
     rooms: [],
     feedMessages: [],
+    avatars: {},
     setAddress: async (address: string) => {
       set({ address });
     },
@@ -184,6 +187,18 @@ export const useGlobalStore = create<
         };
       });
     },    
+    setAvatar: (address: string, avatar: string) => {
+      useGlobalStore.setState((state) => {
+        // Only update if avatar is different
+        if (state.avatars[address] === avatar) return state;
+        return {
+          avatars: {
+            ...state.avatars,
+            [address]: avatar,
+          },
+        };
+      });
+    },
     setStoreContacts: (contacts: Contact[]) => {
       set({ contacts });
     },

@@ -351,6 +351,28 @@ export async function saveRoomUser(
   }
 }
 
+export async function getUserAvatar(address: string): Promise<string> {
+
+  try {
+    const results = await db.executeSql(
+      'SELECT avatar FROM groupusers WHERE address = ? LIMIT 1',
+      [address]
+    );
+
+    if (results.length > 0 && results[0].rows.length > 0) {
+      const avatar = results[0].rows.item(0).avatar;
+      console.log('Got avatar:', avatar);
+      return avatar;
+    }
+
+    return '';
+  } catch (err) {
+    console.log('Error fetching avatar:', err);
+    return '';
+  }
+}
+
+
 export async function getRoomUsers(room: string): Promise<User[]> {
   console.log('Get room users for room ', room);
 

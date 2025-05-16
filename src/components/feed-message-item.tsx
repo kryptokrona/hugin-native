@@ -317,7 +317,7 @@ export const FeedMessageItem: React.FC<Props> = ({
         <View style={styles.messageContainer}>
           <View style={[styles.avatar, {backgroundColor: userColor}]}>
             {userAddress.length > 15 && (
-              <Avatar base64={getAvatar(userAddress)} size={24} />
+              <Avatar address={userAddress} size={24} />
             )}
           </View>
           <View>
