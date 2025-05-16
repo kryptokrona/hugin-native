@@ -15,6 +15,7 @@ import {
   useGlobalStore,
   useUserStore,
 } from '../zustand';
+import { Notify } from '../../services/utils';
 
 // import { sleep } from '@/utils';
 
@@ -41,7 +42,6 @@ import {
 
 export const setLatestMessages = async () => {
   const latestContacts = await getLatestMessages();
-
   // const currentContacts = useGlobalStore.getState().contacts;
   const userAddress = useUserStore.getState().user.address;
   const currentContact = useGlobalStore.getState().thisContact;
@@ -70,18 +70,27 @@ export const setLatestMessages = async () => {
   );
 };
 
-export const updateMessage = async (message: Message, history = false) => {
+export const updateMessage = async (message: Message, background = false) => {
   const thisContact = getCurrentContact();
   const inRoom = thisContact === message.room;
   if (inRoom) {
     const messages = await getMessages(thisContact, 0);
     setStoreMessages(messages);
   }
-};
 
-// const updateVoiceChannelStatus = (status: any) => {
-//   //Update the user voice status
-// };
+  if (background) {
+    const contacts = useGlobalStore((state) => state.contacts);
+    for (const contact of contacts) {
+      if (contact.address === message.address) {
+          Notify.new({ 
+            name: contact.name, 
+            text: message.message }, background, {} //Todo: Data for navigation on click notif.
+          )
+          break;
+      }
+    }
+  }
+}
 
 export const setMessages = async (contact: string, page: number) => {
   console.log('Load message page:', page);
@@ -89,153 +98,3 @@ export const setMessages = async (contact: string, page: number) => {
   console.log('Set store messs');
   setStoreMessages(messages);
 };
-
-// const onSendGroupMessage = async (
-//   key: string,
-//   message: string,
-//   reply: string | null,
-//   tip: JSON | false,
-// ) => {
-//   return await send_swarm_msg(key, message, reply, tip);
-// };
-
-// const onSendGroupMessageWithFile = (
-//   key: string,
-//   file: SelectedFile,
-//   message: string,
-// ) => {
-//   const fileData: FileInput = {
-//     ...file,
-//     key,
-//     message,
-//   };
-//   const JSONfileData = JSON.stringify(fileData);
-//   begin_send_file(JSONfileData);
-// };
-
-// const onRequestNewGroupKey = async () => {
-//   const key = await group_random_key();
-//   return key;
-// };
-
-// const onDeleteGroup = async (key: string) => {
-//   await removeRoomFromDatabase(key);
-//   await setLatestRoomMessages();
-//   onLeaveGroup(key);
-// };
-
-// const onLeaveGroup = (key: string) => {
-//   end_swarm(key);
-// };
-
-// const leaveRooms = async () => {
-//   const rooms = await getRooms();
-//   for (const r of rooms) {
-//     end_swarm(r.key);
-//   }
-//   await sleep(200);
-//   return;
-// };
-
-// const joinRooms = async () => {
-//   console.log('********* Joining rooms! ***********');
-//   const rooms = await getRooms();
-//   // for (r of rooms) {
-//   //   await sleep(100);
-//   //   await onDeleteGroup(r.key);
-//   // }
-//   const adminkeys = await loadAdminKeys();
-//   for (const r of rooms) {
-//     const key = adminkeys.find((a) => a.key === r.key && a.seed);
-//     const admin: string = key?.seed;
-//     await sleep(100);
-//     console.log('Joining room -->');
-//     await swarm(naclHash(r.key), r.key, admin);
-//   }
-// };
-
-// const loadAdminKeys = async () => {
-//   const rooms = await getRooms();
-//   const keys = [];
-//   for (const r of rooms) {
-//     if (r.seed) {
-//       const admin = { key: r.key, seed: r.seed };
-//       keys.push(admin);
-//     }
-//   }
-//   return keys;
-// };
-
-// const joinAndSaveRoom = async (
-//   key: string,
-//   name: string,
-//   address: string,
-//   userName: string,
-//   admin?: string,
-// ) => {
-//   await swarm(naclHash(key), key, admin);
-//   console.log('Swarm launched');
-//   await saveRoomToDatabase(name, key, admin);
-//   await saveRoomMessageAndUpdate(
-//     address,
-//     'Joined room',
-//     key,
-//     '',
-//     Date.now(),
-//     userName,
-//     randomKey(),
-//     true,
-//   );
-//   setRoomMessages(key, 0);
-//   setStoreCurrentRoom(key);
-// };
-
-// const saveRoomMessageAndUpdate = async (
-//   address: string,
-//   message: string,
-//   room: string,
-//   reply: string,
-//   timestamp: number,
-//   nickname: string,
-//   hash: string,
-//   sent: boolean,
-//   history: boolean | undefined = false,
-//   file?: FileInfo | undefined,
-//   tip?: JSON | undefined,
-// ) => {
-//   let isFile = false;
-//   if (typeof file === 'object') {
-//     isFile = true;
-//     await saveFileInfo(file);
-//   }
-
-//   const newMessage = await saveRoomMessage(
-//     address,
-//     message,
-//     room,
-//     reply,
-//     timestamp,
-//     nickname,
-//     hash,
-//     sent,
-//     tip,
-//   );
-
-//   if (newMessage && !history) {
-//     if (isFile) {
-//       newMessage.file = file;
-//     }
-//     updateMessage(newMessage);
-//   }
-
-//   if (!history) {
-//     setLatestMessages();
-//   }
-// };
-
-// const createUserAddress = async () => {
-//   const keys = newKeyPair();
-//   await saveAccount(keys.publicKey, keys.secretKey);
-
-//   return keys.publicKey;
-// };

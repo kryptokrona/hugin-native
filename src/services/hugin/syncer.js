@@ -53,7 +53,7 @@ class Syncer {
     if (incoming) return false;
     //Latest version, fetch more messages with last checked timestamp
     const lastChecked = this.lastChecked;
-    this.lastChecked = Date.now();
+    this.lastChecked = Date.now() - 1000;
 
     const resp = await Nodes.sync({
       request: true,
@@ -124,7 +124,7 @@ class Syncer {
     }
   }
 
-  async check_for_pm(thisExtra, thisHash) {
+  async check_for_pm(thisExtra, thisHash, background) {
     const [privateSpendKey, privateViewKey] = this.keys;
     const keys = { privateSpendKey, privateViewKey };
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
@@ -152,7 +152,7 @@ class Syncer {
         undefined,
       );
       if (saved) {
-        updateMessage(saved);
+        updateMessage(saved, background);
       }
       setLatestMessages();
       return true;
