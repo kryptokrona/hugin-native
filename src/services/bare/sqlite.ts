@@ -361,7 +361,6 @@ export async function getUserAvatar(address: string): Promise<string> {
 
     if (results.length > 0 && results[0].rows.length > 0) {
       const avatar = results[0].rows.item(0).avatar;
-      console.log('Got avatar:', avatar);
       return avatar;
     }
 
@@ -620,13 +619,10 @@ export async function getLatestRoomMessages() {
 
 export async function getRoomMessages(room: string, page: number) {
   const limit: number = 55;
-  let offset: number = 0;
-  if (page !== 0) {
-    offset = page * limit;
-  }
+  let offset: number = page * limit;
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
-    [room],
+    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`,
+    [room]
   );
 
   return await setReplies(results);

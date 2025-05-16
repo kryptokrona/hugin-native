@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
   Animated,
+  ActivityIndicator,
 } from 'react-native';
 
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
@@ -53,6 +54,7 @@ import {
   setStoreCurrentRoom,
   useThemeStore,
   WebRTC,
+  setStoreRoomMessages,
 } from '@/services';
 import { textType } from '@/styles';
 import type {
@@ -72,6 +74,7 @@ import {
 } from '../services/bare/groups';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { GlideInItem } from '../components/glider';
+import { getRoomMessages } from '../services/bare/sqlite';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -92,6 +95,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
   const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
+  // const [messages, setMessages] = useState<Message[]>(globalMessages || []);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  
   // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
@@ -259,6 +267,17 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         type: 'error',
       });
     }
+  }
+
+  const loadMoreMessages = async () => {
+    if (isLoadingMore || noMoreMessages) return;
+    setIsLoadingMore(true);
+    const nextPageMessages = await getRoomMessages(roomKey, currentPage);
+    if (nextPageMessages.length == 0) setNoMoreMessages(true);
+    const newMessages = [...nextPageMessages, ...messages];
+    setStoreRoomMessages(newMessages);
+    setCurrentPage(currentPage + 1);
+    setIsLoadingMore(false);
   }
 
   useFocusEffect(
@@ -468,6 +487,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           contentContainerStyle={styles.flatListContent}
           initialNumToRender={messages.length}
           maxToRenderPerBatch={messages.length}
+          onEndReached={loadMoreMessages}
+          onEndReachedThreshold={0.1}
+          ListHeaderComponent={isLoadingMore ? <ActivityIndicator size="small" color={color}  /> : null}
         />
   
            
