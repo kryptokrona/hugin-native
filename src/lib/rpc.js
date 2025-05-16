@@ -85,7 +85,7 @@ export class Bridge {
         case 'new-swarm':
           break;
         case 'beam-message':
-          MessageSync.check_for_pm(json.message, json.hash);
+          MessageSync.check_for_pm(json.message, json.hash, json.background);
           break;
         case 'beam-connected':
           //Change state to -> "connected"

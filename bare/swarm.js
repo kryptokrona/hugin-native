@@ -573,7 +573,7 @@ const incoming_message = async (data, topic, connection, peer, beam) => {
 
   if (beam) {
     const hash = str.substring(0, 64);
-    Hugin.send('beam-message', { message: str, hash });
+    Hugin.send('beam-message', { message: str, hash, background: Hugin.background });
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
