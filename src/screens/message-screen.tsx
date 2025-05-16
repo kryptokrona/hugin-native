@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   inputWrapper: {
-    bottom: 6,
+    bottom: 0,
     left: 0,
     // marginBottom: 10,
     paddingBottom: 10,
