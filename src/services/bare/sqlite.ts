@@ -11,6 +11,8 @@ import { containsOnlyEmojis } from '@/utils';
 import { Files } from './globals';
 
 import { useUserStore } from '../zustand';
+import { Platform } from 'react-native';
+import RNFS from 'react-native-fs';
 
 enablePromise(true);
 
@@ -306,10 +308,15 @@ export async function saveFileInfo(file: FileInfo) {
 export async function loadSavedFiles() {
   const results = await db.executeSql('SELECT * FROM files');
   const files: Array<FileInfo> = [];
+  const fileLocation = Platform.OS == 'ios'
+  ? RNFS.LibraryDirectoryPath
+  : RNFS.CachesDirectoryPath;
 
   for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
-      files.push(result.rows.item(index));
+      const file = result.rows.item(index);
+      file.path = fileLocation + '/' + file.fileName;
+      files.push(file);
     }
   }
   return files;
