@@ -70,16 +70,15 @@ export const setLatestMessages = async () => {
   );
 };
 
-export const updateMessage = async (message: Message, background = false) => {
+export const updateMessage = async (message: Message, background: boolean) => {
   const thisContact = getCurrentContact();
   const inRoom = thisContact === message.room;
   if (inRoom) {
     const messages = await getMessages(thisContact, 0);
     setStoreMessages(messages);
   }
-
   if (background) {
-    const contacts = useGlobalStore((state) => state.contacts);
+    const contacts = useGlobalStore.getState().contacts;
     for (const contact of contacts) {
       if (contact.address === message.address) {
           Notify.new({ 
