@@ -1,7 +1,8 @@
 
  plugins {
-    id("com.facebook.react")
+    
     id("com.android.application")
+    id("com.facebook.react")
     id("org.jetbrains.kotlin.android") // if using Kotlin
 }
 
@@ -103,11 +104,11 @@ android {
     defaultConfig {
         buildToolsVersion '35'
         targetSdkVersion '35'
-        compileSdk 34
+        compileSdk 35
         applicationId 'com.hugin'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 104
+        versionCode 106
         versionName "1.0.0"
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
 
@@ -204,7 +205,6 @@ dependencies {
     implementation project(':react-native-bare-kit')
     implementation project(':react-native-fs')
     implementation project(':react-native-image-picker')
-    implementation project(':react-native-document-picker')
     implementation("androidx.activity:activity:1.9.+")
     implementation 'com.google.mlkit:barcode-scanning:17.2.0'
     implementation project(':react-native-incall-manager')

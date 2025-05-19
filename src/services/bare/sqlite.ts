@@ -315,9 +315,11 @@ export async function loadSavedFiles() {
     for (let index = 0; index < result.rows.length; index++) {
       const file = result.rows.item(index);
 
+      if (Platform.OS === 'ios') {
+      //Change dynamic path on ios
       const locationDir = file.path.split('/').at(-2);
-
       file.path = `${sandboxRoot}/${locationDir}/${file.fileName}`;
+      }
 
       files.push(file);
     }
