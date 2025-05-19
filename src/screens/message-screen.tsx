@@ -104,10 +104,16 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const inCall = currentCall.room === keyRef.current;
 
   useEffect(() => {
-    if (keyRef.current.length > 64) return; // Prevent re-execution if key is already set
+  console.log('Keyref changed!', keyRef.current)
+}, [keyRef]);
 
+  useEffect(() => {
+    console.log('Updating keyref!', keyRef.current)
+    if (keyRef.current != 'null') return; // Prevent re-execution if key is already set
+    console.log('Continuing updating keyref!')
     const deriveKey = async () => {
       const derivedKey = await Wallet.key_derivation_hash(roomKey);
+      console.log('Derived key:', derivedKey);
       keyRef.current = derivedKey;
       setRoomUsers(allRoomUsers[derivedKey])
     };
@@ -116,13 +122,21 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   }, [roomKey]); // Run only when `roomKey` changes
 
 
-  useEffect(() => {
-    if (keyRef.current === 'null') return; // Don't run when key isnt set yet
-    const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current]
-    setRoomUsers(currentRoomUsers)
-    setOnline(currentRoomUsers.some((a) => a.address === roomKey));
-    setVoiceUsers(currentRoomUsers.filter(a => a.voice == true))
-  }, [allRoomUsers]);
+const handleRoomUserUpdate = () => {
+  if (keyRef.current === 'null') return;
+  const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current];
+  setRoomUsers(currentRoomUsers);
+  setOnline(currentRoomUsers.some((a) => a.address === roomKey));
+  setVoiceUsers(currentRoomUsers.filter(a => a.voice === true));
+};
+
+useEffect(() => {
+  handleRoomUserUpdate();
+}, []);
+
+useEffect(() => {
+  handleRoomUserUpdate();
+}, [allRoomUsers, keyRef.current]);
   
 
   const upgradeHugin = () => {
