@@ -17,7 +17,8 @@ import {
   useAudioPermission,
 } from '@simform_solutions/react-native-audio-waveform';
 import { useTranslation } from 'react-i18next';
-import DocumentPicker, { types } from '@react-native-documents/picker';
+import { pick, types, keepLocalCopy, errorCodes, isErrorWithCode } from '@react-native-documents/picker';
+
 import RNFS from 'react-native-fs';
 import {
   CameraOptions,
@@ -123,49 +124,61 @@ export const MessageInput: React.FC<Props> = ({
   }
 
   async function onFilePress() {
-    Camera.on(); // TODO Change to global state
-    if (Platform.OS === 'android') {
-      try {
-        const res = await DocumentPicker.pick({
-          copyTo: 'documentDirectory',
-          type: [types.allFiles],
-        });
+  Camera.on(); // TODO: Change to global state
+  if (Platform.OS === 'android') {
+    try {
+      const res = await pick({
+        type: [types.allFiles],
+        allowVirtualFiles: true,
+        mode: 'open',
+        requestLongTermAccess: false,
+      });
 
-        const { size, name, uri, type, fileCopyUri } = res;
-        if (!uri || !name || !size) {
-          return;
-        }
+      const { name, uri, size, type } = res[0];
 
-        const fileInfo: SelectedFile = {
-          fileName: name,
-          path: fileCopyUri?.slice(7, fileCopyUri.length),
-          size,
-          time: new Date().getTime(),
-          type,
-          uri: uri,
-        };
-
-        setSelectedFile(fileInfo);
-
-        await sleep(300);
-        Camera.off();
-      } catch (err) {
-        if (DocumentPicker.isCancel(err)) {
-          console.log('User cancelled file picker');
-          await sleep(1000);
-          Camera.off();
-        } else {
-          console.error('DocumentPicker Error: ', err);
-        }
+      if (!uri || !name || !size) {
+        return;
       }
-    } else {
-      const options: CameraOptions = {
-        mediaType: 'photo',
-        quality: 0.5,
-        saveToPhotos: true,
+
+      const localCopies = await keepLocalCopy({
+        destination: 'documentDirectory',
+        files: [{
+          uri,
+          fileName: name,
+          convertVirtualFileToType: type || 'application/octet-stream',
+        }]
+      });
+
+      const localUri = localCopies[0]?.status === 'success' ? localCopies[0].localUri : null;
+      if (!localUri) {
+        console.error('Failed to create local copy of file');
+        return;
+      }
+
+      const fileInfo: SelectedFile = {
+        fileName: name,
+        path: localUri.replace('file://', ''),
+        size,
+        time: new Date().getTime(),
+        type,
+        uri: uri,
       };
 
-      launchImageLibrary(options, async (response) => {
+      setSelectedFile(fileInfo);
+
+      await sleep(300);
+      Camera.off();
+    } catch (err) {
+      if (isErrorWithCode(err) && err.code === errorCodes.OPERATION_CANCELED) {
+        console.log('User cancelled file picker');
+        await sleep(1000);
+        Camera.off();
+      } else {
+        console.error('DocumentPicker Error:', err);
+      }
+    }
+  } else {
+     launchImageLibrary(options, async (response) => {
         Camera.on();
         if (response.didCancel) {
           console.log('User cancelled image picker');
