@@ -308,19 +308,24 @@ export async function saveFileInfo(file: FileInfo) {
 export async function loadSavedFiles() {
   const results = await db.executeSql('SELECT * FROM files');
   const files: Array<FileInfo> = [];
-  const fileLocation = Platform.OS == 'ios'
-  ? RNFS.LibraryDirectoryPath
-  : RNFS.CachesDirectoryPath;
+
+  const sandboxRoot = RNFS.DocumentDirectoryPath.replace(/\/Documents$/, '');
 
   for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const file = result.rows.item(index);
-      file.path = fileLocation + '/' + file.fileName;
+
+      const locationDir = file.path.split('/').at(-2);
+
+      file.path = `${sandboxRoot}/${locationDir}/${file.fileName}`;
+
       files.push(file);
     }
   }
+
   return files;
 }
+
 
 export async function saveRoomUser(
   name: string,
