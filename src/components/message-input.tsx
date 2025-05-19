@@ -17,7 +17,7 @@ import {
   useAudioPermission,
 } from '@simform_solutions/react-native-audio-waveform';
 import { useTranslation } from 'react-i18next';
-import DocumentPicker, { types } from 'react-native-document-picker';
+import DocumentPicker, { types } from '@react-native-documents/picker';
 import RNFS from 'react-native-fs';
 import {
   CameraOptions,
@@ -70,8 +70,6 @@ export const MessageInput: React.FC<Props> = ({
     useAudioPermission();
   const [selectedRecording, setselectedRecording] =
     useState<SelectedFile | null>(null);
-
-    console.log('large input?', large);
 
   useEffect(() => {
     if (replyToName?.length) {
@@ -128,7 +126,7 @@ export const MessageInput: React.FC<Props> = ({
     Camera.on(); // TODO Change to global state
     if (Platform.OS === 'android') {
       try {
-        const res = await DocumentPicker.pickSingle({
+        const res = await DocumentPicker.pick({
           copyTo: 'documentDirectory',
           type: [types.allFiles],
         });
