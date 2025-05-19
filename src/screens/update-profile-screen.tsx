@@ -45,7 +45,8 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<MainStackNavigationType>();
   const preferences = usePreferencesStore((state) => state.preferences);
-  const { name, avatar, address } = useUserStore((state) => state.user);
+  const { name, address } = useUserStore((state) => state.user);
+  const avatar = useUserStore((state) => state.user.avatar);
   const [value, setValue] = useState<string>(name);
   const [authMethod, setAuthMethod] = useState<AuthMethods | null>(
     preferences.authMethod,
@@ -127,7 +128,16 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
           <TouchableOpacity
             onPress={onUpdateAvatar}
             style={styles.avatarContainer}>
-            <Avatar base64={avatar} address={address} size={70} />
+            <>
+              {address && avatar?.length === 0 && (
+                <Avatar address={address} size={70} />
+              )}
+  
+              {avatar?.length > 15 && (
+                <Avatar key={avatar} base64={avatar} size={70} />
+              )}
+              {/* <HuginSvg style={styles.logo} /> */}
+            </>
             <View style={styles.avatarButton}>
               <CustomIcon
                 type="MI"

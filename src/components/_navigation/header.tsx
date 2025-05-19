@@ -54,10 +54,12 @@ export const Header: React.FC<Props> = ({
         {!backButton && (
           <>
             {address && avatar?.length === 0 && (
-              <Avatar base64={getAvatar(address)} address={address} size={30} />
+              <Avatar address={address} size={30} />
             )}
 
-            {avatar?.length > 15 && <Avatar base64={avatar} size={30} />}
+            {avatar?.length > 15 && (
+              <Avatar key={avatar} base64={avatar} size={30} />
+            )}
             {/* <HuginSvg style={styles.logo} /> */}
           </>
         )}
