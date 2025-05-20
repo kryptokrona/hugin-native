@@ -178,6 +178,11 @@ export const MessageInput: React.FC<Props> = ({
       }
     }
   } else {
+    const options: CameraOptions = {
+        mediaType: 'photo',
+        quality: 0.5,
+        saveToPhotos: true,
+      };
      launchImageLibrary(options, async (response) => {
         Camera.on();
         if (response.didCancel) {
