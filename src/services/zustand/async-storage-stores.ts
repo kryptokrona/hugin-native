@@ -145,6 +145,8 @@ interface PreferencesStore {
   preferences: Preferences;
   setPreferences: (preferences: Preferences) => void;
   setAuthMethod: (authMethod: AuthMethods | null) => void;
+  setSkipBgRefreshWarning: (skip: boolean) => void;
+  skipBgRefreshWarning: boolean;
 }
 
 export const usePreferencesStore = create<PreferencesStore>()(
@@ -160,6 +162,8 @@ export const usePreferencesStore = create<PreferencesStore>()(
         set((state) => ({
           preferences: { ...state.preferences, language },
         })),
+      skipBgRefreshWarning: false,
+      setSkipBgRefreshWarning: (skip) => set({ skipBgRefreshWarning: skip }),
     }),
     {
       merge: (persistedState: unknown, currentState: PreferencesStore) => {
@@ -168,7 +172,9 @@ export const usePreferencesStore = create<PreferencesStore>()(
           | undefined;
         const preferences =
           typedPersistedState?.preferences ?? defaultPreferences;
-        return { ...currentState, preferences };
+        const skipBgRefreshWarning =
+          typedPersistedState?.skipBgRefreshWarning ?? false;
+        return { ...currentState, preferences, skipBgRefreshWarning }
       },
       name: ASYNC_STORAGE_KEYS.PREFERENCES,
       onRehydrateStorage: () => () => {

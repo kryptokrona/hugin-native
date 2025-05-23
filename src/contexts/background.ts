@@ -3,7 +3,10 @@ import { sleep } from '@/utils';
 import { Beam, Rooms } from '../lib/native';
 import { Notify } from '../services/utils';
 import notifee, { IntervalTrigger, TriggerType, TimeUnit } from '@notifee/react-native';
-import { Platform } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
+import { t } from 'i18next';
+import Toast from 'react-native-toast-message';
+import { usePreferencesStore } from '@/services';
 
 
 class BackgroundTask {
@@ -47,16 +50,27 @@ class BackgroundTask {
         // Notify.wakeup();
         BackgroundFetch.finish(taskId);
       };
-      
-      await BackgroundFetch.configure(
-        { minimumFetchInterval: 15,
-          stopOnTerminate: false,
-          startOnBoot: true,
-          enableHeadless: true
-        },
-        event,
-        timeout,
-      );
+      try {
+
+        await BackgroundFetch.configure(
+          { minimumFetchInterval: 15,
+            stopOnTerminate: false,
+            startOnBoot: true,
+            enableHeadless: true
+          },
+          event,
+          timeout,
+        );
+      } catch (e) {
+        console.log('Failed to configure bg fetch:', e)
+        const skipWarning = usePreferencesStore.getState().skipBgRefreshWarning;
+        if (e == '1' && Platform.OS == 'ios' && !skipWarning) {
+              Alert.alert(t('backgroundRefreshTitle'), t('backgroundRefreshSubtitle'), [
+              {text: t('openSettings'), onPress: () => Linking.openSettings()},
+              {text: t('dontAskAgain'), onPress: () => usePreferencesStore.getState().setSkipBgRefreshWarning(true)},
+            ]);
+        }
+      }
 
       // console.log('Scheduling..')
       // BackgroundFetch.scheduleTask({

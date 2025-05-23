@@ -119,5 +119,9 @@
   "mnemonicCopied": "Mnemonic copied ✅",
   "debugLog": "Debug log",
   "noMnemonicError": "Wallet failed to provide mnemonic",
-  "walletOfflineError": "Wallet not started"
+  "walletOfflineError": "Wallet not started",
+  "backgroundRefreshTitle": "Background app refresh not activated",
+  "backgroundRefreshSubtitle": "Please activate 'Background app refresh' in Settings > Apps > Hugin in order to get notifications.",
+  "openSettings": "Open settings",
+  "dontAskAgain": "Don't ask again"
 }
