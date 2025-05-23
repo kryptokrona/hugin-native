@@ -46,9 +46,13 @@ export const Header: React.FC<Props> = ({
 
   function gotoProfile() {
       navigation.navigate('SettingsStack', {
+        screen: MainScreens.SettingsScreen,
+      });
+      navigation.navigate('SettingsStack', {
         screen: MainScreens.UpdateProfileScreen,
       });
   }
+  
   return (
     <View style={[styles.container, { backgroundColor, borderColor }]}>
       <View style={styles.side}>
