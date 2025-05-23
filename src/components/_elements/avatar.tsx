@@ -1,4 +1,4 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 
 import { Styles } from '@/styles';
@@ -9,9 +9,10 @@ interface Props {
   base64?: string;
   address?: string | null;
   size?: number;
+  onPress?: () => void;
 }
 
-export const Avatar: React.FC<Props> = ({ base64, address, size = 70 }) => {
+export const Avatar: React.FC<Props> = ({ base64, address, size = 70, onPress }) => {
   const style = { height: size, width: size };
   const uriFromBase64 = `data:image/png;base64,${base64}`;
   const [imageUri, setImageUri] = useState<string>('');
@@ -26,9 +27,11 @@ export const Avatar: React.FC<Props> = ({ base64, address, size = 70 }) => {
   }, [avatarFromStore]);
 
   return (
-    <View style={[styles.container, style]}>
+    <TouchableOpacity onPress={onPress}>
+    <View onPress style={[styles.container, style]}>
       {imageUri && <Image source={{ uri: imageUri }} style={[style]} />}
     </View>
+    </TouchableOpacity>
   );
 };
 

@@ -8,6 +8,7 @@ import { useThemeStore, useUserStore } from '@/services';
 import { getAvatar } from '@/utils';
 
 import { Avatar, CustomIcon, TextField } from '../_elements';
+import { MainScreens } from '@/config';
 
 interface Props {
   title?: string;
@@ -43,6 +44,9 @@ export const Header: React.FC<Props> = ({
     }
   }
 
+  function gotoProfile() {
+      navigation.navigate(MainScreens.UpdateProfileScreen)
+  }
   return (
     <View style={[styles.container, { backgroundColor, borderColor }]}>
       <View style={styles.side}>
@@ -54,11 +58,11 @@ export const Header: React.FC<Props> = ({
         {!backButton && (
           <>
             {address && avatar?.length === 0 && (
-              <Avatar address={address} size={30} />
+              <Avatar onPress={() => gotoProfile()} address={address} size={30} />
             )}
 
             {avatar?.length > 15 && (
-              <Avatar key={avatar} base64={avatar} size={30} />
+              <Avatar onPress={() => gotoProfile()} key={avatar} base64={avatar} size={30} />
             )}
             {/* <HuginSvg style={styles.logo} /> */}
           </>
