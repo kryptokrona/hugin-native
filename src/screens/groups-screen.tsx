@@ -56,11 +56,13 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
+  const navigationInProgressRef = useRef(false);
+
 
   const suggestedRooms = [
   {
     name: 'Hugin',
-    roomKey: '1d921b478302d0abe084a0b9e62d33209626ebf3413f86eb33340b8afce6beae4aeec7f94d82776fb8a642c36ead7af8b407b99ae19f85eeb689b6799aead35a',
+    roomKey: '8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc',
     invite: 'hugin://Hugin/8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc'
   },
   {
@@ -135,11 +137,18 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
   }
 
   async function onPress(roomKey: string, name: string) {
+
+  navigationInProgressRef.current = true;
+  try {
     await setRoomMessages(roomKey, 0);
     setStoreCurrentRoom(roomKey);
     setThisRoom(roomKey);
-    navigation.push(MainScreens.GroupChatScreen, {name, roomKey});
+    navigation.push(MainScreens.GroupChatScreen, { name, roomKey });
+  } finally {
+    setTimeout(() => {navigationInProgressRef.current = false}, 300);
   }
+}
+
   function onSuggestedPress(invite: string) {
     onJoinpress(invite);
   }
@@ -276,7 +285,7 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
       <FlatList
         data={rooms}
         keyExtractor={(item, i) => `${item.roomKey}-${i}`}
-        renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
+        renderItem={({ item }) => <PreviewItem {...item} onPress={navigationInProgressRef.current ? () => {} : onPress} />}
       />
       {filteredSuggestedRooms.length > 0 && rooms.length < 3 && (
   <Container>
