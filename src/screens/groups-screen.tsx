@@ -237,10 +237,10 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
               label={t('inviteLink')}
               value={link}
               onChange={onInputChange}
-              onSubmitEditing={onJoinpress}
+              onSubmitEditing={() => {onJoinpress()}}
             />
             <TextButton onPress={onScanPress}>{t('scanQR')}</TextButton>
-            <TextButton disabled={link === null} onPress={onJoinpress}>
+            <TextButton disabled={link === null} onPress={() => {onJoinpress()}}>
               {t('joinRoom')}
             </TextButton>
           </>
