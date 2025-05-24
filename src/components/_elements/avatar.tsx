@@ -28,7 +28,7 @@ export const Avatar: React.FC<Props> = ({ base64, address, size = 70, onPress })
 
   return (
     <TouchableOpacity onPress={onPress}>
-    <View onPress style={[styles.container, style]}>
+    <View style={[styles.container, style]}>
       {imageUri && <Image source={{ uri: imageUri }} style={[style]} />}
     </View>
     </TouchableOpacity>
