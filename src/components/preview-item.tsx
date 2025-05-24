@@ -1,16 +1,18 @@
-import { Avatar, TextField, Unreads } from './_elements';
+import { Avatar, TextButton, TextField, Unreads } from './_elements';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { getAvatar } from '@/utils';
 import { useThemeStore } from '@/services';
+import { t } from 'i18next';
 
 interface Props {
   name: string;
   roomKey?: string;
   address?: string;
-  message: string;
+  message?: string;
   unreads?: number;
   onPress: (key: string, name: string) => void;
+  suggested?: boolean;
 }
 
 export const PreviewItem: React.FC<Props> = ({
@@ -18,12 +20,13 @@ export const PreviewItem: React.FC<Props> = ({
   roomKey,
   address,
   message,
-  onPress,
   unreads = 0,
+  onPress,
+  suggested = false,
 }) => {
   const mRoomKey: string = roomKey ? roomKey : (address as string);
   const theme = useThemeStore((state) => state.theme);
-  const isNew = false; // dummy
+  const isNew = false; // Can be used for future logic
   const borderColor = isNew ? theme.foreground : theme.border;
 
   function handlePress() {
@@ -35,23 +38,24 @@ export const PreviewItem: React.FC<Props> = ({
       onPress={handlePress}
       style={[
         styles.container,
-        {
-          borderColor,
-        },
+        { borderColor },
       ]}>
       <View style={styles.avatarContainer}>
         <Unreads unreads={unreads} />
         {mRoomKey?.length > 15 && (
-          <Avatar size={50} address={mRoomKey} base64={getAvatar(mRoomKey)} />
+          <Avatar size={suggested ? 25 : 50} address={mRoomKey} base64={getAvatar(mRoomKey)} />
         )}
       </View>
-      <View style={styles.content}>
-        <TextField bold={isNew} maxLength={22} size="large">
+
+      <View style={[styles.content, suggested && styles.centeredContent]}>
+        <TextField bold={isNew} maxLength={22} size={suggested ? "small" : "large"}>
           {name}
         </TextField>
-        <TextField bold={isNew} maxLength={65} size="small">
-          {message}
-        </TextField>
+        {!suggested &&
+          <TextField bold={isNew} maxLength={65} size="small">
+            {message}
+          </TextField>
+        }
       </View>
     </TouchableOpacity>
   );
@@ -65,9 +69,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     paddingVertical: 16,
+    alignItems: 'center',
   },
   content: {
     flex: 1,
     marginLeft: 16,
-  },
+    justifyContent: 'center',
+  }
 });

@@ -56,6 +56,30 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
   const { hasPermission, requestPermission } = useCameraPermission();
+
+  const suggestedRooms = [
+  {
+    name: 'Hugin',
+    roomKey: '1d921b478302d0abe084a0b9e62d33209626ebf3413f86eb33340b8afce6beae4aeec7f94d82776fb8a642c36ead7af8b407b99ae19f85eeb689b6799aead35a',
+    invite: 'hugin://Hugin/8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc'
+  },
+  {
+    name: 'Kryptokrona',
+    roomKey: '63a34ec1982f923b584a2d8de16f9578a722945382152fba20c83e48363a2b9d8f592bfec505d30772f60bff80b8474f75b497c4a8417c13188ded33cca673f0',
+    invite: 'hugin://Kryptokrona/63a34ec1982f923b584a2d8de16f9578a722945382152fba20c83e48363a2b9d8f592bfec505d30772f60bff80b8474f75b497c4a8417c13188ded33cca673f0'
+  },
+  {
+    name: 'Support',
+    roomKey: '8ebc23b43ffbe8f7c4c2725590d4c40d7e2ae182fb8480e19c326ceef3a372483b78391ccd761d11960e29b5bccf081616a8695283d2e9fa63b801a0b8ca421d',
+    invite: 'hugin://Support/8ebc23b43ffbe8f7c4c2725590d4c40d7e2ae182fb8480e19c326ceef3a372483b78391ccd761d11960e29b5bccf081616a8695283d2e9fa63b801a0b8ca421d'
+  },
+];
+
+const joinedRoomKeys = new Set(rooms.map(r => r.roomKey));
+const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.roomKey));
+
+
+
   if (device == null) {
     // Alert.alert('Error!', 'Camera could not be started');
   }
@@ -116,6 +140,9 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
     setThisRoom(roomKey);
     navigation.push(MainScreens.GroupChatScreen, {name, roomKey});
   }
+  function onSuggestedPress(invite: string) {
+    onJoinpress(invite);
+  }
 
   function onCloseModal() {
     setModalVisible(false);
@@ -159,12 +186,18 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
     setQrScanner(true);
   };
 
-  function onJoinpress() {
+  function onJoinpress(linkToUse?: string) {
     setStoreRoomMessages([]);
-    if (!link) {
+    if (!link && !linkToUse) {
       return;
     }
-    const parse = link.split("/")
+
+    let parse;
+    if (!linkToUse) {
+      parse = link.split("/")
+    } else {
+      parse = linkToUse.split("/")
+    }
     const roomName = parse[2];
     const originalName = roomName.replace(/-/g, ' ');
     const inviteKey = parse[3];
@@ -245,6 +278,27 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
         keyExtractor={(item, i) => `${item.roomKey}-${i}`}
         renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
       />
+      {filteredSuggestedRooms.length > 0 && rooms.length < 3 && (
+  <Container>
+    <View style={{alignItems: 'center'}}>
+
+    
+    <TextField size="small">{t('suggestedRooms', 'Suggested Rooms')}</TextField>
+    {filteredSuggestedRooms.map((room) => (
+      <PreviewItem
+        key={room.roomKey}
+        name={room.name}
+        roomKey={room.roomKey}
+        onPress={() => onSuggestedPress(room.invite)}
+        suggested={true}
+      />
+
+    ))}
+    <View style={styles.divider} />
+    </View>
+  </Container>
+)}
+
     </ScreenLayout>
   );
 };

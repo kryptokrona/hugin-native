@@ -62,21 +62,7 @@ export class ActiveWallet {
   }
 
   async joinBetaRoom(nickname) {
-    const key =
-      '8828094c877f097854c5122013b5bb0e804dbe904fa15aece310f62ba93dc76c55bb8d1f705afa6f45aa044fb4b95277a7f529a9e55782d0c9de6f0a6fb367cc';
-    await saveRoomToDatabase('Hugin Beta Testers', key, undefined);
-    await saveRoomMessageAndUpdate(
-      this.address,
-      'Joined room',
-      key,
-      '',
-      Date.now(),
-      nickname,
-      randomKey(),
-      true,
-    );
-    setRoomMessages(key, 0);
-    setStoreCurrentRoom(key);
+    return;
   }
 
   async create(node, nickname) {
