@@ -32,6 +32,7 @@ export const AddGroupScreen: React.FC<Props> = ({ route }) => {
       setStoreCurrentRoom(generated.invite);
       setThisRoom(generated.invite)
       joinAndSaveRoom(generated.invite, name, address, userName, admin);
+      navigation.pop();
       navigation.navigate(MainScreens.GroupChatScreen, {
         name,
         roomKey: generated.invite,
