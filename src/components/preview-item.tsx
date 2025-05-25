@@ -28,6 +28,7 @@ export const PreviewItem: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const isNew = false; // Can be used for future logic
   const borderColor = isNew ? theme.foreground : theme.border;
+  const color = theme.background;
 
   function handlePress() {
     onPress(mRoomKey, name);
@@ -38,7 +39,7 @@ export const PreviewItem: React.FC<Props> = ({
       onPress={handlePress}
       style={[
         styles.container,
-        { borderColor },
+        { borderColor, borderBottomWidth: suggested ? 0 : 1 },
       ]}>
       <View style={styles.avatarContainer}>
         <Unreads unreads={unreads} />
@@ -56,6 +57,13 @@ export const PreviewItem: React.FC<Props> = ({
             {message}
           </TextField>
         }
+        {suggested && 
+          <TouchableOpacity style={[styles.joinButton, {backgroundColor: theme.primary}]}>
+            <TextField bold size="xsmall" color={color}>
+            {t('joinRoom')}
+            </TextField>
+          </TouchableOpacity>
+        }
       </View>
     </TouchableOpacity>
   );
@@ -66,7 +74,6 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   container: {
-    borderBottomWidth: 1,
     flexDirection: 'row',
     paddingVertical: 16,
     alignItems: 'center',
@@ -75,5 +82,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 16,
     justifyContent: 'center',
+  },
+  centeredContent: {
+    flexDirection: 'row',
+    flex: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  joinButton: {
+    borderRadius: 5,
+    paddingHorizontal: 4
   }
 });

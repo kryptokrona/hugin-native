@@ -288,8 +288,8 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
         renderItem={({ item }) => <PreviewItem {...item} onPress={navigationInProgressRef.current ? () => {} : onPress} />}
       />
       {filteredSuggestedRooms.length > 0 && rooms.length < 3 && (
-  <Container>
-    <View style={{alignItems: 'center'}}>
+
+    <View style={{ alignItems: 'center', justifyContent: 'flex-end' }}>
 
     
     <TextField size="small">{t('suggestedRooms', 'Suggested Rooms')}</TextField>
@@ -305,7 +305,7 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
     ))}
     <View style={styles.divider} />
     </View>
-  </Container>
+
 )}
 
     </ScreenLayout>
