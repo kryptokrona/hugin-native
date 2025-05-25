@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,7 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<AuthStackNavigationType>();
   const mainNavigation = useNavigation<any>();
   const theme = useThemeStore((state) => state.theme);
+  const color = theme.foreground;
   const backgroundColor = theme.accentForeground;
   const borderColor = theme.border;
   const [name, setName] = useState<string>('');
@@ -222,6 +223,7 @@ export const CreateAccScreen: React.FC<Props> = ({ route }) => {
       <View>
         <Container bottom>
           <TextButton
+            icon={loading ? <ActivityIndicator size="small" color={color}  /> : <></>}
             onPress={onCreateProfile}
             disabled={loading || nameError || pinError}>
             {t('createAccount')}

@@ -101,7 +101,7 @@ useEffect(() => {
             <CustomIcon name={'arrow-back-ios'} type={'MI'} />
           </TouchableOpacity>
         )}
-        {!backButton && (
+        {!backButton && address && (
           <>
             {address && avatar?.length === 0 && (
               <Avatar onPress={() => gotoProfile()} address={address} size={30} />
