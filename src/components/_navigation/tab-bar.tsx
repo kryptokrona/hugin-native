@@ -6,6 +6,7 @@ import {
   Animated,
   Keyboard,
   View,
+  Platform,
 } from 'react-native';
 
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -134,7 +135,7 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
 
 const styles = StyleSheet.create({
   hideTabNavigation: {
-    // display: 'none',
+   display: Platform.OS === 'android' ? 'none' : 'flex'
   },
   tab: {
     alignItems: 'center',
