@@ -1,6 +1,13 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 
-import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import {
@@ -9,14 +16,7 @@ import {
   type RouteProp,
 } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import QRCode from 'react-native-qrcode-svg';
-import {
-  Camera,
-  CameraRuntimeError,
-  useCameraDevice,
-  useCameraPermission,
-  useCodeScanner,
-} from 'react-native-vision-camera';
+import { useCameraPermission } from 'react-native-vision-camera';
 
 import {
   CustomIcon,
@@ -25,6 +25,8 @@ import {
   InputField,
   ModalCenter,
   PreviewItem,
+  QrCodeDisplay,
+  QrScanner,
   ScreenLayout,
   TextButton,
   TextField,
@@ -38,16 +40,18 @@ import {
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
+import { Beam } from '../lib/native';
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import { addContact, deleteContact } from '../services/bare/sqlite';
 
 import 'text-encoding';
-import { Beam } from '../lib/native';
-import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessagesScreen>;
 }
+
+const windowWidth = Dimensions.get('window').width;
+const exactWidth = windowWidth - 100;
 
 export const MessagesScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
@@ -55,37 +59,15 @@ export const MessagesScreen: React.FC<Props> = () => {
   const navigation = useNavigation<MainStackNavigationType>();
   const contacts = useGlobalStore((state) => state.contacts);
   const [modalVisible, setModalVisible] = useState(false);
-  const [joining, setJoinVisible] = useState(false);
-  const [link, setLink] = useState('');
+  const [joining, setJoining] = useState(false);
+  const [link, setLink] = useState<string | null>(null);
   const [name, setName] = useState('Anon');
   const [qrScanner, setQrScanner] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const { hasPermission, requestPermission } = useCameraPermission();
-  const device = useCameraDevice('back');
-  const camera = useRef<Camera>(null);
 
-  if (device == null) {
-    // Alert.alert('Error!', 'Camera could not be started');
-  }
-
-  const onError = (error: CameraRuntimeError) => {
-    Alert.alert('Error!', error.message);
-  };
-
-  const codeScanner = useCodeScanner({
-    codeTypes: ['qr'],
-    onCodeScanned: (codes) => {
-      if (codes.length > 0) {
-        if (codes[0].value) {
-          setTimeout(() => gotQRCode(codes[0].value), 500);
-        }
-      }
-      return;
-    },
-  });
-
-  function gotQRCode(code) {
-    setLink(code);
+  function gotQRCode(code: string | undefined) {
+    setLink(code ?? null);
     setQrScanner(false);
   }
 
@@ -116,7 +98,7 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   function onCloseModal() {
     setModalVisible(false);
-    setJoinVisible(false);
+    setJoining(false);
     setQrScanner(false);
     setShowQR(false);
     setLink('');
@@ -130,32 +112,31 @@ export const MessagesScreen: React.FC<Props> = () => {
   };
 
   function onJoinPress() {
-    setJoinVisible(true);
+    setJoining(true);
   }
 
-  function removeContact(contact) {
-
-    const doRemoveContact = async (contact) => {
-      await deleteContact(contact.address);
+  function removeContact(contact: { address: string; name: string }) {
+    const doRemoveContact = async (address: string) => {
+      await deleteContact(address);
       setLatestMessages();
-    }
+    };
 
-      Alert.alert(t('deleteContact'), t('areYouSure'), [
-      {text: t('delete'), onPress: () => doRemoveContact(contact), style: 'destructive'},
-      {text: t('cancel'), onPress: () => {}},
+    Alert.alert(t('deleteContact'), t('areYouSure'), [
+      {
+        onPress: () => doRemoveContact(contact.address),
+        style: 'destructive',
+        text: t('delete'),
+      },
+      { onPress: () => {}, text: t('cancel') },
     ]);
-
   }
 
   function onCreateRoom() {
-    // setStoreMessages([]);
     if (!user.huginAddress) {
       return;
     }
     Clipboard.setString(user.huginAddress);
     setModalVisible(false);
-
-    // navigation.navigate(MainScreens.AddGroupScreen);
   }
 
   function onInputChange(text: string) {
@@ -167,7 +148,7 @@ export const MessagesScreen: React.FC<Props> = () => {
   }
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       // This effect runs when the screen is focused
       setStoreCurrentContact('null');
 
@@ -178,8 +159,12 @@ export const MessagesScreen: React.FC<Props> = () => {
   async function onJoinpress() {
     setStoreMessages([]);
 
-    const xkrAddr = link.substring(0, 99);
-    const messageKey = link.slice(-64);
+    if (!link) {
+      return;
+    }
+
+    const xkrAddr = link?.substring(0, 99);
+    const messageKey = link?.slice(-64);
 
     await addContact(name, xkrAddr, messageKey, true);
 
@@ -229,24 +214,7 @@ export const MessagesScreen: React.FC<Props> = () => {
         )}
 
         {joining && qrScanner && (
-          <View
-            style={{
-              borderRadius: 10,
-              height: 300,
-              margin: -30,
-              overflow: 'hidden',
-              width: 300,
-            }}>
-            <Camera
-              ref={camera}
-              onError={onError}
-              photo={false}
-              style={styles.fullScreenCamera}
-              device={device}
-              codeScanner={codeScanner}
-              isActive={qrScanner}
-            />
-          </View>
+          <QrScanner visible={qrScanner} onGotQrCode={gotQRCode} />
         )}
 
         {!joining && !showQR && (
@@ -261,11 +229,7 @@ export const MessagesScreen: React.FC<Props> = () => {
             <TextButton onPress={onJoinPress}>{t('addUser')}</TextButton>
           </View>
         )}
-        {!joining && showQR && (
-          <View>
-            <QRCode value={user.huginAddress} size={300} />
-          </View>
-        )}
+        {!joining && showQR && <QrCodeDisplay code={user.huginAddress} />}
       </ModalCenter>
       {contacts.length === 0 && (
         <EmptyPlaceholder text={t('emptyAddressBook')} />
@@ -273,27 +237,20 @@ export const MessagesScreen: React.FC<Props> = () => {
       <FlatList
         data={contacts}
         keyExtractor={(item, i) => `${item.address}-${i}`}
-        renderItem={({ item }) => <PreviewItem {...item} onLongPress={() => removeContact(item)} onPress={onPress} />}
+        renderItem={({ item }) => (
+          <PreviewItem
+            {...item}
+            onLongPress={() => removeContact(item)}
+            onPress={onPress}
+          />
+        )}
       />
     </ScreenLayout>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   divider: {
     marginVertical: 10,
   },
-  emptyAddressBook: {
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    marginTop: 100,
-    width: 300,
-  },
-  fullScreenCamera: {
-    flex: 1,
-    height: '100%',
-    position: 'absolute',
-    width: '100%',
-    zIndex: 100,
-  },
-};
+});

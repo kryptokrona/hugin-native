@@ -6,8 +6,8 @@ import {
   View,
 } from 'react-native';
 
-import { Styles } from '@/styles';
 import { useThemeStore } from '@/services';
+import { Styles } from '@/styles';
 
 interface Props {
   visible: boolean;
@@ -62,11 +62,10 @@ const styles = StyleSheet.create({
     borderRadius: Styles.borderRadius.large,
     borderWidth: 1,
     justifyContent: 'center',
+    margin: 20,
     minWidth: 300,
-    paddingHorizontal: 30,
-    paddingVertical: 30,
+    padding: 30,
   },
-
   modal: {
     alignItems: 'center',
     borderTopLeftRadius: 16,

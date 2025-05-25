@@ -13,13 +13,13 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import QRCode from 'react-native-qrcode-svg';
 
 import {
   Card,
   CopyButton,
   Header,
   ModalCenter,
+  QrCodeDisplay,
   ScreenLayout,
   TextButton,
   TextField,
@@ -50,8 +50,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   const onlineUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
   const [userList, setUserList] = useState<User[]>([]);
 
-  const [change, setChange] = useState<boolean>(false);
-
   const [offlineUsers, setOfflineUsers] = useState<User[]>([]);
 
   const [showQR, setShowQR] = useState(false);
@@ -61,8 +59,9 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   }
 
   useEffect(() => {
-
-    if (!onlineUsers) return;
+    if (!onlineUsers) {
+      return;
+    }
 
     function fetchAndMergeUsers() {
       const mergedUsers = [...onlineUsers, ...offlineUsers];
@@ -78,11 +77,10 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
         return acc;
       }, []);
 
-      setUserList(uniqueUsers)
+      setUserList(uniqueUsers);
     }
 
     fetchAndMergeUsers();
-
   }, [onlineUsers, offlineUsers]);
 
   useEffect(() => {
@@ -92,7 +90,6 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
     }
     fetchOfflineUsers();
   }, []);
-
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -139,15 +136,14 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
             {`${t('onlineRoomMembers')} (${onlineUsers?.length})`}
           </TextField>
           <View style={styles.flatListWrapper}>
-
-          <FlatList
-            nestedScrollEnabled={true}
-            numColumns={2}
-            data={userList}
-            renderItem={OnlineUserMapper}
-            keyExtractor={(item, i) => `${item.name}-${i}`}
-            style={{ flex: 1 }}
-          />
+            <FlatList
+              nestedScrollEnabled={true}
+              numColumns={2}
+              data={userList}
+              renderItem={OnlineUserMapper}
+              keyExtractor={(item, i) => `${item.name}-${i}`}
+              style={{ flex: 1 }}
+            />
           </View>
         </View>
         <TouchableWithoutFeedback>
@@ -172,9 +168,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
       </View>
 
       <ModalCenter visible={showQR} closeModal={onCloseModal}>
-        <View>
-          <QRCode value={inviteText} size={300} />
-        </View>
+        <QrCodeDisplay code={inviteText} />
       </ModalCenter>
     </ScreenLayout>
   );
@@ -182,16 +176,16 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
 
 const styles = StyleSheet.create({
   flatListContainer: {
-    marginVertical: 12,
     flex: 1,
+    marginVertical: 12,
   },
   flatListWrapper: {
     flex: 1,
   },
   leaveContainer: {
+    flexShrink: 0,
     justifyContent: 'flex-end',
     paddingBottom: 20,
-    flexShrink: 0,
   },
   scrollViewContainer: {
     flexGrow: 1,

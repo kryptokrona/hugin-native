@@ -14,7 +14,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  Animated,
   ActivityIndicator,
 } from 'react-native';
 
@@ -68,15 +67,15 @@ import type {
 } from '@/types';
 
 import { Header } from '../components/_navigation/header';
+import { GlideInItem } from '../components/glider';
 import {
   onSendGroupMessage,
   saveRoomMessageAndUpdate,
   onSendGroupMessageWithFile,
   setRoomMessages,
 } from '../services/bare/groups';
-import { Wallet } from '../services/kryptokrona/wallet';
-import { GlideInItem } from '../components/glider';
 import { getRoomMessages } from '../services/bare/sqlite';
+import { Wallet } from '../services/kryptokrona/wallet';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -91,7 +90,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { roomKey, name, call } = route.params;
-  const messages = useGlobalStore((state) => state.roomMessages).filter(a => a.room === roomKey);
+  const messages = useGlobalStore((state) => state.roomMessages).filter(
+    (a) => a.room === roomKey,
+  );
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
@@ -101,7 +102,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  
+
   // const [inCall, setInCall] = useState<boolean>();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
@@ -112,11 +113,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
 
-
   useEffect(() => {
-    if (!roomUsers) return;
+    if (!roomUsers) {
+      return;
+    }
     setVoiceUsers(roomUsers.filter((a) => a.voice === true));
-  }, [roomUsers, inCall])
+  }, [roomUsers, inCall]);
 
   const userList = useMemo(() => {
     return voiceUsers;
@@ -142,7 +144,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       bottomSheetRef?.current?.snapToIndex(0);
     } else {
       if (inCall) {
-        onEndCall()
+        onEndCall();
       } else {
         onJoinCall();
       }
@@ -150,12 +152,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   useEffect(() => {
-
     if (call && bottomSheetRef?.current) {
       setTimeout(() => onShowCall(), 777);
     }
-
-  }, [bottomSheetRef])
+  }, [bottomSheetRef]);
 
   function onJoinCall() {
     WebRTC.init();
@@ -174,14 +174,19 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     const peer = {
       address: myUserAddress,
       audioMute: false,
+      room: roomKey,
       screenshare: false,
       video: false,
       voice: true,
-      room: roomKey
     };
     const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
     me.voice = true;
-    const call = { room: roomKey, time: Date.now(), users: [...userList, me], talkingUsers: {} };
+    const call = {
+      room: roomKey,
+      talkingUsers: {},
+      time: Date.now(),
+      users: [...userList, me],
+    };
     useGlobalStore.getState().setCurrentCall(call);
     Peers.voicestatus(peer);
   }
@@ -202,10 +207,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     const peer = {
       address: myUserAddress,
       audioMute: false,
+      room: roomKey,
       screenshare: false,
       video: false,
       voice: false,
-      room: roomKey
     };
 
     Peers.voicestatus(peer);
@@ -217,8 +222,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     return <UserItem {...item} />;
   }
 
-  const handleSheetChanges = useCallback((index: number) => {
-  }, []);
+  const handleSheetChanges = useCallback((index: number) => {}, []);
 
   function onCustomizeGroupPress() {
     navigation.push(MainScreens.ModifyGroupScreen, {
@@ -272,15 +276,19 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   const loadMoreMessages = async () => {
-    if (isLoadingMore || noMoreMessages) return;
+    if (isLoadingMore || noMoreMessages) {
+      return;
+    }
     setIsLoadingMore(true);
     const nextPageMessages = await getRoomMessages(roomKey, currentPage);
-    if (nextPageMessages.length == 0) setNoMoreMessages(true);
+    if (nextPageMessages.length == 0) {
+      setNoMoreMessages(true);
+    }
     const newMessages = [...nextPageMessages, ...messages];
     setStoreRoomMessages(newMessages);
     setCurrentPage(currentPage + 1);
     setIsLoadingMore(false);
-  }
+  };
 
   // useEffect(() => {
   //   setRoomMessages(roomKey, 0);
@@ -332,14 +340,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                     type={'MI'}
                     color={`${inCall ? 'green' : 'grey'}`}
                   />
-                    {voiceUsers &&
-                      <View style={{ marginLeft: 5, marginTop: 15 }}>
-                        <OnlineUsers
-                            online={voiceUsers.length}
-                            // color={`${online ? 'green' : 'grey'}`}
-                            />
-                      </View>
-                      }
+                  {voiceUsers && (
+                    <View style={{ marginLeft: 5, marginTop: 15 }}>
+                      <OnlineUsers
+                        online={voiceUsers.length}
+                        // color={`${online ? 'green' : 'grey'}`}
+                      />
+                    </View>
+                  )}
                 </View>
               </TouchableOpacity>
               {/* <TouchableOpacity
@@ -364,7 +372,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
                     }
               </TouchableOpacity> */}
-              <GroupOnlineIndicator roomKey={roomKey} onPress={onCustomizeGroupPress} />
+              <GroupOnlineIndicator
+                roomKey={roomKey}
+                onPress={onCustomizeGroupPress}
+              />
             </View>
           }
         />
@@ -436,7 +447,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
-
   return (
     <ScreenLayout>
       <GestureHandlerRootView>
@@ -469,7 +479,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           data={messages}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item, index }) => {
-            const isNewestMessage = index === messages.length - 1
+            const isNewestMessage = index === messages.length - 1;
             const content = (
               <GroupMessageItem
                 message={item.message}
@@ -487,7 +497,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 tip={item.tip}
               />
             );
-        
+
             return isNewestMessage ? (
               <GlideInItem>{content}</GlideInItem>
             ) : (
@@ -499,10 +509,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           maxToRenderPerBatch={messages.length}
           onEndReached={loadMoreMessages}
           onEndReachedThreshold={0.1}
-          ListHeaderComponent={isLoadingMore ? <ActivityIndicator size="small" color={color}  /> : null}
+          ListHeaderComponent={
+            isLoadingMore ? (
+              <ActivityIndicator size="small" color={color} />
+            ) : null
+          }
         />
-  
-           
 
         <KeyboardAvoidingView
           style={[styles.inputWrapper, { backgroundColor }]}
@@ -515,67 +527,70 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           />
         </KeyboardAvoidingView>
 
-        {Platform.OS == "ios" &&
-
-        <BottomSheet
-          ref={bottomSheetRef}
-          onChange={handleSheetChanges}
-          snapPoints={snapPoints}
-          index={-1}
-          enablePanDownToClose={true}
-          backgroundStyle={{backgroundColor: 'transparent'}}
-          bottomInset={10}
-          handleIndicatorStyle={{ backgroundColor: color }}>
-          <BottomSheetView
-            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
-            {/* <TextField>Awesome 🎉</TextField> */}
-            <View style={{ flex: 1, width: '100%' }}>
-              <View style={styles.flatListContainer}>
-                <TextField size={'xsmall'} type="muted" style={styles.onlineUsersText}>
-                  {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-                </TextField>
-                <View style={styles.flatListWrapper}>
-                  <FlatList
-                    nestedScrollEnabled={true}
-                    numColumns={2}
-                    data={userList}
-                    renderItem={OnlineUserMapper}
-                    keyExtractor={(item, i) => `${item.name}-${i}`}
-                    style={{ flex: 1 }}
-                  />
-                </View>
-              </View>
-
-              {!inCall ? (
-                <TextButton
-                  small
-                  type="secondary"
-                  onPress={onJoinCall}
-                  icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                  {t('joinCall')}
-                </TextButton>
-              ) : (
-                <TextButton
-                  small
-                  type="destructive"
-                  onPress={onEndCall}
-                  icon={
-                    <CustomIcon
-                      color={theme[textType.destructive]}
-                      name="phone-hangup"
-                      type="MCI"
-                      size={16}
+        {Platform.OS == 'ios' && (
+          <BottomSheet
+            ref={bottomSheetRef}
+            onChange={handleSheetChanges}
+            snapPoints={snapPoints}
+            index={-1}
+            enablePanDownToClose={true}
+            backgroundStyle={{ backgroundColor: 'transparent' }}
+            bottomInset={10}
+            handleIndicatorStyle={{ backgroundColor: color }}>
+            <BottomSheetView
+              style={[
+                { backgroundColor, borderColor },
+                styles.contentContainer,
+              ]}>
+              {/* <TextField>Awesome 🎉</TextField> */}
+              <View style={{ flex: 1, width: '100%' }}>
+                <View style={styles.flatListContainer}>
+                  <TextField
+                    size={'xsmall'}
+                    type="muted"
+                    style={styles.onlineUsersText}>
+                    {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
+                  </TextField>
+                  <View style={styles.flatListWrapper}>
+                    <FlatList
+                      nestedScrollEnabled={true}
+                      numColumns={2}
+                      data={userList}
+                      renderItem={OnlineUserMapper}
+                      keyExtractor={(item, i) => `${item.name}-${i}`}
+                      style={{ flex: 1 }}
                     />
-                  }>
-                  {t('endCall')}
-                </TextButton>
-              )}
-            </View>
-          </BottomSheetView>
-        </BottomSheet>
-      
-        }
+                  </View>
+                </View>
 
+                {!inCall ? (
+                  <TextButton
+                    small
+                    type="secondary"
+                    onPress={onJoinCall}
+                    icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+                    {t('joinCall')}
+                  </TextButton>
+                ) : (
+                  <TextButton
+                    small
+                    type="destructive"
+                    onPress={onEndCall}
+                    icon={
+                      <CustomIcon
+                        color={theme[textType.destructive]}
+                        name="phone-hangup"
+                        type="MCI"
+                        size={16}
+                      />
+                    }>
+                    {t('endCall')}
+                  </TextButton>
+                )}
+              </View>
+            </BottomSheetView>
+          </BottomSheet>
+        )}
       </GestureHandlerRootView>
     </ScreenLayout>
   );
@@ -588,20 +603,14 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     alignItems: 'center',
-    flex: 1,
-    padding: 25,
-    marginBottom: 10,
     borderRadius: 25,
-    borderWidth: 1
+    borderWidth: 1,
+    flex: 1,
+    marginBottom: 10,
+    padding: 25,
   },
   flatListContainer: {
     flex: 1,
-  },
-  onlineUsersText: {
-    textAlign: 'center',
-    width: '100%',
-    marginTop: -10,
-    marginBottom: 10
   },
   flatListContent: {
     flexDirection: 'column-reverse',
@@ -617,5 +626,11 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
+  },
+  onlineUsersText: {
+    marginBottom: 10,
+    marginTop: -10,
+    textAlign: 'center',
+    width: '100%',
   },
 });
