@@ -9,6 +9,7 @@ import { updateLanguage, useThemeStore } from '@/services';
 import type { MainNavigationParamList } from '@/types';
 
 import { languages } from '../i18n';
+import { flags } from '../assets/flags';
 
 interface Props {
   route: RouteProp<
@@ -40,12 +41,15 @@ export const ChangeLanguageScreen: React.FC<Props> = () => {
       navigation.goBack();
     }
     const active = currentLanguage === item.code;
-
+    console.log('item:', item)
+    const flag = flags?.find(a => a.code == item.code)
+    console.log('flag:', flag)
     return (
       <TouchableOpacity
         disabled={active}
         onPress={onPress}
         style={[styles.item, { borderColor }]}>
+        <TextField style={styles.flag}>{flag ? flag.flag : ''} </TextField>
         <TextField style={styles.itemTitle} bold={active}>
           {item.name}
         </TextField>
