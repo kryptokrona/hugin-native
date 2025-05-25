@@ -100,16 +100,13 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const snapPoints = useMemo(() => ['50%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   
-  const inCall = currentCall.room === keyRef.current;
   const keyRef = useRef('null');
+  const inCall = currentCall.room === keyRef.current;
 
   useEffect(() => {
-    console.log('Updating keyref!', keyRef.current)
     if (keyRef.current != 'null') return; // Prevent re-execution if key is already set
-    console.log('Continuing updating keyref!')
     const deriveKey = async () => {
       const derivedKey = await Wallet.key_derivation_hash(roomKey);
-      console.log('Derived key:', derivedKey);
       keyRef.current = derivedKey;
       setRoomUsers(allRoomUsers[derivedKey])
     };
