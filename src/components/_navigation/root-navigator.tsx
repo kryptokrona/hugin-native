@@ -87,6 +87,12 @@ export const RootNavigator = () => {
     return () => subscription.remove();
   }, []);
 
+  useEffect(() => {
+  if (hydrated.preferences && hydrated.user && hydrated.theme) {
+    setDisplaySplash(false);
+  }
+}, [hydrated]);
+
   if (
     (!hydrated.preferences || !hydrated.user || !hydrated.theme) &&
     displaySplash

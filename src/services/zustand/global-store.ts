@@ -240,3 +240,24 @@ useGlobalStore.subscribe(
 export const setAuthenticated = (authenticated: boolean) => {
   useGlobalStore.setState({ authenticated });
 };
+
+export const resetGlobalStore = () => {
+  useGlobalStore.setState({
+    address: '',
+    authenticated: false,
+    balance: { locked: 0, unlocked: 0 },
+    contacts: [],
+    currentCall: { ...defaultCall },
+    fiatPrice: 0,
+    messages: [],
+    roomMessages: [],
+    roomUsers: {},
+    rooms: [],
+    feedMessages: [],
+    avatars: {},
+    syncStatus: [],
+    thisContact: '',
+    thisRoom: '',
+    transactions: [],
+  });
+};

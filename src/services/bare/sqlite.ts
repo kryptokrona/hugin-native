@@ -283,6 +283,25 @@ export async function loadAccount() {
   return results[0].rows.item(0);
 }
 
+export async function resetDB() {
+      const tables = [
+      'rooms',
+      'roomsmessages',
+      'feedmessages',
+      'contacts',
+      'groupusers',
+      'messages',
+      'account',
+      'files',
+      'wallet',
+    ];
+
+    for (const table of tables) {
+      await db.executeSql(`DROP TABLE IF EXISTS ${table}`);
+    }
+    create = false;
+}
+
 export async function saveFileInfo(file: FileInfo) {
   // console.log('Saving file ', file);
   Files.new(file);

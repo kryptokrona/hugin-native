@@ -35,6 +35,15 @@ class Syncer {
     await this.start();
   }
 
+    reset() {
+    this.node = {};
+    this.incoming_pm_que = [];
+    this.lastChecked = 0;
+    this.incoming_messages = [];
+    this.keys = {};
+    this.known_keys = [];
+  }
+
   async start() {
     while (true) {
       await sleep(3000);

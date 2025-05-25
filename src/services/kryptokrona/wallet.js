@@ -61,6 +61,30 @@ export class ActiveWallet {
     return true;
   }
 
+  async reset() {
+
+    if (this.started && this.active) {
+      try {
+        await this.active.stop();
+      } catch (e) {
+        console.warn('Error stopping wallet during reset:', e);
+      }
+    }
+
+    this.active = undefined;
+    this.loaded = false;
+    this.address = undefined;
+    this.nodeUrl = undefined;
+    this.nodePort = undefined;
+    this.started = false;
+    this.deadNodeEmitted = true;
+    this.messageKeys = undefined;
+    this.daemon = undefined;
+
+    console.log('Wallet has been reset.');
+  }
+
+
   async joinBetaRoom(nickname) {
     return;
   }

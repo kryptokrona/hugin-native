@@ -62,10 +62,12 @@ export class Swarm {
   }
 
   async close() {
+    console.log('Closing all connections..');
     const rooms = await getRooms();
     for (const k of rooms) {
       this.leave(k.key);
     }
+    worklet.terminate();
   }
 
   init(user) {

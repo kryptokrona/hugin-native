@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { FlatList, View, StyleSheet, Platform, Text } from 'react-native';
-import { useNavigation, type RouteProp } from '@react-navigation/native';
+import { FlatList, View, StyleSheet, Platform, Text, Alert } from 'react-native';
+import { CommonActions, useNavigation, type RouteProp } from '@react-navigation/native';
 import {
   ScreenLayout,
   SettingsItem,
@@ -9,11 +9,13 @@ import {
   TextField,
   TextButton,
 } from '@/components';
-import { MainScreens } from '@/config';
-import type {
-  CustomIconProps,
-  MainStackNavigationType,
-  MainNavigationParamList,
+import { AuthScreens, MainScreens, Stacks } from '@/config';
+import {
+  type CustomIconProps,
+  type MainStackNavigationType,
+  type MainNavigationParamList,
+  type AuthStackNavigationType,
+  AuthMethods,
 } from '@/types';
 import { Wallet } from '../services/kryptokrona';
 import { Linking } from 'react-native';
@@ -21,8 +23,13 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import { t } from 'i18next';
 import { TouchableOpacity } from 'react-native';
-import { Nodes } from 'lib/native';
-import { useThemeStore } from '@/services';
+import { Nodes, Rooms } from 'lib/native';
+import { defaultPreferences, defaultRoom, defaultUser, resetGlobalStore, useAppStoreState, useGlobalStore, usePreferencesStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
+import DeviceInfo from 'react-native-device-info';
+import { resetDB } from '@/services/bare/sqlite';
+import { defaultTheme } from '@/styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 interface Item {
   title: string;
@@ -43,7 +50,10 @@ const openURL = () => {
 
 export const SettingsScreen: React.FC<Props> = () => {
   const navigation = useNavigation<MainStackNavigationType>();
-  const authNavigation = useNavigation<any>();
+  const authnavigation = useNavigation<AuthStackNavigationType>();
+  const authMethod = usePreferencesStore(
+    (state) => state.preferences.authMethod,
+  );
   const [syncActivated, setSyncActivated] = useState(true);
   const [publicKey, setPublicKey] = useState('');
   const theme = useThemeStore((state) => state.theme);
@@ -51,7 +61,9 @@ export const SettingsScreen: React.FC<Props> = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const registerAddress =
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
-  
+  let readableVersion = DeviceInfo.getReadableVersion();
+
+
   useEffect(() => {
     if (!Wallet?.messageKeys) return;
     setPublicKey(Wallet?.messageKeys[1] || '');
@@ -82,6 +94,87 @@ export const SettingsScreen: React.FC<Props> = () => {
       type: 'success',
     });
   };
+
+  const deleteAccount = () => {
+
+  Alert.alert(t('deleteAccount'), t('deleteAccountSubtitle'), [
+  {text: t('deleteAccount'), onPress: continueDeleteAccount, style: 'destructive'},
+  {text: t('cancel'), onPress: () => {}},
+]);
+
+};
+
+
+  const continueDeleteAccount = () => {
+
+  const doDeleteAccount = async () => {
+
+    resetDB();
+    try {
+
+    await AsyncStorage.clear();
+
+
+    useUserStore.setState({ user: defaultUser });
+    usePreferencesStore.setState({ preferences: defaultPreferences, skipBgRefreshWarning: false });
+    useThemeStore.setState({ theme: defaultTheme, showFooterMask: false });
+    useRoomStore.setState({ thisRoom: defaultRoom });
+
+
+    useAppStoreState.getState().resetHydration();
+    resetGlobalStore();
+
+  } catch (e) {
+    console.error('Error resetting app state', e);
+  }
+    console.log('Account deleted');
+    Rooms.close();
+    Wallet.reset();
+
+navigation.dispatch(
+  CommonActions.reset({
+    index: 0,
+    routes: [{ name: Stacks.MainStack, state: {
+      routes: [{ name: MainScreens.GroupsScreen }]
+    }}],
+  })
+);
+
+authnavigation.dispatch(
+  CommonActions.reset({
+    index: 0,
+    routes: [{ name: Stacks.AuthStack, state: {
+      routes: [{ name: AuthScreens.WelcomeScreen }]
+    }}],
+  })
+);
+
+    
+  };
+
+    let screen;
+
+    if (authMethod === AuthMethods.pincode) {
+      screen = AuthScreens.RequestPinScreen;
+    }
+    if (authMethod === AuthMethods.bioMetric) {
+      screen = AuthScreens.RequestFingerPrintScreen;
+    }
+    if (authMethod === AuthMethods.reckless) {
+      doDeleteAccount();
+      return;
+    }
+
+    authnavigation.navigate('AuthStack', {
+      screen,
+      params: {
+        finishFunction: doDeleteAccount,
+      },
+    });
+
+
+
+};
 
   const upgradeHugin = async () => {
 
@@ -179,6 +272,11 @@ export const SettingsScreen: React.FC<Props> = () => {
       icon: { name: 'backup-restore', type: 'MCI' },
       title: 'copyMnemonic',
     },
+        {
+      function: deleteAccount,
+      icon: { name: 'delete', type: 'MCI' },
+      title: 'deleteAccount',
+    },
   ];
 
   if (Platform.OS == 'android') {
@@ -233,6 +331,9 @@ export const SettingsScreen: React.FC<Props> = () => {
           <TextButton onPress={() => setModalVisible(false)}>Close</TextButton>
         </View>
       </ModalCenter>
+      <View style={{alignItems: 'center', flexDirection: 'column'}}>
+      <TextField size={"xsmall"}>Hugin Messenger v.{readableVersion}</TextField>
+      </View>
     </ScreenLayout>
   );
 };

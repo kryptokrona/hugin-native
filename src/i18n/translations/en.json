@@ -123,5 +123,6 @@
   "backgroundRefreshTitle": "Background app refresh not activated",
   "backgroundRefreshSubtitle": "Please activate 'Background app refresh' in Settings > Apps > Hugin in order to get notifications.",
   "openSettings": "Open settings",
-  "dontAskAgain": "Don't ask again"
+  "dontAskAgain": "Don't ask again",
+  "deleteAccountSubtitle": "Are you sure you want to delete your account? This action cannot be undone."
 }
