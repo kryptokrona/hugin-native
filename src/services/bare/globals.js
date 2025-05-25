@@ -55,7 +55,7 @@ class ConnectionType {
   async restart(type) {
     if (this.type() !== '') {
       this.reset = true;
-      Rooms.idle(true, false);
+      Rooms.idle(true, false, true);
       await sleep(2000)
       Rooms.idle(false, false)
     }
