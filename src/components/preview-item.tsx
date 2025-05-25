@@ -5,6 +5,7 @@ import { getAvatar } from '@/utils';
 import { useGlobalStore, useThemeStore, Wallet } from '@/services';
 import { t } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
+import { GroupOnlineIndicator } from './group-online-indicator';
 
 interface Props {
   name: string;
@@ -15,6 +16,7 @@ interface Props {
   onPress: (key: string, name: string) => void;
   onLongPress?: () => void;
   suggested?: boolean;
+  alreadyInRoom?: boolean;
 }
 
 export const PreviewItem: React.FC<Props> = ({
@@ -26,6 +28,7 @@ export const PreviewItem: React.FC<Props> = ({
   onPress,
   onLongPress,
   suggested = false,
+  alreadyInRoom = true
 }) => {
   const mRoomKey: string = roomKey ? roomKey : (address as string);
   const theme = useThemeStore((state) => state.theme);
@@ -54,6 +57,7 @@ export const PreviewItem: React.FC<Props> = ({
         setOnline(allRoomUsers[mRoomKey]?.length > 1);
         return;
       }
+      console.log('allRoomUsers[keyRef.current]', allRoomUsers[keyRef.current].length)
       setOnline(allRoomUsers[keyRef.current]?.length > 1);
     }, [allRoomUsers]); // Run only when `roomKey` changes
 
@@ -99,12 +103,15 @@ export const PreviewItem: React.FC<Props> = ({
             {message}
           </TextField>
         }
-        {suggested && 
+        {suggested && !alreadyInRoom && 
           <TouchableOpacity style={[styles.joinButton, {backgroundColor: theme.primary}]}>
             <TextField bold size="xsmall" color={color}>
             {t('joinRoom')}
             </TextField>
           </TouchableOpacity>
+        }
+        {suggested && alreadyInRoom &&
+          <GroupOnlineIndicator roomKey={roomKey} onPress={() => {}} />
         }
       </View>
     </TouchableOpacity>

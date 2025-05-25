@@ -32,6 +32,7 @@ import {
 } from './_elements';
 import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
+import { GroupInvite } from '.';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -182,6 +183,27 @@ export const GroupMessageItem: React.FC<Props> = ({
   function handleImagePress() {
     onShowImagePress(imageDetails?.imagePath);
   }
+
+
+function extractHuginLinkAndClean(text: string): { link: string; cleanedMessage: string } {
+  const regex = /hugin:\/\/[^\s]+\/[a-fA-F0-9]{128}/;
+  const match = text.match(regex);
+
+  if (match && match[0]) {
+    const link = match[0];
+    const cleanedMessage = text.replace(link, '').trim();
+    return { link, cleanedMessage };
+  }
+
+  return { link: '', cleanedMessage: text };
+}
+
+const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
+if (huginLink) {
+  console.log(message, cleanedMessage)
+
+}
+
 
   useEffect(() => {
     return () => {
@@ -344,11 +366,12 @@ export const GroupMessageItem: React.FC<Props> = ({
                 
                 </View>
             )}
-            {!audioDetails?.isAudioMessage && !imageDetails?.isImageMessage && (
+            {!audioDetails?.isAudioMessage && !imageDetails?.isImageMessage && message && (
             <TextField size="small" style={styles.message}>
-                {message ?? ''}
+                {cleanedMessage ?? ''}
               </TextField>
             )}
+            {huginLink && <GroupInvite invite={huginLink} />}
             {tip && (
               <View>
                 <Tip tip={tip as unknown as TipType} />
@@ -408,7 +431,7 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     flexDirection: 'row',
-    overflow: 'visible',
+    overflow: 'visible'
   },
 
   replyContainer: {

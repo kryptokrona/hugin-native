@@ -44,6 +44,7 @@ import {
   OnlineUsers,
   TextField,
   UserItem,
+  GroupOnlineIndicator,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -71,6 +72,7 @@ import {
   onSendGroupMessage,
   saveRoomMessageAndUpdate,
   onSendGroupMessageWithFile,
+  setRoomMessages,
 } from '../services/bare/groups';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { GlideInItem } from '../components/glider';
@@ -89,7 +91,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { roomKey, name, call } = route.params;
-  const messages = useGlobalStore((state) => state.roomMessages);
+  const messages = useGlobalStore((state) => state.roomMessages).filter(a => a.room === roomKey);
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
@@ -280,10 +282,17 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setIsLoadingMore(false);
   }
 
+  // useEffect(() => {
+  //   setRoomMessages(roomKey, 0);
+  // },[roomKey])
+
   useFocusEffect(
     React.useCallback(() => {
       setStoreCurrentRoom(roomKey);
-      return () => {};
+      setRoomMessages(roomKey, 0);
+      return () => {
+        // setStoreRoomMessages(messages);
+      };
     }, [roomKey]),
   );
 
@@ -333,7 +342,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                       }
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={{ flexDirection: 'row', marginRight: 15 }}
                 onPress={onCustomizeGroupPress}>
                 <CustomIcon type="MI" name={'groups-3'} />
@@ -354,7 +363,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                       />
 
                     }
-              </TouchableOpacity>
+              </TouchableOpacity> */}
+              <GroupOnlineIndicator roomKey={roomKey} onPress={onCustomizeGroupPress} />
             </View>
           }
         />
