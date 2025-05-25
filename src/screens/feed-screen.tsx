@@ -43,6 +43,7 @@ import {
   TextField,
   UserItem,
   ModalBottom,
+  EmptyPlaceholder,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -299,6 +300,10 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             {t('close')}
           </TextButton>
         </ModalCenter>
+
+        {messages?.length == 0 &&
+          <EmptyPlaceholder text={t('noFeed')} />
+        }
 
         <FlatList
           // inverted

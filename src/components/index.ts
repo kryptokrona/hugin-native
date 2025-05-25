@@ -16,3 +16,4 @@ export * from './transaction';
 export * from './separator';
 export * from './loading-bar';
 export * from './call-floater';
+export * from './empty-placeholder';

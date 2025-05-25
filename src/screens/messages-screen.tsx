@@ -20,6 +20,7 @@ import {
 
 import {
   CustomIcon,
+  EmptyPlaceholder,
   Header,
   InputField,
   ModalCenter,
@@ -38,7 +39,7 @@ import {
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
-import { addContact } from '../services/bare/sqlite';
+import { addContact, deleteContact } from '../services/bare/sqlite';
 
 import 'text-encoding';
 import { Beam } from '../lib/native';
@@ -130,6 +131,20 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   function onJoinPress() {
     setJoinVisible(true);
+  }
+
+  function removeContact(contact) {
+
+    const doRemoveContact = async (contact) => {
+      await deleteContact(contact.address);
+      setLatestMessages();
+    }
+
+      Alert.alert(t('deleteContact'), t('areYouSure'), [
+      {text: t('delete'), onPress: () => doRemoveContact(contact), style: 'destructive'},
+      {text: t('cancel'), onPress: () => {}},
+    ]);
+
   }
 
   function onCreateRoom() {
@@ -253,16 +268,12 @@ export const MessagesScreen: React.FC<Props> = () => {
         )}
       </ModalCenter>
       {contacts.length === 0 && (
-        <View style={styles.emptyAddressBook}>
-          <TextField centered type="muted" size="large">
-            {t('emptyAddressBook')}
-          </TextField>
-        </View>
+        <EmptyPlaceholder text={t('emptyAddressBook')} />
       )}
       <FlatList
         data={contacts}
         keyExtractor={(item, i) => `${item.address}-${i}`}
-        renderItem={({ item }) => <PreviewItem {...item} onPress={onPress} />}
+        renderItem={({ item }) => <PreviewItem {...item} onLongPress={() => removeContact(item)} onPress={onPress} />}
       />
     </ScreenLayout>
   );

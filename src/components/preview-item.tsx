@@ -12,6 +12,7 @@ interface Props {
   message?: string;
   unreads?: number;
   onPress: (key: string, name: string) => void;
+  onLongPress?: () => void;
   suggested?: boolean;
 }
 
@@ -22,6 +23,7 @@ export const PreviewItem: React.FC<Props> = ({
   message,
   unreads = 0,
   onPress,
+  onLongPress,
   suggested = false,
 }) => {
   const mRoomKey: string = roomKey ? roomKey : (address as string);
@@ -37,6 +39,7 @@ export const PreviewItem: React.FC<Props> = ({
   return (
     <TouchableOpacity
       onPress={handlePress}
+      onLongPress={onLongPress}
       style={[
         styles.container,
         { borderColor, borderBottomWidth: suggested ? 0 : 1 },

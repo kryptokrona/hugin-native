@@ -19,6 +19,7 @@ import {
 import {
   Container,
   CustomIcon,
+  EmptyPlaceholder,
   Header,
   InputField,
   ModalCenter,
@@ -37,7 +38,7 @@ import {
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
-import { joinAndSaveRoom, setRoomMessages } from '../services/bare/groups';
+import { joinAndSaveRoom, onDeleteGroup, setRoomMessages } from '../services/bare/groups';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupsScreen>;
@@ -179,6 +180,21 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
     setLink(text);
   }
 
+  function removeGroup(group) {
+
+    const doRemoveGroup = (group) => {
+      onDeleteGroup(group.roomKey);
+    }
+
+      Alert.alert(t('leaveGroup'), t('areYouSure'), [
+      {text: t('delete'), onPress: () => doRemoveGroup(group), style: 'destructive'},
+      {text: t('cancel'), onPress: () => {}},
+    ]);
+
+    console.log('Removing group', group)
+
+  }
+
   useFocusEffect(
     useCallback(() => {
       // This effect runs when the screen is focused
@@ -278,14 +294,12 @@ const filteredSuggestedRooms = suggestedRooms.filter(r => !joinedRoomKeys.has(r.
         )}
       </ModalCenter>
       {rooms.length === 0 && (
-        <Container>
-          <TextField size="large">{t('emptyAddressBook')}</TextField>
-        </Container>
+        <EmptyPlaceholder text={t('noRooms')} />
       )}
       <FlatList
         data={rooms}
         keyExtractor={(item, i) => `${item.roomKey}-${i}`}
-        renderItem={({ item }) => <PreviewItem {...item} onPress={navigationInProgressRef.current ? () => {} : onPress} />}
+        renderItem={({ item }) => <PreviewItem {...item} onLongPress={() => removeGroup(item)} onPress={navigationInProgressRef.current ? () => {} : onPress} />}
       />
       {filteredSuggestedRooms.length > 0 && rooms.length < 3 && (
 
