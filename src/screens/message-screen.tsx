@@ -119,8 +119,8 @@ const handleRoomUserUpdate = () => {
   if (keyRef.current === 'null') return;
   const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current];
   setRoomUsers(currentRoomUsers);
-  setOnline(currentRoomUsers.some((a) => a.address === roomKey));
-  setVoiceUsers(currentRoomUsers.filter(a => a.voice === true));
+  setOnline(currentRoomUsers?.some((a) => a.address === roomKey));
+  setVoiceUsers(currentRoomUsers?.filter(a => a.voice === true));
 };
 
 useEffect(() => {
@@ -311,15 +311,15 @@ useEffect(() => {
             <TouchableOpacity
               style={{ flexDirection: 'row' }}
               onPress={onCustomizeGroupPress}>
-              <View style={{ position: 'relative', marginRight: 5, marginTop: 4 }}>
+              <View style={{ position: 'relative', marginRight: 20, marginTop: -3 }}>
                 {roomKey && (
                   <Avatar
                     base64={getAvatar(roomKey)}
                     address={roomKey}
-                    size={30}
+                    size={36}
                   />
                 )}
-                <View style={{position: 'absolute', top: -4, right: -4}}>
+                <View style={{position: 'absolute', top: 2, right: -4}}>
                   <CustomIcon
                     name={'lens'}
                     size={10}

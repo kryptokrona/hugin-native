@@ -29,7 +29,7 @@ export const Avatar: React.FC<Props> = ({ base64, address, size = 70, onPress })
   return (
     <TouchableOpacity onPress={onPress}>
     <View style={[styles.container, style]}>
-      {imageUri && <Image source={{ uri: imageUri }} style={[style]} />}
+      {imageUri && <Image source={{ uri: imageUri }} style={{borderRadius: Styles.borderRadius.small, height: avatarFromStore ? size*0.7 : size, width: avatarFromStore ? size*0.7 : size}} />}
     </View>
     </TouchableOpacity>
   );
@@ -37,8 +37,8 @@ export const Avatar: React.FC<Props> = ({ base64, address, size = 70, onPress })
 
 const styles = StyleSheet.create({
   container: {
+    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: Styles.borderRadius.small,
     overflow: 'hidden',
   },
 });

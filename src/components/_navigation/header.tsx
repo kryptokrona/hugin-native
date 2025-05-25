@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -29,6 +29,38 @@ export const Header: React.FC<Props> = ({
   const avatar = useUserStore((state) => state.user?.avatar);
   const address = useUserStore((state) => state.user?.address);
   const online = useGlobalStore((state) => state.huginNode.connected);
+  const [blinkAnim] = useState(new Animated.Value(1));
+
+useEffect(() => {
+  let animation: Animated.CompositeAnimation | null = null;
+
+  if (!online) {
+    animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(blinkAnim, {
+          toValue: 0.2,
+          duration: 500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(blinkAnim, {
+          toValue: 1,
+          duration: 500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    animation.start();
+  } else {
+    blinkAnim.setValue(1); // Reset to visible when online
+  }
+
+  return () => {
+    animation?.stop();
+  };
+}, [online]);
+
   // const [online, setOnline] = useState(false);
 
   // useEffect(() => {
@@ -79,14 +111,17 @@ export const Header: React.FC<Props> = ({
               <Avatar onPress={() => gotoProfile()} key={avatar} base64={avatar} size={30} />
             )}
             {/* <HuginSvg style={styles.logo} /> */}
-            <View style={{position: 'absolute', right: 5, bottom: 0}}>
-            <CustomIcon
-              name={'lens'}
-              size={10}
-              type={'MI'}
-              color={`${online ? 'green' : 'grey'}`}
-            />
+            <View style={{ position: 'absolute', right: 5, top: -3 }}>
+              <Animated.View style={{ opacity: blinkAnim }}>
+                <CustomIcon
+                  name={'lens'}
+                  size={10}
+                  type={'MI'}
+                  color={'green'}
+                />
+              </Animated.View>
             </View>
+
           </>
         )}
       </View>
