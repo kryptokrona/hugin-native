@@ -24,15 +24,12 @@ export const ChangeLanguageScreen: React.FC<Props> = () => {
   const theme = useThemeStore((state) => state.theme);
   const borderColor = theme.muted;
   const currentLanguage = i18n.language;
-  const sortedLanguages = [...languages].sort((a, b) => {
-    if (a.code === currentLanguage) {
-      return -1;
-    }
-    if (b.code === currentLanguage) {
-      return 1;
-    }
-    return 0;
-  });
+const sortedLanguages = [...languages].sort((a, b) => {
+  if (a.code === currentLanguage) return -1;
+  if (b.code === currentLanguage) return 1;
+  return a.name.localeCompare(b.name);
+});
+
 
   const itemMapper = (item: { name: string; code: string }) => {
     async function onPress() {
@@ -41,9 +38,7 @@ export const ChangeLanguageScreen: React.FC<Props> = () => {
       navigation.goBack();
     }
     const active = currentLanguage === item.code;
-    console.log('item:', item)
     const flag = flags?.find(a => a.code == item.code)
-    console.log('flag:', flag)
     return (
       <TouchableOpacity
         disabled={active}
