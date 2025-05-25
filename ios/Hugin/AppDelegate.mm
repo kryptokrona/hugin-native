@@ -1,6 +1,9 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
+#import <React/RCTRootView.h>
+#import <React/RCTBridge.h>
+
 #import <AVFoundation/AVFoundation.h> 
 #import <TSBackgroundFetch/TSBackgroundFetch.h>
 
@@ -8,9 +11,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  self.moduleName = @"Hugin";
-  self.initialProps = @{};
-
   NSError *audioError = nil;
   [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
                                    withOptions:AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker
@@ -28,18 +28,24 @@
 
   [[TSBackgroundFetch sharedInstance] didFinishLaunching];
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+                                                   moduleName:@"Hugin"
+                                            initialProperties:@{}];
+
+  self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UIViewController *rootViewController = [UIViewController new];
+  rootViewController.view = rootView;
+  self.window.rootViewController = rootViewController;
+  [self.window makeKeyAndVisible];
+
+  return YES;
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
-  return [self bundleURL];
-}
-
-- (NSURL *)bundleURL
-{
 #if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@".expo/.virtual-metro-entry"];
+  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif

@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* HuginTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* HuginTests.m */; };
 		048848C92DC04058B4C0BC9F /* Roboto-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 59B3497C32624D07AADA8ECF /* Roboto-Thin.ttf */; };
-		0DD5CC6A0491A8CCACEF3D94 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F42CD377E0382FCCDD8BFE33 /* ExpoModulesProvider.swift */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -36,21 +35,20 @@
 		3EF5CBA22C14E0190071ADEE /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3EF5CB8F2C14E0190071ADEE /* Fontisto.ttf */; };
 		4A7C3BB92DBEE49A0065D14D /* TSBackgroundFetch.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A7C3BB82DBEE49A0065D14D /* TSBackgroundFetch.xcframework */; };
 		4F96809E00304521A1D16DE3 /* Montserrat-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B9BEF04A67474451B1AA7544 /* Montserrat-Thin.ttf */; };
+		4FAFD0EA5F23911B1CF8D52A /* libPods-Hugin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 924D512318CD497C0468FA30 /* libPods-Hugin.a */; };
 		6311024F685D47DAB572A5CE /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 55E26584F1ED499A886E78F6 /* Roboto-Regular.ttf */; };
 		7383CDBC103742BC8AD01099 /* Montserrat-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 82BE6AF21DF54D9D8A7FAC19 /* Montserrat-Bold.ttf */; };
+		7D774C0D4087B989695DD1AA /* libPods-Hugin-HuginTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 30C96AC15AB9ED3E9F381FB1 /* libPods-Hugin-HuginTests.a */; };
 		7DDDDA75A50843E6B5E7B985 /* Roboto-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6F9E2389FCA34C289A4FB948 /* Roboto-Bold.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		92475B7FDE014E53ADC3331C /* Montserrat-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 10C5D7DC10564D57A4A87852 /* Montserrat-Black.ttf */; };
-		9B413E02B61791B89B85F852 /* libPods-Hugin-HuginTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6C8DF45CE5E8F5D8DF7D081E /* libPods-Hugin-HuginTests.a */; };
 		A245146D8B784A5591B684A6 /* Montserrat-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AAE2D995CA5B4E8388F7D92F /* Montserrat-SemiBold.ttf */; };
 		A5A5CEB5398443F8ABF9A9A2 /* Roboto-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 450882FFA2D04E1AA2E203BB /* Roboto-Light.ttf */; };
 		B726ABAC8CAB46B0A763F228 /* Roboto-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9F5F91AD38E84A0EBFE857A9 /* Roboto-Medium.ttf */; };
 		BC0B4EB7C40C4BFC911DFBE0 /* Roboto-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 53763BC343EC400F9F28EF9D /* Roboto-Black.ttf */; };
 		D897F47961BE4A199F51508E /* Montserrat-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 76C26A35419D449692F6E7FF /* Montserrat-Regular.ttf */; };
 		D91053670CB58E93792F1E04 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 7F5739FC563C3876DA7636CE /* PrivacyInfo.xcprivacy */; };
-		EA7BED5536B7A6E7C70CFF0E /* libPods-Hugin.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C7F7F686CACC10D8DCAA876 /* libPods-Hugin.a */; };
 		F0E5E89DC5144A8EB75BD2D8 /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3221EC289913409996978DB8 /* Montserrat-Medium.ttf */; };
-		F8483FF02B0DB79D9654AF40 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192E85579D0034C1FD814325 /* ExpoModulesProvider.swift */; };
 		FBFEDE2D0B28489A80C30051 /* Montserrat-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2C753714BB2B4A4D95028B7A /* Montserrat-ExtraBold.ttf */; };
 /* End PBXBuildFile section */
 
@@ -76,8 +74,6 @@
 		00E356EE1AD99517003FC87E /* HuginTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HuginTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* HuginTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HuginTests.m; sourceTree = "<group>"; };
-		0C7F7F686CACC10D8DCAA876 /* libPods-Hugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Hugin.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		1074C9BA69A4DF271322D2BF /* Pods-Hugin.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin.release.xcconfig"; path = "Target Support Files/Pods-Hugin/Pods-Hugin.release.xcconfig"; sourceTree = "<group>"; };
 		10C5D7DC10564D57A4A87852 /* Montserrat-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Black.ttf"; path = "../src/assets/fonts/Montserrat-Black.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Hugin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hugin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Hugin/AppDelegate.h; sourceTree = "<group>"; };
@@ -86,10 +82,9 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Hugin/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Hugin/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Hugin/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		192E85579D0034C1FD814325 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Hugin-HuginTests/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		29A3922E64F1791AADDB1317 /* Pods-Hugin-HuginTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin-HuginTests.release.xcconfig"; path = "Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests.release.xcconfig"; sourceTree = "<group>"; };
+		150BFACFBB6860C88F04AA59 /* Pods-Hugin.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin.release.xcconfig"; path = "Target Support Files/Pods-Hugin/Pods-Hugin.release.xcconfig"; sourceTree = "<group>"; };
 		2C753714BB2B4A4D95028B7A /* Montserrat-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraBold.ttf"; path = "../src/assets/fonts/Montserrat-ExtraBold.ttf"; sourceTree = "<group>"; };
-		304602F5F974D2BB2E13FD23 /* Pods-Hugin.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin.debug.xcconfig"; path = "Target Support Files/Pods-Hugin/Pods-Hugin.debug.xcconfig"; sourceTree = "<group>"; };
+		30C96AC15AB9ED3E9F381FB1 /* libPods-Hugin-HuginTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Hugin-HuginTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3221EC289913409996978DB8 /* Montserrat-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Medium.ttf"; path = "../src/assets/fonts/Montserrat-Medium.ttf"; sourceTree = "<group>"; };
 		3E1ADCAD2C19FDAC0019D938 /* Montserrat-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-SemiBold.ttf"; sourceTree = "<group>"; };
 		3E1ADCAF2C19FDB30019D938 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Montserrat-Bold.ttf"; sourceTree = "<group>"; };
@@ -116,22 +111,23 @@
 		4A6613772DBFD3AE00D9ABDE /* RNBackgroundFetch.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNBackgroundFetch.xcodeproj; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch.xcodeproj"; sourceTree = "<group>"; };
 		4A7C3BB62DBEDFD30065D14D /* BackgroundTasks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BackgroundTasks.framework; path = System/Library/Frameworks/BackgroundTasks.framework; sourceTree = SDKROOT; };
 		4A7C3BB82DBEE49A0065D14D /* TSBackgroundFetch.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:32A636YFGZ:9224-2932 Quebec Inc"; lastKnownFileType = wrapper.xcframework; name = TSBackgroundFetch.xcframework; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/TSBackgroundFetch.xcframework"; sourceTree = "<group>"; };
+		4BE9A375B4459506928CB2E2 /* Pods-Hugin-HuginTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin-HuginTests.debug.xcconfig"; path = "Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests.debug.xcconfig"; sourceTree = "<group>"; };
 		53763BC343EC400F9F28EF9D /* Roboto-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Black.ttf"; path = "../src/assets/fonts/Roboto-Black.ttf"; sourceTree = "<group>"; };
 		55E26584F1ED499A886E78F6 /* Roboto-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Regular.ttf"; path = "../src/assets/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
 		59B3497C32624D07AADA8ECF /* Roboto-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Thin.ttf"; path = "../src/assets/fonts/Roboto-Thin.ttf"; sourceTree = "<group>"; };
-		6C8DF45CE5E8F5D8DF7D081E /* libPods-Hugin-HuginTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Hugin-HuginTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F9E2389FCA34C289A4FB948 /* Roboto-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Bold.ttf"; path = "../src/assets/fonts/Roboto-Bold.ttf"; sourceTree = "<group>"; };
 		76C26A35419D449692F6E7FF /* Montserrat-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Regular.ttf"; path = "../src/assets/fonts/Montserrat-Regular.ttf"; sourceTree = "<group>"; };
 		7F5739FC563C3876DA7636CE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Hugin/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Hugin/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		82BE6AF21DF54D9D8A7FAC19 /* Montserrat-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Bold.ttf"; path = "../src/assets/fonts/Montserrat-Bold.ttf"; sourceTree = "<group>"; };
+		8E7820DA07D6452AD46338F4 /* Pods-Hugin-HuginTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin-HuginTests.release.xcconfig"; path = "Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests.release.xcconfig"; sourceTree = "<group>"; };
+		924D512318CD497C0468FA30 /* libPods-Hugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Hugin.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9F5F91AD38E84A0EBFE857A9 /* Roboto-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-Medium.ttf"; path = "../src/assets/fonts/Roboto-Medium.ttf"; sourceTree = "<group>"; };
 		AAE2D995CA5B4E8388F7D92F /* Montserrat-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-SemiBold.ttf"; path = "../src/assets/fonts/Montserrat-SemiBold.ttf"; sourceTree = "<group>"; };
 		B9BEF04A67474451B1AA7544 /* Montserrat-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-Thin.ttf"; path = "../src/assets/fonts/Montserrat-Thin.ttf"; sourceTree = "<group>"; };
 		CB1CFF59AEC54F5DB494AA09 /* Montserrat-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Montserrat-ExtraLight.ttf"; path = "../src/assets/fonts/Montserrat-ExtraLight.ttf"; sourceTree = "<group>"; };
+		DD0AEC3441BFF0A57542CA89 /* Pods-Hugin.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin.debug.xcconfig"; path = "Target Support Files/Pods-Hugin/Pods-Hugin.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		F42CD377E0382FCCDD8BFE33 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Hugin/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		FF0BE2450BE491B9777C8C2A /* Pods-Hugin-HuginTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Hugin-HuginTests.debug.xcconfig"; path = "Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -139,7 +135,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B413E02B61791B89B85F852 /* libPods-Hugin-HuginTests.a in Frameworks */,
+				7D774C0D4087B989695DD1AA /* libPods-Hugin-HuginTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,7 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4A7C3BB92DBEE49A0065D14D /* TSBackgroundFetch.xcframework in Frameworks */,
-				EA7BED5536B7A6E7C70CFF0E /* libPods-Hugin.a in Frameworks */,
+				4FAFD0EA5F23911B1CF8D52A /* libPods-Hugin.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,8 +190,8 @@
 				4A7C3BB82DBEE49A0065D14D /* TSBackgroundFetch.xcframework */,
 				4A7C3BB62DBEDFD30065D14D /* BackgroundTasks.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				0C7F7F686CACC10D8DCAA876 /* libPods-Hugin.a */,
-				6C8DF45CE5E8F5D8DF7D081E /* libPods-Hugin-HuginTests.a */,
+				924D512318CD497C0468FA30 /* libPods-Hugin.a */,
+				30C96AC15AB9ED3E9F381FB1 /* libPods-Hugin-HuginTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -206,14 +202,6 @@
 				4A66137C2DBFD3AE00D9ABDE /* libRNBackgroundFetch.a */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		737FF4891AEDF81425B81E8C /* HuginTests */ = {
-			isa = PBXGroup;
-			children = (
-				192E85579D0034C1FD814325 /* ExpoModulesProvider.swift */,
-			);
-			name = HuginTests;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -233,7 +221,6 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
 				B629E6EC3127433D8C484F3A /* Resources */,
-				EAC680ACD37B23D49B4D7B91 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -295,29 +282,12 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				304602F5F974D2BB2E13FD23 /* Pods-Hugin.debug.xcconfig */,
-				1074C9BA69A4DF271322D2BF /* Pods-Hugin.release.xcconfig */,
-				FF0BE2450BE491B9777C8C2A /* Pods-Hugin-HuginTests.debug.xcconfig */,
-				29A3922E64F1791AADDB1317 /* Pods-Hugin-HuginTests.release.xcconfig */,
+				DD0AEC3441BFF0A57542CA89 /* Pods-Hugin.debug.xcconfig */,
+				150BFACFBB6860C88F04AA59 /* Pods-Hugin.release.xcconfig */,
+				4BE9A375B4459506928CB2E2 /* Pods-Hugin-HuginTests.debug.xcconfig */,
+				8E7820DA07D6452AD46338F4 /* Pods-Hugin-HuginTests.release.xcconfig */,
 			);
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		EAC680ACD37B23D49B4D7B91 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				F3E8E7094A4D150D5B299881 /* Hugin */,
-				737FF4891AEDF81425B81E8C /* HuginTests */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
-		F3E8E7094A4D150D5B299881 /* Hugin */ = {
-			isa = PBXGroup;
-			children = (
-				F42CD377E0382FCCDD8BFE33 /* ExpoModulesProvider.swift */,
-			);
-			name = Hugin;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -327,13 +297,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "HuginTests" */;
 			buildPhases = (
-				A62EF50E1E35EE7EA6A97232 /* [CP] Check Pods Manifest.lock */,
+				87A9C7665112E3CA567E45FD /* [CP] Check Pods Manifest.lock */,
 				E31183D2F73DD206B1ADC788 /* [Expo] Configure project */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				EE055F114718E935668D9F43 /* [CP] Embed Pods Frameworks */,
-				4E46DFF5FDD013B1E007CA65 /* [CP] Copy Pods Resources */,
+				BDB3DDFE8EC9891F768C3D94 /* [CP] Embed Pods Frameworks */,
+				57AF89D1BD12A1A9025B50FA /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -349,14 +319,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Hugin" */;
 			buildPhases = (
-				546EA8E513EB2E5B4586F744 /* [CP] Check Pods Manifest.lock */,
-				CF8AAB2128DAD7239BDA32AE /* [Expo] Configure project */,
+				73E9A1FDBFB96A8BF0645BF8 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				5D17AEEF56FB4753361F85F4 /* [CP] Embed Pods Frameworks */,
-				AB29A0610DB972254CCD3CEA /* [CP] Copy Pods Resources */,
+				4A388D332DCA3AEC00404E67 /* ShellScript */,
+				A079F8DE69347376F123B433 /* [CP] Embed Pods Frameworks */,
+				258519E60D81E092840EEE29 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -488,9 +458,49 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli')\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n";
+			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
-		4E46DFF5FDD013B1E007CA65 /* [CP] Copy Pods Resources */ = {
+		258519E60D81E092840EEE29 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4A388D332DCA3AEC00404E67 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Prepend the correct Node path to PATH\nexport PATH=\"/Users/harry/.nvm/versions/node/v18.20.0/bin:$PATH\"\n\n# Optional: Verify Node version\necho \"Using Node at: $(which node)\"\nnode -v\n";
+			showEnvVarsInLog = 0;
+		};
+		57AF89D1BD12A1A9025B50FA /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -498,16 +508,20 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		546EA8E513EB2E5B4586F744 /* [CP] Check Pods Manifest.lock */ = {
+		73E9A1FDBFB96A8BF0645BF8 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -529,24 +543,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5D17AEEF56FB4753361F85F4 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A62EF50E1E35EE7EA6A97232 /* [CP] Check Pods Manifest.lock */ = {
+		87A9C7665112E3CA567E45FD /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -568,41 +565,47 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AB29A0610DB972254CCD3CEA /* [CP] Copy Pods Resources */ = {
+		A079F8DE69347376F123B433 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		CF8AAB2128DAD7239BDA32AE /* [Expo] Configure project */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			inputPaths = (
 			);
-			name = "[Expo] Configure project";
+			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Hugin/expo-configure-project.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin/Pods-Hugin-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BDB3DDFE8EC9891F768C3D94 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		E31183D2F73DD206B1ADC788 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -623,23 +626,6 @@
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Hugin-HuginTests/expo-configure-project.sh\"\n";
 		};
-		EE055F114718E935668D9F43 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Hugin-HuginTests/Pods-Hugin-HuginTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -648,7 +634,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				00E356F31AD99517003FC87E /* HuginTests.m in Sources */,
-				F8483FF02B0DB79D9654AF40 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -658,7 +643,6 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				0DD5CC6A0491A8CCACEF3D94 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -675,7 +659,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = FF0BE2450BE491B9777C8C2A /* Pods-Hugin-HuginTests.debug.xcconfig */;
+			baseConfigurationReference = 4BE9A375B4459506928CB2E2 /* Pods-Hugin-HuginTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -703,7 +687,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 29A3922E64F1791AADDB1317 /* Pods-Hugin-HuginTests.release.xcconfig */;
+			baseConfigurationReference = 8E7820DA07D6452AD46338F4 /* Pods-Hugin-HuginTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -728,11 +712,11 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 304602F5F974D2BB2E13FD23 /* Pods-Hugin.debug.xcconfig */;
+			baseConfigurationReference = DD0AEC3441BFF0A57542CA89 /* Pods-Hugin.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = JPZ73847LL;
 				ENABLE_BITCODE = NO;
 				HEADER_SEARCH_PATHS = (
@@ -740,11 +724,6 @@
 					"\"${PODS_ROOT}/Headers/Public\"",
 					"\"${PODS_ROOT}/Headers/Public/CocoaAsyncSocket\"",
 					"\"${PODS_ROOT}/Headers/Public/DoubleConversion\"",
-					"\"${PODS_ROOT}/Headers/Public/EXConstants\"",
-					"\"${PODS_ROOT}/Headers/Public/EXFont\"",
-					"\"${PODS_ROOT}/Headers/Public/Expo\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoFileSystem\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoModulesCore\"",
 					"\"${PODS_ROOT}/Headers/Public/FBLazyVector\"",
 					"\"${PODS_ROOT}/Headers/Public/HelloBare\"",
 					"\"${PODS_ROOT}/Headers/Public/RCT-Folly\"",
@@ -804,7 +783,6 @@
 					"\"${PODS_ROOT}/Headers/Public/react-native-sqlite-storage\"",
 					"\"${PODS_ROOT}/Headers/Public/react-native-udp\"",
 					"\"$(PODS_ROOT)/DoubleConversion\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoModulesCore/Swift Compatibility Header\"",
 					"\"$(PODS_ROOT)/Headers/Private/React-bridging/react/bridging\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/React-bridging/react_bridging.framework/Headers\"",
 					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
@@ -818,17 +796,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 1.0.4;
 				OTHER_CFLAGS = (
 					"$(inherited)",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/Expo/Expo.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoAsset/ExpoAsset.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFont/ExpoFont.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoKeepAwake/ExpoKeepAwake.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoModulesCore/ExpoModulesCore.modulemap\"",
-					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/ImageColors/ImageColors.modulemap\"",
 					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/VisionCamera/VisionCamera.modulemap\"",
 					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-audio-waveform/react_native_audio_waveform.modulemap\"",
 					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-document-picker/react_native_document_picker.modulemap\"",
@@ -859,8 +829,6 @@
 					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_renderer_graphics/React-graphics.modulemap\"",
 					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_renderer_imagemanager/React-ImageManager.modulemap\"",
 					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_utils/React-utils.modulemap\"",
-					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/reacthermes/React-hermes.modulemap\"",
-					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/yoga/Yoga.modulemap\"",
 					"$(inherited)",
 					"$(inherited)",
 					"-DFOLLY_NO_CONFIG",
@@ -892,11 +860,11 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1074C9BA69A4DF271322D2BF /* Pods-Hugin.release.xcconfig */;
+			baseConfigurationReference = 150BFACFBB6860C88F04AA59 /* Pods-Hugin.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = JPZ73847LL;
 				ENABLE_NS_ASSERTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -906,11 +874,6 @@
 					"\"${PODS_ROOT}/Headers/Public\"",
 					"\"${PODS_ROOT}/Headers/Public/CocoaAsyncSocket\"",
 					"\"${PODS_ROOT}/Headers/Public/DoubleConversion\"",
-					"\"${PODS_ROOT}/Headers/Public/EXConstants\"",
-					"\"${PODS_ROOT}/Headers/Public/EXFont\"",
-					"\"${PODS_ROOT}/Headers/Public/Expo\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoFileSystem\"",
-					"\"${PODS_ROOT}/Headers/Public/ExpoModulesCore\"",
 					"\"${PODS_ROOT}/Headers/Public/FBLazyVector\"",
 					"\"${PODS_ROOT}/Headers/Public/HelloBare\"",
 					"\"${PODS_ROOT}/Headers/Public/RCT-Folly\"",
@@ -970,7 +933,6 @@
 					"\"${PODS_ROOT}/Headers/Public/react-native-sqlite-storage\"",
 					"\"${PODS_ROOT}/Headers/Public/react-native-udp\"",
 					"\"$(PODS_ROOT)/DoubleConversion\"",
-					"\"${PODS_CONFIGURATION_BUILD_DIR}/ExpoModulesCore/Swift Compatibility Header\"",
 					"\"$(PODS_ROOT)/Headers/Private/React-bridging/react/bridging\"",
 					"\"$(PODS_CONFIGURATION_BUILD_DIR)/React-bridging/react_bridging.framework/Headers\"",
 					"\"$(PODS_ROOT)/Headers/Private/Yoga\"",
@@ -984,8 +946,55 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 1.0.4;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/VisionCamera/VisionCamera.modulemap\"",
+					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-audio-waveform/react_native_audio_waveform.modulemap\"",
+					"-fmodule-map-file=\"${PODS_CONFIGURATION_BUILD_DIR}/react-native-document-picker/react_native_document_picker.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/DoubleConversion/DoubleConversion.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/RCTDeprecation/RCTDeprecation.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/RCTFabric/React-RCTFabric.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/RCTTypeSafety/RCTTypeSafety.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/RNReanimated/RNReanimated.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/React/React-Core.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/ReactCodegen/ReactCodegen.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/ReactCommon/ReactCommon.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/React_Fabric/React-Fabric.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/React_FabricComponents/React-FabricComponents.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/React_NativeModulesApple/React-NativeModulesApple.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/React_RCTAppDelegate/React-RCTAppDelegate.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/folly/RCT-Folly.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/glog/glog.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/jsi/React-jsi.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/jsinspector_modern/React-jsinspector.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_debug/React-debug.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_featureflags/React-featureflags.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_nativemodule_defaults/React-defaultsnativemodule.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_nativemodule_dom/React-domnativemodule.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_nativemodule_featureflags/React-featureflagsnativemodule.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_nativemodule_idlecallbacks/React-idlecallbacksnativemodule.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_nativemodule_microtasks/React-microtasksnativemodule.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_renderer_debug/React-rendererdebug.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_renderer_graphics/React-graphics.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_renderer_imagemanager/React-ImageManager.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/react_utils/React-utils.modulemap\"",
+					"-fmodule-map-file=\"${PODS_ROOT}/Headers/Public/yoga/Yoga.modulemap\"",
+					"$(inherited)",
+					"$(inherited)",
+					"-DFOLLY_NO_CONFIG",
+					"-DFOLLY_MOBILE=1",
+					"-DFOLLY_USE_LIBCPP=1",
+					"-Wno-comma",
+					"-Wno-shorten-64-to-32",
+					"-DRCT_NEW_ARCH_ENABLED",
+					"-DREACT_NATIVE_MINOR_VERSION=76",
+					"-DREANIMATED_VERSION=3.17.5",
+					"$(inherited)",
+					"-DREACT_NATIVE_MINOR_VERSION=76",
+					"-DNDEBUG",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -1076,10 +1085,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -1153,10 +1159,7 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
