@@ -57,7 +57,7 @@ export const PreviewItem: React.FC<Props> = ({
         setOnline(allRoomUsers[mRoomKey]?.length > 1);
         return;
       }
-      console.log('allRoomUsers[keyRef.current]', allRoomUsers[keyRef.current].length)
+      console.log('allRoomUsers[keyRef.current]', allRoomUsers[keyRef?.current]?.length)
       setOnline(allRoomUsers[keyRef.current]?.length > 1);
     }, [allRoomUsers]); // Run only when `roomKey` changes
 

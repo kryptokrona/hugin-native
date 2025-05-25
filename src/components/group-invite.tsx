@@ -50,6 +50,13 @@ function onPress() {
     if (roomKey && originalName && user?.address) {
       if (!inRoom) joinAndSaveRoom(roomKey, originalName, user.address, user?.name);
 
+      const state = navigation.getState();
+      const currentRoute = state.routes[state.index]?.name;
+
+      if (currentRoute != "GroupChatScreen") {
+        navigation.navigate(MainScreens.GroupsScreen);
+      }
+
       navigation.push(MainScreens.GroupChatScreen, {
         name: roomName,
         roomKey

@@ -8,6 +8,7 @@ import { prettyPrintDate } from '@/utils';
 
 import { Avatar, TextField } from './_elements';
 import { ModalBottom } from './_layout';
+import { extractHuginLinkAndClean } from '@/services/utils';
 
 interface Props {
   inverted: boolean;
@@ -41,6 +42,8 @@ export const MessageItem: React.FC<Props> = ({
     setModalVisible(false);
   }
 
+const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
+
   return (
     <TouchableOpacity
       style={[
@@ -60,7 +63,7 @@ export const MessageItem: React.FC<Props> = ({
           </View>
           <View style={[styles.messageContainer]}>
             <View style={[styles.card, { backgroundColor: theme.muted }]}>
-              <TextField size="small">{message}</TextField>
+              <TextField size="small">{cleanedMessage}</TextField>
             </View>
           </View>
         </>
@@ -72,7 +75,7 @@ export const MessageItem: React.FC<Props> = ({
           </TextField>
           <View style={styles.invertedCard}>
             <View style={[styles.card, { backgroundColor: theme.background }]}>
-              <TextField size="small">{message}</TextField>
+              <TextField size="small">{cleanedMessage}</TextField>
             </View>
           </View>
         </View>

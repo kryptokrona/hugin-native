@@ -33,6 +33,7 @@ import {
 import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
 import { GroupInvite } from '.';
+import { extractHuginLinkAndClean } from '@/services/utils';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -184,25 +185,7 @@ export const GroupMessageItem: React.FC<Props> = ({
     onShowImagePress(imageDetails?.imagePath);
   }
 
-
-function extractHuginLinkAndClean(text: string): { link: string; cleanedMessage: string } {
-  const regex = /hugin:\/\/[^\s]+\/[a-fA-F0-9]{128}/;
-  const match = text.match(regex);
-
-  if (match && match[0]) {
-    const link = match[0];
-    const cleanedMessage = text.replace(link, '').trim();
-    return { link, cleanedMessage };
-  }
-
-  return { link: '', cleanedMessage: text };
-}
-
 const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
-if (huginLink) {
-  console.log(message, cleanedMessage)
-
-}
 
 
   useEffect(() => {

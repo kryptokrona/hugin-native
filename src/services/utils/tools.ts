@@ -100,3 +100,16 @@ export function lightenHexColor(hex, percent = 10) {
   
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+export function extractHuginLinkAndClean(text: string): { link: string; cleanedMessage: string } {
+  const regex = /hugin:\/\/[^\s]+\/[a-fA-F0-9]{128}/;
+  const match = text.match(regex);
+
+  if (match && match[0]) {
+    const link = match[0];
+    const cleanedMessage = text.replace(link, '').trim();
+    return { link, cleanedMessage };
+  }
+
+  return { link: '', cleanedMessage: text };
+}

@@ -36,7 +36,8 @@ import { EmojiPicker } from './emoji-picker';
 import { getColors } from 'react-native-image-colors'
 import { useNavigation } from '@react-navigation/native';
 import { MainScreens } from '@/config';
-import { lightenHexColor } from '@/services/utils/tools';
+import { extractHuginLinkAndClean, lightenHexColor } from '@/services/utils/tools';
+import { GroupInvite } from './group-invite';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -91,6 +92,8 @@ export const FeedMessageItem: React.FC<Props> = ({
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
   const name = nickname ?? 'Anon';
+
+  const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
 
   if (replies?.length) {
 
@@ -389,9 +392,10 @@ export const FeedMessageItem: React.FC<Props> = ({
             )}
             {!audioDetails?.isAudioMessage && !imageDetails?.isImageMessage && (
             <TextField size="small" style={styles.message}>
-                {message ?? ''}
+                {cleanedMessage ?? ''}
               </TextField>
             )}
+            {huginLink && <GroupInvite invite={huginLink} />}
             {tip && (
               <View>
                 <Tip tip={tip as unknown as TipType} />
