@@ -2,7 +2,7 @@ import type { Transaction } from 'kryptokrona-wallet-backend-js';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { Balance, Message, Room, User, Contact, Call } from '@/types';
+import type { Balance, Message, Room, User, Contact, Call, HuginNode } from '@/types';
 
 type GlobalStore = {
   balance: Balance;
@@ -21,6 +21,8 @@ type GlobalStore = {
   syncStatus: number[];
   fiatPrice: number;
   currentCall: Call;
+  huginNode: HuginNode;
+  setHuginNode: (payload: HuginNode) => void;
   setRoomMessages: (payload: Message[]) => void;
   setMessages: (payload: Message[]) => void;
   setFeedMessages: (payload: Message[]) => void;
@@ -63,6 +65,11 @@ export const useGlobalStore = create<
     rooms: [],
     feedMessages: [],
     avatars: {},
+    huginNode: {connected: false},
+    setHuginNode: (huginNode: HuginNode) => {
+      console.log('Setting node global state:', huginNode)
+      set({ huginNode });
+    },
     setAddress: async (address: string) => {
       set({ address });
     },

@@ -3,7 +3,7 @@ import {
   setRoomMessages,
   setLatestRoomMessages,
 } from '@/services/bare';
-import { getCurrentRoom } from '@/services/zustand';
+import { getCurrentRoom, useGlobalStore } from '@/services/zustand';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
@@ -79,6 +79,14 @@ export class Bridge {
       switch (json.type) {
         case 'log':
           console.log(json);
+        case 'hugin-node-connected':
+          console.log('Hugin node connected!')
+          useGlobalStore.getState().setHuginNode({connected: true});
+          break;
+        case 'hugin-node-disconnected':
+          console.log('Hugin node disconnected!')
+          useGlobalStore.getState().setHuginNode({connected: false});
+          break;
         case 'node-address':
           Nodes.address = json.address
           break;

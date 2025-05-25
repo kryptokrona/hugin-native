@@ -100,12 +100,8 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const snapPoints = useMemo(() => ['50%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
   
-  const keyRef = useRef('null');
   const inCall = currentCall.room === keyRef.current;
-
-  useEffect(() => {
-  console.log('Keyref changed!', keyRef.current)
-}, [keyRef]);
+  const keyRef = useRef('null');
 
   useEffect(() => {
     console.log('Updating keyref!', keyRef.current)

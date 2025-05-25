@@ -103,3 +103,8 @@ export interface Call {
   time: number;
   talkingUsers: Record<string, boolean>;
 }
+
+export interface HuginNode {
+  address?: string;
+  connected: boolean;
+}

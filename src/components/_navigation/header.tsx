@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
-import { useThemeStore, useUserStore } from '@/services';
+import { useGlobalStore, useThemeStore, useUserStore } from '@/services';
 import { getAvatar } from '@/utils';
 
 import { Avatar, CustomIcon, TextField } from '../_elements';
 import { MainScreens } from '@/config';
+import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
 interface Props {
   title?: string;
@@ -27,6 +28,13 @@ export const Header: React.FC<Props> = ({
   const theme = useThemeStore((state) => state.theme);
   const avatar = useUserStore((state) => state.user?.avatar);
   const address = useUserStore((state) => state.user?.address);
+  const online = useGlobalStore((state) => state.huginNode.connected);
+  // const [online, setOnline] = useState(false);
+
+  // useEffect(() => {
+  //   setOnline(huginNode.connected);
+  //   console.log('Updating onlnie', huginNode)
+  // }, [huginNode])
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', (_e) => {});
@@ -71,6 +79,14 @@ export const Header: React.FC<Props> = ({
               <Avatar onPress={() => gotoProfile()} key={avatar} base64={avatar} size={30} />
             )}
             {/* <HuginSvg style={styles.logo} /> */}
+            <View style={{position: 'absolute', right: 5, bottom: 0}}>
+            <CustomIcon
+              name={'lens'}
+              size={10}
+              type={'MI'}
+              color={`${online ? 'green' : 'grey'}`}
+            />
+            </View>
           </>
         )}
       </View>

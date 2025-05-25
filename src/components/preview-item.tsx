@@ -1,9 +1,10 @@
-import { Avatar, TextButton, TextField, Unreads } from './_elements';
+import { Avatar, CustomIcon, TextButton, TextField, Unreads } from './_elements';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { getAvatar } from '@/utils';
-import { useThemeStore } from '@/services';
+import { useGlobalStore, useThemeStore, Wallet } from '@/services';
 import { t } from 'i18next';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   name: string;
@@ -31,6 +32,31 @@ export const PreviewItem: React.FC<Props> = ({
   const isNew = false; // Can be used for future logic
   const borderColor = isNew ? theme.foreground : theme.border;
   const color = theme.background;
+  const allRoomUsers = useGlobalStore((state) => state.roomUsers);
+  const [online, setOnline] = useState(false);
+
+  const keyRef = useRef('null');
+  
+    useEffect(() => {
+      if (roomKey) return;
+      if (keyRef.current != 'null') return;
+      const deriveKey = async () => {
+        const derivedKey = await Wallet.key_derivation_hash(address);
+        keyRef.current = derivedKey;
+      };
+      deriveKey();
+    }, [mRoomKey]); // Run only when `roomKey` changes
+
+
+    useEffect(() => {
+      console.log('Roomusers update!');
+      if (roomKey) {
+        setOnline(allRoomUsers[mRoomKey]?.length > 1);
+        return;
+      }
+      setOnline(allRoomUsers[keyRef.current]?.length > 1);
+    }, [allRoomUsers]); // Run only when `roomKey` changes
+
 
   function handlePress() {
     onPress(mRoomKey, name);
@@ -47,7 +73,20 @@ export const PreviewItem: React.FC<Props> = ({
       <View style={styles.avatarContainer}>
         <Unreads unreads={unreads} />
         {mRoomKey?.length > 15 && (
+          <>
           <Avatar size={suggested ? 25 : 50} address={mRoomKey} base64={getAvatar(mRoomKey)} />
+          {!suggested &&
+
+            <View style={{position: 'absolute', right: 0, top: 0}}>
+            <CustomIcon
+            name={'lens'}
+            size={10}
+            type={'MI'}
+            color={`${online ? 'green' : 'grey'}`}
+            />
+            </View>
+          }
+          </>
         )}
       </View>
 
