@@ -504,6 +504,7 @@ const send_joined_message = async (topic, dht_keys, connection) => {
   }
 
   const signature = await sign(dht_keys.get().publicKey.toString('hex'));
+  const messages = await Hugin.request({ type: 'get-room-history', key: active.key });
 
   const data = JSON.stringify({
     address: Hugin.address,
@@ -521,6 +522,7 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     audioMute,
     videoMute,
     screenshare,
+    messages
   });
 
   connection.write(data);
@@ -710,6 +712,8 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
         (obj) => !uniq[obj] && (uniq[obj] = true),
       );
       active.peers = peers;
+      
+      process_request(joined.messages, active.key)
 
       const time = parseInt(joined.time);
       //Request message history from peer connected before us.
@@ -789,7 +793,7 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
         return true;
       } else if (data.type === SEND_HISTORY && con.request) {
         console.log('Got message history from some cool guise');
-        process_request(data.messages, active.key);
+        // process_request(data.messages, active.key);
         if ('files' in data) {
           console.log('Got some files', data.files);
           process_files(data, active, con, topic);
