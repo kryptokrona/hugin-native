@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 
@@ -19,6 +18,7 @@ import {
   CustomIcon,
   Header,
   ModalCenter,
+  QrCodeDisplay,
   ScreenLayout,
   TextButton,
   TextField,
@@ -28,7 +28,6 @@ import { MainScreens } from '@/config';
 import { useGlobalStore } from '@/services';
 import type { MainStackNavigationType } from '@/types';
 import { formatHashString } from '@/utils';
-import QRCode from 'react-native-qrcode-svg';
 
 export const DashboardScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -103,11 +102,11 @@ export const DashboardScreen: React.FC = () => {
     <ScreenLayout>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <TouchableOpacity onPress={toggleFiat}>
-        <Card style={styles.balance}>
-          <TextField style={{ margin: 10 }} size="large" bold>
-            {showFiat ? '$'+amountInFiat : balanceText}
-          </TextField>
-        </Card>
+          <Card style={styles.balance}>
+            <TextField style={{ margin: 10 }} size="large" bold>
+              {showFiat ? '$' + amountInFiat : balanceText}
+            </TextField>
+          </Card>
         </TouchableOpacity>
 
         <View style={[styles.container]}>
@@ -137,12 +136,7 @@ export const DashboardScreen: React.FC = () => {
         </View>
       </ScrollView>
       <ModalCenter visible={showQR} closeModal={onCloseModal}>
-        <View>
-          <QRCode
-            value={address}
-            size={300}
-          />
-        </View>
+        <QrCodeDisplay code={address} />
       </ModalCenter>
     </ScreenLayout>
   );

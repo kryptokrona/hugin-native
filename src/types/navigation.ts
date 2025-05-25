@@ -1,7 +1,7 @@
-import { AuthScreens, MainScreens, Stacks } from '@/config';
-
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+import { AuthScreens, MainScreens, Stacks } from '@/config';
 
 export type MainNavigationParamList = {
   [MainScreens.SettingsScreen]: undefined;
@@ -12,10 +12,12 @@ export type MainNavigationParamList = {
   [MainScreens.ChangeThemeScreen]: undefined;
   [MainScreens.MessagesScreen]: undefined;
   [MainScreens.MessageScreen]: { name: string; roomKey: string };
-  [MainScreens.GroupsScreen]: {
-    joining?: boolean;
-    link?: string;
-  };
+  [MainScreens.GroupsScreen]:
+    | {
+        joining?: boolean;
+        link?: string;
+      }
+    | undefined;
   [MainScreens.GroupChatScreen]: {
     roomKey: string;
     name: string;
@@ -30,11 +32,13 @@ export type MainNavigationParamList = {
     | undefined;
   [MainScreens.PickNodeScreen]: undefined;
   [MainScreens.DashboardScreen]: undefined;
-  [MainScreens.SendTransactionScreen]: { 
-    address?: string;
-    paymentId?: string;
-    amount?: number;
-   } | undefined;
+  [MainScreens.SendTransactionScreen]:
+    | {
+        address?: string;
+        paymentId?: string;
+        amount?: number;
+      }
+    | undefined;
   [MainScreens.WalletStatusScreen]: undefined;
   [MainScreens.ModifyContactScreen]: { name: string; roomKey: string };
 
