@@ -104,7 +104,7 @@ export const PreviewItem: React.FC<Props> = ({
           </TextField>
         }
         {suggested && !alreadyInRoom && 
-          <TouchableOpacity style={[styles.joinButton, {backgroundColor: theme.primary}]}>
+          <TouchableOpacity onPress={handlePress} style={[styles.joinButton, {backgroundColor: theme.primary}]}>
             <TextField bold size="xsmall" color={color}>
             {t('joinRoom')}
             </TextField>
