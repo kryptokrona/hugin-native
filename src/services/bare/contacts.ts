@@ -42,11 +42,11 @@ import { Notify } from '../../services/utils';
 
 export const setLatestMessages = async () => {
   const latestContacts = await getLatestMessages();
-  // const currentContacts = useGlobalStore.getState().contacts;
+  const currentContacts = useGlobalStore.getState().contacts;
   const userAddress = useUserStore.getState().user.address;
   const currentContact = useGlobalStore.getState().thisContact;
   const updatedContacts = latestContacts?.map((latestContact) => {
-    const existingContact = latestContacts.find(
+    const existingContact = currentContacts.find(
       (contact) => contact.messagekey === latestContact.messagekey,
     );
 
@@ -54,14 +54,14 @@ export const setLatestMessages = async () => {
 
     const newUnreads =
       existingContact &&
-      latestContact.timestamp > (latestContact.timestamp || 0) &&
+      latestContact.timestamp > (existingContact.timestamp || 0) &&
       !isFromUser
-        ? (latestContact.unreads || 0) + 1
-        : latestContact?.unreads || 0;
+        ? (existingContact.unreads || 0) + 1
+        : existingContact?.unreads || 0;
 
     return {
       ...latestContact,
-      unreads: currentContact === latestContact.key ? 0 : newUnreads, // Reset unreads if in room
+      unreads: currentContact === latestContact.address ? 0 : newUnreads, // Reset unreads if in room
     };
   });
 

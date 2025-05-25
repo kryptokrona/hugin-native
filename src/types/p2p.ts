@@ -23,6 +23,7 @@ export interface Contact {
   messagekey: string;
   message: string;
   unreads?: number;
+  timestamp?: number
 }
 
 export interface Message {

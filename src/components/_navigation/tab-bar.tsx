@@ -33,9 +33,15 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   const theme = useThemeStore((state) => state.theme);
   const [keyboardShow, setKeyboardShow] = useState(false);
   const rooms = useGlobalStore((state) => state.rooms);
+  const contacts = useGlobalStore((state) => state.contacts);
 
   const totalUnreads = rooms.reduce(
     (sum, room) => sum + (room.unreads || 0),
+    0,
+  );
+
+  const contactsUnreads = contacts.reduce(
+    (sum, contact) => sum + (contact.unreads || 0),
     0,
   );
 
@@ -110,6 +116,12 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
             {route.name === MainScreens.GroupStack && (
               <Unreads
                 unreads={totalUnreads}
+                style={{ bottom: 10, right: 20 }}
+              />
+            )}
+            {route.name === MainScreens.MessageStack && (
+              <Unreads
+                unreads={contactsUnreads}
                 style={{ bottom: 10, right: 20 }}
               />
             )}

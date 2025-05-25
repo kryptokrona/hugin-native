@@ -237,6 +237,25 @@ useGlobalStore.subscribe(
   },
 );
 
+useGlobalStore.subscribe(
+  (state) => state.thisContact,
+  (current, _previous) => {
+    const mContacts = useGlobalStore.getState().contacts;
+
+    const updatedContacts = mContacts.map((contact) => {
+      if (contact.address === current) {
+        return {
+          ...contact,
+          unreads: 0,
+        };
+      }
+
+      return contact;
+    });
+    useGlobalStore.setState({ contacts: updatedContacts });
+  },
+);
+
 export const setAuthenticated = (authenticated: boolean) => {
   useGlobalStore.setState({ authenticated });
 };
