@@ -95,3 +95,6 @@ web-build/
 android/gradlew.bat
 
 src/config/nodes.json
+
+src/services/kryptokrona/privates.js
+src/services/kryptokrona/privates.ts
