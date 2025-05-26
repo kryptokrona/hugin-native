@@ -520,50 +520,50 @@ useEffect(() => {
 
       <ModalBottom visible={callMenuActive} closeModal={onCloseCallMenu}>
       
-                  <TextField
-                    size={'xsmall'}
-                    type="muted"
-                    style={styles.onlineUsersText}>
-                    {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-                  </TextField>
-                  
-                  <View style={styles.flatListWrapper}>
-                    <FlatList
-                      nestedScrollEnabled={true}
-                      numColumns={2}
-                      data={userList}
-                      renderItem={OnlineUserMapper}
-                      keyExtractor={(item, i) => `${item.name}-${i}`}
-                      style={{ flex: 1 }}
-                    />
-                  </View>
-      
-                  {!inCall ? (
-                    <TextButton
-                      small
-                      type="secondary"
-                      onPress={onJoinCall}
-                      icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                      {t('joinCall')}
-                    </TextButton>
-                  ) : (
-                    <TextButton
-                      small
-                      type="destructive"
-                      onPress={onEndCall}
-                      icon={
-                        <CustomIcon
-                          color={theme[textType.destructive]}
-                          name="phone-hangup"
-                          type="MCI"
-                          size={16}
-                        />
-                      }>
-                      {t('endCall')}
-                    </TextButton>
-                  )}
-      
-                  </ModalBottom>
+        <TextField
+          size={'xsmall'}
+          type="muted"
+          style={styles.onlineUsersText}>
+          {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
+        </TextField>
+        
+        <View style={styles.flatListWrapper}>
+          <FlatList
+            nestedScrollEnabled={true}
+            numColumns={2}
+            data={userList}
+            renderItem={OnlineUserMapper}
+            keyExtractor={(item, i) => `${item.name}-${i}`}
+            style={{ flex: 1 }}
+          />
+        </View>
+
+        {!inCall ? (
+          <TextButton
+            small
+            type="secondary"
+            onPress={onJoinCall}
+            icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+            {t('joinCall')}
+          </TextButton>
+        ) : (
+          <TextButton
+            small
+            type="destructive"
+            onPress={onEndCall}
+            icon={
+              <CustomIcon
+                color={theme[textType.destructive]}
+                name="phone-hangup"
+                type="MCI"
+                size={16}
+              />
+            }>
+            {t('endCall')}
+          </TextButton>
+        )}
+        </ModalBottom>
+
     </ScreenLayout>
   );
 };

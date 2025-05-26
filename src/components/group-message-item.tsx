@@ -138,9 +138,6 @@ export const GroupMessageItem: React.FC<Props> = ({
     };
 
   function handleLongPress() {
-    if (dm) {
-      return false;
-    }
     setActionsModal(true);
   }
 
@@ -208,9 +205,10 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
   return (
     <TouchableOpacity style={styles.container} onLongPress={handleLongPress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
-        <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
+        {!dm && <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />}
         {actions && (
           <View>
+            {!dm &&
             <TextButton
               small
               type="secondary"
@@ -218,6 +216,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
               icon={<CustomIcon name="reply" type="FA5" size={16} />}>
               {t('reply')}
             </TextButton>
+            }
             <CopyButton
               small
               type="secondary"
