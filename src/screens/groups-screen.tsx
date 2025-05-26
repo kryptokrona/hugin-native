@@ -299,6 +299,7 @@ export const GroupsScreen: React.FC<Props> = ({ route }) => {
               roomKey={room.roomKey}
               onPress={() => onSuggestedPress(room.invite)}
               suggested={true}
+              alreadyInRoom={false}
             />
           ))}
           <View style={styles.divider} />
