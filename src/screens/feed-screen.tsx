@@ -17,14 +17,12 @@ import {
   View,
 } from 'react-native';
 
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   type RouteProp,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 import { t } from 'i18next';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
@@ -89,8 +87,6 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
   const messages = useGlobalStore((state) => state.feedMessages);
-  const [isBottomSheetVisible, setBottomSheetVisible] = useState(false);
-  const closeBottomSheet = () => setBottomSheetVisible(false);
 
   useEffect(() => {
     setFeedMessages(0);
@@ -116,7 +112,6 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
   const user = useUserStore((state) => state.user);
 
@@ -180,9 +175,6 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   }
 
   function onCreatePost() {
-    setBottomSheetVisible(true)
-      bottomSheetRef?.current?.snapToIndex(0);
-
   }
 
   useLayoutEffect(() => {
@@ -248,7 +240,6 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
     }
     if (!emoji) {
       scrollToBottom();
-      bottomSheetRef?.current?.close()
     }
   }
 
@@ -277,7 +268,6 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout padding={false}>
-      <GestureHandlerRootView>
         {/* Full-Screen Image Viewer */}
         {imagePath && (
           <FullScreenImageViewer
@@ -349,47 +339,20 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
             onCloseReplyPress={onCloseReplyPress}
           />
         </KeyboardAvoidingView> */}
-       {Platform.OS === 'ios' ? (
-  <BottomSheet
-    ref={bottomSheetRef}
-    snapPoints={snapPoints}
-    index={-1}
-    enablePanDownToClose={true}
-    keyboardBehavior="interactive"
-    backgroundStyle={{ backgroundColor: 'transparent' }}
-    bottomInset={10}
-    handleIndicatorStyle={{ backgroundColor: color }}
-  >
-    <BottomSheetView
-      style={[{ backgroundColor, borderColor }, styles.contentContainer]}
-    >
-      <View style={styles.inputWrapper}>
-        <MessageInput
-          onSend={onSend}
-          replyToName={replyToName}
-          onCloseReplyPress={onCloseReplyPress}
-          hideExtras={true}
-        />
-      </View>
-    </BottomSheetView>
-  </BottomSheet>
-) : (
-
-      <KeyboardAvoidingView
-        style={[styles.inputWrapper, { backgroundColor }]}
+        <KeyboardAvoidingView
+        style={[styles.inputWrapper, { backgroundColor, borderColor }]}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
         <MessageInput
           onSend={onSend}
+          // replyToName={'anon'}
           hideExtras={true}
-          replyToName={replyToName}
           onCloseReplyPress={onCloseReplyPress}
           dm={true}
         />
       </KeyboardAvoidingView>
 
-)}
-      </GestureHandlerRootView>
+
     </ScreenLayout>
   );
 };
@@ -424,9 +387,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputWrapper: {
-    paddingBottom: 10,
-    flex: 1,
-    width: '100%',
-    minHeight: 60,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    zIndex: 999999,
+    borderTopWidth: 1
+    // flex: 1
   },
 });

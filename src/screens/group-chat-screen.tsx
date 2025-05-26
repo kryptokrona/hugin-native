@@ -17,14 +17,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   type RouteProp,
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 import { t } from 'i18next';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
@@ -44,6 +42,7 @@ import {
   TextField,
   UserItem,
   GroupOnlineIndicator,
+  ModalBottom,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -102,16 +101,22 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
-
+  
+  
   // const [inCall, setInCall] = useState<boolean>();
-  const bottomSheetRef = useRef<BottomSheet>(null);
   const myUserAddress = useGlobalStore((state) => state.address);
   const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
   const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
   const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
-
+  
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
+  
+  const [callMenuActive, setCallMenuActive] = useState<boolean>(false);
+
+  function onCloseCallMenu() {
+    setCallMenuActive(false);
+  }
 
   useEffect(() => {
     if (!roomUsers) {
@@ -140,22 +145,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const snapPoints = useMemo(() => ['50%'], []);
 
   function onShowCall() {
-    if (Platform.OS == 'ios') {
-      bottomSheetRef?.current?.snapToIndex(0);
-    } else {
-      if (inCall) {
-        onEndCall();
-      } else {
-        onJoinCall();
-      }
-    }
+    setCallMenuActive(true);
   }
-
-  useEffect(() => {
-    if (call && bottomSheetRef?.current) {
-      setTimeout(() => onShowCall(), 777);
-    }
-  }, [bottomSheetRef]);
 
   function onJoinCall() {
     WebRTC.init();
@@ -221,8 +212,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   function OnlineUserMapper({ item }: { item: User }) {
     return <UserItem {...item} />;
   }
-
-  const handleSheetChanges = useCallback((index: number) => {}, []);
 
   function onCustomizeGroupPress() {
     navigation.push(MainScreens.ModifyGroupScreen, {
@@ -449,7 +438,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   return (
     <ScreenLayout>
-      <GestureHandlerRootView>
         {/* Full-Screen Image Viewer */}
         {imagePath && (
           <FullScreenImageViewer
@@ -527,71 +515,53 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           />
         </KeyboardAvoidingView>
 
-        {Platform.OS == 'ios' && (
-          <BottomSheet
-            ref={bottomSheetRef}
-            onChange={handleSheetChanges}
-            snapPoints={snapPoints}
-            index={-1}
-            enablePanDownToClose={true}
-            backgroundStyle={{ backgroundColor: 'transparent' }}
-            bottomInset={10}
-            handleIndicatorStyle={{ backgroundColor: color }}>
-            <BottomSheetView
-              style={[
-                { backgroundColor, borderColor },
-                styles.contentContainer,
-              ]}>
-              {/* <TextField>Awesome 🎉</TextField> */}
-              <View style={{ flex: 1, width: '100%' }}>
-                <View style={styles.flatListContainer}>
-                  <TextField
-                    size={'xsmall'}
-                    type="muted"
-                    style={styles.onlineUsersText}>
-                    {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-                  </TextField>
-                  <View style={styles.flatListWrapper}>
-                    <FlatList
-                      nestedScrollEnabled={true}
-                      numColumns={2}
-                      data={userList}
-                      renderItem={OnlineUserMapper}
-                      keyExtractor={(item, i) => `${item.name}-${i}`}
-                      style={{ flex: 1 }}
-                    />
-                  </View>
-                </View>
+          <ModalBottom visible={callMenuActive} closeModal={onCloseCallMenu}>
 
-                {!inCall ? (
-                  <TextButton
-                    small
-                    type="secondary"
-                    onPress={onJoinCall}
-                    icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                    {t('joinCall')}
-                  </TextButton>
-                ) : (
-                  <TextButton
-                    small
-                    type="destructive"
-                    onPress={onEndCall}
-                    icon={
-                      <CustomIcon
-                        color={theme[textType.destructive]}
-                        name="phone-hangup"
-                        type="MCI"
-                        size={16}
-                      />
-                    }>
-                    {t('endCall')}
-                  </TextButton>
-                )}
-              </View>
-            </BottomSheetView>
-          </BottomSheet>
-        )}
-      </GestureHandlerRootView>
+            <TextField
+              size={'xsmall'}
+              type="muted"
+              style={styles.onlineUsersText}>
+              {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
+            </TextField>
+            
+            <View style={styles.flatListWrapper}>
+              <FlatList
+                nestedScrollEnabled={true}
+                numColumns={2}
+                data={userList}
+                renderItem={OnlineUserMapper}
+                keyExtractor={(item, i) => `${item.name}-${i}`}
+                style={{ flex: 1 }}
+              />
+            </View>
+
+            {!inCall ? (
+              <TextButton
+                small
+                type="secondary"
+                onPress={onJoinCall}
+                icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+                {t('joinCall')}
+              </TextButton>
+            ) : (
+              <TextButton
+                small
+                type="destructive"
+                onPress={onEndCall}
+                icon={
+                  <CustomIcon
+                    color={theme[textType.destructive]}
+                    name="phone-hangup"
+                    type="MCI"
+                    size={16}
+                  />
+                }>
+                {t('endCall')}
+              </TextButton>
+            )}
+
+            </ModalBottom>
+
     </ScreenLayout>
   );
 };
@@ -606,7 +576,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     borderWidth: 1,
     flex: 1,
-    marginBottom: 10,
+    marginBottom: 200,
     padding: 25,
   },
   flatListContainer: {
@@ -617,7 +587,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   flatListWrapper: {
-    flex: 1,
+    minHeight: 200
   },
   inputWrapper: {
     bottom: 0,

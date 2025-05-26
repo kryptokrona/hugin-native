@@ -30,6 +30,7 @@ import {
   TextField,
   UserItem,
   ModalCenter,
+  ModalBottom,
 } from '@/components';
 import { MainScreens } from '@/config';
 import {
@@ -55,9 +56,7 @@ import { setLatestMessages, updateMessage } from '../services/bare/contacts';
 import { saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Beam, Rooms } from 'lib/native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { textType } from '@/styles';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { GlideInItem } from '../components/glider';
 
 interface Props {
@@ -97,11 +96,16 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const currentCall = useGlobalStore((state) => state.currentCall);
   
   const myUserAddress = useGlobalStore((state) => state.address);
-  const snapPoints = useMemo(() => ['50%'], []);
-  const bottomSheetRef = useRef<BottomSheet>(null);
+
   
   const keyRef = useRef('null');
   const inCall = currentCall.room === keyRef.current;
+
+  const [callMenuActive, setCallMenuActive] = useState<boolean>(false);
+
+  function onCloseCallMenu() {
+    setCallMenuActive(false);
+  }
 
   useEffect(() => {
     if (keyRef.current != 'null') return; // Prevent re-execution if key is already set
@@ -267,15 +271,7 @@ useEffect(() => {
   );
 
   function onShowCall() {
-    if (Platform.OS == 'ios') {
-      bottomSheetRef?.current?.snapToIndex(0);
-    } else {
-      if (inCall) {
-        onEndCall()
-      } else {
-        onJoinCall();
-      }
-    }
+    setCallMenuActive(true);
   }
 
   useLayoutEffect(() => {
@@ -425,7 +421,6 @@ useEffect(() => {
 
   return (
     <ScreenLayout>
-      <GestureHandlerRootView>
 
       <ModalCenter
         visible={modalVisible}
@@ -522,65 +517,53 @@ useEffect(() => {
           dm={true}
         />
       </KeyboardAvoidingView>
-      {Platform.OS == 'ios' &&
-      <BottomSheet
-          ref={bottomSheetRef}
-          onChange={() => {}}
-          snapPoints={snapPoints}
-          index={-1}
-          enablePanDownToClose={true}
-          backgroundStyle={{backgroundColor: 'transparent'}}
-          bottomInset={10}
-          handleIndicatorStyle={{ backgroundColor: color }}>
-          <BottomSheetView
-            style={[{ backgroundColor, borderColor }, styles.contentContainer]}>
-            {/* <TextField>Awesome 🎉</TextField> */}
-            <View style={{ flex: 1, width: '100%' }}>
-              <View style={styles.flatListContainer}>
-                <TextField size={'xsmall'} type="muted" style={styles.onlineUsersText}>
-                  {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-                </TextField>
-                <View style={styles.flatListWrapper}>
-                  <FlatList
-                    nestedScrollEnabled={true}
-                    numColumns={2}
-                    data={userList}
-                    renderItem={OnlineUserMapper}
-                    keyExtractor={(item, i) => `${item.name}-${i}`}
-                    style={{ flex: 1 }}
-                  />
-                </View>
-              </View>
 
-              {!inCall ? (
-                <TextButton
-                  small
-                  type="secondary"
-                  onPress={onJoinCall}
-                  icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                  {t('joinCall')}
-                </TextButton>
-              ) : (
-                <TextButton
-                  small
-                  type="destructive"
-                  onPress={onEndCall}
-                  icon={
-                    <CustomIcon
-                      color={theme[textType.destructive]}
-                      name="phone-hangup"
-                      type="MCI"
-                      size={16}
+      <ModalBottom visible={callMenuActive} closeModal={onCloseCallMenu}>
+      
+                  <TextField
+                    size={'xsmall'}
+                    type="muted"
+                    style={styles.onlineUsersText}>
+                    {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
+                  </TextField>
+                  
+                  <View style={styles.flatListWrapper}>
+                    <FlatList
+                      nestedScrollEnabled={true}
+                      numColumns={2}
+                      data={userList}
+                      renderItem={OnlineUserMapper}
+                      keyExtractor={(item, i) => `${item.name}-${i}`}
+                      style={{ flex: 1 }}
                     />
-                  }>
-                  {t('endCall')}
-                </TextButton>
-              )}
-            </View>
-          </BottomSheetView>
-        </BottomSheet>
-        }
-      </GestureHandlerRootView>
+                  </View>
+      
+                  {!inCall ? (
+                    <TextButton
+                      small
+                      type="secondary"
+                      onPress={onJoinCall}
+                      icon={<CustomIcon name="phone" type="MCI" size={16} />}>
+                      {t('joinCall')}
+                    </TextButton>
+                  ) : (
+                    <TextButton
+                      small
+                      type="destructive"
+                      onPress={onEndCall}
+                      icon={
+                        <CustomIcon
+                          color={theme[textType.destructive]}
+                          name="phone-hangup"
+                          type="MCI"
+                          size={16}
+                        />
+                      }>
+                      {t('endCall')}
+                    </TextButton>
+                  )}
+      
+                  </ModalBottom>
     </ScreenLayout>
   );
 };
@@ -629,7 +612,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   flatListWrapper: {
-    flex: 1,
+    minHeight: 200
   },
   inviteContainer: {
     alignItems: 'center',

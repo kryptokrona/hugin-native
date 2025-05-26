@@ -327,7 +327,7 @@ export const MessageInput: React.FC<Props> = ({
             borderColor: color,
           },
         ]}>
-        {focus && !displayActions && (
+        {focus && !displayActions && !hideExtras && (
           <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
             <CustomIcon
               name="arrow-forward-ios"

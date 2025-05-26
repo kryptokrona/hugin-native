@@ -43,7 +43,7 @@ export const ModalBottom: React.FC<Props> = ({
               styles.inner,
               {
                 backgroundColor: theme.popover,
-                borderColor: theme.mutedForeground,
+                borderColor: theme.border,
               },
             ]}>
             <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -67,24 +67,26 @@ const styles = StyleSheet.create({
   },
 
   inner: {
-    borderBottomWidth: 0,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    padding: 6,
-    width: '100%',
+    padding: 20,
+    paddingTop: 6,
+    width: '90%',
+    marginLeft: '5%',
   },
 
   modal: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderRadius: 16,
     flex: 1,
     justifyContent: 'flex-end',
+    marginBottom: 40
   },
   top: {
     borderRadius: Styles.borderRadius.small,
     height: 5,
     marginBottom: 6,
     width: 40,
+    position: 'absolute',
+    top: -20
   },
 });
