@@ -93,6 +93,11 @@ class VoiceChannel {
         console.log('Error closing connection');
       }
     }
+    const videoTracks = this.localMediaStream?.getVideoTracks() || [];
+    for (const track of videoTracks) {
+      this.localMediaStream.removeTrack(track);
+      track.stop();
+    }
     this.localMediaStream = null;
   }
 
@@ -143,7 +148,7 @@ class VoiceChannel {
 
   async setVideo(video) {
 
-    const mediaConstraints = { audio: false, video };
+    const mediaConstraints = { audio: true, video: video };
 
     let newTrack;
 

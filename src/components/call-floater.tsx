@@ -127,13 +127,12 @@ export const CallFloater: React.FC = () => {
     setCamera(!camera);
 
     if (camera) {
-      const videoTrack = WebRTC.localMediaStream?.getVideoTracks()[0];
-  
-      if (videoTrack) {
-        WebRTC.localMediaStream?.removeTrack(videoTrack);
-    
-        videoTrack.stop();
-      }
+      
+    const videoTracks = WebRTC.localMediaStream?.getVideoTracks() || [];
+    for (const track of videoTracks) {
+      WebRTC.localMediaStream?.removeTrack(track);
+      track.stop();
+    }
     }
 
   }
