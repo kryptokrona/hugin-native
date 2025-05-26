@@ -3,7 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
 import { TouchableOpacity } from '@gorhom/bottom-sheet';
-import { PanGestureHandler } from 'react-native-gesture-handler';
+import {
+  GestureDetector,
+  Gesture,
+} from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -38,6 +41,8 @@ export const CallFloater: React.FC = () => {
   
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+  const startX = useSharedValue(0);
+  const startY = useSharedValue(0);
 
   const myUserAddress = useGlobalStore((state) => state.address);
   const theme = useThemeStore((state) => state.theme);
@@ -75,19 +80,14 @@ export const CallFloater: React.FC = () => {
   //   return () => clearInterval(timer);
   // }, [currentCall.time]);
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onActive: (event, ctx: any) => {
-      translateX.value = ctx.startX + event.translationX;
-      translateY.value = ctx.startY + event.translationY;
-    },
-    onEnd: () => {
-      translateX.value = withSpring(translateX.value);
-      translateY.value = withSpring(translateY.value);
-    },
-    onStart: (_, ctx: any) => {
-      ctx.startX = translateX.value;
-      ctx.startY = translateY.value;
-    },
+const panGesture = Gesture.Pan()
+  .onStart((e) => {
+    startX.value = translateX.value;
+    startY.value = translateY.value;
+  })
+  .onUpdate((e) => {
+    translateX.value = startX.value + e.translationX;
+    translateY.value = startY.value + e.translationY;
   });
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -182,7 +182,7 @@ export const CallFloater: React.FC = () => {
   }
 
   return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
+    <GestureDetector gesture={panGesture}>
       <Animated.View
         style={[
           styles.overlayContainer,
@@ -291,7 +291,7 @@ export const CallFloater: React.FC = () => {
           />
         </TouchableOpacity>
       </Animated.View>
-    </PanGestureHandler>
+    </GestureDetector>
   );
 };
 
