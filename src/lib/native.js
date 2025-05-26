@@ -180,8 +180,7 @@ class NodeConnection {
 
  async sync(request) {
   const data = { type: 'sync_from_node', request };
-  const {resp} = await rpc.request(data);
-  return resp
+  return await rpc.request(data);
  }
  
 }

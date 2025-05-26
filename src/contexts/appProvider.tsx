@@ -189,7 +189,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // console.log('******** INACTIVE STATE *********');
         // //Idle status might be used to display "yellow symbol" instead of "disconnecting"
         // //Or display notifications during background mode
-        if (WebRTC.localMediaStream === null) {
+        if (WebRTC.localMediaStream === null && authenticated) {
         Rooms.idle(true, true);
         } //else {
         //   Rooms.idle(false, true);

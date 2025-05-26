@@ -55,7 +55,7 @@ const onrequest = async (p) => {
       return {sent};
     case 'sync_from_node':
       const resp = await Nodes.sync(p.request)
-      return {resp}
+      return {resp, background: Hugin.background}
     case 'connect_to_node':
       Nodes.connect(p.address, p.pub)
       return

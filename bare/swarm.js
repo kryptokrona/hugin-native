@@ -204,8 +204,9 @@ async reconnect() {
   while(this.connection === null) {
     Hugin.send('hugin-node-disconnected', {})
     console.log("Reconnecting to node...")
+    Nodes.node.resume();
     this.discovery.refresh({client: true, server: false})
-    await sleep(10000)
+    await sleep(2000);
   }
   return
 }
@@ -235,6 +236,9 @@ close() {
 
 async message(payload, hash) {
   console.log('payload, hash', payload, hash)
+    if (this.connection === null) {
+    await this.reconnect();
+  }
   return new Promise( async (resolve, reject) => {
   const timestamp = Date.now()
   this.requests.set(timestamp, { resolve, reject })
@@ -254,9 +258,7 @@ async message(payload, hash) {
 
   }
 
-  if (this.connection === null) {
-    reject("No connection")
-  }
+
 
   this.connection.write(JSON.stringify(data))
   

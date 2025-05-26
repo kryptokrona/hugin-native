@@ -64,7 +64,7 @@ class Syncer {
     const lastChecked = this.lastChecked;
     this.lastChecked = Date.now() - 1000;
 
-    const resp = await Nodes.sync({
+    const {resp, background} = await Nodes.sync({
       request: true,
       type: 'some',
       timestamp: lastChecked,
@@ -74,13 +74,14 @@ class Syncer {
       return false;
     }
 
-    return resp;
+    return {resp, background};
   }
 
   async sync() {
     const incoming = this.incoming_messages.length > 0 ? true : false;
     //First start, set known pool txs
-    const transactions = await this.fetch();
+    const {resp, background} = await this.fetch();
+    const transactions = resp;
     if (!transactions && !incoming) return;
     const large_batch = transactions.length > 299 ? true : false;
 
@@ -106,10 +107,10 @@ class Syncer {
 
     // if (transactions.length < 5) Hugin.send('incoming-que', false);
     console.log('Incoming transactions', transactions.length);
-    this.decrypt(transactions, false);
+    this.decrypt(transactions, false, background);
   }
 
-  async decrypt(list, que = false) {
+  async decrypt(list, que = false, background) {
     console.log('Checking nr of txs:', list.length);
     for (const message of list) {
       try {
@@ -122,7 +123,7 @@ class Syncer {
 
           if (await this.check_for_viewtag(thisExtra)) {
             if (await messageExists(thisHash)) continue;
-            await this.check_for_pm(thisExtra, thisHash);
+            await this.check_for_pm(thisExtra, thisHash, background);
             continue;
           }
         }
