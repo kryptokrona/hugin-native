@@ -1,6 +1,7 @@
 import * as NaclSealed from 'tweetnacl-sealed-box';
 
 import { Address, CryptoNote } from 'kryptokrona-utils';
+import { Beam, Nodes } from '../../lib/native';
 import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import {
   cnFastHash,
@@ -29,16 +30,16 @@ import {
   setSyncStatus,
   setTransactions,
 } from '@/services';
-import { privateKeys } from './privates';
-import { Platform } from 'react-native';
-import { t } from 'i18next';
+
+import Clipboard from '@react-native-clipboard/clipboard';
 import { MessageSync } from '../hugin/syncer';
+import { Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
 import naclUtil from 'tweetnacl-util';
+import { privateKeys } from './privates';
+import { t } from 'i18next';
 import tweetnacl from 'tweetnacl';
-import { Beam, Nodes } from '../../lib/native';
-import Clipboard from '@react-native-clipboard/clipboard';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -62,7 +63,6 @@ export class ActiveWallet {
   }
 
   async reset() {
-
     if (this.started && this.active) {
       try {
         await this.active.stop();
@@ -84,7 +84,6 @@ export class ActiveWallet {
     console.log('Wallet has been reset.');
   }
 
-
   async joinBetaRoom(nickname) {
     return;
   }
@@ -92,7 +91,10 @@ export class ActiveWallet {
   async create(node, nickname) {
     this.setDaemon(node);
     try {
-      console.log('Creating wallet with online wallet backend:', WalletBackend != undefined);
+      console.log(
+        'Creating wallet with online wallet backend:',
+        WalletBackend != undefined,
+      );
       this.active = await WalletBackend.createWallet(this.daemon, WalletConfig);
     } catch (err) {
       console.log('Creating wallet failed!', err);
@@ -111,7 +113,10 @@ export class ActiveWallet {
       console.log('Saving wallet!');
       console.log('--------------->');
       const walletJSON = this.active.toJSONString();
-      console.log('Saving wallet with size:', JSON.stringify(walletJSON).length);
+      console.log(
+        'Saving wallet with size:',
+        JSON.stringify(walletJSON).length,
+      );
       await saveWallet(walletJSON);
     } catch (err) {
       console.log(err);
@@ -209,16 +214,18 @@ export class ActiveWallet {
   getIOSkey() {
     // All iOS users gets free Hugin+ accounts because
     // Apple does not allow third party payments yet.
-    
+
     //Get a random pre paid private key pair from a list
-    
-    
-    const key = privateKeys[Math.floor(Math.random() * privateKeys.length)];
-    return key
+
+    if (Platform.OS !== 'ios') {
+      return;
     }
+    const key = privateKeys[Math.floor(Math.random() * privateKeys.length)];
+    return key;
+  }
 
   async messageKeyPair() {
-    if (this.messageKeys) return this.messageKeys
+    if (this.messageKeys) return this.messageKeys;
     const priv = Platform.OS === 'android' ? this.spendKey() : this.getIOSkey();
     const keys = await generateDeterministicSubwalletKeys(priv, 1);
     const address = await Address.fromSeed(keys.private_key);
@@ -520,28 +527,27 @@ export class ActiveWallet {
   }
 
   async copyMnemonic() {
-  if (this.active) {
-    const mnemonic = await this.active.getMnemonicSeed();
-    if (mnemonic[0]) {
-      Clipboard.setString(mnemonic[0]);
-      Toast.show({
+    if (this.active) {
+      const mnemonic = await this.active.getMnemonicSeed();
+      if (mnemonic[0]) {
+        Clipboard.setString(mnemonic[0]);
+        Toast.show({
           type: 'success',
           text1: t('mnemonicCopied'),
         });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: t('noMnemonicError'),
+        });
+      }
     } else {
       Toast.show({
         type: 'error',
-        text1: t('noMnemonicError'),
+        text1: t('walletOfflineError'),
       });
     }
-  } else {
-    Toast.show({
-      type: 'error',
-      text1: t('walletOfflineError'),
-    });
   }
-};
-
 }
 
 export const Wallet = new ActiveWallet();
