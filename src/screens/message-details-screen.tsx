@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 
@@ -23,7 +23,6 @@ import {
   useNavigation,
 } from '@react-navigation/native';
 import { t } from 'i18next';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 
 import { Peers } from 'lib/connections';
@@ -321,6 +320,13 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
           </TextButton>
         </ModalCenter>
 
+        <FlatList
+          // inverted
+          ListFooterComponent={
+            <View style={{height: 50}} />
+          }
+          ListHeaderComponent={
+            <TouchableWithoutFeedback onPress={() => {}}>
         <View style={styles.messageContainer}>
           <View style={[styles.avatar, {backgroundColor: userColor}]}>
             {message?.address.length > 15 && (
@@ -353,24 +359,8 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
             }
           </View>
         </View>
-
-        <View style={{marginLeft: '-25%', width: '150%', borderColor, borderTopWidth: 1}} />
-
-        <KeyboardAvoidingView
-              style={[styles.inputWrapper, { backgroundColor }]}
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
-              <MessageInput
-                onSend={onSend}
-                // replyToName={'anon'}
-                hideExtras={true}
-                onCloseReplyPress={onCloseReplyPress}
-              />
-            </KeyboardAvoidingView>
-
-
-        <FlatList
-          // inverted
+        </TouchableWithoutFeedback>
+          }
           ref={flatListRef}
           data={replies}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
@@ -398,8 +388,21 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
           contentContainerStyle={styles.flatListContent}
           initialNumToRender={replies.length}
           maxToRenderPerBatch={replies.length}
+          style={{ flex: 1 }}
           ItemSeparatorComponent={<View style={{marginLeft: '-100%', width: '250%', borderColor, borderTopWidth: 1}} />}
         />
+
+        <KeyboardAvoidingView
+        style={[styles.inputWrapper, { backgroundColor, borderColor }]}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
+        <MessageInput
+          onSend={onSend}
+          // replyToName={'anon'}
+          hideExtras={true}
+          onCloseReplyPress={onCloseReplyPress}
+        />
+      </KeyboardAvoidingView>
     </ScreenLayout>
   );
 };
@@ -425,11 +428,10 @@ const styles = StyleSheet.create({
   inputWrapper: {
     bottom: 0,
     left: 0,
-    // marginBottom: 10,
-    paddingBottom: 10,
     position: 'absolute',
     right: 0,
-    zIndex: 999999
+    zIndex: 999999,
+    borderTopWidth: 1
     // flex: 1
   },
   waveFormWrapper: {
