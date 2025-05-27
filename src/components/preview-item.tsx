@@ -1,17 +1,19 @@
 import { Avatar, CustomIcon, TextButton, TextField, Unreads } from './_elements';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { getAvatar } from '@/utils';
+import { getAvatar, prettyPrintDate } from '@/utils';
 import { useGlobalStore, useThemeStore, Wallet } from '@/services';
 import { t } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
 import { GroupOnlineIndicator } from './group-online-indicator';
+import { Styles } from '@/styles';
 
 interface Props {
   name: string;
   roomKey?: string;
   address?: string;
   message?: string;
+  timestamp?: number;
   unreads?: number;
   onPress: (key: string, name: string) => void;
   onLongPress?: () => void;
@@ -28,15 +30,19 @@ export const PreviewItem: React.FC<Props> = ({
   onPress,
   onLongPress,
   suggested = false,
-  alreadyInRoom = true
+  alreadyInRoom = true,
+  timestamp = undefined
 }) => {
   const mRoomKey: string = roomKey ? roomKey : (address as string);
   const theme = useThemeStore((state) => state.theme);
   const isNew = false; // Can be used for future logic
   const borderColor = isNew ? theme.foreground : theme.border;
   const color = theme.background;
+  const foreground = theme.foreground;
   const allRoomUsers = useGlobalStore((state) => state.roomUsers);
   const [online, setOnline] = useState(false);
+
+  const dateString = prettyPrintDate(timestamp ?? 0);
 
   const keyRef = useRef('null');
   
@@ -102,6 +108,13 @@ export const PreviewItem: React.FC<Props> = ({
           <TextField bold={isNew} maxLength={65} size="small">
             {message}
           </TextField>
+        }
+        {timestamp &&
+        <View style={{ position: 'absolute', right: 0}}>
+          <TextField style={{color: theme.foreground}} bold={isNew} maxLength={65} size="xsmall">
+            {dateString}
+          </TextField>
+        </View>
         }
         {suggested && !alreadyInRoom && 
           <TouchableOpacity onPress={handlePress} style={[styles.joinButton, {backgroundColor: theme.primary}]}>
