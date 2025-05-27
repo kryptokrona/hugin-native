@@ -182,11 +182,11 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
       header: () => (
         <Header
           title={'Feed'}
-          right={
-            <TouchableOpacity onPress={onCreatePost}>
-              <CustomIcon type="IO" name="add-outline" size={30} />
-            </TouchableOpacity>
-          }
+          // right={
+          //   <TouchableOpacity onPress={onCreatePost}>
+          //     <CustomIcon type="IO" name="add-outline" size={30} />
+          //   </TouchableOpacity>
+          // }
         />
       ),
     });
