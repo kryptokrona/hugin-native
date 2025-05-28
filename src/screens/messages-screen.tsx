@@ -5,7 +5,6 @@ import {
   Dimensions,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -30,6 +29,7 @@ import {
   ScreenLayout,
   TextButton,
   TextField,
+  TouchableOpacity
 } from '@/components';
 import { MainScreens } from '@/config';
 import {

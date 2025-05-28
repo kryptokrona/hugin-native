@@ -1,5 +1,5 @@
-import { Avatar, CustomIcon, TextButton, TextField, Unreads } from './_elements';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Avatar, CustomIcon, TouchableOpacity, TextField, Unreads } from './_elements';
+import { StyleSheet, View } from 'react-native';
 
 import { getAvatar, prettyPrintDate } from '@/utils';
 import { useGlobalStore, useThemeStore, Wallet } from '@/services';
@@ -87,7 +87,7 @@ export const PreviewItem: React.FC<Props> = ({
           <Avatar onPress={handlePress} size={suggested ? 25 : 50} address={mRoomKey} base64={getAvatar(mRoomKey)} />
           {!suggested &&
 
-            <View style={{position: 'absolute', right: 0, top: 0}}>
+            <View style={{opacity: online ? 1 : 0, position: 'absolute', right: 0, top: 0}}>
             <CustomIcon
             name={'lens'}
             size={10}
@@ -102,7 +102,7 @@ export const PreviewItem: React.FC<Props> = ({
 
       <View style={[styles.content, suggested && styles.centeredContent]}>
         <TextField bold={isNew} maxLength={22} size={suggested ? "small" : "large"}>
-          {name}
+          {name.substring(0,18) + (name.length > 18 ? '...' : '')}
         </TextField>
         {!suggested &&
           <TextField bold={isNew} maxLength={20} size="small">

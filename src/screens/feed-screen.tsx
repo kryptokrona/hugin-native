@@ -13,7 +13,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -40,7 +39,7 @@ import {
   Unreads,
   TextField,
   UserItem,
-  ModalBottom,
+  TouchableOpacity,
   EmptyPlaceholder,
 } from '@/components';
 

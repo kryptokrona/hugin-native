@@ -12,3 +12,4 @@ export * from './tip';
 export * from './unreads';
 export * from './onlineusers';
 export * from './xkr-logo';
+export * from './touchable-opacity';

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
 
-import { TouchableOpacity } from '@gorhom/bottom-sheet';
 import {
   GestureDetector,
   Gesture,
@@ -19,7 +18,7 @@ import { MainScreens } from '@/config';
 import { Peers } from 'lib/connections';
 import { Rooms } from 'lib/native';
 
-import { Avatar } from '@/components';
+import { Avatar, TouchableOpacity } from '@/components';
 import { useGlobalStore, WebRTC, useThemeStore } from '@/services';
 import { textType } from '@/styles';
 import { Call } from '@/types';

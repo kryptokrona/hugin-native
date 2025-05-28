@@ -1,5 +1,6 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
+import { TouchableOpacity } from '../_elements';
 
 import { Styles } from '@/styles';
 import { getAvatar } from '@/utils';

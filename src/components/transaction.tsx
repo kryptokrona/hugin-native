@@ -1,5 +1,5 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { TextField } from './_elements';
+import { StyleSheet, View } from 'react-native';
+import { TextField, TouchableOpacity } from './_elements';
 import type { Transaction } from 'kryptokrona-wallet-backend-js';
 import { nameMaxLength } from '@/config';
 import { prettyPrintAmount } from 'kryptokrona-wallet-backend-js';

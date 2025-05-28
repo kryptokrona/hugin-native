@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Modal, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, useWindowDimensions } from 'react-native';
-import { CustomIcon } from './_elements';
+import { View, Modal, StyleSheet, TouchableWithoutFeedback, useWindowDimensions } from 'react-native';
+import { CustomIcon, TouchableOpacity } from './_elements';
 import { MediaStream, RTCView } from 'react-native-webrtc';
 
 interface FullScreenVideoViewerProps {

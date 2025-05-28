@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import {
-  TouchableOpacity,
   StyleSheet,
   Animated,
   Keyboard,
@@ -15,7 +14,7 @@ import { MainScreens, TabBar } from '@/config';
 import { useGlobalStore, useThemeStore, lightenHexColor } from '@/services';
 import { IconType } from '@/types';
 
-import { CustomIcon, Unreads } from '../_elements';
+import { CustomIcon, Unreads, TouchableOpacity } from '../_elements';
 import { Styles } from '@/styles';
 
 const tabbarButtons = [

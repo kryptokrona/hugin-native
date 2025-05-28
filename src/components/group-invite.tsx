@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { joinAndSaveRoom, setStoreCurrentRoom, setStoreRoomMessages, useGlobalStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
 import { Styles } from '@/styles';
-import { prettyPrintDate } from '@/utils';
-
-import { Avatar, TextField } from './_elements';
-import { ModalBottom } from './_layout';
 import { PreviewItem } from '.';
 import { MainScreens } from '@/config';
 import { useNavigation } from '@react-navigation/native';

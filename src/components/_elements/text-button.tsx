@@ -2,13 +2,14 @@ import {
   StyleProp,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { Styles, backgroundType, textType } from '@/styles';
 
 import type { ElementType } from '@/types';
 import { useThemeStore } from '@/services';
+
+import { TouchableOpacity } from '@/components';
 
 interface Props {
   children: React.ReactNode;

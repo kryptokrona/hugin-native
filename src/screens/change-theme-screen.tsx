@@ -1,9 +1,8 @@
-import { Container, ScreenLayout, TextButton, TextField } from '@/components';
+import { Container, ScreenLayout, TextButton, TextField, TouchableOpacity } from '@/components';
 import {
   Dimensions,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import type { MainNavigationParamList, Theme, ThemeBase } from '@/types';
@@ -48,8 +47,10 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
   function ItemMapper({ item }: { item: string }) {
     const mTheme = themes[item as keyof typeof themes] as ThemeBase;
     const mainColors = {
-      card: mTheme.dark.card,
-      primary: mTheme.dark.primary,
+      card: mTheme[theme.mode].card,
+      primary: mTheme[theme.mode].primary,
+      background: mTheme[theme.mode].background,
+      border: mTheme[theme.mode].border,
     };
     const active = theme.name === item;
     const borderColor = active ? theme.primary : theme.border;
@@ -79,7 +80,7 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
             ]}
           />
         </View>
-        <TextField style={{ textTransform: 'capitalize' }}>{item}</TextField>
+        <TextField size={"xsmall"} style={{ textTransform: 'capitalize' }}>{item}</TextField>
       </TouchableOpacity>
     );
   }

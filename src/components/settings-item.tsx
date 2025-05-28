@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -6,7 +6,7 @@ import { useThemeStore } from '@/services';
 import { Styles, textType } from '@/styles';
 import type { CustomIconProps } from '@/types';
 
-import { CustomIcon, TextField } from './_elements';
+import { CustomIcon, TextField, TouchableOpacity } from './_elements';
 
 interface Props {
   onPress: () => void;

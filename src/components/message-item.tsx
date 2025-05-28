@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 import { prettyPrintDate } from '@/utils';
 
-import { Avatar, TextField } from './_elements';
+import { Avatar, TextField, TouchableOpacity } from './_elements';
 import { ModalBottom } from './_layout';
 import { extractHuginLinkAndClean } from '@/services/utils';
 

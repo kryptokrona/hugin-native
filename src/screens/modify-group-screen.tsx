@@ -35,6 +35,7 @@ import {
 
 import { onDeleteGroup } from '../services/bare/groups';
 import { getRoomUsers } from '../services/bare/sqlite';
+import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
 interface Props {
   route: RouteProp<
@@ -115,7 +116,7 @@ export const ModifyGroupScreen: React.FC<Props> = ({ route }) => {
   );
 
   function OnlineUserMapper({ item }: { item: User }) {
-    return <UserItem {...item} />;
+    return <UserItem style={{opacity: item.online ? 1 : 0.3 }} {...item} />;
   }
 
   function onLeave() {

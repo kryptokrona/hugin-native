@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +12,7 @@ import { Avatar, TextField } from './_elements';
 import { ModalCenter } from './_layout';
 import { useGlobalStore, useThemeStore, WebRTC } from '@/services';
 import { getColors } from 'react-native-image-colors'
+import { TouchableOpacity } from '@/components';
 
 
 import {

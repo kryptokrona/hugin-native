@@ -3,13 +3,13 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  TouchableOpacity,
   Animated,
   View,
 } from 'react-native';
 
 import { Styles } from '@/styles';
 import { TextField } from './text-field';
+import { TouchableOpacity } from './touchable-opacity';
 import { useThemeStore } from '@/services';
 
 interface Props {

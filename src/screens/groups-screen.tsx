@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 
-import { Alert, FlatList, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, View } from 'react-native';
 
 import {
   useFocusEffect,
@@ -30,6 +30,7 @@ import {
   ScreenLayout,
   TextButton,
   TextField,
+  TouchableOpacity
 } from '@/components';
 import { MainScreens } from '@/config';
 import {

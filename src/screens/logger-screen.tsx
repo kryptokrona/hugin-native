@@ -1,9 +1,9 @@
-import { FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
 import { useNavigation, type RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 
-import { CopyButton, ScreenLayout, TextButton, TextField } from '@/components';
+import { CopyButton, ScreenLayout, TextButton, TextField, TouchableOpacity } from '@/components';
 import { MainScreens } from '@/config';
 import { updateLanguage, useThemeStore } from '@/services';
 import type { MainNavigationParamList } from '@/types';

@@ -4,7 +4,6 @@ import {
   FlatList,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -23,6 +22,7 @@ import {
   TextButton,
   TextField,
   TransactionItem,
+  TouchableOpacity
 } from '@/components';
 import { MainScreens } from '@/config';
 import { useGlobalStore } from '@/services';

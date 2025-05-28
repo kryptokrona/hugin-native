@@ -1,5 +1,5 @@
 import { Avatar, TextButton, TextField, Unreads } from './_elements';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { getAvatar } from '@/utils';
 import { useThemeStore } from '@/services';

@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
   TextInput,
-  TouchableOpacity,
   View,
   Platform,
 } from 'react-native';
@@ -34,7 +33,7 @@ import { Styles, commonInputProps } from '@/styles';
 import type { SelectedFile } from '@/types';
 import { sleep } from '@/utils';
 
-import { CustomIcon, FileSelected, ReplyIndicator } from './_elements';
+import { CustomIcon, FileSelected, ReplyIndicator, TouchableOpacity } from './_elements';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;

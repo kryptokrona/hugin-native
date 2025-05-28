@@ -78,7 +78,8 @@ export const GroupMessageItem: React.FC<Props> = ({
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
-  const name = nickname ?? 'Anon';
+  let name = nickname ?? 'Anon';
+  name = name.substring(0,10) + (name.length > 10 ? '...' : '');
 
   // Parse the message to see if it's JSON with a "path" property
   const imageDetails = useMemo(() => {
@@ -257,7 +258,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
               />
             </View>
             <TextField style={{ marginRight: 10 }} size="xsmall" type="muted">
-              {replyto[0].nickname}
+              {replyto[0].nickname.substring(0,10) + (replyto[0].nickname.length > 10 ? '...' : '')}
             </TextField>
             {replyImageDetails?.isImageMessage ? (
               <Image
@@ -276,13 +277,13 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
         <View style={styles.messageContainer}>
           <View style={styles.avatar}>
             {userAddress.length > 15 && (
-              <Avatar base64={getAvatar(userAddress)} size={24} />
+              <Avatar base64={getAvatar(userAddress)} size={36} />
             )}
           </View>
           <View>
             <View style={styles.info}>
               <TextField bold size="xsmall" style={{ color }}>
-                {name}
+                {name.substring(0,10) + (name.length > 10 ? '...' : '')}
               </TextField>
               <TextField type="muted" size="xsmall" style={styles.date}>
                 {dateString}

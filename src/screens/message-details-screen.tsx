@@ -42,6 +42,7 @@ import {
   UserItem,
   Reactions,
   Avatar,
+  GroupInvite,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -53,6 +54,7 @@ import {
   useThemeStore,
   WebRTC,
   useUserStore,
+  extractHuginLinkAndClean,
 } from '@/services';
 import { textType } from '@/styles';
 import type {
@@ -102,6 +104,8 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
   const { hash } = route.params;
 
   const avatar = useMemo(() => getAvatar(message?.address ?? ''), [message?.address]);
+
+  const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message?.message || '');
 
   useEffect(() => {
 
@@ -352,8 +356,9 @@ export const MessageDetailsScreen: React.FC<Props> = ({ route }) => {
               </TouchableOpacity>
             )} */}
             <TextField size="small" style={styles.message}>
-                {message?.message ?? ''}
+                {cleanedMessage}
             </TextField>
+            {huginLink && <GroupInvite invite={huginLink} />}
             {message?.reactions && 
             <Reactions items={message?.reactions} onReact={onPressReaction} />
             }

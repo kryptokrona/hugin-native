@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { StyleSheet, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
 
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import {
   ScreenLayout,
   TextButton,
   TextField,
+  TouchableOpacity
 } from '@/components';
 import { AuthScreens, MainScreens, Stacks, nameMaxLength } from '@/config';
 import {

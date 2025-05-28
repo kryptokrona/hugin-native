@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
@@ -13,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { WalletConfig } from 'config/wallet-config';
 
-import { InputField, ScreenLayout, TextButton, TextField } from '@/components';
+import { InputField, ScreenLayout, TextButton, TextField, TouchableOpacity } from '@/components';
 import { usePreferencesStore, useThemeStore } from '@/services';
 import { randomNode } from '@/utils';
 

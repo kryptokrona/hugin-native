@@ -4,11 +4,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { Emoji, EmojiCategory } from '@/types';
 import { useMemo, useState } from 'react';
+import { TouchableOpacity } from '@/components';
 
 import { CustomIcon } from './_elements/custom-icon';
 import { Styles } from '@/styles';
@@ -28,7 +28,7 @@ export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
   const [category, setCategory] = useState<string>('Smileys & Emotion');
   const backgroundColor = theme.background;
   const { width } = Dimensions.get('window');
-  const columns = Math.floor(width / 36);
+  const columns = Math.floor(width / 45);
 
   const filteredEmojis = useMemo(() => {
     return emojiDataByGroup.map((group: { name: string; emojis: Emoji[] }) => ({
@@ -141,6 +141,7 @@ export const EmojiPicker: React.FC<Props> = ({ hideActions, emojiPressed }) => {
         <ScrollView style={styles.scrollView}>
           <View style={styles.emojiListContainer}>
             <FlatList
+              style={{flex: 1}}
               scrollEnabled={false}
               data={currentCategoryEmojis}
               keyExtractor={(item) => item.slug}

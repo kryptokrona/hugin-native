@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { Animated, Easing, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, Easing, StyleSheet, View } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
 
 import { useGlobalStore, useThemeStore, useUserStore } from '@/services';
 import { getAvatar } from '@/utils';
 
-import { Avatar, CustomIcon, TextField } from '../_elements';
+import { Avatar, CustomIcon, TextField, TouchableOpacity } from '../_elements';
 import { MainScreens } from '@/config';
 import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 import { Styles } from '@/styles';

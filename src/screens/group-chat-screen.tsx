@@ -12,7 +12,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  TouchableOpacity,
   View,
   ActivityIndicator,
 } from 'react-native';
@@ -43,6 +42,8 @@ import {
   UserItem,
   GroupOnlineIndicator,
   ModalBottom,
+  TouchableOpacity,
+  CallModal
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -207,10 +208,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     Peers.voicestatus(peer);
     useGlobalStore.getState().resetCurrentCall();
     WebRTC.exit();
-  }
-
-  function OnlineUserMapper({ item }: { item: User }) {
-    return <UserItem {...item} />;
   }
 
   function onCustomizeGroupPress() {
@@ -517,49 +514,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
           <ModalBottom visible={callMenuActive} closeModal={onCloseCallMenu}>
 
-            <TextField
-              size={'xsmall'}
-              type="muted"
-              style={styles.onlineUsersText}>
-              {`${t('onlineRoomMembers')} (${voiceUsers?.length})`}
-            </TextField>
-            
-            <View style={styles.flatListWrapper}>
-              <FlatList
-                nestedScrollEnabled={true}
-                numColumns={2}
-                data={userList}
-                renderItem={OnlineUserMapper}
-                keyExtractor={(item, i) => `${item.name}-${i}`}
-                style={{ flex: 1 }}
-              />
-            </View>
+            <CallModal 
+            onEndCall={onEndCall} 
+            onJoinCall={onJoinCall} 
+            voiceUsers={voiceUsers} 
+            userList={userList} 
+            inCall={inCall} />
 
-            {!inCall ? (
-              <TextButton
-                small
-                onPress={onJoinCall}
-                icon={<CustomIcon name="phone" type="MCI" size={16} />}>
-                {t('joinCall')}
-              </TextButton>
-            ) : (
-              <TextButton
-                small
-                type="destructive"
-                onPress={onEndCall}
-                icon={
-                  <CustomIcon
-                    color={theme[textType.destructive]}
-                    name="phone-hangup"
-                    type="MCI"
-                    size={16}
-                  />
-                }>
-                {t('endCall')}
-              </TextButton>
-            )}
-
-            </ModalBottom>
+          </ModalBottom>
 
     </ScreenLayout>
   );

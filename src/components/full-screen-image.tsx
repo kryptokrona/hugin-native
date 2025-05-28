@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { View, Modal, Image, TouchableOpacity, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import { View, Modal, Image, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 
-import { CustomIcon } from './_elements';
+import { CustomIcon, TouchableOpacity } from './_elements';
 
 interface FullScreenImageViewerProps {
   imagePath: string; // Path to the image file

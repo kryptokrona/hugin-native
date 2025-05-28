@@ -1,4 +1,4 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
@@ -7,6 +7,7 @@ import { formatFileSize } from '@/utils';
 
 import { CustomIcon } from './custom-icon';
 import { TextField } from './text-field';
+import { TouchableOpacity } from './touchable-opacity';
 
 interface Props extends SelectedFile {
   removeFile: () => void;

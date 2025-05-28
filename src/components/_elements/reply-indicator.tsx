@@ -1,7 +1,8 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { CustomIcon } from './custom-icon';
 import { TextField } from './text-field';
+import { TouchableOpacity } from './touchable-opacity';
 import { useThemeStore } from '@/services';
 
 interface Props {

@@ -1,5 +1,5 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { CustomIcon, OnlineUsers } from './_elements';
+import { StyleSheet, View } from 'react-native';
+import { CustomIcon, OnlineUsers, TouchableOpacity } from './_elements';
 import { useGlobalStore } from '@/services';
 
 interface Props {

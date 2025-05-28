@@ -1,11 +1,10 @@
 import {
   Modal,
   StyleSheet,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-
+import { TouchableOpacity } from '@/components';
 import { useThemeStore } from '@/services';
 import { Styles } from '@/styles';
 

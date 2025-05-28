@@ -25,13 +25,13 @@ import { Linking } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import { t } from 'i18next';
-import { TouchableOpacity } from 'react-native';
 import { Nodes, Rooms } from 'lib/native';
 import { defaultPreferences, defaultRoom, defaultUser, resetGlobalStore, useAppStoreState, useGlobalStore, usePreferencesStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
 import DeviceInfo from 'react-native-device-info';
 import { resetDB } from '@/services/bare/sqlite';
 import { defaultTheme, Styles } from '@/styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { TouchableOpacity } from '@/components';
 
 
 interface Item {

@@ -21,3 +21,4 @@ export * from './separator';
 export * from './settings-item';
 export * from './transaction';
 export * from './user-item';
+export * from './call-modal';

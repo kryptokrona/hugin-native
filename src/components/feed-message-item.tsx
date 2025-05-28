@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
+
+import { TouchableOpacity } from '@/components';
 
 import { useTranslation } from 'react-i18next';
 
@@ -91,7 +93,8 @@ export const FeedMessageItem: React.FC<Props> = ({
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
-  const name = nickname ?? 'Anon';
+  let name = nickname ?? 'Anon';
+  name = name.substring(0,10) + (name.length > 10 ? '...' : '');
 
   const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
 
@@ -316,9 +319,9 @@ export const FeedMessageItem: React.FC<Props> = ({
         )}
 
         <View style={styles.messageContainer}>
-          <View style={[styles.avatar, {backgroundColor: userColor}]}>
+          <View style={[styles.avatar]}>
             {userAddress.length > 15 && (
-              <Avatar address={userAddress} size={24} />
+              <Avatar address={userAddress} size={36} />
             )}
           </View>
           <View>
@@ -390,7 +393,7 @@ export const FeedMessageItem: React.FC<Props> = ({
             )}
             {!audioDetails?.isAudioMessage && !imageDetails?.isImageMessage && (
             <TextField size="small" style={styles.message}>
-                {cleanedMessage ?? ''}
+                {cleanedMessage.replace(/(\r\n|\r|\n){2,}/g, '$1\n') ?? ''}
               </TextField>
             )}
             {huginLink && <GroupInvite invite={huginLink} />}

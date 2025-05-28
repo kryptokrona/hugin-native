@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -8,7 +8,7 @@ import { nameMaxLength } from '@/config';
 import type { User } from '@/types';
 import { getAvatar } from '@/utils';
 
-import { Avatar, TextField } from './_elements';
+import { Avatar, TextField, TouchableOpacity } from './_elements';
 import { ModalCenter } from './_layout';
 
 type Props = User;
