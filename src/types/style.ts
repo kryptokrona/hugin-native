@@ -29,7 +29,22 @@ export type ThemeBase = {
   color: Theme;
 };
 
-export type ThemeName = 'aesir' | 'neutral' | 'stonks' | 'blush' | 'amethyst' | 'forest' | 'crimson' | 'military' | 'navy' | 'frost' | 'evergreen' | 'steel' | 'blonde';
+export type ThemeName = 
+'aesir' | 
+'navy' | 
+'mist' | 
+'neutral' | 
+'frost' | 
+'steel' | 
+'stonks' | 
+'blush' | 
+'amethyst' | 
+'forest' | 
+'crimson' | 
+'military' | 
+'evergreen' | 
+'blonde' | 
+'watermelon';
 
 export type ThemeMode = 'dark' | 'light' | 'color';
 

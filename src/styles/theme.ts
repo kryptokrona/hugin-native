@@ -264,7 +264,7 @@ const military = createTheme('military', {
     secondary: '#D2E4D0',
     secondaryForeground: '#1C251B',
   },
-  color: generateMonochromaticColorTheme('#5C745D'),
+  color: generateMonochromaticColorTheme('#5D6532'),
 });
 
 const navy = createTheme('navy', {
@@ -367,6 +367,46 @@ const blonde = createTheme('blonde', {
   color: generateMonochromaticColorTheme('#B8A78C'), // Ashy blonde base
 });
 
+const watermelon = createTheme('watermelon', {
+  dark: {
+    accent: '#700F2B', // Darker watermelon flesh
+    accentForeground: '#FFEDEF',
+    primary: '#A0153E', // Base accent
+    primaryForeground: '#FFF6F7',
+    secondary: '#4D0B1E', // Almost black cherry
+    secondaryForeground: '#FFDDE4',
+  },
+  light: {
+    accent: '#FFA3B5', // Soft flesh tone
+    accentForeground: '#3E0A15',
+    primary: '#A0153E',
+    primaryForeground: '#FFF6F7',
+    secondary: '#FFD7E1',
+    secondaryForeground: '#3E0A15',
+  },
+  color: generateMonochromaticColorTheme('#A0153E'),
+});
+
+const mist = createTheme('mist', {
+  dark: {
+    accent: '#5F8989', // Muted teal-gray
+    accentForeground: '#EFF8F8',
+    primary: '#A6D6D6', // Base accent
+    primaryForeground: '#0A1A1A',
+    secondary: '#3C5A5A', // Shadowed teal
+    secondaryForeground: '#EFF8F8',
+  },
+  light: {
+    accent: '#E6F4F4', // Soft sky fog
+    accentForeground: '#1A2C2C',
+    primary: '#A6D6D6',
+    primaryForeground: '#0A1A1A',
+    secondary: '#D2EAEA',
+    secondaryForeground: '#1A2C2C',
+  },
+  color: generateMonochromaticColorTheme('#A6D6D6'),
+});
+
 
 
 
@@ -390,18 +430,20 @@ export const backgroundType = {
 // Export all themes
 export const themes: { [key in ThemeName]: ThemeBase } = {
   aesir,
+  navy,
+  mist,
   neutral,
+  frost,
+  steel,
+  blonde,
   stonks,
   blush,
   amethyst,
-  forest,
   crimson,
+  watermelon,
+  forest,
   military,
-  navy,
-  frost,
   evergreen,
-  steel,
-  blonde
 };
 
 export const defaultTheme = neutral.dark;
