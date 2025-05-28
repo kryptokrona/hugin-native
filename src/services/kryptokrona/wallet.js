@@ -387,19 +387,7 @@ export class ActiveWallet {
   }
 
   async create_message_wallet() {
-    if (this.active.subWallets.getAddresses().length < 2) {
-      const subWalletKeys = await generateDeterministicSubwalletKeys(
-        this.spendKey(),
-        1,
-      );
-      const [address, error] = await this.active.importSubWallet(
-        subWalletKeys.private_key,
-      );
-    }
-    console.log(
-      'this.active.subWallets.getAddresses()',
-      this.active.subWallets.getAddresses(),
-    );
+    return;
   }
 
   async optimize_message_inputs(force = false) {

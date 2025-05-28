@@ -283,7 +283,9 @@ class VoiceChannel {
     });
 
     peerConnection.addEventListener('icecandidate', async (event) => {
-      if (!event.candidate) {
+      peerConnection.icecandidatesFound = peerConnection.icecandidatesFound != undefined ? peerConnection.icecandidatesFound + 1 : 0;
+      console.log('peerConnection.icecandidatesFound', peerConnection.icecandidatesFound)
+      if (peerConnection.icecandidatesFound === 5 || !event.cadidate) {
         try {
           if (type === 'offer') {
             let offer = await peerConnection.createOffer(this.settings);

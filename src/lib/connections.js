@@ -34,10 +34,25 @@ class Connections extends EventEmitter {
 
     const peerPreviousCallStatus = thisRoomUsers.find(a => a.address == peer.address).voice;
 
+    console.log('State is true?', peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address)
+
     if (peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address ) {
-      const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === peer.room)?.name;
-      const message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
-      Notify.new({ name: peer.name, text: message }, true, {roomKey: peer.room, type: 'roomcall', name: roomName});
+      let roomName;
+      let message;
+      try {
+        roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === peer.room)?.name;
+      } catch (e) {
+        console.log('Failed to get room name:', e)
+      }
+      if (!roomName) {
+        message = `Has started a call`;
+        Notify.new({ name: peer.name, text: message }, true);
+      } else {
+        message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
+        Notify.new({ name: peer.name, text: message }, true, {roomKey: peer.room, type: 'roomcall', name: roomName});
+      }
+      
+      
     }
 
     let list = this.active();
