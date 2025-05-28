@@ -91,15 +91,33 @@ export function lightenHexColor(hex, percent = 10) {
   
   // Convert hex to RGB
   let num = parseInt(hex, 16);
-  let r = (num >> 16) + (255 - (num >> 16)) * (percent / 100);
-  let g = ((num >> 8) & 0x00FF) + (255 - ((num >> 8) & 0x00FF)) * (percent / 100);
-  let b = (num & 0x0000FF) + (255 - (num & 0x0000FF)) * (percent / 100);
-  
+  let r = (num >> 16);
+  let g = (num >> 8) & 0x00FF;
+  let b = num & 0x0000FF;
+
+  // Calculate the adjustment based on the percent value
+  const adjustColor = (color, percent) => {
+    return color + (255 - color) * (percent / 100);
+  };
+
+  // If percent is negative, darken the color
+  if (percent < 0) {
+    r = r + (0 - r) * (Math.abs(percent) / 100);
+    g = g + (0 - g) * (Math.abs(percent) / 100);
+    b = b + (0 - b) * (Math.abs(percent) / 100);
+  } else {
+    r = adjustColor(r, percent);
+    g = adjustColor(g, percent);
+    b = adjustColor(b, percent);
+  }
+
   // Clamp values to 255 and convert back to hex
   const toHex = c => Math.min(255, Math.max(0, Math.round(c))).toString(16).padStart(2, '0');
   
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+
 
 export function extractHuginLinkAndClean(text: string): { link: string; cleanedMessage: string } {
   const regex = /hugin:\/\/[^\s]+\/[a-fA-F0-9]{128}/;

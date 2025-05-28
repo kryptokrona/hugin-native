@@ -5,3 +5,4 @@ export * from './kryptokrona';
 export * from './NativeTest';
 export * from './hugin';
 export * from './calls';
+export * from './utils';

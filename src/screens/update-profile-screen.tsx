@@ -130,11 +130,11 @@ export const UpdateProfileScreen: React.FC<Props> = () => {
             style={styles.avatarContainer}>
             <>
               {address && avatar?.length === 0 && (
-                <Avatar address={address} size={70} />
+                <Avatar onPress={onUpdateAvatar} address={address} size={70} />
               )}
   
               {avatar?.length > 15 && (
-                <Avatar key={avatar} base64={avatar} size={70} />
+                <Avatar onPress={onUpdateAvatar} key={avatar} base64={avatar} size={70} />
               )}
               {/* <HuginSvg style={styles.logo} /> */}
             </>

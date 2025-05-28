@@ -42,7 +42,7 @@ export const ModalBottom: React.FC<Props> = ({
             style={[
               styles.inner,
               {
-                backgroundColor: theme.popover,
+                backgroundColor: theme.card,
                 borderColor: theme.border,
               },
             ]}>
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
 
   inner: {
     borderRadius: 16,
-    borderWidth: 1,
+    // borderWidth: 1,
     padding: 20,
     paddingTop: 6,
     width: '90%',

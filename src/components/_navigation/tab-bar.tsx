@@ -12,10 +12,11 @@ import {
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { MainScreens, TabBar } from '@/config';
-import { useGlobalStore, useThemeStore } from '@/services';
+import { useGlobalStore, useThemeStore, lightenHexColor } from '@/services';
 import { IconType } from '@/types';
 
 import { CustomIcon, Unreads } from '../_elements';
+import { Styles } from '@/styles';
 
 const tabbarButtons = [
   MainScreens.GroupStack,
@@ -66,12 +67,13 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   }, []);
 
   return (
-    <Animated.View
+    <View style={{backgroundColor: theme.background}}>
+    <View
       style={[
         styles.tabBar,
         keyboardShow && styles.hideTabNavigation,
         {
-          backgroundColor: theme.background,
+          backgroundColor: theme.card,
           borderColor: theme.muted,
         },
       ]}>
@@ -141,7 +143,8 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
           </TouchableOpacity>
         );
       })}
-    </Animated.View>
+    </View>
+    </View>
   );
 };
 
@@ -155,8 +158,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabBar: {
-    borderTopWidth: 1,
+    borderWidth: 0,
     flexDirection: 'row',
     height: 50,
+    borderRadius: Styles.borderRadius.round,
+    width: '90%',
+    marginLeft: '5%'
   },
 });

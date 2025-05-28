@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { FlatList, View, StyleSheet, Platform, Text, Alert } from 'react-native';
 import { CommonActions, useNavigation, type RouteProp } from '@react-navigation/native';
 import {
@@ -8,6 +8,9 @@ import {
   InputField,
   TextField,
   TextButton,
+  Avatar,
+  CustomIcon,
+  Header,
 } from '@/components';
 import { AuthScreens, MainScreens, Stacks } from '@/config';
 import {
@@ -27,7 +30,7 @@ import { Nodes, Rooms } from 'lib/native';
 import { defaultPreferences, defaultRoom, defaultUser, resetGlobalStore, useAppStoreState, useGlobalStore, usePreferencesStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
 import DeviceInfo from 'react-native-device-info';
 import { resetDB } from '@/services/bare/sqlite';
-import { defaultTheme } from '@/styles';
+import { defaultTheme, Styles } from '@/styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -54,6 +57,7 @@ export const SettingsScreen: React.FC<Props> = () => {
   const authMethod = usePreferencesStore(
     (state) => state.preferences.authMethod,
   );
+  const { name, address, avatar } = useUserStore((state) => state.user);
   const [syncActivated, setSyncActivated] = useState(true);
   const [publicKey, setPublicKey] = useState('');
   const theme = useThemeStore((state) => state.theme);
@@ -226,6 +230,17 @@ authnavigation.dispatch(
 
   }
 
+    useLayoutEffect(() => {
+      navigation.setOptions({
+        header: () => (
+          <Header
+            noLeft={true}
+            title={t('settingsTitle')}
+          />
+        ),
+      });
+    }, []);
+
   const syncActivatedIcon = syncActivated
     ? 'checkbox-marked-outline'
     : 'checkbox-blank-outline';
@@ -240,11 +255,6 @@ authnavigation.dispatch(
       icon: { name: 'globe', type: 'SLI' },
       screen: MainScreens.ChangeLanguageScreen,
       title: 'changeLanguage',
-    },
-    {
-      icon: { name: 'user-circle', type: 'FA6' },
-      screen: MainScreens.UpdateProfileScreen,
-      title: 'updateProfile',
     },
     {
       icon: { name: 'server', type: 'FA6' },
@@ -303,12 +313,38 @@ authnavigation.dispatch(
     );
   };
 
+  const updateProfile = () => {
+    navigation.navigate(MainScreens.UpdateProfileScreen);
+  }
+
   return (
     <ScreenLayout>
+
+      <TouchableOpacity onPress={updateProfile} style={[styles.profile, {borderColor: theme.border}]}>
+        {address && avatar?.length === 0 && (
+          <Avatar address={address} size={70} />
+        )}
+
+        {avatar?.length > 15 && (
+          <Avatar key={avatar} base64={avatar} size={70} />
+        )}
+        <View>
+        <TextField bold>{name}</TextField>
+        <TextField size={"xsmall"}>
+          {t('updateProfile')}
+        </TextField>
+        </View>
+        <View style={{position: 'absolute', right: 10}}>
+        <CustomIcon name={'arrow-forward-ios'} type={'MI'} size={10} />
+        </View>
+      </TouchableOpacity>
+
       <FlatList
+        contentContainerStyle={[styles.settingsGroup, {borderColor: theme.border}]}
         data={items}
         keyExtractor={(item, i) => `${item.title}-${i}`}
         renderItem={({ item }) => itemMapper(item)}
+        ItemSeparatorComponent={<View style={{width: '100%', borderColor: theme.border, borderBottomWidth: 1}}></View>}
       />
 
       <ModalCenter
@@ -339,6 +375,12 @@ authnavigation.dispatch(
 };
 
 const styles = StyleSheet.create({
+  profile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: Styles.borderRadius.large,
+    borderWidth: 0
+  },
   inviteContainer: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -354,4 +396,8 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     marginBottom: 20,
   },
+  settingsGroup: {
+    borderRadius: Styles.borderRadius.large,
+    borderWidth: 1
+  }
 });

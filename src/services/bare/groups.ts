@@ -33,6 +33,8 @@ import {
   useUserStore,
 } from '../zustand';
 
+import { navigationRef } from '@/contexts';
+
 export const setLatestRoomMessages = async () => {
   const latestRooms = await getLatestRoomMessages();
 
@@ -102,15 +104,21 @@ export const updateMessages = async (
       setStoreRoomMessages(updatedMessages);
     }
   }
-
-  if (!history && !inRoom && !background) {
+  const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === message.room)?.name;
+  if (!history && !inRoom && !background && !message.file) {
     Toast.show({
-      text1: message.nickname,
+      text1: message.nickname + ' in ' + roomName,
       text2: message.message,
       type: 'success',
+      onPress: () => {
+        navigationRef.navigate('GroupChatScreen', {
+          name: roomName,
+          roomKey: message.room,
+        });
+      },
+
     });
   } else if (background) {
-    const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === message.room)?.name;
     Notify.new({ name: message.nickname + " in " + roomName, text: message.message }, background, {roomKey: message.room, type: 'room', name: roomName});
   }
 };

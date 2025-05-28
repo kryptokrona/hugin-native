@@ -37,6 +37,11 @@ export const getToastConfig = (theme: Theme) => {
           fontFamily: 'Montserrat-Medium',
           fontSize: 16,
         }}
+        text2Style={{
+          color: theme.primary,
+          fontFamily: 'Montserrat-Medium',
+          fontSize: 14,
+        }}
       />
     ),
 
@@ -55,6 +60,11 @@ export const getToastConfig = (theme: Theme) => {
           color: theme.primary,
           fontFamily: 'Montserrat-Medium',
           fontSize: 16,
+        }}
+        text2Style={{
+          color: theme.primary,
+          fontFamily: 'Montserrat-Medium',
+          fontSize: 14,
         }}
       />
     ),

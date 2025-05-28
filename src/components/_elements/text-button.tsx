@@ -34,7 +34,7 @@ export const TextButton: React.FC<Props> = ({
   const backgroundColor = theme[backgroundType[type]];
   const borderColor = mType === 'destructive' ? 'none' : theme[textType[type]];
   const borderWidth = theme.mode === 'dark' || type === 'secondary' ? 1 : 0;
-  const color = theme[textType[type]];
+  const color = type === 'destructive' ? 'white' : theme.mode === 'color' ? theme[textType['primary']] : theme[textType[type]];
 
   const smallButtonStyle = small
     ? {
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
   icon: {
     left: 18,
     position: 'absolute',
+    color: 'red'
   },
   text: {
     fontFamily: 'Montserrat-SemiBold',

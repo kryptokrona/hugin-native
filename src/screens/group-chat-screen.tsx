@@ -456,7 +456,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           <TextButton disabled={tipAmount === '0'} onPress={sendTip}>
             {t('send')}
           </TextButton>
-          <TextButton type="secondary" onPress={() => setTipping(false)}>
+          <TextButton onPress={() => setTipping(false)}>
             {t('close')}
           </TextButton>
         </ModalCenter>
@@ -538,7 +538,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             {!inCall ? (
               <TextButton
                 small
-                type="secondary"
                 onPress={onJoinCall}
                 icon={<CustomIcon name="phone" type="MCI" size={16} />}>
                 {t('joinCall')}

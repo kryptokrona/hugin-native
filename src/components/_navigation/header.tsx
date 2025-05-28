@@ -10,11 +10,13 @@ import { getAvatar } from '@/utils';
 import { Avatar, CustomIcon, TextField } from '../_elements';
 import { MainScreens } from '@/config';
 import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
+import { Styles } from '@/styles';
 
 interface Props {
   title?: string;
   backButton?: boolean;
   right?: React.ReactNode;
+  noLeft?: boolean;
   onBackPress?: () => void;
 }
 
@@ -23,6 +25,7 @@ export const Header: React.FC<Props> = ({
   backButton,
   right,
   onBackPress,
+  noLeft = false
 }) => {
   const navigation = useNavigation();
   const theme = useThemeStore((state) => state.theme);
@@ -92,16 +95,19 @@ useEffect(() => {
         screen: MainScreens.UpdateProfileScreen,
       });
   }
+
+  console.log('card color: ', theme.card)
   
   return (
-    <View style={[styles.container, { backgroundColor, borderColor }]}>
+    <View style={{backgroundColor}}>
+    <View style={[styles.container, { backgroundColor: theme.card, borderColor }]}>
       <View style={styles.side}>
-        {backButton && (
+        {backButton && !noLeft && (
           <TouchableOpacity hitSlop={{ bottom: 16, left: 16, right: 16, top: 16 }} onPress={onPress}>
             <CustomIcon name={'arrow-back-ios'} type={'MI'} />
           </TouchableOpacity>
         )}
-        {!backButton && address && (
+        {!backButton && !noLeft && address && (
           <>
             {address && avatar?.length === 0 && (
               <Avatar onPress={() => gotoProfile()} address={address} size={30} />
@@ -130,6 +136,7 @@ useEffect(() => {
       </View>
       <View style={styles.side}>{right}</View>
     </View>
+    </View>
   );
 };
 
@@ -141,13 +148,16 @@ const styles = StyleSheet.create({
   },
   container: {
     alignItems: 'center',
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     flexDirection: 'row',
-    height: 56,
+    height: 50,
     justifyContent: 'space-between',
     paddingBottom: 10,
     paddingHorizontal: 10,
     paddingVertical: 10,
+    width: '90%',
+    marginLeft: '5%',
+    borderRadius: Styles.borderRadius.round,
   },
   logo: {
     height: 30,

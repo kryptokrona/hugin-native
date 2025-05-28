@@ -391,8 +391,7 @@ const styles = StyleSheet.create({
     left: 0,
     position: 'absolute',
     right: 0,
-    zIndex: 999999,
-    borderTopWidth: 1
+    zIndex: 999999
     // flex: 1
   },
 });

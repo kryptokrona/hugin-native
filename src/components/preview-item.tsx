@@ -105,7 +105,7 @@ export const PreviewItem: React.FC<Props> = ({
           {name}
         </TextField>
         {!suggested &&
-          <TextField bold={isNew} maxLength={65} size="small">
+          <TextField bold={isNew} maxLength={20} size="small">
             {message}
           </TextField>
         }

@@ -263,7 +263,6 @@ export const FeedMessageItem: React.FC<Props> = ({
           <View>
             <CopyButton
               small
-              type="secondary"
               data={message ?? ''}
               text={t('copyText')}
               onPress={onPressCopyText}
@@ -280,7 +279,6 @@ export const FeedMessageItem: React.FC<Props> = ({
             </TextButton> */}
             <TextButton
               small
-              type="secondary"
               onPress={onTipUser}
               icon={<CustomIcon name="attach-money" type="MI" size={16} />}>
               {t('tipUser')}

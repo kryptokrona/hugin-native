@@ -446,7 +446,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     maxHeight: 80,
-    padding: 10
+    padding: 10,
+    paddingTop: 0
   },
   inputField: {
     borderRadius: Styles.borderRadius.medium,
@@ -458,6 +459,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
     minHeight: 40,
     paddingHorizontal: 10,
+    paddingVertical: 5,
     textAlignVertical: 'center',
   },
   liveWaveformView: {

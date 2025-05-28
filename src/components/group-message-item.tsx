@@ -211,7 +211,6 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
             {!dm &&
             <TextButton
               small
-              type="secondary"
               onPress={onReplyPess}
               icon={<CustomIcon name="reply" type="FA5" size={16} />}>
               {t('reply')}
@@ -219,7 +218,6 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
             }
             <CopyButton
               small
-              type="secondary"
               data={message ?? ''}
               text={t('copyText')}
               onPress={onPressCopyText}
@@ -268,7 +266,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
                 resizeMode="contain"
               />
             ) : (
-              <TextField size="xsmall" style={styles.replyMessage}>
+              <TextField maxLength={35} size="xsmall" style={styles.replyMessage}>
                 {replyto?.[0]?.message ?? ''}
               </TextField>
             )}

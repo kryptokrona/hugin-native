@@ -129,5 +129,6 @@
   "areYouSure": "Are you sure you want to continue?",
   "delete": "Delete",
   "noRooms": "You haven't joined any rooms yet! Add one or join one of the suggestions below.",
-  "noFeed": "No feed messages received yet. Feed messages will be downloaded from your contacts, and users in groups you are a member of."
+  "noFeed": "No feed messages received yet. Feed messages will be downloaded from your contacts, and users in groups you are a member of.",
+  "themeColor": "Color"
 }

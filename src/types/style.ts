@@ -26,11 +26,12 @@ export type Theme = {
 export type ThemeBase = {
   light: Theme;
   dark: Theme;
+  color: Theme;
 };
 
-export type ThemeName = 'aesir' | 'neutral' | 'stonks';
+export type ThemeName = 'aesir' | 'neutral' | 'stonks' | 'blush' | 'amethyst' | 'forest' | 'crimson' | 'military' | 'navy' | 'frost' | 'evergreen' | 'steel' | 'blonde';
 
-export type ThemeMode = 'dark' | 'light';
+export type ThemeMode = 'dark' | 'light' | 'color';
 
 export interface ThemeColor {
   colorCode: string;

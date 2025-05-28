@@ -281,21 +281,22 @@ useEffect(() => {
       header: () => (
         <Header
           backButton
-          title={name}
+          title={name.substring(0,10) + (name.length > 10 ? '..' : '')}
           right={
-            <View style={{ flexDirection: 'row', gap: 10, marginLeft: -5 }}>
+            <View style={{ flexDirection: 'row', gap: 10, marginLeft: -5, marginRight: 10 }}>
             <TouchableOpacity
-              style={{ flexDirection: 'row' }}
+              style={{ flexDirection: 'row', marginTop: 5 }}
               onPress={onShowCall}>
-              <View style={{ marginRight: 5, marginTop: 4 }}>
+              <View style={{ position: 'absolute', bottom: -3, right: -5  }}>
                 <Unreads
-                  unreads={0}
+                style={{transform: [{ scale: 0.8 }], zIndex: 9999999}}
+                  unreads={userList?.length}
                   color={`${inCall ? 'green' : 'grey'}`}
                 />
               </View>
 
-              <CustomIcon type="MCI" name={'phone'} />
-              <View style={{ marginLeft: -5 }}>
+              <CustomIcon size={24} type="MCI" name={'phone'} />
+              <View style={{ marginLeft: -5, marginTop: -3 }}>
                 <CustomIcon
                   name={'lens'}
                   size={10}
@@ -307,12 +308,13 @@ useEffect(() => {
             <TouchableOpacity
               style={{ flexDirection: 'row' }}
               onPress={onCustomizeGroupPress}>
-              <View style={{ position: 'relative', marginRight: 20, marginTop: -3 }}>
+              <View style={{ position: 'relative', marginRight: 20, marginTop: 0 }}>
                 {roomKey && (
                   <Avatar
                     base64={getAvatar(roomKey)}
                     address={roomKey}
                     size={36}
+                    onPress={onCustomizeGroupPress}
                   />
                 )}
                 <View style={{position: 'absolute', top: 2, right: -4}}>
@@ -330,7 +332,7 @@ useEffect(() => {
         />
       ),
     });
-  }, [roomKey, name, online]);
+  }, [roomKey, name, online, userList]);
 
   // useLayoutEffect(() => {
   //   const timeout = setTimeout(() => {
@@ -541,7 +543,7 @@ useEffect(() => {
         {!inCall ? (
           <TextButton
             small
-            type="secondary"
+            // type="secondary"
             onPress={onJoinCall}
             icon={<CustomIcon name="phone" type="MCI" size={16} />}>
             {t('joinCall')}

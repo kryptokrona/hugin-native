@@ -26,6 +26,7 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
   const isDark = theme.mode === 'dark';
+  const isColor = theme.mode === 'color';
   const { width } = Dimensions.get('window');
   const itemWidth = (width - size * 2) / 3;
 
@@ -39,6 +40,11 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
     useThemeStore.setState({ theme: lightTheme });
   }
 
+  function setColorfulTheme() {
+    const colorTheme = themes[theme.name as keyof typeof themes].color as Theme;
+    useThemeStore.setState({ theme: colorTheme });
+  }
+
   function ItemMapper({ item }: { item: string }) {
     const mTheme = themes[item as keyof typeof themes] as ThemeBase;
     const mainColors = {
@@ -50,7 +56,8 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
 
     function setColorTheme() {
       const newTheme = themes[item as keyof typeof themes] as ThemeBase;
-      useThemeStore.setState({ theme: newTheme.dark });
+      const currentMode = theme.mode;
+      useThemeStore.setState({ theme: newTheme[currentMode] });
     }
 
     return (
@@ -83,7 +90,7 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
         <Container row>
           <TextButton
             style={{ flex: 1 }}
-            type={isDark ? 'primary' : 'secondary'}
+            type={isDark ? 'primary' : isColor ? 'primary' : 'secondary'}
             onPress={setDarkTheme}>
             {t('themeDark')}
           </TextButton>
@@ -92,6 +99,12 @@ export const ChangeThemeScreen: React.FC<Props> = () => {
             type={isDark ? 'secondary' : 'primary'}
             onPress={setLightTheme}>
             {t('themeLight')}
+          </TextButton>
+          <TextButton
+            style={{ flex: 1 }}
+            type={isDark ? 'secondary' : 'primary'}
+            onPress={setColorfulTheme}>
+            {t('themeColor')}
           </TextButton>
         </Container>
         <FlatList
