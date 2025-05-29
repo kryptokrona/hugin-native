@@ -109,7 +109,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
   const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
   const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
-  
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
   
@@ -546,6 +545,7 @@ const styles = StyleSheet.create({
   flatListContent: {
     flexDirection: 'column-reverse',
     paddingTop: 60,
+    maxWidth: '95%'
   },
   flatListWrapper: {
     minHeight: 200
