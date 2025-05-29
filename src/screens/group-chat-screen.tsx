@@ -545,7 +545,7 @@ const styles = StyleSheet.create({
   flatListContent: {
     flexDirection: 'column-reverse',
     paddingTop: 60,
-    maxWidth: '95%'
+    maxWidth: '91%'
   },
   flatListWrapper: {
     minHeight: 200
