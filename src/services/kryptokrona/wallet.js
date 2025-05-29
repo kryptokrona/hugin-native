@@ -394,6 +394,15 @@ export class ActiveWallet {
     return;
   }
 
+  withTimeout(promise, timeoutMs) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), timeoutMs)
+      ),
+    ]);
+  }
+
   async send_message(message, receiver, beam = false) {
     //Assert address length
     if (receiver.length !== 163) {
@@ -426,7 +435,8 @@ export class ActiveWallet {
       const send = hash + '99' + payload_hex;
       Beam.message(address, send);
     } else {
-      const sent = await Nodes.message(payload_hex, hash);
+     try {
+      const sent = await this.withTimeout(Nodes.message(payload_hex, hash), 10000);
       console.log('Sent!', sent);
       if (!sent.success) {
         if (typeof sent.reason !== 'string') return;
@@ -434,6 +444,10 @@ export class ActiveWallet {
         console.log('Error sending message', sent.reason);
         return { success: false, error: sent.reason, hash: '' };
       }
+    } catch (error) {
+      console.log('Error sending message:', error.message);
+      return { success: false, error: error.message, hash: '' };
+    }
     }
 
     return { success: true, error: 'success', hash };

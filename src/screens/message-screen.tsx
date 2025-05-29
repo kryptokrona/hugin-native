@@ -41,6 +41,7 @@ import {
   getCurrentRoom,
   setStoreCurrentContact,
   WebRTC,
+  setStoreMessages,
 } from '@/services';
 import type {
   SelectedFile,
@@ -349,11 +350,32 @@ useEffect(() => {
 
   async function onSend(
     text: string,
-    file: SelectedFile | null,
+    file: SelectedFile | undefined,
     reply: string,
     emoji: boolean | undefined,
     tip?: JSON | undefined,
+    retryHash?: string | undefined
   ) {
+
+
+      const newMessage: Message = {
+        address: myUserAddress,
+        message: text,
+        reply,
+        timestamp: Date.now(),
+        nickname: userName,
+        hash: Date.now().toString(),
+        sent: true,
+        reactions: [],
+        joined: false,
+        status: 'pending',
+        file
+      };
+
+      const messageList = retryHash ? messages.filter(a => a.hash != retryHash) : messages;
+
+      setStoreMessages([...messageList, newMessage]);
+
     if (file) {
       text = file.fileName;
     }
@@ -372,11 +394,18 @@ useEffect(() => {
       );
 
       if (!success) {
-        setModalVisible(true);
-        Toast.show({
-          text1: error,
-          type: 'error',
-        });
+          Toast.show({
+            text1: error,
+            type: 'error',
+          });   
+
+        if (error == 'Not verified.') {
+          setModalVisible(true);
+        }
+
+        newMessage.status = 'failed';
+        setStoreMessages([...messageList, newMessage]);
+
         return;
       }
       if (hash) {
@@ -426,7 +455,7 @@ useEffect(() => {
     <ScreenLayout>
 
       <ModalCenter
-        visible={modalVisible}
+        visible={modalVisible && Platform.OS == 'android'}
         closeModal={() => setModalVisible(false)}>
         <View style={styles.inviteContainer}>
           <TextField size="large" weight="medium">
@@ -495,6 +524,10 @@ useEffect(() => {
               file={item.file!}
               onShowImagePress={showBigImage}
               tip={item.tip}
+              status={item.status}
+              onPress={item.status == 'failed' ? 
+                () => onSend(item.message, item.file, item.reply, false, false, item.hash) : 
+                () => {}}
             />
           );
       

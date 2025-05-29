@@ -41,7 +41,10 @@ export interface Message {
   replyto?: Message[] | undefined;
   replies?: Message[] | undefined;
   tip?: TipType | false;
+  status?: MessageStatus;
 }
+
+export type MessageStatus = 'pending' | 'success' | 'failed' | undefined;
 
 export interface File {
   fileName: string;

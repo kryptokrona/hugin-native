@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore, useThemeStore } from '@/services';
-import { Message, TipType } from '@/types';
+import { Message, MessageStatus, TipType } from '@/types';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
@@ -43,7 +43,9 @@ interface Props extends Partial<Message> {
   onEmojiReactionPress: (val: string, val2: string) => void;
   onShowImagePress: (path: string | undefined) => void;
   onTipPress: (address: string) => void;
+  onPress?: () => void;
   dm?: boolean;
+  status: MessageStatus;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -58,9 +60,11 @@ export const GroupMessageItem: React.FC<Props> = ({
   onEmojiReactionPress,
   onShowImagePress,
   onTipPress,
+  onPress,
   replyto,
   tip,
   dm = false,
+  status = 'success'
 }) => {
   try {
     tip = JSON.parse(tip);
@@ -204,7 +208,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
   }, [imageDetails?.imagePath]);
 
   return (
-    <TouchableOpacity style={styles.container} onLongPress={handleLongPress}>
+    <TouchableOpacity onPress={onPress} style={[styles.container, (status == 'pending') && styles.pending]} onLongPress={handleLongPress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         {!dm && <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />}
         {actions && (
@@ -362,6 +366,16 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
           </View>
         </View>
       </View>
+      {status == 'failed' &&
+      <View>
+        <TextField size='xsmall'>❌</TextField>
+      </View>
+      }
+      {status == 'pending' &&
+      <View>
+        <ActivityIndicator size={'small'} /> 
+      </View>
+      }
     </TouchableOpacity>
   );
 };
@@ -436,5 +450,8 @@ const styles = StyleSheet.create({
   },
   staticWaveformView: {
     flex: 1,
+  },
+  pending: {
+    opacity: 0.4
   }
 });
