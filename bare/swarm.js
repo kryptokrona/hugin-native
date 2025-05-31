@@ -757,7 +757,7 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
     return true;
   }
 
-  if (!con.joined) return 'Error';
+  if (!con.joined) return true
 
   if ('type' in data) {
     if (data.type === 'ban') {
