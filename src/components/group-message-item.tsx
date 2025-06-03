@@ -46,6 +46,8 @@ interface Props extends Partial<Message> {
   onPress?: () => void;
   dm?: boolean;
   status: MessageStatus;
+  scrollToMessage: (hash: string) => void;
+
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -64,7 +66,8 @@ export const GroupMessageItem: React.FC<Props> = ({
   replyto,
   tip,
   dm = false,
-  status = 'success'
+  status = 'success',
+  scrollToMessage = () => {}
 }) => {
   try {
     tip = JSON.parse(tip);
@@ -169,6 +172,13 @@ export const GroupMessageItem: React.FC<Props> = ({
     setActionsModal(false);
   }
 
+function handleReplyPress() {
+  const replyToHash = replyto?.[0]?.hash;
+  if (replyToHash) {
+    scrollToMessage(replyToHash);
+  }
+}
+
   function onDmUser() {
     setActionsModal(false);
     //TODO: DM USER
@@ -252,7 +262,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
       {/* REPLY STUFF */}
       <View style={styles.content}>
         {replyto?.[0]?.nickname && (
-          <View style={styles.replyContainer}>
+          <TouchableOpacity onPress={handleReplyPress} style={styles.replyContainer}>
             <View style={styles.replyIcon}>
               <CustomIcon
                 type="FI"
@@ -275,7 +285,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
                 {replyto?.[0]?.message ?? ''}
               </TextField>
             )}
-          </View>
+          </TouchableOpacity>
         )}
 
         <View style={styles.messageContainer}>
@@ -426,7 +436,9 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     flexDirection: 'row',
-    overflow: 'visible'
+    overflow: 'visible',
+    flex: 1,
+    maxWidth: '98%'
   },
 
   replyContainer: {

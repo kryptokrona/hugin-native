@@ -34,6 +34,7 @@ import type { SelectedFile } from '@/types';
 import { sleep } from '@/utils';
 
 import { CustomIcon, FileSelected, ReplyIndicator, TouchableOpacity } from './_elements';
+import { Rooms } from 'lib/native';
 
 interface Props {
   onSend: (text: string, file: SelectedFile | null) => void;
@@ -42,6 +43,7 @@ interface Props {
   dm?: boolean;
   large?: boolean;
   hideExtras?: boolean;
+  roomKey?: string;
 }
 
 export const MessageInput: React.FC<Props> = ({
@@ -50,7 +52,8 @@ export const MessageInput: React.FC<Props> = ({
   onCloseReplyPress,
   dm = false,
   large = false,
-  hideExtras = false
+  hideExtras = false,
+  roomKey = undefined
 }) => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
@@ -266,7 +269,19 @@ export const MessageInput: React.FC<Props> = ({
     setSelectedFile(fileInfo);
   }
 
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+
   function handleSend() {
+    
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+      // Always send false on empty text
+      sendTypingStatus(false);
+      isTypingRef.current = false;
+  
     if (text.trim() || selectedFile) {
       const trimmedText = text.trim() || '';
       onSend(trimmedText, selectedFile);
@@ -277,8 +292,41 @@ export const MessageInput: React.FC<Props> = ({
     }
   }
 
-  function onChange(text: string) {
-    setText(text);
+const isTypingRef = useRef(false);
+function onChange(text: string) {
+  setText(text);
+
+  if (text.length > 0 && !isTypingRef.current) {
+    sendTypingStatus(true);
+    isTypingRef.current = true;
+  }
+
+  if (text.length === 0) {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    // Always send false on empty text
+    sendTypingStatus(false);
+    isTypingRef.current = false;
+    return; // Exit early so no timeout is set
+  }
+
+  if (typingTimeoutRef.current) {
+    clearTimeout(typingTimeoutRef.current);
+  }
+
+  typingTimeoutRef.current = setTimeout(() => {
+    sendTypingStatus(false);
+    isTypingRef.current = false;
+    typingTimeoutRef.current = null;
+  }, 5000);
+}
+
+
+
+  function sendTypingStatus(typing: boolean) {
+    Rooms.typing(typing, roomKey);
   }
 
   function onBlur() {

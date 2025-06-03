@@ -101,6 +101,13 @@ export class Bridge {
         case 'new-beam':
           //Set some state 'started, not connected'
           break;
+        case 'typing':
+          if (json?.datas?.typing) {
+            useGlobalStore.getState().addTypingUser(json?.datas?.key, json?.datas?.address);
+          } else {
+            useGlobalStore.getState().removeTypingUser(json?.datas?.key, json?.datas?.address);
+          }
+          break;
         case 'get-history':
           //Get history from db
           //await db response here then send it back to bare

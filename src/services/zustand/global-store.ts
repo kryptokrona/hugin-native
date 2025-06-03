@@ -22,6 +22,7 @@ type GlobalStore = {
   fiatPrice: number;
   currentCall: Call;
   huginNode: HuginNode;
+  typingUsers: Record<string, string[]>;
   setHuginNode: (payload: HuginNode) => void;
   setRoomMessages: (payload: Message[]) => void;
   setMessages: (payload: Message[]) => void;
@@ -39,6 +40,9 @@ type GlobalStore = {
   resetCurrentCall: () => void;
   setUsers: (payload: User[]) => void;
   setAvatar: (address: string, avatar: string) => void;
+  setTypingUsers: (roomId: string, users: string[]) => void;
+  addTypingUser: (roomId: string, address: string) => void;
+  removeTypingUser: (roomId: string, address: string) => void;
 };
 
 const defaultCall: Call = { 
@@ -53,6 +57,7 @@ export const useGlobalStore = create<
   [['zustand/subscribeWithSelector', never]]
 >(
   subscribeWithSelector((set) => ({
+    typingUsers: {},
     address: '',
     authenticated: false,
     balance: { locked: 0, unlocked: 0 },
@@ -66,6 +71,40 @@ export const useGlobalStore = create<
     feedMessages: [],
     avatars: {},
     huginNode: {connected: false},
+    setTypingUsers: (roomId: string, users: string[]) => {
+      set((state) => ({
+        typingUsers: {
+          ...state.typingUsers,
+          [roomId]: users,
+        },
+      }));
+    },
+
+    addTypingUser: (roomId: string, address: string) => {
+      set((state) => {
+        const current = state.typingUsers[roomId] || [];
+        if (current.includes(address)) return state;
+        return {
+          typingUsers: {
+            ...state.typingUsers,
+            [roomId]: [...current, address],
+          },
+        };
+      });
+    },
+
+    removeTypingUser: (roomId: string, address: string) => {
+      set((state) => {
+        const current = state.typingUsers[roomId] || [];
+        const updated = current.filter((a) => a !== address);
+        return {
+          typingUsers: {
+            ...state.typingUsers,
+            [roomId]: updated,
+          },
+        };
+      });
+    },
     setHuginNode: (huginNode: HuginNode) => {
       console.log('Setting node global state:', huginNode)
       set({ huginNode });

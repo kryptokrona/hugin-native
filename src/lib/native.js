@@ -26,6 +26,13 @@ export class Swarm {
     worklet.suspend();
   }
 
+
+  async typing(typing, key) {
+      const data = { type: 'typing', key, typing };
+      console.log('Sending typing data:', data)
+      rpc.send(data);
+  }
+
   async message(key, message, reply, tip) {
     const data = {
       type: 'send_room_msg',

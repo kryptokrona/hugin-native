@@ -43,7 +43,8 @@ import {
   GroupOnlineIndicator,
   ModalBottom,
   TouchableOpacity,
-  CallModal
+  CallModal,
+  Avatar
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -76,6 +77,7 @@ import {
 } from '../services/bare/groups';
 import { getRoomMessages } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
+import { sleep } from '@/utils';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.GroupChatScreen>;
@@ -97,11 +99,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
   const [tipAddress, setTipAddress] = useState<string>('');
+  const [dots, setDots] = useState<string>('');
+  const [someoneTyping, setSomeoneTyping] = useState<boolean>(false);
   const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
   // const [messages, setMessages] = useState<Message[]>(globalMessages || []);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const typingUsers = useGlobalStore((state) => state.typingUsers[roomKey]);
   
   
   // const [inCall, setInCall] = useState<boolean>();
@@ -117,6 +122,24 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   function onCloseCallMenu() {
     setCallMenuActive(false);
   }
+
+  useEffect(() => {
+
+    async function changeDots() {
+      while (typingUsers?.length > 0) {
+        await sleep(500);
+        setDots('.')
+        await sleep(500);
+        setDots('..')
+        await sleep(500);
+        setDots('...')
+      }
+    }
+    if (typingUsers?.length === 0) setSomeoneTyping(false);
+    if (typingUsers?.length > 0) setSomeoneTyping(true);
+    if (!someoneTyping) changeDots();
+
+  }, [typingUsers]);
 
   useEffect(() => {
     if (!roomUsers) {
@@ -432,6 +455,13 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
+  const scrollToMessage = (hash: string) => {
+  const index = messages.findIndex((m) => m.hash === hash);
+  if (index !== -1 && flatListRef.current) {
+    flatListRef.current.scrollToIndex({ index: index + 1, animated: true });
+  }
+};
+
   return (
     <ScreenLayout>
         {/* Full-Screen Image Viewer */}
@@ -479,6 +509,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 file={item.file!}
                 onShowImagePress={showBigImage}
                 tip={item.tip}
+                scrollToMessage={scrollToMessage}
+
               />
             );
 
@@ -500,11 +532,22 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           }
         />
 
+        {typingUsers?.length > 0 &&
+          <View style={{ position: 'absolute', paddingLeft:'40%', bottom: 50, width: '100%', zIndex: 9999999999}}>
+            {typingUsers?.length == 1 ?
+            (<TextField size='xsmall'>{roomUsers.find(a => a.address == typingUsers[0])?.name} is typing{dots}</TextField>)
+            :
+            (<TextField size='xsmall'>{typingUsers.length} users are typing{dots}</TextField>)
+            }
+          </View>
+        }
+
         <KeyboardAvoidingView
           style={[styles.inputWrapper, { backgroundColor }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
           <MessageInput
+            roomKey={roomKey}
             onSend={onSend}
             replyToName={replyToName}
             onCloseReplyPress={onCloseReplyPress}
@@ -531,21 +574,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
     flex: 1,
   },
-  contentContainer: {
-    alignItems: 'center',
-    borderRadius: 25,
-    borderWidth: 1,
-    flex: 1,
-    marginBottom: 200,
-    padding: 25,
-  },
-  flatListContainer: {
-    flex: 1,
-  },
   flatListContent: {
     flexDirection: 'column-reverse',
     paddingTop: 60,
-    maxWidth: '91%'
+    maxWidth: '100%',
   },
   flatListWrapper: {
     minHeight: 200
@@ -557,6 +589,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     position: 'absolute',
     right: 0,
+    paddingTop: 20
   },
   onlineUsersText: {
     marginBottom: 10,
