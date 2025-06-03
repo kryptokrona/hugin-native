@@ -279,6 +279,12 @@ const sanitizeHtml = (data) => {
   return data;
 };
 
+const sanitize_typing_message = (data) => { 
+  const typing = sanitizeHtml(data?.typing);
+  if (typeof data?.typing !== 'boolean')          return [false, false];
+  return [typing, true]
+}
+
 //Check if it is an image or video with allowed type
 function check_if_media(path, size) {
   if (path === undefined) return false;
@@ -358,4 +364,5 @@ module.exports = {
   sign_joined_message,
   check_hash,
   create_room_invite,
+  sanitize_typing_message
 };

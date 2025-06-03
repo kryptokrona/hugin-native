@@ -15,6 +15,7 @@ const {
   room_message_exists,
   sign,
   sleep,
+  sanitize_typing_message,
 } = require('./utils');
 const {
   send_file,
@@ -621,6 +622,16 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       return true;
     }
   }
+
+  if ('typing' in data) {
+    console.log('Typing..');
+    const [typing, checked] = sanitize_typing_message(data)
+    if (!checked) return
+    if (!con.address) return
+    const datas = {typing, key: beam ? con.address : active.key, address: con.address};
+    Hugin.send('typing', {datas})
+  }
+  
 
   if ('info' in data) {
     const fileData = sanitize_file_message(data);
@@ -1305,6 +1316,14 @@ function send_sdp(data) {
   send_voice_channel_sdp(sendMessage);
 }
 
+const send_typing_status = async (typing, key) => {
+  const active = active_swarms.find((a) => a.key === key);
+  if (!active) return;
+  send_swarm_message(JSON.stringify({
+    typing
+  }),active.topic)
+}
+
 const send_voice_channel_status = async (joined, status, update = false) => {
   const active = active_swarms.find((a) => a.key === status.key);
   if (!active) return;
@@ -1601,5 +1620,6 @@ module.exports = {
   send_dm_message,
   send_dm_file,
   send_feed_message,
+  send_typing_status,
   Nodes
 };

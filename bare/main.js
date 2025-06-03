@@ -9,6 +9,7 @@ const {
   close_all_connections,
   idle,
   send_voice_channel_status,
+  send_typing_status,
   send_sdp,
   send_dm_message,
   send_dm_file,
@@ -82,6 +83,9 @@ const onrequest = async (p) => {
       break;
     case 'voice_status':
       send_voice_channel_status(p.status.voice, p.status, p.update);
+      break;
+    case 'typing':
+      send_typing_status(p.typing, p.key);
       break;
     case 'send_sdp':
       send_sdp(p.data);
