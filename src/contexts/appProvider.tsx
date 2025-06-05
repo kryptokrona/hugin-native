@@ -37,16 +37,18 @@ import {
   setLatestMessages,
   setLatestRoomMessages,
   setRoomMessages,
+  updateMessage,
 } from '../services/bare';
 import { keychain } from '../services/bare/crypto';
 import { Camera, Connection, Files } from '../services/bare/globals';
-import { getContacts, getFeedMessages, initDB, loadSavedFiles } from '../services/bare/sqlite';
+import { getContacts, getFeedMessages, initDB, loadSavedFiles, saveMessage } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Notify } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
 import { setStoreFeedMessages } from '../services/zustand';
 import { useTranslation } from 'react-i18next';
+import { getMessageQueue, resetMessageQueue } from '@/utils/messageQueue';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -237,6 +239,27 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           joining = false;
           console.log('**** Successfully joined rooms after inactivity ****');
         }
+        const message_queue = await getMessageQueue();
+        console.log('message_queue', message_queue)
+
+        for (const message of message_queue) {
+          const saved = await saveMessage(
+            message.from,
+            message.msg,
+            '', //Todo reply
+            message.timestamp,
+            message.timestamp.toString(),
+            false,
+            undefined,
+            false,
+            message.name
+          );
+          if (saved) {
+            updateMessage(saved, false);
+          }
+          setLatestMessages();
+        }
+        resetMessageQueue();
       }
     };
 

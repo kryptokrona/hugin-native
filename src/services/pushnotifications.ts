@@ -23,6 +23,8 @@ import * as Keychain from 'react-native-keychain';
 import * as naclSealed from 'tweetnacl-sealed-box';
 import * as nacl from 'tweetnacl';
 import * as naclutil from 'tweetnacl-util';
+import { saveMessageToQueue, resetMessageQueue, getMessageQueue } from '../utils/messageQueue';
+
 
 function hexToUint(hexString: string) {
   return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
@@ -158,6 +160,11 @@ let channelId;
       const payload = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload));
       
       message = decryptMessage(payload.box, payload.t, key);
+      await saveMessageToQueue({
+        ...message,
+        timestamp: payload.t,
+      });
+
       console.log('final msg:', message)
     } catch (e){
       console.log('Error:', e);
