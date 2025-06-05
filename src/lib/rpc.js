@@ -82,9 +82,9 @@ export class Bridge {
           console.log(json);
         case 'hugin-node-connected':
           console.log('Hugin node connected!')
+          useGlobalStore.getState().setHuginNode({connected: true});
           const pushRegistration = await Wallet.encrypt_push_registration();
           this.send({type: 'push_registration', data: pushRegistration});
-          useGlobalStore.getState().setHuginNode({connected: true});
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')

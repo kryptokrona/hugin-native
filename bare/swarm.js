@@ -96,15 +96,32 @@ class NodeConnection {
     this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
     this.topic = ''
     this.address = null
+    this.backup_connections = [];
   }
 
+async reset(address, pub) { 
+    this.node = null
+    this.connection = null
+    this.requests = new Map()
+    this.discovery = null
+    this.pending = []
+    this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
+    this.topic = ''
+    this.address = null
+    this.backup_connections = [];
+
+    this.connect('', true);
+
+}
+
 async connect(address, pub) {
+  console.log('Connecting to node..');
   //If we choose the public option. We connect to the first responding node.
   //in the public network.
   const key = pub ? this.public : address
   const [base_keys, dht_keys, sig] = get_new_peer_keys(key)
   const topicHash = base_keys.publicKey.toString('hex')
-    this.node = new HyperSwarm({ maxPeers: 1,
+    this.node = new HyperSwarm({ maxPeers: 3,
     firewall (remotePublicKey) {
 
     //If we are connecting to a public node. Allow connection.
@@ -125,7 +142,10 @@ async connect(address, pub) {
 
 async listen() {
   this.node.on('connection', (conn, info) => {
-    if (this.connection) return
+    if (this.connection) {
+      this.backup_connections.unshift(conn);
+      return;
+    }
     this.node_connection(conn)
   })
 
@@ -202,14 +222,22 @@ async change(address, pub) {
 }
 
 async reconnect() {
-  while(this.connection === null) {
+  let tries = 0;
+  while(this.connection === null && tries < 4) {
     Hugin.send('hugin-node-disconnected', {})
     console.log("Reconnecting to node...")
+    if (this.backup_connections?.length > 0) {
+      this.connection = this.backup_connections.at(-1);
+      Hugin.send('hugin-node-connected', {})
+      this.backup_connections.pop();
+    }
     Nodes.node.resume();
     this.discovery.refresh({client: true, server: false})
     await sleep(2000);
+    tries += 1;
   }
-  return
+  this.reset();
+  return;
 }
 
 sync(data) {
@@ -235,7 +263,7 @@ close() {
   this.connection = null
 }
 
-async message(payload, hash) {
+async message(payload, hash, viewtag) {
   console.log('payload, hash', payload, hash)
     if (this.connection === null) {
     await this.reconnect();
@@ -254,6 +282,8 @@ async message(payload, hash) {
     timestamp,
     hash,
     signature,
+    viewtag,
+    push: true,
     id: timestamp
     }
 
@@ -265,6 +295,23 @@ async message(payload, hash) {
   
   })
 }
+
+async register(data) {
+
+  if (this.connection === null) {
+    await this.reconnect();
+  }
+  
+  const payload = {
+    register: true,
+    data
+  }
+
+  this.connection.write(JSON.stringify(payload));
+  
+}
+
+
 }
 const Nodes = new NodeConnection()
 
@@ -285,7 +332,11 @@ class Room {
     const [base_keys, dht_keys, sig] = get_new_peer_keys(invite);
     const topic = base_keys.publicKey.toString('hex');
     const hash = Buffer.alloc(32).fill(topic);
-    await Storage.load_drive(topic);
+    try {
+      await Storage.load_drive(topic);
+    } catch (e) {
+      console.log('Error:', e);
+    }
 
     console.log('Joining room....');
     try {
@@ -1544,7 +1595,12 @@ const check_if_online = async (topic) => {
     //Check message state every 20seconds if idle
     if (a % 2 !== 0 && Hugin.idle()) return;
     const active = get_active_topic(topic);
-    const allFiles = await Storage.load_meta(topic);
+    let allFiles = [];
+    try {
+      allFiles = await Storage.load_meta(topic);
+    } catch(e) {
+      console.error('Error:', e);
+    }
     active.files = allFiles.sort((a, b) => a.time - b.time).slice(-10);
     const hashes = await Hugin.request({
       type: 'get-latest-room-hashes',

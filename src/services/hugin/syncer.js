@@ -25,11 +25,12 @@ class Syncer {
     this.incoming_messages = [];
     this.keys = {};
     this.known_keys = [];
+    this.sync_interval = null;
   }
 
   async init(node, known, keys) {
     this.node = node;
-    this.lastChecked = Math.floor(Date.now() / 1000) - 60 * 60 * 24;
+    this.lastChecked = 0;
     this.keys = keys;
     this.known_keys = known;
     await this.start();
@@ -45,10 +46,9 @@ class Syncer {
   }
 
   async start() {
-    while (true) {
-      await sleep(3000);
+    this.sync_interval = setInterval(async () => {
       await this.sync();
-    }
+    }, 3000);
   }
 
   set_node(node) {
@@ -62,17 +62,16 @@ class Syncer {
     if (incoming) return false;
     //Latest version, fetch more messages with last checked timestamp
     const lastChecked = this.lastChecked;
-    this.lastChecked = Date.now() - 1000;
 
     const {resp, background} = await Nodes.sync({
       request: true,
       type: 'some',
       timestamp: lastChecked,
-    });
-
+    }); 
     if (resp.length === 0) {
       return false;
     }
+    this.lastChecked = Date.now();
 
     return {resp, background};
   }
@@ -145,7 +144,7 @@ class Syncer {
     if (!text) return;
     if (message.type === 'sealedbox' || 'box') {
       if (!this.known_keys.some((a) => a === key)) {
-        const added = await addContact('Anon', addr, key);
+        const added = await addContact(message?.name || 'Anon' , addr, key);
         if (added) {
           this.known_keys.push(added.messagekey);
           const key = await Wallet.key_derivation_hash(addr);

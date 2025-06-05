@@ -28,6 +28,9 @@ const onrequest = async (p) => {
   switch (p.type) {
     case 'log':
       break;
+    case 'push_registration':
+      Nodes.register(p.data);
+      break;
     case 'init_bare':
       initBareMain(p.user);
       break;
@@ -52,7 +55,7 @@ const onrequest = async (p) => {
       const feed_message = await send_feed_message(p.message, p.reply, p.tip);
       return feed_message;
     case 'send_node_msg':
-      const sent = await Nodes.message(p.payload, p.hash);
+      const sent = await Nodes.message(p.payload, p.hash, p.viewtag);
       return {sent};
     case 'sync_from_node':
       const resp = await Nodes.sync(p.request)
