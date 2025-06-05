@@ -1,8 +1,10 @@
 /**
  * @format
  */
+import './shim';
 import 'react-native-reanimated';
 import './src/i18n/i18n';
+import './src/services/pushnotifications';
 
 import App from './src/App';
 import { AppRegistry } from 'react-native';

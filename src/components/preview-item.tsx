@@ -105,7 +105,7 @@ export const PreviewItem: React.FC<Props> = ({
           {name.substring(0,18) + (name.length > 18 ? '...' : '')}
         </TextField>
         {!suggested &&
-          <TextField bold={isNew} maxLength={20} size="small">
+          <TextField numberOfLines={1} bold={isNew} maxLength={20} size="small">
             {message}
           </TextField>
         }
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     marginLeft: 16,
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   centeredContent: {
     flexDirection: 'row',

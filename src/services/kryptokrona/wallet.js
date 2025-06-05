@@ -29,6 +29,7 @@ import {
   setStoreCurrentRoom,
   setSyncStatus,
   setTransactions,
+  useUserStore,
 } from '@/services';
 
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -40,6 +41,8 @@ import naclUtil from 'tweetnacl-util';
 import { privateKeys } from './privates';
 import { t } from 'i18next';
 import tweetnacl from 'tweetnacl';
+import { getDeviceId } from '../../services/pushnotifications';
+import * as Keychain from 'react-native-keychain';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -325,6 +328,16 @@ export class ActiveWallet {
         }
       },
     );
+    try {
+        const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
+        console.log('key', key);
+        await Keychain.setGenericPassword('encryption', key, {
+          accessible: Keychain.ACCESSIBLE.ALWAYS,
+        });
+        console.log('🔐 Key saved securely.');
+    } catch (err) {
+      console.error('❌ Failed to store encryption key:', err);
+    }
   }
 
   async send(tx) {
@@ -420,7 +433,7 @@ export class ActiveWallet {
     let has_history = await this.check_history(messageKey, address);
 
     let payload_hex;
-    const seal = has_history ? false : true;
+    const seal = has_history && beam ? false : true;
 
     payload_hex = await this.encrypt_hugin_message(
       message,
@@ -436,7 +449,7 @@ export class ActiveWallet {
       Beam.message(address, send);
     } else {
      try {
-      const sent = await this.withTimeout(Nodes.message(payload_hex, hash), 10000);
+      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address)), 10000);
       console.log('Sent!', sent);
       if (!sent.success) {
         if (typeof sent.reason !== 'string') return;
@@ -475,7 +488,9 @@ export class ActiveWallet {
         k: Buffer.from(keychain.getKeyPair().publicKey).toString('hex'),
         msg: message,
         s: signature,
+        name: useUserStore.getState().user.name
       };
+      console.log(payload_json);
       let payload_json_decoded = naclUtil.decodeUTF8(
         JSON.stringify(payload_json),
       );
@@ -510,6 +525,38 @@ export class ActiveWallet {
     return payload_hex;
   }
 
+  async encrypt_push_registration() {
+
+    let timestamp = Date.now();
+    let box;
+
+    //Create the view tag using a one time private key and the receiver view key
+    const keys = await generateKeys();
+
+    let payload_json = {
+      deviceId: getDeviceId(),
+      viewTag: await Wallet.generate_view_tag()
+    };
+    let payload_json_decoded = naclUtil.decodeUTF8(
+      JSON.stringify(payload_json),
+    );
+
+    box = new NaclSealed.sealedbox(
+      payload_json_decoded,
+      nonceFromTimestamp(timestamp),
+      hexToUint('hunter2'),
+    );
+
+    //Box object
+    let payload_box = {
+      box: Buffer.from(box).toString('hex'),
+      t: timestamp
+    };
+    // Convert json to hex
+    let payload_hex = toHex(JSON.stringify(payload_box));
+    return payload_hex;
+  }
+
   async check_history(messageKey) {
     //Check history
     if (MessageSync.known_keys.indexOf(messageKey) > -1) {
@@ -526,6 +573,14 @@ export class ActiveWallet {
     const recvPubKey = recvAddr.m_keys.m_viewKeys.m_publicKey;
     const derivation = await generateKeyDerivation(recvPubKey, privateViewKey);
     return await cnFastHash(derivation);
+  }
+
+  async generate_view_tag(address = this.active.getAddresses()[0]) {
+    const myAddr = await Address.fromAddress(address);
+    const pubKey = myAddr.m_keys.m_viewKeys.m_publicKey;
+    const weeklyTimestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
+    const hash = await cnFastHash(pubKey + weeklyTimestamp);
+    return hash.substring(0,3);
   }
 
   async copyMnemonic() {

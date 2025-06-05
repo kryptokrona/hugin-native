@@ -543,7 +543,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         }
 
         <KeyboardAvoidingView
-          style={[styles.inputWrapper, { backgroundColor }]}
+          style={[styles.inputWrapper, { backgroundColor, paddingTop: typingUsers?.length > 0 ? 20 : 0 }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
           <MessageInput
@@ -588,8 +588,7 @@ const styles = StyleSheet.create({
     // marginBottom: 10,
     paddingBottom: 10,
     position: 'absolute',
-    right: 0,
-    paddingTop: 20
+    right: 0
   },
   onlineUsersText: {
     marginBottom: 10,

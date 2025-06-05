@@ -27,7 +27,8 @@ export const TextField: React.FC<Props> = ({
   bold,
   style,
   centered,
-  color
+  color,
+  ...rest
 }) => {
   const theme = useThemeStore((state) => state.theme);
   if (!color) color = theme[textType[type]];
@@ -50,7 +51,9 @@ export const TextField: React.FC<Props> = ({
         },
         { color, fontSize, fontWeight, ...style },
         centered && { textAlign: 'center' },
-      ]}>
+      ]}
+      {...rest}
+      >
       {truncatedText}
     </Text>
   );
@@ -58,6 +61,6 @@ export const TextField: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   text: {
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Montserrat-Medium'
   },
 });

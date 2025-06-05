@@ -174,8 +174,8 @@ class NodeConnection {
     this.address = null
   }
 
- async message(payload, hash) {
-  const data = { type: 'send_node_msg', payload, hash };
+ async message(payload, hash, viewtag) {
+  const data = { type: 'send_node_msg', payload, hash, viewtag };
   const {sent} = await rpc.request(data);
   return sent
  }

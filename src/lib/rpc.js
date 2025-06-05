@@ -24,6 +24,7 @@ import { Notify, notify } from '../services/utils';
 import { MessageSync } from '../services/hugin/syncer';
 import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 import { Nodes } from './native';
+import { getDeviceId } from '../services/pushnotifications';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -81,6 +82,8 @@ export class Bridge {
           console.log(json);
         case 'hugin-node-connected':
           console.log('Hugin node connected!')
+          const pushRegistration = await Wallet.encrypt_push_registration();
+          this.send({type: 'push_registration', data: pushRegistration});
           useGlobalStore.getState().setHuginNode({connected: true});
           break;
         case 'hugin-node-disconnected':
