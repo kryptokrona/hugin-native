@@ -142,6 +142,7 @@ async connect(address, pub) {
 
 async listen() {
   this.node.on('connection', (conn, info) => {
+    info.priority = 3
     if (this.connection) {
       this.backup_connections.unshift(conn);
       return;
