@@ -126,7 +126,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   useEffect(() => {
 
     async function changeDots() {
-      while (typingUsers?.length > 0) {
+      while (typingUsers?.length > 0 && someoneTyping) {
         await sleep(500);
         setDots('.')
         await sleep(500);
@@ -137,7 +137,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     }
     if (typingUsers?.length === 0) setSomeoneTyping(false);
     if (typingUsers?.length > 0) setSomeoneTyping(true);
-    if (!someoneTyping) changeDots();
+    if (someoneTyping) changeDots();
 
   }, [typingUsers]);
 
@@ -530,20 +530,26 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               <ActivityIndicator size="small" color={color} />
             ) : null
           }
+          ListFooterComponentStyle={{height: 20}}
+          ListFooterComponent={
+            typingUsers?.length > 0 ? 
+            (
+              <View style={{height: 20, justifyContent: 'center', alignItems: 'center' }}>
+                {typingUsers?.length == 1 ?
+                (<TextField size='xsmall'>{roomUsers.find(a => a.address == typingUsers[0])?.name} is typing{dots}</TextField>)
+                :
+                (<TextField size='xsmall'>{typingUsers.length} users are typing{dots}</TextField>)
+                }
+              </View>
+            ) : 
+            <View style={{height: 20}}>
+            </View>
+            }
         />
 
-        {typingUsers?.length > 0 &&
-          <View style={{ position: 'absolute', paddingLeft:'40%', bottom: 50, width: '100%', zIndex: 9999999999}}>
-            {typingUsers?.length == 1 ?
-            (<TextField size='xsmall'>{roomUsers.find(a => a.address == typingUsers[0])?.name} is typing{dots}</TextField>)
-            :
-            (<TextField size='xsmall'>{typingUsers.length} users are typing{dots}</TextField>)
-            }
-          </View>
-        }
 
         <KeyboardAvoidingView
-          style={[styles.inputWrapper, { backgroundColor, paddingTop: typingUsers?.length > 0 ? 20 : 0 }]}
+          style={[styles.inputWrapper, { backgroundColor }]}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 97 : 0}>
           <MessageInput
