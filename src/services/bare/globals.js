@@ -1,6 +1,7 @@
 import NetInfo from '@react-native-community/netinfo';
 import { sleep } from '@/utils';
 import { Rooms, Beam } from 'lib/native';
+import { WebRTC } from '@/services/calls';
 
 class FilesCache {
   constructor() {
@@ -60,6 +61,7 @@ class ConnectionType {
       Rooms.idle(false, false)
     }
     this.update(type);
+    WebRTC.restartCall();
     this.done();
   }
 

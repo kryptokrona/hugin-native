@@ -5,6 +5,12 @@ export enum AuthMethods {
   bioMetric = 'bioMetric',
 }
 
+export enum ConnectionStatus {
+  connected = 'connected',
+  disconnected = 'disconnected',
+  connecting = 'connecting',
+}
+
 export interface Preferences {
   authMethod: AuthMethods | null;
   pincode: string | null;
@@ -37,6 +43,7 @@ export interface User {
   muted?: boolean;
   talking?: boolean;
   dm?: boolean;
+  connectionStatus?: ConnectionStatus;
 }
 
 export interface PeerUser {
