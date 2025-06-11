@@ -91,7 +91,7 @@ export const useUnreadMessagesStore = create<UnreadMessagesStore>()(
         get().unreadRoomMessages.filter((msg) => msg.room === roomKey).length,
 
       getUnreadPrivate: (address) =>
-        get().unreadRoomMessages.filter((msg) => msg.room === address).length,
+        get().unreadPrivateMessages.filter((msg) => msg.room === address).length,
     }),
     {
       name: ASYNC_STORAGE_KEYS.UNREAD_MESSAGES,
