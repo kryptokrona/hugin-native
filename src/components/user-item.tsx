@@ -13,7 +13,10 @@ import { ModalCenter } from './_layout';
 
 type Props = User;
 
-export const UserItem: React.FC<Props> = ({ name, address, online = true, avatar = undefined }) => {
+// export const UserItem: React.FC<Props> = ({ name, address, online = true, avatar = undefined }) => {
+  export const UserItem: React.FC<User> = (props) => {
+
+  let { address, name, avatar, online } = props;
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const w = Dimensions.get('window').width;
@@ -48,6 +51,9 @@ export const UserItem: React.FC<Props> = ({ name, address, online = true, avatar
       <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
         {name}
       </TextField>
+      {props?.muted &&
+      <View><TextField size={"xsmall"}> 🔇</TextField></View>
+      }
     </TouchableOpacity>
   );
 };
@@ -63,5 +69,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     margin: 1,
     marginBottom: 4,
+    alignItems: 'center', 
   },
 });

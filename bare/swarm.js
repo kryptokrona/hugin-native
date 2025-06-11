@@ -1086,6 +1086,7 @@ const process_request = async (messages, key) => {
   let i = 0;
   try {
     for (const m of messages.reverse()) {
+      i++;
       if (m?.address === Hugin.address) continue;
       if (m?.hash?.length !== 64) continue;
       const inc = {
@@ -1103,7 +1104,6 @@ const process_request = async (messages, key) => {
       const message = sanitize_group_message(inc);
       if (!message) continue;
       //Save room message in background mode ??   
-      i++;
       message.history = true;
       if (messages.length === i) message.history = false;
       message.background = Hugin.background;

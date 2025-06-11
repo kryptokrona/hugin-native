@@ -209,6 +209,9 @@ const panGesture = Gesture.Pan()
             {user.connectionStatus === 'disconnected' &&
             <View style={{position: 'absolute', left: 4, top: -1}}><TextField size={"xsmall"}>❌</TextField></View>
             }
+            {user.muted &&
+            <View style={{position: 'absolute', left: 4, top: -1}}><TextField size={"xsmall"}>🔇</TextField></View>
+            }
             </View>
           ))}
         </View>
