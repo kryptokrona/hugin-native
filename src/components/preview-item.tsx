@@ -58,14 +58,14 @@ export const PreviewItem: React.FC<Props> = ({
 
 
     useEffect(() => {
-      console.log('Roomusers update!');
+      console.log("Roomusers update!", allRoomUsers[mRoomKey]?.length)
       if (roomKey) {
         setOnline(allRoomUsers[mRoomKey]?.length > 1);
         return;
       }
       console.log('allRoomUsers[keyRef.current]', allRoomUsers[keyRef?.current]?.length)
       setOnline(allRoomUsers[keyRef.current]?.length > 1);
-    }, [allRoomUsers]); // Run only when `roomKey` changes
+    }, [allRoomUsers[mRoomKey]]); // Run only when `roomKey` changes
 
 
   function handlePress() {
