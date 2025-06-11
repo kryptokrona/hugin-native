@@ -232,7 +232,28 @@ export const useGlobalStore = create<
           },
         };
       });
-    },    
+    },  
+    updateConnectionStatus: (address: string, connectionStatus: string) => {
+      set((state) => {
+        console.log('Updating user state ', address, ' to ', connectionStatus);
+        const updatedUsers = state.currentCall.users.map((user) => {
+          if (user.address === address) {
+            return {
+              ...user,
+              connectionStatus,
+            };
+          }
+          return user;
+        });
+
+        return {
+          currentCall: {
+            ...state.currentCall,
+            users: updatedUsers,
+          },
+        };
+      });
+    },
     setAvatar: (address: string, avatar: string) => {
       useGlobalStore.setState((state) => {
         // Only update if avatar is different

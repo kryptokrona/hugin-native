@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
@@ -24,7 +24,11 @@ import { lightenHexColor } from '@/services/utils';
 
 type Props = User;
 
-export const CallUserItem: React.FC<Props> = ({ name, address, online = true, avatar = undefined, talking = false, video = false }) => {
+export const CallUserItem: React.FC<User> = (props) => {
+
+  const { address, name, avatar, video, talking, online } = props;
+
+
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   
@@ -41,10 +45,6 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
 
   const w = Dimensions.get('window').width;
   const width = w / 2;
-  if (!avatar) {
-    hadAvatar = false;
-    avatar = useMemo(() => getAvatar(address ?? ''), [address]);
-  }
 
   useEffect(() => {
 
@@ -109,13 +109,14 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
   }, [video, address]);
 
   return (
-    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: online === false ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : 'transparent'  }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: (props.connectionStatus === 'connected' && myUserAddress !== address) ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : 'transparent'  }]} onPress={onPress}>
       <View style={[{backgroundColor: video ? 'transparent' : userColor, borderWidth: 3, borderColor: backgroundColor, borderRadius: 22}, styles.onlineUser]}>
         {!stream && !video &&
         <ModalCenter visible={modalVisible} closeModal={onClose}>
           <View style={styles.modalInner}>
             <Avatar size={200} base64={avatar} />
             <TextField style={{ marginVertical: 12 }}>{name}</TextField>
+            {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
           </View>
         </ModalCenter>
         }
@@ -139,6 +140,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
           <TextField size="xsmall" maxLength={nameMaxLength} style={styles.inlineName}>
             {name}
           </TextField>
+          {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
         </View>
       ) : (
         <>
@@ -149,6 +151,7 @@ export const CallUserItem: React.FC<Props> = ({ name, address, online = true, av
             <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
               {name}
             </TextField>
+            {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
           </View>
         </>
       )}

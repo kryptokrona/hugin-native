@@ -260,6 +260,7 @@ parse(d) {
 }
 
 close() {
+  if (!this.connection) return;
   this.connection.end();
   this.connection = null
 }
@@ -307,7 +308,7 @@ async register(data) {
     register: true,
     data
   }
-
+  if (!this.connection) return;
   this.connection.write(JSON.stringify(payload));
   
 }
@@ -801,13 +802,19 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       //   active.buffer = [];
       // }
 
+      Hugin.send('peer-connected', { joined, beam: active.beam });
+
       //If our new connection is also in voice, check who was connected first to decide who creates the offer
       const [in_voice, video] = get_local_voice_status(topic);
       if (con.voice && in_voice && parseInt(active.time) > time) {
-        join_voice_channel(active.key, topic, joined.address);
+        await sleep(2000);
+        try {
+          join_voice_channel(active.key, topic, joined.address);
+        } catch (e) {
+          console.error('Failed to join voice channel!', e);
+        }
       }
 
-      Hugin.send('peer-connected', { joined, beam: active.beam });
       console.log('Connection updated: Joined:', con.name);
       return true;
     }

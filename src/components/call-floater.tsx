@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 
 import {
   GestureDetector,
@@ -18,7 +18,7 @@ import { MainScreens } from '@/config';
 import { Peers } from 'lib/connections';
 import { Rooms } from 'lib/native';
 
-import { Avatar, TouchableOpacity } from '@/components';
+import { Avatar, TextField, TouchableOpacity } from '@/components';
 import { useGlobalStore, WebRTC, useThemeStore } from '@/services';
 import { textType } from '@/styles';
 import { Call } from '@/types';
@@ -196,13 +196,19 @@ const panGesture = Gesture.Pan()
         ]}>
         <View style={styles.avatarsContainer}>
           {users.map((user) => (
-            <View key={user.address} style={{borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
+            <View key={user.address} style={{opacity: (user.address == myUserAddress || user.connectionStatus == 'connected') ? 1 : 0.5, borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
             <Avatar
               base64={
                 user.avatar !== '' ? user.avatar : getAvatar(user.address, 32)
               }
               size={24}
             />
+            {user.connectionStatus === 'connecting' || (user.connectionStatus === undefined &&  user.address != myUserAddress) &&
+            <View style={{position: 'absolute', right: 2, top: 2}}><ActivityIndicator size={"small"} /></View>
+            }
+            {user.connectionStatus === 'disconnected' &&
+            <View style={{position: 'absolute', left: 4, top: -1}}><TextField size={"xsmall"}>❌</TextField></View>
+            }
             </View>
           ))}
         </View>

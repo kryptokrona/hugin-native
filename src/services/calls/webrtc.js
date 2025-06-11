@@ -57,6 +57,14 @@ class VoiceChannel {
     };
   }
 
+  async restartCall() {
+
+    const oldConnections = [...this.connections];
+    await this.exit();
+    return;
+    
+  }
+
   async init(video = false) {
     if (this.localMediaStream) return;
     //TODO***
@@ -276,55 +284,83 @@ class VoiceChannel {
     peerConnection.addEventListener('connectionstatechange', () => {
       console.log('Connection state changed:', peerConnection.connectionState);
       if (peerConnection.connectionState === 'closed') {
+        useGlobalStore.getState().updateConnectionStatus(address, 'disconnected');
         this.remove(address);
       }
+
+      if (peerConnection.connectionState === 'connecting') {
+        useGlobalStore.getState().updateConnectionStatus(address, 'connecting');
+      }
+
       if (peerConnection.connectionState === 'connected')
+        useGlobalStore.getState().updateConnectionStatus(address, 'connected');
         this.peervolume(address);
     });
 
 
 peerConnection.addEventListener('icecandidate', async (event) => {
   peerConnection.icecandidatesFound = peerConnection.icecandidatesFound != undefined ? peerConnection.icecandidatesFound + 1 : 0;
+  peerConnection.addEventListener('icecandidate', async (event) => {
+  peerConnection.icecandidatesFound = (peerConnection.icecandidatesFound ?? -1) + 1;
+
+    if (peerConnection.offerSent) {
+    console.log('Offer already sent, skipping...');
+    return;
+  }
+
+  // Shared function to finalize ICE gathering and send the SDP offer
+  const finalizeIceGathering = async () => {
+    if (peerConnection.offerSent) return; // guard again
+    peerConnection.offerSent = true;
+    try {
+      if (type === 'offer') {
+        let offer = await peerConnection.createOffer(this.settings);
+        offer = new RTCSessionDescription({
+          type: 'offer',
+          sdp: this.forceOpus(offer.sdp),
+        });
+        await peerConnection.setLocalDescription(offer);
+
+        setTimeout(() => {
+        Rooms.sdp({
+          type,
+          key,
+          topic,
+          address,
+          data: offer,
+        })
+        setTimeout(() => {
+          peerConnection.offerSent = undefined;
+        }, 5000);
+        },
+        1000);
+        
+      }
+    } catch (error) {
+      console.error('Error creating or sending offer:', error);
+    }
+  };
 
   if (event.candidate) {
     peerConnection.lastCandidateTimestamp = Date.now();
 
-    // Clear existing timeout and start a new one
-    if (peerConnection.candidateTimeout) clearTimeout(peerConnection.candidateTimeout);
+    // Clear existing timeout and restart
+    if (peerConnection.candidateTimeout) {
+      clearTimeout(peerConnection.candidateTimeout);
+    }
 
-    peerConnection.candidateTimeout = setTimeout(async () => {
-      // 500ms passed since last candidate, send offer
-      try {
-        if (type === 'offer') {
-          let offer = await peerConnection.createOffer(this.settings);
-          offer = new RTCSessionDescription({
-            type: 'offer',
-            sdp: this.forceOpus(offer.sdp),
-          });
-          await peerConnection.setLocalDescription(offer);
-
-          // Send to backend
-          Rooms.sdp({
-            type,
-            key,
-            topic,
-            address,
-            data: offer,
-          });
-        }
-      } catch (error) {
-        console.error('Error creating offer:', error);
-      }
+    peerConnection.candidateTimeout = setTimeout(() => {
+      finalizeIceGathering();
     }, 500);
-
   } else {
-    // event.candidate is null, ice gathering complete
-    // Clear timeout if any and send offer immediately
     if (peerConnection.candidateTimeout) {
       clearTimeout(peerConnection.candidateTimeout);
       peerConnection.candidateTimeout = undefined;
     }
+    finalizeIceGathering();
   }
+});
+
 });
 
 
