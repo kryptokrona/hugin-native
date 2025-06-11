@@ -88,7 +88,8 @@ export const updateMessages = async (
   }
 
   const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === message.room)?.name;
-  if (!history && !inRoom && !background && !message.file) {
+  const messageAge = Date.now() - message.timestamp;
+  if (!history && !inRoom && !background && !message.file && messageAge < (1000 * 30)) {
     Toast.show({
       text1: message.nickname + ' in ' + roomName,
       text2: message.message,
