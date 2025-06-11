@@ -240,7 +240,7 @@ export const MessageInput: React.FC<Props> = ({
 
     if (hasPermission === PermissionStatus.granted) {
       startRecording();
-    } else if (hasPermission === PermissionStatus.undetermined) {
+    } else if (hasPermission === PermissionStatus.undetermined || PermissionStatus.denied) {
       const permissionStatus = await getAudioRecorderPermission();
       if (permissionStatus === PermissionStatus.granted) {
         startRecording();
@@ -254,7 +254,10 @@ export const MessageInput: React.FC<Props> = ({
     setIsRecording(false);
     const recording = await waveformRef.current?.stopRecord();
     console.log('Recording complete: ', recording);
-    const path = recording?.slice(7, recording.length);
+    let path
+    if (Platform.OS === 'android') {
+      path = recording
+    } else path = recording?.slice(7, recording.length);
     const file = await RNFS.stat(path);
 
     const fileInfo: SelectedFile = {

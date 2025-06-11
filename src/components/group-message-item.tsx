@@ -94,7 +94,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isImageMessage: boolean = false;
       let imagePath = '';
 
-      if (file?.path && file?.image && file?.type == 'image') {
+      if (file?.path && file?.image && file?.type === 'image') {
         isImageMessage = true;
         imagePath = 'file://' + file.path;
       }
@@ -109,7 +109,7 @@ export const GroupMessageItem: React.FC<Props> = ({
       let imagePath = '';
 
       const parsedMessage = replyto?.[0].file;
-      if (parsedMessage?.path && parsedMessage?.image && file?.type == 'image') {
+      if (parsedMessage?.path && parsedMessage?.image && file?.type === 'image') {
         isImageMessage = true;
         imagePath = 'file://' + parsedMessage.path;
       }
@@ -123,9 +123,11 @@ export const GroupMessageItem: React.FC<Props> = ({
       let isAudioMessage: boolean = false;
       let audioPath = '';
 
-      if (file?.path && file?.type == 'audio') {
+      if (file?.path && file?.type === 'audio') {
         isAudioMessage = true;
-        audioPath = 'file://' + file.path;
+        if (Platform.OS === 'android') {
+          audioPath = file.path;
+        } else audioPath = 'file://' + file.path;
       }
       // setIsLoading(false);
       return { audioPath, isAudioMessage };
