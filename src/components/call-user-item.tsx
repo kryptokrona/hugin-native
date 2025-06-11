@@ -109,14 +109,19 @@ export const CallUserItem: React.FC<User> = (props) => {
   }, [video, address]);
 
   return (
-    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: (props.connectionStatus === 'connected' && myUserAddress !== address) ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : 'transparent'  }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: (props.connectionStatus !== 'connected' && myUserAddress !== address) ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : 'transparent'  }]} onPress={onPress}>
       <View style={[{backgroundColor: video ? 'transparent' : userColor, borderWidth: 3, borderColor: backgroundColor, borderRadius: 22}, styles.onlineUser]}>
         {!stream && !video &&
         <ModalCenter visible={modalVisible} closeModal={onClose}>
           <View style={styles.modalInner}>
             <Avatar size={200} base64={avatar} />
+            <View style={styles.userInfo}>
             <TextField style={{ marginVertical: 12 }}>{name}</TextField>
             {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
+            {props?.muted &&
+              <View><TextField size={"xsmall"}> 🔇</TextField></View>
+            }
+            </View>
           </View>
         </ModalCenter>
         }
@@ -137,10 +142,15 @@ export const CallUserItem: React.FC<User> = (props) => {
         {video && stream ? (
         <View style={styles.inlineContainer}>
           <Avatar size={24} base64={avatar} />
+          <View style={styles.userInfo}>
           <TextField size="xsmall" maxLength={nameMaxLength} style={styles.inlineName}>
             {name}
           </TextField>
+            {props?.muted &&
+              <View><TextField size={"xsmall"}> 🔇</TextField></View>
+            }
           {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
+          </View>
         </View>
       ) : (
         <>
@@ -151,6 +161,9 @@ export const CallUserItem: React.FC<User> = (props) => {
             <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
               {name}
             </TextField>
+            {props?.muted &&
+              <View><TextField size={"xsmall"}> 🔇</TextField></View>
+            }
             {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
           </View>
         </>
@@ -182,8 +195,10 @@ const styles = StyleSheet.create({
   userInfo: {
     position: 'absolute',
     bottom: 5,
-    width: '100%',
+    width: '100%',  
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   avatar: {
     position: 'absolute',

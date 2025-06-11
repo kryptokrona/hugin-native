@@ -81,6 +81,11 @@ class Connections extends EventEmitter {
     const voiceUsers = thisRoomUsers.filter(a => a.voice === true);
   
     const updatedTalkingUsers = currentCall.talkingUsers || {};
+
+    for (const user of currentCall.users) {
+      const thisUser = voiceUsers.find(a => a.address == user.address);
+      if (thisUser) thisUser.connectionStatus = user.connectionStatus;
+    }
   
     useGlobalStore.getState().setCurrentCall({
       ...currentCall,
