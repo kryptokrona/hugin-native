@@ -11,7 +11,7 @@ import {
 import { type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { MainScreens, TabBar } from '@/config';
-import { useGlobalStore, useThemeStore, lightenHexColor } from '@/services';
+import { useGlobalStore, useThemeStore, lightenHexColor, useUnreadMessagesStore } from '@/services';
 import { IconType } from '@/types';
 
 import { CustomIcon, Unreads, TouchableOpacity } from '../_elements';
@@ -35,15 +35,9 @@ export const MyTabBar: React.FC<BottomTabBarProps> = ({
   const rooms = useGlobalStore((state) => state.rooms);
   const contacts = useGlobalStore((state) => state.contacts);
 
-  const totalUnreads = rooms.reduce(
-    (sum, room) => sum + (room.unreads || 0),
-    0,
-  );
+  const totalUnreads = useUnreadMessagesStore.getState().getAllRoomUnreadCount()
 
-  const contactsUnreads = contacts.reduce(
-    (sum, contact) => sum + (contact.unreads || 0),
-    0,
-  );
+  const contactsUnreads = useUnreadMessagesStore.getState().getAllPrivateUnreadCount()
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(

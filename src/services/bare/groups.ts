@@ -30,38 +30,16 @@ import {
   setStoreRoomMessages,
   setStoreRooms,
   useGlobalStore,
+  useUnreadMessagesStore,
   useUserStore,
 } from '../zustand';
 
 import { navigationRef } from '@/contexts';
 
-export const setLatestRoomMessages = async () => {
+export const setLatestRoomMessages = async (history: boolean) => {
+  if (history) return
   const latestRooms = await getLatestRoomMessages();
-
-  const currentRooms = useGlobalStore.getState().rooms;
-  const userAddress = useUserStore.getState().user.address;
-  const currentRoom = useGlobalStore.getState().thisRoom;
-  const updatedRooms = latestRooms?.map((latestRoom) => {
-    const existingRoom = currentRooms.find(
-      (room) => room.roomKey === latestRoom.roomKey,
-    );
-
-    const isFromUser = latestRoom.address === userAddress;
-
-    const newUnreads =
-      existingRoom &&
-      latestRoom.timestamp > (existingRoom.timestamp || 0) &&
-      !isFromUser
-        ? (existingRoom.unreads || 0) + 1
-        : existingRoom?.unreads || 0;
-
-    return {
-      ...latestRoom,
-      unreads: currentRoom === latestRoom.roomKey ? 0 : newUnreads, // Reset unreads if in room
-    };
-  });
-
-  setStoreRooms(updatedRooms?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
+  setStoreRooms(latestRooms?.sort((a, b) => b.timestamp - a.timestamp) ?? []);
 };
 
 export const updateMessages = async (
@@ -73,6 +51,7 @@ export const updateMessages = async (
   const inRoom = thisRoom === message.room;
 
   if (inRoom) {
+
     const messages = getRoomsMessages();
 
     if (message.reply?.length === 64) {
@@ -103,7 +82,11 @@ export const updateMessages = async (
       );
       setStoreRoomMessages(updatedMessages);
     }
+  } else {
+    //Not active in this room. Add it to unread.
+    useUnreadMessagesStore.getState().addUnreadRoomMessage(message)
   }
+
   const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === message.room)?.name;
   if (!history && !inRoom && !background && !message.file) {
     Toast.show({
@@ -230,7 +213,7 @@ export const saveRoomMessageAndUpdate = async (
     await updateMessages(newMessage, history, background);
   }
 
-  setLatestRoomMessages();
+  setLatestRoomMessages(history);
 };
 
 export const createUserAddress = async () => {

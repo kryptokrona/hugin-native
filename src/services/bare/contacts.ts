@@ -13,6 +13,7 @@ import {
   setStoreContacts,
   setStoreMessages,
   useGlobalStore,
+  useUnreadMessagesStore,
   useUserStore,
 } from '../zustand';
 import { Notify } from '../../services/utils';
@@ -42,31 +43,8 @@ import { Notify } from '../../services/utils';
 
 export const setLatestMessages = async () => {
   const latestContacts = await getLatestMessages();
-  const currentContacts = useGlobalStore.getState().contacts;
-  const userAddress = useUserStore.getState().user.address;
-  const currentContact = useGlobalStore.getState().thisContact;
-  const updatedContacts = latestContacts?.map((latestContact) => {
-    const existingContact = currentContacts.find(
-      (contact) => contact.messagekey === latestContact.messagekey,
-    );
-
-    const isFromUser = latestContact.address === userAddress;
-
-    const newUnreads =
-      existingContact &&
-      latestContact.timestamp > (existingContact.timestamp || 0) &&
-      !isFromUser
-        ? (existingContact.unreads || 0) + 1
-        : existingContact?.unreads || 0;
-
-    return {
-      ...latestContact,
-      unreads: currentContact === latestContact.address ? 0 : newUnreads, // Reset unreads if in room
-    };
-  });
-
   setStoreContacts(
-    updatedContacts?.sort((a, b) => b.timestamp - a.timestamp) ?? [],
+    latestContacts?.sort((a, b) => b.timestamp - a.timestamp) ?? [],
   );
 };
 
@@ -76,6 +54,8 @@ export const updateMessage = async (message: Message, background: boolean) => {
   if (inRoom) {
     const messages = await getMessages(thisContact, 0);
     setStoreMessages(messages);
+  } else {
+     useUnreadMessagesStore.getState().addUnreadPrivateMessage(message)
   }
   if (background) {
     const contacts = useGlobalStore.getState().contacts;

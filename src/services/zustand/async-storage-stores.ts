@@ -10,7 +10,7 @@ import {
 } from 'zustand/middleware';
 
 import { defaultTheme, themes } from '@/styles';
-import { AuthMethods, Preferences, Theme, ThemeName, User } from '@/types';
+import { AuthMethods, Message, Preferences, Theme, ThemeName, User } from '@/types';
 
 import { ASYNC_STORAGE_KEYS } from './async-storage-keys';
 import { setAuthenticated } from './global-store';
@@ -35,6 +35,71 @@ interface RoomStore {
   thisRoom: string;
   setThisRoom: (room: string) => void;
 }
+
+interface UnreadMessagesStore {
+  unreadRoomMessages: Message[];
+  unreadPrivateMessages: Message[];
+  clearUnreadRoomMessages: (roomKey: string) => void;
+  clearUnreadPrivateMessages: (roomKey: string) => void;
+  addUnreadRoomMessage: (message: Message) => void;
+  addUnreadPrivateMessage: (message: Message) => void;
+  getAllRoomUnreadCount: () => number;
+  getAllPrivateUnreadCount: () => number;
+  getUnreadRoom: (roomKey: string) => number;
+  getUnreadPrivate: (address: string) => number;
+
+}
+
+export const useUnreadMessagesStore = create<UnreadMessagesStore>()(
+  persist(
+    (set, get) => ({
+      unreadRoomMessages: [],
+      unreadPrivateMessages: [],
+
+    
+      clearUnreadRoomMessages: (roomKey) =>
+        set((state) => ({
+          unreadRoomMessages: state.unreadRoomMessages.filter(
+            (msg) => msg.room !== roomKey
+          ),
+        })),
+
+      clearUnreadPrivateMessages: (address) =>
+        set((state) => ({
+          unreadPrivateMessages: state.unreadPrivateMessages.filter(
+            (msg) => msg.room !== address
+          ),
+        })),
+
+      addUnreadRoomMessage: (message) =>
+        set((state) => ({
+          unreadRoomMessages: [...state.unreadRoomMessages, message],
+        })),
+
+      addUnreadPrivateMessage: (message) =>
+        set((state) => ({
+          unreadPrivateMessages: [...state.unreadPrivateMessages, message],
+        })),
+
+      getAllRoomUnreadCount: () =>
+        get().unreadRoomMessages.length,
+
+      getAllPrivateUnreadCount: () =>
+        get().unreadPrivateMessages.length,
+
+      getUnreadRoom: (roomKey) =>
+        get().unreadRoomMessages.filter((msg) => msg.room === roomKey).length,
+
+      getUnreadPrivate: (address) =>
+        get().unreadRoomMessages.filter((msg) => msg.room === address).length,
+    }),
+    {
+      name: ASYNC_STORAGE_KEYS.UNREAD_MESSAGES,
+      storage: createJSONStorage(() => AsyncStorage),
+    }
+  )
+);
+
 
 export const useRoomStore = create<RoomStore>()(
   persist(
@@ -216,7 +281,7 @@ export const defaultUser: User = {
     Platform.OS == 'ios'
       ? RNFS.LibraryDirectoryPath
       : RNFS.DocumentDirectoryPath,
-  files: []
+  files: [],
 };
 
 export const getAuthMethod = () => {

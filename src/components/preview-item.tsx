@@ -2,7 +2,7 @@ import { Avatar, CustomIcon, TouchableOpacity, TextField, Unreads } from './_ele
 import { StyleSheet, View } from 'react-native';
 
 import { getAvatar, prettyPrintDate } from '@/utils';
-import { useGlobalStore, useThemeStore, Wallet } from '@/services';
+import { useGlobalStore, useThemeStore, useUnreadMessagesStore, Wallet } from '@/services';
 import { t } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
 import { GroupOnlineIndicator } from './group-online-indicator';
@@ -41,6 +41,9 @@ export const PreviewItem: React.FC<Props> = ({
   const foreground = theme.foreground;
   const allRoomUsers = useGlobalStore((state) => state.roomUsers);
   const [online, setOnline] = useState(false);
+  const unreadCount = roomKey ? 
+  useUnreadMessagesStore.getState().getUnreadRoom(mRoomKey)
+  : useUnreadMessagesStore.getState().getUnreadPrivate(mRoomKey)
 
   const dateString = prettyPrintDate(timestamp ?? 0);
 
@@ -70,6 +73,8 @@ export const PreviewItem: React.FC<Props> = ({
 
   function handlePress() {
     onPress(mRoomKey, name);
+    roomKey ? useUnreadMessagesStore.getState().clearUnreadRoomMessages(mRoomKey) : 
+    useUnreadMessagesStore.getState().clearUnreadPrivateMessages(mRoomKey)
   }
 
   return (
@@ -81,7 +86,7 @@ export const PreviewItem: React.FC<Props> = ({
         { borderColor, borderBottomWidth: suggested ? 0 : 1 },
       ]}>
       <View style={styles.avatarContainer}>
-        <Unreads unreads={unreads} />
+        <Unreads unreads={unreadCount} />
         {mRoomKey?.length > 15 && (
           <>
           <Avatar onPress={handlePress} size={suggested ? 25 : 50} address={mRoomKey} base64={getAvatar(mRoomKey)} />

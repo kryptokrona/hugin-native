@@ -3,4 +3,5 @@ export const ASYNC_STORAGE_KEYS = {
   THEME: 'THEME',
   USER: 'USER',
   CURRENT_ROOM: 'CURRENT_ROOM',
+  UNREAD_MESSAGES: 'UNREAD'
 } as const;

@@ -1102,10 +1102,11 @@ const process_request = async (messages, key) => {
       if (await room_message_exists(inc.hash)) continue;
       const message = sanitize_group_message(inc);
       if (!message) continue;
-      //Save room message in background mode ??
-      message.history = true;
-      message.background = Hugin.background;
+      //Save room message in background mode ??   
       i++;
+      message.history = true;
+      if (messages.length === i) message.history = false;
+      message.background = Hugin.background;
       Hugin.send('swarm-message', { message });
     }
     //Trigger update when all messages are synced? here.
