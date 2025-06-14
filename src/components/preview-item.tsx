@@ -7,6 +7,7 @@ import { t } from 'i18next';
 import { useEffect, useRef, useState } from 'react';
 import { GroupOnlineIndicator } from './group-online-indicator';
 import { Styles } from '@/styles';
+import { CallIndicator } from './_elements/call-indicator';
 
 interface Props {
   name: string;
@@ -41,6 +42,7 @@ export const PreviewItem: React.FC<Props> = ({
   const foreground = theme.foreground;
   const allRoomUsers = useGlobalStore((state) => state.roomUsers);
   const [online, setOnline] = useState(false);
+  const [callOnline, setCallOnline] = useState(false);
   const unreadCount = roomKey ? 
   useUnreadMessagesStore.getState().getUnreadRoom(mRoomKey)
   : useUnreadMessagesStore.getState().getUnreadPrivate(mRoomKey)
@@ -61,14 +63,15 @@ export const PreviewItem: React.FC<Props> = ({
 
 
     useEffect(() => {
-      console.log("Roomusers update!", allRoomUsers[mRoomKey]?.length)
       if (roomKey) {
         setOnline(allRoomUsers[mRoomKey]?.length > 1);
+        setCallOnline(allRoomUsers[mRoomKey]?.some(a => a.voice === true));
         return;
       }
-      console.log('allRoomUsers[keyRef.current]', allRoomUsers[keyRef?.current]?.length)
       setOnline(allRoomUsers[keyRef.current]?.length > 1);
-    }, [allRoomUsers[mRoomKey]]); // Run only when `roomKey` changes
+      setCallOnline(allRoomUsers[keyRef.current]?.some(a => a.voice === true));
+
+    }, [allRoomUsers]); // Run only when `roomKey` changes
 
 
   function handlePress() {
@@ -99,6 +102,9 @@ export const PreviewItem: React.FC<Props> = ({
             type={'MI'}
             color={`${online ? 'green' : 'grey'}`}
             />
+            {callOnline && 
+              <CallIndicator />
+            }
             </View>
           }
           </>
