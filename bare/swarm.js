@@ -1100,7 +1100,6 @@ const process_request = async (messages, key) => {
         hash: m?.hash,
         tip: m?.tip,
       };
-      if (await room_message_exists(inc.hash)) continue;
       const message = sanitize_group_message(inc);
       if (!message) continue;
       //Save room message in background mode ??   

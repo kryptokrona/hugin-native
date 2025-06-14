@@ -851,10 +851,10 @@ export async function roomMessageExists(hash: string) {
   return true;
 }
 
-export async function messageExists(hash: string) {
+export async function messageExists(time: number) {
   const messageExist = `SELECT *
   FROM messages
-  WHERE hash = '${hash}'
+  WHERE timestamp = '${time}'
   `;
 
   const results: [ResultSet] = await db.executeSql(messageExist);
@@ -1045,6 +1045,9 @@ export async function saveRoomMessage(
   sent: boolean,
   tip: TipType | false = false,
 ) {
+
+  if (await roomMessageExists(hash)) return false
+  
   if ((!message || message?.length === 0) && !tip) {
     return false;
   }
@@ -1094,6 +1097,9 @@ export async function saveMessage(
   tip: TipType | false = false,
   nickname: string | undefined,
 ) {
+
+  if (await messageExists(timestamp)) return
+
   console.log('Saving message: ', message);
   if ((!message || message?.length === 0) && !tip) {
     return false;
