@@ -214,6 +214,7 @@ export const saveRoomMessageAndUpdate = async (
     await updateMessages(newMessage, history, background);
   }
 
+  if (!newMessage) return
   setLatestRoomMessages(history);
 };
 

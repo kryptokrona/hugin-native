@@ -173,6 +173,20 @@ let channelId;
 
     if (!message.msg) return;
 
+    if (!channelId) {
+
+    channelId = await notifee.createChannel({
+      id: 'hugin_notifiy',
+      name: 'Hugin',
+      sound: 'roommessage',
+      vibration: true,
+      vibrationPattern: [200, 400],
+      });
+
+    }
+
+
+
     await notifee.displayNotification({
       android: {
         category: AndroidCategory.MESSAGE,
