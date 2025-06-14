@@ -83,15 +83,16 @@ useEffect(() => {
     if (onBackPress) {
       onBackPress();
     } else {
-      navigation.goBack();
+      try {
+        navigation.pop();
+      } catch (e) {
+        navigation.goBack();
+      }
     }
   }
 
   function gotoProfile() {
-      navigation.navigate('SettingsStack', {
-        screen: MainScreens.SettingsScreen,
-      });
-      navigation.navigate('SettingsStack', {
+      navigation.navigate(MainScreens.SettingsStack, {
         screen: MainScreens.UpdateProfileScreen,
       });
   }

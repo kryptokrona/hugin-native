@@ -5,7 +5,8 @@
 // import { send_idle_status } from 'lib/native';
 
 import type { Message } from '@/types';
-
+import Toast from 'react-native-toast-message';
+import { navigationRef } from '@/contexts';
 import { getLatestMessages, getMessages } from './sqlite';
 
 import {
@@ -17,6 +18,7 @@ import {
   useUserStore,
 } from '../zustand';
 import { Notify } from '../../services/utils';
+import { MainScreens } from '@/config';
 
 // import { sleep } from '@/utils';
 
@@ -51,11 +53,33 @@ export const setLatestMessages = async () => {
 export const updateMessage = async (message: Message, background: boolean) => {
   const thisContact = getCurrentContact();
   const inRoom = thisContact === message.room;
+  const messages = await getMessages(message.room, 0);
   if (inRoom) {
-    const messages = await getMessages(thisContact, 0);
     setStoreMessages(messages);
   } else {
      useUnreadMessagesStore.getState().addUnreadPrivateMessage(message)
+     const messageAge = Date.now() - message.timestamp;
+     if (!background && messageAge < (1000 * 30)) {
+
+         Toast.show({
+           text1: message.nickname,
+           text2: message.message,
+           type: 'success',
+           onPress: () => {
+            setStoreMessages(messages);
+
+              navigationRef.navigate(MainScreens.MessageStack, {
+                screen: MainScreens.MessageScreen,
+                params: {
+                  name: message.nickname,
+                  roomKey: message.address,
+                },
+              });
+
+            },
+            
+         });
+       }
   }
   if (background) {
     const contacts = useGlobalStore.getState().contacts;
