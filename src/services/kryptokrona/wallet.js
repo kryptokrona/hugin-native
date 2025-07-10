@@ -43,6 +43,7 @@ import { t } from 'i18next';
 import tweetnacl from 'tweetnacl';
 import { getDeviceId } from '../../services/pushnotifications';
 import * as Keychain from 'react-native-keychain';
+import { fetchWithTimeout } from '@/utils';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -53,7 +54,7 @@ export class ActiveWallet {
     this.nodeUrl = undefined;
     this.nodePort = undefined;
     this.started = false;
-    this.deadNodeEmitted = true;
+    this.deadNodeEmitted = false;
     this.messageKeys = undefined;
   }
 
@@ -270,6 +271,18 @@ export class ActiveWallet {
     this.active.on('deadnode', async () => {
       if (!this.deadNodeEmitted) {
         this.deadNodeEmitted = true;
+        let response;
+        try {
+          response = await fetchWithTimeout(`https://${this.nodeUrl}:${this.nodePort}/info`, {});
+        } catch (e) {
+         try {
+          response = await fetchWithTimeout(`http://${this.nodeUrl}:${this.nodePort}/info`, {});
+        } catch (e) {
+        } 
+        }
+        if (response?.ok == true) {
+          return;
+        }
         Toast.show({
           text1: 'Your node has gone offline',
           type: 'success',
@@ -544,7 +557,7 @@ export class ActiveWallet {
     box = new NaclSealed.sealedbox(
       payload_json_decoded,
       nonceFromTimestamp(timestamp),
-      hexToUint('hunter2'),
+      hexToUint('6e49ab1a59019b2c22eb27efc5664be419c9d3d58016319cd0915e0494de4071'),
     );
 
     //Box object
