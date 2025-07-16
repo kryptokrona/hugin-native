@@ -39,7 +39,7 @@ export const formatHashString = (hash: string) => {
   return hash.substring(0, 8) + '...' + hash.substring(91, 99);
 };
 
-async function fetchWithTimeout(url, options, timeout = 1000) {
+export async function fetchWithTimeout(url, options, timeout = 1000) {
   return Promise.race([
     fetch(url, options),
     new Promise((_, reject) =>

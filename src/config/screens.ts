@@ -40,6 +40,7 @@ export enum MainScreens {
   FeedStack = 'FeedStack',
   MessageDetailsScreen = 'MessageDetailsScreen',
   LoggerScreen = 'LoggerScreen',
+  BuyXKRScreen = 'BuyXKRScreen',
 }
 
 export const TabBar = {

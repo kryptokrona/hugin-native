@@ -22,3 +22,4 @@ export * from './call-screen';
 export * from './feed-screen';
 export * from './message-details-screen';
 export * from './logger-screen';
+export * from './buy-xkr-screen';

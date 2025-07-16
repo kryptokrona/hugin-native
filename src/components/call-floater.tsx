@@ -140,6 +140,9 @@ const panGesture = Gesture.Pan()
       WebRTC.localMediaStream?.removeTrack(track);
       track.stop();
     }
+    } else {
+      InCallManager.setSpeakerphoneOn(true);
+      setSpeaker(true);
     }
 
   }

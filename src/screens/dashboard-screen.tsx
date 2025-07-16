@@ -54,6 +54,10 @@ export const DashboardScreen: React.FC = () => {
     navigation.push(MainScreens.WalletStatusScreen);
   };
 
+  const buyXKR = () => {
+    navigation.push(MainScreens.BuyXKRScreen);
+  };
+
   useLayoutEffect(() => {
     navigation.setOptions({
       header: () => (
@@ -106,6 +110,7 @@ export const DashboardScreen: React.FC = () => {
             <TextField style={{ margin: 10 }} size="large" bold>
               {showFiat ? '$' + amountInFiat : balanceText}
             </TextField>
+            <TextButton onPress={buyXKR} small style={styles.buyxkr}>Buy/Sell</TextButton>
           </Card>
         </TouchableOpacity>
 
@@ -146,10 +151,16 @@ const styles = StyleSheet.create({
   balance: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 10
   },
   container: {
     marginVertical: 15,
     padding: 5,
   },
+  buyxkr: {
+    position: 'absolute',
+    right: -2,
+    top: -2,
+  transform: [{ scale: 0.7 }]
+  }
 });

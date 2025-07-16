@@ -429,6 +429,20 @@ export class ActiveWallet {
     ]);
   }
 
+  waitForCondition(conditionFn, timeout = 10000, interval = 100) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    const check = () => {
+      if (conditionFn()) return resolve(true);
+      if (Date.now() - start >= timeout) return reject(new Error('Timeout waiting for condition'));
+      setTimeout(check, interval);
+    };
+
+    check();
+  });
+}
+
   async send_message(message, receiver, beam = false) {
     //Assert address length
     if (receiver.length !== 163) {
@@ -461,10 +475,16 @@ export class ActiveWallet {
       const send = hash + '99' + payload_hex;
       Beam.message(address, send);
     } else {
+      try {
+        await this.waitForCondition(() => useGlobalStore.getState().huginNode.connected, 10000);
+      } catch (err) {
+        console.log('Error: Hugin node not connected in time', error);
+        return { success: false, error: 'not_connected', hash: '' };
+      }
      try {
       const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address)), 10000);
       console.log('Sent!', sent);
-      if (!sent.success) {
+      if (!sent?.success) {
         if (typeof sent.reason !== 'string') return;
         if (sent.reason.length > 40) return;
         console.log('Error sending message', sent.reason);

@@ -17,7 +17,8 @@ import {
   CallScreen,
   FeedScreen,
   MessageDetailsScreen,
-  LoggerScreen
+  LoggerScreen,
+  BuyXKRScreen
 } from '@/screens';
 
 import { Header } from '../header';
@@ -151,6 +152,15 @@ const WalletStack = () => {
         component={PickNodeScreen}
         options={{
           header: (_props) => <Header title={t('nodePicker')} backButton />,
+        }}
+      />
+      <NativeStack.Screen
+        name={MainScreens.BuyXKRScreen}
+        component={BuyXKRScreen}
+        options={{
+          header: (_props) => (
+            <Header title={t('buyXKR')} backButton />
+          ),
         }}
       />
     </NativeStack.Navigator>

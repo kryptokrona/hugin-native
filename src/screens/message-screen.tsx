@@ -369,7 +369,6 @@ useEffect(() => {
         sent: true,
         reactions: [],
         joined: false,
-        status: 'pending',
         file
       };
 
