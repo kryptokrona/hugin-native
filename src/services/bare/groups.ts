@@ -214,6 +214,10 @@ export const saveRoomMessageAndUpdate = async (
     await updateMessages(newMessage, history, background);
   }
 
+  if (newMessage && history) {
+    useUnreadMessagesStore.getState().addUnreadRoomMessage(newMessage);
+  }
+
   if (!newMessage) return
   setLatestRoomMessages(history);
 };
