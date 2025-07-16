@@ -88,7 +88,6 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const registerAddress =
     'SEKReVsk6By22AuCcRnQGkSjY6r4AxuXxSV9ygAXwnWxGAhSPinP7AsYUdqPNKmsPg2M73FiA19JT3oy31WDZq1jBkfy3kxEMNM';
-  const publicKey = Wallet.messageKeys[1];
 
   const allRoomUsers = useGlobalStore((state) => state.roomUsers);
   const [roomUsers, setRoomUsers] = useState<User[]>([]);
@@ -140,11 +139,13 @@ useEffect(() => {
 
   const upgradeHugin = () => {
 
+    if (!Wallet?.messageKeys[1]) return;
+
     navigation.navigate(MainScreens.WalletStack, {
       screen: MainScreens.SendTransactionScreen,
       params: {
         address: registerAddress,
-        paymentId: publicKey,
+        paymentId: Wallet.messageKeys[1],
         amount: "99"
       }
     });
