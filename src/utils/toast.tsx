@@ -8,16 +8,16 @@ export const getToastConfig = (theme: Theme) => {
       <ErrorToast
         {...props}
         style={{
-          backgroundColor: theme.destructiveForeground,
+          backgroundColor: theme.destructive,
           borderLeftColor: 'transparent',
         }}
         text1Style={{
-          color: theme.primary,
+          color: theme.destructiveForeground,
           fontFamily: 'Montserrat-Medium',
           fontSize: 16,
         }}
         text2Style={{
-          color: theme.primary,
+          color: theme.destructiveForeground,
           fontFamily: 'Montserrat-Medium',
           fontSize: 14,
         }}
