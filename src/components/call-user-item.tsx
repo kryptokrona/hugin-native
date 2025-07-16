@@ -141,8 +141,8 @@ export const CallUserItem: React.FC<User> = (props) => {
         }
         {video && stream ? (
         <View style={styles.inlineContainer}>
-          <Avatar size={24} base64={avatar} />
           <View style={styles.userInfo}>
+          <Avatar size={24} base64={avatar} />
           <TextField size="xsmall" maxLength={nameMaxLength} style={styles.inlineName}>
             {name}
           </TextField>

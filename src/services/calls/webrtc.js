@@ -456,6 +456,23 @@ peerConnection.addEventListener('icecandidate', async (event) => {
     }
     
   }
+    
+  switchCamera = () => {
+    if (!this.localMediaStream) return;
+
+    const videoTracks = this.localMediaStream.getVideoTracks();
+    if (videoTracks.length === 0) return;
+
+    const videoTrack = videoTracks[0];
+
+    if (typeof videoTrack._switchCamera === 'function') {
+      console.log('Switching camera...');
+      videoTrack._switchCamera();
+    } else {
+      console.warn('Camera switch not supported on this platform/track.');
+    }
+  };
+
 }
 
 export const WebRTC = new VoiceChannel();

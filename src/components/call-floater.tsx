@@ -48,6 +48,7 @@ export const CallFloater: React.FC = () => {
   const [speaker, setSpeaker] = useState(false);
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(users.find(a => a.address === myUserAddress)?.video);
+  const [frontCamera, setFrontCamera] = useState(true);
 
   const backgroundColor = theme.background;
   const borderColor = theme.border;
@@ -106,6 +107,13 @@ const panGesture = Gesture.Pan()
   }
 
   async function toggleCamera() {
+    if (frontCamera && camera) {
+      WebRTC.switchCamera();
+      setFrontCamera(false);
+      return;
+    } else if (!frontCamera && camera) {
+      setFrontCamera(true);
+    }
     await WebRTC.setVideo(!camera);
     Rooms.voice(
       {
@@ -262,6 +270,16 @@ const panGesture = Gesture.Pan()
         </TouchableOpacity>
         <TouchableOpacity onPress={toggleCamera}>
           {camera ?
+            frontCamera ?
+            (
+              <CustomIcon
+                color={color}
+                name="camera-flip"
+                type="MCI"
+                size={24}
+              />
+            )
+            :
             (
               <CustomIcon
                 color="#dc2626"
