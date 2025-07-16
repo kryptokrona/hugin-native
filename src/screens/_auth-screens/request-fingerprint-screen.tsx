@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { View, Alert } from 'react-native';
+import { View, Alert, AppState, AppStateStatus } from 'react-native';
 
 import {
   CommonActions,
@@ -15,6 +15,8 @@ import { ScreenLayout } from '@/components';
 import { AuthScreens, Stacks } from '@/config';
 import { setAuthenticated } from '@/services';
 import type { AuthStackParamList, MainStackNavigationType } from '@/types';
+import { InteractionManager } from 'react-native';
+
 
 interface Props {
   route: RouteProp<
@@ -26,6 +28,8 @@ interface Props {
 export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const mainNavigation = useNavigation<MainStackNavigationType>();
+    const appState = React.useRef(AppState.currentState);
+
 
   const finishProcess = () => {
     setAuthenticated(true);
@@ -68,8 +72,25 @@ export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   };
 
   // Run fingerprint authentication on mount
+
   useEffect(() => {
-    authenticateBiometric();
+    const onChange = (nextAppState: AppStateStatus) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        InteractionManager.runAfterInteractions(() => {
+          authenticateBiometric();
+        });
+      }
+      appState.current = nextAppState;
+    };
+
+    if (appState.current == 'active') authenticateBiometric();
+
+    const sub = AppState.addEventListener('change', onChange);
+
+    return () => sub.remove();
   }, []);
 
   return (

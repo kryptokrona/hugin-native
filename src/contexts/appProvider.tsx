@@ -182,6 +182,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   /////////////////////////////////////////////
 
   useEffect(() => {
+    let timeoutId = null;
     const onAppStateChange = async (state: string) => {
       if (state === 'inactive') {
         // if (!started) {
@@ -207,6 +208,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           return;
         }
         console.log('******** BACKGROUND ********');
+        timeoutId = setTimeout(() => {
+          useGlobalStore.getState().setAuthenticated(false);
+        }, 10000);
 
         // Rooms.pause();
         
@@ -238,6 +242,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           Wallet.active?.start();
           joining = false;
           console.log('**** Successfully joined rooms after inactivity ****');
+        }
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
         }
         const message_queue = await getMessageQueue();
         console.log('message_queue', message_queue)

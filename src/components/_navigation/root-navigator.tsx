@@ -115,31 +115,28 @@ export const RootNavigator = () => {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer ref={navigationRef} linking={authenticated ? linking : undefined}>
-        {currentCallRoom.length > 0 && <CallFloater />}
-        <Stack.Navigator
-          initialRouteName={initialRouteName}
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen
-            name={Stacks.AuthStack}
-            component={AuthNavigator}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name={Stacks.MainStack}
-            component={MainNavigator}
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator>
-        {authenticated && pendingLink && (
-          <NavigationHandler
-            pendingLink={pendingLink}
-            clearPendingLink={() => setPendingLink(null)}
-          />
-        )}
-      </NavigationContainer>
-    </GestureHandlerRootView>
+<GestureHandlerRootView style={{ flex: 1 }}>
+  <NavigationContainer ref={navigationRef} linking={authenticated ? linking : undefined}>
+    {currentCallRoom.length > 0 && <CallFloater />}
+    
+    {authenticated ? (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name={Stacks.MainStack} component={MainNavigator} />
+      </Stack.Navigator>
+    ) : (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name={Stacks.AuthStack} component={AuthNavigator} />
+      </Stack.Navigator>
+    )}
+
+    {authenticated && pendingLink && (
+      <NavigationHandler
+        pendingLink={pendingLink}
+        clearPendingLink={() => setPendingLink(null)}
+      />
+    )}
+  </NavigationContainer>
+</GestureHandlerRootView>
+
   );
 };
