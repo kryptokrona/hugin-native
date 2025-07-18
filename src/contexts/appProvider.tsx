@@ -49,6 +49,7 @@ import { getCoinPriceFromAPI } from '../utils/fiat';
 import { setStoreFeedMessages } from '../services/zustand';
 import { useTranslation } from 'react-i18next';
 import { getMessageQueue, resetMessageQueue } from '@/utils/messageQueue';
+import { AuthMethods } from '@/types';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -67,6 +68,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
   const showFooterMask = useThemeStore((s) => s.showFooterMask);
+  const authMethod = usePreferencesStore(
+      (state) => state.preferences.authMethod,
+    );
 
 
   useEffect(() => {
@@ -209,6 +213,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
         console.log('******** BACKGROUND ********');
         timeoutId = setTimeout(() => {
+          if (authMethod === AuthMethods.reckless) return;
           useGlobalStore.getState().setAuthenticated(false);
         }, 10000);
 
