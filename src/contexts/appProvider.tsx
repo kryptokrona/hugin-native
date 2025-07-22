@@ -60,7 +60,6 @@ import { useTranslation } from 'react-i18next';
 import { getMessageQueue, resetMessageQueue } from '@/utils/messageQueue';
 import { AuthMethods, ConnectionStatus, User } from '@/types';
 import { waitForCondition } from '@/utils';
-import { navigateWhenReady } from './navigationHelper';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -201,7 +200,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     let token = '';
     let incomingCall = null;
     let currentAppState = 'active';
-    // VoipPushNotification.requestPermissions();
+
     VoipPushNotification.registerVoipToken();
 
     VoipPushNotification.addEventListener('register', (t) => {
@@ -209,22 +208,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.log('voiptoken', token)
       useGlobalStore.getState().setDeviceToken(token);
     });
-
-    // VoipPushNotification.addEventListener('notification', (notification) => {
-
-    //       console.log('notification', notification);
-    //       notification.roomKeyBox;
-    //       incomingCall.roomKey = ; 
-    //       VoipPushNotification.onVoipNotificationCompleted(notification?.uuid);
-    // });
-
-    // RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
-    //   // you might want to do following things when receiving this event:
-    //   // - Start playing ringback if it is an outgoing call
-    //   console.log('didDisplayIncomingCall', payload);
-    //   incomingCall = payload;
-
-    // });
 
     const options = {
       ios: {
@@ -240,11 +223,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     RNCallKeep.setup(options);
 
     RNCallKeep.addEventListener('endCall', ({ callUUID }) => {
-
-      // if (WebRTC.localMediaStream === null) return;
-
-      console.log('💀 Ending call RNCallKeep')
-
 
       incomingCall = null;
 
@@ -281,26 +259,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
       // Handle call answer event
 
-      // incomingCall = getIncomingCall();
-      console.log('✅ Answering call..');
-
       incomingCall = await NativeModules.TurtleCoin.getInitialVoipPayload();
-
-      console.log('✅ incomingCall payload:', incomingCall);
 
       navigationRef.navigate(MainScreens.CallScreen);
 
       await waitForCondition(() => started, 10000);
-      
-      console.log('✅ Init complete');
 
       Rooms.idle(false, false);
 
-      console.log('✅ Idle rejected');
-
       WebRTC.init();
-
-      console.log('✅ WebRTC started');
 
       Rooms.voice(
         {
@@ -313,8 +280,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         },
         false,
       );
-
-      console.log('✅ Rooms.voice finished');
   
       const peer = {
         address: Wallet.address,
@@ -324,13 +289,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         voice: true,
         room: incomingCall?.call
       };
-      // const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
-      // me.voice = true;
+
+
       const me: User = {
         address: Wallet.address,
         name: useUserStore.getState().user.name,
-        // the rest are optional and can be added as needed
-        // avatar: "https://example.com/avatar.png",
         room: incomingCall?.call,
         online: true,
         voice: true,
@@ -343,15 +306,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         avatar: ''
       };
 
-      console.log('✅ COnstructed variables');
-
       const allRoomUsers = useGlobalStore.getState().roomUsers[incomingCall?.call];
-      console.log('AllRoomUsers answer:', allRoomUsers);
       const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
 
       const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: [...voiceUsers, me], talkingUsers: {} };
       useGlobalStore.getState().setCurrentCall(call);
-      console.log('currentcall: ', useGlobalStore.getState().currentCall);
       // Peers.voicestatus(peer);
 
 
@@ -381,11 +340,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //   // await Background.init();
         // }
       } else if (state === 'background') {
-        console.log('bgtrigcall', incomingCall);
         if (Camera.active || incomingCall || !started) {
           return;
         }
-        console.log('******** BACKGROUND ********', started);
+        console.log('******** BACKGROUND ********');
         timeoutId = setTimeout(() => {
           if (authMethod === AuthMethods.reckless) return;
           useGlobalStore.getState().setAuthenticated(false);
