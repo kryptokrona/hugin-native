@@ -182,6 +182,7 @@ useEffect(() => {
 
   async function onJoinCall() {
       WebRTC.init();
+      onCloseCallMenu();
       Rooms.voice(
         {
           audioMute: false,
@@ -207,6 +208,8 @@ useEffect(() => {
       const call = { room: keyRef.current, time: Date.now(), users: [...userList, me], talkingUsers: {} };
       useGlobalStore.getState().setCurrentCall(call);
       Peers.voicestatus(peer);
+      if (voiceUsers?.length > 0) return; // Change to voice
+      Wallet.start_call(keyRef.current, huginAddress);
     }
   
     function onEndCall() {
@@ -233,7 +236,7 @@ useEffect(() => {
   
       Peers.voicestatus(peer);
       useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
-      WebRTC.exit();
+      WebRTC.exit('message-screen');
     }
 
   const scrollToBottom = () => {

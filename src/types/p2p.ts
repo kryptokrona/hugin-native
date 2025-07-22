@@ -105,9 +105,22 @@ export interface Call {
   users: User[];
   time: number;
   talkingUsers: Record<string, boolean>;
+  callkit?: boolean;
 }
 
 export interface HuginNode {
   address?: string;
   connected: boolean;
 }
+
+export enum AudioDevice {
+  bluetooth = 'bluetooth',
+  speaker = 'speaker',
+  earpiece = 'earpiece'
+}
+
+export type WiredHeadsetEventData = {
+  isPlugged: boolean;
+  hasMic: boolean;
+  deviceName?: string;
+};

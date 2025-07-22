@@ -7,6 +7,7 @@ export type MainNavigationParamList = {
   [MainScreens.SettingsScreen]: undefined;
   [MainScreens.SettingsScreen]: undefined;
   [MainScreens.FaqScreen]: undefined;
+  [MainScreens.CallScreen]: undefined;
   [MainScreens.ChangeLanguageScreen]: undefined;
   [MainScreens.UpdateProfileScreen]: undefined;
   [MainScreens.ChangeThemeScreen]: undefined;

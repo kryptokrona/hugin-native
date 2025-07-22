@@ -9,9 +9,11 @@ import {
   View,
 } from 'react-native';
 
-import { NavigationContainerRef, createNavigationContainerRef } from '@react-navigation/native';
+import { NativeModules } from 'react-native';
+
+import { createNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import InCallManager from 'react-native-incall-manager';
 
 import {
@@ -26,12 +28,19 @@ import {
   WebRTC,
 } from '@/services';
 
-import { getLogs, clearLogs } from '@/utils';
+import { MainScreens } from '@/config';
+
+import VoipPushNotification from 'react-native-voip-push-notification';
+import RNCallKeep from 'react-native-callkeep';
+
+import { Peers } from '../lib/connections';
 
 import { Background } from './background';
 
 import { Beam, Nodes, Rooms } from '../lib/native';
 // import { Foreground } from './service';
+
+import { getIncomingCall } from '../services/pushnotifications';
 
 import {
   setLatestMessages,
@@ -49,7 +58,9 @@ import { getCoinPriceFromAPI } from '../utils/fiat';
 import { setStoreFeedMessages } from '../services/zustand';
 import { useTranslation } from 'react-i18next';
 import { getMessageQueue, resetMessageQueue } from '@/utils/messageQueue';
-import { AuthMethods } from '@/types';
+import { AuthMethods, ConnectionStatus, User } from '@/types';
+import { waitForCondition } from '@/utils';
+import { navigateWhenReady } from './navigationHelper';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -186,9 +197,171 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   /////////////////////////////////////////////
 
   useEffect(() => {
+
+    let token = '';
+    let incomingCall = null;
+    let currentAppState = 'active';
+    // VoipPushNotification.requestPermissions();
+    VoipPushNotification.registerVoipToken();
+
+    VoipPushNotification.addEventListener('register', (t) => {
+      token = t; // Send token to the APN server
+      console.log('voiptoken', token)
+      useGlobalStore.getState().setDeviceToken(token);
+    });
+
+    // VoipPushNotification.addEventListener('notification', (notification) => {
+
+    //       console.log('notification', notification);
+    //       notification.roomKeyBox;
+    //       incomingCall.roomKey = ; 
+    //       VoipPushNotification.onVoipNotificationCompleted(notification?.uuid);
+    // });
+
+    // RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
+    //   // you might want to do following things when receiving this event:
+    //   // - Start playing ringback if it is an outgoing call
+    //   console.log('didDisplayIncomingCall', payload);
+    //   incomingCall = payload;
+
+    // });
+
+    const options = {
+      ios: {
+        appName: 'Hugin Messenger',
+        supportsVideo: true,
+      },
+      android: {
+        alertTitle: 'Permissions required',
+        alertDescription: 'This application needs to access your phone accounts',
+      },
+    };
+
+    RNCallKeep.setup(options);
+
+    RNCallKeep.addEventListener('endCall', ({ callUUID }) => {
+
+      // if (WebRTC.localMediaStream === null) return;
+
+      console.log('💀 Ending call RNCallKeep')
+
+
+      incomingCall = null;
+
+      if (currentAppState != 'active') Rooms.idle(true, true, true);
+
+      Rooms.voice(
+              {
+                audioMute: false,
+                key: incomingCall?.call,
+                screenshare: false,
+                video: false,
+                videoMute: false,
+                voice: false,
+              },
+              false,
+            );
+        
+            const peer = {
+              address: Wallet.address,
+              audioMute: false,
+              screenshare: false,
+              video: false,
+              voice: false,
+              room: incomingCall?.call
+            };
+        
+            // Peers.voicestatus(peer);
+            useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
+            WebRTC.exit('endCallAppProv');
+
+
+    });
+
+    RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
+      // Handle call answer event
+
+      // incomingCall = getIncomingCall();
+      console.log('✅ Answering call..');
+
+      incomingCall = await NativeModules.TurtleCoin.getInitialVoipPayload();
+
+      console.log('✅ incomingCall payload:', incomingCall);
+
+      navigationRef.navigate(MainScreens.CallScreen);
+
+      await waitForCondition(() => started, 10000);
+      
+      console.log('✅ Init complete');
+
+      Rooms.idle(false, false);
+
+      console.log('✅ Idle rejected');
+
+      WebRTC.init();
+
+      console.log('✅ WebRTC started');
+
+      Rooms.voice(
+        {
+          audioMute: false,
+          key: incomingCall?.call,
+          screenshare: false,
+          video: false,
+          videoMute: false,
+          voice: true,
+        },
+        false,
+      );
+
+      console.log('✅ Rooms.voice finished');
+  
+      const peer = {
+        address: Wallet.address,
+        audioMute: false,
+        screenshare: false,
+        video: false,
+        voice: true,
+        room: incomingCall?.call
+      };
+      // const me = roomUsers.filter((a) => a.address === myUserAddress)[0];
+      // me.voice = true;
+      const me: User = {
+        address: Wallet.address,
+        name: useUserStore.getState().user.name,
+        // the rest are optional and can be added as needed
+        // avatar: "https://example.com/avatar.png",
+        room: incomingCall?.call,
+        online: true,
+        voice: true,
+        video: false,
+        screenshare: false,
+        muted: false,
+        talking: false,
+        dm: true,
+        connectionStatus: ConnectionStatus.connected,
+        avatar: ''
+      };
+
+      console.log('✅ COnstructed variables');
+
+      const allRoomUsers = useGlobalStore.getState().roomUsers[incomingCall?.call];
+      console.log('AllRoomUsers answer:', allRoomUsers);
+      const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
+
+      const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: [...voiceUsers, me], talkingUsers: {} };
+      useGlobalStore.getState().setCurrentCall(call);
+      console.log('currentcall: ', useGlobalStore.getState().currentCall);
+      // Peers.voicestatus(peer);
+
+
+    });
+
     let timeoutId = null;
     const onAppStateChange = async (state: string) => {
+      currentAppState = state;
       if (state === 'inactive') {
+        if (incomingCall) return;
         // if (!started) {
         //   return;
         // }
@@ -208,10 +381,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //   // await Background.init();
         // }
       } else if (state === 'background') {
-        if (Camera.active) {
+        console.log('bgtrigcall', incomingCall);
+        if (Camera.active || incomingCall || !started) {
           return;
         }
-        console.log('******** BACKGROUND ********');
+        console.log('******** BACKGROUND ********', started);
         timeoutId = setTimeout(() => {
           if (authMethod === AuthMethods.reckless) return;
           useGlobalStore.getState().setAuthenticated(false);

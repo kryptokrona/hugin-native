@@ -48,6 +48,20 @@ export async function fetchWithTimeout(url, options, timeout = 1000) {
   ]);
 }
 
+  export function waitForCondition(conditionFn, timeout = 10000, interval = 100) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    const check = () => {
+      if (conditionFn()) return resolve(true);
+      if (Date.now() - start >= timeout) return reject(new Error('Timeout waiting for condition'));
+      setTimeout(check, interval);
+    };
+
+    check();
+  });
+}
+
 const fetchNodes = async () => {
   let response;
   for (const url of WalletConfig.nodeListURLs) {

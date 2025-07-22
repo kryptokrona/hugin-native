@@ -1,7 +1,7 @@
 import * as NaclSealed from 'tweetnacl-sealed-box';
 
 import { Address, CryptoNote } from 'kryptokrona-utils';
-import { Beam, Nodes } from '../../lib/native';
+import { Beam, get_sealed_box, Nodes } from '../../lib/native';
 import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import {
   cnFastHash,
@@ -30,6 +30,7 @@ import {
   setSyncStatus,
   setTransactions,
   useUserStore,
+  useGlobalStore
 } from '@/services';
 
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -343,8 +344,8 @@ export class ActiveWallet {
     );
     try {
         const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
-        console.log('key', key);
-        await Keychain.setGenericPassword('encryption', key, {
+        const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
+        await Keychain.setGenericPassword('encryption', key+pubKey, {
           accessible: Keychain.ACCESSIBLE.ALWAYS,
         });
         console.log('🔐 Key saved securely.');
@@ -443,7 +444,7 @@ export class ActiveWallet {
   });
 }
 
-  async send_message(message, receiver, beam = false) {
+  async send_message(message, receiver, beam = false, call = false) {
     //Assert address length
     if (receiver.length !== 163) {
       console.log('Error: Address too long/short');
@@ -482,7 +483,7 @@ export class ActiveWallet {
         return { success: false, error: 'not_connected', hash: '' };
       }
      try {
-      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address)), 10000);
+      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address, call)), 10000);
       console.log('Sent!', sent);
       if (!sent?.success) {
         if (typeof sent.reason !== 'string') return;
@@ -497,6 +498,64 @@ export class ActiveWallet {
     }
 
     return { success: true, error: 'success', hash };
+  }
+
+  async start_call(roomKey, receiver) {
+
+    //Assert address length
+    if (receiver.length !== 163) {
+      console.log('Error: Address too long/short');
+      return { error: 'address', success: false, hash: '' };
+    }
+    if (roomKey.length === 0) {
+      console.log('Error: No message to send');
+      return { error: 'message', success: false, hash: '' };
+    }
+
+    //Split address
+    let address = receiver.substring(0, 99);
+    let messageKey = receiver.substring(99, 163);
+
+    let my_address = this.address;
+    
+    let payload_json = {
+      from: my_address,
+      name: useUserStore.getState().user.name,
+      call: roomKey
+    }
+
+    console.log('Payload to send:', payload_json);
+
+    const sealed_box = await get_sealed_box({data: JSON.stringify(payload_json), messageKey});
+
+    console.log('sealed_box', sealed_box);
+
+    let payload_box = { box: sealed_box };
+    // Convert json to hex
+    let payload_hex = toHex(JSON.stringify(payload_box))
+
+    const hash = randomKey();
+
+    try {
+        await this.waitForCondition(() => useGlobalStore.getState().huginNode.connected, 10000);
+      } catch (err) {
+        console.log('Error: Hugin node not connected in time', error);
+        return { success: false, error: 'not_connected', hash: '' };
+      }
+     try {
+      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address, true)), 10000);
+      console.log('Sent!', sent);
+      if (!sent?.success) {
+        if (typeof sent.reason !== 'string') return;
+        if (sent.reason.length > 40) return;
+        console.log('Error sending message', sent.reason);
+        return { success: false, error: sent.reason, hash: '' };
+      }
+    } catch (error) {
+      console.log('Error sending message:', error.message);
+      return { success: false, error: error.message, hash: '' };
+    }
+
   }
 
   async encrypt_hugin_message(message, messageKey, sealed = false, toAddr) {
@@ -590,6 +649,43 @@ export class ActiveWallet {
     return payload_hex;
   }
 
+  async encrypt_call_push_registration() {
+
+    let timestamp = Date.now();
+    let box;
+
+    //Create the view tag using a one time private key and the receiver view key
+    const keys = await generateKeys();
+
+    try {
+    let payload_json = {
+      deviceId: useGlobalStore.getState().deviceToken,
+      viewTag: await Wallet.generate_view_tag(undefined, true),
+      type: 'call'
+    };
+    let payload_json_decoded = naclUtil.decodeUTF8(
+      JSON.stringify(payload_json),
+    );
+
+    box = new NaclSealed.sealedbox(
+      payload_json_decoded,
+      nonceFromTimestamp(timestamp),
+      hexToUint('6e49ab1a59019b2c22eb27efc5664be419c9d3d58016319cd0915e0494de4071'),
+    );
+
+    //Box object
+    let payload_box = {
+      box: Buffer.from(box).toString('hex'),
+      t: timestamp
+    };
+    // Convert json to hex
+    let payload_hex = toHex(JSON.stringify(payload_box));
+    return payload_hex;
+    } catch (e) {
+      console.error('Error making callkit shit:', e)
+    }
+  }
+
   async check_history(messageKey) {
     //Check history
     if (MessageSync.known_keys.indexOf(messageKey) > -1) {
@@ -608,12 +704,12 @@ export class ActiveWallet {
     return await cnFastHash(derivation);
   }
 
-  async generate_view_tag(address = this.active.getAddresses()[0]) {
+  async generate_view_tag(address = this.active.getAddresses()[0], long = false) {
     const myAddr = await Address.fromAddress(address);
     const pubKey = myAddr.m_keys.m_viewKeys.m_publicKey;
     const weeklyTimestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
     const hash = await cnFastHash(pubKey + weeklyTimestamp);
-    return hash.substring(0,3);
+    return long ? hash : hash.substring(0,3);
   }
 
   async copyMnemonic() {

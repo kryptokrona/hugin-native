@@ -28,6 +28,10 @@ std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs
 @interface TurtleCoinModule : NSObject <RCTBridgeModule>
 
 // Method declarations
+
+- (void)getInitialVoipPayload:(RCTPromiseResolveBlock)resolve
+                     rejecter:(RCTPromiseRejectBlock)reject;
+
 - (void)getWalletSyncData:(NSArray<NSString *> *)blockHashCheckpoints
                  startHeight:(NSInteger)startHeight
               startTimestamp:(NSInteger)startTimestamp

@@ -11,6 +11,8 @@ import { Rooms } from 'lib/native';
 
 import InCallManager from 'react-native-incall-manager';
 
+import RNCallKeep from 'react-native-callkeep';
+
 class VoiceChannel {
   constructor() {
     this.connections = [];
@@ -94,6 +96,7 @@ class VoiceChannel {
 
   async exit() {
     InCallManager.stop();
+    RNCallKeep.endAllCalls();
     for (const con of this.connections) {
       try {
         con.peerConnection.close();
@@ -298,8 +301,6 @@ class VoiceChannel {
     });
 
 
-peerConnection.addEventListener('icecandidate', async (event) => {
-  peerConnection.icecandidatesFound = peerConnection.icecandidatesFound != undefined ? peerConnection.icecandidatesFound + 1 : 0;
   peerConnection.addEventListener('icecandidate', async (event) => {
   peerConnection.icecandidatesFound = (peerConnection.icecandidatesFound ?? -1) + 1;
 
@@ -341,6 +342,8 @@ peerConnection.addEventListener('icecandidate', async (event) => {
     }
   };
 
+  if (peerConnection.icecandidatesFound > 3) finalizeIceGathering();
+
   if (event.candidate) {
     peerConnection.lastCandidateTimestamp = Date.now();
 
@@ -361,7 +364,6 @@ peerConnection.addEventListener('icecandidate', async (event) => {
   }
 });
 
-});
 
 
     peerConnection.addEventListener('icecandidateerror', (event) => {

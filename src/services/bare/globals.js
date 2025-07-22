@@ -59,9 +59,9 @@ class ConnectionType {
       Rooms.idle(true, false, true);
       await sleep(2000)
       Rooms.idle(false, false)
+      WebRTC.restartCall();
     }
     this.update(type);
-    WebRTC.restartCall();
     this.done();
   }
 

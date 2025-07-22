@@ -24,6 +24,7 @@ import * as naclSealed from 'tweetnacl-sealed-box';
 import * as nacl from 'tweetnacl';
 import * as naclutil from 'tweetnacl-util';
 import { saveMessageToQueue, resetMessageQueue, getMessageQueue } from '../utils/messageQueue';
+import RNCallKeep from 'react-native-callkeep';
 
 
 function hexToUint(hexString: string) {
@@ -80,7 +81,7 @@ async function getEncryptionKey(): Promise<string | null> {
   try {
     const credentials = await Keychain.getGenericPassword();
     if (credentials) {
-      return credentials.password; // This is the stored key
+      return credentials.password.substring(0,64); // This is the stored key
     }
     console.warn('🔑 No key found in Keychain.');
     return null;
@@ -144,10 +145,23 @@ let channelId;
     //   {}
     // )
   });
+
   let deviceId;
+  let incomingCall;
+
+  RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
+        // you might want to do following things when receiving this event:
+        // - Start playing ringback if it is an outgoing call
+        incomingCall = payload;
+      });
+
   export function getDeviceId() {
     return deviceId;
   }
+
+  export function getIncomingCall() {
+  return incomingCall;
+}
 
   setBackgroundMessageHandler(messaging, async remoteMessage => {
     console.log('🔔 Background message:', remoteMessage);

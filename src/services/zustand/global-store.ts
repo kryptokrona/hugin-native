@@ -11,6 +11,7 @@ type GlobalStore = {
   rooms: Room[];
   contacts: Contact[];
   thisRoom: string;
+  deviceToken: string;
   thisContact: string;
   roomMessages: Message[];
   messages: Message[];
@@ -23,6 +24,7 @@ type GlobalStore = {
   currentCall: Call;
   huginNode: HuginNode;
   typingUsers: Record<string, string[]>;
+  setDeviceToken: (payload: string) => void;
   setHuginNode: (payload: HuginNode) => void;
   setRoomMessages: (payload: Message[]) => void;
   setMessages: (payload: Message[]) => void;
@@ -59,6 +61,7 @@ export const useGlobalStore = create<
   subscribeWithSelector((set) => ({
     typingUsers: {},
     address: '',
+    deviceToken: '',
     authenticated: false,
     balance: { locked: 0, unlocked: 0 },
     contacts: [],
@@ -111,6 +114,10 @@ export const useGlobalStore = create<
     },
     setAddress: async (address: string) => {
       set({ address });
+    },
+    setDeviceToken: async (deviceToken: string) => {
+      console.log('Setting devicetoken to', deviceToken);
+      set({ deviceToken });
     },
     setAuthenticated: (authenticated: boolean) => {
       set({ authenticated });

@@ -32,7 +32,12 @@ class Connections extends EventEmitter {
     const thisRoomUsers = this.active()[peer.room];
     useGlobalStore.getState().updateRoomUser(peer)
 
-    const peerPreviousCallStatus = thisRoomUsers.find(a => a.address == peer.address).voice;
+    const peerPreviousCallStatus = false;
+    try {
+      peerPreviousCallStatus = thisRoomUsers.find(a => a.address == peer.address).voice;
+    } catch (e) {
+
+    }
 
     console.log('State is true?', peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address)
 

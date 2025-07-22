@@ -215,3 +215,9 @@ export const close_all_connections = () => {
   const data = { type: 'close_connections' };
   rpc.send(data);
 };
+
+export const get_sealed_box = async (data) => {
+  const send = { type: 'get_sealed_box', data };
+  const { box } = await rpc.request(send);
+  return box
+};

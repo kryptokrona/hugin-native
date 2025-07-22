@@ -23,6 +23,22 @@ RCT_EXPORT_MODULE(TurtleCoin);
 
 static long BLOCK_COUNT = 100;
 
+RCT_EXPORT_METHOD(getInitialVoipPayload:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+    {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *payload = [defaults objectForKey:@"InitialVoipPayload"];
+
+    if (payload != nil) {
+        // Optionally clear it to avoid re-processing
+        [defaults removeObjectForKey:@"InitialVoipPayload"];
+        resolve(payload);
+    } else {
+        resolve(nil);
+    }
+    }
+
+
 RCT_EXPORT_METHOD(getWalletSyncData:(NSArray<NSString *> *)blockHashCheckpoints
                   startHeight:(NSInteger)startHeight
                   startTimestamp:(NSInteger)startTimestamp
@@ -158,6 +174,7 @@ RCT_EXPORT_METHOD(generateRingSignatures:(NSString *)prefixHash
             return;
         }
         uint64_t cppRealOutput = [realOutputIndex unsignedLongLongValue];
+        NSLog(@"cppRealOutput: %llu", cppRealOutput);
 
         // Initialize the C++ vector for signatures
         std::vector<std::string> cppSignatures;

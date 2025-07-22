@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, DeviceEventEmitter } from 'react-native';
 
 import {
   GestureDetector,
@@ -21,7 +21,7 @@ import { Rooms } from 'lib/native';
 import { Avatar, TextField, TouchableOpacity } from '@/components';
 import { useGlobalStore, WebRTC, useThemeStore } from '@/services';
 import { textType } from '@/styles';
-import { Call } from '@/types';
+import { AudioDevice, WiredHeadsetEventData } from '@/types';
 import type { MainStackNavigationType } from '@/types';
 
 import { CustomIcon } from './_elements/custom-icon';
@@ -35,6 +35,7 @@ export const CallFloater: React.FC = () => {
 
   const users = useGlobalStore(state => state.currentCall.users);
   const room = useGlobalStore(state => state.currentCall.room);
+  const callKit = useGlobalStore(state => state.currentCall.callkit);
   const talkingUsers = useGlobalStore(state => state.currentCall.talkingUsers);
   const navigation = useNavigation<MainStackNavigationType>();
   
@@ -46,6 +47,8 @@ export const CallFloater: React.FC = () => {
   const myUserAddress = useGlobalStore((state) => state.address);
   const theme = useThemeStore((state) => state.theme);
   const [speaker, setSpeaker] = useState(false);
+  const [showAudioDeviceMenu, setShowAudioDeviceMenu] = useState(false);
+  const [audioDevice, setAudioDevice] = useState<AudioDevice>(AudioDevice.earpiece);
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(users.find(a => a.address === myUserAddress)?.video);
   const [frontCamera, setFrontCamera] = useState(true);
@@ -56,6 +59,22 @@ export const CallFloater: React.FC = () => {
 
   const [callDuration, setCallDuration] = useState('00 00 00'.split(' ').join('\n'));
 
+
+  useEffect(() => {
+    
+    if (audioDevice === AudioDevice.speaker) {
+      InCallManager.setForceSpeakerphoneOn(true);
+    }
+
+    if (audioDevice === AudioDevice.earpiece) {
+      InCallManager.setForceSpeakerphoneOn(false);
+    }
+
+  }, [audioDevice]);
+
+  useEffect(() => {
+    popUp();
+  }, [callKit])
 
   // useEffect(() => {
   //   console.log('Update time')
@@ -101,11 +120,6 @@ const panGesture = Gesture.Pan()
     navigation.navigate(MainScreens.CallScreen);
   }
 
-  function toggleSpeaker() {
-    InCallManager.setSpeakerphoneOn(!speaker);
-    setSpeaker(!speaker);
-  }
-
   async function toggleCamera() {
     if (frontCamera && camera) {
       WebRTC.switchCamera();
@@ -141,8 +155,8 @@ const panGesture = Gesture.Pan()
       track.stop();
     }
     } else {
-      InCallManager.setSpeakerphoneOn(true);
-      setSpeaker(true);
+      InCallManager.setForceSpeakerphoneOn(true);
+      setAudioDevice(AudioDevice.speaker);
     }
 
   }
@@ -188,7 +202,7 @@ const panGesture = Gesture.Pan()
     Peers.voicestatus(peer);
 
     useGlobalStore.getState().resetCurrentCall();
-    WebRTC.exit();
+    WebRTC.exit('callFloater');
   }
 
   return (
@@ -206,12 +220,11 @@ const panGesture = Gesture.Pan()
           },
         ]}>
         <View style={styles.avatarsContainer}>
-          {users.map((user) => (
+          {users.map((user) => 
+          (
             <View key={user.address} style={{opacity: (user.address == myUserAddress || user.connectionStatus == 'connected') ? 1 : 0.5, borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
             <Avatar
-              base64={
-                user.avatar !== '' ? user.avatar : getAvatar(user.address, 32)
-              }
+              address={user.address}
               size={24}
             />
             {user.connectionStatus === 'connecting' || (user.connectionStatus === undefined &&  user.address != myUserAddress) &&
@@ -226,30 +239,62 @@ const panGesture = Gesture.Pan()
             </View>
           ))}
         </View>
-        {/* <Text style={{ color }}>{callDuration}</Text> */}
-        <TouchableOpacity onPress={toggleSpeaker}>
-          {speaker ?
-            (
+        {showAudioDeviceMenu && 
+        <View style={[styles.audioDeviceMenu,
+          {
+            backgroundColor,
+            borderColor,
+            borderRadius: 20,
+            borderWidth: 1,
+            color,
+          }]}>
+          <TouchableOpacity onPress={() => setAudioDevice(AudioDevice.speaker)}>
               <CustomIcon
                 color={color}
                 name="volume-up"
                 type="MI"
                 size={24}
               />
-            ) :
-            (
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setAudioDevice(AudioDevice.earpiece)}>
               <CustomIcon
                 color={color}
                 name="volume-mute"
                 type="MI"
                 size={24}
               />
-            )
-          
+          </TouchableOpacity>
+        </View>
+        }
+        {/* <Text style={{ color }}>{callDuration}</Text> */}
+        <TouchableOpacity hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }} onPress={() => {if(audioDevice === AudioDevice.bluetooth) return; setShowAudioDeviceMenu(!showAudioDeviceMenu)}}>
+          {audioDevice == AudioDevice.speaker &&
+              <CustomIcon
+                color={color}
+                name="volume-up"
+                type="MI"
+                size={24}
+              />
+          }
+          {audioDevice == AudioDevice.earpiece &&
+              <CustomIcon
+                color={color}
+                name="volume-mute"
+                type="MI"
+                size={24}
+              />          
+          }
+          {audioDevice == AudioDevice.bluetooth &&
+              <CustomIcon
+                color={color}
+                name="bluetooth"
+                type="MI"
+                size={24}
+              />          
           }
           
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleMuted}>
+        <TouchableOpacity hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }} onPress={toggleMuted}>
           {muted ?
             (
               <CustomIcon
@@ -271,7 +316,7 @@ const panGesture = Gesture.Pan()
           }
           
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleCamera}>
+        <TouchableOpacity hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }} onPress={toggleCamera}>
           {camera ?
             frontCamera ?
             (
@@ -303,7 +348,7 @@ const panGesture = Gesture.Pan()
           }
           
         </TouchableOpacity>
-        <TouchableOpacity onPress={popUp}>
+        <TouchableOpacity hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }} onPress={popUp}>
           <CustomIcon
             color={color}
             name="popup"
@@ -311,7 +356,7 @@ const panGesture = Gesture.Pan()
             size={24}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={endCall}>
+        <TouchableOpacity hitSlop={{ bottom: 8, left: 8, right: 8, top: 8 }} onPress={endCall}>
           <CustomIcon
             color="#dc2626"
             name="phone-hangup"
@@ -325,6 +370,14 @@ const panGesture = Gesture.Pan()
 };
 
 const styles = StyleSheet.create({
+  audioDeviceMenu: {
+    position: 'absolute',
+    left: -60,
+    gap: 5,
+    padding: 10,
+    width: 50,
+    alignItems: 'center'
+  },
   avatarsContainer: {
     alignItems: 'center',
     flexDirection: 'column',
