@@ -14,6 +14,7 @@ import { Styles } from '@/styles';
 
 interface Props {
   title?: string;
+  subtitle?: string;
   backButton?: boolean;
   right?: React.ReactNode;
   noLeft?: boolean;
@@ -22,6 +23,7 @@ interface Props {
 
 export const Header: React.FC<Props> = ({
   title,
+  subtitle,
   backButton,
   right,
   onBackPress,
@@ -133,7 +135,8 @@ useEffect(() => {
         )}
       </View>
       <View style={styles.center}>
-        {title && <TextField maxLength={24}>{title}</TextField>}
+        {title && <TextField style={{ marginTop: subtitle ? 7 : undefined }} maxLength={24}>{title}</TextField>}
+        {subtitle && <TextField style={{ marginTop: 0 }} size="xsmall" maxLength={24}>{subtitle}</TextField>}
       </View>
       <View style={styles.side}>{right}</View>
     </View>

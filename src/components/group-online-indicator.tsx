@@ -29,14 +29,14 @@ export const GroupOnlineIndicator: React.FC<Props> = ({
       color={`${roomUsers?.length > 0 ? 'green' : 'grey'}`}
       />
       </View>
-    {roomUsers &&
+    {/* {roomUsers &&
 
       <OnlineUsers
           online={roomUsers.length}
           // color={`${online ? 'green' : 'grey'}`}
           />
 
-        }
+        } */}
   </TouchableOpacity>
   );
 };
