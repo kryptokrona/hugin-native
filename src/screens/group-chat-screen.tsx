@@ -172,6 +172,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   function onJoinCall() {
+    onCloseCallMenu();
     WebRTC.init();
     Rooms.voice(
       {
@@ -328,6 +329,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         <Header
           backButton
           title={name}
+          subtitle={`${roomUsers?.length} online`}
           right={
             <View style={{ flexDirection: 'row', gap: 10, marginLeft: -5 }}>
               <TouchableOpacity
