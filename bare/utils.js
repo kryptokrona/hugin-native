@@ -5,6 +5,36 @@ const b4a = require('b4a');
 const { Hugin } = require('./account');
 //const nacl = require('tweetnacl');
 
+function encrypt_sealed_box(pk, data) {
+  console.log('Received m: ', data)
+  console.log('Received pk: ', pk)
+  const pub = Buffer.from(pk, 'hex')
+  const m = Buffer.from(data, 'utf-8')
+  const cipher = Buffer.alloc(m.length + sodium.crypto_box_SEALBYTES)
+  sodium.crypto_box_seal(cipher, m, pub)
+  console.log('Sealedbox: ', cipher)
+  console.log('Sealedbox hex: ', cipher.toString('hex'))
+  return cipher.toString('hex');
+}
+
+function decrypt_sealed_box(data) {
+  const {skHex, pkHex, cipherHex} = data;
+  const sk = Buffer.from(skHex, 'hex'); // secret key
+  const pk = Buffer.from(pkHex, 'hex'); // public key
+  const cipher = Buffer.from(cipherHex, 'hex');
+
+  const message = Buffer.alloc(cipher.length - sodium.crypto_box_SEALBYTES);
+
+  const success = sodium.crypto_box_seal_open(message, cipher, pk, sk);
+
+  if (!success) {
+    throw new Error('Decryption failed: invalid sealed box or wrong key');
+  }
+
+  console.log('Decrypted message: ', message.toString('utf-8'));
+  return message.toString('utf-8');
+}
+
 function create_peer_base_keys(buf) {
   const keypair = DHT.keyPair(buf);
   const keys = Keychain.from(keypair);
@@ -364,5 +394,7 @@ module.exports = {
   sign_joined_message,
   check_hash,
   create_room_invite,
-  sanitize_typing_message
+  sanitize_typing_message,
+  encrypt_sealed_box,
+  decrypt_sealed_box
 };

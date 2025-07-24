@@ -1,6 +1,6 @@
 require('./runtime');
 
-const { create_room_invite } = require('./utils');
+const { create_room_invite, encrypt_sealed_box, decrypt_sealed_box } = require('./utils');
 const {
   send_message,
   create_swarm,
@@ -28,6 +28,14 @@ const onrequest = async (p) => {
   switch (p.type) {
     case 'log':
       break;
+    case 'get_sealed_box':
+      console.log('🎁 Returning sealed box from backend')
+      const box = encrypt_sealed_box(p.data.messageKey, p.data.data);
+      return { box };
+    case 'decrypt_sealed_box':
+      console.log('🎁 Decrypting sealed box from backend')
+      const plaintext = decrypt_sealed_box(p.data);
+      return { plaintext };
     case 'push_registration':
       Nodes.register(p.data);
       break;

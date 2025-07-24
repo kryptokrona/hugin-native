@@ -7,9 +7,8 @@ import {
   SafeAreaView,
   StyleSheet,
   View,
+  Settings
 } from 'react-native';
-
-import { NativeModules } from 'react-native';
 
 import { createNavigationContainerRef } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
@@ -37,10 +36,8 @@ import { Peers } from '../lib/connections';
 
 import { Background } from './background';
 
-import { Beam, Nodes, Rooms } from '../lib/native';
+import { Beam, decrypt_sealed_box, get_sealed_box, Nodes, Rooms } from '../lib/native';
 // import { Foreground } from './service';
-
-import { getIncomingCall } from '../services/pushnotifications';
 
 import {
   setLatestMessages,
@@ -53,13 +50,13 @@ import { Camera, Connection, Files } from '../services/bare/globals';
 import { getContacts, getFeedMessages, initDB, loadSavedFiles, saveMessage } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 import { Wallet } from '../services/kryptokrona/wallet';
-import { Notify } from '../services/utils';
+import { fromHex, Notify } from '../services/utils';
 import { getCoinPriceFromAPI } from '../utils/fiat';
 import { setStoreFeedMessages } from '../services/zustand';
 import { useTranslation } from 'react-i18next';
 import { getMessageQueue, resetMessageQueue } from '@/utils/messageQueue';
 import { AuthMethods, ConnectionStatus, User } from '@/types';
-import { waitForCondition } from '@/utils';
+import { sleep, waitForCondition } from '@/utils';
 
 interface AppProviderProps {
   children: React.ReactNode;
@@ -209,6 +206,60 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       useGlobalStore.getState().setDeviceToken(token);
     });
 
+    // async function getInitialEvents() {
+
+    //   await waitForCondition(() => started, 10000);
+
+    //   console.log('Started?', started);
+
+    //   const initialEvents = await RNCallKeep.getInitialEvents();
+    //   console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+    //   console.log('initialEvents', initialEvents);
+    //   console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+
+    //   const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
+    //   console.log('key', key)
+    //   const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
+    //   console.log('pubKey', pubKey)
+    //   const sealed_box = await get_sealed_box({data: JSON.stringify({lmao: 'lol'}), pubKey});
+    //   console.log('sealed_box', sealed_box);
+    //   const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: sealed_box})
+    //   console.log('plaintext', plaintext)
+
+    // }
+    
+    // getInitialEvents();
+
+  // ===== Step 3: subscribe `didLoadWithEvents` event =====
+    VoipPushNotification.addEventListener('didLoadWithEvents', async (events) => {
+        // --- this will fire when there are events occured before js bridge initialized
+        // --- use this event to execute your event handler manually by event type
+
+        if (!events || !Array.isArray(events) || events.length < 1) {
+            return;
+        }
+        for (let voipPushEvent of events) {
+            let { name, data } = voipPushEvent;
+            if (name === VoipPushNotification.RNVoipPushRemoteNotificationReceivedEvent) {
+              await waitForCondition(() => started, 10000);
+              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+              console.log('started', started);
+              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+              const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
+              const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
+              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+              console.log('key', key,pubKey);
+              const box = JSON.parse(fromHex(data?.payload)).box;
+              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+              console.log('box', box);
+              const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: box})
+              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+              console.log('data', plaintext);
+              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+            }
+        }
+    });
+
     const options = {
       ios: {
         appName: 'Hugin Messenger',
@@ -251,23 +302,27 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         
             // Peers.voicestatus(peer);
             useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
-            WebRTC.exit('endCallAppProv');
+            WebRTC.exit();
 
 
     });
 
     RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
-      // Handle call answer event
-
-      incomingCall = await NativeModules.TurtleCoin.getInitialVoipPayload();
-
-      navigationRef.navigate(MainScreens.CallScreen);
-
+      // Handle call answer event     
+      
       await waitForCondition(() => started, 10000);
+
+      console.log('✅ Conditions met')
 
       Rooms.idle(false, false);
 
       WebRTC.init();
+
+      incomingCall = useGlobalStore.getState().voipPayload;
+
+      if(!incomingCall) return;
+
+      console.log('✅ Got incoming call:', incomingCall)
 
       Rooms.voice(
         {
@@ -310,6 +365,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
 
       const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: [...voiceUsers, me], talkingUsers: {} };
+      console.log('✅ currentcall:', call)
       useGlobalStore.getState().setCurrentCall(call);
       // Peers.voicestatus(peer);
 
