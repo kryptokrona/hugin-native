@@ -202,7 +202,7 @@ const panGesture = Gesture.Pan()
     Peers.voicestatus(peer);
 
     useGlobalStore.getState().resetCurrentCall();
-    WebRTC.exit('callFloater');
+    WebRTC.exit();
   }
 
   return (

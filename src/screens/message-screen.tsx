@@ -113,6 +113,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
     const deriveKey = async () => {
       const derivedKey = await Wallet.key_derivation_hash(roomKey);
       keyRef.current = derivedKey;
+      console.log('derived key', derivedKey);
       setRoomUsers(allRoomUsers[derivedKey])
     };
 
@@ -236,7 +237,7 @@ useEffect(() => {
   
       Peers.voicestatus(peer);
       useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
-      WebRTC.exit('message-screen');
+      WebRTC.exit();
     }
 
   const scrollToBottom = () => {

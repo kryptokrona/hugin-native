@@ -62,7 +62,6 @@ interface AppProviderProps {
   children: React.ReactNode;
 }
 
-let started = false;
 let joining = false;
 
 export const navigationRef = createNavigationContainerRef();
@@ -71,6 +70,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const theme = useThemeStore((state) => state.theme);
   const { i18n } = useTranslation();
   const authenticated = useGlobalStore((state) => state.authenticated);
+  const started = useGlobalStore((state) => state.started);
   const user = useUserStore((state) => state.user);
   const preferences = usePreferencesStore((state) => state.preferences);
   const { setThisRoom } = useRoomStore();
@@ -145,7 +145,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Rooms.join();
     Beam.join();
     Nodes.connect('', true)
-    started = true;
+    useGlobalStore.getState().setStarted(true);
 
     updateFiatPrice();
 
@@ -176,21 +176,92 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
   }
 
-  // const stopTasks = () => {
-  //   Foreground?.service?.stopAll();
-  // };
+  const answerCall = async () => {
+      // Handle call answer event     
 
-  /// Deactivated timer to stop foreground tasks on Android
+      console.log('☎️ Answering call..');
 
-  // const Timeout = new Timer(() => {
-  //   console.log('Stop task!');
+      const incomingCall = useGlobalStore.getState().voipPayload;
 
-  //   if (Platform.OS === 'android') {
-  //     stopTasks();
-  //   }
-  // });
+      const me: User = {
+        address: Wallet.address,
+        name: useUserStore.getState().user.name,
+        room: incomingCall?.call,
+        online: true,
+        voice: true,
+        video: false,
+        screenshare: false,
+        muted: false,
+        talking: false,
+        dm: true,
+        connectionStatus: ConnectionStatus.connected,
+        avatar: ''
+      };
 
-  /////////////////////////////////////////////
+      const caller: User = {
+        address: incomingCall?.from || '',
+        name: incomingCall?.name || 'Anonymous',
+        room: incomingCall?.call,
+        online: true,
+        voice: true,
+        video: false,
+        screenshare: false,
+        muted: false,
+        talking: false,
+        dm: true,
+        connectionStatus: ConnectionStatus.connecting,
+        avatar: ''
+      };
+
+      const currentCall = { callKit: true, room: incomingCall?.call, time: Date.now(), users: [me, caller], talkingUsers: {} };
+      useGlobalStore.getState().setCurrentCall(currentCall);
+      
+      await waitForCondition(() => started, 10000);
+
+      Rooms.idle(false, false);
+
+      WebRTC.init();
+
+      if(!incomingCall) return;
+
+      await waitForCondition(() => useGlobalStore.getState().roomUsers[incomingCall?.call]?.length > 0, 5000);
+
+
+      const peer = {
+        address: Wallet.address,
+        audioMute: false,
+        screenshare: false,
+        video: false,
+        voice: true,
+        room: incomingCall?.call
+      };
+
+      Peers.voicestatus(peer);
+
+      Rooms.voice(
+        {
+          audioMute: false,
+          key: incomingCall?.call,
+          screenshare: false,
+          video: false,
+          videoMute: false,
+          voice: true,
+        },
+        false,
+      );
+
+      const allRoomUsers = useGlobalStore.getState().roomUsers[incomingCall?.call];
+      const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
+
+      const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: voiceUsers, talkingUsers: {} };
+
+      useGlobalStore.getState().setCurrentCall(call);
+      await sleep(10000);
+
+      WebRTC.fixAudio(incomingCall?.from)
+
+
+    }
 
   useEffect(() => {
 
@@ -242,20 +313,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
             let { name, data } = voipPushEvent;
             if (name === VoipPushNotification.RNVoipPushRemoteNotificationReceivedEvent) {
               await waitForCondition(() => started, 10000);
-              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
-              console.log('started', started);
-              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
               const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
               const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
-              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
-              console.log('key', key,pubKey);
               const box = JSON.parse(fromHex(data?.payload)).box;
-              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
-              console.log('box', box);
-              const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: box})
-              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
-              console.log('data', plaintext);
-              console.log('🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉')
+              const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: box});
+              const json = JSON.parse(plaintext);
+              useGlobalStore.getState().setVoipPayload(json);
+              RNCallKeep.endAllCalls();
+              answerCall();
             }
         }
     });
@@ -307,76 +372,21 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     });
 
-    RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
-      // Handle call answer event     
+    RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
+
+      useGlobalStore.getState().setVoipPayload(payload);
       
-      await waitForCondition(() => started, 10000);
+    });
 
-      console.log('✅ Conditions met')
-
-      Rooms.idle(false, false);
-
-      WebRTC.init();
-
-      incomingCall = useGlobalStore.getState().voipPayload;
-
-      if(!incomingCall) return;
-
-      console.log('✅ Got incoming call:', incomingCall)
-
-      Rooms.voice(
-        {
-          audioMute: false,
-          key: incomingCall?.call,
-          screenshare: false,
-          video: false,
-          videoMute: false,
-          voice: true,
-        },
-        false,
-      );
-  
-      const peer = {
-        address: Wallet.address,
-        audioMute: false,
-        screenshare: false,
-        video: false,
-        voice: true,
-        room: incomingCall?.call
-      };
-
-
-      const me: User = {
-        address: Wallet.address,
-        name: useUserStore.getState().user.name,
-        room: incomingCall?.call,
-        online: true,
-        voice: true,
-        video: false,
-        screenshare: false,
-        muted: false,
-        talking: false,
-        dm: true,
-        connectionStatus: ConnectionStatus.connected,
-        avatar: ''
-      };
-
-      const allRoomUsers = useGlobalStore.getState().roomUsers[incomingCall?.call];
-      const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
-
-      const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: [...voiceUsers, me], talkingUsers: {} };
-      console.log('✅ currentcall:', call)
-      useGlobalStore.getState().setCurrentCall(call);
-      // Peers.voicestatus(peer);
-
-
+    RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
+      answerCall();
     });
 
     let timeoutId = null;
     const onAppStateChange = async (state: string) => {
       currentAppState = state;
       if (state === 'inactive') {
-        if (incomingCall) return;
+        if (useGlobalStore.getState().voipPayload !== null) return;
         // if (!started) {
         //   return;
         // }

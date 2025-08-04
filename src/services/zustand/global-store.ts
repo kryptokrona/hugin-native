@@ -8,6 +8,7 @@ type GlobalStore = {
   balance: Balance;
   address: string;
   authenticated: boolean;
+  started: boolean;
   rooms: Room[];
   contacts: Contact[];
   thisRoom: string;
@@ -24,6 +25,10 @@ type GlobalStore = {
   currentCall: Call;
   huginNode: HuginNode;
   typingUsers: Record<string, string[]>;
+  voipPayload: Record<string, any> | null;
+  setStarted: (payload: boolean) => void;
+  setVoipPayload: (payload: Record<string, any>) => void;
+  clearVoipPayload: () => void;
   setDeviceToken: (payload: string) => void;
   setHuginNode: (payload: HuginNode) => void;
   setRoomMessages: (payload: Message[]) => void;
@@ -59,6 +64,7 @@ export const useGlobalStore = create<
   [['zustand/subscribeWithSelector', never]]
 >(
   subscribeWithSelector((set) => ({
+    voipPayload: null,
     typingUsers: {},
     address: '',
     deviceToken: '',
@@ -74,6 +80,9 @@ export const useGlobalStore = create<
     feedMessages: [],
     avatars: {},
     huginNode: {connected: false},
+    started: false,
+    setVoipPayload: (voipPayload) => set({ voipPayload }),
+    clearVoipPayload: () => set({ voipPayload: null }),
     setTypingUsers: (roomId: string, users: string[]) => {
       set((state) => ({
         typingUsers: {
@@ -121,6 +130,9 @@ export const useGlobalStore = create<
     },
     setAuthenticated: (authenticated: boolean) => {
       set({ authenticated });
+    },
+    setStarted: (started: boolean) => {
+      set({ started });
     },
     setBalance: async (balance: Balance) => {
       set({ balance });

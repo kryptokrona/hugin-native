@@ -68,7 +68,11 @@ class VoiceChannel {
   }
 
   async init(video = false) {
-    if (this.localMediaStream) return;
+    
+    if (this.localMediaStream) {
+      console.log('☎️ Already have localMediaStream, stop init!')
+      return;
+    };
     //TODO***
     //If we have active video during the call, if someone joins, we should set vidoe = true
     const mediaConstraints = { audio: true, video };
@@ -97,6 +101,7 @@ class VoiceChannel {
   async exit() {
     InCallManager.stop();
     RNCallKeep.endAllCalls();
+    useGlobalStore.getState().clearVoipPayload();
     for (const con of this.connections) {
       try {
         con.peerConnection.close();

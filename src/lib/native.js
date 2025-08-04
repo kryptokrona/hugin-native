@@ -221,3 +221,10 @@ export const get_sealed_box = async (data) => {
   const { box } = await rpc.request(send);
   return box
 };
+
+export const decrypt_sealed_box = async (data) => {
+  console.log('🔓 Decrypting box:', data);
+  const send = { type: 'decrypt_sealed_box', data };
+  const { plaintext } = await rpc.request(send);
+  return plaintext
+};
