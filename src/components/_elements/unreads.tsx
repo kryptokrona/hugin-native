@@ -27,10 +27,10 @@ export const Unreads: React.FC<Props> = ({ unreads, style }) => {
     <View
       style={[
         styles.counter,
-        { backgroundColor: theme.accent },
+        { backgroundColor: theme.accent, minWidth: unreads > 20 ? 37 : unreads > 9 ? 28 : 20 },
         style && style,
       ]}>
-      <TextField bold size="xsmall" type="secondary">
+      <TextField bold numberOfLines={1} size="xsmall" type="secondary">
         {mUnreads}
       </TextField>
     </View>
@@ -51,5 +51,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     zIndex: 10,
+    alignSelf: 'flex-start'
   },
 });
