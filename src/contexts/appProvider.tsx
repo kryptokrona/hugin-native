@@ -7,7 +7,8 @@ import {
   SafeAreaView,
   StyleSheet,
   View,
-  Settings
+  Settings,
+  AppStateStatus
 } from 'react-native';
 
 import { createNavigationContainerRef } from '@react-navigation/native';
@@ -78,6 +79,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authMethod = usePreferencesStore(
       (state) => state.preferences.authMethod,
     );
+  let frontendStarted = false;
 
 
   useEffect(() => {
@@ -96,23 +98,17 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     //     return;
     //   }
     // }
-
+    
     if (started) {
+      initFrontend();
       return;
     }
 
     await Rooms.start();
     await initDB();
-    await setLatestRoomMessages();
-    await setLatestMessages();
+  
     Files.update(await loadSavedFiles());
     await Background.init();
-
-    // Function to update the fiat price every minute
-    async function updateFiatPrice() {
-      const price = await getCoinPriceFromAPI();
-      useGlobalStore.setState({ fiatPrice: price });
-    }
 
     const node = preferences?.node
       ? {
@@ -122,7 +118,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       : { port: 80, url: 'node.xkr.network' };
 
     Connection.listen();
-    Notify.setup();
     await Wallet.init(node);
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
@@ -145,12 +140,35 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Rooms.join();
     Beam.join();
     Nodes.connect('', true)
+    console.log('📱 App started!, changing state..')
     useGlobalStore.getState().setStarted(true);
+    console.log('📱 App started state:', started)
+    console.log('📱 App started state lonk:', useGlobalStore.getState().started);
+    initFrontend();
 
+  }
+
+  async function initFrontend() {
+    console.log('Initing front end..', frontendStarted)
+    if (frontendStarted) return;
+    console.log('Setting latest room messages..')
+    await setLatestRoomMessages(false);
+    console.log('Setting latest messages..')
+    await setLatestMessages();
+    console.log('Starting fiat price loop..')
+    // Function to update the fiat price every minute
+    async function updateFiatPrice() {
+      const price = await getCoinPriceFromAPI();
+      useGlobalStore.setState({ fiatPrice: price });
+    }
+    console.log('Starting Notify..')
+    Notify.setup();
     updateFiatPrice();
-
+    
     // Start the interval
     setInterval(updateFiatPrice, 60000);
+    frontendStarted = true;
+
   }
 
   useEffect(() => {
@@ -182,6 +200,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       console.log('☎️ Answering call..');
 
       const incomingCall = useGlobalStore.getState().voipPayload;
+
+      console.log('☎️ Incoming call:', incomingCall);
 
       const me: User = {
         address: Wallet.address,
@@ -215,17 +235,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
       const currentCall = { callKit: true, room: incomingCall?.call, time: Date.now(), users: [me, caller], talkingUsers: {} };
       useGlobalStore.getState().setCurrentCall(currentCall);
+
+      console.log('☎️ Set current call:', currentCall);
       
-      await waitForCondition(() => started, 10000);
-
-      Rooms.idle(false, false);
-
       WebRTC.init();
+
+      console.log('☎️ WebRTC inited, waiting for started:', started);
+
+      await waitForCondition(() => useGlobalStore.getState().started, 10000);
+
+      console.log('☎️ App started!');
+      
+      Rooms.idle(false, false);
 
       if(!incomingCall) return;
 
+      console.log('☎️ Got incoming call, waiting for p2p conn...');
+
       await waitForCondition(() => useGlobalStore.getState().roomUsers[incomingCall?.call]?.length > 0, 5000);
 
+      console.log('☎️ Got p2p conn!');
 
       const peer = {
         address: Wallet.address,
@@ -237,6 +266,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       };
 
       Peers.voicestatus(peer);
+
+      console.log('☎️ Sent voice status!');
 
       Rooms.voice(
         {
@@ -250,15 +281,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         false,
       );
 
-      const allRoomUsers = useGlobalStore.getState().roomUsers[incomingCall?.call];
-      const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
+      // const allRoomUsers = useGlobalStore.getState().roomUsers[incomingCall?.call];
+      // const voiceUsers = allRoomUsers?.filter(a => a.voice === true) || [];
 
-      const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: voiceUsers, talkingUsers: {} };
+      // const call = { callKit: true, room: incomingCall?.call, time: Date.now(), users: voiceUsers, talkingUsers: {} };
 
-      useGlobalStore.getState().setCurrentCall(call);
-      await sleep(10000);
+      // useGlobalStore.getState().setCurrentCall(call);
 
-      WebRTC.fixAudio(incomingCall?.from)
 
 
     }
@@ -319,24 +348,24 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
               const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: box});
               const json = JSON.parse(plaintext);
               useGlobalStore.getState().setVoipPayload(json);
-              RNCallKeep.endAllCalls();
+              // RNCallKeep.endAllCalls();
               answerCall();
             }
         }
     });
 
-    const options = {
-      ios: {
-        appName: 'Hugin Messenger',
-        supportsVideo: true,
-      },
-      android: {
-        alertTitle: 'Permissions required',
-        alertDescription: 'This application needs to access your phone accounts',
-      },
-    };
+    // const options = {
+    //   ios: {
+    //     appName: 'Hugin Messenger',
+    //     supportsVideo: true,
+    //   },
+    //   android: {
+    //     alertTitle: 'Permissions required',
+    //     alertDescription: 'This application needs to access your phone accounts',
+    //   },
+    // };
 
-    RNCallKeep.setup(options);
+    // RNCallKeep.setup(options);
 
     RNCallKeep.addEventListener('endCall', ({ callUUID }) => {
 
@@ -383,8 +412,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
 
     let timeoutId = null;
-    const onAppStateChange = async (state: string) => {
+    const onAppStateChange = async (state: AppStateStatus) => {
       currentAppState = state;
+      useGlobalStore.getState().setAppState(state);
       if (state === 'inactive') {
         if (useGlobalStore.getState().voipPayload !== null) return;
         // if (!started) {

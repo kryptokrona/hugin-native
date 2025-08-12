@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 import type { Balance, Message, Room, User, Contact, Call, HuginNode } from '@/types';
+import { AppStateStatus } from 'react-native';
 
 type GlobalStore = {
   balance: Balance;
@@ -26,6 +27,8 @@ type GlobalStore = {
   huginNode: HuginNode;
   typingUsers: Record<string, string[]>;
   voipPayload: Record<string, any> | null;
+  appState: AppStateStatus;
+  setAppState: (payload: AppStateStatus) => void;
   setStarted: (payload: boolean) => void;
   setVoipPayload: (payload: Record<string, any>) => void;
   clearVoipPayload: () => void;
@@ -81,6 +84,8 @@ export const useGlobalStore = create<
     avatars: {},
     huginNode: {connected: false},
     started: false,
+    appState: 'inactive',
+    setAppState: (appState) => set({appState}),
     setVoipPayload: (voipPayload) => set({ voipPayload }),
     clearVoipPayload: () => set({ voipPayload: null }),
     setTypingUsers: (roomId: string, users: string[]) => {

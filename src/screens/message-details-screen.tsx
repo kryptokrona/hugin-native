@@ -53,9 +53,9 @@ import {
   setStoreCurrentRoom,
   useThemeStore,
   WebRTC,
-  useUserStore,
-  extractHuginLinkAndClean,
+  useUserStore
 } from '@/services';
+import {extractHuginLinkAndClean} from '@/services/utils/tools';
 import { textType } from '@/styles';
 import type {
   SelectedFile,

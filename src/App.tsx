@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { AppState, AppStateStatus, View } from 'react-native';
 
 import Toast from 'react-native-toast-message';
 
@@ -10,13 +11,28 @@ import { RootNavigator } from './components/_navigation/root-navigator';
 
 const App = () => {
   const theme = useThemeStore((state) => state.theme);
-
   const toastConfig = getToastConfig(theme);
+
+  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', setAppState);
+    return () => sub.remove();
+  }, []);
+
+  const isActive = appState === 'active';
 
   return (
     <AppProvider>
-      <RootNavigator />
-      <Toast config={toastConfig} />
+      {isActive ? (
+        <>
+          <RootNavigator />
+          <Toast config={toastConfig} />
+        </>
+      ) : (
+        // Minimal placeholder when backgrounded
+        <View />
+      )}
     </AppProvider>
   );
 };

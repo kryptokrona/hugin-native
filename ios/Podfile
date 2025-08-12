@@ -15,6 +15,9 @@ node_require('react-native/scripts/react_native_pods.rb')
 node_require('react-native-permissions/scripts/setup.rb')
 
 platform :ios, '15.1'
+pod 'GoogleUtilities', :modular_headers => true
+pod 'FirebaseCore', :modular_headers => true
+
 prepare_react_native_project!
 
 setup_permissions([
@@ -54,6 +57,10 @@ target 'Hugin' do
 
   ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 
+  # use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
+
+
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -63,6 +70,9 @@ target 'Hugin' do
   pod 'TurtleCoinModule', :path => './crypto'
   pod 'react-native-audio-waveform', :path => '../node_modules/@simform_solutions/react-native-audio-waveform' 
   pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
+  pod 'RNFBMessaging', :path => '../node_modules/@react-native-firebase/messaging'
+  pod 'sodium-ios'
+
 
 
   target 'HuginTests' do

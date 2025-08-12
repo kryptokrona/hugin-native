@@ -29,6 +29,7 @@ export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
     this.id = 0;
+    this.sentpush = false;
     this.rpc = new RPC(IPC, (req, error) => {
       const data = this.parse(b4a.toString(req.data));
       if (!data) {
@@ -68,6 +69,7 @@ export class Bridge {
   }
 
   async on_message(m) {
+    // console.log('Got message from bare: ', m)
     const json = m;
     if (!json) {
       console.log('** RPC ERROR, lib/rpc.js **');
@@ -83,10 +85,12 @@ export class Bridge {
         case 'hugin-node-connected':
           console.log('Hugin node connected!')
           useGlobalStore.getState().setHuginNode({connected: true});
+          if (this.sentpush) return;
           const pushRegistration = await Wallet.encrypt_push_registration();
           this.send({type: 'push_registration', data: pushRegistration});
           const callPushRegistration = await Wallet.encrypt_call_push_registration();
           this.send({type: 'push_registration', data: callPushRegistration});
+          this.sentpush = true;
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')
@@ -169,7 +173,7 @@ export class Bridge {
           }
           break;
         case 'peer-connected':
-          // console.log('peer-connected!', json);
+          console.log('peer-connected!', json.joined.name);
           Peers.join(json.joined, json.beam);
           saveRoomUser(
             json.joined.name,
@@ -179,7 +183,7 @@ export class Bridge {
           );
           break;
         case 'peer-disconnected':
-          // console.log('peer-disconnected!', json.address);
+          console.log('peer-disconnected!', json.name);
           Peers.left(json);
           break;
         case 'voice-channel-status':
@@ -207,6 +211,7 @@ export class Bridge {
           WebRTC.signal(key, topic, address, data);
           break;
         case 'error-message':
+          console.log('HUGE ERROR:', json.data)
           break;
         case 'save-file-info':
           break;
