@@ -92,12 +92,13 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const { roomKey, name, call } = route.params;
-  const messages = useGlobalStore((state) => state.roomMessages).filter(
-    (a) => a.room === roomKey,
-  );
+  const messages = useGlobalStore((state) => state.roomMessages);//.filter((a) => a.room === roomKey,
+  
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
+  const [unreadIndex, setUnreadIndex] = useState<number>(0);
+  const [unreadCounted, setUnreadCounted] = useState<boolean>(false);
   const [tipAddress, setTipAddress] = useState<string>('');
   const [dots, setDots] = useState<string>('');
   const [someoneTyping, setSomeoneTyping] = useState<boolean>(false);
@@ -107,6 +108,24 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const typingUsers = useGlobalStore((state) => state.typingUsers[roomKey]);
+
+  useEffect(() => {
+
+    if (unreadCounted) return;
+    if (!messages?.length) return;
+    setUnreadCounted(true);
+
+    setUnreadIndex(messages.findIndex(m => !m.read) - 1);
+    if (messages.findIndex(m => !m.read) !== -1) {
+      flatListRef.current?.scrollToIndex({
+        index: messages.findIndex(m => !m.read),
+        animated: false,
+        viewPosition: 0.5
+      });
+      } else {
+        scrollToBottom();
+      }
+  }, [messages])
   
   
   // const [inCall, setInCall] = useState<boolean>();
@@ -308,7 +327,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       setStoreCurrentRoom(roomKey);
       setRoomMessages(roomKey, 0);
       return () => {
-        // setStoreRoomMessages(messages);
+        setStoreRoomMessages([]);
       };
     }, [roomKey]),
   );
@@ -488,7 +507,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             {t('close')}
           </TextButton>
         </ModalCenter>
-
+        {messages?.length && 
         <FlatList
           inverted
           ref={flatListRef}
@@ -496,7 +515,14 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item, index }) => {
             const isNewestMessage = index === messages.length - 1;
+            const isFirstUnread = index === unreadIndex;
             const content = (
+                  <>
+      {isFirstUnread && (
+        <View style={{ alignItems: 'center', marginVertical: 8 }}>
+          <TextField size="small">-- New messages below --</TextField>
+        </View>
+      )}
               <GroupMessageItem
                 message={item.message}
                 timestamp={item.timestamp}
@@ -511,9 +537,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 file={item.file!}
                 onShowImagePress={showBigImage}
                 tip={item.tip}
+                read={item.read}
                 scrollToMessage={scrollToMessage}
-
               />
+                  </>
             );
 
             return isNewestMessage ? (
@@ -547,8 +574,17 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             <View style={{height: 20}}>
             </View>
             }
+              onScrollToIndexFailed={info => {
+              setTimeout(() => {
+                flatListRef.current?.scrollToIndex({
+                  index: info.index,
+                  animated: false,
+                  viewPosition: 0.5
+                });
+              }, 100);
+            }}
         />
-
+          }
 
         <KeyboardAvoidingView
           style={[styles.inputWrapper, { backgroundColor }]}
