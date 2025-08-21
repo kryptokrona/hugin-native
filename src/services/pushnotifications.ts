@@ -173,7 +173,7 @@ VoipPushNotification.addEventListener('didLoadWithEvents', async (events) => {
               // const audioRoutes = await RNCallKeep.getAudioRoutes();
               // console.log('audioRoutes:', audioRoutes)
 
-              if (useGlobalStore.getState().started === false) await init();
+              // if (useGlobalStore.getState().started === false) await init();
 
               const payload = data?.payload;
 
@@ -332,6 +332,7 @@ let channelId;
 
   setBackgroundMessageHandler(messaging, async remoteMessage => {
     console.log('🔔 Background message:', remoteMessage);
+    setTimeout(() => {Rooms.idle(true, true, true)}, 15000);
     let message;
     let error;
     try {

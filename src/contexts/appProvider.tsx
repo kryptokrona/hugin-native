@@ -98,9 +98,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     //     return;
     //   }
     // }
+    initFrontend();
+
+    if (1==1) return;
     
     if (started) {
-      initFrontend();
       return;
     }
 
@@ -164,10 +166,29 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     console.log('Starting Notify..')
     Notify.setup();
     updateFiatPrice();
+
+    Files.update(await loadSavedFiles());
     
     // Start the interval
     setInterval(updateFiatPrice, 60000);
     frontendStarted = true;
+
+    const contacts = await getContacts();
+    const knownKeys = contacts.map((contact) => contact.messagekey);
+    const keys = Wallet.privateKeys();
+    MessageSync.init('', knownKeys, keys);
+
+    const huginAddress = Wallet.address + keychain.getMsgKey();
+    console.log('huginAddress', huginAddress);
+
+    const files = Files.all().map((a) => {
+      return a.hash;
+    });
+
+    updateUser({
+      files,
+      huginAddress,
+    });
 
   }
 
@@ -402,6 +423,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     });
 
     RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
+
+      console.log('☎️ didDisplayIncomingCall')
 
       useGlobalStore.getState().setVoipPayload(payload);
       
