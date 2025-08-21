@@ -35,7 +35,6 @@ import {
 
 import { onDeleteGroup } from '../services/bare/groups';
 import { getRoomUsers } from '../services/bare/sqlite';
-import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
 interface Props {
   route: RouteProp<

@@ -16,7 +16,6 @@ import {
   View,
 } from 'react-native';
 
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   type RouteProp,
   useFocusEffect,
@@ -53,9 +52,9 @@ import {
   setStoreCurrentRoom,
   useThemeStore,
   WebRTC,
-  useUserStore,
-  extractHuginLinkAndClean,
+  useUserStore
 } from '@/services';
+import {extractHuginLinkAndClean} from '@/services/utils/tools';
 import { textType } from '@/styles';
 import type {
   SelectedFile,

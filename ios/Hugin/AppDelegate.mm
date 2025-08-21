@@ -21,6 +21,13 @@
   self.moduleName = @"Hugin";
   self.initialProps = @{};
 
+[RNCallKeep setup:@{
+    @"appName": @"Hugin Messenger",
+    @"maximumCallGroups": @3,
+    @"maximumCallsPerCallGroup": @1,
+    @"supportsVideo": @YES,
+  }];
+
   NSError *audioError = nil;
   [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
                                    withOptions:AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker
@@ -311,7 +318,7 @@ NSData* decodePayloadHex(NSString *payloadHex) {
     }
 
   // --- Retrieve information from your voip push payload
-  NSString *uuid = payload.dictionaryPayload[@"uuid"];
+  NSString *uuid = [[[NSUUID UUID] UUIDString] lowercaseString];
   NSString *handle = payload.dictionaryPayload[@"handle"];
 
   // --- this is optional, only required if you want to call `completion()` on the js side

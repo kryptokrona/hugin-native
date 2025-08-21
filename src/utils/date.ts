@@ -15,6 +15,10 @@ const prettyPrintMomentDate = (date?: moment.Moment) => {
 };
 
 export const prettyPrintDate = (date: number) => {
-  const currentDate = moment(date);
+  let currentDate = moment(date);
+    if (!currentDate.isValid()) {
+    currentDate = moment.unix(0);
+  }
+
   return prettyPrintMomentDate(currentDate);
 };

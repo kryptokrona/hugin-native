@@ -30,6 +30,7 @@ export interface Message {
   address: string;
   message: string;
   room?: string;
+  read?: boolean;
   reply: string;
   timestamp: number;
   nickname: string;

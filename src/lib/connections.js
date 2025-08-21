@@ -25,9 +25,12 @@ class Connections extends EventEmitter {
     };
     useGlobalStore.getState().addRoomUser(connected);
     this.change();
+    let list = this.active();
+    this.update(list);
   }
 
   voicestatus(peer) {
+    try {
     console.log('Voice status changed for ', peer );
     const thisRoomUsers = this.active()[peer.room];
     useGlobalStore.getState().updateRoomUser(peer)
@@ -49,10 +52,11 @@ class Connections extends EventEmitter {
       } catch (e) {
         console.log('Failed to get room name:', e)
       }
-      if (!roomName) {
-        message = `Has started a call`;
-        Notify.new({ name: peer.name, text: message }, true);
-      } else {
+      // if (!roomName) {
+      //   message = `Has started a call`;
+      //   Notify.new({ name: peer.name, text: message }, true);
+      // } else {
+      if (roomName) {
         message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
         Notify.new({ name: peer.name, text: message }, true, {roomKey: peer.room, type: 'roomcall', name: roomName});
       }
@@ -62,6 +66,10 @@ class Connections extends EventEmitter {
 
     let list = this.active();
     this.update(list);
+
+    } catch (e) {
+      console.log('❌ BIG ERROR', e)
+    }
 
   }
 
@@ -81,7 +89,7 @@ class Connections extends EventEmitter {
   update(list) {
     const currentCall = useGlobalStore.getState().currentCall;
 
-    const thisRoomUsers = list[currentCall.room];
+    const thisRoomUsers = list[currentCall.room] || [];
 
     const voiceUsers = thisRoomUsers.filter(a => a.voice === true);
   
@@ -98,7 +106,7 @@ class Connections extends EventEmitter {
       talkingUsers: updatedTalkingUsers,
     });
   
-    setStoreActiveRoomUsers(list);
+    // setStoreActiveRoomUsers(list);
   }
 
   active() {

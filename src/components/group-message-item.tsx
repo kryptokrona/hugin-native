@@ -34,6 +34,7 @@ import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
 import { GroupInvite } from '.';
 import { extractHuginLinkAndClean } from '@/services/utils';
+import { markMessageAsRead } from '@/services/bare/sqlite';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -65,6 +66,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   onPress,
   replyto,
   tip,
+  read,
   dm = false,
   status = 'success',
   scrollToMessage = () => {}
@@ -80,6 +82,10 @@ export const GroupMessageItem: React.FC<Props> = ({
   const ref = useRef<IWaveformRef>(null);
   const [playerState, setPlayerState] = useState(PlayerState.stopped);
   const [isLoading, setIsLoading] = useState(true);
+
+  if(!read) {
+    markMessageAsRead(replyHash, 'roomsmessages');
+  }
 
 
 

@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 
 import { StyleSheet, View } from 'react-native';
 
-import { joinAndSaveRoom, setStoreCurrentRoom, setStoreRoomMessages, useGlobalStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
+import { setStoreCurrentRoom, setStoreRoomMessages, useGlobalStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
 import { Styles } from '@/styles';
 import { PreviewItem } from '.';
 import { MainScreens } from '@/config';
 import { useNavigation } from '@react-navigation/native';
 import { MainStackNavigationType } from '@/types';
+import { joinAndSaveRoom } from '@/services/bare';
 
 interface Props {
   invite: string;
@@ -72,6 +73,7 @@ const styles = StyleSheet.create({
     margin: 10,
     marginTop: 0,
     marginLeft: -25,
+    paddingLeft: 30,
     minWidth: '98%',
     alignSelf: 'stretch',
     borderRadius: Styles.borderRadius.small,

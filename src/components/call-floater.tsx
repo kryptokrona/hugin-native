@@ -58,6 +58,8 @@ export const CallFloater: React.FC = () => {
   const color = theme.foreground;
 
   const [callDuration, setCallDuration] = useState('00 00 00'.split(' ').join('\n'));
+  const AnimatedView = Animated.createAnimatedComponent(View);
+
 
 
   useEffect(() => {
@@ -207,7 +209,7 @@ const panGesture = Gesture.Pan()
 
   return (
     <GestureDetector gesture={panGesture}>
-      <Animated.View
+      <AnimatedView
         style={[
           styles.overlayContainer,
           animatedStyle,
@@ -364,7 +366,7 @@ const panGesture = Gesture.Pan()
             size={24}
           />
         </TouchableOpacity>
-      </Animated.View>
+      </AnimatedView>
     </GestureDetector>
   );
 };

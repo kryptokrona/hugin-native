@@ -148,6 +148,16 @@ export const initDB = async () => {
       await db.executeSql(query);
     } catch (err) {}
 
+    query = 'ALTER TABLE messages ADD read BOOLEAN default 0';
+    try {
+      await db.executeSql(query);
+    } catch (err) {}
+
+    query = 'ALTER TABLE roomsmessages ADD read BOOLEAN default 0';
+    try {
+      await db.executeSql(query);
+    } catch (err) {}
+
     const xkrwallet = `CREATE TABLE IF NOT EXISTS wallet (
       id INTEGER PRIMARY KEY,
       json TEXT
@@ -490,6 +500,18 @@ export async function deleteContact(address: string) {
   }
   //Update active room list
   return true;
+}
+
+export async function markMessageAsRead(hash: string, type: string) {
+  try {
+    const result = await db.executeSql(
+      `UPDATE ${type} SET read = 1 WHERE hash = ?`,
+      [hash],
+    );
+
+  } catch (err) {
+    console.log('Failed to mark as read: ', err);
+  }
 }
 
 export async function getRooms() {
@@ -896,6 +918,7 @@ async function setFeedReplies(results: [ResultSet]) {
       res.replies = replies;
       res.reactions = reactions;
       const r: Message = toMessage(res);
+      if (!Number.isInteger(res?.timestamp)) continue;
       messages.push(r);
     }
   }
@@ -935,6 +958,7 @@ export async function getFeedMessages(page: number, replies=false) {
     for (const result of results) {
       for (let index = 0; index < result.rows.length; index++) {
         const res = result.rows.item(index);
+        if (!Number.isInteger(res?.timestamp)) continue;
         messages.push(res);
       }
     }
@@ -1053,7 +1077,7 @@ export async function saveRoomMessage(
   }
   try {
     await db.executeSql(
-      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, read, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         address,
         message,
@@ -1062,6 +1086,7 @@ export async function saveRoomMessage(
         timestamp,
         nickname,
         hash,
+        sent ? 1 : 0,
         sent ? 1 : 0,
         JSON.stringify(tip),
       ],
@@ -1106,13 +1131,14 @@ export async function saveMessage(
   }
   try {
     await db.executeSql(
-      'REPLACE INTO messages (conversation, message, reply, timestamp, hash, sent, tip) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO messages (conversation, message, reply, timestamp, hash, sent, read, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [
         conversation,
         message,
         reply,
         timestamp,
         hash,
+        sent ? 1 : 0,
         sent ? 1 : 0,
         JSON.stringify(tip),
       ],
@@ -1189,6 +1215,8 @@ export const toMessage = (res: any) => {
     timestamp: res.timestamp,
 
     tip: res.tip,
+
+    read: res.read === 1,
   };
 
   return message;

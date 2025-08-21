@@ -111,12 +111,31 @@ export async function getCoinPriceFromAPI() {
     let i = 0;
 
     while (!fiatPrice && i < WalletConfig.priceApiLinks.length) {
-        const uri = WalletConfig.priceApiLinks[i].url; 
+        const uri = WalletConfig.priceApiLinks[i].url;
 
         try {
+
             const response = await fetch(uri, {
-                method: 'GET',
-                timeout: WalletConfig.requestTimeout
+                "headers": {
+                    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                    "accept-language": "sv-SE,sv;q=0.9,en-SE;q=0.8,en;q=0.7,en-US;q=0.6",
+                    "cache-control": "no-cache",
+                    "pragma": "no-cache",
+                    "priority": "u=0, i",
+                    "sec-ch-ua": "\"Google Chrome\";v=\"137\", \"Chromium\";v=\"137\", \"Not/A)Brand\";v=\"24\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": "\"macOS\"",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "none",
+                    "sec-fetch-user": "?1",
+                    "upgrade-insecure-requests": "1"
+                },
+                "referrerPolicy": "strict-origin-when-cross-origin",
+                "body": null,
+                "method": "GET",
+                "mode": "cors",
+                "credentials": "include"
             });
 
             if (!response.ok) {
@@ -136,6 +155,7 @@ export async function getCoinPriceFromAPI() {
             const coinData = currentLevel;
 
             if (coinData) {
+                console.log('Got fiat price:', coinData);
                 return coinData;
             }
         } catch (error) {
@@ -148,6 +168,7 @@ export async function getCoinPriceFromAPI() {
     console.log('Failed to get price from API.');
     return undefined;
 }
+
 
 
 function getCurrencyTickers() {
