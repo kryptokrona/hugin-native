@@ -18,6 +18,7 @@ function encrypt_sealed_box(pk, data) {
 }
 
 function decrypt_sealed_box(data) {
+
   const {skHex, pkHex, cipherHex} = data;
   const sk = Buffer.from(skHex, 'hex'); // secret key
   const pk = Buffer.from(pkHex, 'hex'); // public key
@@ -28,11 +29,12 @@ function decrypt_sealed_box(data) {
   const success = sodium.crypto_box_seal_open(message, cipher, pk, sk);
 
   if (!success) {
-    throw new Error('Decryption failed: invalid sealed box or wrong key');
+    return "fail";
   }
 
   console.log('Decrypted message: ', message.toString('utf-8'));
   return message.toString('utf-8');
+  
 }
 
 function create_peer_base_keys(buf) {

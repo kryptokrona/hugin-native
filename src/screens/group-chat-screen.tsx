@@ -520,7 +520,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                   <>
       {isFirstUnread && (
         <View style={{ alignItems: 'center', marginVertical: 8 }}>
-          <TextField size="small">-- New messages below --</TextField>
+          <TextField size="xsmall">-- New messages below --</TextField>
         </View>
       )}
               <GroupMessageItem

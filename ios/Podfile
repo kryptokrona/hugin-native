@@ -1,3 +1,4 @@
+ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 # Resolve react_native_pods.rb with node to allow for hoisting
 
@@ -55,8 +56,6 @@ target 'Hugin' do
   end
   config = use_native_modules!
 
-  ENV['RCT_NEW_ARCH_ENABLED'] = '1'
-
   # use_frameworks! :linkage => :static
   $RNFirebaseAsStaticFramework = true
 
@@ -64,7 +63,8 @@ target 'Hugin' do
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :new_arch_enabled => true
   )
 
   pod 'TurtleCoinModule', :path => './crypto'

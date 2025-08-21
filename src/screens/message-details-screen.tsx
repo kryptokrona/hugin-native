@@ -16,7 +16,6 @@ import {
   View,
 } from 'react-native';
 
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   type RouteProp,
   useFocusEffect,

@@ -508,7 +508,6 @@ export async function markMessageAsRead(hash: string, type: string) {
       `UPDATE ${type} SET read = 1 WHERE hash = ?`,
       [hash],
     );
-    console.log('Marked as read: ', hash);
 
   } catch (err) {
     console.log('Failed to mark as read: ', err);
