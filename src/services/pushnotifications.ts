@@ -26,7 +26,7 @@ import * as naclutil from 'tweetnacl-util';
 import { saveMessageToQueue, resetMessageQueue, getMessageQueue } from '../utils/messageQueue';
 import VoipPushNotification from 'react-native-voip-push-notification';
 import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from './zustand';
-import { initDB } from './bare/sqlite';
+import { getRooms, initDB, messageExists, roomMessageExists, saveRoomMessage } from './bare/sqlite';
 import { Beam, decrypt_sealed_box, Nodes, Rooms } from 'lib/native';
 import { Connection } from './bare/globals';
 import { ConnectionStatus, User } from '../types/user';
@@ -34,8 +34,9 @@ import { WebRTC } from './calls';
 import { Peers } from 'lib/connections';
 import { sleep, waitForCondition } from '../utils/utils';
 import { Wallet } from './kryptokrona';
-import { keychain } from './bare';
+import { keychain, saveRoomMessageAndUpdate } from './bare';
 import RNCallKeep from 'react-native-callkeep';
+import tweetnacl from 'tweetnacl';
 
 
 const answerCall = async () => {
@@ -255,6 +256,49 @@ function decryptMessage(box: string, timestamp: number, key: string) {
 
 }
 
+async function decryptRoomMessage(box: string, timestamp: number) {
+  let decryptBox;
+  let rooms = undefined;
+  let roomName = undefined;
+  let tries = 0;
+  while (rooms === undefined && tries < 10) {
+    try {
+      rooms = await getRooms();
+    } catch (e) {
+      console.log('failed to get rooms..:', e)
+    }
+    await sleep(500);
+    tries += 1;
+  }
+  
+          for (const room in rooms) {
+            try {
+              console.log('🔐 Trying room:', rooms[room].name);
+              const roomKey = rooms[room].key.substring(0,64);
+              const secretKey = keychain.getNaclKeys(roomKey).secretKey;
+              decryptBox = tweetnacl.secretbox.open(
+                hexToUint(box),
+                nonceFromTimestamp(timestamp),
+                secretKey
+              );
+              roomName = rooms[room].name;
+              if (decryptBox) {
+                decryptBox = naclutil.encodeUTF8(decryptBox);
+                decryptBox = JSON.parse(decryptBox);
+                decryptBox.roomName = roomName;
+                decryptBox.roomKey = rooms[room].key;
+                return decryptBox;
+              }
+            } catch (e) {
+              console.log('Failed to decrypt:', e);
+            }
+          } 
+          
+        
+        return false;
+
+}
+
 async function getEncryptionKey(): Promise<string | null> {
   try {
     const credentials = await Keychain.getGenericPassword();
@@ -335,23 +379,65 @@ let channelId;
     setTimeout(() => {Rooms.idle(true, true, true)}, 15000);
     let message;
     let error;
+    let box;
+
+    try {
+      box = JSON.parse(remoteMessage?.data?.encryptedPayload);
+    } catch (e) {
+      try {
+        box = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload));
+      } catch (e) {
+        console.error('Failed to parse box!');
+      }
+    }
+
     try {
 
-      const key = await getEncryptionKey();
-      
-      const payload = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload));
-      
-      message = decryptMessage(payload.box, payload.t, key);
-      await saveMessageToQueue({
-        ...message,
-        timestamp: payload.t,
-      });
+      if (box?.type && box?.type == 'room') {
 
-      console.log('final msg:', message)
-    } catch (e){
-      console.log('Error:', e);
-      error = e;
-    }
+        console.log('🔔 Room message received!!');
+
+        message = await decryptRoomMessage(box.box, box.timestamp);
+
+        if (await roomMessageExists(message.hash)) return;
+
+        const newMessage = saveRoomMessage(
+          message.address,
+          message.message,
+          message.roomKey,
+          message.reply,
+          box.timestamp,
+          message.name,
+          message.hash,
+          false,
+          message.tip
+        );
+        
+        message = {
+          msg: message.message,
+          name: message.name + ' in ' + message.roomName
+        }
+
+      } else {
+
+        const key = await getEncryptionKey();
+        
+        message = decryptMessage(box.box, box.t, key);
+
+        if (await messageExists(box.t)) return;
+
+        await saveMessageToQueue({
+          ...message,
+          timestamp: box.t,
+        });
+
+
+      }
+
+      } catch (e){
+        console.log('Error:', e);
+        error = e;
+      }
 
     if (!message.msg) return;
 

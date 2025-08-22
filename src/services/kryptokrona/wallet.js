@@ -686,6 +686,38 @@ export class ActiveWallet {
     }
   }
 
+  async encrypt_room_push_registration(room) {
+
+    let timestamp = Date.now();
+    let box;
+
+    //Create the view tag using a one time private key and the receiver view key
+    const keys = await generateKeys();
+
+    let payload_json = {
+      deviceId: getDeviceId(),
+      viewTag: await this.generate_room_view_tag(room)
+    };
+    let payload_json_decoded = naclUtil.decodeUTF8(
+      JSON.stringify(payload_json),
+    );
+
+    box = new NaclSealed.sealedbox(
+      payload_json_decoded,
+      nonceFromTimestamp(timestamp),
+      hexToUint('6e49ab1a59019b2c22eb27efc5664be419c9d3d58016319cd0915e0494de4071'),
+    );
+
+    //Box object
+    let payload_box = {
+      box: Buffer.from(box).toString('hex'),
+      t: timestamp
+    };
+    // Convert json to hex
+    let payload_hex = toHex(JSON.stringify(payload_box));
+    return payload_hex;
+  }
+
   async check_history(messageKey) {
     //Check history
     if (MessageSync.known_keys.indexOf(messageKey) > -1) {
@@ -710,6 +742,11 @@ export class ActiveWallet {
     const weeklyTimestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
     const hash = await cnFastHash(pubKey + weeklyTimestamp);
     return long ? hash : hash.substring(0,3);
+  }
+
+  async generate_room_view_tag(room) {
+    const hash = await cnFastHash(room);
+    return hash.substring(0,5);
   }
 
   async copyMnemonic() {
