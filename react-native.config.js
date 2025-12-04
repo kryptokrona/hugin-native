@@ -17,9 +17,6 @@ module.exports = {
       },
     },
     'react-native-bare-kit': {
-      platforms: {
-        android: null,
-      },
     },
   },
 };

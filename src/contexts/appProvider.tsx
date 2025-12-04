@@ -315,6 +315,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   useEffect(() => {
 
+    if (Platform.OS === 'android') return
     let token = '';
     let incomingCall = null;
     let currentAppState = 'active';
