@@ -53,6 +53,8 @@ type GlobalStore = {
   setTypingUsers: (roomId: string, users: string[]) => void;
   addTypingUser: (roomId: string, address: string) => void;
   removeTypingUser: (roomId: string, address: string) => void;
+  loadingStatus: string;
+  setLoadingStatus: (payload: string) => void;
 };
 
 const defaultCall: Call = { 
@@ -84,6 +86,8 @@ export const useGlobalStore = create<
     avatars: {},
     huginNode: {connected: false},
     started: false,
+    loadingStatus: 'Starting...',
+    setLoadingStatus: (loadingStatus: string) => set({ loadingStatus }),
     appState: 'inactive',
     setAppState: (appState) => set({appState}),
     setVoipPayload: (voipPayload) => set({ voipPayload }),
@@ -369,5 +373,6 @@ export const resetGlobalStore = () => {
     thisContact: '',
     thisRoom: '',
     transactions: [],
+    loadingStatus: 'Starting...',
   });
 };

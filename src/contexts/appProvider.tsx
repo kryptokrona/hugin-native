@@ -99,14 +99,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     //   }
     // }
     initFrontend();
-
-    if (1==1) return;
     
     if (started) {
       return;
     }
 
     await Rooms.start();
+    useGlobalStore.getState().setLoadingStatus('Initializing database...');
     await initDB();
   
     Files.update(await loadSavedFiles());
@@ -120,6 +119,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       : { port: 80, url: 'node.xkr.network' };
 
     Connection.listen();
+    useGlobalStore.getState().setLoadingStatus('Initializing wallet...');
     await Wallet.init(node);
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
@@ -133,6 +133,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       huginAddress,
     });
 
+    useGlobalStore.getState().setLoadingStatus('Syncing contacts...');
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);
     const keys = Wallet.privateKeys();
@@ -141,6 +142,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     Rooms.init(user);
     Rooms.join();
     Beam.join();
+    useGlobalStore.getState().setLoadingStatus('Connecting to node...');
     Nodes.connect('', true)
     console.log('📱 App started!, changing state..')
     useGlobalStore.getState().setStarted(true);

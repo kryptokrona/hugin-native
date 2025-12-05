@@ -15,6 +15,7 @@ import { usePreferencesStore, useUserStore } from '@/services';
 import { AuthMethods, type AuthStackParamList } from '@/types';
 
 import { Header } from '../header';
+import { defaultScreenTransition } from '@/styles';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -48,7 +49,7 @@ export const AuthNavigator = () => {
   }
 
   return (
-    <Stack.Navigator initialRouteName={initialRouteName}>
+    <Stack.Navigator initialRouteName={initialRouteName} screenOptions={defaultScreenTransition}>
       <Stack.Screen
         name={AuthScreens.RequestPinScreen}
         component={RequestPinScreen}

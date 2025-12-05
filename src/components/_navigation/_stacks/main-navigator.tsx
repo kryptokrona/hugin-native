@@ -30,6 +30,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'i18next';
 import { Platform } from 'react-native';
+import { defaultScreenTransition, modalScreenTransition } from '@/styles';
 
 const Tab = createBottomTabNavigator<MainNavigationParamList>();
 const NativeStack = createNativeStackNavigator<MainNavigationParamList>();
@@ -37,7 +38,7 @@ const NativeStack = createNativeStackNavigator<MainNavigationParamList>();
 // Sequential flow: Native Stack Navigator for Groups, Chat, and Modify Group
 const GroupsStack = () => {
   return (
-    <NativeStack.Navigator>
+    <NativeStack.Navigator screenOptions={defaultScreenTransition}>
       <NativeStack.Screen
         name={MainScreens.GroupsScreen}
         component={GroupsScreen}
@@ -68,6 +69,7 @@ const GroupsStack = () => {
         component={AddGroupScreen}
         options={{
           header: (_props) => <Header backButton title={t('addRoom')} />,
+          ...modalScreenTransition,
         }}
       />
     </NativeStack.Navigator>
@@ -76,7 +78,7 @@ const GroupsStack = () => {
 
 const FeedStack = () => {
   return (
-    <NativeStack.Navigator>
+    <NativeStack.Navigator screenOptions={defaultScreenTransition}>
       <NativeStack.Screen
         name={MainScreens.FeedScreen}
         component={FeedScreen}
@@ -91,7 +93,7 @@ const FeedStack = () => {
 
 const MessagesStack = () => {
   return (
-    <NativeStack.Navigator>
+    <NativeStack.Navigator screenOptions={defaultScreenTransition}>
       <NativeStack.Screen
         name={MainScreens.MessagesScreen}
         component={MessagesScreen}
@@ -126,7 +128,7 @@ const MessagesStack = () => {
 
 const WalletStack = () => {
   return (
-    <NativeStack.Navigator>
+    <NativeStack.Navigator screenOptions={defaultScreenTransition}>
       <NativeStack.Screen
         name={MainScreens.DashboardScreen}
         component={DashboardScreen}
@@ -138,6 +140,7 @@ const WalletStack = () => {
           header: (_props) => (
             <Header title={t('sendTransaction')} backButton />
           ),
+          ...modalScreenTransition,
         }}
       />
       <NativeStack.Screen
@@ -169,7 +172,7 @@ const WalletStack = () => {
 
 const SettingsStack = () => {
   return (
-    <NativeStack.Navigator>
+    <NativeStack.Navigator screenOptions={defaultScreenTransition}>
       <NativeStack.Screen
         name={MainScreens.SettingsScreen}
         component={SettingsScreen}
