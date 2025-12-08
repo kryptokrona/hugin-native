@@ -46,6 +46,8 @@ export const AuthNavigator = () => {
     // if(authMethod === AuthMethods.reckless){
     //   initialRouteName = AuthScreens.CreateAccountScreen;
     // }
+    
+  console.log('initialRouteName:', initialRouteName);
   }
 
   return (

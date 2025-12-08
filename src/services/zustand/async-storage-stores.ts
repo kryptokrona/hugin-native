@@ -244,10 +244,9 @@ export const usePreferencesStore = create<PreferencesStore>()(
       name: ASYNC_STORAGE_KEYS.PREFERENCES,
       onRehydrateStorage: () => () => {
         const authMethod = getAuthMethod();
+        const user = getUser();
 
-
-
-        if (authMethod === AuthMethods.reckless) {
+        if (authMethod === AuthMethods.reckless && user?.address) {
           setAuthenticated(true);
         }
 

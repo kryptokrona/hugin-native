@@ -567,7 +567,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingVertical: Platform.OS === 'ios' ? 40 : 0
+    paddingVertical: Platform.OS === 'ios' ? 40 : 40
   },
   footerMask: {
     height: 40, // or however tall the cropped part is
