@@ -33,7 +33,7 @@ export const AuthNavigator = () => {
   // }
 
   let initialRouteName = AuthScreens.CreateAccountScreen;
-
+  
   if (!user?.address) {
     initialRouteName = AuthScreens.WelcomeScreen;
   } else {

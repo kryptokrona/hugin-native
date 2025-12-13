@@ -72,16 +72,18 @@ export const RootNavigator = () => {
     (state) => state.preferences?.authMethod,
   );
 
-  const [displaySplash, setDisplaySplash] = useState(true);
+  const [displaySplash, setDisplaySplash] = useState(!started);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(started);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, 4000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!started) {
+      const timer = setTimeout(() => {
+        setMinTimeElapsed(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [started]);
 
   useEffect(() => {
     const handleDeepLink = ({ url }: { url: string }) => {
@@ -99,6 +101,9 @@ export const RootNavigator = () => {
   }, []);
 
   useEffect(() => {
+    if (started) {  
+      setDisplaySplash(false);
+    }
     const isHydrated = hydrated.preferences && hydrated.user && hydrated.theme;
     
     if (isHydrated && minTimeElapsed) {
@@ -107,12 +112,11 @@ export const RootNavigator = () => {
         authMethod && 
         user?.address && 
         user.address.length >= 64;
+        
 
       if (shouldGoToMain && !started) {
         return;
       }
-      
-      setDisplaySplash(false);
     }
   }, [hydrated, authenticated, authMethod, user, started, minTimeElapsed]);
 
