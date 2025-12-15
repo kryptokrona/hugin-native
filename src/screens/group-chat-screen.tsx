@@ -514,6 +514,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           data={messages}
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item, index }) => {
+            const previousMessage = messages[index - 1];
+            const onlyMessage =
+            !!previousMessage &&
+            previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && !item.tip;
             const isNewestMessage = index === messages.length - 1;
             const isFirstUnread = index === unreadIndex;
             const content = (
@@ -539,6 +543,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 tip={item.tip}
                 read={item.read}
                 scrollToMessage={scrollToMessage}
+                onlyMessage={onlyMessage}
               />
                   </>
             );

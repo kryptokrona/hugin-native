@@ -188,6 +188,8 @@ export const MessagesScreen: React.FC<Props> = () => {
       roomKey: xkrAddr,
     });
     setLink('');
+    setName('Anon');
+    setJoining(false);
   }
 
   return (
