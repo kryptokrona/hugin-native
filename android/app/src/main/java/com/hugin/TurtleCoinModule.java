@@ -32,7 +32,7 @@ import com.hugin.KeyPair;
 
 public class TurtleCoinModule extends ReactContextBaseJavaModule {
     static {
-        System.loadLibrary("TurtleCoin_jni");
+        System.loadLibrary("appmodules");
     }
 
     public TurtleCoinModule(ReactApplicationContext reactContext) {

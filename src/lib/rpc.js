@@ -91,6 +91,11 @@ export class Bridge {
           const callPushRegistration = await Wallet.encrypt_call_push_registration();
           this.send({type: 'push_registration', data: callPushRegistration});
           this.sentpush = true;
+          const rooms = useGlobalStore.getState().rooms;
+          for (const room in rooms) {
+            const roomPushRegistration = await Wallet.encrypt_room_push_registration(rooms[room].roomKey);
+            this.send({type: 'push_registration', data: roomPushRegistration});
+          }
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')

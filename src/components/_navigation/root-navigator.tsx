@@ -17,6 +17,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { navigationRef } from '@/contexts';
 
+import { fadeScreenTransition } from '@/styles';
+
 const Stack = createNativeStackNavigator();
 
 const linking: LinkingOptions<RootStackParamList> = {
@@ -63,14 +65,25 @@ const NavigationHandler = ({ pendingLink, clearPendingLink }: { pendingLink: str
 export const RootNavigator = () => {
   const hydrated = useAppStoreState((state) => state._hasHydrated);
   const authenticated = useGlobalStore((state) => state.authenticated);
+  const started = useGlobalStore((state) => state.started);
   const currentCallRoom = useGlobalStore((state) => state.currentCall).room;
   const user = useUserStore((state) => state.user);
   const authMethod = usePreferencesStore(
     (state) => state.preferences?.authMethod,
   );
 
-  const [displaySplash, setDisplaySplash] = useState(true);
+  const [displaySplash, setDisplaySplash] = useState(!started);
   const [pendingLink, setPendingLink] = useState<string | null>(null);
+  const [minTimeElapsed, setMinTimeElapsed] = useState(started);
+
+  useEffect(() => {
+    if (!started) {
+      const timer = setTimeout(() => {
+        setMinTimeElapsed(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [started]);
 
   useEffect(() => {
     const handleDeepLink = ({ url }: { url: string }) => {
@@ -88,55 +101,47 @@ export const RootNavigator = () => {
   }, []);
 
   useEffect(() => {
-  if (hydrated.preferences && hydrated.user && hydrated.theme) {
-    setDisplaySplash(false);
-  }
-}, [hydrated]);
+    if (started) {  
+      setDisplaySplash(false);
+    }
+    const isHydrated = hydrated.preferences && hydrated.user && hydrated.theme;
+    
+    if (isHydrated && minTimeElapsed) {
+      const shouldGoToMain = 
+        authenticated && 
+        authMethod && 
+        user?.address && 
+        user.address.length >= 64;
+        
 
-  if (
-    (!hydrated.preferences || !hydrated.user || !hydrated.theme) &&
-    displaySplash
-  ) {
-    return (
-      <NavigationContainer>
-        <SplashScreen />
-      </NavigationContainer>
-    );
-  }
-
-  let initialRouteName = Stacks.AuthStack;
-  if (
-    authenticated &&
-    authMethod &&
-    user?.address &&
-    user.address.length >= 64
-  ) {
-    initialRouteName = Stacks.MainStack;
-  }
+      if (shouldGoToMain && !started) {
+        return;
+      }
+    }
+  }, [hydrated, authenticated, authMethod, user, started, minTimeElapsed]);
 
   return (
-<GestureHandlerRootView style={{ flex: 1 }}>
-  <NavigationContainer ref={navigationRef} linking={authenticated ? linking : undefined}>
-    {currentCallRoom.length > 0 && <CallFloater />}
-    
-    {authenticated ? (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name={Stacks.MainStack} component={MainNavigator} />
-      </Stack.Navigator>
-    ) : (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name={Stacks.AuthStack} component={AuthNavigator} />
-      </Stack.Navigator>
-    )}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer ref={navigationRef} linking={authenticated ? linking : undefined}>
+        {currentCallRoom.length > 0 && <CallFloater />}
+        
+        <Stack.Navigator screenOptions={{ headerShown: false, ...fadeScreenTransition }}>
+          {displaySplash ? (
+            <Stack.Screen name="SplashScreen" component={SplashScreen} />
+          ) : authenticated ? (
+            <Stack.Screen name={Stacks.MainStack} component={MainNavigator} />
+          ) : (
+            <Stack.Screen name={Stacks.AuthStack} component={AuthNavigator} />
+          )}
+        </Stack.Navigator>
 
-    {authenticated && pendingLink && (
-      <NavigationHandler
-        pendingLink={pendingLink}
-        clearPendingLink={() => setPendingLink(null)}
-      />
-    )}
-  </NavigationContainer>
-</GestureHandlerRootView>
-
+        {authenticated && pendingLink && (
+          <NavigationHandler
+            pendingLink={pendingLink}
+            clearPendingLink={() => setPendingLink(null)}
+          />
+        )}
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 };
