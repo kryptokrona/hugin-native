@@ -48,7 +48,7 @@ interface Props extends Partial<Message> {
   dm?: boolean;
   status: MessageStatus;
   scrollToMessage: (hash: string) => void;
-
+  onlyMessage?: boolean;
 }
 
 export const GroupMessageItem: React.FC<Props> = ({
@@ -69,6 +69,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   read,
   dm = false,
   status = 'success',
+  onlyMessage = false,
   scrollToMessage = () => {}
 }) => {
   try {
@@ -226,7 +227,15 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
   }, [imageDetails?.imagePath]);
 
   return (
-    <TouchableOpacity onPress={onPress} style={[styles.container, (status == 'pending') && styles.pending]} onLongPress={handleLongPress}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        styles.container,
+        status === 'pending' && styles.pending,
+        onlyMessage && { marginTop: 0, marginBottom: 2, marginLeft: 45 }
+      ]}
+      onLongPress={handleLongPress}
+    >
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
         {!dm && <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />}
         {actions && (
@@ -297,12 +306,15 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
         )}
 
         <View style={styles.messageContainer}>
+          {!onlyMessage && 
           <View style={styles.avatar}>
             {userAddress.length > 15 && (
               <Avatar base64={getAvatar(userAddress)} size={36} />
             )}
           </View>
+          }
           <View>
+            {!onlyMessage && 
             <View style={styles.info}>
               <TextField bold size="xsmall" style={{ color }}>
                 {name.substring(0,10) + (name.length > 10 ? '...' : '')}
@@ -311,6 +323,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
                 {dateString}
               </TextField>
             </View>
+            }
             {imageDetails?.isImageMessage && (
               <TouchableOpacity onPress={handleImagePress}>
                 <Image
@@ -370,7 +383,13 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
                 </View>
             )}
             {!audioDetails?.isAudioMessage && !imageDetails?.isImageMessage && message && (
-            <TextField size="small" style={styles.message}>
+            <TextField
+              size="small"
+              style={[
+                styles.message,
+                onlyMessage && { marginTop: 0 }
+              ]}
+            >
                 {cleanedMessage ?? ''}
               </TextField>
             )}
@@ -415,7 +434,8 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     marginRight: 8,
-    marginVertical: 8,
+    // marginVertical: 8,
+    marginTop: 8
   },
   content: {
     flex: 1,

@@ -511,6 +511,12 @@ useEffect(() => {
         keyExtractor={(item: Message, i) => `${item.address}-${i}`}
         renderItem={({ item, index }) => {
           const isNewestMessage = index === messages.length - 1;
+
+          const previousMessage = messages[index - 1];
+
+          const onlyMessage =
+            !!previousMessage &&
+            previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && item.tip;
       
           const messageContent = (
             <GroupMessageItem
@@ -529,6 +535,7 @@ useEffect(() => {
               onShowImagePress={showBigImage}
               tip={item.tip}
               status={item.status}
+              onlyMessage={onlyMessage}
               onPress={item.status == 'failed' ? 
                 () => onSend(item.message, item.file, item.reply, false, false, item.hash) : 
                 () => {}}

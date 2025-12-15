@@ -28,21 +28,6 @@
     @"supportsVideo": @YES,
   }];
 
-  NSError *audioError = nil;
-  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
-                                   withOptions:AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker
-                                         error:&audioError];
-
-  if (audioError) {
-    NSLog(@"Error setting AVAudioSession category: %@", audioError.localizedDescription);
-  }
-
-  [[AVAudioSession sharedInstance] setActive:YES error:&audioError];
-
-  if (audioError) {
-    NSLog(@"Error activating AVAudioSession: %@", audioError.localizedDescription);
-  }
-
   [[TSBackgroundFetch sharedInstance] didFinishLaunching];
 
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
@@ -273,22 +258,23 @@ NSData* decodePayloadHex(NSString *payloadHex) {
 
 // --- Handle incoming pushes
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(PKPushType)type withCompletionHandler:(void (^)(void))completion {
-  
 
-  // --- NOTE: apple forced us to invoke callkit ASAP when we receive voip push
-  // --- see: react-native-callkeep
+    NSError *audioError = nil;
+  [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayAndRecord
+                                   withOptions:AVAudioSessionCategoryOptionAllowBluetooth | AVAudioSessionCategoryOptionDefaultToSpeaker
+                                         error:&audioError];
 
-  // NSString *hexPrivateKey = getEncryptionKeyFromKeychain(); // From earlier
-  // NSData *ciphertext = payload.dictionaryPayload[@"payload"]; // Load from file, server, etc.
-  // NSData *plaintext = decryptSealedBox(decodePayloadHex(ciphertext), hexPrivateKey);
-  // if (plaintext) {
-  //     NSString *message = [[NSString alloc] initWithData:plaintext encoding:NSUTF8StringEncoding];
-  //     NSLog(@"📬 Decrypted message: %@", message);
-  // }
+  if (audioError) {
+    NSLog(@"Error setting AVAudioSession category: %@", audioError.localizedDescription);
+  }
 
+  [[AVAudioSession sharedInstance] setActive:YES error:&audioError];
 
+  if (audioError) {
+    NSLog(@"Error activating AVAudioSession: %@", audioError.localizedDescription);
+  }
 
-  NSString *hexKeypair = getEncryptionKeyFromKeychain(); // 64 hex chars
+    NSString *hexKeypair = getEncryptionKeyFromKeychain(); // 64 hex chars
     NSData *sealedBox = decodePayloadHex(payload.dictionaryPayload[@"payload"]); // your sealed message as hex
 
     NSString *callerName = @"Anonymous";
