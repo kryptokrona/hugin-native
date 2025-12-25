@@ -122,5 +122,6 @@
   "registrationSuccess": "¡Registro exitoso! ✅",
   "copyMnemonic": "Respaldar cuenta",
   "mnemonicCopied": "Mnemotécnica copiada ✅",
-  "noFunds": "Fondos insuficientes"
+  "noFunds": "Fondos insuficientes",
+  "buyXKR": "Comprar/Vender XKR"
 }
