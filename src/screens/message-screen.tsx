@@ -516,7 +516,7 @@ useEffect(() => {
 
           const onlyMessage =
             !!previousMessage &&
-            previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && item.tip;
+            previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && item.tip != false;
       
           const messageContent = (
             <GroupMessageItem
@@ -542,7 +542,7 @@ useEffect(() => {
             />
           );
       
-          return isNewestMessage ? (
+          return isNewestMessage && ((item.sent && item.status == "pending") || (!item.sent))  ? (
             <GlideInItem>{messageContent}</GlideInItem>
           ) : (
             messageContent

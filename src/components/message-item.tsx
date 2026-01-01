@@ -17,6 +17,7 @@ interface Props {
   date: number;
   name: string;
   address: string;
+  onlymessage: boolean;
 }
 
 export const MessageItem: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const MessageItem: React.FC<Props> = ({
   // avatar,
   date,
   address,
+  onlymessage = false,
   // name,
 }) => {
   // const navigation = useNavigation<MainStackNavigationType>();
@@ -55,12 +57,14 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
       <ModalBottom visible={modalVisible} closeModal={onClose} />
       {!inverted && (
         <>
+        {!onlymessage &&
           <View style={styles.user}>
             <Avatar base64={address} size={30} />
             <TextField size="small" style={styles.date}>
               {dateString}
             </TextField>
           </View>
+          }
           <View style={[styles.messageContainer]}>
             <View style={[styles.card, { backgroundColor: theme.muted }]}>
               <TextField size="small">{cleanedMessage}</TextField>

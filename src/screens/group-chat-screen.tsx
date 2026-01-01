@@ -548,7 +548,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                   </>
             );
 
-            return isNewestMessage ? (
+            return isNewestMessage && ((item.sent && item.status == "pending") || (!item.sent))  ? (
               <GlideInItem>{content}</GlideInItem>
             ) : (
               content
