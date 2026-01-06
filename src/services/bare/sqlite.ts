@@ -5,7 +5,7 @@ import {
   openDatabase,
 } from 'react-native-sqlite-storage';
 
-import { FileInfo, Message, TipType, User } from '@/types';
+import { FileInfo, Message, MessageStatus, TipType, User } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
 import { Files } from './globals';
@@ -154,6 +154,11 @@ export const initDB = async () => {
     } catch (err) {}
 
     query = 'ALTER TABLE roomsmessages ADD read BOOLEAN default 0';
+    try {
+      await db.executeSql(query);
+    } catch (err) {}
+
+    query = 'ALTER TABLE messages ADD status TEXT default "success"';
     try {
       await db.executeSql(query);
     } catch (err) {}
@@ -1121,6 +1126,7 @@ export async function saveMessage(
   myaddress: string,
   tip: TipType | false = false,
   nickname: string | undefined,
+  status: MessageStatus = 'success'
 ) {
 
   if (await messageExists(timestamp)) return
@@ -1131,7 +1137,7 @@ export async function saveMessage(
   }
   try {
     await db.executeSql(
-      'REPLACE INTO messages (conversation, message, reply, timestamp, hash, sent, read, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO messages (conversation, message, reply, timestamp, hash, sent, read, status, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         conversation,
         message,
@@ -1140,6 +1146,7 @@ export async function saveMessage(
         hash,
         sent ? 1 : 0,
         sent ? 1 : 0,
+        status,
         JSON.stringify(tip),
       ],
     );
@@ -1159,6 +1166,7 @@ export async function saveMessage(
       room: conversation,
       sent: sent,
       timestamp: timestamp,
+      status: status,
       tip,
     };
     return newMessage;

@@ -410,6 +410,23 @@ useEffect(() => {
         newMessage.status = 'failed';
         setStoreMessages([...messageList, newMessage]);
 
+        const saved = await saveMessage(
+          roomKey,
+          text,
+          '',
+          Date.now(),
+          hash,
+          true,
+          address,
+          undefined,
+          name,
+          "failed"
+        );
+        if (saved) {
+          updateMessage(saved);
+          setLatestMessages();
+        }
+
         return;
       }
       if (hash) {
@@ -423,6 +440,7 @@ useEffect(() => {
           address,
           undefined,
           name,
+          "success"
         );
         if (saved) {
           updateMessage(saved);
