@@ -1,37 +1,19 @@
-cmake_minimum_required(VERSION 3.4.1)
+cmake_minimum_required(VERSION 3.13)
 
-# Source files
-set(SOURCE_FILES
-    Java.cpp
-    crypto.cpp
-    hash.cpp
-    keccak.cpp
-    StringTools.cpp
-    kryptokrona.cpp
-    multisig.cpp
-    crypto-ops.cpp
-    crypto-ops-data.cpp
-)
+project(appmodules)
 
-# Create shared library
-add_library(
-    TurtleCoin_jni
-    SHARED
-    ${SOURCE_FILES}
-)
+# Bring in React Native's default New Architecture configuration so libappmodules.so
+# is generated alongside our custom native library.
+include(${REACT_ANDROID_DIR}/cmake-utils/ReactNative-application.cmake)
 
-# Find Android's logging library
 find_library(
     log-lib
     log
 )
 
-# Set compile flags
+
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fexceptions")
 
-# Link libraries
-target_link_libraries(
-    TurtleCoin_jni
-    ${log-lib}
-)

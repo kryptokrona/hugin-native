@@ -7,7 +7,7 @@
 
 #include <jni.h>
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved);
+void init_turtlecoin_jni(JNIEnv *env);
 
 std::vector<Crypto::PublicKey> makeNativePublicKeys(JNIEnv *env, jobjectArray jPublicKeys);
 

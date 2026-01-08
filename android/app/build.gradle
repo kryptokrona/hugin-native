@@ -4,10 +4,12 @@
     id("com.android.application")
     id("com.facebook.react")
     id("org.jetbrains.kotlin.android") // if using Kotlin
+    id("com.google.gms.google-services")
 }
 
 project.ext.react = [
-    enableHermes: false,
+    enableHermes: true,
+    enableNewArchitecture: true,
 ]
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
@@ -101,6 +103,15 @@ android {
     ndkVersion rootProject.ext.ndkVersion
 
     namespace 'com.hugin'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
     defaultConfig {
         buildToolsVersion '35'
         targetSdkVersion '35'
@@ -108,8 +119,8 @@ android {
         applicationId 'com.hugin'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 106
-        versionName "1.0.0"
+        versionCode 117
+        versionName "1.0.9"
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
 
          ndk {
@@ -121,6 +132,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17 -O3 -fexceptions"
+                arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
             }
         }
 
@@ -172,6 +184,9 @@ android {
         pickFirst '**/x86_64/libc++_shared.so'
         pickFirst '**/x86/libjsc.so'
         pickFirst '**/armeabi-v7a/libjsc.so'
+        jniLibs {
+            useLegacyPackaging = true
+        }
        
     }
 }

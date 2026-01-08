@@ -44,14 +44,8 @@ jfieldID SPEND_KEY_PRIVATE_KEY;
 
 jclass JAVA_STRING;
 
-extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
+void init_turtlecoin_jni(JNIEnv *env)
 {
-    JNIEnv *env;
-    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK)
-    {
-        return -1;
-    }
-
     KEY_OUTPUT = (jclass)env->NewGlobalRef(env->FindClass("com/hugin/KeyOutput"));
     KEY_OUTPUT_CONST = env->GetMethodID(KEY_OUTPUT, "<init>", "(Ljava/lang/String;JJ)V");
     KEY_OUTPUT_KEY = env->GetFieldID(KEY_OUTPUT, "key", "Ljava/lang/String;");
@@ -88,8 +82,6 @@ extern "C" jint JNI_OnLoad(JavaVM *vm, void *reserved)
     INPUT_MAP_TRANSACTION_INPUT = env->GetFieldID(INPUT_MAP, "input", "Lcom/hugin/TransactionInput;");
 
     JAVA_STRING = (jclass)env->NewGlobalRef(env->FindClass("java/lang/String"));
-
-    return JNI_VERSION_1_6;
 }
 
 extern "C" JNIEXPORT jobject JNICALL

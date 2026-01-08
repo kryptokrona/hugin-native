@@ -4,7 +4,7 @@ LOCAL_PATH := $(call my-dir)
 # TurtleCoin_jni Module
 # ===============================
 include $(CLEAR_VARS)
-
+LOCAL_LDFLAGS += "-Wl,-z,max-page-size=16384"
 LOCAL_MODULE := TurtleCoin_jni
 LOCAL_SRC_FILES := \
     Java.cpp \

@@ -98,3 +98,6 @@ src/config/nodes.json
 
 src/services/kryptokrona/privates.js
 src/services/kryptokrona/privates.ts
+android/app/google-services.json
+android/.kotlin/
+android/app/debug.keystore
