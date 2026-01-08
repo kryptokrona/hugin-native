@@ -457,9 +457,8 @@ class VoiceChannel {
       const talking = array.some((volume) => volume > sensitivity);
       array.shift();
 
-      const updatedTalkingUsers = { ...currentCall.talkingUsers, [address]: talking };
-    
-      setCurrentCall({ ...currentCall, talkingUsers: updatedTalkingUsers });
+      useGlobalStore.getState().setTalkingUser(address, talking);
+
     }
     
   }

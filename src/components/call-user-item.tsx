@@ -22,11 +22,14 @@ import {
 import { FullScreenVideoViewer } from './full-screen-video';
 import { lightenHexColor } from '@/services/utils';
 
-type Props = User;
+type Props = User & {
+  isTalking?: boolean;
+};
 
-export const CallUserItem: React.FC<User> = (props) => {
+export const CallUserItem: React.FC<Props> = (props) => {
 
-  const { address, name, avatar, video, talking, online } = props;
+
+  const { address, name, avatar, video, isTalking, online } = props;
 
 
   const { t } = useTranslation();
@@ -40,8 +43,6 @@ export const CallUserItem: React.FC<User> = (props) => {
   const [userColor, setUserColor] = useState(theme.card);
   let hadAvatar = true;
   const myUserAddress = useGlobalStore((state) => state.address);
-
-  const talkingUsers = useGlobalStore(state => state.currentCall.talkingUsers);
 
   const w = Dimensions.get('window').width;
   const width = w / 2;
@@ -109,7 +110,7 @@ export const CallUserItem: React.FC<User> = (props) => {
   }, [video, address]);
 
   return (
-    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: (props.connectionStatus !== 'connected' && myUserAddress !== address) ? 0.3 : 1, borderColor: talkingUsers[address] ? 'green' : 'transparent'  }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.onlineUser, { borderRadius: 25, borderWidth: 2, width, opacity: (props.connectionStatus !== 'connected' && myUserAddress !== address) ? 0.3 : 1, borderColor: isTalking ? 'green' : 'transparent'  }]} onPress={onPress}>
       <View style={[{backgroundColor: video ? 'transparent' : userColor, borderWidth: 3, borderColor: backgroundColor, borderRadius: 22}, styles.onlineUser]}>
         {!stream && !video &&
         <ModalCenter visible={modalVisible} closeModal={onClose}>
