@@ -36,7 +36,7 @@ export const CallFloater: React.FC = () => {
   const users = useGlobalStore(state => state.currentCall.users);
   const room = useGlobalStore(state => state.currentCall.room);
   const callKit = useGlobalStore(state => state.currentCall.callkit);
-  const talkingUsers = useGlobalStore(state => state.currentCall.talkingUsers);
+  const talkingUsers = useGlobalStore(state => state.talkingUsers);
   const navigation = useNavigation<MainStackNavigationType>();
   
   const translateX = useSharedValue(0);
@@ -60,7 +60,9 @@ export const CallFloater: React.FC = () => {
   const [callDuration, setCallDuration] = useState('00 00 00'.split(' ').join('\n'));
   const AnimatedView = Animated.createAnimatedComponent(View);
 
-
+  useEffect(() => {
+    console.log('talkingUsers:', talkingUsers)
+  }, [talkingUsers]);
 
   useEffect(() => {
     
@@ -77,6 +79,53 @@ export const CallFloater: React.FC = () => {
   useEffect(() => {
     popUp();
   }, [callKit])
+
+  const CallAvatar = React.memo(
+  ({ user, isTalking }: { user: User; isTalking: boolean }) => {
+    const isMe = user.address === myUserAddress;
+    const connected = user.connectionStatus === 'connected';
+
+    return (
+      <View
+        style={{
+          opacity: isMe || connected ? 1 : 0.5,
+          borderRadius: 5,
+          borderWidth: 2,
+          borderColor: isTalking ? 'green' : 'transparent',
+        }}
+      >
+        <Avatar address={user.address} size={24} />
+
+        {/* Connecting / unknown */}
+        {(user.connectionStatus === 'connecting' ||
+          (user.connectionStatus === undefined && !isMe)) && (
+          <View style={{ position: 'absolute', right: 2, top: 2 }}>
+            <ActivityIndicator size="small" />
+          </View>
+        )}
+
+        {/* Disconnected */}
+        {user.connectionStatus === 'disconnected' && (
+          <View style={{ position: 'absolute', left: 4, top: -1 }}>
+            <TextField size="xsmall">❌</TextField>
+          </View>
+        )}
+
+        {/* Muted */}
+        {user.muted && (
+          <View style={{ position: 'absolute', left: 4, bottom: -1 }}>
+            <TextField size="xsmall">🔇</TextField>
+          </View>
+        )}
+      </View>
+    );
+  },
+  (prev, next) =>
+    prev.isTalking === next.isTalking &&
+    prev.user.connectionStatus === next.user.connectionStatus &&
+    prev.user.muted === next.user.muted
+);
+
 
   // useEffect(() => {
   //   console.log('Update time')
@@ -222,24 +271,13 @@ const panGesture = Gesture.Pan()
           },
         ]}>
         <View style={styles.avatarsContainer}>
-          {users.map((user) => 
-          (
-            <View key={user.address} style={{opacity: (user.address == myUserAddress || user.connectionStatus == 'connected') ? 1 : 0.5, borderRadius: 5, borderWidth: 2, borderColor: talkingUsers[user.address] ? 'green' : 'transparent'}}>
-            <Avatar
-              address={user.address}
-              size={24}
-            />
-            {user.connectionStatus === 'connecting' || (user.connectionStatus === undefined &&  user.address != myUserAddress) &&
-            <View style={{position: 'absolute', right: 2, top: 2}}><ActivityIndicator size={"small"} /></View>
-            }
-            {user.connectionStatus === 'disconnected' &&
-            <View style={{position: 'absolute', left: 4, top: -1}}><TextField size={"xsmall"}>❌</TextField></View>
-            }
-            {user.muted &&
-            <View style={{position: 'absolute', left: 4, top: -1}}><TextField size={"xsmall"}>🔇</TextField></View>
-            }
-            </View>
-          ))}
+        {users.map(user => (
+          <CallAvatar
+            key={user.address}
+            user={user}
+            isTalking={talkingUsers[user.address]}
+          />
+        ))}
         </View>
         {showAudioDeviceMenu && 
         <View style={[styles.audioDeviceMenu,

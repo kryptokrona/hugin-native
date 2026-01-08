@@ -28,6 +28,7 @@ type GlobalStore = {
   typingUsers: Record<string, string[]>;
   voipPayload: Record<string, any> | null;
   appState: AppStateStatus;
+  talkingUsers: Record<string, boolean>;
   setAppState: (payload: AppStateStatus) => void;
   setStarted: (payload: boolean) => void;
   setVoipPayload: (payload: Record<string, any>) => void;
@@ -53,6 +54,7 @@ type GlobalStore = {
   setTypingUsers: (roomId: string, users: string[]) => void;
   addTypingUser: (roomId: string, address: string) => void;
   removeTypingUser: (roomId: string, address: string) => void;
+  setTalkingUser: (address: string, talking: boolean) => void;
   loadingStatus: string;
   setLoadingStatus: (payload: string) => void;
 };
@@ -89,6 +91,7 @@ export const useGlobalStore = create<
     loadingStatus: 'Starting...',
     setLoadingStatus: (loadingStatus: string) => set({ loadingStatus }),
     appState: 'inactive',
+    talkingUsers: {},
     setAppState: (appState) => set({appState}),
     setVoipPayload: (voipPayload) => set({ voipPayload }),
     clearVoipPayload: () => set({ voipPayload: null }),
@@ -171,6 +174,15 @@ export const useGlobalStore = create<
       set({ currentCall });
     },
     resetCurrentCall: () => set({ currentCall: { ...defaultCall, time: Date.now() } }),
+    setTalkingUser: (address, talking) => {
+      set(state => ({
+        talkingUsers:
+          state.talkingUsers[address] === talking
+            ? state.talkingUsers
+            : { ...state.talkingUsers, [address]: talking },
+      })) 
+      console.log('Updating talker', address, talking);
+    },
     setUsers(newUsers: User[]) {
       set((state) => ({
         currentCall: {

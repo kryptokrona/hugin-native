@@ -92,7 +92,7 @@ export const PreviewItem: React.FC<Props> = ({
         <Unreads unreads={unreadCount} />
         {mRoomKey?.length > 15 && (
           <>
-          <Avatar onPress={handlePress} size={suggested ? 25 : 50} address={mRoomKey} base64={getAvatar(mRoomKey)} />
+          <Avatar onPress={handlePress} size={suggested ? 25 : 40} address={mRoomKey} base64={getAvatar(mRoomKey)} />
           {!suggested &&
 
             <View style={{opacity: online ? 1 : 0, position: 'absolute', right: 0, top: 0}}>

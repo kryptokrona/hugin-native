@@ -68,7 +68,7 @@ export const Tip: React.FC<Props> = ({ tip }) => {
 const styles = StyleSheet.create({
   cardContainer: {
     borderRadius: 12,
-    marginTop: -20,
+    marginTop: 10,
     opacity: 0,
     padding: 5,
     width: '100%',

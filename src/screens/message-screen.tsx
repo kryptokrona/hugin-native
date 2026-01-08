@@ -320,7 +320,7 @@ useEffect(() => {
                   <Avatar
                     base64={getAvatar(roomKey)}
                     address={roomKey}
-                    size={36}
+                    size={28}
                     onPress={onCustomizeGroupPress}
                   />
                 )}
@@ -373,6 +373,7 @@ useEffect(() => {
         sent: true,
         reactions: [],
         joined: false,
+        status: 'pending',
         file
       };
 

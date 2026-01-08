@@ -48,22 +48,22 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
   const navigation = useNavigation<MainStackNavigationType>();
   const flatListRef = useRef<FlatList>(null);
   const [imagePath, setImagePath] = useState<string | null>(null);
-  const currentCall = useGlobalStore((state) => state.currentCall);
-
-
-  const userList = useMemo(() => {
-    return currentCall.users;
-  }, [currentCall.users]);
+  const users = useGlobalStore(state => state.currentCall.users);
+  const talkingUsers = useGlobalStore(state => state.talkingUsers);
+  const room = useGlobalStore(state => state.currentCall.room);
 
   function OnlineUserMapper({ item }: { item: User }) {
-    return <CallUserItem {...item} />;
+    return <CallUserItem 
+    {...item} 
+    isTalking={!!talkingUsers[item.address]}
+    />;
   }
 
   useEffect(() => {
-    if (currentCall.room.length === 0) {
+    if (!room) {
       navigation.goBack();
     }
-  }, [currentCall.room, navigation]);
+  }, [room, navigation]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -96,7 +96,7 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
                     columnWrapperStyle={{ gap: 10 }}
                     contentContainerStyle={{ gap: 10 }}
                     numColumns={2}
-                    data={userList}
+                    data={users}
                     renderItem={OnlineUserMapper}
                     keyExtractor={(item, i) => `${item.name}-${i}`}
                     style={{ flex: 1, gap: 5 }}

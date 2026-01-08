@@ -98,7 +98,7 @@ export function getAvatar(
     ],
     foreground: [rgb.red, rgb.green, rgb.blue, 255],
     format,
-    margin: 0.2,
+    margin: 0.1,
     size,
   };
 

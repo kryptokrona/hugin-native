@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
   card: {
     margin: 10,
     marginTop: 0,
-    marginLeft: -25,
     paddingLeft: 30,
     minWidth: '98%',
     alignSelf: 'stretch',
