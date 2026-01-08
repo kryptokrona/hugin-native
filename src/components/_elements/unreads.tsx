@@ -14,8 +14,8 @@ export const Unreads: React.FC<Props> = ({ unreads, style }) => {
 
   let mUnreads = null;
 
-  if (unreads > 20) {
-    mUnreads = '20+';
+  if (unreads > 99) {
+    mUnreads = '99+';
   } else if (unreads > 0) {
     mUnreads = String(unreads);
   }
@@ -27,7 +27,7 @@ export const Unreads: React.FC<Props> = ({ unreads, style }) => {
     <View
       style={[
         styles.counter,
-        { backgroundColor: theme.accent, minWidth: unreads > 20 ? 37 : unreads > 9 ? 28 : 20 },
+        { backgroundColor: theme.accent, minWidth: unreads > 99 ? 37 : unreads > 9 ? 28 : 20 },
         style && style,
       ]}>
       <TextField bold numberOfLines={1} size="xsmall" type="secondary">

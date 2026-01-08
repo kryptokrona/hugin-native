@@ -14,8 +14,8 @@ export const OnlineUsers: React.FC<Props> = ({ online, style }) => {
 
   let mUnreads = null;
 
-  if (online > 20) {
-    mUnreads = '20+';
+  if (online > 99) {
+    mUnreads = '99+';
   } else if (online > 0) {
     mUnreads = String(online);
   }
