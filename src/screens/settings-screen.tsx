@@ -321,13 +321,15 @@ authnavigation.dispatch(
     <ScreenLayout>
 
       <TouchableOpacity onPress={updateProfile} style={[styles.profile, {borderColor: theme.border}]}>
+        <View style={{margin: 5}}>
         {address && avatar?.length === 0 && (
-          <Avatar address={address} size={70} />
+          <Avatar address={address} size={50} />
         )}
 
         {avatar?.length > 15 && (
-          <Avatar key={avatar} base64={avatar} size={70} />
+          <Avatar key={avatar} base64={avatar} size={50} />
         )}
+        </View>
         <View>
         <TextField bold>{name}</TextField>
         <TextField size={"xsmall"}>

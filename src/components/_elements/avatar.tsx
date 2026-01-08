@@ -13,33 +13,61 @@ interface Props {
   onPress?: () => void;
 }
 
-export const Avatar: React.FC<Props> = ({ base64, address, size = 70, onPress }) => {
-  const style = { height: size, width: size };
-  const uriFromBase64 = `data:image/png;base64,${base64}`;
+export const Avatar: React.FC<Props> = ({
+  base64,
+  address,
+  size = 70,
+  onPress,
+}) => {
   const [imageUri, setImageUri] = useState<string>('');
 
-  const avatarFromStore = useGlobalStore((state) => state.avatars[address]);
- 
+  const avatarFromStore = useGlobalStore(
+    (state) => state.avatars[address]
+  );
 
   useEffect(() => {
-    if (base64) setImageUri(uriFromBase64);
-    if (avatarFromStore) setImageUri(`data:image/png;base64,${avatarFromStore}`);
-    if (address) setImageUri(`data:image/png;base64,${getAvatar(address, size)}`);
-  }, [avatarFromStore]);
+    if (base64) {
+      setImageUri(`data:image/png;base64,${base64}`);
+    } else if (avatarFromStore) {
+      setImageUri(`data:image/png;base64,${avatarFromStore}`);
+    } else if (address) {
+      setImageUri(`data:image/png;base64,${getAvatar(address, size)}`);
+    }
+  }, [base64, avatarFromStore, address, size]);
 
   return (
     <TouchableOpacity onPress={onPress}>
-    <View style={[styles.container, style]}>
-      {imageUri && <Image source={{ uri: imageUri }} style={{borderRadius: Styles.borderRadius.small, height: avatarFromStore || base64 ? size*0.7 : size, width: avatarFromStore || base64 ? size*0.7 : size}} />}
-    </View>
+      <View
+        style={[
+          styles.container,
+          {
+            width: size,
+            height: size,
+            borderRadius: Styles.borderRadius.small,
+          },
+        ]}
+      >
+        {!!imageUri && (
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        )}
+      </View>
     </TouchableOpacity>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
   },
 });
