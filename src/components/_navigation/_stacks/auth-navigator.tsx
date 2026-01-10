@@ -15,6 +15,7 @@ import { usePreferencesStore, useUserStore } from '@/services';
 import { AuthMethods, type AuthStackParamList } from '@/types';
 
 import { Header } from '../header';
+import { defaultScreenTransition } from '@/styles';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -32,7 +33,7 @@ export const AuthNavigator = () => {
   // }
 
   let initialRouteName = AuthScreens.CreateAccountScreen;
-
+  
   if (!user?.address) {
     initialRouteName = AuthScreens.WelcomeScreen;
   } else {
@@ -45,10 +46,12 @@ export const AuthNavigator = () => {
     // if(authMethod === AuthMethods.reckless){
     //   initialRouteName = AuthScreens.CreateAccountScreen;
     // }
+    
+  console.log('initialRouteName:', initialRouteName);
   }
 
   return (
-    <Stack.Navigator initialRouteName={initialRouteName}>
+    <Stack.Navigator initialRouteName={initialRouteName} screenOptions={defaultScreenTransition}>
       <Stack.Screen
         name={AuthScreens.RequestPinScreen}
         component={RequestPinScreen}

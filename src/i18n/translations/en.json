@@ -134,5 +134,9 @@
   "buyXKR": "Buy/Sell XKR",
   "manual": "Manual",
   "automatic": "Auto pick node",
-  "inputNodeAddress": "Enter Hugin node address"
+  "inputNodeAddress": "Enter Hugin node address",
+  "encrypted": "Encrypted",
+  "private": "Private",
+  "secure": "Secure",
+  "decentralized": "Decentralized"
 }

@@ -19,7 +19,7 @@ module.exports = {
     ],
 
     [
-      'react-native-reanimated/plugin',
+      'react-native-worklets/plugin',
       {
         globals: ['__scanCodes'],
       },

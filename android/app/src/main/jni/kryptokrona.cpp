@@ -15,7 +15,7 @@ namespace Core
     {
         result.clear();
 
-        for (const auto element : stringVector)
+        for (const auto & element : stringVector)
         {
             T value = T();
 
@@ -30,7 +30,7 @@ namespace Core
     {
         result.clear();
 
-        for (const auto element : typedVector)
+        for (const auto & element : typedVector)
         {
             if (sizeof(element) == sizeof(Crypto::Signature))
             {
