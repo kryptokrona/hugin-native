@@ -17,6 +17,9 @@ export interface Preferences {
   language: string;
   nickname: string;
   node: string;
+  huginNodeMode?: 'automatic' | 'manual';
+  huginNode?: string;
+
 }
 
 export interface Payee {

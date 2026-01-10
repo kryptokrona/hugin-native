@@ -13,11 +13,16 @@ import { useTranslation } from 'react-i18next';
 import { WalletConfig } from 'config/wallet-config';
 
 import { InputField, ScreenLayout, TextButton, TextField, TouchableOpacity } from '@/components';
-import { usePreferencesStore, useThemeStore } from '@/services';
+import { useGlobalStore, usePreferencesStore, useThemeStore } from '@/services';
 import { randomNode } from '@/utils';
 
 import offline_node_list from '../config/nodes.json';
 import { Wallet } from '../services/kryptokrona';
+
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { Switch } from 'react-native';
+import { Nodes } from '../lib/native';
+
 
 interface Props {
   route: any;
@@ -34,6 +39,15 @@ export const PickNodeScreen: React.FC<Props> = () => {
   const [loadingNode, setLoadingNode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingCheck, setCheckLoading] = useState(false);
+  const huginNode = useGlobalStore((state) => state.huginNode);
+
+  const Tab = createMaterialTopTabNavigator();
+  const [huginMode, setHuginMode] = useState<'automatic' | 'manual'>(
+  preferences.huginNodeMode ?? 'automatic'
+);
+
+  const [huginNodeInput, setHuginNodeInput] = useState(preferences.huginNode || '');
+
 
   const theme = useThemeStore((state) => state.theme);
 
@@ -99,6 +113,24 @@ export const PickNodeScreen: React.FC<Props> = () => {
     setCheckLoading(false);
   };
 
+  useEffect(() => {
+  usePreferencesStore.setState((state) => ({
+    preferences: {
+      ...state.preferences,
+      huginNodeMode: huginMode,
+    },
+  }));
+}, [huginMode]);
+
+//   useEffect(() => {
+//   usePreferencesStore.setState((state) => ({
+//     preferences: {
+//       ...state.preferences,
+//       huginNode: huginNodeInput,
+//     },
+//   }));
+// }, [huginNode]);
+
   const handleRandomNode = async () => {
     setLoadingNode(true);
     const node = await randomNode(true);
@@ -128,6 +160,19 @@ export const PickNodeScreen: React.FC<Props> = () => {
     navigation.goBack(); // Adjust as needed for your navigation structure
   };
 
+  const connectToHuginNode = () => {
+    setLoading(true);
+    // setSelectedNode(selectedNodeDetails);
+    // Wallet.node(nodeInput);
+    usePreferencesStore.setState((state) => ({
+      preferences: { ...state.preferences, huginNode: huginNodeInput },
+    }));
+    setLoading(false);
+    Nodes.connect(huginNodeInput, false)
+    // Simulate dispatch or navigation action
+    // navigation.goBack(); // Adjust as needed for your navigation structure
+};
+
   const chooseNode = (node) => {
     setNodeInput(`${node.url}:${node.port}`);
     setSelectedNode(node);
@@ -156,10 +201,8 @@ export const PickNodeScreen: React.FC<Props> = () => {
     </TouchableOpacity>
   );
 
-  return (
-    <ScreenLayout>
-      <View style={{ flex: 1 }}>
-        <TextField size="large">{t('pickANode')}</TextField>
+  const XKRNodeTab = () => {
+    return <View style={[{ flex: 1, backgroundColor: theme.background, }]}>
         <View>
           <InputField
             label={t('inputNodeUrl')}
@@ -191,6 +234,106 @@ export const PickNodeScreen: React.FC<Props> = () => {
           contentContainerStyle={styles.nodeList}
         />
       </View>
+  }
+
+  const HuginNodeTab = () => {
+  const isManual = huginMode === 'manual';
+
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.background, paddingTop: 15 }}>
+
+    {huginNode?.connected === true && 
+    <>
+      <TextField size="small">Connected to:</TextField>
+        <TextField size="xsmall">
+          {huginNode?.address}
+        </TextField>
+      </>
+    }
+
+    {huginNode?.connected != true && 
+      <TextField size="small">Not connected</TextField>
+    }
+    
+      
+      {/* Mode switch */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          margin: 16,
+        }}
+      >
+        <TextField>
+          {isManual ? t('manual') : t('automatic')}
+        </TextField>
+
+        <Switch
+          value={isManual}
+          onValueChange={(value) =>
+            setHuginMode(value ? 'manual' : 'automatic')
+          }
+          trackColor={{
+            false: theme.input,
+            true: theme.foreground,
+          }}
+          thumbColor={theme.background}
+        />
+      </View>
+
+      {/* Manual-only UI */}
+      {isManual && (
+        <View>
+          <InputField
+            label={t('inputNodeAddress')}
+            value={huginNodeInput}
+            onChange={setHuginNodeInput}
+          />
+          <TextButton
+            icon={loading ? <ActivityIndicator /> : undefined}
+            onPress={connectToHuginNode}
+          >
+            {t('connectToNode')}
+          </TextButton>
+        </View>
+      )}
+
+    </View>
+  );
+};
+
+
+  return (
+    <ScreenLayout>
+
+      <Tab.Navigator
+        screenOptions={{
+          swipeEnabled: true,
+          tabBarIndicatorStyle: {
+            backgroundColor: theme.foreground,
+          },
+          tabBarStyle: {
+            backgroundColor: theme.background,
+          },
+          tabBarLabelStyle: {
+            color: theme.foreground,
+            fontWeight: '600',
+          },
+        }}
+      >
+        <Tab.Screen
+          name="XKR Node"
+          component={XKRNodeTab}
+          options={{ title: 'XKR node' }}
+        />
+        <Tab.Screen
+          name="Hugin Node"
+          component={HuginNodeTab}
+          options={{ title: 'Hugin node' }}
+        />
+      </Tab.Navigator>
+      
     </ScreenLayout>
   );
 };

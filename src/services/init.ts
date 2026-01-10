@@ -39,7 +39,7 @@ export async function init() {
       Rooms.init(user);
       Rooms.join();
       Beam.join();
-      Nodes.connect('', true);
+      Nodes.connect(preferences.huginNodeMode == 'manual' ? preferences.huginNode : '', preferences.huginNodeMode == 'manual' ? false : true);
       Notify.setup();
       useGlobalStore.getState().setStarted(true);
       console.log('☎️ Init complete..')
