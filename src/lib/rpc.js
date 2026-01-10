@@ -83,7 +83,6 @@ export class Bridge {
         case 'log':
           console.log(json);
         case 'hugin-node-connected':
-          console.log('Hugin node connected!')
           useGlobalStore.getState().setHuginNode({connected: true});
           if (this.sentpush) return;
           const pushRegistration = await Wallet.encrypt_push_registration();
@@ -99,10 +98,11 @@ export class Bridge {
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')
-          useGlobalStore.getState().setHuginNode({connected: false});
+          useGlobalStore.getState().setHuginNode({connected: false, address: null});
           break;
         case 'node-address':
           Nodes.address = json.address
+          useGlobalStore.getState().setHuginNode({connected: true, address: json.address});
           break;
         case 'new-swarm':
           break;
