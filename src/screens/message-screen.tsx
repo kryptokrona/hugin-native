@@ -55,7 +55,7 @@ import { getAvatar } from '@/utils';
 import { Header } from '../components/_navigation/header';
 import { Peers } from '../lib/connections';
 import { setLatestMessages, updateMessage } from '../services/bare/contacts';
-import { saveMessage } from '../services/bare/sqlite';
+import { deleteMessage, saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Beam, Rooms } from 'lib/native';
 import { textType } from '@/styles';
@@ -411,12 +411,14 @@ useEffect(() => {
         newMessage.status = 'failed';
         setStoreMessages([...messageList, newMessage]);
 
+        const timestamp = Date.now();
+
         const saved = await saveMessage(
           roomKey,
           text,
           '',
-          Date.now(),
-          hash,
+          timestamp,
+          replyHash || timestamp.toString(),
           true,
           address,
           undefined,
@@ -430,7 +432,11 @@ useEffect(() => {
 
         return;
       }
+
       if (hash) {
+
+        if (retryHash) deleteMessage(retryHash);
+
         const saved = await saveMessage(
           roomKey,
           text,
@@ -530,7 +536,6 @@ useEffect(() => {
         keyExtractor={(item: Message, i) => `${item.address}-${i}`}
         renderItem={({ item, index }) => {
           const isNewestMessage = index === messages.length - 1;
-
           const previousMessage = messages[index - 1];
 
           const onlyMessage =
@@ -561,7 +566,7 @@ useEffect(() => {
             />
           );
       
-          return isNewestMessage && ((item.sent && item.status == "pending") || (!item.sent))  ? (
+          return isNewestMessage && ((item.sent && item.status == "pending") || (item.sent != true))  ? (
             <GlideInItem>{messageContent}</GlideInItem>
           ) : (
             messageContent

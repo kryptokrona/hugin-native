@@ -507,6 +507,19 @@ export async function deleteContact(address: string) {
   return true;
 }
 
+export async function deleteMessage(hash: string) {
+  try {
+
+    let results = await db.executeSql(
+      'DELETE FROM messages WHERE hash = ?',
+      [hash],
+    );
+  } catch (err) {
+    console.log('Error removing room', err);
+    return false;
+  }
+}
+
 export async function markMessageAsRead(hash: string, type: string) {
   try {
     const result = await db.executeSql(
@@ -1223,6 +1236,8 @@ export const toMessage = (res: any) => {
     timestamp: res.timestamp,
 
     tip: res.tip,
+
+    status: res.status,
 
     read: res.read === 1,
   };
