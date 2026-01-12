@@ -85,11 +85,7 @@ useEffect(() => {
     if (onBackPress) {
       onBackPress();
     } else {
-      try {
-        navigation.pop();
-      } catch (e) {
         navigation.goBack();
-      }
     }
   }
 

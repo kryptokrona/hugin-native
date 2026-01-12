@@ -90,7 +90,7 @@ Bug reports:
     ✔ Send DM did not work (Android) @done(25-02-15 20:04)
     ✔ Pick avatar reports toast error even when cancelled @done(25-02-15 18:38)
     ✔ Icon on hugin in app store (iOS) white borders @done(25-05-24 14:21)
-    ☐ Clicking avatar to settings makes it impossible to go back to settings
+    ✔ Clicking avatar to settings makes it impossible to go back to settings @done(26-01-12 15:06)
     ✔ Cannot scroll in feed details view @done(25-06-05 03:05)
     ☐ Online status of users is not correct in contact list (shows offline there, but online in the chat)
 
