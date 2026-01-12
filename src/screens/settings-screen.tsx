@@ -32,6 +32,7 @@ import { resetDB } from '@/services/bare/sqlite';
 import { defaultTheme, Styles } from '@/styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from '@/components';
+import { waitForCondition } from '@/utils';
 
 
 interface Item {
@@ -169,12 +170,10 @@ authnavigation.dispatch(
       return;
     }
 
-    authnavigation.navigate('AuthStack', {
-      screen,
-      params: {
-        finishFunction: doDeleteAccount,
-      },
-    });
+    useGlobalStore.setState({ authenticated: false });
+
+    waitForCondition(() => useGlobalStore.getState().authenticated === true).then(doDeleteAccount);
+
 
 
 
