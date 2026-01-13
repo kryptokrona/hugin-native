@@ -83,11 +83,22 @@ export const GroupMessageItem: React.FC<Props> = ({
   const ref = useRef<IWaveformRef>(null);
   const [playerState, setPlayerState] = useState(PlayerState.stopped);
   const [isLoading, setIsLoading] = useState(true);
+  const lastPress = useRef<number>(0);
+  const DOUBLE_PRESS_DELAY = 300;
 
   if(!read) {
     markMessageAsRead(replyHash, 'roomsmessages');
   }
 
+  const handlePress = () => {
+  const now = Date.now();
+
+  if (now - lastPress.current < DOUBLE_PRESS_DELAY) {
+    onReaction('👍');
+  }
+
+  lastPress.current = now;
+};
 
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
@@ -228,7 +239,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
 
   return (
     <TouchableOpacity
-      onPress={onPress}
+      onPress={handlePress}
       style={[
         styles.container,
         status === 'pending' && styles.pending,
