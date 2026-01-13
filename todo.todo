@@ -22,6 +22,7 @@ Todo:
     ✔ Update React version @done(25-05-11 20:48)
     ✔ Update react-native-bare-kit @done(25-05-11 20:48)
     ☐ Add search
+    ☐ Clicking some notifications do not send user to the right part of the app
 
 Optimizations:
     ☐ Add "type" property to messages - i.e. message, reaction, reply, tip etc.
@@ -43,7 +44,7 @@ Todo feed:
     ✔ Add message screen @done(25-04-03 21:38)
     ✔ Add reply & replies @done(25-04-03 21:38)
     ☐ Add friend requests
-    ☐ Add avatar support
+    ✔ Add avatar support @done(26-01-12 15:07)
     ☐ Add files
     ☐ Reload message when making reply
     ☐ Add infinite scrolling
