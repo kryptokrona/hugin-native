@@ -348,7 +348,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         <Header
           backButton
           title={name}
-          subtitle={`${roomUsers?.length} online`}
+          subtitle={`${roomUsers?.length || 0} online`}
           right={
             <View style={{ flexDirection: 'row', gap: 10, marginLeft: -5 }}>
               <TouchableOpacity
