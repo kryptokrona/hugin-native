@@ -37,6 +37,7 @@ import { Wallet } from './kryptokrona';
 import { keychain, saveRoomMessageAndUpdate } from './bare';
 import RNCallKeep from 'react-native-callkeep';
 import tweetnacl from 'tweetnacl';
+import { Linking } from 'react-native';
 
 
 const answerCall = async () => {
@@ -383,6 +384,7 @@ let channelId;
     let message;
     let error;
     let box;
+    let url;
 
     try {
       box = JSON.parse(remoteMessage?.data?.encryptedPayload);
@@ -427,6 +429,12 @@ let channelId;
         
         message = decryptMessage(box.box, box.t, key);
 
+        console.log('Displaying notification for message:', message);
+
+        console.log('🔔 Direct message received!!', message.from);
+
+        url = 'hugin://message/' + encodeURIComponent(message.from) + '/' + encodeURIComponent(message.name);
+
         if (await messageExists(box.t)) return;
 
         await saveMessageToQueue({
@@ -456,8 +464,6 @@ let channelId;
 
     }
 
-
-
     await notifee.displayNotification({
       android: {
         category: AndroidCategory.MESSAGE,
@@ -474,7 +480,7 @@ let channelId;
       },
 
       body: message.msg,//message.msg || 'You\'ve got a new message!',
-
+      data: {url},
       ios: {
         sound: 'roommessage.wav',
       },
@@ -485,6 +491,10 @@ let channelId;
 
   onNotificationOpenedApp(messaging, async remoteMessage => {
     console.log('🔔 Opened with notification:', remoteMessage);
+    const initialNotification = await getInitialNotification(messaging);
+    if (initialNotification?.data?.url) {
+      Linking.openURL(initialNotification.data.url);
+    }
   })
 
   requestPermissionAndGetToken(messaging);
