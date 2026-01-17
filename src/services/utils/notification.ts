@@ -7,7 +7,10 @@ import notifee, {
   EventType,
 } from '@notifee/react-native';
 import { navigationRef } from '@/contexts';
-import { setRoomMessages } from '@/services';
+import { setMessages, setRoomMessages, useGlobalStore } from '@/services';
+import { Linking } from 'react-native';
+import { parseHuginUrl, waitForCondition } from '@/utils';
+import { Stacks } from '@/config';
 
 type Notification = {
   name: string;
@@ -32,32 +35,21 @@ class Notifee {
 
   async handleNotificationPress(data: any) {
 
-    if (data.type == 'room') {
+    console.log('Notification pressed with this data:', data);
 
-      await setRoomMessages(data.roomKey, 0);
+    const url = data?.url;
 
-      if (navigationRef.isReady()) {
-        navigationRef.navigate('GroupChatScreen', {
-          name: data.name,
-          roomKey: data.roomKey,
-        });
+    console.log('Do we have url?', url);
 
+    if (url) {
+      console.log('Opening URL from notification data:', url);
+    } else {
+      console.log('No URL found in notification data');
     }
-  } 
-    
-    if (data.type == 'roomcall') {
 
-      await setRoomMessages(data.roomKey, 0);
 
-      if (navigationRef.isReady()) {
-        navigationRef.navigate('GroupChatScreen', {
-          name: data.name,
-          roomKey: data.roomKey,
-          call: true
-        });
+    useGlobalStore.getState().setPendingLink(data?.url);
 
-    }
-  }
   }
 
   async setup() {
@@ -75,9 +67,10 @@ class Notifee {
 
     notifee.onBackgroundEvent(async ({ type, detail }) => {
       if (type === EventType.PRESS) {
-        this.handleNotificationPress(detail.notification?.data);
+        const url = detail.notification?.data?.url;
       }
     });
+
 
     notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
@@ -99,6 +92,7 @@ class Notifee {
   }
 
   async display(name: string, text: string, data: object) {
+    console.log('Displaying notification:', { name, text, data });
     await notifee.displayNotification({
       android: {
         category: AndroidCategory.MESSAGE,
@@ -109,7 +103,6 @@ class Notifee {
         pressAction: {
           id: 'default',
         },
-
         smallIcon: '@mipmap/ic_launcher',
         visibility: AndroidVisibility.PUBLIC,
       },

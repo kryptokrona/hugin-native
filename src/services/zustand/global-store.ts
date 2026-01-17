@@ -29,6 +29,9 @@ type GlobalStore = {
   voipPayload: Record<string, any> | null;
   appState: AppStateStatus;
   talkingUsers: Record<string, boolean>;
+  pendingLink: string | null;
+  setPendingLink: (payload: string) => void;
+  resetPendingLink: () => void;
   setAppState: (payload: AppStateStatus) => void;
   setStarted: (payload: boolean) => void;
   setVoipPayload: (payload: Record<string, any>) => void;
@@ -89,6 +92,7 @@ export const useGlobalStore = create<
     huginNode: {connected: false},
     started: false,
     loadingStatus: 'Starting...',
+    pendingLink: null,
     setLoadingStatus: (loadingStatus: string) => set({ loadingStatus }),
     appState: 'inactive',
     talkingUsers: {},
@@ -156,7 +160,12 @@ export const useGlobalStore = create<
     setCurrentRoom: (thisRoom: string) => {
       set({ thisRoom });
     },
-
+    setPendingLink: (pendingLink: string) => {
+      set({ pendingLink });
+    },
+    resetPendingLink: () => {
+      set({ pendingLink: null });
+    },
     setMessages: (messages: Message[]) => {
       set({ messages });
     },

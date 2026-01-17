@@ -62,6 +62,23 @@ export async function fetchWithTimeout(url, options, timeout = 1000) {
   });
 }
 
+export function parseHuginUrl(url: string) {
+  const match = url.match(/^hugin:\/\/([^/]+)\/([^/]+)\/([^/]+)/);
+  if (!match) return null;
+
+  const [, type, name, roomKey] = match;
+
+  console.log('Parsed Hugin URL:', { type, name, roomKey });
+
+  return {
+    type,
+    params: {
+      name: decodeURIComponent(name),
+      roomKey: decodeURIComponent(roomKey),
+    },
+  };
+}
+
 const fetchNodes = async () => {
   let response;
   for (const url of WalletConfig.nodeListURLs) {
