@@ -404,7 +404,10 @@ let channelId;
 
         message = await decryptRoomMessage(box.box, box.timestamp);
 
-        if (await roomMessageExists(message.hash)) return;
+        if (await roomMessageExists(message.hash)) {
+          console.log('🔕 Room message already exists, skipping notification.');
+          return;
+        };
 
         const newMessage = saveRoomMessage(
           message.address,
@@ -418,10 +421,13 @@ let channelId;
           message.tip
         );
         
+        url = 'hugin://chat/' + encodeURIComponent(message.roomName) + '/' + encodeURIComponent(message.roomKey);
+
         message = {
           msg: message.message,
           name: message.name + ' in ' + message.roomName
         }
+
 
       } else {
 
@@ -433,7 +439,7 @@ let channelId;
 
         console.log('🔔 Direct message received!!', message.from);
 
-        url = 'hugin://message/' + encodeURIComponent(message.from) + '/' + encodeURIComponent(message.name);
+        url = 'hugin://message/' + encodeURIComponent(message.name) + '/' + encodeURIComponent(message.from);
 
         if (await messageExists(box.t)) return;
 

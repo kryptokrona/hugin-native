@@ -7,8 +7,10 @@ import notifee, {
   EventType,
 } from '@notifee/react-native';
 import { navigationRef } from '@/contexts';
-import { setRoomMessages } from '@/services';
+import { setMessages, setRoomMessages, useGlobalStore } from '@/services';
 import { Linking } from 'react-native';
+import { parseHuginUrl, waitForCondition } from '@/utils';
+import { Stacks } from '@/config';
 
 type Notification = {
   name: string;
@@ -41,38 +43,13 @@ class Notifee {
 
     if (url) {
       console.log('Opening URL from notification data:', url);
-      Linking.openURL(url);
     } else {
       console.log('No URL found in notification data');
     }
 
 
-  //   if (data.type == 'room') {
+    useGlobalStore.getState().setPendingLink(data?.url);
 
-  //     await setRoomMessages(data.roomKey, 0);
-
-  //     if (navigationRef.isReady()) {
-  //       navigationRef.navigate('GroupChatScreen', {
-  //         name: data.name,
-  //         roomKey: data.roomKey,
-  //       });
-
-  //   }
-  // } 
-    
-  //   if (data.type == 'roomcall') {
-
-  //     await setRoomMessages(data.roomKey, 0);
-
-  //     if (navigationRef.isReady()) {
-  //       navigationRef.navigate('GroupChatScreen', {
-  //         name: data.name,
-  //         roomKey: data.roomKey,
-  //         call: true
-  //       });
-
-  //   }
-  // }
   }
 
   async setup() {
@@ -91,7 +68,6 @@ class Notifee {
     notifee.onBackgroundEvent(async ({ type, detail }) => {
       if (type === EventType.PRESS) {
         const url = detail.notification?.data?.url;
-        if (url) Linking.openURL(url);
       }
     });
 

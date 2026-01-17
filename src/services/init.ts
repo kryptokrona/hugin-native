@@ -3,6 +3,8 @@ import { initDB } from './bare/sqlite';
 import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from './zustand';
 import { Wallet } from './kryptokrona';
 import { Notify } from './utils';
+import { Platform } from 'react-native';
+import RNFS from 'react-native-fs';
 
 export async function init() {
 
@@ -36,10 +38,19 @@ export async function init() {
       const user = useUserStore.getState().user;
       console.log('☎️ Got user')
 
+      const currentStorePath = Platform.OS === 'ios' ? RNFS.LibraryDirectoryPath : RNFS.DocumentDirectoryPath;
+      console.log('Current store path:', currentStorePath);
+      updateUser({ store: currentStorePath, downloadDir: currentStorePath });
+
       Rooms.init(user);
       Rooms.join();
       Beam.join();
-      Nodes.connect(preferences.huginNodeMode == 'manual' ? preferences.huginNode : '', preferences.huginNodeMode == 'manual' ? false : true);
+
+      const huginNode = preferences.huginNodeMode === 'manual' ? preferences.huginNode : '';
+      const useAuto = preferences.huginNodeMode !== 'manual';
+      console.log('☎️ Connecting to hugin node..', huginNode, useAuto);
+      Nodes.connect(huginNode, useAuto);
+
       Notify.setup();
       useGlobalStore.getState().setStarted(true);
       console.log('☎️ Init complete..')

@@ -8,6 +8,7 @@ import {
   usePreferencesStore,
   useUserStore,
 } from '@/services';
+import { setMessages } from '../../services/bare/contacts';
 
 import { CallFloater } from '@/components';
 import { Alert, Linking } from 'react-native';
@@ -18,6 +19,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { navigationRef } from '@/contexts';
 
 import { fadeScreenTransition } from '@/styles';
+import { parseHuginUrl } from '@/utils';
 
 const Stack = createNativeStackNavigator();
 
@@ -56,103 +58,6 @@ const linking: LinkingOptions<RootStackParamList> = {
 };
 
 
-// const NavigationHandler = ({ pendingLink, clearPendingLink }: { pendingLink: string | null, clearPendingLink: () => void }) => {
-//   const navigation = useNavigation();
-
-//   const parseDeepLink = (url: string) => {
-//     const match = url.match(/hugin:\/\/([^/]+)\/([^/]+)\/([^/]+)/);
-//     if (match) {
-//       const [_, path, name, roomKey] = match;
-//       return { path, params: { name, roomKey } };
-//     }
-//     return { path: '', params: null };
-//   };
-
-//   useEffect(() => {
-//     console.log('Opening link:', pendingLink)
-//     if (pendingLink) {
-
-//       navigation.navigate(MainScreens.GroupsScreen, {
-//         joining: true,
-//         link: pendingLink,
-//       });
-
-//       clearPendingLink();
-//     }
-//   }, [pendingLink]);
-
-//   return null;
-// };
-
-function parseHuginUrl(url: string) {
-  const match = url.match(/^hugin:\/\/([^/]+)\/([^/]+)\/([^/]+)/);
-  if (!match) return null;
-
-  const [, type, name, roomKey] = match;
-
-  return {
-    type,
-    params: {
-      name: decodeURIComponent(name),
-      roomKey: decodeURIComponent(roomKey),
-    },
-  };
-}
-
-export const NavigationHandler = ({
-  pendingLink,
-  clearPendingLink,
-  authenticated,
-}: {
-  pendingLink: string | null;
-  clearPendingLink: () => void;
-  authenticated: boolean;
-}) => {
-  useEffect(() => {
-    if (!pendingLink) return;
-    if (!authenticated) return;
-    if (!navigationRef.isReady()) return;
-
-    const parsed = parseHuginUrl(pendingLink);
-    if (!parsed) return;
-
-    console.log('Navigating from pending link:', parsed);
-
-    // Always navigate through MainStack
-    switch (parsed.type) {
-      case 'message':
-        navigationRef.navigate(Stacks.MainStack, {
-          screen: MainScreens.MessageScreen,
-          params: parsed.params,
-        });
-        break;
-
-      case 'chat':
-        navigationRef.navigate(Stacks.MainStack, {
-          screen: MainScreens.GroupChatScreen,
-          params: parsed.params,
-        });
-        break;
-
-      case 'call':
-        navigationRef.navigate(Stacks.MainStack, {
-          screen: MainScreens.GroupChatScreen,
-          params: { ...parsed.params, call: true },
-        });
-        break;
-
-      default:
-        console.warn('Unknown deep link type:', parsed.type);
-    }
-
-    clearPendingLink();
-  }, [pendingLink, authenticated]);
-
-  return null;
-};
-
-
-
 export const RootNavigator = () => {
   const hydrated = useAppStoreState((state) => state._hasHydrated);
   const authenticated = useGlobalStore((state) => state.authenticated);
@@ -164,16 +69,15 @@ export const RootNavigator = () => {
   );
 
   const [displaySplash, setDisplaySplash] = useState(!started);
-  const [pendingLink, setPendingLink] = useState<string | null>(null);
   const [minTimeElapsed, setMinTimeElapsed] = useState(started);
   const [navigationReady, setNavigationReady] = useState(false);
   const [mainStackReady, setMainStackReady] = useState(false);
+  const pendingLink = useGlobalStore((state) => state.pendingLink);
 
   useEffect(() => {
     if (navigationReady && mainStackReady && pendingLink) {
-      console.log('Navigating from pending link in RootNavigator:', pendingLink);
       navigateFromUrl(pendingLink);
-      setPendingLink(null);
+      // useGlobalStore().resetPendingLink();
     }
   },[navigationReady, mainStackReady, pendingLink]);
 
@@ -181,12 +85,15 @@ export const RootNavigator = () => {
   if (!navigationRef.isReady()) return;
 
   const parsed = parseHuginUrl(url);
-  if (!parsed) return;
+  if (!parsed) {
+    console.warn('Failed to parse URL:', url);
+  };
 
   console.log('Navigating from URL:', parsed);
 
   switch (parsed.type) {
     case 'message':
+      setMessages(parsed.params.roomKey, 0);
       navigationRef.navigate(MainScreens.MessageStack, {
         screen: MainScreens.MessageScreen,
         params: parsed.params,
@@ -194,7 +101,7 @@ export const RootNavigator = () => {
       break;
 
     case 'chat':
-      navigationRef.navigate(Stacks.MainStack, {
+      navigationRef.navigate(MainScreens.GroupStack, {
         screen: MainScreens.GroupChatScreen,
         params: parsed.params,
       });
@@ -223,24 +130,10 @@ export const RootNavigator = () => {
   }, [started]);
 
   useEffect(() => {
-    const handleDeepLink = ({ url }: { url: string }) => {
-      setPendingLink(url);  // Always store link, NavigationHandler will handle whether to act or wait.
-    };
-
-    const subscription = Linking.addEventListener('url', handleDeepLink);
-
-    Linking.getInitialURL().then((url) => {
-      console.log('Initial URL:', url);
-      Alert.alert('Initial URL', url || 'No initial URL');
-      if (url) handleDeepLink({ url });
+    Linking.getInitialURL().then(url => {
+      if (url) useGlobalStore().setPendingLink(url);
     });
 
-    Linking.addEventListener('url',(url)=>{ 
-      console.log('this is the url: ',url);
-      if (url) handleDeepLink({ url });
-  });
-
-    return () => subscription.remove();
   }, []);
 
   useEffect(() => {
@@ -292,21 +185,6 @@ export const RootNavigator = () => {
             <Stack.Screen name={Stacks.AuthStack} component={AuthNavigator} />
           )}
         </Stack.Navigator>
-
-        {/* {authenticated && pendingLink && (
-          <NavigationHandler
-            pendingLink={pendingLink}
-            clearPendingLink={() => setPendingLink(null)}
-          />
-        )} */}
-        {/* {authenticated && pendingLink && (
-          <NavigationHandler
-            pendingLink={pendingLink}
-            clearPendingLink={() => setPendingLink(null)}
-            authenticated={authenticated}
-          />
-        )
-        } */}
 
       </NavigationContainer>
     </GestureHandlerRootView>
