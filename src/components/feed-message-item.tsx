@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { TouchableOpacity } from '@/components';
 
@@ -280,12 +280,14 @@ export const FeedMessageItem: React.FC<Props> = ({
               }>
               {t('messageUser')}
             </TextButton> */}
-            <TextButton
+            {Platform.OS !== 'ios' && (
+              <TextButton
               small
               onPress={onTipUser}
               icon={<CustomIcon name="attach-money" type="MI" size={16} />}>
               {t('tipUser')}
             </TextButton>
+              )}
           </View>
         )}
       </ModalBottom>
