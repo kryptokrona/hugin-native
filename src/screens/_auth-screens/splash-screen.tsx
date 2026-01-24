@@ -3,6 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { useGlobalStore, useThemeStore } from '@/services';
+import DeviceInfo from 'react-native-device-info';
 
 export const SplashScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export const SplashScreen: React.FC = () => {
             </Animated.Text>
         </View>
         
-        <Text style={[styles.version, { color: theme.mutedForeground }]}>v0.0.1</Text>
+        <Text style={[styles.version, { color: theme.mutedForeground }]}>v.{DeviceInfo.getReadableVersion()}</Text>
       </View>
     </View>
   );
