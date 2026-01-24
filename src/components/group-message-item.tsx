@@ -35,6 +35,7 @@ import { EmojiPicker } from './emoji-picker';
 import { GroupInvite } from '.';
 import { extractHuginLinkAndClean } from '@/services/utils';
 import { markMessageAsRead } from '@/services/bare/sqlite';
+import Toast from 'react-native-toast-message';
 
 interface Props extends Partial<Message> {
   userAddress: string;
@@ -93,7 +94,7 @@ export const GroupMessageItem: React.FC<Props> = ({
   const handlePress = () => {
   const now = Date.now();
 
-  if (now - lastPress.current < DOUBLE_PRESS_DELAY) {
+  if (now - lastPress.current < DOUBLE_PRESS_DELAY && status === 'success' && !dm) {
     onReaction('👍');
   }
 
@@ -183,6 +184,13 @@ export const GroupMessageItem: React.FC<Props> = ({
   }
 
   function onReaction(emoji: string) {
+    if (emoji === '👍') {
+          Toast.show({
+            text1: "Info",
+            text2: t('thumbsUpInfo'),
+            type: 'info'
+          });
+        }
     onEmojiReactionPress(emoji, replyHash!);
     setActionsModal(false);
   }

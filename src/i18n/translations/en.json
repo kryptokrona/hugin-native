@@ -138,5 +138,6 @@
   "encrypted": "Encrypted",
   "private": "Private",
   "secure": "Secure",
-  "decentralized": "Decentralized"
+  "decentralized": "Decentralized",
+  "thumbsUpInfo": "Double tap to react with 👍"
 }
