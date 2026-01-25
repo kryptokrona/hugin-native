@@ -1,6 +1,6 @@
 import { Beam, decrypt_sealed_box, Nodes, Rooms } from 'lib/native';
 import { initDB } from './bare/sqlite';
-import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from './zustand';
+import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from '@/services';
 import { Wallet } from './kryptokrona';
 import { Notify } from './utils';
 import { Platform } from 'react-native';
@@ -53,7 +53,6 @@ export async function init() {
 
       Notify.setup();
       useGlobalStore.getState().setStarted(true);
-      console.log('☎️ Init complete..')
       return;
     }
 

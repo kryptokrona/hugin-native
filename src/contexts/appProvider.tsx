@@ -8,7 +8,8 @@ import {
   StyleSheet,
   View,
   Settings,
-  AppStateStatus
+  AppStateStatus,
+  Linking
 } from 'react-native';
 
 import { createNavigationContainerRef } from '@react-navigation/native';
@@ -103,12 +104,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (started) {
       return;
     }
+    if (1==1) return;
 
     await Rooms.start();
     useGlobalStore.getState().setLoadingStatus('Initializing database...');
     await initDB();
-  
-    Files.update(await loadSavedFiles());
     await Background.init();
 
     const node = preferences?.node
@@ -195,16 +195,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   useEffect(() => {
-    updateUser({
-      downloadDir:
-        Platform.OS == 'ios'
-          ? RNFS.LibraryDirectoryPath
-          : RNFS.CachesDirectoryPath,
-      store:
-        Platform.OS == 'ios'
-          ? RNFS.LibraryDirectoryPath
-          : RNFS.DocumentDirectoryPath,
-    });
     if (authenticated && user?.address) {
       console.log('running authenticated');
       init();
@@ -462,7 +452,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //   // await Background.init();
         // }
       } else if (state === 'background') {
-        if (Camera.active || incomingCall || !started) {
+        
+        const hasIncomingCall = useGlobalStore.getState().voipPayload !== null;
+        if (Camera.active || hasIncomingCall || !useGlobalStore.getState().started) {
           return;
         }
         console.log('******** BACKGROUND ********');
@@ -477,7 +469,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         //Or display notifications during background mode
         console.log('Close!');
         if (WebRTC.localMediaStream === null) {
-          Rooms.idle(true, true);
+          Rooms.idle(true, true, true);
         }
         if (WebRTC.localMediaStream !== null) {
           InCallManager.start({ media: 'audio' });
@@ -491,7 +483,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         }
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
-        if (started && !joining) {
+        if (useGlobalStore.getState().started && !joining) {
           joining = true;
           Rooms.idle(false, false);
           const room = getThisRoom();

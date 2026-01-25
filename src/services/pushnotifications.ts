@@ -380,7 +380,8 @@ let channelId;
 
   setBackgroundMessageHandler(messaging, async remoteMessage => {
     console.log('🔔 Background message:', remoteMessage);
-    setTimeout(() => {Rooms.idle(true, true, true)}, 15000);
+    // setTimeout(() => {Rooms.idle(true, true, true)}, 15000);
+    Rooms.idle(true, true, true);
     let message;
     let error;
     let box;
