@@ -57,7 +57,7 @@ subprojects {
                 defaultConfig {
                     externalNativeBuild {
                         cmake {
-                            arguments "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-z,max-page-size=16384"
+                            arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
                         }
                         ndkBuild {
                             arguments "APP_LDFLAGS+=-Wl,-z,max-page-size=16384"
