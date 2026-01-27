@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 
 import {
+  ActivityIndicator,
   FlatList,
   InteractionManager,
   KeyboardAvoidingView,
@@ -85,13 +86,41 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const flatListRef = useRef<FlatList>(null);
   const [replyToMessageHash, setReplyToMessageHash] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
-  const messages = useGlobalStore((state) => state.feedMessages);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+  ///---
+  const [messages, setMessages] = useState<Message[]>([]);
+const [page, setPage] = useState(0);
+const [loading, setLoading] = useState(false);
+const [noMoreMessages, setNoMoreMessages] = useState(false);
+
+const loadMessages = async () => {
+  console.log('Loading messages for page ', page);
+  if (loading || noMoreMessages) return;
+  setLoading(true);
+
+  const newMessages = await getFeedMessages(page);
+  console.log(`Loaded ${newMessages.length} messages for page ${page}: `, newMessages);
+  if (newMessages.length === 0) {
+    setNoMoreMessages(true);
+  } else {
+    setMessages((old) => [...old, ...newMessages]);
+    setPage((prev) => prev + 1);
+  }
+
+  setLoading(false);
+};
+
+
+  
+
 
   useEffect(() => {
-    setFeedMessages(0);
-    return () => {
-      
-    };
+    if(messages.length === 0) {
+      loadMessages()
+    }
   }, []);
 
   const onRefresh = async () => {
@@ -324,6 +353,13 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
           ItemSeparatorComponent={<View style={{marginLeft: '-100%', width: '250%', borderColor, borderTopWidth: 1}} />}
           initialNumToRender={messages.length}
           maxToRenderPerBatch={messages.length}
+          onEndReached={() => loadMessages()}
+          onEndReachedThreshold={0.1}
+          ListHeaderComponent={
+            isLoadingMore ? (
+              <ActivityIndicator size="small" color={color} />
+            ) : null
+          }
           // refreshing={refreshing}
           // onRefresh={onRefresh}
         />

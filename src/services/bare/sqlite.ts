@@ -944,13 +944,12 @@ async function setFeedReplies(results: [ResultSet]) {
 }
 
 export async function getFeedMessages(page: number, replies=false) {
-  const limit: number = 55;
-  let offset: number = 0;
-  if (page !== 0) {
-    offset = page * limit;
-  }
+  const limit: number = 4;
+  let offset: number = page * limit;
+  console.log('Fetching feed messages, offset ', offset, ' limit: ', limit, ' page: ', page);
+
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM feedmessages ${replies ? '' : 'WHERE reply = ""'} ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`
+    `SELECT * FROM feedmessages ${replies ? '' : 'WHERE reply = ""'} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`
   );
 
   // const files = Files.all();
