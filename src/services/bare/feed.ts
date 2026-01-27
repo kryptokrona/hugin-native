@@ -14,7 +14,7 @@ import { containsOnlyEmojis } from '@/utils';
 import { naclHash, newKeyPair, randomKey } from './crypto';
 import {
   feedMessageExists,
-    getFeedMessages,
+  getFeedMessages,
   getLatestRoomMessages,
   getRoomMessages,
   removeRoomFromDatabase,
@@ -43,8 +43,6 @@ export const updateMessages = async (
 ) => {
   
   // console.log('Updating feed messages..')
-
-    const messages = await getFeedMessages(0);
 
     // console.log('Get feed messages from db: ', messages);
 
@@ -75,7 +73,14 @@ export const updateMessages = async (
     //   const updatedMessages = [...messages, message].sort(
     //     (a, b) => a.timestamp - b.timestamp,
     //   );
-      setStoreFeedMessages(messages);
+    console.log('Adding new feed message: ', message);
+    if (
+      useGlobalStore.getState().feedMessages.some((msg) => msg.hash === message.hash) || 
+      message.reply !== ''
+    ) {
+      return;
+    }
+      setStoreFeedMessages([...useGlobalStore.getState().feedMessages, message]);
     // }
   }
 

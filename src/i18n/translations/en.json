@@ -139,5 +139,7 @@
   "private": "Private",
   "secure": "Secure",
   "decentralized": "Decentralized",
-  "thumbsUpInfo": "Double tap to react with 👍"
+  "thumbsUpInfo": "Double tap to react with 👍",
+  "newMessage": "new message",
+  "newMessages": "new messages"
 }

@@ -42,6 +42,7 @@ import {
   UserItem,
   TouchableOpacity,
   EmptyPlaceholder,
+  Avatar,
 } from '@/components';
 
 // import Animated, { useSharedValue } from 'react-native-reanimated';
@@ -53,6 +54,7 @@ import {
   useThemeStore,
   WebRTC,
   useUserStore,
+  setStoreFeedMessages,
 } from '@/services';
 import { textType } from '@/styles';
 import type {
@@ -72,6 +74,7 @@ import {
 } from '../services/bare/feed';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { getFeedMessages } from '../services/bare/sqlite';
+import { Text } from 'react-native-gesture-handler';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.FeedScreen>;
@@ -88,6 +91,7 @@ export const FeedScreen: React.FC<Props> = ({ route }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const incomingMessages = useGlobalStore((state) => state.feedMessages);
 
 
   ///---
@@ -124,15 +128,10 @@ const loadMessages = async () => {
   }, []);
 
   const onRefresh = async () => {
-    try {
-      setRefreshing(true);
-      // Your actual refresh logic here:
-      await setFeedMessages(0);  // or call getFeedMessages / fetch new data
-    } catch (error) {
-      console.error('Error refreshing feed:', error);
-    } finally {
-      setRefreshing(false);
-    }
+
+    setMessages((old) => [...incomingMessages.reverse(), ...old]);
+    setStoreFeedMessages([]);
+    
   };
 
   const [imagePath, setImagePath] = useState<string | null>(null);
@@ -319,6 +318,34 @@ const loadMessages = async () => {
           </TextButton>
         </ModalCenter>
 
+        {incomingMessages?.length > 0 &&
+        <TouchableOpacity onPress={onRefresh}>
+          <View style={[styles.unreads, { borderColor }]}>
+            <TextField size="xsmall">
+              {incomingMessages.length +
+                (incomingMessages.length === 1
+                  ? " " + t("newMessage")
+                  : " " + t("newMessages"))}
+            </TextField>
+
+                  <View style={styles.avatarsWrapper}>
+                  {incomingMessages.filter(
+                      (msg, index, self) =>
+                        self.findIndex((m) => m.address === msg.address) === index
+                    ).slice(-3).map((msg, i) => (
+                    <View style={[styles.avatarStyle, {backgroundColor, borderColor: backgroundColor},i !== 0 && { marginLeft: -8 }]}>
+                    <Avatar
+                      key={msg.hash}
+                      address={msg.address}
+                      size={24}
+                    />
+                    </View>
+                  ))}
+                </View>
+          </View>
+        </TouchableOpacity>
+        }
+
         {messages?.length == 0 &&
           <EmptyPlaceholder text={t('noFeed')} />
         }
@@ -429,4 +456,24 @@ const styles = StyleSheet.create({
     zIndex: 999999
     // flex: 1
   },
+  unreads: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderWidth: 1,
+    borderRadius: 20,
+    alignSelf: 'center',
+    marginVertical: 10,
+    paddingLeft: 12,
+    paddingRight: 12,
+  },
+  avatarsWrapper: {
+    flexDirection: 'row',
+    marginLeft: 8, 
+  },
+  avatarStyle: {
+    borderWidth: 2,
+    borderRadius: 50,
+    overflow: 'hidden',
+  }
 });
