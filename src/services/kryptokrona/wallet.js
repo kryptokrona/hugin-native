@@ -195,10 +195,15 @@ export class ActiveWallet {
     let [unlockedBalance, lockedBalance] = await this.active.getBalance();
     setBalance([unlockedBalance, lockedBalance]);
     const transactions = await this.active.getTransactions();
-    const filteredTransactions = transactions.filter(
-      (transaction) => transaction.totalAmount() >= 10000,
-    );
-    setTransactions(filteredTransactions);
+    // Sort: unconfirmed transactions first, then by timestamp (newest first)
+    const sortedTransactions = transactions.sort((a, b) => {
+      // Unconfirmed transactions (timestamp = 0) come first
+      if (a.timestamp === 0 && b.timestamp !== 0) return -1;
+      if (a.timestamp !== 0 && b.timestamp === 0) return 1;
+      // Both unconfirmed or both confirmed: sort by timestamp descending
+      return b.timestamp - a.timestamp;
+    });
+    setTransactions(sortedTransactions);
   }
 
   setDaemon(node) {
