@@ -23,11 +23,6 @@ export const RequestPinScreen: React.FC<Props> = ({ route }) => {
 
   const finishProcess = () => {
     setAuthenticated(true);
-    if (route.params?.finishFunction) {
-      route.params.finishFunction();
-    } else {
-      mainNavigation.navigate(Stacks.MainStack); // TODO fix type
-    }
   };
 
   const verifyPin = (inputPin: string) => {

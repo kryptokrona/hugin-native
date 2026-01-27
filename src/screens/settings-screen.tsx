@@ -33,6 +33,8 @@ import { defaultTheme, Styles } from '@/styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableOpacity } from '@/components';
 import { waitForCondition } from '@/utils';
+import { navigationRef } from '@/contexts';
+
 
 
 interface Item {
@@ -109,6 +111,25 @@ export const SettingsScreen: React.FC<Props> = () => {
 
 };
 
+const doCopyMnemonic = () => {
+
+  console.log('Preparing to copy mnemonic');
+
+  const finishFunction = async () => {
+    Wallet.copyMnemonic();
+  };
+
+  useGlobalStore.getState().setAuthTarget({
+    stack: Stacks.MainStack,
+    parent: MainScreens.SettingsStack,
+    screen: MainScreens.SettingsScreen,
+  });
+  useGlobalStore.getState().setAuthFinishFunction(finishFunction);
+  useGlobalStore.getState().setAuthenticated(false);
+
+};
+
+
 
   const continueDeleteAccount = () => {
 
@@ -136,25 +157,24 @@ export const SettingsScreen: React.FC<Props> = () => {
     Rooms.close();
     Wallet.reset();
 
-navigation.dispatch(
-  CommonActions.reset({
-    index: 0,
-    routes: [{ name: Stacks.MainStack, state: {
-      routes: [{ name: MainScreens.GroupsScreen }]
-    }}],
-  })
-);
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: Stacks.MainStack, state: {
+          routes: [{ name: MainScreens.GroupsScreen }]
+        }}],
+      })
+    );
 
-authnavigation.dispatch(
-  CommonActions.reset({
-    index: 0,
-    routes: [{ name: Stacks.AuthStack, state: {
-      routes: [{ name: AuthScreens.WelcomeScreen }]
-    }}],
-  })
-);
+    authnavigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: Stacks.AuthStack, state: {
+          routes: [{ name: AuthScreens.WelcomeScreen }]
+        }}],
+      })
+    );
 
-    
   };
 
     let screen;
@@ -173,8 +193,6 @@ authnavigation.dispatch(
     useGlobalStore.setState({ authenticated: false });
 
     waitForCondition(() => useGlobalStore.getState().authenticated === true).then(doDeleteAccount);
-
-
 
 
 };
@@ -277,7 +295,7 @@ authnavigation.dispatch(
       title: 'debugLog',
     },
     {
-      function: () => Wallet.copyMnemonic(),
+      function: () => doCopyMnemonic(),
       icon: { name: 'backup-restore', type: 'MCI' },
       title: 'copyMnemonic',
     },
