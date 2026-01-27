@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import {
   ActivityIndicator,
+  Dimensions,
   FlatList,
   StyleSheet,
   View,
@@ -19,10 +20,9 @@ import { randomNode } from '@/utils';
 import offline_node_list from '../config/nodes.json';
 import { Wallet } from '../services/kryptokrona';
 
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { Switch } from 'react-native';
+import { Switch, Pressable } from 'react-native';
 import { Nodes } from '../lib/native';
-
+import { TabView, SceneMap } from 'react-native-tab-view';
 
 interface Props {
   route: any;
@@ -40,14 +40,16 @@ export const PickNodeScreen: React.FC<Props> = () => {
   const [loading, setLoading] = useState(false);
   const [loadingCheck, setCheckLoading] = useState(false);
   const huginNode = useGlobalStore((state) => state.huginNode);
-
-  const Tab = createMaterialTopTabNavigator();
   const [huginMode, setHuginMode] = useState<'automatic' | 'manual'>(
   preferences.huginNodeMode ?? 'automatic'
 );
 
   const [huginNodeInput, setHuginNodeInput] = useState(preferences.huginNode || '');
-
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'xkr', title: 'XKR node' },
+    { key: 'hugin', title: 'Hugin node' },
+  ]);
 
   const theme = useThemeStore((state) => state.theme);
 
@@ -304,41 +306,58 @@ export const PickNodeScreen: React.FC<Props> = () => {
 };
 
 
+  const renderScene = SceneMap({
+    xkr: XKRNodeTab,
+    hugin: HuginNodeTab,
+  });
+
+  const renderTabBar = (props: any) => (
+    <View style={[styles.tabBar, { backgroundColor: theme.background }]}>
+      {props.navigationState.routes.map((route: any, i: number) => {
+        const isActive = i === props.navigationState.index;
+        return (
+          <Pressable
+            key={route.key}
+            style={[
+              styles.tabItem,
+              isActive && { borderBottomColor: theme.foreground, borderBottomWidth: 3 }
+            ]}
+            onPress={() => setIndex(i)}
+          >
+            <TextField color={theme.foreground} bold={isActive}>
+              {route.title}
+            </TextField>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
   return (
     <ScreenLayout>
-
-      <Tab.Navigator
-        screenOptions={{
-          swipeEnabled: true,
-          tabBarIndicatorStyle: {
-            backgroundColor: theme.foreground,
-          },
-          tabBarStyle: {
-            backgroundColor: theme.background,
-          },
-          tabBarLabelStyle: {
-            color: theme.foreground,
-            fontWeight: '600',
-          },
-        }}
-      >
-        <Tab.Screen
-          name="XKR Node"
-          component={XKRNodeTab}
-          options={{ title: 'XKR node' }}
-        />
-        <Tab.Screen
-          name="Hugin Node"
-          component={HuginNodeTab}
-          options={{ title: 'Hugin node' }}
-        />
-      </Tab.Navigator>
-      
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        renderTabBar={renderTabBar}
+        onIndexChange={setIndex}
+        initialLayout={{ width: Dimensions.get('window').width }}
+      />
     </ScreenLayout>
   );
 };
 
 const styles = StyleSheet.create({
+  tabBar: {
+    flexDirection: 'row',
+    paddingTop: 10,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
+  },
   nodeCard: {
     alignItems: 'center',
     borderRadius: 8,

@@ -8,6 +8,7 @@ import { useThemeStore } from './services';
 import { getToastConfig } from './utils';
 
 import { RootNavigator } from './components/_navigation/root-navigator';
+import { Camera } from 'services/bare/globals';
 
 const App = () => {
   const theme = useThemeStore((state) => state.theme);
@@ -20,7 +21,7 @@ const App = () => {
     return () => sub.remove();
   }, []);
 
-  const isActive = appState === 'active';
+  const isActive = appState === 'active' || Camera.active;
 
   return (
     <AppProvider>
