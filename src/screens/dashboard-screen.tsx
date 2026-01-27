@@ -1,8 +1,9 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 
 import {
+  ActivityIndicator,
   FlatList,
-  ScrollView,
+  RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
@@ -29,6 +30,8 @@ import { useGlobalStore } from '@/services';
 import type { MainStackNavigationType } from '@/types';
 import { formatHashString } from '@/utils';
 
+const ITEMS_PER_PAGE = 50;
+
 export const DashboardScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<MainStackNavigationType>();
@@ -36,6 +39,9 @@ export const DashboardScreen: React.FC = () => {
   const [synced, setSynced] = useState(status[0] == status[2]);
   const [showQR, setShowQR] = useState(false);
   const [showFiat, setShowFiat] = useState(false);
+  const [displayedCount, setDisplayedCount] = useState(ITEMS_PER_PAGE);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const fiatPrice = useGlobalStore((state) => state.fiatPrice);
 
   function onCloseModal() {
@@ -88,6 +94,10 @@ export const DashboardScreen: React.FC = () => {
   const address = useGlobalStore((state) => state.address);
   const transactions = useGlobalStore((state) => state.transactions);
 
+  // Get paginated transactions
+  const displayedTransactions = transactions.slice(0, displayedCount);
+  const hasMore = displayedCount < transactions.length;
+
   const transactionsCB = ({ item }: { item: Transaction }) => {
     return <TransactionItem item={item} fiat={showFiat} />;
   };
@@ -95,6 +105,35 @@ export const DashboardScreen: React.FC = () => {
   function onSendButton() {
     navigation.push(MainScreens.SendTransactionScreen);
   }
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Reset to first page
+    setDisplayedCount(ITEMS_PER_PAGE);
+    // The wallet will automatically update transactions from the store
+    setTimeout(() => setRefreshing(false), 1000);
+  }, []);
+
+  const loadMore = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    setTimeout(() => {
+      setDisplayedCount((prev) => prev + ITEMS_PER_PAGE);
+      setLoadingMore(false);
+    }, 500);
+  }, [loadingMore, hasMore]);
+
+  const renderFooter = () => {
+    if (!loadingMore) return null;
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" />
+        <TextField type="muted" size="xsmall" style={{ marginLeft: 8 }}>
+          Loading more...
+        </TextField>
+      </View>
+    );
+  };
 
   const calcBalance =
     (Number(balance.unlocked) + Number(balance.locked)) / 100000;
@@ -104,42 +143,47 @@ export const DashboardScreen: React.FC = () => {
 
   return (
     <ScreenLayout>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <TouchableOpacity onPress={toggleFiat}>
-          <Card style={styles.balance}>
-            <TextField style={{ margin: 10 }} size="large" bold>
-              {showFiat ? '$' + amountInFiat : balanceText}
-            </TextField>
-            <TextButton onPress={buyXKR} small style={styles.buyxkr}>Buy/Sell</TextButton>
-          </Card>
-        </TouchableOpacity>
+      <FlatList
+        ListHeaderComponent={
+          <>
+            <TouchableOpacity onPress={toggleFiat}>
+              <Card style={styles.balance}>
+                <TextField style={{ margin: 10 }} size="large" bold>
+                  {showFiat ? '$' + amountInFiat : balanceText}
+                </TextField>
+                <TextButton onPress={buyXKR} small style={styles.buyxkr}>Buy/Sell</TextButton>
+              </Card>
+            </TouchableOpacity>
 
-        <View style={[styles.container]}>
-          <TextField style={{ paddingBottom: 10 }} centered>
-            {formatHashString(address)}
-          </TextField>
-          <CopyButton
-            onPress={() => ''}
-            text={t('copyAddress')}
-            data={address}
-          />
-          <TextButton onPress={() => setShowQR(true)}>{t('showQR')}</TextButton>
-          <TextButton onPress={onSendButton}>{t('sendTransaction')}</TextButton>
-        </View>
-        <View>
-          {transactions.length > 0 ? (
-            <FlatList
-              nestedScrollEnabled={true}
-              numColumns={1}
-              data={transactions}
-              renderItem={transactionsCB}
-              keyExtractor={(item, i) => `${item.hash}-${i}`}
-            />
-          ) : (
-            <TextField type="muted">{t('noTransactions')}</TextField>
-          )}
-        </View>
-      </ScrollView>
+            <View style={[styles.container]}>
+              <TextField style={{ paddingBottom: 10 }} centered>
+                {formatHashString(address)}
+              </TextField>
+              <CopyButton
+                onPress={() => ''}
+                text={t('copyAddress')}
+                data={address}
+              />
+              <TextButton onPress={() => setShowQR(true)}>{t('showQR')}</TextButton>
+              <TextButton onPress={onSendButton}>{t('sendTransaction')}</TextButton>
+            </View>
+          </>
+        }
+        data={displayedTransactions}
+        renderItem={transactionsCB}
+        keyExtractor={(item, i) => `${item.hash}-${i}`}
+        ListEmptyComponent={
+          <View style={{ padding: 20 }}>
+            <TextField type="muted" centered>{t('noTransactions')}</TextField>
+          </View>
+        }
+        ListFooterComponent={renderFooter}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      />
       <ModalCenter visible={showQR} closeModal={onCloseModal}>
         <QrCodeDisplay code={address} />
       </ModalCenter>
@@ -161,6 +205,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -2,
     top: -2,
-  transform: [{ scale: 0.7 }]
-  }
+    transform: [{ scale: 0.7 }]
+  },
+  footerLoader: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
 });
