@@ -3,8 +3,20 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import { AuthScreens, MainScreens, Stacks } from '@/config';
 
+export type ReturnTarget =
+  | {
+      stack: typeof Stacks.MainStack;
+      screen: keyof MainNavigationParamList;
+      params?: MainNavigationParamList[keyof MainNavigationParamList];
+    }
+  | undefined;
+
+  export type AuthChallengeParams = {
+    finishFunction?: () => void | Promise<void>;
+    returnTo?: ReturnTarget;
+  };
+
 export type MainNavigationParamList = {
-  [MainScreens.SettingsScreen]: undefined;
   [MainScreens.SettingsScreen]: undefined;
   [MainScreens.FaqScreen]: undefined;
   [MainScreens.CallScreen]: undefined;
@@ -58,15 +70,18 @@ export interface RootStackParamList {
 }
 
 export type AuthStackParamList = {
-  // [AuthScreens.ChooseAuthMethodScreen]: undefined;
   [AuthScreens.ForgotPinScreen]: undefined;
+
   [AuthScreens.RequestFingerPrintScreen]:
-    | { finishFunction?: (nav?: MainStackNavigationType) => void }
+    | AuthChallengeParams
     | undefined;
+
   [AuthScreens.RequestPinScreen]:
-    | { finishFunction?: (nav?: MainStackNavigationType) => void }
+    | AuthChallengeParams
     | undefined;
+
   [AuthScreens.SplashScreen]: undefined;
+
   [AuthScreens.CreateAccountScreen]:
     | {
         selectedValues: {
@@ -75,9 +90,11 @@ export type AuthStackParamList = {
         };
       }
     | undefined;
+
   [AuthScreens.WelcomeScreen]: undefined;
   [AuthScreens.RestoreAccountScreen]: undefined;
 };
+
 
 export type AuthStackNavigationType =
   NativeStackNavigationProp<AuthStackParamList>;

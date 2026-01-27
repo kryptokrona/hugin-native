@@ -156,6 +156,63 @@ export const RootNavigator = () => {
     }
   }, [hydrated, authenticated, authMethod, user, started, minTimeElapsed]);
 
+  useEffect(() => {
+  if (!authenticated || !navigationReady || !mainStackReady) {
+    return;
+  }
+
+  const {
+    authFinishFunction,
+    authTarget,
+    resetAuthFinishFunction,
+    resetAuthTarget,
+  } = useGlobalStore.getState();
+
+  (async () => {
+    try {
+      if (authFinishFunction) {
+        await authFinishFunction();
+      }
+
+      if (authTarget) {
+      console.log('🔐 Post-auth navigating to:', authTarget);
+
+      navigationRef.reset({
+        index: 0,
+        routes: [
+          {
+            name: Stacks.MainStack,
+            state: {
+              index: 0,
+              routes: [
+                {
+                  name: authTarget.parent,
+                  state: {
+                    index: 0,
+                    routes: [
+                      {
+                        name: authTarget.screen,
+                        params: authTarget.params,
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+    }
+
+    } finally {
+      resetAuthFinishFunction();
+      resetAuthTarget();
+    }
+  })();
+}, [authenticated, navigationReady, mainStackReady]);
+
+
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer 

@@ -17,7 +17,8 @@ import { AuthScreens, Stacks } from '@/config';
 import { setAuthenticated } from '@/services';
 import type { AuthStackParamList, MainStackNavigationType } from '@/types';
 import { InteractionManager } from 'react-native';
-import { sleep } from '@/utils';
+import { sleep, waitForCondition } from '@/utils';
+import { navigationRef } from '@/contexts';
 
 
 interface Props {
@@ -30,93 +31,101 @@ interface Props {
 export const RequestFingerprintScreen: React.FC<Props> = ({ route }) => {
   const { t } = useTranslation();
   const mainNavigation = useNavigation<MainStackNavigationType>();
-    const appState = React.useRef(AppState.currentState);
+  const appState = React.useRef(AppState.currentState);
+  const hasPromptedRef = React.useRef(false);
+  const isFinishingRef = React.useRef(false);
 
 
-  const finishProcess = () => {
-    setAuthenticated(true);
-    if (route.params?.finishFunction) {
-      route.params.finishFunction();
-    } else {
-      mainNavigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: Stacks.MainStack }],
-        }),
-      );
-    }
-  };
+
+const finishProcess = async () => {
+  if (isFinishingRef.current) return;
+  isFinishingRef.current = true;
+
+  setAuthenticated(true);
+
+  if (route.params?.finishFunction) {
+    await route.params.finishFunction();
+  }
+};
+
+
 
   // const handleForgotPin = () => {
   //   navigation.navigate(AuthScreens.ForgotPinScreen);
   // };
 
   const authenticateBiometric = async () => {
-    console.log('Invoking authenticateBiometric')
-    const rnBiometrics = new ReactNativeBiometrics();
-    
-    let result = await rnBiometrics.isSensorAvailable();
-    let { available, biometryType } = result;
+  if (hasPromptedRef.current) {
+    console.log('⏭️ Biometric already prompted, skipping');
+    return;
+  }
 
-    console.log('Available: ', available)
+  hasPromptedRef.current = true;
 
-    let timeouts = 0;
-    while (!available && timeouts < 10) {
-      await sleep(500);
-      result = await rnBiometrics.isSensorAvailable();
-      available = result.available;
-      biometryType = result.biometryType;
-      timeouts++;
+  console.log('Invoking authenticateBiometric');
+
+  const rnBiometrics = new ReactNativeBiometrics();
+
+  let result = await rnBiometrics.isSensorAvailable();
+  let { available, biometryType } = result;
+
+  let timeouts = 0;
+  while (!available && timeouts < 10) {
+    await sleep(500);
+    result = await rnBiometrics.isSensorAvailable();
+    available = result.available;
+    biometryType = result.biometryType;
+    timeouts++;
+  }
+
+  if (!available) return;
+
+  try {
+    const { success } = await rnBiometrics.simplePrompt({
+      cancelButtonText: t('cancel'),
+      promptMessage: t('authenticateBiometric'),
+    });
+
+    if (success) {
+      await finishProcess();
+    } else {
+      hasPromptedRef.current = false; // allow retry on manual tap
+      Alert.alert(
+        t('authenticationFailed'),
+        t('authenticationBiometricFailed'),
+      );
     }
+  } catch (error) {
+    hasPromptedRef.current = false; // allow retry
+  }
+};
 
-    if (!available) {
-      // Alert.alert(t('error'), t('biometricUnavailable'));
-      return;
-    }
-
-    try {
-      const { success } = await rnBiometrics.simplePrompt({
-        cancelButtonText: t('cancel'),
-        promptMessage: t('authenticateBiometric'),
-      });
-
-      if (success) {
-        finishProcess();
-      } else {
-        Alert.alert(
-          t('authenticationFailed'),
-          t('authenticationBiometricFailed'),
-        );
-      }
-    } catch (error) {
-      // Alert.alert(t('error'), t('authenticationBiometricNA'));
-    }
-  };
 
   // Run fingerprint authentication on mount
 
+  // useEffect(() => {
+  //   console.log('RequestFingerprintScreen mounted');
+
+  //   authenticateBiometric();
+
+  //   return () => {
+  //     console.log('RequestFingerprintScreen unmounted');
+  //   };
+  // }, []);
+
   useEffect(() => {
-    console.log('Invoking useEffect with state', appState.current)
-    const onChange = (nextAppState: AppStateStatus) => {
-      console.log('Invoking onChange with state', appState.current, '->', nextAppState)
-      if (
-        appState.current.match(/inactive|background/) &&
-        nextAppState === 'active'
-      ) {
+    const sub = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        hasPromptedRef.current = false;
         authenticateBiometric();
-        InteractionManager.runAfterInteractions(() => {
-          authenticateBiometric();
-        });
       }
-      appState.current = nextAppState;
-    };
+    });
 
-    if (appState.current == 'active') authenticateBiometric();
-
-    const sub = AppState.addEventListener('change', onChange);
+    authenticateBiometric();
 
     return () => sub.remove();
   }, []);
+
 
 //   useFocusEffect(
 //   React.useCallback(() => {

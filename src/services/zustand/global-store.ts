@@ -9,6 +9,8 @@ type GlobalStore = {
   balance: Balance;
   address: string;
   authenticated: boolean;
+  authFinishFunction: (() => void | Promise<void>) | null;
+  authTarget: any;
   started: boolean;
   rooms: Room[];
   contacts: Contact[];
@@ -45,6 +47,11 @@ type GlobalStore = {
   setCurrentContact: (payload: string) => void;
   setRoomUserList: (roomId: string, users: User[]) => void;
   setAuthenticated: (payload: boolean) => void;
+  setAuthFinishFunction: (payload: (() => void | Promise<void>) | null) => void;
+  setAuthTarget: (payload: any) => void;
+  resetAuthFinishFunction: () => void;
+  resetAuthTarget: () => void;
+  updateRoomUser: (user: any) => void;
   setStoreRooms: (payload: Room[]) => void;
   setStoreContacts: (payload: Contact[]) => void;
   setBalance: (payload: Balance) => void;
@@ -79,6 +86,8 @@ export const useGlobalStore = create<
     address: '',
     deviceToken: '',
     authenticated: false,
+    authFinishFunction: null,
+    authTarget: null,
     balance: { locked: 0, unlocked: 0 },
     contacts: [],
     currentCall: { ...defaultCall },
@@ -146,6 +155,20 @@ export const useGlobalStore = create<
     },
     setAuthenticated: (authenticated: boolean) => {
       set({ authenticated });
+    },
+    setAuthFinishFunction: (authFinishFunction: (() => void | Promise<void>) | null) => {
+      set({ authFinishFunction });
+    },
+    setAuthTarget: (authTarget: any) => {
+      set({ authTarget });
+    },
+    resetAuthFinishFunction: () => {
+      console.log('Resetting authFinishFunction');
+      set({ authFinishFunction: null });
+    },
+    resetAuthTarget: () => {
+      console.log('Resetting auth target')
+      set({ authTarget: null });
     },
     setStarted: (started: boolean) => {
       set({ started });
