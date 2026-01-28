@@ -286,7 +286,6 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
             {Platform.OS == 'android' && 
             <TextButton
               small
-              type="secondary"
               onPress={onTipUser}
               icon={<CustomIcon name="attach-money" type="MI" size={16} />}>
               {t('tipUser')}
