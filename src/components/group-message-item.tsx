@@ -263,7 +263,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
             <TextButton
               small
               onPress={onReplyPess}
-              icon={<CustomIcon name="reply" type="FA5" size={16} />}>
+              icon={<CustomIcon name="reply" color={theme.primaryForeground} type="MI" size={16} />}>
               {t('reply')}
             </TextButton>
             }
@@ -287,7 +287,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
             <TextButton
               small
               onPress={onTipUser}
-              icon={<CustomIcon name="attach-money" type="MI" size={16} />}>
+              icon={<CustomIcon color={theme.primaryForeground} name="attach-money" type="MI" size={16} />}>
               {t('tipUser')}
             </TextButton>
             }
