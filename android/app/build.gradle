@@ -113,13 +113,13 @@ android {
         jvmTarget = '17'
     }
     defaultConfig {
-        buildToolsVersion '35'
-        targetSdkVersion '35'
-        compileSdk 35
+        buildToolsVersion '36'
+        targetSdkVersion '36'
+        compileSdk 36
         applicationId 'com.hugin'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 120
+        versionCode 128
         versionName "1.0.9"
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
 
@@ -132,6 +132,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++17 -O3 -fexceptions"
+                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
 
@@ -255,3 +256,9 @@ dependencies {
 }
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
+// Fix task dependency for react-native-vector-icons
+tasks.configureEach { task ->
+    if (task.name.contains('LintVitalReportModel')) {
+        task.dependsOn('copyReactNativeVectorIconFonts')
+    }
+}

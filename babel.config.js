@@ -1,6 +1,7 @@
 module.exports = {
   presets: ['babel-preset-expo'],
   plugins: [
+    '@babel/plugin-proposal-explicit-resource-management',
     [
       'module-resolver',
       {
