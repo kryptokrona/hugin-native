@@ -1,4 +1,4 @@
-const DHT = require('hyperdht');
+const DHT = require('hyperdht-hugin');
 const Keychain = require('keypear');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
