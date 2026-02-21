@@ -31,6 +31,9 @@ jobs:
       - name: 🩹 Patch NPM packages
         run: npm run patch
 
+      - name: 📦 Bundle bare
+        run: ./bin/bundle.js -ra
+
       - name: 🔐 Decode Keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/my-release-key.keystore
