@@ -175,8 +175,8 @@
     "typescript-eslint": "^7.8.0",
     "which": "^4.0.0"
   },
-    "overrides": {
-    "bare-pack>bare-module-traverse": "1.4.1"
+  "overrides": {
+    "bare-module-traverse": "1.4.1"
   },
   "engines": {
     "node": ">=18"
