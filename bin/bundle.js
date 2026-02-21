@@ -3,7 +3,7 @@ const { spawnSync, spawn } = require('child_process');
 const { program } = require('commander');
 const pkg = require('../package.json');
 //Consts
-const pack = 'bare-pack';
+const pack = require.resolve('bare-pack/bin.js');
 const linked = '--linked';
 const out = '--out';
 const bundle = 'app.bundle.js';
