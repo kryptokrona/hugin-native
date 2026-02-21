@@ -31,6 +31,12 @@ jobs:
       - name: 🩹 Patch NPM packages
         run: npm run patch
 
+      - name: 🐞 Debug packages
+        run: npm ls bare-module-traverse
+
+      - name: 🐞 Debug packages 2
+        run: npm ls bare-pack
+
       - name: 📦 Bundle bare
         run: ./bin/bundle.js -ra
 
