@@ -28,6 +28,9 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
+      - name: 🩹 Patch NPM packages
+        run: npm run patch
+
       - name: 🔐 Decode Keystore
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/my-release-key.keystore
