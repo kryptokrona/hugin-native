@@ -31,11 +31,21 @@ jobs:
       - name: 🩹 Patch NPM packages
         run: npm run patch
 
+      - name: 🔧 Patch keypear for Node 18
+        run: |
+          KEYPEAR_PKG="node_modules/keypear/package.json"
+          echo "Patching keypear imports..."
+          jq '.imports.fs = {"bare":"builtin:fs","default":"fs"} | .imports.path = {"bare":"builtin:path","default":"path"}' $KEYPEAR_PKG > $KEYPEAR_PKG.tmp
+          mv $KEYPEAR_PKG.tmp $KEYPEAR_PKG
+
       - name: 🐞 Debug packages
         run: npm ls bare-module-traverse
 
       - name: 🐞 Debug packages 2
         run: npm ls bare-pack
+
+      - name: 🐞 Debug patch 
+        run: cat node_modules/keypear/package.json
 
       - name: 📦 Bundle bare
         run: ./bin/bundle.js -ra
