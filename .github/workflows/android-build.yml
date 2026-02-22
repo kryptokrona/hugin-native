@@ -41,6 +41,9 @@ jobs:
       - name: 📋 Get offline lists
         run: npm run get-offline-lists
 
+      - name: 🔑 Export private keys file
+        run: npm run create-private-keys
+
       - name: 📦 Bundle bare
         run: ./bin/bundle.js -ra
 
