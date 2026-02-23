@@ -28,6 +28,9 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install
 
+      - name: 🐛 Debug xkr krypto
+        run: npm ls kryptokrona-crypto
+
       - name: 🩹 Patch NPM packages
         run: npm run patch
 
