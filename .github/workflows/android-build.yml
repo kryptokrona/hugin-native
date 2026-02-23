@@ -66,10 +66,18 @@ jobs:
 
       - name: 🛠️ Build Release APK & AAB
         run: |
+          export LDFLAGS="-Wl,-z,max-page-size=16384"
+          export CFLAGS=""
+          export CXXFLAGS=""
           cd android
           ./gradlew clean
           ./gradlew assembleRelease
           ./gradlew bundleRelease
+
+      - name: Check alignment
+        run: |
+          unzip android/app/build/outputs/bundle/release/*.aab -d aab
+          find aab -name "libquickbit-native*.so" -exec readelf -l {} \; | grep LOAD
 
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
