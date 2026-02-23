@@ -26,7 +26,9 @@ jobs:
           java-version: 17
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: | 
+          export LDFLAGS="-Wl,-z,max-page-size=16384"
+          npm install
 
       - name: 🐛 Debug xkr krypto
         run: npm ls kryptokrona-crypto
