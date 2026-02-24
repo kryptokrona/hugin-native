@@ -178,7 +178,6 @@
   },
  "overrides": {
     "bare-module-traverse": "1.4.1",
-    "sodium-native": "5.0.10",
     "bare-pipe": "4.1.3",
     "quickbit-native": "2.4.8",
     "simdle-native": "2.4.8",
