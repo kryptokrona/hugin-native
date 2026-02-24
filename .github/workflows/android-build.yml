@@ -37,6 +37,14 @@ jobs:
           export LDFLAGS="-Wl,-z,max-page-size=16384"
           npm install
 
+      - name: 🐛 Debug npm packages
+        run: | 
+          npm ls bare-pipe
+          npm ls quickbit-native
+          npm ls simdle-native
+          npm ls sodium-native
+          npm ls udx-native
+
       - name: 🐛 Debug find .so files
         run: find node_modules -name "*.so"
 
