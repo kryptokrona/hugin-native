@@ -19,6 +19,13 @@ jobs:
         with:
           node-version: 18
 
+      - name: Force Android linker flags
+        run: |
+          echo "export LDFLAGS=\"-Wl,-z,max-page-size=16384\"" >> $GITHUB_ENV
+          echo "export CFLAGS=\"\"" >> $GITHUB_ENV
+          echo "export CXXFLAGS=\"\"" >> $GITHUB_ENV
+          echo "export GYP_DEFINES=\"android_max_page_size=16384\"" >> $GITHUB_ENV
+
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
         with:
