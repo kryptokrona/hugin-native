@@ -37,11 +37,14 @@ jobs:
           export LDFLAGS="-Wl,-z,max-page-size=16384"
           npm install
 
-      - name: 🐛 Debug find .so files
-        run: find node_modules -name "*.so"
+      - name: 🐛 Debug check packages
+        run: npm ls simdle-native
+
+      - name: 🐛 Debug check packages 2
+        run: npm ls simdle-native
 
       - name: 🩹 Patch NPM packages
-        run: npm run patch
+        run: npm ls sodium-native
 
       - name: 🔧 Patch keypear for Node 18
         run: |
