@@ -149,7 +149,6 @@ android {
          externalNativeBuild {
             cmake {
                 path "src/main/jni/CMakeLists.txt"
-                arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
             }
         }
 
