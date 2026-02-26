@@ -46,13 +46,6 @@ jobs:
       - name: 🩹 Patch NPM packages
         run: npm ls sodium-native
 
-      - name: 🔧 Patch keypear for Node 18
-        run: |
-          KEYPEAR_PKG="node_modules/keypear/package.json"
-          echo "Patching keypear imports..."
-          jq '.imports.fs = {"bare":"builtin:fs","default":"fs"} | .imports.path = {"bare":"builtin:path","default":"path"}' $KEYPEAR_PKG > $KEYPEAR_PKG.tmp
-          mv $KEYPEAR_PKG.tmp $KEYPEAR_PKG
-
       - name: 📋 Get offline lists
         run: npm run get-offline-lists
 
