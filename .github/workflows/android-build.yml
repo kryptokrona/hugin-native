@@ -39,12 +39,12 @@ jobs:
 
       - name: 🐛 Debug check packages
         run: npm ls simdle-native
-
+        
       - name: 🐛 Debug check packages 2
-        run: npm ls simdle-native
-
-      - name: 🩹 Patch NPM packages
         run: npm ls sodium-native
+        
+      - name: 🩹 Patch NPM packages
+        run: npm run patch
 
       - name: 📋 Get offline lists
         run: npm run get-offline-lists
