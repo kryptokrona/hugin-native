@@ -6,7 +6,7 @@
     "bare-os": "3.6.2"
   },
   "overrides": {
-    "bare-os": "3.6.2"
+    "bare-module-traverse": "1.4.1"
   },
   "bin": {
     "bundle": "./bin/bundle.js"
@@ -66,7 +66,6 @@
     "i18next": "^23.11.5",
     "identicon.js": "^2.3.3",
     "int-encoder": "^1.1.1",
-    "keypear": "^1.2.2",
     "kryptokrona-crypto": "^1.0.3",
     "kryptokrona-wallet-backend-js": "^2.5.8",
     "metro-react-native-babel-preset": "^0.77.0",
@@ -175,9 +174,6 @@
     "typescript": "^5.3.0",
     "typescript-eslint": "^7.8.0",
     "which": "^4.0.0"
-  },
- "overrides": {
-    "bare-module-traverse": "1.4.1"
   },
   "engines": {
     "node": ">=18"

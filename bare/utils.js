@@ -1,7 +1,35 @@
 const DHT = require('hyperdht-hugin');
-const Keychain = require('keypear');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
+
+class Keychain {
+  constructor(keypair) {
+    this.publicKey = keypair.publicKey;
+    this.secretKey = keypair.secretKey;
+  }
+
+  static from(keypair) {
+    return new Keychain(keypair);
+  }
+
+  get() {
+    return {
+      publicKey: this.publicKey,
+      sign: (message) => {
+        const sig = b4a.alloc(sodium.crypto_sign_BYTES);
+        sodium.crypto_sign_detached(sig, message, this.secretKey);
+        return sig;
+      },
+      verify: (message, signature) => {
+        return sodium.crypto_sign_verify_detached(signature, message, this.publicKey);
+      }
+    };
+  }
+
+  static verify(message, signature, publicKey) {
+    return sodium.crypto_sign_verify_detached(signature, message, publicKey);
+  }
+}
 const { Hugin } = require('./account');
 //const nacl = require('tweetnacl');
 
