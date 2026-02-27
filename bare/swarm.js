@@ -150,13 +150,13 @@ async listen() {
     this.node_connection(conn)
   })
 
-  process.once('SIGINT', function () {
-    this.node.on('close', function () {
-        process.exit();
-    });
-    this.node.destroy();
-    setTimeout(() => process.exit(), 2000);
-  });
+  // process.once('SIGINT', function () {
+  //   this.node.on('close', function () {
+  //       process.exit();
+  //   });
+  //   this.node.destroy();
+  //   setTimeout(() => process.exit(), 2000);
+  // });
 
   }
   async node_connection(conn) {
@@ -454,13 +454,13 @@ const create_swarm = async (hashkey, key, beam = false, chat = false) => {
 
   check_if_online(room.topic);
 
-  process.once('SIGINT', function () {
-    room.swarm.on('close', function () {
-      process.exit();
-    });
-    room.swarm.destroy();
-    setTimeout(() => process.exit(), 2000);
-  });
+  // process.once('SIGINT', function () {
+  //   room.swarm.on('close', function () {
+  //     process.exit();
+  //   });
+  //   room.swarm.destroy();
+  //   setTimeout(() => process.exit(), 2000);
+  // });
 
   return room.topic;
 };

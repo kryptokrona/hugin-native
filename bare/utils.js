@@ -3,33 +3,86 @@ const sodium = require('sodium-native');
 const b4a = require('b4a');
 
 class Keychain {
-  constructor(keypair) {
-    this.publicKey = keypair.publicKey;
-    this.secretKey = keypair.secretKey;
+  constructor(key_pair) {
+    const kp = normalize_keypair(key_pair);
+    this.publicKey = kp.publicKey;
+    this.secretKey = kp.secretKey;
+    this.scalar = kp.scalar || (kp.secretKey ? secret_key_to_scalar(kp.secretKey) : null);
   }
 
-  static from(keypair) {
-    return new Keychain(keypair);
+  get isKeychain() {
+    return true;
   }
 
   get() {
-    return {
+    return create_signer({
       publicKey: this.publicKey,
-      sign: (message) => {
-        const sig = b4a.alloc(sodium.crypto_sign_BYTES);
-        sodium.crypto_sign_detached(sig, message, this.secretKey);
-        return sig;
-      },
-      verify: (message, signature) => {
-        return sodium.crypto_sign_verify_detached(signature, message, this.publicKey);
-      }
-    };
+      secretKey: this.secretKey,
+      scalar: this.scalar
+    });
   }
 
-  static verify(message, signature, publicKey) {
-    return sodium.crypto_sign_verify_detached(signature, message, publicKey);
+  static from(k) {
+    return this.isKeychain(k) ? k : new this(k);
+  }
+
+  static verify(signable, signature, publicKey) {
+    return sodium.crypto_sign_verify_detached(signature, signable, publicKey);
+  }
+
+  static isKeychain(k) {
+    return !!(k && k.isKeychain);
   }
 }
+
+function normalize_keypair(key_pair) {
+  if (b4a.isBuffer(key_pair) || key_pair instanceof Uint8Array) {
+    const publicKey = b4a.from(key_pair);
+    return { publicKey, secretKey: null, scalar: null };
+  }
+
+  if (!key_pair || typeof key_pair !== 'object') {
+    return { publicKey: null, secretKey: null, scalar: null };
+  }
+
+  const publicKey = key_pair.publicKey ? b4a.from(key_pair.publicKey) : null;
+  const secretKey = key_pair.secretKey ? b4a.from(key_pair.secretKey) : null;
+  const scalar = key_pair.scalar ? b4a.from(key_pair.scalar) : null;
+
+  return { publicKey, secretKey, scalar };
+}
+
+function secret_key_to_scalar(secret_key) {
+  const scalar = b4a.alloc(32);
+  sodium.extension_tweak_ed25519_sk_to_scalar(scalar, secret_key);
+  return scalar;
+}
+
+function create_signer(kp) {
+  const verify = (signable, signature) =>
+    sodium.crypto_sign_verify_detached(signature, signable, kp.publicKey);
+
+  const signer = {
+    publicKey: kp.publicKey,
+    secretKey: kp.secretKey || null,
+    scalar: kp.scalar || null,
+    writable: !!kp.scalar,
+    sign: null,
+    verify
+  };
+
+  if (!kp.scalar) return signer;
+
+  signer.sign = (signable) => {
+    const sig = b4a.alloc(sodium.crypto_sign_BYTES);
+    sodium.extension_tweak_ed25519_sign_detached(sig, signable, kp.scalar);
+    return sig;
+  };
+
+  return signer;
+}
+
+
 const { Hugin } = require('./account');
 //const nacl = require('tweetnacl');
 
@@ -83,9 +136,7 @@ function get_new_peer_keys(key) {
 
 function random_key() {
   let key = Buffer.alloc(32);
-
   sodium.randombytes_buf(key);
-
   return key;
 }
 
