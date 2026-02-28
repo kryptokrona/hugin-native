@@ -636,7 +636,7 @@ export async function getLatestMessages() {
   for (const contact of contacts) {
     //Loop through list and get one message from each room
     const results = await db.executeSql(
-      'SELECT * FROM messages WHERE conversation = ? AND message IS NOT "" ORDER BY timestamp DESC LIMIT 1',
+      "SELECT * FROM messages WHERE conversation = ? AND message IS NOT NULL AND message != '' ORDER BY timestamp DESC LIMIT 1",
       [contact.address],
     );
 
@@ -668,7 +668,7 @@ export async function getLatestRoomMessages() {
   for (const room of rooms) {
     //Loop through list and get one message from each room
     const results = await db.executeSql(
-      'SELECT * FROM roomsmessages WHERE room = ? AND message IS NOT "" ORDER BY timestamp DESC LIMIT 1',
+      "SELECT * FROM roomsmessages WHERE room = ? AND message IS NOT NULL AND message != '' ORDER BY timestamp DESC LIMIT 1",
       [room.key],
     );
 
@@ -949,7 +949,7 @@ export async function getFeedMessages(page: number, replies=false) {
   console.log('Fetching feed messages, offset ', offset, ' limit: ', limit, ' page: ', page);
 
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM feedmessages ${replies ? '' : 'WHERE reply = ""'} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`
+    `SELECT * FROM feedmessages ${replies ? '' : "WHERE reply = ''"} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`
   );
 
   // const files = Files.all();

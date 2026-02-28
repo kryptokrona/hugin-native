@@ -108,11 +108,24 @@ const onrequest = async (p) => {
 };
 
 async function response(request) {
-  //return data to React Native
-  const send = await onrequest(request);
-  if (send === undefined) return;
-  send.id = request.id;
-  rpc.send(request.type, send);
+  try {
+    const send = await onrequest(request);
+    if (send === undefined) return;
+    send.id = request.id;
+    rpc.send(request.type, send);
+  } catch (e) {
+    try {
+      console.error('Bare worklet request failed:', request?.type, e?.stack ?? e);
+      if (request?.id !== undefined) {
+        rpc.send(request.type, {
+          id: request.id,
+          error: (e && typeof e === 'object' && 'message' in e) ? e.message : String(e),
+        });
+      }
+    } catch (_) {
+      // Never throw from the worklet request handler.
+    }
+  }
 }
 
 // Function implementations
@@ -126,8 +139,15 @@ const updateBareUser = (user) => {
 
 const newSwarm = async (hashkey, key, admin, beam, chat) => {
   if (Hugin.rooms.some((a) => a.key === key)) return;
-  const topic = await create_swarm(hashkey, key, beam, chat);
-  Hugin.rooms.push({ key, topic, admin });
+  Hugin.rooms.push({ key, topic: null, admin });
+  try {
+    const topic = await create_swarm(hashkey, key, beam, chat);
+    const entry = Hugin.rooms.find((a) => a.key === key);
+    if (entry) entry.topic = topic ?? null;
+  } catch (e) {
+    Hugin.rooms = Hugin.rooms.filter((a) => a.key !== key);
+    return;
+  }
 };
 
 const endSwarm = async (key) => {
