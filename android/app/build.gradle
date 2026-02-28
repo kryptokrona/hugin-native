@@ -119,7 +119,7 @@ android {
         applicationId 'com.hugin'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode System.getenv("GITHUB_RUN_NUMBER")?.toInteger() ?: 1
+        versionCode System.getenv("GITHUB_RUN_NUMBER")?.toInteger() + 80 ?: 1
         versionName "1.0.11"
         buildConfigField("boolean", "REACT_NATIVE_UNSTABLE_USE_RUNTIME_SCHEDULER_ALWAYS", (findProperty("reactNative.unstable_useRuntimeSchedulerAlways") ?: true).toString())
 
