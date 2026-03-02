@@ -108,7 +108,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     await Rooms.start();
     useGlobalStore.getState().setLoadingStatus('Initializing database...');
-    await initDB();
+    try {
+      await initDB();
+    } catch (e) {
+      console.log('Failed to initialize database:', e);
+    }
     await Background.init();
 
     const node = preferences?.node

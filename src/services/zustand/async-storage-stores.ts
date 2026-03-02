@@ -1,7 +1,4 @@
-import { Platform } from 'react-native';
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNFS from 'react-native-fs';
 import { create } from 'zustand';
 import {
   createJSONStorage,
@@ -267,19 +264,12 @@ export const defaultPreferences: Preferences = {
 
 export const defaultUser: User = {
   address: '',
-  downloadDir:
-    Platform.OS == 'ios'
-      ? RNFS.LibraryDirectoryPath
-      : RNFS.DownloadDirectoryPath,
+  downloadDir: '',
   huginAddress: '',
-
   keys: {},
   name: 'Anon',
   room: 'lobby',
-  store:
-    Platform.OS == 'ios'
-      ? RNFS.LibraryDirectoryPath
-      : RNFS.DocumentDirectoryPath,
+  store: '',
   files: [],
 };
 

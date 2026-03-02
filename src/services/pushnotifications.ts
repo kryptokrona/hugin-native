@@ -120,7 +120,7 @@ const answerCall = async () => {
 async function init() {
 
   
-  console.log('☎️ Initing stuff in the background..')
+  console.log('☎️ Initing stuff in the background.. push notifications')
   
     await Rooms.start();
   

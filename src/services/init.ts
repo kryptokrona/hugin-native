@@ -7,10 +7,11 @@ import { Platform } from 'react-native';
 import RNFS from 'react-native-fs';
 
 export async function init() {
-
+  const user = useUserStore.getState().user;
+  if (!user?.address) return;
   if (useGlobalStore.getState().started === true) return;
 
-  console.log('☎️ Initing stuff in the background..')
+  console.log('☎️ Initing stuff in the background.. init')
   
     await Rooms.start();
   
@@ -35,8 +36,7 @@ export async function init() {
       await Wallet.init(node);
       console.log('☎️ Trying to rehydrate user..')
       await useUserStore.persist.rehydrate();
-      const user = useUserStore.getState().user;
-      console.log('☎️ Got user')
+      console.log('☎️ Got user', user)
 
       const currentStorePath = Platform.OS === 'ios' ? RNFS.LibraryDirectoryPath : RNFS.DocumentDirectoryPath;
       console.log('Current store path:', currentStorePath);
