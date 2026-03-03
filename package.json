@@ -61,7 +61,7 @@
     "compact-encoding": "^2.15.0",
     "console-browserify": "^1.1.0",
     "corestore": "^7.7.0",
-    "expo": "^54.0.25",
+    "expo": "^53.0.0",
     "expo-modules-core": "^3.0.26",
     "fs": "^0.0.1-security",
     "https-browserify": "~0.0.0",

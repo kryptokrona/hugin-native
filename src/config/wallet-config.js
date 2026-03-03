@@ -2,8 +2,6 @@
 //
 // Please see the included LICENSE file for more information.
 
-import { Platform } from 'react-native';
-
 import { MixinLimit, MixinLimits, Daemon } from 'kryptokrona-wallet-backend-js';
 import {
   derivePublicKey,
