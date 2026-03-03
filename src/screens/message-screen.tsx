@@ -55,6 +55,7 @@ import { getAvatar } from '@/utils';
 import { Header } from '../components/_navigation/header';
 import { Peers } from '../lib/connections';
 import { setLatestMessages, updateMessage } from '../services/bare/contacts';
+import { randomKey } from '../services/bare/crypto';
 import { deleteMessage, saveMessage } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Beam, Rooms } from 'lib/native';
@@ -362,18 +363,19 @@ useEffect(() => {
     retryHash?: string | undefined
   ) {
 
-
+      const timestamp = Date.now();
+      const outgoingHash = randomKey();
       const newMessage: Message = {
         address: myUserAddress,
         message: text,
         reply,
-        timestamp: Date.now(),
+        timestamp,
         nickname: userName,
-        hash: Date.now().toString(),
+        hash: outgoingHash,
         sent: true,
         reactions: [],
         joined: false,
-        status: 'pending',
+        status: 'success',
         file
       };
 
@@ -390,12 +392,32 @@ useEffect(() => {
       //If we need to return something... or print something locally
       // console.log('sent file!', sentFile);
     } else {
+      if (retryHash) await deleteMessage(retryHash);
+      const savedOptimistic = await saveMessage(
+        roomKey,
+        text,
+        '',
+        timestamp,
+        outgoingHash,
+        true,
+        address,
+        undefined,
+        name,
+        'success'
+      );
+      if (savedOptimistic) {
+        updateMessage(savedOptimistic, false);
+        setLatestMessages();
+      }
+
       ///
       // const beam = false; //// *** check if connected to this user in beam.
-      const { hash, success, error } = await Wallet.send_message(
+      const { success, error } = await Wallet.send_message(
         text,
         huginAddress,
         online,
+        false,
+        outgoingHash
       );
 
       if (!success) {
@@ -411,14 +433,12 @@ useEffect(() => {
         newMessage.status = 'failed';
         setStoreMessages([...messageList, newMessage]);
 
-        const timestamp = Date.now();
-
         const saved = await saveMessage(
           roomKey,
           text,
           '',
           timestamp,
-          replyHash || timestamp.toString(),
+          outgoingHash,
           true,
           address,
           undefined,
@@ -426,33 +446,11 @@ useEffect(() => {
           "failed"
         );
         if (saved) {
-          updateMessage(saved);
+          updateMessage(saved, false);
           setLatestMessages();
         }
 
         return;
-      }
-
-      if (hash) {
-
-        if (retryHash) deleteMessage(retryHash);
-
-        const saved = await saveMessage(
-          roomKey,
-          text,
-          '',
-          Date.now(),
-          hash,
-          true,
-          address,
-          undefined,
-          name,
-          "success"
-        );
-        if (saved) {
-          updateMessage(saved);
-          setLatestMessages();
-        }
       }
 
       setReplyToMessageHash('');

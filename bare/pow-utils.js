@@ -94,8 +94,45 @@ function nonceTagFromMessageHash(messageHash, bits) {
   return value & mask;
 }
 
+function stringToHex(str) {
+  let out = '';
+  for (let i = 0; i < str.length; i++) {
+    out += str.charCodeAt(i).toString(16);
+  }
+  return out;
+}
+
+function nonceTagFromDigestHex(digestHex, bits) {
+  const b = typeof bits === 'number' ? bits : 0;
+  if (b <= 0 || b > 16) return 0;
+  if (typeof digestHex !== 'string' || digestHex.length < 2) return 0;
+  const mask = (1 << b) - 1;
+  const firstByte = parseInt(digestHex.slice(0, 2), 16);
+  if (!Number.isFinite(firstByte)) return 0;
+  return firstByte & mask;
+}
+
+function nonceMatchesTag(nonceHex, tagValue, bits) {
+  if (typeof nonceHex !== 'string' || nonceHex.length !== 8) return false;
+  const b = typeof bits === 'number' ? bits : 0;
+  if (b <= 0 || b > 16) return false;
+  const mask = (1 << b) - 1;
+  const nonceBytes = hexToBytes(nonceHex);
+  if (nonceBytes.length !== 4) return false;
+  const nonce = (
+    (nonceBytes[0]) |
+    (nonceBytes[1] << 8) |
+    (nonceBytes[2] << 16) |
+    (nonceBytes[3] << 24)
+  ) >>> 0;
+  return (nonce & mask) === (tagValue & mask);
+}
+
 module.exports = {
   getNonceOffset,
   extractPrevIdFromBlob,
   nonceTagFromMessageHash,
+  stringToHex,
+  nonceTagFromDigestHex,
+  nonceMatchesTag,
 };

@@ -19,7 +19,12 @@ const {
   logPow,
   validate_pow_job,
 } = require('./utils');
-const { extractPrevIdFromBlob, nonceTagFromMessageHash } = require('./pow-utils');
+const {
+  extractPrevIdFromBlob,
+  stringToHex,
+  nonceTagFromDigestHex,
+  nonceMatchesTag,
+} = require('./pow-utils');
 const {
   send_file,
   start_download,
@@ -50,8 +55,8 @@ const REQUEST_FILE = 'request-file';
 const ONE_DAY = 24 * 60 * 60 * 1000
 const POW_NONCE_TAG_BITS = 4;
 const MAX_NATIVE_POW_ATTEMPTS = 5000000;
-const POW_TOTAL_HASHES_PER_SECOND_CAP = 1500;
-const POW_PHASE1_HASHES_PER_SECOND_CAP = 950;
+const POW_TOTAL_HASHES_PER_SECOND_CAP = 900;
+const POW_PHASE1_HASHES_PER_SECOND_CAP = 600;
 const POW_PHASE2_HASHES_PER_SECOND_CAP = 250;
 const POW_PHASE1_MS = 2 * 60 * 1000;
 const POW_SLICE_MS_PHASE1 = 10000;
@@ -405,12 +410,64 @@ async request_job() {
   });
 }
 
+async request_pow_tag(message_hash) {
+  if (!this.connection) return null;
+  return new Promise((resolve, reject) => {
+    const id = random_key().toString('hex');
+    this.requests.set(id, { resolve, reject });
+    this.connection.write(JSON.stringify({
+      type: 'pow_tag',
+      hash: String(message_hash || ''),
+      id,
+    }));
+    logPow('pow_tag_request', { id });
+    setTimeout(() => {
+      if (this.requests.has(id)) {
+        this.requests.delete(id);
+        logPow('pow_tag_request_timeout', { id });
+        resolve(null);
+      }
+    }, 5000);
+  });
+}
+
 async challenge(message_hash) {
   if (!this.connection) return null;
   active_pow_tasks++;
   try {
     const start = Date.now();
-    const nonce_tag_value = nonceTagFromMessageHash(message_hash, POW_NONCE_TAG_BITS);
+    let nonce_tag_value = null;
+    try {
+      const powTag = await this.request_pow_tag(message_hash);
+      if (powTag && typeof powTag.tagValue === 'number') {
+        nonce_tag_value = powTag.tagValue >>> 0;
+      }
+    } catch (e) {
+      // Ignore and fall back to local derivation.
+    }
+    try {
+      if (nonce_tag_value === null) {
+        const digestHex = await Hugin.request({
+          type: 'cn-fast-hash',
+          hashInput: stringToHex(String(message_hash || '')),
+        });
+        if (typeof digestHex === 'string' && digestHex.length >= 2) {
+          nonce_tag_value = nonceTagFromDigestHex(digestHex, POW_NONCE_TAG_BITS);
+        }
+      }
+    } catch (e) {
+      // Ignore and fail below if no tag value.
+    }
+    if (typeof nonce_tag_value !== 'number' || !Number.isFinite(nonce_tag_value)) {
+      logPow('pow_tag_unavailable', { messageHash: String(message_hash || '').slice(0, 16) });
+      await sleep(100);
+      return null;
+    }
+    logPow('pow_tag_selected', {
+      messageHash: String(message_hash || '').slice(0, 16),
+      nonceTagValue: nonce_tag_value,
+      nonceTagBits: POW_NONCE_TAG_BITS,
+    });
     const shares = [];
     const share_nonces = new Set();
 
@@ -467,6 +524,7 @@ async challenge(message_hash) {
             jobId: job.job_id,
             sliceMs: time_budget_ms,
             hps: hashes_per_second,
+            nonceTagValue: nonce_tag_value,
           });
           await sleep(in_phase1 ? 100 : 300);
           continue;
@@ -475,6 +533,28 @@ async challenge(message_hash) {
       }
 
       if (share && typeof share.nonce === 'string' && typeof share.result === 'string') {
+        if (!nonceMatchesTag(share.nonce, nonce_tag_value, POW_NONCE_TAG_BITS)) {
+          logPow('pow_share_local_tag_reject', {
+            jobId: job.job_id,
+            nonce: share.nonce,
+            nonceTagValue: nonce_tag_value,
+            nonceTagBits: POW_NONCE_TAG_BITS,
+          });
+          await sleep(in_phase1 ? 50 : 250);
+          continue;
+        }
+        const nonceBytes = Buffer.from(share.nonce, 'hex');
+        const nonceLE = nonceBytes.length === 4
+          ? ((nonceBytes[0]) | (nonceBytes[1] << 8) | (nonceBytes[2] << 16) | (nonceBytes[3] << 24)) >>> 0
+          : 0;
+        const nonceMask = (1 << POW_NONCE_TAG_BITS) - 1;
+        logPow('pow_share_found_local', {
+          jobId: job.job_id,
+          nonce: share.nonce,
+          nonceLowBits: nonceLE & nonceMask,
+          nonceTagValue: nonce_tag_value,
+          nonceTagBits: POW_NONCE_TAG_BITS,
+        });
         const normalized = {
           job_id: String(share.job_id),
           nonce: share.nonce.toLowerCase(),
@@ -515,182 +595,195 @@ close() {
 }
 
 async message(payload, hash, viewtag) {
-  if (this.connection === null) {
-    await this.reconnect();
-  }
-  if (!this.connection) return { success: false, reason: 'No connection' };
-
-  const request_id = Date.now();
-
-  const [pub, signature] = await Hugin.request({
-    type: 'sign-node-message',
-    message: payload + hash,
-  });
-
-  const baseMessage = {
-    cipher: payload,
-    pub,
-    timestamp: request_id,
-    hash,
-    signature,
-    viewtag,
-    push: true,
-    id: request_id,
-  };
-
-  const send_post = async (postData) => {
-    if (!this.connection) {
-      this.reconnect();
-      await sleep(5000);
+  try {
+    if (this.connection === null) {
+      await this.reconnect();
     }
-    return await new Promise((resolve, reject) => {
-      this.requests.set(request_id, { resolve, reject });
-      try {
-        this.connection.write(JSON.stringify(postData));
-      } catch (e) {
-        this.requests.delete(request_id);
-        resolve({ success: false, reason: 'write_failed' });
-        return;
-      }
-      setTimeout(() => {
-        if (!this.requests.has(request_id)) return;
-        this.requests.delete(request_id);
-        resolve({ success: false, reason: 'timeout' });
-      }, 60000);
+    if (!this.connection) return { success: false, reason: 'No connection' };
+
+    const request_id = Date.now();
+    const max_attempts = 3;
+
+    const [pub, signature] = await Hugin.request({
+      type: 'sign-node-message',
+      message: payload + hash,
     });
-  };
 
-  const compute_pow = async () => {
-    let pow = null;
-    try {
-      pow = await this.challenge(hash);
-      if (pow && pow.shares) {
-        logPow('pow_message_ready', { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
+    const baseMessage = {
+      cipher: payload,
+      pub,
+      timestamp: request_id,
+      hash,
+      signature,
+      viewtag,
+      push: true,
+      id: request_id,
+    };
+
+    const should_retry = (res) => {
+      if (!res) return true;
+      if (res.success === true) return false;
+      return !!res.reason;
+    };
+
+    const send_post = async (postData) => {
+      if (!this.connection) {
+        this.reconnect();
+        await sleep(5000);
       }
-    } catch (e) {
-      console.log('PoW calculation failed:', e && e.message ? e.message : e);
-      logPow('pow_error', { message: e && e.message });
-    }
-    return pow;
-  };
+      return await new Promise((resolve, reject) => {
+        this.requests.set(request_id, { resolve, reject });
+        try {
+          this.connection.write(JSON.stringify(postData));
+        } catch (e) {
+          this.requests.delete(request_id);
+          resolve({ success: false, reason: 'write_failed' });
+          return;
+        }
+      });
+    };
 
-  const build_post = (pow) => ({
-    type: 'post',
-    message: {
-      ...baseMessage,
+    const compute_pow = async () => {
+      let pow = null;
+      try {
+        pow = await this.challenge(hash);
+        if (pow && pow.shares) {
+          logPow('pow_message_ready', { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
+        }
+      } catch (e) {
+        logPow('pow_error', { message: e && e.message });
+      }
+      return pow;
+    };
+
+    const build_post = (pow) => ({
+      type: 'post',
+      message: {
+        ...baseMessage,
+        pow: {
+          version: 2,
+          job: pow.job,
+          shares: pow.shares,
+        },
+      },
+    });
+
+    let last_res = { success: false, reason: 'unknown' };
+    for (let attempt = 1; attempt <= max_attempts; attempt++) {
+      let pow = await compute_pow();
+      if (!pow || !pow.shares || pow.shares.length === 0) {
+        logPow('pow_message_retry', { attempt, reason: 'no_shares' });
+        this.currentJob = null;
+        const jobResponse = await this.request_job();
+        if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
+        last_res = { success: false, reason: 'PoW required' };
+        continue;
+      }
+
+      const res = await send_post(build_post(pow));
+      if (res && res.success === true) return res;
+
+      last_res = res || { success: false, reason: 'unknown' };
+      if (!should_retry(last_res)) break;
+
+      logPow('pow_message_retry', { attempt, reason: last_res.reason, jobId: pow && pow.job && pow.job.job_id });
+      this.currentJob = null;
+      const jobResponse = await this.request_job();
+      if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
+      await sleep(100);
+    }
+    return last_res;
+  } catch (e) {
+    logPow('pow_message_error', { message: e && e.message });
+    return { success: false, reason: 'message_exception' };
+  }
+}
+
+async register(data) {
+  try {
+    if (this.connection === null) {
+      await this.reconnect();
+    }
+    if (!this.connection) return { success: false, reason: 'No connection' };
+
+    const request_id = Date.now();
+    const message_hash = random_key().toString('hex');
+    const max_attempts = 3;
+
+    const should_retry = (res) => {
+      if (!res) return true;
+      if (res.success === true) return false;
+      return !!res.reason;
+    };
+
+    const send_register = async (payload) => {
+      return await new Promise((resolve, reject) => {
+        this.requests.set(request_id, { resolve, reject });
+        try {
+          this.connection.write(JSON.stringify(payload));
+        } catch (e) {
+          this.requests.delete(request_id);
+          resolve({ success: false, reason: 'write_failed' });
+          return;
+        }
+      });
+    };
+
+    const compute_pow = async () => {
+      let pow = null;
+      try {
+        pow = await this.challenge(message_hash);
+        if (pow && pow.shares) {
+          logPow('pow_register_ready', { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
+        }
+      } catch (e) {
+        logPow('pow_error', { message: e && e.message });
+      }
+      return pow;
+    };
+
+    const build_register = (pow) => ({
+      register: true,
+      data,
+      timestamp: request_id,
+      id: request_id,
+      hash: message_hash,
       pow: {
         version: 2,
         job: pow.job,
         shares: pow.shares,
       },
-    },
-  });
-
-  let pow = await compute_pow();
-  if (!pow || !pow.shares || pow.shares.length === 0) {
-    logPow('pow_message_blocked', {
-      reason: 'no_shares',
-      jobId: (pow && pow.job && pow.job.job_id) || null,
     });
-    return { success: false, reason: 'PoW required' };
-  }
 
-  let res = await send_post(build_post(pow));
-  if (res && res.success === false && res.reason === 'pool_reject') {
-    logPow('pool_reject_retry', { id: request_id, jobId: pow && pow.job && pow.job.job_id });
-    this.currentJob = null;
-    const jobResponse = await this.request_job();
-    if (jobResponse && jobResponse.job) {
-      this.set_job(jobResponse.job);
-    }
-    pow = await compute_pow();
-    if (!pow || !pow.shares || pow.shares.length === 0) {
-      return { success: false, reason: 'PoW required' };
-    }
-    res = await send_post(build_post(pow));
-  }
-  return res;
-}
-
-async register(data) {
-
-  if (this.connection === null) {
-    await this.reconnect();
-  }
-  if (!this.connection) return;
-
-  const request_id = Date.now();
-  const message_hash = random_key().toString('hex');
-
-  const send_register = async (payload) => {
-    return await new Promise((resolve, reject) => {
-      this.requests.set(request_id, { resolve, reject });
-      try {
-        this.connection.write(JSON.stringify(payload));
-      } catch (e) {
-        this.requests.delete(request_id);
-        resolve({ success: false, reason: 'write_failed' });
-        return;
+    let last_res = { success: false, reason: 'unknown' };
+    for (let attempt = 1; attempt <= max_attempts; attempt++) {
+      let pow = await compute_pow();
+      if (!pow || !pow.shares || pow.shares.length === 0) {
+        logPow('pow_register_retry', { attempt, reason: 'no_shares' });
+        this.currentJob = null;
+        const jobResponse = await this.request_job();
+        if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
+        last_res = { success: false, reason: 'PoW required' };
+        continue;
       }
-      setTimeout(() => {
-        if (!this.requests.has(request_id)) return;
-        this.requests.delete(request_id);
-        resolve({ success: false, reason: 'timeout' });
-      }, 60000);
-    });
-  };
 
-  const compute_pow = async () => {
-    let pow = null;
-    try {
-      pow = await this.challenge(message_hash);
-      if (pow && pow.shares) {
-        logPow('pow_register_ready', { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
-      }
-    } catch (e) {
-      console.log('PoW calculation failed:', e && e.message ? e.message : e);
-      logPow('pow_error', { message: e && e.message });
+      const res = await send_register(build_register(pow));
+      if (res && res.success === true) return res;
+
+      last_res = res || { success: false, reason: 'unknown' };
+      if (!should_retry(last_res)) break;
+
+      logPow('pow_register_retry', { attempt, reason: last_res.reason, jobId: pow && pow.job && pow.job.job_id });
+      this.currentJob = null;
+      const jobResponse = await this.request_job();
+      if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
+      await sleep(100);
     }
-    return pow;
-  };
-
-  const build_register = (pow) => ({
-    register: true,
-    data,
-    timestamp: request_id,
-    id: request_id,
-    hash: message_hash,
-    pow: {
-      version: 2,
-      job: pow.job,
-      shares: pow.shares,
-    },
-  });
-
-  let pow = await compute_pow();
-  if (!pow || !pow.shares || pow.shares.length === 0) {
-    logPow('pow_register_blocked', {
-      reason: 'no_shares',
-      jobId: (pow && pow.job && pow.job.job_id) || null,
-    });
-    return { success: false, reason: 'PoW required' };
+    return last_res;
+  } catch (e) {
+    logPow('pow_register_error', { message: e && e.message });
+    return { success: false, reason: 'register_exception' };
   }
-
-  let res = await send_register(build_register(pow));
-  if (res && res.success === false && res.reason === 'pool_reject') {
-    logPow('pool_reject_retry', { id: request_id, jobId: pow && pow.job && pow.job.job_id });
-    this.currentJob = null;
-    const jobResponse = await this.request_job();
-    if (jobResponse && jobResponse.job) {
-      this.set_job(jobResponse.job);
-    }
-    pow = await compute_pow();
-    if (!pow || !pow.shares || pow.shares.length === 0) {
-      return { success: false, reason: 'PoW required' };
-    }
-    res = await send_register(build_register(pow));
-  }
-  return res;
 
 }
 

@@ -449,7 +449,7 @@ export class ActiveWallet {
   });
 }
 
-  async send_message(message, receiver, beam = false, call = false) {
+  async send_message(message, receiver, beam = false, call = false, messageHash = '') {
     //Assert address length
     if (receiver.length !== 163) {
       console.log('Error: Address too long/short');
@@ -475,7 +475,7 @@ export class ActiveWallet {
       address,
     );
 
-    const hash = randomKey();
+    const hash = messageHash && typeof messageHash === 'string' ? messageHash : randomKey();
 
     if (beam) {
       const send = hash + '99' + payload_hex;
@@ -488,7 +488,7 @@ export class ActiveWallet {
         return { success: false, error: 'not_connected', hash: '' };
       }
      try {
-      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address, call)), 10000);
+      const sent = await Nodes.message(payload_hex, hash, await this.generate_view_tag(address, call));
       console.log('Sent!', sent);
       if (!sent?.success) {
         if (typeof sent.reason !== 'string') return;
