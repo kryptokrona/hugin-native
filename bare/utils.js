@@ -1,6 +1,7 @@
 const DHT = require('hyperdht-hugin');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
+const { getNonceOffset } = require('./pow-utils');
 
 class Keychain {
   constructor(key_pair) {
@@ -163,6 +164,44 @@ async function sign(message, signkey = false) {
 function check_hash(hash) {
   if (typeof hash !== 'string' || hash.length !== 64) return false;
   return true;
+}
+
+const pow_config = {
+  DEBUG: true,
+  MAX_BLOB_HEX_BYTES: 1024,
+};
+
+const logPow = (...args) => {
+  if (pow_config.DEBUG) {
+    console.log('[pow]', ...args);
+  }
+};
+
+function is_hex_string(value) {
+  return typeof value === 'string' && /^[0-9a-f]+$/i.test(value);
+}
+
+function validate_pow_job(job) {
+  if (!job || typeof job !== 'object') return { ok: false, reason: 'invalid_job' };
+  if (typeof job.job_id !== 'string' || job.job_id.length > 32) {
+    return { ok: false, reason: 'invalid_job_id' };
+  }
+  if (!is_hex_string(job.blob)) return { ok: false, reason: 'invalid_blob' };
+  if (job.blob.length % 2 !== 0) return { ok: false, reason: 'invalid_blob_len' };
+  if ((job.blob.length / 2) > pow_config.MAX_BLOB_HEX_BYTES) {
+    return { ok: false, reason: 'blob_too_large' };
+  }
+  if (!is_hex_string(job.target) || job.target.length !== 8) {
+    return { ok: false, reason: 'invalid_target' };
+  }
+  const offset = getNonceOffset(job.blob);
+  if (typeof offset !== 'number' || offset < 0) {
+    return { ok: false, reason: 'invalid_nonce_offset' };
+  }
+  if ((offset + 4) * 2 > job.blob.length) {
+    return { ok: false, reason: 'nonce_out_of_bounds' };
+  }
+  return { ok: true };
 }
 
 const sanitize_join_swarm_data = (data) => {
@@ -477,5 +516,7 @@ module.exports = {
   create_room_invite,
   sanitize_typing_message,
   encrypt_sealed_box,
-  decrypt_sealed_box
+  decrypt_sealed_box,
+  logPow,
+  validate_pow_job
 };

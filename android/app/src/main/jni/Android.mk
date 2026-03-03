@@ -14,7 +14,21 @@ LOCAL_SRC_FILES := \
     kryptokrona.cpp \
     multisig.cpp \
     crypto-ops.cpp \
-    crypto-ops-data.cpp
+    crypto-ops-data.cpp \
+    aesb.c \
+    blake256.c \
+    groestl.c \
+    hash-extra-blake.c \
+    hash-extra-groestl.c \
+    hash-extra-jh.c \
+    hash-extra-skein.c \
+    jh.c \
+    oaes_lib.c \
+    skein.c \
+    slow-hash-arm.c \
+    slow-hash-portable.c \
+    slow-hash-x86.c \
+    tree-hash.c
 LOCAL_LDLIBS := -llog
 LOCAL_CPPFLAGS += -fexceptions
 

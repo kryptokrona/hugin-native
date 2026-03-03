@@ -25,6 +25,28 @@ export async function cnFastHash(hashInput) {
   return NativeModules.TurtleCoin.cnFastHash(hashInput);
 }
 
+export async function cnTurtleLiteSlowHashV2(hashInput) {
+  return NativeModules.TurtleCoin.cnTurtleLiteSlowHashV2(hashInput);
+}
+
+export async function findPowShare(
+  blobHex,
+  targetHex,
+  startNonce,
+  maxAttempts,
+  nonceTagBits,
+  nonceTagValue,
+) {
+  return NativeModules.TurtleCoin.findPowShare(
+    blobHex,
+    targetHex,
+    startNonce,
+    maxAttempts,
+    nonceTagBits,
+    nonceTagValue,
+  );
+}
+
 export async function secretKeyToPublicKey(secretKey) {
   return NativeModules.TurtleCoin.secretKeyToPublicKey(secretKey);
 }

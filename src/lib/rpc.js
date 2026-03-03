@@ -25,6 +25,8 @@ import { MessageSync } from '../services/hugin/syncer';
 import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 import { Nodes } from './native';
 import { getDeviceId } from '../services/pushnotifications';
+import { cnTurtleLiteSlowHashV2 } from '../services/NativeTest';
+import { findPowShare } from '../services/NativeTest';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -273,6 +275,17 @@ export class Bridge {
           request.data.signature,
         );
         return verify;
+      case 'cn-turtle-lite-slow-hash-v2':
+        return await cnTurtleLiteSlowHashV2(request.blobHex);
+      case 'pow-find-share':
+        return await findPowShare(
+          request.blobHex,
+          request.targetHex,
+          request.startNonce,
+          request.maxAttempts,
+          request.nonceTagBits,
+          request.nonceTagValue,
+        );
       default:
         return false;
     }

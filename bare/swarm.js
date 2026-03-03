@@ -16,7 +16,10 @@ const {
   sign,
   sleep,
   sanitize_typing_message,
+  logPow,
+  validate_pow_job,
 } = require('./utils');
+const { extractPrevIdFromBlob, nonceTagFromMessageHash } = require('./pow-utils');
 const {
   send_file,
   start_download,
@@ -45,6 +48,30 @@ const PING_SYNC = 'Ping';
 const REQUEST_FILE = 'request-file';
 
 const ONE_DAY = 24 * 60 * 60 * 1000
+const POW_NONCE_TAG_BITS = 4;
+const MAX_NATIVE_POW_ATTEMPTS = 5000000;
+const POW_TOTAL_HASHES_PER_SECOND_CAP = 1500;
+const POW_PHASE1_HASHES_PER_SECOND_CAP = 950;
+const POW_PHASE2_HASHES_PER_SECOND_CAP = 250;
+const POW_PHASE1_MS = 2 * 60 * 1000;
+const POW_SLICE_MS_PHASE1 = 10000;
+const POW_SLICE_MS_PHASE2 = 10000;
+const POW_MAX_JOB_TIME_MS = 90000;
+let active_pow_tasks = 0;
+
+function pow_rate_policy(active_tasks, elapsed_ms) {
+  const in_phase1 = elapsed_ms < POW_PHASE1_MS;
+  const per_task_budget = Math.max(
+    1,
+    Math.floor(POW_TOTAL_HASHES_PER_SECOND_CAP / Math.max(1, active_tasks)),
+  );
+  const hashes_per_second = Math.min(
+    per_task_budget,
+    in_phase1 ? POW_PHASE1_HASHES_PER_SECOND_CAP : POW_PHASE2_HASHES_PER_SECOND_CAP,
+  );
+  const time_budget_ms = in_phase1 ? POW_SLICE_MS_PHASE1 : POW_SLICE_MS_PHASE2;
+  return { hashes_per_second, time_budget_ms, in_phase1 };
+}
 
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
@@ -93,22 +120,68 @@ class NodeConnection {
     this.requests = new Map()
     this.discovery = null
     this.pending = []
-    this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
+    this.public = 'xkr96c0f8a36e951b399681d447922f6c54c28c6ef3cad1c65d3568008151337'
     this.topic = ''
     this.address = null
     this.backup_connections = [];
+    this.currentJob = null;
+    this.jobGeneration = 0;
+    this.currentPrevId = null;
+    this.previousPrevId = null;
+    this.twoBackPrevId = null;
+    this.jobPollTimer = null;
+    this.pow_backend = {
+      find_share: async ({
+        job,
+        hashes_per_second,
+        time_budget_ms,
+        nonce_tag_bits,
+        nonce_tag_value,
+      }) => {
+        const maxAttempts = Math.max(
+          1,
+          Math.floor((parseInt(hashes_per_second, 10) * parseInt(time_budget_ms, 10)) / 1000),
+        );
+        const clampedAttempts = Math.min(maxAttempts, MAX_NATIVE_POW_ATTEMPTS);
+        const startNonce = Math.floor(Math.random() * 0xffffffff);
+        const clampedNonceTagBits = Math.max(0, Math.min(16, parseInt(nonce_tag_bits, 10) || 0));
+        const clampedNonceTagValue = (parseInt(nonce_tag_value, 10) || 0) >>> 0;
+        const share = await Hugin.request({
+          type: 'pow-find-share',
+          blobHex: job.blob,
+          targetHex: job.target,
+          startNonce,
+          maxAttempts: clampedAttempts,
+          nonceTagBits: clampedNonceTagBits,
+          nonceTagValue: clampedNonceTagValue,
+        });
+        if (share && !share.job_id) {
+          share.job_id = String(job.job_id);
+        }
+        return share || null;
+      },
+    };
   }
 
 async reset(address, pub) { 
+    if (this.jobPollTimer) {
+      clearInterval(this.jobPollTimer);
+      this.jobPollTimer = null;
+    }
     this.node = null
     this.connection = null
     this.requests = new Map()
     this.discovery = null
     this.pending = []
-    this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
+    this.public = 'xkr96c0f8a36e951b399681d447922f6c54c28c6ef3cad1c65d3568008151337'
     this.topic = ''
     this.address = null
     this.backup_connections = [];
+    this.currentJob = null;
+    this.jobGeneration = 0;
+    this.currentPrevId = null;
+    this.previousPrevId = null;
+    this.twoBackPrevId = null;
 
     this.connect('', true);
 
@@ -162,6 +235,7 @@ async listen() {
   async node_connection(conn) {
     this.connection = conn
     Hugin.send('hugin-node-connected', {})
+    this.start_job_polling();
     conn.on('error', () => {
     console.log("Got error connection signal")
         conn.end();
@@ -177,9 +251,20 @@ async listen() {
       if ('address' in data) {
         if (typeof data.address !== 'string') return
         if (data.address?.length !== 99) return
-        this.address = data.addres
+        this.address = data.address
         Hugin.send('node-address', {address: data.address})
         return
+      }
+
+      if (data.type === 'job' && data.job && !this.requests.has(data.id)) {
+        logPow('job_push', { type: data.type, jobId: data.job && data.job.job_id });
+        const validation = validate_pow_job(data.job);
+        if (validation.ok) {
+          this.set_job(data.job);
+        } else {
+          logPow('job_reject', { reason: validation.reason });
+        }
+        return;
       }
       if (this.requests.has(data.id)) {
         const { resolve, reject } = this.requests.get(data.id);
@@ -197,6 +282,31 @@ async listen() {
           resolve(data)
           this.requests.delete(data.id);
           return
+        }
+
+        if (data.type === 'job' || data.type === 'job_pending') {
+          logPow('job_response', {
+            id: data.id,
+            type: data.type,
+            jobId: data.job && data.job.job_id,
+          });
+          if (data.job) {
+            const validation = validate_pow_job(data.job);
+            if (validation.ok) {
+              this.set_job(data.job);
+            } else {
+              logPow('job_reject', { reason: validation.reason });
+            }
+          }
+          resolve(data);
+          this.requests.delete(data.id);
+          return;
+        }
+
+        if (data.type === 'share_result') {
+          resolve(data);
+          this.requests.delete(data.id);
+          return;
         }
 
         resolve(data.response);
@@ -250,6 +360,145 @@ sync(data) {
   });
 }
 
+start_job_polling() {
+  if (this.jobPollTimer) return;
+  this.jobPollTimer = setInterval(async () => {
+    if (!this.connection) return;
+    const response = await this.request_job();
+    if (response && response.job) {
+      this.set_job(response.job);
+    }
+  }, 15000);
+}
+
+set_job(job) {
+  if (!job || !job.job_id) return;
+  if (this.currentJob && this.currentJob.job_id === job.job_id) return;
+  const prevId = extractPrevIdFromBlob(job.blob);
+  if (prevId) {
+    this.twoBackPrevId = this.previousPrevId;
+    this.previousPrevId = this.currentPrevId;
+    this.currentPrevId = prevId;
+  }
+  this.currentJob = job;
+  this.jobGeneration++;
+  logPow('job_set', { jobId: job.job_id });
+}
+
+async request_job() {
+  if (!this.connection) return null;
+  return new Promise((resolve, reject) => {
+    const id = random_key().toString('hex');
+    this.requests.set(id, { resolve, reject });
+    this.connection.write(JSON.stringify({
+      type: 'job_request',
+      id,
+    }));
+    logPow('job_request', { id });
+    setTimeout(() => {
+      if (this.requests.has(id)) {
+        this.requests.delete(id);
+        logPow('job_request_timeout', { id });
+        resolve(null);
+      }
+    }, 10000);
+  });
+}
+
+async challenge(message_hash) {
+  if (!this.connection) return null;
+  active_pow_tasks++;
+  try {
+    const start = Date.now();
+    const nonce_tag_value = nonceTagFromMessageHash(message_hash, POW_NONCE_TAG_BITS);
+    const shares = [];
+    const share_nonces = new Set();
+
+    while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < 1) {
+      let job = this.currentJob;
+      if (!job) {
+        const jobResponse = await this.request_job();
+        if (jobResponse && jobResponse.job) {
+          this.set_job(jobResponse.job);
+          job = this.currentJob;
+        }
+      }
+      if (!job) {
+        await sleep(250);
+        continue;
+      }
+
+      const prevId = extractPrevIdFromBlob(job.blob);
+      const fresh =
+        !!prevId &&
+        !!this.currentPrevId &&
+        (prevId === this.currentPrevId ||
+          prevId === this.previousPrevId ||
+          prevId === this.twoBackPrevId);
+
+      if (!fresh) {
+        logPow('pow_stale_local', { jobId: job.job_id });
+        const refreshed = await this.request_job();
+        if (refreshed && refreshed.job) {
+          this.set_job(refreshed.job);
+        }
+        await sleep(250);
+        continue;
+      }
+
+      const elapsed_ms = Date.now() - start;
+      const { hashes_per_second, time_budget_ms, in_phase1 } = pow_rate_policy(
+        active_pow_tasks,
+        elapsed_ms,
+      );
+
+      let share = null;
+      try {
+        share = await this.pow_backend.find_share({
+          job,
+          hashes_per_second,
+          time_budget_ms,
+          nonce_tag_bits: POW_NONCE_TAG_BITS,
+          nonce_tag_value,
+        });
+      } catch (e) {
+        if (e && e.message === 'pow_worker_timeout') {
+          logPow('pow_worker_timeout_retry', {
+            jobId: job.job_id,
+            sliceMs: time_budget_ms,
+            hps: hashes_per_second,
+          });
+          await sleep(in_phase1 ? 100 : 300);
+          continue;
+        }
+        throw e;
+      }
+
+      if (share && typeof share.nonce === 'string' && typeof share.result === 'string') {
+        const normalized = {
+          job_id: String(share.job_id),
+          nonce: share.nonce.toLowerCase(),
+          result: share.result.toLowerCase(),
+        };
+        if (!share_nonces.has(normalized.nonce)) {
+          share_nonces.add(normalized.nonce);
+          shares.push(normalized);
+        }
+      }
+
+      if (shares.length >= 1) {
+        return { job, shares };
+      }
+
+      await sleep(in_phase1 ? 50 : 250);
+    }
+
+    return null;
+  } finally {
+    active_pow_tasks = Math.max(0, active_pow_tasks - 1);
+  }
+}
+
 
 parse(d) {
   try{
@@ -266,36 +515,101 @@ close() {
 }
 
 async message(payload, hash, viewtag) {
-  console.log('payload, hash', payload, hash)
-    if (this.connection === null) {
+  if (this.connection === null) {
     await this.reconnect();
   }
-  return new Promise( async (resolve, reject) => {
-  const timestamp = Date.now()
-  this.requests.set(timestamp, { resolve, reject })
-  //Create a new derived sub key pair for sending messages to nodes.
-  const [pub, signature] = await Hugin.request({type: 'sign-node-message', message: payload + hash})
-  //We sign the payload and hash to avoid denial of service attacks.
-  const data = {
-    type: 'post',
-    message: {
+  if (!this.connection) return { success: false, reason: 'No connection' };
+
+  const request_id = Date.now();
+
+  const [pub, signature] = await Hugin.request({
+    type: 'sign-node-message',
+    message: payload + hash,
+  });
+
+  const baseMessage = {
     cipher: payload,
     pub,
-    timestamp,
+    timestamp: request_id,
     hash,
     signature,
     viewtag,
     push: true,
-    id: timestamp
-    }
+    id: request_id,
+  };
 
+  const send_post = async (postData) => {
+    if (!this.connection) {
+      this.reconnect();
+      await sleep(5000);
+    }
+    return await new Promise((resolve, reject) => {
+      this.requests.set(request_id, { resolve, reject });
+      try {
+        this.connection.write(JSON.stringify(postData));
+      } catch (e) {
+        this.requests.delete(request_id);
+        resolve({ success: false, reason: 'write_failed' });
+        return;
+      }
+      setTimeout(() => {
+        if (!this.requests.has(request_id)) return;
+        this.requests.delete(request_id);
+        resolve({ success: false, reason: 'timeout' });
+      }, 60000);
+    });
+  };
+
+  const compute_pow = async () => {
+    let pow = null;
+    try {
+      pow = await this.challenge(hash);
+      if (pow && pow.shares) {
+        logPow('pow_message_ready', { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
+      }
+    } catch (e) {
+      console.log('PoW calculation failed:', e && e.message ? e.message : e);
+      logPow('pow_error', { message: e && e.message });
+    }
+    return pow;
+  };
+
+  const build_post = (pow) => ({
+    type: 'post',
+    message: {
+      ...baseMessage,
+      pow: {
+        version: 2,
+        job: pow.job,
+        shares: pow.shares,
+      },
+    },
+  });
+
+  let pow = await compute_pow();
+  if (!pow || !pow.shares || pow.shares.length === 0) {
+    logPow('pow_message_blocked', {
+      reason: 'no_shares',
+      jobId: (pow && pow.job && pow.job.job_id) || null,
+    });
+    return { success: false, reason: 'PoW required' };
   }
 
-
-
-  this.connection.write(JSON.stringify(data))
-  
-  })
+  let res = await send_post(build_post(pow));
+  if (res && res.success === false && res.reason === 'pool_reject') {
+    logPow('pool_reject_retry', { id: request_id, jobId: pow && pow.job && pow.job.job_id });
+    this.currentJob = null;
+    const jobResponse = await this.request_job();
+    if (jobResponse && jobResponse.job) {
+      this.set_job(jobResponse.job);
+    }
+    pow = await compute_pow();
+    if (!pow || !pow.shares || pow.shares.length === 0) {
+      return { success: false, reason: 'PoW required' };
+    }
+    res = await send_post(build_post(pow));
+  }
+  return res;
 }
 
 async register(data) {
@@ -303,14 +617,81 @@ async register(data) {
   if (this.connection === null) {
     await this.reconnect();
   }
-  
-  const payload = {
-    register: true,
-    data
-  }
   if (!this.connection) return;
-  this.connection.write(JSON.stringify(payload));
-  
+
+  const request_id = Date.now();
+  const message_hash = random_key().toString('hex');
+
+  const send_register = async (payload) => {
+    return await new Promise((resolve, reject) => {
+      this.requests.set(request_id, { resolve, reject });
+      try {
+        this.connection.write(JSON.stringify(payload));
+      } catch (e) {
+        this.requests.delete(request_id);
+        resolve({ success: false, reason: 'write_failed' });
+        return;
+      }
+      setTimeout(() => {
+        if (!this.requests.has(request_id)) return;
+        this.requests.delete(request_id);
+        resolve({ success: false, reason: 'timeout' });
+      }, 60000);
+    });
+  };
+
+  const compute_pow = async () => {
+    let pow = null;
+    try {
+      pow = await this.challenge(message_hash);
+      if (pow && pow.shares) {
+        logPow('pow_register_ready', { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
+      }
+    } catch (e) {
+      console.log('PoW calculation failed:', e && e.message ? e.message : e);
+      logPow('pow_error', { message: e && e.message });
+    }
+    return pow;
+  };
+
+  const build_register = (pow) => ({
+    register: true,
+    data,
+    timestamp: request_id,
+    id: request_id,
+    hash: message_hash,
+    pow: {
+      version: 2,
+      job: pow.job,
+      shares: pow.shares,
+    },
+  });
+
+  let pow = await compute_pow();
+  if (!pow || !pow.shares || pow.shares.length === 0) {
+    logPow('pow_register_blocked', {
+      reason: 'no_shares',
+      jobId: (pow && pow.job && pow.job.job_id) || null,
+    });
+    return { success: false, reason: 'PoW required' };
+  }
+
+  let res = await send_register(build_register(pow));
+  if (res && res.success === false && res.reason === 'pool_reject') {
+    logPow('pool_reject_retry', { id: request_id, jobId: pow && pow.job && pow.job.job_id });
+    this.currentJob = null;
+    const jobResponse = await this.request_job();
+    if (jobResponse && jobResponse.job) {
+      this.set_job(jobResponse.job);
+    }
+    pow = await compute_pow();
+    if (!pow || !pow.shares || pow.shares.length === 0) {
+      return { success: false, reason: 'PoW required' };
+    }
+    res = await send_register(build_register(pow));
+  }
+  return res;
+
 }
 
 

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import {
   AppState,
@@ -80,7 +80,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authMethod = usePreferencesStore(
       (state) => state.preferences.authMethod,
     );
-  let frontendStarted = false;
+  const frontendStartedRef = useRef(false);
+  const initInProgressRef = useRef(false);
 
 
   useEffect(() => {
@@ -90,6 +91,12 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, [preferences]);
 
   async function init() {
+    if (initInProgressRef.current) {
+      return;
+    }
+    initInProgressRef.current = true;
+
+    try {
     /// Activate this if we want to run foreground task running on Android
     /// It drains alot of battery but some users might want it.
 
@@ -99,12 +106,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     //     return;
     //   }
     // }
-    initFrontend();
-    
     if (started) {
+      await initFrontend();
       return;
     }
-    if (1==1) return;
 
     await Rooms.start();
     useGlobalStore.getState().setLoadingStatus('Initializing database...');
@@ -152,13 +157,16 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     useGlobalStore.getState().setStarted(true);
     console.log('📱 App started state:', started)
     console.log('📱 App started state lonk:', useGlobalStore.getState().started);
-    initFrontend();
+    await initFrontend();
+    } finally {
+      initInProgressRef.current = false;
+    }
 
   }
 
   async function initFrontend() {
-    console.log('Initing front end..', frontendStarted)
-    if (frontendStarted) return;
+    console.log('Initing front end..', frontendStartedRef.current)
+    if (frontendStartedRef.current) return;
     console.log('Setting latest room messages..')
     await setLatestRoomMessages(false);
     console.log('Setting latest messages..')
@@ -177,7 +185,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     // Start the interval
     setInterval(updateFiatPrice, 60000);
-    frontendStarted = true;
+    frontendStartedRef.current = true;
 
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);

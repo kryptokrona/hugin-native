@@ -53,3 +53,16 @@ namespace Crypto
         return h;
     }
 }
+
+extern "C"
+{
+    void hash_permutation(union hash_state *state)
+    {
+        Crypto::hash_permutation(state);
+    }
+
+    void hash_process(union hash_state *state, const uint8_t *buf, size_t count)
+    {
+        Crypto::hash_process(state, buf, count);
+    }
+}

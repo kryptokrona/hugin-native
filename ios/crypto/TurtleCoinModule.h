@@ -82,6 +82,19 @@ std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputs
           resolver:(RCTPromiseResolveBlock)resolve
           rejecter:(RCTPromiseRejectBlock)reject;
 
+- (void)cnTurtleLiteSlowHashV2:(NSString *)input
+                      resolver:(RCTPromiseResolveBlock)resolve
+                      rejecter:(RCTPromiseRejectBlock)reject;
+
+- (void)findPowShare:(NSString *)blobHex
+           targetHex:(NSString *)targetHex
+          startNonce:(nonnull NSNumber *)startNonce
+         maxAttempts:(nonnull NSNumber *)maxAttempts
+        nonceTagBits:(nonnull NSNumber *)nonceTagBits
+       nonceTagValue:(nonnull NSNumber *)nonceTagValue
+            resolver:(RCTPromiseResolveBlock)resolve
+            rejecter:(RCTPromiseRejectBlock)reject;
+
 - (void)processBlockOutputs:(NSDictionary *)block
                  privateViewKey:(NSString *)privateViewKey
                       spendKeys:(NSDictionary *)spendKeys

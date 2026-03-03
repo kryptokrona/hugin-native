@@ -12,7 +12,6 @@ const source = 'bare/main.js';
 const ios = '--target ios';
 const iossim = '--target ios --simulator';
 const android = '--target android';
-const builtin = '--builtins bare/builtins.json';
 
 let flags = [];
 
@@ -44,7 +43,7 @@ const build = () => {
     throw new Error('No available options set.');
   }
 
-  flags = [...flags, linked, builtin, out, bundle, source];
+  flags = [...flags, linked, out, bundle, source];
 
   console.log('Settings:', flags);
 

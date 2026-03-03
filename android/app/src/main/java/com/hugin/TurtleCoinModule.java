@@ -27,6 +27,7 @@ import java.net.URL;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONException;
 
 import com.hugin.KeyPair;
 
@@ -101,6 +102,65 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
                 } catch (Exception e) {
 
                     promise.reject("Error in cnFastHash: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void cnTurtleLiteSlowHashV2(
+        final String hashInput,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String hexHash = cnTurtleLiteSlowHashV2JNI(hashInput);
+                    promise.resolve(hexHash);
+                } catch (Exception e) {
+                    promise.reject("Error in cnTurtleLiteSlowHashV2: ", e);
+                }
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void findPowShare(
+        final String blobHex,
+        final String targetHex,
+        final double startNonce,
+        final double maxAttempts,
+        final double nonceTagBits,
+        final double nonceTagValue,
+        final Promise promise) {
+
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String result = findPowShareJNI(
+                        blobHex,
+                        targetHex,
+                        (long)startNonce,
+                        (long)maxAttempts,
+                        (int)nonceTagBits,
+                        (int)nonceTagValue
+                    );
+
+                    if (result == null || result.isEmpty()) {
+                        promise.resolve(null);
+                        return;
+                    }
+
+                    JSONObject json = new JSONObject(result);
+                    WritableMap map = new WritableNativeMap();
+                    map.putString("job_id", json.optString("job_id", ""));
+                    map.putString("nonce", json.optString("nonce", ""));
+                    map.putString("result", json.optString("result", ""));
+                    promise.resolve(map);
+                } catch (JSONException e) {
+                    promise.reject("Error in findPowShare parse: ", e);
+                } catch (Exception e) {
+                    promise.reject("Error in findPowShare: ", e);
                 }
             }
         }).start();
@@ -712,6 +772,8 @@ public class TurtleCoinModule extends ReactContextBaseJavaModule {
 
 
     public native String cnFastHashJNI(String hashInput);
+    public native String cnTurtleLiteSlowHashV2JNI(String hashInput);
+    public native String findPowShareJNI(String blobHex, String targetHex, long startNonce, long maxAttempts, int nonceTagBits, int nonceTagValue);
     public native String secretKeyToPublicKeyJNI(String publicKey);
     public native String scReduce32JNI(String scalar);
     public native boolean checkKeyJNI(String key);
