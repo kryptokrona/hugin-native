@@ -427,6 +427,22 @@ build_pow_auth(message_hash, timestamp, shares, context = '') {
   };
 }
 
+should_recalc_share(res) {
+  if (!res || typeof res !== 'object') return false;
+  const reason = typeof res.reason === 'string' ? res.reason.toLowerCase() : '';
+  if (reason.includes('pool_reject') || reason.includes('invalid_share') || reason.includes('stale') || reason.includes('job')) {
+    return true;
+  }
+  if (!Array.isArray(res.rejects)) return false;
+  return res.rejects.some((entry) => {
+    if (!entry) return false;
+    const txt = typeof entry === 'string'
+      ? entry.toLowerCase()
+      : JSON.stringify(entry).toLowerCase();
+    return txt.includes('invalid') || txt.includes('stale') || txt.includes('low') || txt.includes('job');
+  });
+}
+
 async challenge(message_hash) {
   if (!this.connection) return null;
   active_pow_tasks++;
@@ -565,22 +581,6 @@ async message(payload, hash, viewtag) {
       if (res.success === true) return false;
       return !!res.reason;
     };
-    const should_recalc_share = (res) => {
-      if (!res || typeof res !== 'object') return false;
-      const reason = typeof res.reason === 'string' ? res.reason.toLowerCase() : '';
-      if (reason.includes('pool_reject') || reason.includes('invalid_share') || reason.includes('stale') || reason.includes('job')) {
-        return true;
-      }
-      if (!Array.isArray(res.rejects)) return false;
-      return res.rejects.some((entry) => {
-        if (!entry) return false;
-        const txt = typeof entry === 'string'
-          ? entry.toLowerCase()
-          : JSON.stringify(entry).toLowerCase();
-        return txt.includes('invalid') || txt.includes('stale') || txt.includes('low') || txt.includes('job');
-      });
-    };
-
     const send_post = async (postData) => {
       if (!this.connection) {
         this.reconnect();
@@ -656,7 +656,7 @@ async message(payload, hash, viewtag) {
       last_res = res || { success: false, reason: 'unknown' };
       if (!should_retry(last_res)) break;
 
-      const recalc = should_recalc_share(last_res);
+      const recalc = this.should_recalc_share(last_res);
       if (recalc && stale_share_retries < max_stale_share_retries) {
         stale_share_retries++;
         logPow('pow_message_recalc', {
@@ -695,22 +695,6 @@ async register(data) {
       if (res.success === true) return false;
       return !!res.reason;
     };
-    const should_recalc_share = (res) => {
-      if (!res || typeof res !== 'object') return false;
-      const reason = typeof res.reason === 'string' ? res.reason.toLowerCase() : '';
-      if (reason.includes('pool_reject') || reason.includes('invalid_share') || reason.includes('stale') || reason.includes('job')) {
-        return true;
-      }
-      if (!Array.isArray(res.rejects)) return false;
-      return res.rejects.some((entry) => {
-        if (!entry) return false;
-        const txt = typeof entry === 'string'
-          ? entry.toLowerCase()
-          : JSON.stringify(entry).toLowerCase();
-        return txt.includes('invalid') || txt.includes('stale') || txt.includes('low') || txt.includes('job');
-      });
-    };
-
     const send_register = async (payload) => {
       if (!this.connection) {
         this.reconnect();
@@ -785,7 +769,7 @@ async register(data) {
       last_res = res || { success: false, reason: 'unknown' };
       if (!should_retry(last_res)) break;
 
-      const recalc = should_recalc_share(last_res);
+      const recalc = this.should_recalc_share(last_res);
       if (recalc && stale_share_retries < max_stale_share_retries) {
         stale_share_retries++;
         logPow('pow_register_recalc', {
