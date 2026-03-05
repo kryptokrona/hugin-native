@@ -570,41 +570,28 @@ close() {
 }
 
 async message(payload, hash, viewtag) {
-  console.log('message called');
   try {
-    if (this.connection === null) {
-      console.log('reconnecting');
-      await this.reconnect();
-    }
-    if (!this.connection) {
-      console.log('no connection');
-      return { success: false, reason: 'No connection' };
-    }
-    console.log('connection');
+    if (!this.connection) return { success: false, reason: 'No connection' };
+
     const request_id = Date.now();
     const max_attempts = 3;
-    console.log('request_id', request_id);
-    // const [pub, signature] = await Hugin.request({
-    //   type: 'sign-node-message',
-    //   message: payload + hash,
-    // });
-    // console.log('pub', pub);
-    // console.log('signature', signature);
+ 
+
     const baseMessage = {
       cipher: payload,
       timestamp: request_id,
       hash,
-      viewtag,
-      push: true,
       id: request_id,
+      push: true,
+      viewtag,
     };
-    console.log('baseMessage', baseMessage);
+
     const should_retry = (res) => {
       if (!res) return true;
       if (res.success === true) return false;
       return !!res.reason;
     };
-    console.log('should_retry', should_retry);
+
     const send_post = async (postData) => {
       if (!this.connection) {
         this.reconnect();
@@ -619,6 +606,11 @@ async message(payload, hash, viewtag) {
           resolve({ success: false, reason: 'write_failed' });
           return;
         }
+        setTimeout(() => {
+          if (!this.requests.has(request_id)) return;
+          this.requests.delete(request_id);
+          resolve({ success: false, reason: 'timeout' });
+        }, 60000);
       });
     };
 
@@ -647,10 +639,9 @@ async message(payload, hash, viewtag) {
         },
       },
     });
-    console.log('starting shieet');
+
     let last_res = { success: false, reason: 'unknown' };
     for (let attempt = 1; attempt <= max_attempts; attempt++) {
-      console.log('attempt', attempt);
       let pow = await compute_pow();
       if (!pow || !pow.shares || pow.shares.length === 0) {
         logPow('pow_message_retry', { attempt, reason: 'no_shares' });
@@ -685,7 +676,6 @@ async message(payload, hash, viewtag) {
     }
     return last_res;
   } catch (e) {
-    console.log('error', e);
     logPow('pow_message_error', { message: e && e.message });
     return { success: false, reason: 'message_exception' };
   }
@@ -693,9 +683,6 @@ async message(payload, hash, viewtag) {
 
 async register(data) {
   try {
-    if (this.connection === null) {
-      await this.reconnect();
-    }
     if (!this.connection) return { success: false, reason: 'No connection' };
 
     const request_id = Date.now();
@@ -709,6 +696,10 @@ async register(data) {
     };
 
     const send_register = async (payload) => {
+      if (!this.connection) {
+        this.reconnect();
+        await sleep(5000);
+      }
       return await new Promise((resolve, reject) => {
         this.requests.set(request_id, { resolve, reject });
         try {
@@ -718,6 +709,11 @@ async register(data) {
           resolve({ success: false, reason: 'write_failed' });
           return;
         }
+        setTimeout(() => {
+          if (!this.requests.has(request_id)) return;
+          this.requests.delete(request_id);
+          resolve({ success: false, reason: 'timeout' });
+        }, 60000);
       });
     };
 
@@ -753,7 +749,6 @@ async register(data) {
       let pow = await compute_pow();
       if (!pow || !pow.shares || pow.shares.length === 0) {
         logPow('pow_register_retry', { attempt, reason: 'no_shares' });
-        // this.currentJob = null;
         const jobResponse = await this.request_job();
         if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
         last_res = { success: false, reason: 'PoW required' };
