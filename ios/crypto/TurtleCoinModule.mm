@@ -585,18 +585,22 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
             const uint32_t bits = std::min([nonceTagBits unsignedIntValue], MAX_NONCE_TAG_BITS);
             const uint32_t mask = bits > 0 ? ((1u << bits) - 1u) : 0;
             const uint32_t tagValue = [nonceTagValue unsignedIntValue] & mask;
+            const uint32_t nonceStep = bits > 0 ? (1u << bits) : 1u;
 
             uint64_t attempts = [maxAttempts unsignedLongLongValue];
             if (attempts == 0) attempts = 1;
             if (attempts > MAX_POW_ATTEMPTS) attempts = MAX_POW_ATTEMPTS;
-            uint32_t nonce = [startNonce unsignedIntValue];
+            const uint32_t startNonce32 = [startNonce unsignedIntValue];
+            uint32_t nonce = startNonce32;
+            if (bits > 0) {
+                // Align to first nonce that matches the message tag so each attempt hashes.
+                nonce = (nonce & ~mask) | tagValue;
+                if (nonce < startNonce32) {
+                    nonce += nonceStep;
+                }
+            }
 
             for (uint64_t i = 0; i < attempts; i++) {
-                if (bits > 0 && ((nonce & mask) != tagValue)) {
-                    nonce += 1;
-                    continue;
-                }
-
                 blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);
                 blobBytes[nonceOffset + 1] = static_cast<uint8_t>((nonce >> 8) & 0xff);
                 blobBytes[nonceOffset + 2] = static_cast<uint8_t>((nonce >> 16) & 0xff);
@@ -607,7 +611,7 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
 
                 std::vector<uint8_t> hashBytes;
                 if (!hexToBytes(result, hashBytes) || hashBytes.size() < 32) {
-                    nonce += 1;
+                    nonce += nonceStep;
                     continue;
                 }
 
@@ -626,7 +630,7 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
                     return;
                 }
 
-                nonce += 1;
+                nonce += nonceStep;
             }
 
             resolve(nil);

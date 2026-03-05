@@ -424,19 +424,24 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
                                  : 0;
     const uint32_t tagMask = tagBits > 0 ? ((1u << tagBits) - 1u) : 0;
     const uint32_t tagValue = static_cast<uint32_t>(nonceTagValue) & tagMask;
+    const uint32_t nonceStep = tagBits > 0 ? (1u << tagBits) : 1u;
 
     const uint64_t requestedAttempts = maxAttempts > 0 ? static_cast<uint64_t>(maxAttempts) : 1ULL;
     const uint64_t attempts = std::min(requestedAttempts, MAX_POW_ATTEMPTS);
-    uint32_t nonce = static_cast<uint32_t>(startNonce);
+    const uint32_t startNonce32 = static_cast<uint32_t>(startNonce);
+    uint32_t nonce = startNonce32;
+    if (tagBits > 0)
+    {
+        // Align to first nonce that matches the message tag so each attempt hashes.
+        nonce = (nonce & ~tagMask) | tagValue;
+        if (nonce < startNonce32)
+        {
+            nonce += nonceStep;
+        }
+    }
 
     for (uint64_t i = 0; i < attempts; i++)
     {
-        if (tagBits > 0 && ((nonce & tagMask) != tagValue))
-        {
-            nonce += 1;
-            continue;
-        }
-
         blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);
         blobBytes[nonceOffset + 1] = static_cast<uint8_t>((nonce >> 8) & 0xff);
         blobBytes[nonceOffset + 2] = static_cast<uint8_t>((nonce >> 16) & 0xff);
@@ -448,7 +453,7 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
         std::vector<uint8_t> hashBytes;
         if (!hexToBytes(result, hashBytes) || hashBytes.size() < 32)
         {
-            nonce += 1;
+            nonce += nonceStep;
             continue;
         }
 
@@ -474,7 +479,7 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
             return env->NewStringUTF(json.c_str());
         }
 
-        nonce += 1;
+        nonce += nonceStep;
     }
 
     return env->NewStringUTF("");

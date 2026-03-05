@@ -420,6 +420,27 @@ async request_job() {
   });
 }
 
+async submit_shares(shares) {
+  if (!this.connection || !Array.isArray(shares) || shares.length === 0) return null;
+  return new Promise((resolve, reject) => {
+    const id = random_key().toString('hex');
+    this.requests.set(id, { resolve, reject });
+    this.connection.write(JSON.stringify({
+      type: 'share',
+      shares,
+      id,
+    }));
+    logPow('share_submit', { id, count: shares.length });
+    setTimeout(() => {
+      if (this.requests.has(id)) {
+        this.requests.delete(id);
+        logPow('share_submit_timeout', { id });
+        resolve({ status: 'timeout' });
+      }
+    }, 30000);
+  });
+}
+
 async request_pow_tag(message_hash) {
   if (!this.connection) return null;
   return new Promise((resolve, reject) => {
@@ -479,7 +500,9 @@ async challenge(message_hash) {
       nonceTagBits: POW_NONCE_TAG_BITS,
     });
     const shares = [];
-    const share_nonces = new Set();
+    const allShares = [];
+    const tagged_nonces = new Set();
+    const all_nonces = new Set();
 
     while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < 1) {
       let job = this.currentJob;
@@ -525,8 +548,8 @@ async challenge(message_hash) {
           job,
           hashes_per_second,
           time_budget_ms,
-          nonce_tag_bits: POW_NONCE_TAG_BITS,
-          nonce_tag_value,
+          nonce_tag_bits: 0,
+          nonce_tag_value: 0,
         });
       } catch (e) {
         if (e && e.message === 'pow_worker_timeout') {
@@ -543,41 +566,35 @@ async challenge(message_hash) {
       }
 
       if (share && typeof share.nonce === 'string' && typeof share.result === 'string') {
-        if (!nonceMatchesTag(share.nonce, nonce_tag_value, POW_NONCE_TAG_BITS)) {
-          logPow('pow_share_local_tag_reject', {
-            jobId: job.job_id,
-            nonce: share.nonce,
-            nonceTagValue: nonce_tag_value,
-            nonceTagBits: POW_NONCE_TAG_BITS,
-          });
-          await sleep(in_phase1 ? 50 : 250);
-          continue;
-        }
         const nonceBytes = Buffer.from(share.nonce, 'hex');
         const nonceLE = nonceBytes.length === 4
           ? ((nonceBytes[0]) | (nonceBytes[1] << 8) | (nonceBytes[2] << 16) | (nonceBytes[3] << 24)) >>> 0
           : 0;
         const nonceMask = (1 << POW_NONCE_TAG_BITS) - 1;
-        logPow('pow_share_found_local', {
-          jobId: job.job_id,
-          nonce: share.nonce,
-          nonceLowBits: nonceLE & nonceMask,
-          nonceTagValue: nonce_tag_value,
-          nonceTagBits: POW_NONCE_TAG_BITS,
-        });
         const normalized = {
           job_id: String(share.job_id),
           nonce: share.nonce.toLowerCase(),
           result: share.result.toLowerCase(),
         };
-        if (!share_nonces.has(normalized.nonce)) {
-          share_nonces.add(normalized.nonce);
+        if (!all_nonces.has(normalized.nonce)) {
+          all_nonces.add(normalized.nonce);
+          allShares.push(normalized);
+        }
+        if (nonceMatchesTag(normalized.nonce, nonce_tag_value, POW_NONCE_TAG_BITS) && !tagged_nonces.has(normalized.nonce)) {
+          tagged_nonces.add(normalized.nonce);
+          logPow('pow_share_found_local', {
+            jobId: job.job_id,
+            nonce: normalized.nonce,
+            nonceLowBits: nonceLE & nonceMask,
+            nonceTagValue: nonce_tag_value,
+            nonceTagBits: POW_NONCE_TAG_BITS,
+          });
           shares.push(normalized);
         }
       }
 
       if (shares.length >= 1) {
-        return { job, shares };
+        return { job, shares, allShares };
       }
 
       await sleep(in_phase1 ? 50 : 250);
@@ -695,6 +712,9 @@ async message(payload, hash, viewtag) {
         continue;
       }
 
+      if (Array.isArray(pow.allShares) && pow.allShares.length) {
+        await this.submit_shares(pow.allShares);
+      }
       const res = await send_post(build_post(pow));
       if (res && res.success === true) return res;
 
@@ -783,6 +803,9 @@ async register(data) {
         continue;
       }
 
+      if (Array.isArray(pow.allShares) && pow.allShares.length) {
+        await this.submit_shares(pow.allShares);
+      }
       const res = await send_register(build_register(pow));
       if (res && res.success === true) return res;
 
