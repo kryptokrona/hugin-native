@@ -49,7 +49,7 @@ export class Swarm {
 
     const sent_message = await rpc.request(data);
 
-    this.send_room_message_push(sent_message);
+    await this.send_room_message_push(sent_message);
 
     return sent_message;
   }
@@ -110,7 +110,12 @@ export class Swarm {
     };
     // Convert json to hex
     let payload_hex = toHex(JSON.stringify(payload_box));
-    rpc.send({type: 'push_registration', data: payload_hex});
+    const registration = await rpc.request({ type: 'push_registration', data: payload_hex });
+    const sent = registration && registration.sent;
+    if (!sent || sent.success !== true) {
+      const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
+      console.log('❌ Push registration failed:', reason);
+    }
 
 
     } catch (e) {
