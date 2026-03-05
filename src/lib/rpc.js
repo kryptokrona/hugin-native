@@ -71,6 +71,16 @@ export class Bridge {
     req.send(JSON.stringify(data));
   }
 
+  async sendPushRegistration(data) {
+    const res = await this.request({ type: 'push_registration', data });
+    const sent = res && res.sent;
+    if (!sent || sent.success !== true) {
+      const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
+      console.log('Push registration failed:', reason);
+    }
+    return sent;
+  }
+
   async on_message(m) {
     // console.log('Got message from bare: ', m)
     const json = m;
@@ -90,14 +100,14 @@ export class Bridge {
           useGlobalStore.getState().setHuginNode({connected: true});
           if (this.sentpush) return;
           const pushRegistration = await Wallet.encrypt_push_registration();
-          this.send({type: 'push_registration', data: pushRegistration});
+          await this.sendPushRegistration(pushRegistration);
           const callPushRegistration = await Wallet.encrypt_call_push_registration();
-          this.send({type: 'push_registration', data: callPushRegistration});
+          await this.sendPushRegistration(callPushRegistration);
           this.sentpush = true;
           const rooms = useGlobalStore.getState().rooms;
           for (const room in rooms) {
             const roomPushRegistration = await Wallet.encrypt_room_push_registration(rooms[room].roomKey);
-            this.send({type: 'push_registration', data: roomPushRegistration});
+            await this.sendPushRegistration(roomPushRegistration);
           }
           break;
         case 'hugin-node-disconnected':

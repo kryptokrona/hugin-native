@@ -37,8 +37,8 @@ const onrequest = async (p) => {
       const plaintext = decrypt_sealed_box(p.data);
       return { plaintext };
     case 'push_registration':
-      Nodes.register(p.data);
-      break;
+      const pushRegistered = await Nodes.register(p.data);
+      return { sent: pushRegistered };
     case 'init_bare':
       initBareMain(p.user);
       break;
