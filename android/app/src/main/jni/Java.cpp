@@ -287,7 +287,6 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
 {
     constexpr size_t MAX_BLOB_HEX_CHARS = 2048; // 1024 bytes
     constexpr uint64_t MAX_POW_ATTEMPTS = 5000000ULL;
-    constexpr uint32_t MAX_NONCE_TAG_BITS = 16;
 
     const std::string blobHex = makeNativeString(env, jBlobHex);
     const std::string targetHex = makeNativeString(env, jTargetHex);
@@ -419,27 +418,14 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
         return env->NewStringUTF("");
     }
     const uint64_t targetValue = getTargetValue(targetHex);
-    const uint32_t tagBits = (nonceTagBits > 0)
-                                 ? std::min(static_cast<uint32_t>(nonceTagBits), MAX_NONCE_TAG_BITS)
-                                 : 0;
-    const uint32_t tagMask = tagBits > 0 ? ((1u << tagBits) - 1u) : 0;
-    const uint32_t tagValue = static_cast<uint32_t>(nonceTagValue) & tagMask;
-    const uint32_t nonceStep = tagBits > 0 ? (1u << tagBits) : 1u;
+    (void)nonceTagBits;
+    (void)nonceTagValue;
+    const uint32_t nonceStep = 1u;
 
     const uint64_t requestedAttempts = maxAttempts > 0 ? static_cast<uint64_t>(maxAttempts) : 1ULL;
     const uint64_t attempts = std::min(requestedAttempts, MAX_POW_ATTEMPTS);
     const uint32_t startNonce32 = static_cast<uint32_t>(startNonce);
     uint32_t nonce = startNonce32;
-    if (tagBits > 0)
-    {
-        // Align to first nonce that matches the message tag so each attempt hashes.
-        nonce = (nonce & ~tagMask) | tagValue;
-        if (nonce < startNonce32)
-        {
-            nonce += nonceStep;
-        }
-    }
-
     for (uint64_t i = 0; i < attempts; i++)
     {
         blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);

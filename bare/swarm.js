@@ -21,9 +21,6 @@ const {
 } = require('./utils');
 const {
   extractPrevIdFromBlob,
-  stringToHex,
-  nonceTagFromDigestHex,
-  nonceMatchesTag,
 } = require('./pow-utils');
 const {
   send_file,
@@ -53,11 +50,10 @@ const PING_SYNC = 'Ping';
 const REQUEST_FILE = 'request-file';
 
 const ONE_DAY = 24 * 60 * 60 * 1000
-const POW_NONCE_TAG_BITS = 4;
 const MAX_NATIVE_POW_ATTEMPTS = 5000000;
-const POW_TOTAL_HASHES_PER_SECOND_CAP = 10000;
+const POW_TOTAL_HASHES_PER_SECOND_CAP = 1000;
 const POW_PHASE1_HASHES_PER_SECOND_CAP = 1000;
-const POW_PHASE2_HASHES_PER_SECOND_CAP = 250;
+const POW_PHASE2_HASHES_PER_SECOND_CAP = 1000;
 const POW_PHASE1_MS = 2 * 60 * 1000;
 const POW_SLICE_MS_PHASE1 = 20000;
 const POW_SLICE_MS_PHASE2 = 20000;
@@ -150,7 +146,7 @@ class NodeConnection {
         // So we will request a large number of attempts, let native run for roughly `time_budget_ms`
         // assuming optimistic 1KH/s for the attempt cap, or use the JS capped value if we prefer.
         // Let's rely on time_budget_ms * optimistic_hash_rate / 1000
-        const optimistic_hps = 2000; // Assume we can do 2000 H/s natively
+        const optimistic_hps = 1000;
         const maxAttempts = Math.max(
           1,
           Math.floor((optimistic_hps * parseInt(time_budget_ms, 10)) / 1000),
@@ -441,25 +437,20 @@ async submit_shares(shares) {
   });
 }
 
-async request_pow_tag(message_hash) {
-  if (!this.connection) return null;
-  return new Promise((resolve, reject) => {
-    const id = random_key().toString('hex');
-    this.requests.set(id, { resolve, reject });
-    this.connection.write(JSON.stringify({
-      type: 'pow_tag',
-      hash: String(message_hash || ''),
-      id,
-    }));
-    logPow('pow_tag_request', { id });
-    setTimeout(() => {
-      if (this.requests.has(id)) {
-        this.requests.delete(id);
-        logPow('pow_tag_request_timeout', { id });
-        resolve(null);
-      }
-    }, 5000);
-  });
+build_pow_auth(message_hash, timestamp, shares, context = '') {
+  if (!Array.isArray(shares) || !shares.length) return null;
+  const share = shares[0];
+  const [, oneTimeKeys] = get_new_peer_keys(random_key());
+  const signer = oneTimeKeys && oneTimeKeys.get ? oneTimeKeys.get() : null;
+  if (!signer || !signer.sign || !signer.publicKey) return null;
+  const payload = `powsig:v2:${String(message_hash || '')}:${timestamp}:${String(share.job_id || '')}:${String(share.nonce || '').toLowerCase()}:${String(share.result || '').toLowerCase()}:${String(context || '')}`;
+  const sig = signer.sign(Buffer.from(payload));
+  if (!sig) return null;
+  return {
+    pub: Buffer.from(signer.publicKey).toString('hex'),
+    sig: Buffer.from(sig).toString('hex'),
+    nonce: String(share.nonce || '').toLowerCase(),
+  };
 }
 
 async challenge(message_hash) {
@@ -467,41 +458,9 @@ async challenge(message_hash) {
   active_pow_tasks++;
   try {
     const start = Date.now();
-    let nonce_tag_value = null;
-    try {
-      const powTag = await this.request_pow_tag(message_hash);
-      if (powTag && typeof powTag.tagValue === 'number') {
-        nonce_tag_value = powTag.tagValue >>> 0;
-      }
-    } catch (e) {
-      // Ignore and fall back to local derivation.
-    }
-    try {
-      if (nonce_tag_value === null) {
-        const digestHex = await Hugin.request({
-          type: 'cn-fast-hash',
-          hashInput: stringToHex(String(message_hash || '')),
-        });
-        if (typeof digestHex === 'string' && digestHex.length >= 2) {
-          nonce_tag_value = nonceTagFromDigestHex(digestHex, POW_NONCE_TAG_BITS);
-        }
-      }
-    } catch (e) {
-      // Ignore and fail below if no tag value.
-    }
-    if (typeof nonce_tag_value !== 'number' || !Number.isFinite(nonce_tag_value)) {
-      logPow('pow_tag_unavailable', { messageHash: String(message_hash || '').slice(0, 16) });
-      await sleep(100);
-      return null;
-    }
-    logPow('pow_tag_selected', {
-      messageHash: String(message_hash || '').slice(0, 16),
-      nonceTagValue: nonce_tag_value,
-      nonceTagBits: POW_NONCE_TAG_BITS,
-    });
     const shares = [];
     const allShares = [];
-    const tagged_nonces = new Set();
+    const selected_nonces = new Set();
     const all_nonces = new Set();
 
     while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < 1) {
@@ -566,11 +525,6 @@ async challenge(message_hash) {
       }
 
       if (share && typeof share.nonce === 'string' && typeof share.result === 'string') {
-        const nonceBytes = Buffer.from(share.nonce, 'hex');
-        const nonceLE = nonceBytes.length === 4
-          ? ((nonceBytes[0]) | (nonceBytes[1] << 8) | (nonceBytes[2] << 16) | (nonceBytes[3] << 24)) >>> 0
-          : 0;
-        const nonceMask = (1 << POW_NONCE_TAG_BITS) - 1;
         const normalized = {
           job_id: String(share.job_id),
           nonce: share.nonce.toLowerCase(),
@@ -580,15 +534,9 @@ async challenge(message_hash) {
           all_nonces.add(normalized.nonce);
           allShares.push(normalized);
         }
-        if (nonceMatchesTag(normalized.nonce, nonce_tag_value, POW_NONCE_TAG_BITS) && !tagged_nonces.has(normalized.nonce)) {
-          tagged_nonces.add(normalized.nonce);
-          logPow('pow_share_found_local', {
-            jobId: job.job_id,
-            nonce: normalized.nonce,
-            nonceLowBits: nonceLE & nonceMask,
-            nonceTagValue: nonce_tag_value,
-            nonceTagBits: POW_NONCE_TAG_BITS,
-          });
+        if (!selected_nonces.has(normalized.nonce)) {
+          selected_nonces.add(normalized.nonce);
+          logPow('pow_share_found_local', { jobId: job.job_id, nonce: normalized.nonce });
           shares.push(normalized);
         }
       }
@@ -695,6 +643,7 @@ async message(payload, hash, viewtag) {
           version: 2,
           job: pow.job,
           shares: pow.shares,
+          auth: pow.auth,
         },
       },
     });
@@ -715,7 +664,14 @@ async message(payload, hash, viewtag) {
       if (Array.isArray(pow.allShares) && pow.allShares.length) {
         await this.submit_shares(pow.allShares);
       }
-      const res = await send_post(build_post(pow));
+      const authContext = String(baseMessage.cipher || '');
+      const auth = this.build_pow_auth(hash, request_id, pow.shares, authContext);
+      if (!auth) {
+        logPow('pow_message_retry', { attempt, reason: 'pow_auth_failed' });
+        await sleep(100);
+        continue;
+      }
+      const res = await send_post(build_post({ ...pow, auth }));
       if (res && res.success === true) return res;
 
       last_res = res || { success: false, reason: 'unknown' };
@@ -788,6 +744,7 @@ async register(data) {
         version: 2,
         job: pow.job,
         shares: pow.shares,
+        auth: pow.auth,
       },
     });
 
@@ -806,7 +763,13 @@ async register(data) {
       if (Array.isArray(pow.allShares) && pow.allShares.length) {
         await this.submit_shares(pow.allShares);
       }
-      const res = await send_register(build_register(pow));
+      const auth = this.build_pow_auth(message_hash, request_id, pow.shares, String(data || ''));
+      if (!auth) {
+        logPow('pow_register_retry', { attempt, reason: 'pow_auth_failed' });
+        await sleep(100);
+        continue;
+      }
+      const res = await send_register(build_register({ ...pow, auth }));
       if (res && res.success === true) return res;
 
       last_res = res || { success: false, reason: 'unknown' };

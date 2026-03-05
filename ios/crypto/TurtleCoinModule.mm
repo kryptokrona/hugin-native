@@ -468,7 +468,6 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
         try {
             constexpr size_t MAX_BLOB_HEX_CHARS = 2048; // 1024 bytes
             constexpr uint64_t MAX_POW_ATTEMPTS = 5000000ULL;
-            constexpr uint32_t MAX_NONCE_TAG_BITS = 16;
 
             const std::string blob = [blobHex UTF8String];
             const std::string target = [targetHex UTF8String];
@@ -582,24 +581,15 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
                 resolve(nil);
                 return;
             }
-            const uint32_t bits = std::min([nonceTagBits unsignedIntValue], MAX_NONCE_TAG_BITS);
-            const uint32_t mask = bits > 0 ? ((1u << bits) - 1u) : 0;
-            const uint32_t tagValue = [nonceTagValue unsignedIntValue] & mask;
-            const uint32_t nonceStep = bits > 0 ? (1u << bits) : 1u;
+            (void)nonceTagBits;
+            (void)nonceTagValue;
+            const uint32_t nonceStep = 1u;
 
             uint64_t attempts = [maxAttempts unsignedLongLongValue];
             if (attempts == 0) attempts = 1;
             if (attempts > MAX_POW_ATTEMPTS) attempts = MAX_POW_ATTEMPTS;
             const uint32_t startNonce32 = [startNonce unsignedIntValue];
             uint32_t nonce = startNonce32;
-            if (bits > 0) {
-                // Align to first nonce that matches the message tag so each attempt hashes.
-                nonce = (nonce & ~mask) | tagValue;
-                if (nonce < startNonce32) {
-                    nonce += nonceStep;
-                }
-            }
-
             for (uint64_t i = 0; i < attempts; i++) {
                 blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);
                 blobBytes[nonceOffset + 1] = static_cast<uint8_t>((nonce >> 8) & 0xff);
