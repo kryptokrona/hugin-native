@@ -144,11 +144,8 @@ export const GroupMessageItem: React.FC<Props> = ({
 
       if (file?.path && file?.type === 'audio') {
         isAudioMessage = true;
-        if (Platform.OS === 'android') {
-          audioPath = file.path;
-        } else audioPath = 'file://' + file.path;
+        audioPath = file.path;
       }
-      // setIsLoading(false);
       return { audioPath, isAudioMessage };
     } catch (e) {}
   }, [message]);
@@ -352,8 +349,47 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
 
     {!isLoading && audioDetails?.isAudioMessage && (
       <View style={styles.waveFormWrapper}>
-        {/* unchanged audio code */}
-      </View>
+        <Pressable
+          onPress={handlePlayPauseAction}
+          style={{ padding: 4 }}>
+            {playerState !== PlayerState.playing
+                  ? <CustomIcon
+                  type="FI"
+                  name="play"
+                  color={color}
+                  size={20}
+                />
+                  : <CustomIcon
+                  type="FI"
+                  name="pause"
+                  color={color}
+                  size={20}
+                />}
+                  
+        </Pressable>
+      <Waveform
+      containerStyle={styles.staticWaveformView}
+      mode="static"
+      key={audioDetails?.audioPath}
+      playbackSpeed={1}
+      ref={ref}
+      path={audioDetails?.audioPath}
+      candleSpace={2}
+      candleWidth={4}
+      scrubColor={'#fff'}
+      waveColor={color}
+      candleHeightScale={4}
+      onPlayerStateChange={setPlayerState}
+      onChangeWaveformLoadState={state => {
+      }}
+      onError={error => {
+        console.log('Error in static player:', error);
+      }}
+      onCurrentProgressChange={(_currentProgress, _songDuration) => {
+        }}
+        />
+        
+        </View>
     )}
 
     {!audioDetails?.isAudioMessage &&
