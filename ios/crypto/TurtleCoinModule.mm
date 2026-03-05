@@ -13,8 +13,15 @@
 #include "TurtleCoinModule.h"
 #include <algorithm>
 #include <unordered_map>
+#include <atomic>
+#include <memory>
+#include <chrono>
 #import <React/RCTLog.h>
 
+
+__thread char g_debug_stage_info[20][256];
+__thread int g_debug_stage_count = 0;
+__thread int g_debug_hash_active = 0;
 
 WalletBlockInfo convertWalletBlockInfo(NSDictionary *block);
 
@@ -496,16 +503,7 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
                 return true;
             };
 
-            auto bytesToHex = [](const std::vector<uint8_t> &bytes) -> std::string {
-                static const char *hex = "0123456789abcdef";
-                std::string out;
-                out.resize(bytes.size() * 2);
-                for (size_t i = 0; i < bytes.size(); i++) {
-                    out[i * 2] = hex[(bytes[i] >> 4) & 0x0f];
-                    out[(i * 2) + 1] = hex[bytes[i] & 0x0f];
-                }
-                return out;
-            };
+
 
             auto readVarint = [](const std::vector<uint8_t> &buffer, size_t offset, uint64_t &value, size_t &consumed) -> bool {
                 value = 0;
@@ -544,11 +542,7 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
                         (static_cast<uint32_t>(p[3]) << 24));
             };
 
-            auto readUint64LE = [&](const uint8_t *p) -> uint64_t {
-                const uint64_t lo = static_cast<uint64_t>(readUint32LE(p));
-                const uint64_t hi = static_cast<uint64_t>(readUint32LE(p + 4));
-                return (hi << 32) | lo;
-            };
+
 
             auto getTargetValue = [&](const std::string &targetHexValue, bool &valid) -> uint64_t {
                 valid = false;
@@ -583,47 +577,98 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
             }
             (void)nonceTagBits;
             (void)nonceTagValue;
-            const uint32_t nonceStep = 1u;
 
             uint64_t attempts = [maxAttempts unsignedLongLongValue];
             if (attempts == 0) attempts = 1;
             if (attempts > MAX_POW_ATTEMPTS) attempts = MAX_POW_ATTEMPTS;
             const uint32_t startNonce32 = [startNonce unsignedIntValue];
-            uint32_t nonce = startNonce32;
-            for (uint64_t i = 0; i < attempts; i++) {
-                blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);
-                blobBytes[nonceOffset + 1] = static_cast<uint8_t>((nonce >> 8) & 0xff);
-                blobBytes[nonceOffset + 2] = static_cast<uint8_t>((nonce >> 16) & 0xff);
-                blobBytes[nonceOffset + 3] = static_cast<uint8_t>((nonce >> 24) & 0xff);
 
-                const std::string candidate = bytesToHex(blobBytes);
-                const std::string result = Core::Cryptography::cn_turtle_lite_slow_hash_v2(candidate);
+            // Determine thread count: use active CPU cores, capped at 8
+            const unsigned int maxThreads = 8;
+            const unsigned int cpuCount = (unsigned int)[[NSProcessInfo processInfo] activeProcessorCount];
+            const unsigned int numThreads = std::min(std::max(cpuCount, 1u), maxThreads);
 
-                std::vector<uint8_t> hashBytes;
-                if (!hexToBytes(result, hashBytes) || hashBytes.size() < 32) {
-                    nonce += nonceStep;
-                    continue;
-                }
+            // Shared state across threads (use shared_ptr because ObjC blocks copy-capture)
+            auto found = std::make_shared<std::atomic<bool>>(false);
+            auto totalHashes = std::make_shared<std::atomic<uint64_t>>(0);
+            __block NSString *winnerNonce = nil;
+            __block NSString *winnerResult = nil;
 
-                const uint64_t hashTail = readUint64LE(hashBytes.data() + 24);
-                if (hashTail <= targetValue) {
-                    NSString *nonceHex = [NSString stringWithFormat:@"%02x%02x%02x%02x",
-                                          blobBytes[nonceOffset],
-                                          blobBytes[nonceOffset + 1],
-                                          blobBytes[nonceOffset + 2],
-                                          blobBytes[nonceOffset + 3]];
-                    resolve(@{
-                        @"job_id": @"",
-                        @"nonce": nonceHex,
-                        @"result": [NSString stringWithUTF8String:result.c_str()]
-                    });
-                    return;
-                }
+            dispatch_group_t group = dispatch_group_create();
+            dispatch_queue_t minerQueue = dispatch_queue_create("pow.miner", DISPATCH_QUEUE_CONCURRENT);
 
-                nonce += nonceStep;
+            const uint64_t attemptsPerThread = (attempts + numThreads - 1) / numThreads;
+
+            for (unsigned int t = 0; t < numThreads; t++) {
+                dispatch_group_async(group, minerQueue, ^{
+                    // Each thread gets its own copy of blobBytes
+                    std::vector<uint8_t> localBlob = blobBytes;
+                    uint32_t localNonce = startNonce32 + (uint32_t)(t * attemptsPerThread);
+                    uint64_t localHashes = 0;
+
+                    for (uint64_t i = 0; i < attemptsPerThread; i++) {
+                        if (found->load(std::memory_order_relaxed)) {
+                            break;
+                        }
+
+                        localHashes++;
+
+                        localBlob[nonceOffset]     = static_cast<uint8_t>(localNonce & 0xff);
+                        localBlob[nonceOffset + 1] = static_cast<uint8_t>((localNonce >> 8) & 0xff);
+                        localBlob[nonceOffset + 2] = static_cast<uint8_t>((localNonce >> 16) & 0xff);
+                        localBlob[nonceOffset + 3] = static_cast<uint8_t>((localNonce >> 24) & 0xff);
+
+                        Crypto::Hash hashResult;
+                        Crypto::cn_turtle_lite_slow_hash_v2(localBlob.data(), localBlob.size(), hashResult);
+
+                        uint64_t hashTail;
+                        memcpy(&hashTail, hashResult.data + 24, sizeof(hashTail));
+                        hashTail = CFSwapInt64LittleToHost(hashTail);
+
+                        if (hashTail <= targetValue) {
+                            bool expected = false;
+                            if (found->compare_exchange_strong(expected, true)) {
+                                winnerNonce = [NSString stringWithFormat:@"%02x%02x%02x%02x",
+                                               localBlob[nonceOffset],
+                                               localBlob[nonceOffset + 1],
+                                               localBlob[nonceOffset + 2],
+                                               localBlob[nonceOffset + 3]];
+                                std::vector<uint8_t> hashBytesVec(hashResult.data, hashResult.data + 32);
+                                static const char *hexChars = "0123456789abcdef";
+                                std::string hex;
+                                hex.resize(hashBytesVec.size() * 2);
+                                for (size_t k = 0; k < hashBytesVec.size(); k++) {
+                                    hex[k * 2]     = hexChars[(hashBytesVec[k] >> 4) & 0x0f];
+                                    hex[k * 2 + 1] = hexChars[hashBytesVec[k] & 0x0f];
+                                }
+                                winnerResult = [NSString stringWithUTF8String:hex.c_str()];
+                            }
+                            break;
+                        }
+
+                        localNonce += 1;
+                    }
+
+                    totalHashes->fetch_add(localHashes, std::memory_order_relaxed);
+                });
             }
 
-            resolve(nil);
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+            if (found->load()) {
+                resolve(@{
+                    @"job_id": @"",
+                    @"nonce": winnerNonce,
+                    @"result": winnerResult,
+                    @"hashes_performed": @(totalHashes->load()),
+                    @"threads": @(numThreads)
+                });
+            } else {
+                resolve(@{
+                    @"hashes_performed": @(totalHashes->load()),
+                    @"threads": @(numThreads)
+                });
+            }
         } catch (const std::exception &e) {
             NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
             NSError *error = [NSError errorWithDomain:@"FindPowShareError"

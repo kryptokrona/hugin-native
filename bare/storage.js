@@ -367,32 +367,30 @@ class HyperStorage {
 }
 
 function make_directory(directory, topic) {
-  //If its the first time we create a core store
   const storage = `${directory}/corestorage`;
+  console.log('bare storage path:', storage);
   if (!fs.existsSync(storage)) {
-    fs.mkdirSync(storage);
+    fs.mkdirSync(storage, { recursive: true });
   }
 
-  //If its the first time we join this topic
   const topicPath = `${storage}/${topic}`;
   if (!fs.existsSync(topicPath)) {
-    fs.mkdirSync(topicPath);
+    fs.mkdirSync(topicPath, { recursive: true });
   }
 
-  //Create filedirectory for this topic
   const filesPath = `${topicPath}/files`;
   if (!fs.existsSync(filesPath)) {
-    fs.mkdirSync(filesPath);
+    fs.mkdirSync(filesPath, { recursive: true });
   }
 
-  //Create chat for this topic
   const chatPath = `${topicPath}/chat`;
   if (!fs.existsSync(chatPath)) {
-    fs.mkdirSync(chatPath);
+    fs.mkdirSync(chatPath, { recursive: true });
   }
 
   return [filesPath, chatPath];
 }
+
 
 const Storage = new HyperStorage();
 

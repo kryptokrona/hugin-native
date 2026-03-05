@@ -58,7 +58,7 @@ const POW_PHASE1_MS = 2 * 60 * 1000;
 const POW_SLICE_MS_PHASE1 = 20000;
 const POW_SLICE_MS_PHASE2 = 20000;
 const POW_MAX_JOB_TIME_MS = 90000;
-const POW_REQUIRED_SHARES = 3;
+const POW_REQUIRED_SHARES = 1;
 let active_pow_tasks = 0;
 
 function pow_rate_policy(active_tasks, elapsed_ms) {

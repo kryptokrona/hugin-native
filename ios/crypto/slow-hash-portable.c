@@ -8,6 +8,15 @@
 /* This file contains the portable version of the slow-hash routines
    for the CryptoNight hashing algorithm */
 
+/*
+ * CryptoNight uses U64(x) / (uint64_t*) casts to type-pun uint8_t* buffers.
+ * This is undefined behavior under C strict aliasing rules and breaks under -O1+.
+ * Disable strict-aliasing for this translation unit.
+ */
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC optimize("no-strict-aliasing")
+#endif
+
 #if !(!defined NO_AES && (defined(__arm__) || defined(__aarch64__))) \
     && !(!defined NO_AES && (defined(__x86_64__) || (defined(_MSC_VER) && defined(_WIN64))))
 #pragma message("info: Using slow-hash-portable.c")
@@ -36,7 +45,7 @@ void slow_hash_free_state(void)
 #define INLINE
 #endif /* defined(__GNUC__) */
 
-#define U64(x) ((uint64_t *)(x))
+#define U64(x) ((uint64_alias_t *)(x))
 
 static void (*const extra_hashes[4])(const void *, size_t, char *) = {hash_extra_blake,
                                                                       hash_extra_groestl,
@@ -51,28 +60,28 @@ static void mul(const uint8_t *a, const uint8_t *b, uint8_t *res)
     uint64_t a0, b0;
     uint64_t hi, lo;
 
-    a0 = SWAP64LE(((uint64_t *)a)[0]);
-    b0 = SWAP64LE(((uint64_t *)b)[0]);
+    a0 = SWAP64LE(((const_uint64_alias_t *)a)[0]);
+    b0 = SWAP64LE(((const_uint64_alias_t *)b)[0]);
     lo = mul128(a0, b0, &hi);
-    ((uint64_t *)res)[0] = SWAP64LE(hi);
-    ((uint64_t *)res)[1] = SWAP64LE(lo);
+    ((uint64_alias_t *)res)[0] = SWAP64LE(hi);
+    ((uint64_alias_t *)res)[1] = SWAP64LE(lo);
 }
 
 static void sum_half_blocks(uint8_t *a, const uint8_t *b)
 {
     uint64_t a0, a1, b0, b1;
 
-    a0 = SWAP64LE(((uint64_t *)a)[0]);
-    a1 = SWAP64LE(((uint64_t *)a)[1]);
-    b0 = SWAP64LE(((uint64_t *)b)[0]);
-    b1 = SWAP64LE(((uint64_t *)b)[1]);
+    a0 = SWAP64LE(((uint64_alias_t *)a)[0]);
+    a1 = SWAP64LE(((uint64_alias_t *)a)[1]);
+    b0 = SWAP64LE(((const_uint64_alias_t *)b)[0]);
+    b1 = SWAP64LE(((const_uint64_alias_t *)b)[1]);
     a0 += b0;
     a1 += b1;
-    ((uint64_t *)a)[0] = SWAP64LE(a0);
-    ((uint64_t *)a)[1] = SWAP64LE(a1);
+    ((uint64_alias_t *)a)[0] = SWAP64LE(a0);
+    ((uint64_alias_t *)a)[1] = SWAP64LE(a1);
 }
 
-#define U64(x) ((uint64_t *)(x))
+#define U64(x) ((uint64_alias_t *)(x))
 
 static void copy_block(uint8_t *dst, const uint8_t *src)
 {
@@ -107,6 +116,9 @@ static void xor64(uint8_t *left, const uint8_t *right)
         left[i] ^= right[i];
     }
 }
+
+#define MASK(div) ((uint32_t)(((page_size / AES_BLOCK_SIZE) / (div)-1) << 4))
+#define state_index(x, div) ((*((uint32_alias_t *)x)) & MASK(div))
 
 void cn_slow_hash(
     const void *data,
@@ -182,7 +194,7 @@ void cn_slow_hash(
     for (i = 0; i < aes_rounds; i++)
     {
 #define MASK(div) ((uint64_t)(((page_size / AES_BLOCK_SIZE) / (div)-1) << 4))
-#define state_index(x, div) ((*(uint64_t *)x) & MASK(div))
+#define state_index(x, div) ((*((uint64_alias_t *)x) & MASK(div)))
 
         // Iteration 1
         j = state_index(a, lightFlag);
@@ -240,5 +252,8 @@ void cn_slow_hash(
     free(long_state);
 #endif /* FORCE_USE_HEAP */
 }
+
+#undef MASK
+#undef state_index
 
 #endif

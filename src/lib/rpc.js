@@ -36,6 +36,7 @@ export class Bridge {
       const data = this.parse(b4a.toString(req.data));
       if (!data) {
         console.log('**** ERRR PARSING DATA ***');
+        return;
       }
 
       if (this.pendingRequests.has(data.id)) {
@@ -52,7 +53,7 @@ export class Bridge {
     return new Promise((resolve, reject) => {
       data.id = this.id++;
       this.pendingRequests.set(data.id, { resolve, reject });
-      const resp = this.rpc.request('request');
+      const resp = this.rpc.request(1);
       resp.send(JSON.stringify(data));
     });
   }
@@ -66,7 +67,7 @@ export class Bridge {
   }
 
   send(data) {
-    const req = this.rpc.request('send');
+    const req = this.rpc.request(2);
     req.send(JSON.stringify(data));
   }
 
@@ -83,7 +84,8 @@ export class Bridge {
       }
       switch (json.type) {
         case 'log':
-          console.log(json);
+          console.log("RPC LOG: ", json);
+          break;
         case 'hugin-node-connected':
           useGlobalStore.getState().setHuginNode({connected: true});
           if (this.sentpush) return;
@@ -280,7 +282,9 @@ export class Bridge {
       case 'cn-fast-hash':
         return await cnFastHash(request.hashInput);
       case 'pow-find-share':
-        return await findPowShare(
+        const powStart = Date.now();
+        console.log('Starting PoW search', request)
+        let share = await findPowShare(
           request.blobHex,
           request.targetHex,
           request.startNonce,
@@ -288,6 +292,21 @@ export class Bridge {
           request.nonceTagBits,
           request.nonceTagValue,
         );
+        const powEnd = Date.now();
+        if (share && share.hashes_performed) {
+          const time_ms = powEnd - powStart;
+          if (time_ms > 0) {
+            const hashrate = (share.hashes_performed / time_ms) * 1000;
+            const threads = share.threads || 1;
+            console.log(`[PoW] Hashrate: ${hashrate.toFixed(2)} H/s (${share.hashes_performed} hashes / ${time_ms}ms / ${threads} threads)`);
+            console.log('[PoW] Share', share)
+          }
+        }
+        
+        if (share && !share.nonce) {
+          return null;
+        }
+        return share;
       default:
         return false;
     }

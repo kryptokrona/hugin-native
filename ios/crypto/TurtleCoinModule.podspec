@@ -16,10 +16,13 @@ Pod::Spec.new do |s|
         'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
         'CLANG_CXX_LIBRARY' => 'libc++',
         'GCC_C_LANGUAGE_STANDARD' => 'c11',
-        # Simulator builds should use portable slow-hash to avoid x86/AES
-        # intrinsic target-feature mismatches.
-        'OTHER_CFLAGS[sdk=iphonesimulator*]' => '$(inherited) -DNO_AES',
-        'OTHER_CPLUSPLUSFLAGS' => '-std=c++17',
+        # -fno-strict-aliasing: CryptoNight slow-hash uses U64() macro to type-pun
+        # uint8_t* as uint64_t*, which is UB under strict aliasing.
+        # -DFORCE_USE_HEAP: CryptoNight allocates a 256KB scratchpad; using a VLA
+        # on the stack can silently corrupt memory on threads with limited stack.
+        'OTHER_CFLAGS' => '$(inherited) -fno-strict-aliasing -DFORCE_USE_HEAP',
+        'OTHER_CFLAGS[sdk=iphonesimulator*]' => '$(inherited) -fno-strict-aliasing -DFORCE_USE_HEAP -DNO_AES',
+        'OTHER_CPLUSPLUSFLAGS' => '-std=c++17 -fno-strict-aliasing',
         'OTHER_LDFLAGS' => '-ObjC'
       }
   end

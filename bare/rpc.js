@@ -23,7 +23,7 @@ class Bridge extends EventEmitter {
     return new Promise((resolve, reject) => {
       data.id = this.id++;
       this.pendingRequests.set(data.id, { resolve, reject });
-      const resp = this.rpc.request('request');
+      const resp = this.rpc.request(1);
       resp.send(JSON.stringify(data));
     });
   }
@@ -38,7 +38,7 @@ class Bridge extends EventEmitter {
 
   send(type, send) {
     send.type = type;
-    const resp = this.rpc.request('send');
+    const resp = this.rpc.request(2);
     resp.send(JSON.stringify(send));
   }
 

@@ -9,16 +9,20 @@
 #import <Security/Security.h>
 #import <sodium-ios/sodium-lib.h>
 #import <sodium-ios/crypto_box.h>
+#import <ReactAppDependencyProvider/RCTAppDependencyProvider.h>
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  self.dependencyProvider = [RCTAppDependencyProvider new];
 
   [RNVoipPushNotificationManager voipRegistration];
 
   [FIRApp configure];
   self.moduleName = @"Hugin";
+  // You can add your custom initial props in the dictionary below.
+  // They will be passed down to the ViewController used by React Native.
   self.initialProps = @{};
 
 [RNCallKeep setup:@{

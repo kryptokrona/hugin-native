@@ -13,11 +13,34 @@
 #include "oaes_lib.h"
 #include "variant2_int_sqrt.h"
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+/* Type-punning safe aliases: tells the compiler these pointers may alias
+ * any other type, preventing misoptimization under -O2/-O3. */
+typedef uint64_t __attribute__((may_alias)) uint64_alias_t;
+typedef uint32_t __attribute__((may_alias)) uint32_alias_t;
+typedef const uint64_t __attribute__((may_alias)) const_uint64_alias_t;
+typedef const uint32_t __attribute__((may_alias)) const_uint32_alias_t;
+
+extern __thread char g_debug_stage_info[20][256];
+extern __thread int g_debug_stage_count;
+extern __thread int g_debug_hash_active;
+
+static inline void record_hash_stage(const char *name, const void *data, size_t len) {
+    if (!g_debug_hash_active) return;
+    if (g_debug_stage_count >= 20) return;
+    
+    char hex[65] = {0};
+    size_t print_len = len > 32 ? 32 : len;
+    for (size_t i = 0; i < print_len; i++) {
+        snprintf(&hex[i*2], 3, "%02x", ((const uint8_t*)data)[i]);
+    }
+    snprintf(g_debug_stage_info[g_debug_stage_count], 256, "%-20s: %s", name, hex);
+    g_debug_stage_count++;
+}
 
 // Standard Crypto Definitions
 #define AES_BLOCK_SIZE 16
@@ -85,7 +108,7 @@ union cn_slow_hash_state {
     {                     \
         VARIANT1_CHECK(); \
     }                     \
-    const uint64_t tweak1_2 = (variant == 1) ? (state.hs.w[24] ^ (*((const uint64_t *)NONCE_POINTER))) : 0
+    const uint64_t tweak1_2 = (variant == 1) ? (state.hs.w[24] ^ (*((const_uint64_alias_t *)NONCE_POINTER))) : 0
 
 #define VARIANT2_INIT64()                               \
     uint64_t division_result = 0;                       \
@@ -140,13 +163,13 @@ union cn_slow_hash_state {
         }                                                                                                 \
     while (0)
 
-#define VARIANT2_PORTABLE_SHUFFLE_ADD(base_ptr, offset)             \
-    do                                                              \
-        if (variant == 2)                                           \
-        {                                                           \
-            uint64_t *chunk1 = U64((base_ptr) + ((offset) ^ 0x10)); \
-            uint64_t *chunk2 = U64((base_ptr) + ((offset) ^ 0x20)); \
-            uint64_t *chunk3 = U64((base_ptr) + ((offset) ^ 0x30)); \
+#define VARIANT2_PORTABLE_SHUFFLE_ADD(base_ptr, offset)                       \
+    do                                                                          \
+        if (variant == 2)                                                       \
+        {                                                                       \
+            uint64_alias_t *chunk1 = U64((base_ptr) + ((offset) ^ 0x10)); \
+            uint64_alias_t *chunk2 = U64((base_ptr) + ((offset) ^ 0x20)); \
+            uint64_alias_t *chunk3 = U64((base_ptr) + ((offset) ^ 0x30)); \
                                                                     \
             const uint64_t chunk1_old[2] = {chunk1[0], chunk1[1]};  \
                                                                     \
@@ -168,13 +191,13 @@ union cn_slow_hash_state {
     while (0)
 
 #define VARIANT2_INTEGER_MATH_DIVISION_STEP(b, ptr)                                                      \
-    ((uint64_t *)(b))[0] ^= division_result ^ (sqrt_result << 32);                                       \
+    ((uint64_alias_t *)(b))[0] ^= division_result ^ (sqrt_result << 32);                                       \
     {                                                                                                    \
-        const uint64_t dividend = ((uint64_t *)(ptr))[1];                                                \
-        const uint32_t divisor = (((uint64_t *)(ptr))[0] + (uint32_t)(sqrt_result << 1)) | 0x80000001UL; \
+        const uint64_t dividend = ((const_uint64_alias_t *)(ptr))[1];                                                \
+        const uint32_t divisor = (((const_uint64_alias_t *)(ptr))[0] + (uint32_t)(sqrt_result << 1)) | 0x80000001UL; \
         division_result = ((uint32_t)(dividend / divisor)) + (((uint64_t)(dividend % divisor)) << 32);   \
     }                                                                                                    \
-    const uint64_t sqrt_input = ((uint64_t *)(ptr))[0] + division_result
+    const uint64_t sqrt_input = ((const_uint64_alias_t *)(ptr))[0] + division_result
 
 #define VARIANT2_INTEGER_MATH_SSE2(b, ptr)                 \
     do                                                     \
@@ -221,9 +244,9 @@ union cn_slow_hash_state {
     do                                               \
         if (variant == 2)                            \
         {                                            \
-            *U64(hp_state + (j ^ 0x10)) ^= hi;       \
-            *(U64(hp_state + (j ^ 0x10)) + 1) ^= lo; \
-            hi ^= *U64(hp_state + (j ^ 0x20));       \
-            lo ^= *(U64(hp_state + (j ^ 0x20)) + 1); \
+            *((uint64_alias_t *)(hp_state + (j ^ 0x10))) ^= hi;       \
+            *(((uint64_alias_t *)(hp_state + (j ^ 0x10))) + 1) ^= lo; \
+            hi ^= *((const_uint64_alias_t *)(hp_state + (j ^ 0x20)));       \
+            lo ^= *(((const_uint64_alias_t *)(hp_state + (j ^ 0x20))) + 1); \
         }                                            \
     while (0)

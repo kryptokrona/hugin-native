@@ -39,9 +39,12 @@ extern "C"
 #define ALIGN
 #endif
 
+typedef uint32_t __attribute__((may_alias)) uint32_alias_t;
+typedef const uint32_t __attribute__((may_alias)) const_uint32_alias_t;
+
 #define rf1(r, c) (r)
-#define word_in(x, c) (*((uint32_t *)(x) + (c)))
-#define word_out(x, c, v) (*((uint32_t *)(x) + (c)) = (v))
+#define word_in(x, c) (*((const_uint32_alias_t *)(x) + (c)))
+#define word_out(x, c, v) (*((uint32_alias_t *)(x) + (c)) = (v))
 
 #define s(x, c) x[c]
 #define si(y, x, c) (s(y, c) = word_in(x, c))
@@ -155,7 +158,7 @@ extern "C"
     STATIC INLINE void aesb_single_round(const uint8_t *in, uint8_t *out, uint8_t *expandedKey)
     {
         uint32_t b0[4], b1[4];
-        const uint32_t *kp = (uint32_t *)expandedKey;
+        const_uint32_alias_t *kp = (const_uint32_alias_t *)expandedKey;
         state_in(b0, in);
 
         round(fwd_rnd, b1, b0, kp);
@@ -166,7 +169,7 @@ extern "C"
     STATIC INLINE void aesb_pseudo_round(const uint8_t *in, uint8_t *out, uint8_t *expandedKey)
     {
         uint32_t b0[4], b1[4];
-        const uint32_t *kp = (uint32_t *)expandedKey;
+        const_uint32_alias_t *kp = (const_uint32_alias_t *)expandedKey;
         state_in(b0, in);
 
         round(fwd_rnd, b1, b0, kp);
