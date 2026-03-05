@@ -1,0 +1,17 @@
+diff --git a/node_modules/buffer/index.js b/node_modules/buffer/index.js
+index 1324910..d9263d6 100644
+--- a/node_modules/buffer/index.js
++++ b/node_modules/buffer/index.js
+@@ -396,7 +396,11 @@ Buffer.concat = function concat (list, length) {
+   for (i = 0; i < list.length; ++i) {
+     var buf = list[i]
+     if (!Buffer.isBuffer(buf)) {
+-      throw new TypeError('"list" argument must be an Array of Buffers')
++      if (typeof Uint8Array !== 'undefined' && buf instanceof Uint8Array) {
++        buf = Buffer.from(buf)
++      } else {
++        throw new TypeError('"list" argument must be an Array of Buffers')
++      }
+     }
+     buf.copy(buffer, pos)
+     pos += buf.length
