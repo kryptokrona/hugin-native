@@ -58,6 +58,7 @@ const POW_PHASE1_MS = 2 * 60 * 1000;
 const POW_SLICE_MS_PHASE1 = 20000;
 const POW_SLICE_MS_PHASE2 = 20000;
 const POW_MAX_JOB_TIME_MS = 90000;
+const POW_REQUIRED_SHARES = 3;
 let active_pow_tasks = 0;
 
 function pow_rate_policy(active_tasks, elapsed_ms) {
@@ -313,12 +314,6 @@ async listen() {
           return;
         }
 
-        if (data.type === 'share_result') {
-          resolve(data);
-          this.requests.delete(data.id);
-          return;
-        }
-
         resolve(data.response);
         this.requests.delete(data.id);
      }
@@ -416,27 +411,6 @@ async request_job() {
   });
 }
 
-async submit_shares(shares) {
-  if (!this.connection || !Array.isArray(shares) || shares.length === 0) return null;
-  return new Promise((resolve, reject) => {
-    const id = random_key().toString('hex');
-    this.requests.set(id, { resolve, reject });
-    this.connection.write(JSON.stringify({
-      type: 'share',
-      shares,
-      id,
-    }));
-    logPow('share_submit', { id, count: shares.length });
-    setTimeout(() => {
-      if (this.requests.has(id)) {
-        this.requests.delete(id);
-        logPow('share_submit_timeout', { id });
-        resolve({ status: 'timeout' });
-      }
-    }, 30000);
-  });
-}
-
 build_pow_auth(message_hash, timestamp, shares, context = '') {
   if (!Array.isArray(shares) || !shares.length) return null;
   const share = shares[0];
@@ -463,7 +437,7 @@ async challenge(message_hash) {
     const selected_nonces = new Set();
     const all_nonces = new Set();
 
-    while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < 1) {
+    while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < POW_REQUIRED_SHARES) {
       let job = this.currentJob;
       if (!job) {
         const jobResponse = await this.request_job();
@@ -541,7 +515,7 @@ async challenge(message_hash) {
         }
       }
 
-      if (shares.length >= 1) {
+      if (shares.length >= POW_REQUIRED_SHARES) {
         return { job, shares, allShares };
       }
 
@@ -652,9 +626,6 @@ async message(payload, hash, viewtag) {
         continue;
       }
 
-      if (Array.isArray(pow.allShares) && pow.allShares.length) {
-        await this.submit_shares(pow.allShares);
-      }
       const authContext = String(baseMessage.cipher || '');
       const auth = this.build_pow_auth(hash, request_id, pow.shares, authContext);
       if (!auth) {
@@ -755,9 +726,6 @@ async register(data) {
         continue;
       }
 
-      if (Array.isArray(pow.allShares) && pow.allShares.length) {
-        await this.submit_shares(pow.allShares);
-      }
       const auth = this.build_pow_auth(message_hash, request_id, pow.shares, String(data || ''));
       if (!auth) {
         logPow('pow_register_retry', { attempt, reason: 'pow_auth_failed' });
