@@ -55,12 +55,12 @@ const REQUEST_FILE = 'request-file';
 const ONE_DAY = 24 * 60 * 60 * 1000
 const POW_NONCE_TAG_BITS = 4;
 const MAX_NATIVE_POW_ATTEMPTS = 5000000;
-const POW_TOTAL_HASHES_PER_SECOND_CAP = 900;
-const POW_PHASE1_HASHES_PER_SECOND_CAP = 600;
+const POW_TOTAL_HASHES_PER_SECOND_CAP = 10000;
+const POW_PHASE1_HASHES_PER_SECOND_CAP = 1000;
 const POW_PHASE2_HASHES_PER_SECOND_CAP = 250;
 const POW_PHASE1_MS = 2 * 60 * 1000;
-const POW_SLICE_MS_PHASE1 = 10000;
-const POW_SLICE_MS_PHASE2 = 10000;
+const POW_SLICE_MS_PHASE1 = 20000;
+const POW_SLICE_MS_PHASE2 = 20000;
 const POW_MAX_JOB_TIME_MS = 90000;
 let active_pow_tasks = 0;
 
@@ -143,14 +143,23 @@ class NodeConnection {
         nonce_tag_bits,
         nonce_tag_value,
       }) => {
+        // Since we are moving to native, we want the native thread to run as hot as possible
+        // for the allocated time_budget_ms, ignoring artificial Javascript-side hashes_per_second caps.
+        // We will pass MAX_NATIVE_POW_ATTEMPTS and rely on native or a time check.
+        // But the native iOS module 'findPowShare' doesn't have a time check.
+        // So we will request a large number of attempts, let native run for roughly `time_budget_ms`
+        // assuming optimistic 1KH/s for the attempt cap, or use the JS capped value if we prefer.
+        // Let's rely on time_budget_ms * optimistic_hash_rate / 1000
+        const optimistic_hps = 2000; // Assume we can do 2000 H/s natively
         const maxAttempts = Math.max(
           1,
-          Math.floor((parseInt(hashes_per_second, 10) * parseInt(time_budget_ms, 10)) / 1000),
+          Math.floor((optimistic_hps * parseInt(time_budget_ms, 10)) / 1000),
         );
         const clampedAttempts = Math.min(maxAttempts, MAX_NATIVE_POW_ATTEMPTS);
         const startNonce = Math.floor(Math.random() * 0xffffffff);
         const clampedNonceTagBits = Math.max(0, Math.min(16, parseInt(nonce_tag_bits, 10) || 0));
         const clampedNonceTagValue = (parseInt(nonce_tag_value, 10) || 0) >>> 0;
+        console.log('findPowShare called with max attempts:', clampedAttempts);
         const share = await Hugin.request({
           type: 'pow-find-share',
           blobHex: job.blob,
@@ -377,6 +386,7 @@ start_job_polling() {
 }
 
 set_job(job) {
+  console.log('job', job)
   if (!job || !job.job_id) return;
   if (this.currentJob && this.currentJob.job_id === job.job_id) return;
   const prevId = extractPrevIdFromBlob(job.blob);
@@ -595,37 +605,41 @@ close() {
 }
 
 async message(payload, hash, viewtag) {
+  console.log('message called');
   try {
     if (this.connection === null) {
+      console.log('reconnecting');
       await this.reconnect();
     }
-    if (!this.connection) return { success: false, reason: 'No connection' };
-
+    if (!this.connection) {
+      console.log('no connection');
+      return { success: false, reason: 'No connection' };
+    }
+    console.log('connection');
     const request_id = Date.now();
     const max_attempts = 3;
-
-    const [pub, signature] = await Hugin.request({
-      type: 'sign-node-message',
-      message: payload + hash,
-    });
-
+    console.log('request_id', request_id);
+    // const [pub, signature] = await Hugin.request({
+    //   type: 'sign-node-message',
+    //   message: payload + hash,
+    // });
+    // console.log('pub', pub);
+    // console.log('signature', signature);
     const baseMessage = {
       cipher: payload,
-      pub,
       timestamp: request_id,
       hash,
-      signature,
       viewtag,
       push: true,
       id: request_id,
     };
-
+    console.log('baseMessage', baseMessage);
     const should_retry = (res) => {
       if (!res) return true;
       if (res.success === true) return false;
       return !!res.reason;
     };
-
+    console.log('should_retry', should_retry);
     const send_post = async (postData) => {
       if (!this.connection) {
         this.reconnect();
@@ -667,9 +681,10 @@ async message(payload, hash, viewtag) {
         },
       },
     });
-
+    console.log('starting shieet');
     let last_res = { success: false, reason: 'unknown' };
     for (let attempt = 1; attempt <= max_attempts; attempt++) {
+      console.log('attempt', attempt);
       let pow = await compute_pow();
       if (!pow || !pow.shares || pow.shares.length === 0) {
         logPow('pow_message_retry', { attempt, reason: 'no_shares' });
@@ -694,6 +709,7 @@ async message(payload, hash, viewtag) {
     }
     return last_res;
   } catch (e) {
+    console.log('error', e);
     logPow('pow_message_error', { message: e && e.message });
     return { success: false, reason: 'message_exception' };
   }
@@ -760,7 +776,7 @@ async register(data) {
       let pow = await compute_pow();
       if (!pow || !pow.shares || pow.shares.length === 0) {
         logPow('pow_register_retry', { attempt, reason: 'no_shares' });
-        this.currentJob = null;
+        // this.currentJob = null;
         const jobResponse = await this.request_job();
         if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
         last_res = { success: false, reason: 'PoW required' };
@@ -1919,7 +1935,7 @@ const got_answer = (data) => {
 };
 
 const send_peer_message = (address, topic, message) => {
-  console.log('Send peer message', message);
+  // console.log('Send peer message', message);
   const active = get_active_topic(topic);
   if (!active) {
     errorMessage('Swarm is not active');
