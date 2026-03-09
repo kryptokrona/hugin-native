@@ -24,14 +24,17 @@ import { Notify, notify } from '../services/utils';
 import { MessageSync } from '../services/hugin/syncer';
 import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 import { Nodes } from './native';
-import { getDeviceId } from '../services/pushnotifications';
 import { cnFastHash, cnTurtleLiteSlowHashV2 } from '../services/NativeTest';
 import { findPowShare } from '../services/NativeTest';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
     this.id = 0;
-    this.sentpush = false;
+    this.basePushRegistered = false;
+    this.callPushRegistered = false;
+    this.registeredRoomKeys = new Set();
+    this.pushRegistrationInFlight = null;
+    this.pushRegistrationQueued = false;
     this.rpc = new RPC(IPC, (req, error) => {
       const data = this.parse(b4a.toString(req.data));
       if (!data) {
@@ -71,7 +74,7 @@ export class Bridge {
     req.send(JSON.stringify(data));
   }
 
-  async sendPushRegistration(data) {
+  async send_push_registration(data) {
     const res = await this.request({ type: 'push_registration', data });
     const sent = res && res.sent;
     if (!sent || sent.success !== true) {
@@ -79,6 +82,85 @@ export class Bridge {
       console.log('Push registration failed:', reason);
     }
     return sent;
+  }
+
+  get_room_keys_from_store() {
+    const rooms = useGlobalStore.getState().rooms;
+    return Object.values(rooms || {})
+      .map((room) => room?.roomKey)
+      .filter((roomKey) => typeof roomKey === 'string' && roomKey.length > 0);
+  }
+
+  get_pending_push_registrations(room_keys = []) {
+    const all_room_keys = [...new Set([...this.get_room_keys_from_store(), ...room_keys])];
+    const pending_room_keys = all_room_keys.filter((room_key) => !this.registeredRoomKeys.has(room_key));
+
+    return {
+      include_device_push: !this.basePushRegistered,
+      include_call_push: !this.callPushRegistered,
+      pending_room_keys,
+    };
+  }
+
+  mark_push_registrations_sent({
+    include_device_push,
+    include_call_push,
+    pending_room_keys,
+  }) {
+    if (include_device_push) this.basePushRegistered = true;
+    if (include_call_push) this.callPushRegistered = true;
+    pending_room_keys.forEach((room_key) => this.registeredRoomKeys.add(room_key));
+  }
+
+  async run_push_registration_sync(room_keys = []) {
+    const state = this.get_pending_push_registrations(room_keys);
+    const {
+      include_device_push,
+      include_call_push,
+      pending_room_keys,
+    } = state;
+
+    if (!include_device_push && !include_call_push && pending_room_keys.length === 0) {
+      return { success: true, skipped: true };
+    }
+
+    const push_registration_batch = await Wallet.encrypt_push_registration_batch({
+      includeDevicePush: include_device_push,
+      includeCallPush: include_call_push,
+      roomKeys: pending_room_keys,
+    });
+    if (!push_registration_batch) {
+      return { success: true, skipped: true };
+    }
+
+    const sent = await this.send_push_registration(push_registration_batch);
+    if (sent && sent.success === true) {
+      this.mark_push_registrations_sent(state);
+    }
+    return sent;
+  }
+
+  async sync_push_registrations(room_keys = []) {
+    if (!useGlobalStore.getState().huginNode.connected) {
+      return null;
+    }
+
+    if (this.pushRegistrationInFlight) {
+      this.pushRegistrationQueued = true;
+      return this.pushRegistrationInFlight;
+    }
+
+    this.pushRegistrationInFlight = this.run_push_registration_sync(room_keys);
+
+    try {
+      return await this.pushRegistrationInFlight;
+    } finally {
+      this.pushRegistrationInFlight = null;
+      if (this.pushRegistrationQueued) {
+        this.pushRegistrationQueued = false;
+        await this.sync_push_registrations();
+      }
+    }
   }
 
   async on_message(m) {
@@ -98,17 +180,7 @@ export class Bridge {
           break;
         case 'hugin-node-connected':
           useGlobalStore.getState().setHuginNode({connected: true});
-          if (this.sentpush) return;
-          const pushRegistration = await Wallet.encrypt_push_registration();
-          await this.sendPushRegistration(pushRegistration);
-          const callPushRegistration = await Wallet.encrypt_call_push_registration();
-          await this.sendPushRegistration(callPushRegistration);
-          this.sentpush = true;
-          const rooms = useGlobalStore.getState().rooms;
-          for (const room in rooms) {
-            const roomPushRegistration = await Wallet.encrypt_room_push_registration(rooms[room].roomKey);
-            await this.sendPushRegistration(roomPushRegistration);
-          }
+          await this.sync_push_registrations();
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')
@@ -119,6 +191,9 @@ export class Bridge {
           useGlobalStore.getState().setHuginNode({connected: true, address: json.address});
           break;
         case 'new-swarm':
+          if (!json.beam && typeof json.key === 'string' && json.key.length > 0) {
+            await this.sync_push_registrations([json.key]);
+          }
           break;
         case 'beam-message':
           MessageSync.check_for_pm(json.message, json.hash, json.background);

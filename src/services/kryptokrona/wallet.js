@@ -654,6 +654,51 @@ export class ActiveWallet {
     return payload_hex;
   }
 
+  async encrypt_push_registration_batch(options = {}) {
+    const config = Array.isArray(options)
+      ? {
+          includeDevicePush: true,
+          includeCallPush: true,
+          roomKeys: options,
+        }
+      : {
+          includeDevicePush: options.includeDevicePush !== false,
+          includeCallPush: options.includeCallPush !== false,
+          roomKeys: Array.isArray(options.roomKeys) ? options.roomKeys : [],
+        };
+    const registrations = [];
+
+    if (config.includeDevicePush) {
+      const deviceRegistration = await this.encrypt_push_registration();
+      if (typeof deviceRegistration === 'string' && deviceRegistration.length > 0) {
+        registrations.push(deviceRegistration);
+      }
+    }
+
+    if (config.includeCallPush) {
+      const callRegistration = await this.encrypt_call_push_registration();
+      if (typeof callRegistration === 'string' && callRegistration.length > 0) {
+        registrations.push(callRegistration);
+      }
+    }
+
+    const uniqueRoomKeys = [...new Set(
+      config.roomKeys.filter((roomKey) => typeof roomKey === 'string' && roomKey.length > 0),
+    )];
+    for (const roomKey of uniqueRoomKeys) {
+      const roomRegistration = await this.encrypt_room_push_registration(roomKey);
+      if (typeof roomRegistration === 'string' && roomRegistration.length > 0) {
+        registrations.push(roomRegistration);
+      }
+    }
+
+    if (registrations.length === 0) {
+      return null;
+    }
+
+    return JSON.stringify(registrations);
+  }
+
   async encrypt_call_push_registration() {
 
     let timestamp = Date.now();
