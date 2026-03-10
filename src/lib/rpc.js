@@ -33,8 +33,11 @@ export class Bridge {
     this.basePushRegistered = false;
     this.callPushRegistered = false;
     this.registeredRoomKeys = new Set();
+    this.pendingPushRoomKeys = new Set();
     this.pushRegistrationInFlight = null;
-    this.pushRegistrationQueued = false;
+    this.pushRegistrationTimer = null;
+    this.pushRegistrationDebouncePromise = null;
+    this.pushRegistrationDebounceMs = 750;
     this.rpc = new RPC(IPC, (req, error) => {
       const data = this.parse(b4a.toString(req.data));
       if (!data) {
@@ -112,6 +115,12 @@ export class Bridge {
     pending_room_keys.forEach((room_key) => this.registeredRoomKeys.add(room_key));
   }
 
+  collect_pending_push_room_keys(room_keys = []) {
+    room_keys
+      .filter((room_key) => typeof room_key === 'string' && room_key.length > 0)
+      .forEach((room_key) => this.pendingPushRoomKeys.add(room_key));
+  }
+
   async run_push_registration_sync(room_keys = []) {
     const state = this.get_pending_push_registrations(room_keys);
     const {
@@ -140,27 +149,48 @@ export class Bridge {
     return sent;
   }
 
+  async flush_push_registrations() {
+    const pending_room_keys = [...this.pendingPushRoomKeys];
+    this.pendingPushRoomKeys.clear();
+    return await this.run_push_registration_sync(pending_room_keys);
+  }
+
   async sync_push_registrations(room_keys = []) {
+    this.collect_pending_push_room_keys(room_keys);
+
     if (!useGlobalStore.getState().huginNode.connected) {
       return null;
     }
 
     if (this.pushRegistrationInFlight) {
-      this.pushRegistrationQueued = true;
       return this.pushRegistrationInFlight;
     }
 
-    this.pushRegistrationInFlight = this.run_push_registration_sync(room_keys);
-
-    try {
-      return await this.pushRegistrationInFlight;
-    } finally {
-      this.pushRegistrationInFlight = null;
-      if (this.pushRegistrationQueued) {
-        this.pushRegistrationQueued = false;
-        await this.sync_push_registrations();
-      }
+    if (this.pushRegistrationDebouncePromise) {
+      return this.pushRegistrationDebouncePromise;
     }
+
+    this.pushRegistrationDebouncePromise = new Promise((resolve, reject) => {
+      this.pushRegistrationTimer = setTimeout(async () => {
+        this.pushRegistrationTimer = null;
+        this.pushRegistrationDebouncePromise = null;
+        this.pushRegistrationInFlight = this.flush_push_registrations();
+
+        try {
+          const result = await this.pushRegistrationInFlight;
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        } finally {
+          this.pushRegistrationInFlight = null;
+          if (this.pendingPushRoomKeys.size > 0) {
+            await this.sync_push_registrations();
+          }
+        }
+      }, this.pushRegistrationDebounceMs);
+    });
+
+    return this.pushRegistrationDebouncePromise;
   }
 
   async on_message(m) {
