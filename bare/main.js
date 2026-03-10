@@ -63,7 +63,7 @@ const onrequest = async (p) => {
       const feed_message = await send_feed_message(p.message, p.reply, p.tip);
       return feed_message;
     case 'send_node_msg':
-      const sent = await Nodes.message(p.payload, p.hash, p.viewtag);
+      const sent = await Nodes.message(p.payload, p.hash, p.viewtag, p.kind);
       return {sent};
     case 'sync_from_node':
       const resp = await Nodes.sync(p.request)

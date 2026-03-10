@@ -488,7 +488,12 @@ export class ActiveWallet {
         return { success: false, error: 'not_connected', hash: '' };
       }
      try {
-      const sent = await Nodes.message(payload_hex, hash, await this.generate_view_tag(address, call));
+      const sent = await Nodes.message(
+        payload_hex,
+        hash,
+        await this.generate_view_tag(address, call),
+        call ? 'call' : 'dm',
+      );
       console.log('Sent!', sent);
       if (!sent?.success) {
         if (typeof sent.reason !== 'string') return;
@@ -548,7 +553,7 @@ export class ActiveWallet {
         return { success: false, error: 'not_connected', hash: '' };
       }
      try {
-      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address, true)), 10000);
+      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address, true), 'call'), 10000);
       console.log('Sent!', sent);
       if (!sent?.success) {
         if (typeof sent.reason !== 'string') return;

@@ -98,7 +98,7 @@ export class Swarm {
     let box = new NaclSealed.sealedbox(
       payload_json_decoded,
       nonceFromTimestamp(timestamp),
-      hexToUint('6e49ab1a59019b2c22eb27efc5664be419c9d3d58016319cd0915e0494de4071'),
+      hexToUint('6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345'),
     );
 
     console.log('🔑 Sealedbox encrypted..');
@@ -110,8 +110,12 @@ export class Swarm {
     };
     // Convert json to hex
     let payload_hex = toHex(JSON.stringify(payload_box));
-    const registration = await rpc.request({ type: 'push_registration', data: payload_hex });
-    const sent = registration && registration.sent;
+    const sent = await Nodes.message(
+      payload_hex,
+      message.hash,
+      await Wallet.generate_room_view_tag(message.g),
+      'room',
+    );
     if (!sent || sent.success !== true) {
       const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
       console.log('❌ Push registration failed:', reason);
@@ -253,8 +257,8 @@ class NodeConnection {
     this.address = null
   }
 
- async message(payload, hash, viewtag) {
-  const data = { type: 'send_node_msg', payload, hash, viewtag };
+ async message(payload, hash, viewtag, kind = 'dm') {
+  const data = { type: 'send_node_msg', payload, hash, viewtag, kind };
   const {sent} = await rpc.request(data);
   return sent
  }

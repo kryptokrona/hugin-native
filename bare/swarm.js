@@ -664,7 +664,7 @@ async send_pow_packet({
   }
 }
 
-async message(payload, hash, viewtag) {
+async message(payload, hash, viewtag, kind = 'dm') {
   const request_id = Date.now();
   const baseMessage = {
     cipher: payload,
@@ -673,12 +673,13 @@ async message(payload, hash, viewtag) {
     id: request_id,
     push: true,
     viewtag,
+    kind,
   };
 
   return await this.send_pow_packet({
     request_id,
     message_hash: hash,
-    auth_context: String(baseMessage.cipher || ''),
+    auth_context: kind ? `${kind}:${String(baseMessage.cipher || '')}` : String(baseMessage.cipher || ''),
     log_prefix: 'pow_message',
     exception_reason: 'message_exception',
     build_payload: (pow) => ({
