@@ -61,6 +61,10 @@ const POW_MAX_JOB_TIME_MS = 90000;
 const POW_REQUIRED_SHARES = 1;
 let active_pow_tasks = 0;
 
+const is_timeout_error = (error) => {
+  return error?.code === 'ETIMEDOUT' || error?.message === 'Connection timed out';
+};
+
 function pow_rate_policy(active_tasks, elapsed_ms) {
   const in_phase1 = elapsed_ms < POW_PHASE1_MS;
   const per_task_budget = Math.max(
@@ -247,8 +251,12 @@ async listen() {
     this.connection = conn
     Hugin.send('hugin-node-connected', {})
     this.start_job_polling();
-    conn.on('error', () => {
-    console.log("Got error connection signal")
+    conn.on('error', (error) => {
+    if (is_timeout_error(error)) {
+      console.log('Node connection timed out, reconnecting');
+    } else {
+      console.log("Got error connection signal", error)
+    }
         conn.end();
         conn.destroy();
         this.connection = null
@@ -763,14 +771,19 @@ class Room {
       return;
     }
     this.swarm.on('connection', (connection, information) => {
-      new_connection(
-        connection,
-        topic,
-        this.key,
-        dht_keys,
-        information,
-        this.beam,
-      );
+      try {
+        new_connection(
+          connection,
+          topic,
+          this.key,
+          dht_keys,
+          information,
+          this.beam,
+        );
+      } catch (error) {
+        console.log('Failed to initialize swarm connection', error);
+        connection_closed(connection, topic, 'Swarm on connection init error');
+      }
     });
 
     this.discovery = this.swarm.join(hash, { client: true, server: true });
@@ -898,9 +911,17 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
     request: true,
     publicKey: peer.publicKey.toString('hex'),
   });
-  send_joined_message(topic, dht_keys, connection);
+  send_joined_message(topic, dht_keys, connection).catch((error) => {
+    console.log('Failed to send joined message', error);
+    connection_closed(connection, topic, 'Joined message error');
+  });
   connection.on('data', async (data) => {
-    incoming_message(data, topic, connection, peer, beam);
+    try {
+      await incoming_message(data, topic, connection, peer, beam);
+    } catch (error) {
+      console.log('Incoming message handler failed', error);
+      connection_closed(connection, topic, 'Incoming message error');
+    }
   });
 
   connection.on('close', () => {
@@ -909,8 +930,12 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
   });
 
   connection.on('error', (e) => {
-    console.log('Got error connection signal', e);
-    // connection_closed(connection, topic, 'Connection on error');
+    if (is_timeout_error(e)) {
+      console.log('Connection timed out, closing peer connection');
+    } else {
+      console.log('Got error connection signal', e);
+    }
+    connection_closed(connection, topic, 'Connection on error');
   });
 };
 
@@ -991,7 +1016,11 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     messages
   });
 
-  connection.write(data);
+  try {
+    connection.write(data);
+  } catch (error) {
+    console.log('Failed to write joined message', error);
+  }
 };
 
 const send_swarm_message = (message, topic) => {
