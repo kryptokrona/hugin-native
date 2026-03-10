@@ -1026,13 +1026,8 @@ const send_joined_message = async (topic, dht_keys, connection) => {
 
   try {
     connection.write(data);
-<<<<<<< HEAD
   } catch (error) {
     console.log('Failed to write joined message', error);
-=======
-  } catch (e) {
-    console.error('Error writing to connection:', e);
->>>>>>> e9e2c3b6d5a5d339e539a01f52b8c847bcef5bdb
   }
 };
 
