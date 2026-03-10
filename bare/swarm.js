@@ -361,7 +361,11 @@ sync(data) {
   return new Promise((resolve, reject) => {
     data.id = data.timestamp
     this.requests.set(data.id, { resolve, reject });
-    this.connection.write(JSON.stringify(data));
+    try {
+      this.connection.write(JSON.stringify(data));
+    } catch (e) {
+      console.error('Error writing to connection:', e);
+    }
   });
 }
 
@@ -396,10 +400,14 @@ async request_job() {
   return new Promise((resolve, reject) => {
     const id = random_key().toString('hex');
     this.requests.set(id, { resolve, reject });
-    this.connection.write(JSON.stringify({
-      type: 'job_request',
-      id,
-    }));
+    try {
+      this.connection.write(JSON.stringify({
+        type: 'job_request',
+        id,
+      }));
+    } catch (e) {
+      console.error('Error writing to connection:', e);
+    }
     logPow('job_request', { id });
     setTimeout(() => {
       if (this.requests.has(id)) {
@@ -787,7 +795,7 @@ async function idle(background, force) {
       room.swarm.suspend();
     }
     Nodes.close();
-    Nodes.node.suspend();
+    Nodes.node?.suspend();
     return;
   }
   if (Hugin.idle() && background) {
@@ -800,7 +808,7 @@ async function idle(background, force) {
         room.swarm.suspend();
       }  
       Nodes.close();
-      Nodes.node.suspend();
+      Nodes.node?.suspend();
       idletimer = null;
     }, 10*1000)
     return;
@@ -818,7 +826,7 @@ async function idle(background, force) {
       await room.swarm.resume();
       room.discovery.refresh({client: true, server: true});
     }  
-    Nodes.node.resume();
+    Nodes.node?.resume();
     Nodes.reconnect();
   };
 }
@@ -991,7 +999,11 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     messages
   });
 
-  connection.write(data);
+  try {
+    connection.write(data);
+  } catch (e) {
+    console.error('Error writing to connection:', e);
+  }
 };
 
 const send_swarm_message = (message, topic) => {
@@ -1866,7 +1878,11 @@ const send_peer_message = (address, topic, message) => {
     errorMessage('Connection is closed');
     return;
   }
-  con.connection.write(JSON.stringify(message));
+  try {
+    con.connection.write(JSON.stringify(message));
+  } catch (e) {
+    console.error('Error writing to connection:', e);
+  }
 };
 
 const ban_connection = (conn, topic) => {
@@ -1986,7 +2002,11 @@ const send_feed_message = async (message, reply, tip) => {
   const payload = {type: 'feed', message, nickname: Hugin.name, address: Hugin.address, reply, tip, hash, timestamp: Date.now(), signature};
   for (const swarm of active_swarms) {
     for (const peer of swarm.connections) {
-      peer.connection.write(JSON.stringify(payload))
+      try {
+        peer.connection.write(JSON.stringify(payload));
+      } catch (e) {
+        console.error('Error writing to connection:', e);
+      }
     }
   }
   return payload;
@@ -2044,7 +2064,11 @@ const check_if_online = async (topic) => {
         if (i > 4) {
           if (i % 2 === 0) data.hashes = [];
         }
-        conn.connection.write(JSON.stringify(data));
+        try {
+          conn.connection.write(JSON.stringify(data));
+        } catch (e) {
+          console.error('Error writing to connection:', e);
+        }
         i++;
       }
     }
@@ -2055,7 +2079,11 @@ const admin_ban_user = async (address, key) => {
   const active = get_active(key);
   if (!active) return;
   active.connections.forEach((chat) => {
-    chat.connection.write(JSON.stringify({ type: 'ban', address }));
+    try {
+      chat.connection.write(JSON.stringify({ type: 'ban', address }));
+    } catch (e) {
+      console.error('Error writing to connection:', e);
+    }
   });
   await sleep(200);
   ban_user(address, active.topic);
