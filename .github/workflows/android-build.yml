@@ -38,10 +38,7 @@ jobs:
           npm install
 
       - name: 🐛 Debug check packages
-        run: npm ls simdle-native
-        
-      - name: 🐛 Debug check packages 2
-        run: npm ls sodium-native
+        run: npm ls
         
       - name: 🩹 Patch NPM packages
         run: npm run patch
