@@ -29,7 +29,7 @@ import { Rooms } from 'lib/native';
 
 import {
   CustomIcon,
-  GroupMessageItem,
+  MessageItem,
   MessageInput,
   ScreenLayout,
   FullScreenImageViewer,
@@ -527,7 +527,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           <TextField size="xsmall">-- New messages below --</TextField>
         </View>
       )}
-              <GroupMessageItem
+              <MessageItem
                 message={item.message}
                 timestamp={item.timestamp}
                 nickname={item.nickname}

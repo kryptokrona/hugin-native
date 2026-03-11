@@ -17,7 +17,7 @@ import { t } from 'i18next';
 import Toast from 'react-native-toast-message';
 
 import {
-  GroupMessageItem,
+  MessageItem,
   MessageInput,
   ScreenLayout,
   FullScreenImageViewer,
@@ -541,7 +541,7 @@ useEffect(() => {
             previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && item.tip != false;
       
           const messageContent = (
-            <GroupMessageItem
+            <MessageItem
               dm={true}
               message={item.message}
               timestamp={item.timestamp}
