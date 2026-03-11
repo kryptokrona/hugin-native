@@ -2,6 +2,8 @@ const Corestore = require('corestore');
 const Hyperdrive = require('hyperdrive');
 const fs = require('bare-fs');
 const HyperSwarm = require('hyperswarm-hugin');
+const process = require('bare-process');
+
 const MEDIA_TYPES = [
   { file: '.png', type: 'image' },
   { file: '.jpg', type: 'image' },

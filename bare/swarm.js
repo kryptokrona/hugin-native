@@ -31,6 +31,17 @@ const {
 } = require('./beam');
 const { Storage } = require('./storage.js');
 
+const process = require('bare-process');
+
+process.on('uncaughtException', (err) => {
+  console.log('Caught an unhandled exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+
 const LOCAL_VOICE_STATUS_OFFLINE = {
   voice: false,
   video: false,
@@ -238,13 +249,13 @@ async listen() {
     this.node_connection(conn)
   })
 
-  // process.once('SIGINT', function () {
-  //   this.node.on('close', function () {
-  //       process.exit();
-  //   });
-  //   this.node.destroy();
-  //   setTimeout(() => process.exit(), 2000);
-  // });
+  process.once('SIGINT', function () {
+    this.node.on('close', function () {
+        process.exit();
+    });
+    this.node.destroy();
+    setTimeout(() => process.exit(), 2000);
+  });
 
   }
   async node_connection(conn) {
@@ -885,13 +896,13 @@ const create_swarm = async (hashkey, key, beam = false, chat = false) => {
 
   check_if_online(room.topic);
 
-  // process.once('SIGINT', function () {
-  //   room.swarm.on('close', function () {
-  //     process.exit();
-  //   });
-  //   room.swarm.destroy();
-  //   setTimeout(() => process.exit(), 2000);
-  // });
+  process.once('SIGINT', function () {
+    room.swarm.on('close', function () {
+      process.exit();
+    });
+    room.swarm.destroy();
+    setTimeout(() => process.exit(), 2000);
+  });
 
   return room.topic;
 };
@@ -925,6 +936,7 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
   });
   connection.on('data', async (data) => {
     try {
+      console.log('Incoming message', data, beam);
       await incoming_message(data, topic, connection, peer, beam);
     } catch (error) {
       console.log('Incoming message handler failed', error);
@@ -1056,9 +1068,7 @@ const send_swarm_message = (message, topic) => {
 const incoming_message = async (data, topic, connection, peer, beam) => {
   last_activity = Date.now();
   const str = data.toString();
-  if (str === 'Ping') {
-    return;
-  }
+  
   // Check
   const check = await check_data_message(str, connection, topic, peer, beam);
   if (check === 'Ban') {
@@ -1069,15 +1079,15 @@ const incoming_message = async (data, topic, connection, peer, beam) => {
   }
   if (check === 'Error') {
     // connection_closed(connection, topic, 'Connection Error check');
-    return;
-  }
-  if (check) {
-    peer.priority = 3;
+    console.log('Incoming message error', data, topic, beam);
     return;
   }
 
+  if (check) return;
+
   if (beam) {
     const hash = str.substring(0, 64);
+    console.log('beam-message fired 🔥🔥 🔥')
     Hugin.send('beam-message', { message: str, hash, background: Hugin.background });
     return;
   }
@@ -1210,6 +1220,8 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       });
 
       if (!verified) return 'Ban';
+
+      peer.priority = 3;
 
       con.joined = true;
       con.address = joined.address;
@@ -1385,6 +1397,8 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
   }
   //Dont display messages from blocked users
   if (Hugin.blocked(con.address)) return;
+
+  if (data.type === PING_SYNC) return true;
 
   return false;
 };
