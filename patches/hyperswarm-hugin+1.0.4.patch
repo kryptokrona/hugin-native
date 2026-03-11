@@ -1,0 +1,29 @@
+diff --git a/node_modules/hyperswarm-hugin/lib/peer-info.js b/node_modules/hyperswarm-hugin/lib/peer-info.js
+index a4a301f..127e2d3 100644
+--- a/node_modules/hyperswarm-hugin/lib/peer-info.js
++++ b/node_modules/hyperswarm-hugin/lib/peer-info.js
+@@ -33,7 +33,7 @@ module.exports = class PeerInfo extends EventEmitter {
+     this.topics = [] // TODO: remove on next major (check with mafintosh for context)
+ 
+     this.attempts = 0
+-    this.priority = NORMAL_PRIORITY
++    this._priority = NORMAL_PRIORITY
+ 
+     // Used by shuffled-priority-queue
+     this._index = 0
+@@ -45,6 +45,15 @@ module.exports = class PeerInfo extends EventEmitter {
+     this._seenTopics = new Set()
+   }
+ 
++  get priority() {
++    return this._priority;
++  }
++
++  set priority(val) {
++    if (this.queued) return;
++    this._priority = val;
++  }
++
+   get server() {
+     return !this.client
+   }
