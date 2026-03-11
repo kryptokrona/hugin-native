@@ -78,6 +78,7 @@ export class Bridge {
   }
 
   async send_push_registration(data) {
+    await sleep(5000);
     const res = await this.request({ type: 'push_registration', data });
     const sent = res && res.sent;
     if (!sent || sent.success !== true) {
