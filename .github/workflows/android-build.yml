@@ -17,7 +17,7 @@ jobs:
       - name: 🟢 Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Force Android linker flags
         run: |
@@ -38,10 +38,7 @@ jobs:
           npm install
 
       - name: 🐛 Debug check packages
-        run: npm ls simdle-native
-        
-      - name: 🐛 Debug check packages 2
-        run: npm ls sodium-native
+        run: npm ls
         
       - name: 🩹 Patch NPM packages
         run: npm run patch
