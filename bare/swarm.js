@@ -278,6 +278,13 @@ async listen() {
     const string = d.toString()
     const data = this.parse(string)
     if (!data) return
+      if (data.type === 'new-message' && Array.isArray(data.messages)) {
+        Hugin.send('pool-messages', {
+          messages: data.messages,
+          background: Hugin.background,
+        })
+        return
+      }
       if ('address' in data) {
         if (typeof data.address !== 'string') return
         if (data.address?.length !== 99) return

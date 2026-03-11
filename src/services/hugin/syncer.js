@@ -26,6 +26,9 @@ class Syncer {
     this.keys = {};
     this.known_keys = [];
     this.sync_interval = null;
+    this.startup_sync_runs = 0;
+    this.max_startup_sync_runs = 10;
+    this.sync_stopped = false;
   }
 
   async init(node, known, keys) {
@@ -33,6 +36,8 @@ class Syncer {
     this.lastChecked = 0;
     this.keys = keys;
     this.known_keys = known;
+    this.startup_sync_runs = 0;
+    this.sync_stopped = false;
     await this.start();
   }
 
@@ -43,12 +48,32 @@ class Syncer {
     this.incoming_messages = [];
     this.keys = {};
     this.known_keys = [];
+    this.startup_sync_runs = 0;
+    this.sync_stopped = false;
+    if (this.sync_interval) {
+      clearInterval(this.sync_interval);
+      this.sync_interval = null;
+    }
   }
 
   async start() {
+    if (this.sync_interval) {
+      clearInterval(this.sync_interval);
+      this.sync_interval = null;
+    }
     this.sync_interval = setInterval(async () => {
       await this.sync();
     }, 3000);
+  }
+
+  stop_sync() {
+    if (this.sync_stopped) return;
+    this.sync_stopped = true;
+    if (this.sync_interval) {
+      clearInterval(this.sync_interval);
+      this.sync_interval = null;
+    }
+    console.log('Startup message sync finished, relying on node push updates.');
   }
 
   set_node(node) {
@@ -77,11 +102,21 @@ class Syncer {
   }
 
   async sync() {
+    if (this.sync_stopped) return;
+    if (this.startup_sync_runs >= this.max_startup_sync_runs) {
+      this.stop_sync();
+      return;
+    }
+    this.startup_sync_runs += 1;
     const incoming = this.incoming_messages.length > 0 ? true : false;
     //First start, set known pool txs
-    const {resp, background} = await this.fetch();
+    const fetched = await this.fetch();
+    if (!fetched && !incoming) {
+      if (this.startup_sync_runs >= this.max_startup_sync_runs) this.stop_sync();
+      return;
+    }
+    const {resp = [], background} = fetched || {};
     const transactions = resp;
-    if (!transactions && !incoming) return;
     const large_batch = transactions.length > 299 ? true : false;
 
     if (large_batch || (large_batch && incoming)) {
@@ -107,6 +142,7 @@ class Syncer {
     // if (transactions.length < 5) Hugin.send('incoming-que', false);
     console.log('Incoming transactions', transactions.length);
     this.decrypt(transactions, false, background);
+    if (this.startup_sync_runs >= this.max_startup_sync_runs) this.stop_sync();
   }
 
   async decrypt(list, que = false, background) {

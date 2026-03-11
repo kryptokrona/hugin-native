@@ -229,6 +229,11 @@ export class Bridge {
         case 'beam-message':
           MessageSync.check_for_pm(json.message, json.hash, json.background);
           break;
+        case 'pool-messages':
+          if (Array.isArray(json.messages) && json.messages.length > 0) {
+            await MessageSync.decrypt(json.messages, false, json.background);
+          }
+          break;
         case 'beam-connected':
           //Change state to -> "connected"
           break;
