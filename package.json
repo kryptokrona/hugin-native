@@ -106,7 +106,7 @@
     "react-native-push-notification": "^8.1.1",
     "react-native-qrcode-svg": "^6.3.14",
     "react-native-randombytes": "^3.0.0",
-    "react-native-reanimated": "^4.0.2",
+    "react-native-reanimated": "4.0.2",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "^4.10.0",
     "react-native-sqlite-storage": "^6.0.1",
