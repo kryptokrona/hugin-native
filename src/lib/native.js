@@ -49,13 +49,14 @@ export class Swarm {
 
     const sent_message = await rpc.request(data);
 
-    this.send_room_message_push(sent_message);
+    const sent_node = await this.send_room_message_push(sent_message);
 
-    return sent_message;
+
+    return {sent_message, sent_node};
   }
 
   async send_room_message_push(message) {
-
+    let sent;
     try {
     const roomKey = message.g.substring(0,64);
     const secretKey = keychain.getNaclKeys(roomKey).secretKey;
@@ -98,7 +99,7 @@ export class Swarm {
     let box = new NaclSealed.sealedbox(
       payload_json_decoded,
       nonceFromTimestamp(timestamp),
-      hexToUint('6e49ab1a59019b2c22eb27efc5664be419c9d3d58016319cd0915e0494de4071'),
+      hexToUint('6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345'),
     );
 
     console.log('🔑 Sealedbox encrypted..');
@@ -110,12 +111,33 @@ export class Swarm {
     };
     // Convert json to hex
     let payload_hex = toHex(JSON.stringify(payload_box));
-    rpc.send({type: 'push_registration', data: payload_hex});
+
+    console.log("Sending to node", payload_hex);
+    sent = await Nodes.message(
+      payload_hex,
+      message.hash,
+      await Wallet.generate_room_view_tag(message.g),
+      'room',
+    );
+
+    console.log("Sent to node", sent);
+
+    if (sent.success === true) return sent;
+
+    if (!sent || sent.success !== true) {
+      const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
+      console.log('❌ Push registration failed:', reason);
+    }
 
 
     } catch (e) {
       console.log('❌ Error sending push:', e)
     }
+
+    console.log("Returning", sent);
+
+    return sent || { success: false };
+
   }
 
   async feed_message(message, reply, tip) {
@@ -248,8 +270,8 @@ class NodeConnection {
     this.address = null
   }
 
- async message(payload, hash, viewtag) {
-  const data = { type: 'send_node_msg', payload, hash, viewtag };
+ async message(payload, hash, viewtag, kind = 'dm') {
+  const data = { type: 'send_node_msg', payload, hash, viewtag, kind };
   const {sent} = await rpc.request(data);
   return sent
  }

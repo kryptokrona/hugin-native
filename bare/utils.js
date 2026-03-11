@@ -1,7 +1,89 @@
-const DHT = require('hyperdht');
-const Keychain = require('keypear');
+const DHT = require('hyperdht-hugin');
 const sodium = require('sodium-native');
 const b4a = require('b4a');
+const { getNonceOffset } = require('./pow-utils');
+
+class Keychain {
+  constructor(key_pair) {
+    const kp = normalize_keypair(key_pair);
+    this.publicKey = kp.publicKey;
+    this.secretKey = kp.secretKey;
+    this.scalar = kp.scalar || (kp.secretKey ? secret_key_to_scalar(kp.secretKey) : null);
+  }
+
+  get isKeychain() {
+    return true;
+  }
+
+  get() {
+    return create_signer({
+      publicKey: this.publicKey,
+      secretKey: this.secretKey,
+      scalar: this.scalar
+    });
+  }
+
+  static from(k) {
+    return this.isKeychain(k) ? k : new this(k);
+  }
+
+  static verify(signable, signature, publicKey) {
+    return sodium.crypto_sign_verify_detached(signature, signable, publicKey);
+  }
+
+  static isKeychain(k) {
+    return !!(k && k.isKeychain);
+  }
+}
+
+function normalize_keypair(key_pair) {
+  if (b4a.isBuffer(key_pair) || key_pair instanceof Uint8Array) {
+    const publicKey = b4a.from(key_pair);
+    return { publicKey, secretKey: null, scalar: null };
+  }
+
+  if (!key_pair || typeof key_pair !== 'object') {
+    return { publicKey: null, secretKey: null, scalar: null };
+  }
+
+  const publicKey = key_pair.publicKey ? b4a.from(key_pair.publicKey) : null;
+  const secretKey = key_pair.secretKey ? b4a.from(key_pair.secretKey) : null;
+  const scalar = key_pair.scalar ? b4a.from(key_pair.scalar) : null;
+
+  return { publicKey, secretKey, scalar };
+}
+
+function secret_key_to_scalar(secret_key) {
+  const scalar = b4a.alloc(32);
+  sodium.extension_tweak_ed25519_sk_to_scalar(scalar, secret_key);
+  return scalar;
+}
+
+function create_signer(kp) {
+  const verify = (signable, signature) =>
+    sodium.crypto_sign_verify_detached(signature, signable, kp.publicKey);
+
+  const signer = {
+    publicKey: kp.publicKey,
+    secretKey: kp.secretKey || null,
+    scalar: kp.scalar || null,
+    writable: !!kp.scalar,
+    sign: null,
+    verify
+  };
+
+  if (!kp.scalar) return signer;
+
+  signer.sign = (signable) => {
+    const sig = b4a.alloc(sodium.crypto_sign_BYTES);
+    sodium.extension_tweak_ed25519_sign_detached(sig, signable, kp.scalar);
+    return sig;
+  };
+
+  return signer;
+}
+
+
 const { Hugin } = require('./account');
 //const nacl = require('tweetnacl');
 
@@ -55,9 +137,7 @@ function get_new_peer_keys(key) {
 
 function random_key() {
   let key = Buffer.alloc(32);
-
   sodium.randombytes_buf(key);
-
   return key;
 }
 
@@ -84,6 +164,44 @@ async function sign(message, signkey = false) {
 function check_hash(hash) {
   if (typeof hash !== 'string' || hash.length !== 64) return false;
   return true;
+}
+
+const pow_config = {
+  DEBUG: true,
+  MAX_BLOB_HEX_BYTES: 1024,
+};
+
+const logPow = (...args) => {
+  if (pow_config.DEBUG) {
+    console.log('[pow]', ...args);
+  }
+};
+
+function is_hex_string(value) {
+  return typeof value === 'string' && /^[0-9a-f]+$/i.test(value);
+}
+
+function validate_pow_job(job) {
+  if (!job || typeof job !== 'object') return { ok: false, reason: 'invalid_job' };
+  if (typeof job.job_id !== 'string' || job.job_id.length > 32) {
+    return { ok: false, reason: 'invalid_job_id' };
+  }
+  if (!is_hex_string(job.blob)) return { ok: false, reason: 'invalid_blob' };
+  if (job.blob.length % 2 !== 0) return { ok: false, reason: 'invalid_blob_len' };
+  if ((job.blob.length / 2) > pow_config.MAX_BLOB_HEX_BYTES) {
+    return { ok: false, reason: 'blob_too_large' };
+  }
+  if (!is_hex_string(job.target) || job.target.length !== 8) {
+    return { ok: false, reason: 'invalid_target' };
+  }
+  const offset = getNonceOffset(job.blob);
+  if (typeof offset !== 'number' || offset < 0) {
+    return { ok: false, reason: 'invalid_nonce_offset' };
+  }
+  if ((offset + 4) * 2 > job.blob.length) {
+    return { ok: false, reason: 'nonce_out_of_bounds' };
+  }
+  return { ok: true };
 }
 
 const sanitize_join_swarm_data = (data) => {
@@ -398,5 +516,7 @@ module.exports = {
   create_room_invite,
   sanitize_typing_message,
   encrypt_sealed_box,
-  decrypt_sealed_box
+  decrypt_sealed_box,
+  logPow,
+  validate_pow_job
 };

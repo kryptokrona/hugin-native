@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import {
   AppState,
@@ -80,7 +80,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const authMethod = usePreferencesStore(
       (state) => state.preferences.authMethod,
     );
-  let frontendStarted = false;
+  const frontendStartedRef = useRef(false);
+  const initInProgressRef = useRef(false);
 
 
   useEffect(() => {
@@ -90,71 +91,20 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }, [preferences]);
 
   async function init() {
-    /// Activate this if we want to run foreground task running on Android
-    /// It drains alot of battery but some users might want it.
 
-    // if (Platform.OS === 'android') {
-    //   const err = await Foreground.init();
-    //   if (err) {
-    //     return;
-    //   }
+        // if (started) {
+      await initFrontend();
     // }
-    initFrontend();
-    
-    if (started) {
+
+    if (initInProgressRef.current || 1 == 1) {
       return;
     }
-    if (1==1) return;
-
-    await Rooms.start();
-    useGlobalStore.getState().setLoadingStatus('Initializing database...');
-    await initDB();
-    await Background.init();
-
-    const node = preferences?.node
-      ? {
-          port: parseInt(preferences.node.split(':')[1]),
-          url: preferences.node.split(':')[0],
-        }
-      : { port: 80, url: 'node.xkr.network' };
-
-    Connection.listen();
-    useGlobalStore.getState().setLoadingStatus('Initializing wallet...');
-    await Wallet.init(node);
-    const huginAddress = Wallet.address + keychain.getMsgKey();
-    console.log('huginAddress', huginAddress);
-
-    const files = Files.all().map((a) => {
-      return a.hash;
-    });
-
-    updateUser({
-      files,
-      huginAddress,
-    });
-
-    useGlobalStore.getState().setLoadingStatus('Syncing contacts...');
-    const contacts = await getContacts();
-    const knownKeys = contacts.map((contact) => contact.messagekey);
-    const keys = Wallet.privateKeys();
-    MessageSync.init(node, knownKeys, keys);
-
-    Rooms.init(user);
-    Rooms.join();
-    Beam.join();
-    useGlobalStore.getState().setLoadingStatus('Connecting to node...');
-    Nodes.connect('', true)
-    console.log('📱 App started!, changing state..')
-    useGlobalStore.getState().setStarted(true);
-    console.log('📱 App started state:', started)
-    console.log('📱 App started state lonk:', useGlobalStore.getState().started);
-    initFrontend();
 
   }
 
   async function initFrontend() {
-    console.log('Initing front end..', frontendStarted)
-    if (frontendStarted) return;
+    console.log('Initing front end..', frontendStartedRef.current)
+    if (frontendStartedRef.current) return;
     console.log('Setting latest room messages..')
     await setLatestRoomMessages(false);
     console.log('Setting latest messages..')
@@ -173,7 +123,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     // Start the interval
     setInterval(updateFiatPrice, 60000);
-    frontendStarted = true;
+    frontendStartedRef.current = true;
 
     const contacts = await getContacts();
     const knownKeys = contacts.map((contact) => contact.messagekey);

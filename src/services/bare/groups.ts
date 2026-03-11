@@ -8,6 +8,7 @@ import type {
   Message,
   SelectedFile,
   TipType,
+  MessageStatus,
 } from '@/types';
 import { containsOnlyEmojis } from '@/utils';
 
@@ -188,6 +189,7 @@ export const saveRoomMessageAndUpdate = async (
   file?: FileInfo | undefined,
   tip?: TipType | undefined,
   background?: boolean | undefined,
+  status: MessageStatus = 'success'
 ) => {
   let isFile = false;
   if (typeof file === 'object') {
@@ -205,6 +207,7 @@ export const saveRoomMessageAndUpdate = async (
     hash,
     sent,
     tip,
+    status
   );
 
   if ((newMessage && !history) || (newMessage && history && background)) {

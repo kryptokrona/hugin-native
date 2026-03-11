@@ -5,16 +5,18 @@ import { Wallet } from './kryptokrona';
 import { Notify } from './utils';
 import { Platform } from 'react-native';
 import RNFS from 'react-native-fs';
+import { Connection } from './bare/globals';
 
 export async function init() {
 
-  if (useGlobalStore.getState().started === true) return;
+  if (useGlobalStore.getState().started === true) {
+    Rooms.idle(false, false);
+    return;
+  };
 
   console.log('☎️ Initing stuff in the background..')
   
     await Rooms.start();
-  
-    Rooms.idle(false, false);
     
     console.log('☎️ Rooms started..')
 
@@ -22,7 +24,7 @@ export async function init() {
 
     console.log('☎️ Inited db')
 
-    usePreferencesStore.persist.rehydrate();
+    await usePreferencesStore.persist.rehydrate();
     const preferences = usePreferencesStore.getState().preferences;
 
     const node = preferences?.node
@@ -46,14 +48,18 @@ export async function init() {
       Rooms.join();
       Beam.join();
 
-      const huginNode = preferences.huginNodeMode === 'manual' ? preferences.huginNode : '';
-      const useAuto = preferences.huginNodeMode !== 'manual';
+      const huginNode = preferences?.huginNodeMode === 'manual' ? (preferences?.huginNode || '') : '';
+      const useAuto = preferences?.huginNodeMode !== 'manual';
       console.log('☎️ Connecting to hugin node..', huginNode, useAuto);
       Nodes.connect(huginNode, useAuto);
+
+      Connection.listen();
 
       Notify.setup();
       useGlobalStore.getState().setStarted(true);
       return;
     }
 
-init();
+init().catch((e) => {
+  console.error('☎️ Background init failed:', e);
+});

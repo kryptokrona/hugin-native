@@ -8,15 +8,21 @@ Pod::Spec.new do |s|
     s.author       = { 'The Kryptokrona Developers' => 'info@kryptokrona.se' }
     s.source       = { git: 'https://github.com/kryptokrona/hugin-native.git' }
     s.platform     = :ios, '14.0'
-    s.source_files = '*.{mm,h,cpp}'
+    s.source_files = '*.{mm,h,cpp,c}'
     s.requires_arc = true
     s.dependency 'React-Core'
     s.frameworks = 'Foundation'
     s.pod_target_xcconfig = {
         'CLANG_CXX_LANGUAGE_STANDARD' => 'c++17',
         'CLANG_CXX_LIBRARY' => 'libc++',
-        'OTHER_CFLAGS' => '-fobjc-arc',
+        'GCC_C_LANGUAGE_STANDARD' => 'c11',
+        # -fno-strict-aliasing: CryptoNight slow-hash uses U64() macro to type-pun
+        # uint8_t* as uint64_t*, which is UB under strict aliasing.
+        # -DFORCE_USE_HEAP: CryptoNight allocates a 256KB scratchpad; using a VLA
+        # on the stack can silently corrupt memory on threads with limited stack.
+        'OTHER_CFLAGS' => '$(inherited) -fno-strict-aliasing -DFORCE_USE_HEAP',
+        'OTHER_CFLAGS[sdk=iphonesimulator*]' => '$(inherited) -fno-strict-aliasing -DFORCE_USE_HEAP -DNO_AES',
+        'OTHER_CPLUSPLUSFLAGS' => '-std=c++17 -fno-strict-aliasing',
         'OTHER_LDFLAGS' => '-ObjC'
       }
-      s.compiler_flags = '-std=c++17'
   end

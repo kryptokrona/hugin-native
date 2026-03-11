@@ -1,0 +1,58 @@
+diff --git a/node_modules/kryptokrona-crypto/dist/index.js b/node_modules/kryptokrona-crypto/dist/index.js
+index 951645c..e0aae0e 100644
+--- a/node_modules/kryptokrona-crypto/dist/index.js
++++ b/node_modules/kryptokrona-crypto/dist/index.js
+@@ -1271,21 +1271,8 @@ exports.Crypto = Crypto;
+  * @ignore
+  */
+ function initialize() {
+-    if (moduleVars.crypto === null) {
+-        if (loadNativeAddon()) {
+-            return true;
+-        }
+-        if (loadBrowserWASM()) {
+-            return true;
+-        }
+-        if (loadWASMJS()) {
+-            return true;
+-        }
+-        return loadNativeJS();
+-    }
+-    else {
+-        return true;
+-    }
++    loadNativeJS();
++    return true
+ }
+ /**
+  * @ignore
+@@ -1413,13 +1400,14 @@ function loadNativeAddon() {
+  */
+ function loadNativeJS() {
+     try {
+-        const Self = require('./turtlecoin-crypto.js')();
+-        if (Object.getOwnPropertyNames(Self).length === 0 ||
+-            typeof Self.cn_fast_hash === 'undefined') {
+-            return false;
+-        }
++        // const Self = require('./turtlecoin-crypto.js')();
++        // if (Object.getOwnPropertyNames(Self).length === 0 ||
++        //     typeof Self.cn_fast_hash === 'undefined') {
++        //     return false;
++        // }
++        const Self = {}
+         moduleVars.crypto = Self;
+-        moduleVars.type = Interfaces_1.CryptoType.JS;
++        moduleVars.type = Interfaces_1.CryptoType.EXTERNAL;
+         return true;
+     }
+     catch (e) {
+@@ -1434,7 +1422,7 @@ function loadWASMJS() {
+         return false;
+     }
+     try {
+-        const Self = require('./turtlecoin-crypto-wasm.js')();
++        // const Self = require('./turtlecoin-crypto-wasm.js')();
+         if (Object.getOwnPropertyNames(Self).length === 0) {
+             return false;
+         }

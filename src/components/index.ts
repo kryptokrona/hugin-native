@@ -8,7 +8,7 @@ export * from './feed-message-item';
 export * from './full-screen-image';
 export * from './full-screen-video';
 export * from './group-invite';
-export * from './group-message-item';
+
 export * from './group-online-indicator';
 export * from './loading-bar';
 export * from './message-input';

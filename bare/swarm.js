@@ -16,7 +16,12 @@ const {
   sign,
   sleep,
   sanitize_typing_message,
+  logPow,
+  validate_pow_job,
 } = require('./utils');
+const {
+  extractPrevIdFromBlob,
+} = require('./pow-utils');
 const {
   send_file,
   start_download,
@@ -25,6 +30,17 @@ const {
   update_remote_file,
 } = require('./beam');
 const { Storage } = require('./storage.js');
+
+const process = require('bare-process');
+
+process.on('uncaughtException', (err) => {
+  console.log('Caught an unhandled exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 
 const LOCAL_VOICE_STATUS_OFFLINE = {
   voice: false,
@@ -45,6 +61,34 @@ const PING_SYNC = 'Ping';
 const REQUEST_FILE = 'request-file';
 
 const ONE_DAY = 24 * 60 * 60 * 1000
+const MAX_NATIVE_POW_ATTEMPTS = 5000000;
+const POW_TOTAL_HASHES_PER_SECOND_CAP = 3000;
+const POW_PHASE1_HASHES_PER_SECOND_CAP = 2000;
+const POW_PHASE2_HASHES_PER_SECOND_CAP = 1000;
+const POW_PHASE1_MS = 2 * 60 * 1000;
+const POW_SLICE_MS_PHASE1 = 20000;
+const POW_SLICE_MS_PHASE2 = 20000;
+const POW_MAX_JOB_TIME_MS = 90000;
+const POW_REQUIRED_SHARES = 1;
+let active_pow_tasks = 0;
+
+const is_timeout_error = (error) => {
+  return error?.code === 'ETIMEDOUT' || error?.message === 'Connection timed out';
+};
+
+function pow_rate_policy(active_tasks, elapsed_ms) {
+  const in_phase1 = elapsed_ms < POW_PHASE1_MS;
+  const per_task_budget = Math.max(
+    1,
+    Math.floor(POW_TOTAL_HASHES_PER_SECOND_CAP / Math.max(1, active_tasks)),
+  );
+  const hashes_per_second = Math.min(
+    per_task_budget,
+    in_phase1 ? POW_PHASE1_HASHES_PER_SECOND_CAP : POW_PHASE2_HASHES_PER_SECOND_CAP,
+  );
+  const time_budget_ms = in_phase1 ? POW_SLICE_MS_PHASE1 : POW_SLICE_MS_PHASE2;
+  return { hashes_per_second, time_budget_ms, in_phase1 };
+}
 
 let active_voice_channel = LOCAL_VOICE_STATUS_OFFLINE;
 let active_swarms = [];
@@ -93,22 +137,77 @@ class NodeConnection {
     this.requests = new Map()
     this.discovery = null
     this.pending = []
-    this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
+    this.public = 'xkr96c0f8a36e951b399681d447922f6c54c28c6ef3cad1c65d3568008151337'
     this.topic = ''
     this.address = null
     this.backup_connections = [];
+    this.currentJob = null;
+    this.jobGeneration = 0;
+    this.currentPrevId = null;
+    this.previousPrevId = null;
+    this.twoBackPrevId = null;
+    this.jobPollTimer = null;
+    this.pow_backend = {
+      find_share: async ({
+        job,
+        hashes_per_second,
+        time_budget_ms,
+        nonce_tag_bits,
+        nonce_tag_value,
+      }) => {
+        // Since we are moving to native, we want the native thread to run as hot as possible
+        // for the allocated time_budget_ms, ignoring artificial Javascript-side hashes_per_second caps.
+        // We will pass MAX_NATIVE_POW_ATTEMPTS and rely on native or a time check.
+        // But the native iOS module 'findPowShare' doesn't have a time check.
+        // So we will request a large number of attempts, let native run for roughly `time_budget_ms`
+        // assuming optimistic 1KH/s for the attempt cap, or use the JS capped value if we prefer.
+        // Let's rely on time_budget_ms * optimistic_hash_rate / 1000
+        const optimistic_hps = 1000;
+        const maxAttempts = Math.max(
+          1,
+          Math.floor((optimistic_hps * parseInt(time_budget_ms, 10)) / 1000),
+        );
+        const clampedAttempts = Math.min(maxAttempts, MAX_NATIVE_POW_ATTEMPTS);
+        const startNonce = Math.floor(Math.random() * 0xffffffff);
+        const clampedNonceTagBits = Math.max(0, Math.min(16, parseInt(nonce_tag_bits, 10) || 0));
+        const clampedNonceTagValue = (parseInt(nonce_tag_value, 10) || 0) >>> 0;
+        console.log('findPowShare called with max attempts:', clampedAttempts);
+        const share = await Hugin.request({
+          type: 'pow-find-share',
+          blobHex: job.blob,
+          targetHex: job.target,
+          startNonce,
+          maxAttempts: clampedAttempts,
+          nonceTagBits: clampedNonceTagBits,
+          nonceTagValue: clampedNonceTagValue,
+        });
+        if (share && !share.job_id) {
+          share.job_id = String(job.job_id);
+        }
+        return share || null;
+      },
+    };
   }
 
 async reset(address, pub) { 
+    if (this.jobPollTimer) {
+      clearInterval(this.jobPollTimer);
+      this.jobPollTimer = null;
+    }
     this.node = null
     this.connection = null
     this.requests = new Map()
     this.discovery = null
     this.pending = []
-    this.public = 'a8b2ddb6f70e02b8ab3a1b144f5ddf0616ed6029b9129d6c12bc7660f5b430c5'
+    this.public = 'xkr96c0f8a36e951b399681d447922f6c54c28c6ef3cad1c65d3568008151337'
     this.topic = ''
     this.address = null
     this.backup_connections = [];
+    this.currentJob = null;
+    this.jobGeneration = 0;
+    this.currentPrevId = null;
+    this.previousPrevId = null;
+    this.twoBackPrevId = null;
 
     this.connect('', true);
 
@@ -162,8 +261,13 @@ async listen() {
   async node_connection(conn) {
     this.connection = conn
     Hugin.send('hugin-node-connected', {})
-    conn.on('error', () => {
-    console.log("Got error connection signal")
+    this.start_job_polling();
+    conn.on('error', (error) => {
+    if (is_timeout_error(error)) {
+      console.log('Node connection timed out, reconnecting');
+    } else {
+      console.log("Got error connection signal", error)
+    }
         conn.end();
         conn.destroy();
         this.connection = null
@@ -174,12 +278,30 @@ async listen() {
     const string = d.toString()
     const data = this.parse(string)
     if (!data) return
+      if (data.type === 'new-message' && Array.isArray(data.messages)) {
+        Hugin.send('pool-messages', {
+          messages: data.messages,
+          background: Hugin.background,
+        })
+        return
+      }
       if ('address' in data) {
         if (typeof data.address !== 'string') return
         if (data.address?.length !== 99) return
-        this.address = data.addres
+        this.address = data.address
         Hugin.send('node-address', {address: data.address})
         return
+      }
+
+      if (data.type === 'job' && data.job && !this.requests.has(data.id)) {
+        logPow('job_push', { type: data.type, jobId: data.job && data.job.job_id });
+        const validation = validate_pow_job(data.job);
+        if (validation.ok) {
+          this.set_job(data.job);
+        } else {
+          logPow('job_reject', { reason: validation.reason });
+        }
+        return;
       }
       if (this.requests.has(data.id)) {
         const { resolve, reject } = this.requests.get(data.id);
@@ -197,6 +319,25 @@ async listen() {
           resolve(data)
           this.requests.delete(data.id);
           return
+        }
+
+        if (data.type === 'job' || data.type === 'job_pending') {
+          logPow('job_response', {
+            id: data.id,
+            type: data.type,
+            jobId: data.job && data.job.job_id,
+          });
+          if (data.job) {
+            const validation = validate_pow_job(data.job);
+            if (validation.ok) {
+              this.set_job(data.job);
+            } else {
+              logPow('job_reject', { reason: validation.reason });
+            }
+          }
+          resolve(data);
+          this.requests.delete(data.id);
+          return;
         }
 
         resolve(data.response);
@@ -246,8 +387,195 @@ sync(data) {
   return new Promise((resolve, reject) => {
     data.id = data.timestamp
     this.requests.set(data.id, { resolve, reject });
-    this.connection.write(JSON.stringify(data));
+    try {
+      this.connection.write(JSON.stringify(data));
+    } catch (e) {
+      console.error('Error writing to connection:', e);
+    }
   });
+}
+
+start_job_polling() {
+  if (this.jobPollTimer) return;
+  this.jobPollTimer = setInterval(async () => {
+    if (!this.connection) return;
+    const response = await this.request_job();
+    if (response && response.job) {
+      this.set_job(response.job);
+    }
+  }, 15000);
+}
+
+set_job(job) {
+  console.log('job', job)
+  if (!job || !job.job_id) return;
+  if (this.currentJob && this.currentJob.job_id === job.job_id) return;
+  const prevId = extractPrevIdFromBlob(job.blob);
+  if (prevId) {
+    this.twoBackPrevId = this.previousPrevId;
+    this.previousPrevId = this.currentPrevId;
+    this.currentPrevId = prevId;
+  }
+  this.currentJob = job;
+  this.jobGeneration++;
+  logPow('job_set', { jobId: job.job_id });
+}
+
+async request_job() {
+  if (!this.connection) return null;
+  return new Promise((resolve, reject) => {
+    const id = random_key().toString('hex');
+    this.requests.set(id, { resolve, reject });
+    try {
+      this.connection.write(JSON.stringify({
+        type: 'job_request',
+        id,
+      }));
+    } catch (e) {
+      console.error('Error writing to connection:', e);
+    }
+    logPow('job_request', { id });
+    setTimeout(() => {
+      if (this.requests.has(id)) {
+        this.requests.delete(id);
+        logPow('job_request_timeout', { id });
+        resolve(null);
+      }
+    }, 10000);
+  });
+}
+
+build_pow_auth(message_hash, timestamp, shares, context = '') {
+  if (!Array.isArray(shares) || !shares.length) return null;
+  const share = shares[0];
+  const [, oneTimeKeys] = get_new_peer_keys(random_key());
+  const signer = oneTimeKeys && oneTimeKeys.get ? oneTimeKeys.get() : null;
+  if (!signer || !signer.sign || !signer.publicKey) return null;
+  const payload = `powsig:v2:${String(message_hash || '')}:${timestamp}:${String(share.job_id || '')}:${String(share.nonce || '').toLowerCase()}:${String(share.result || '').toLowerCase()}:${String(context || '')}`;
+  const sig = signer.sign(Buffer.from(payload));
+  if (!sig) return null;
+  return {
+    pub: Buffer.from(signer.publicKey).toString('hex'),
+    sig: Buffer.from(sig).toString('hex'),
+    nonce: String(share.nonce || '').toLowerCase(),
+  };
+}
+
+should_recalc_share(res) {
+  if (!res || typeof res !== 'object') return false;
+  const reason = typeof res.reason === 'string' ? res.reason.toLowerCase() : '';
+  if (reason.includes('pool_reject') || reason.includes('invalid_share') || reason.includes('stale') || reason.includes('job')) {
+    return true;
+  }
+  if (!Array.isArray(res.rejects)) return false;
+  return res.rejects.some((entry) => {
+    if (!entry) return false;
+    const txt = typeof entry === 'string'
+      ? entry.toLowerCase()
+      : JSON.stringify(entry).toLowerCase();
+    return txt.includes('invalid') || txt.includes('stale') || txt.includes('low') || txt.includes('job');
+  });
+}
+
+async challenge(message_hash) {
+  if (!this.connection) return null;
+  active_pow_tasks++;
+  try {
+    const start = Date.now();
+    const shares = [];
+    const allShares = [];
+    const selected_nonces = new Set();
+    const all_nonces = new Set();
+
+    while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < POW_REQUIRED_SHARES) {
+      let job = this.currentJob;
+      if (!job) {
+        const jobResponse = await this.request_job();
+        if (jobResponse && jobResponse.job) {
+          this.set_job(jobResponse.job);
+          job = this.currentJob;
+        }
+      }
+      if (!job) {
+        await sleep(250);
+        continue;
+      }
+
+      const prevId = extractPrevIdFromBlob(job.blob);
+      const fresh =
+        !!prevId &&
+        !!this.currentPrevId &&
+        (prevId === this.currentPrevId ||
+          prevId === this.previousPrevId ||
+          prevId === this.twoBackPrevId);
+
+      if (!fresh) {
+        logPow('pow_stale_local', { jobId: job.job_id });
+        const refreshed = await this.request_job();
+        if (refreshed && refreshed.job) {
+          this.set_job(refreshed.job);
+        }
+        await sleep(250);
+        continue;
+      }
+
+      const elapsed_ms = Date.now() - start;
+      const { hashes_per_second, time_budget_ms, in_phase1 } = pow_rate_policy(
+        active_pow_tasks,
+        elapsed_ms,
+      );
+
+      let share = null;
+      try {
+        share = await this.pow_backend.find_share({
+          job,
+          hashes_per_second,
+          time_budget_ms,
+          nonce_tag_bits: 0,
+          nonce_tag_value: 0,
+        });
+      } catch (e) {
+        if (e && e.message === 'pow_worker_timeout') {
+          logPow('pow_worker_timeout_retry', {
+            jobId: job.job_id,
+            sliceMs: time_budget_ms,
+            hps: hashes_per_second,
+            nonceTagValue: nonce_tag_value,
+          });
+          await sleep(in_phase1 ? 100 : 300);
+          continue;
+        }
+        throw e;
+      }
+
+      if (share && typeof share.nonce === 'string' && typeof share.result === 'string') {
+        const normalized = {
+          job_id: String(share.job_id),
+          nonce: share.nonce.toLowerCase(),
+          result: share.result.toLowerCase(),
+        };
+        if (!all_nonces.has(normalized.nonce)) {
+          all_nonces.add(normalized.nonce);
+          allShares.push(normalized);
+        }
+        if (!selected_nonces.has(normalized.nonce)) {
+          selected_nonces.add(normalized.nonce);
+          logPow('pow_share_found_local', { jobId: job.job_id, nonce: normalized.nonce });
+          shares.push(normalized);
+        }
+      }
+
+      if (shares.length >= POW_REQUIRED_SHARES) {
+        return { job, shares, allShares };
+      }
+
+      await sleep(in_phase1 ? 50 : 250);
+    }
+
+    return null;
+  } finally {
+    active_pow_tasks = Math.max(0, active_pow_tasks - 1);
+  }
 }
 
 
@@ -265,52 +593,168 @@ close() {
   this.connection = null
 }
 
-async message(payload, hash, viewtag) {
-  console.log('payload, hash', payload, hash)
-    if (this.connection === null) {
-    await this.reconnect();
-  }
-  return new Promise( async (resolve, reject) => {
-  const timestamp = Date.now()
-  this.requests.set(timestamp, { resolve, reject })
-  //Create a new derived sub key pair for sending messages to nodes.
-  const [pub, signature] = await Hugin.request({type: 'sign-node-message', message: payload + hash})
-  //We sign the payload and hash to avoid denial of service attacks.
-  const data = {
-    type: 'post',
-    message: {
-    cipher: payload,
-    pub,
-    timestamp,
-    hash,
-    signature,
-    viewtag,
-    push: true,
-    id: timestamp
+async send_pow_packet({
+  request_id,
+  message_hash,
+  auth_context,
+  build_payload,
+  log_prefix,
+  exception_reason,
+}) {
+  try {
+    if (!this.connection) return { success: false, reason: 'No connection' };
+
+    const max_attempts = 3;
+
+    const should_retry = (res) => {
+      if (!res) return true;
+      if (res.success === true) return false;
+      return !!res.reason;
+    };
+    const send_packet = async (packet) => {
+      if (!this.connection) {
+        this.reconnect();
+        await sleep(5000);
+      }
+      return await new Promise((resolve, reject) => {
+        this.requests.set(request_id, { resolve, reject });
+        try {
+          this.connection.write(JSON.stringify(packet));
+        } catch (e) {
+          this.requests.delete(request_id);
+          resolve({ success: false, reason: 'write_failed' });
+          return;
+        }
+        setTimeout(() => {
+          if (!this.requests.has(request_id)) return;
+          this.requests.delete(request_id);
+          resolve({ success: false, reason: 'timeout' });
+        }, 60000);
+      });
+    };
+
+    const compute_pow = async () => {
+      let pow = null;
+      try {
+        pow = await this.challenge(message_hash);
+        if (pow && pow.shares) {
+          logPow(`${log_prefix}_ready`, { jobId: pow.job && pow.job.job_id, shares: pow.shares.length });
+        }
+      } catch (e) {
+        logPow('pow_error', { message: e && e.message });
+      }
+      return pow;
+    };
+
+    let last_res = { success: false, reason: 'unknown' };
+    let stale_share_retries = 0;
+    const max_stale_share_retries = 3;
+    for (let attempt = 1; attempt <= max_attempts; attempt++) {
+      let pow = await compute_pow();
+      if (!pow || !pow.shares || pow.shares.length === 0) {
+        logPow(`${log_prefix}_retry`, { attempt, reason: 'no_shares' });
+        this.currentJob = null;
+        const jobResponse = await this.request_job();
+        if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
+        last_res = { success: false, reason: 'PoW required' };
+        continue;
+      }
+
+      const auth = this.build_pow_auth(message_hash, request_id, pow.shares, auth_context);
+      if (!auth) {
+        logPow(`${log_prefix}_retry`, { attempt, reason: 'pow_auth_failed' });
+        await sleep(100);
+        continue;
+      }
+      const res = await send_packet(build_payload({ ...pow, auth }));
+      if (res && res.success === true) return res;
+
+      last_res = res || { success: false, reason: 'unknown' };
+      if (!should_retry(last_res)) break;
+
+      const recalc = this.should_recalc_share(last_res);
+      if (recalc && stale_share_retries < max_stale_share_retries) {
+        stale_share_retries++;
+        logPow(`${log_prefix}_recalc`, {
+          attempt,
+          stale_share_retries,
+          reason: last_res.reason,
+          jobId: pow && pow.job && pow.job.job_id,
+        });
+        // Do not consume a main attempt for stale/invalid-share churn.
+        attempt--;
+      }
+
+      logPow(`${log_prefix}_retry`, { attempt, reason: last_res.reason, jobId: pow && pow.job && pow.job.job_id });
+      this.currentJob = null;
+      const jobResponse = await this.request_job();
+      if (jobResponse && jobResponse.job) this.set_job(jobResponse.job);
+      await sleep(recalc ? 25 : 100);
     }
-
+    return last_res;
+  } catch (e) {
+    logPow(`${log_prefix}_error`, { message: e && e.message });
+    return { success: false, reason: exception_reason || 'pow_packet_exception' };
   }
+}
 
+async message(payload, hash, viewtag, kind = 'dm') {
+  const request_id = Date.now();
+  const baseMessage = {
+    cipher: payload,
+    timestamp: request_id,
+    hash,
+    id: request_id,
+    push: true,
+    viewtag,
+    kind,
+  };
 
-
-  this.connection.write(JSON.stringify(data))
-  
-  })
+  return await this.send_pow_packet({
+    request_id,
+    message_hash: hash,
+    auth_context: kind ? `${kind}:${String(baseMessage.cipher || '')}` : String(baseMessage.cipher || ''),
+    log_prefix: 'pow_message',
+    exception_reason: 'message_exception',
+    build_payload: (pow) => ({
+      type: 'post',
+      message: {
+        ...baseMessage,
+        pow: {
+          version: 2,
+          job: pow.job,
+          shares: pow.shares,
+          auth: pow.auth,
+        },
+      },
+    }),
+  });
 }
 
 async register(data) {
+  const request_id = Date.now();
+  const message_hash = random_key().toString('hex');
 
-  if (this.connection === null) {
-    await this.reconnect();
-  }
-  
-  const payload = {
-    register: true,
-    data
-  }
-  if (!this.connection) return;
-  this.connection.write(JSON.stringify(payload));
-  
+  return await this.send_pow_packet({
+    request_id,
+    message_hash,
+    auth_context: String(data || ''),
+    log_prefix: 'pow_register',
+    exception_reason: 'register_exception',
+    build_payload: (pow) => ({
+      register: true,
+      data,
+      timestamp: request_id,
+      id: request_id,
+      hash: message_hash,
+      pow: {
+        version: 2,
+        job: pow.job,
+        shares: pow.shares,
+        auth: pow.auth,
+      },
+    }),
+  });
 }
 
 
@@ -353,14 +797,19 @@ class Room {
       return;
     }
     this.swarm.on('connection', (connection, information) => {
-      new_connection(
-        connection,
-        topic,
-        this.key,
-        dht_keys,
-        information,
-        this.beam,
-      );
+      try {
+        new_connection(
+          connection,
+          topic,
+          this.key,
+          dht_keys,
+          information,
+          this.beam,
+        );
+      } catch (error) {
+        console.log('Failed to initialize swarm connection', error);
+        connection_closed(connection, topic, 'Swarm on connection init error');
+      }
     });
 
     this.discovery = this.swarm.join(hash, { client: true, server: true });
@@ -377,7 +826,7 @@ async function idle(background, force) {
       room.swarm.suspend();
     }
     Nodes.close();
-    Nodes.node.suspend();
+    Nodes.node?.suspend();
     return;
   }
   if (Hugin.idle() && background) {
@@ -390,7 +839,7 @@ async function idle(background, force) {
         room.swarm.suspend();
       }  
       Nodes.close();
-      Nodes.node.suspend();
+      Nodes.node?.suspend();
       idletimer = null;
     }, 10*1000)
     return;
@@ -408,7 +857,7 @@ async function idle(background, force) {
       await room.swarm.resume();
       room.discovery.refresh({client: true, server: true});
     }  
-    Nodes.node.resume();
+    Nodes.node?.resume();
     Nodes.reconnect();
   };
 }
@@ -488,9 +937,18 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
     request: true,
     publicKey: peer.publicKey.toString('hex'),
   });
-  send_joined_message(topic, dht_keys, connection);
+  send_joined_message(topic, dht_keys, connection).catch((error) => {
+    console.log('Failed to send joined message', error);
+    connection_closed(connection, topic, 'Joined message error');
+  });
   connection.on('data', async (data) => {
-    incoming_message(data, topic, connection, peer, beam);
+    try {
+      console.log('Incoming message', data, beam);
+      await incoming_message(data, topic, connection, peer, beam);
+    } catch (error) {
+      console.log('Incoming message handler failed', error);
+      connection_closed(connection, topic, 'Incoming message error');
+    }
   });
 
   connection.on('close', () => {
@@ -499,8 +957,12 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
   });
 
   connection.on('error', (e) => {
-    console.log('Got error connection signal', e);
-    // connection_closed(connection, topic, 'Connection on error');
+    if (is_timeout_error(e)) {
+      console.log('Connection timed out, closing peer connection');
+    } else {
+      console.log('Got error connection signal', e);
+    }
+    connection_closed(connection, topic, 'Connection on error');
   });
 };
 
@@ -581,7 +1043,11 @@ const send_joined_message = async (topic, dht_keys, connection) => {
     messages
   });
 
-  connection.write(data);
+  try {
+    connection.write(data);
+  } catch (error) {
+    console.log('Failed to write joined message', error);
+  }
 };
 
 const send_swarm_message = (message, topic) => {
@@ -609,9 +1075,7 @@ const send_swarm_message = (message, topic) => {
 const incoming_message = async (data, topic, connection, peer, beam) => {
   last_activity = Date.now();
   const str = data.toString();
-  if (str === 'Ping') {
-    return;
-  }
+  
   // Check
   const check = await check_data_message(str, connection, topic, peer, beam);
   if (check === 'Ban') {
@@ -622,15 +1086,15 @@ const incoming_message = async (data, topic, connection, peer, beam) => {
   }
   if (check === 'Error') {
     // connection_closed(connection, topic, 'Connection Error check');
-    return;
-  }
-  if (check) {
-    peer.priority = 3;
+    console.log('Incoming message error', data, topic, beam);
     return;
   }
 
+  if (check) return;
+
   if (beam) {
     const hash = str.substring(0, 64);
+    console.log('beam-message fired 🔥🔥 🔥')
     Hugin.send('beam-message', { message: str, hash, background: Hugin.background });
     return;
   }
@@ -763,6 +1227,8 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       });
 
       if (!verified) return 'Ban';
+
+      peer.priority = 3;
 
       con.joined = true;
       con.address = joined.address;
@@ -938,6 +1404,8 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
   }
   //Dont display messages from blocked users
   if (Hugin.blocked(con.address)) return;
+
+  if (data.type === PING_SYNC) return true;
 
   return false;
 };
@@ -1445,7 +1913,7 @@ const got_answer = (data) => {
 };
 
 const send_peer_message = (address, topic, message) => {
-  console.log('Send peer message', message);
+  // console.log('Send peer message', message);
   const active = get_active_topic(topic);
   if (!active) {
     errorMessage('Swarm is not active');
@@ -1456,7 +1924,11 @@ const send_peer_message = (address, topic, message) => {
     errorMessage('Connection is closed');
     return;
   }
-  con.connection.write(JSON.stringify(message));
+  try {
+    con.connection.write(JSON.stringify(message));
+  } catch (e) {
+    console.error('Error writing to connection:', e);
+  }
 };
 
 const ban_connection = (conn, topic) => {
@@ -1576,7 +2048,11 @@ const send_feed_message = async (message, reply, tip) => {
   const payload = {type: 'feed', message, nickname: Hugin.name, address: Hugin.address, reply, tip, hash, timestamp: Date.now(), signature};
   for (const swarm of active_swarms) {
     for (const peer of swarm.connections) {
-      peer.connection.write(JSON.stringify(payload))
+      try {
+        peer.connection.write(JSON.stringify(payload));
+      } catch (e) {
+        console.error('Error writing to connection:', e);
+      }
     }
   }
   return payload;
@@ -1634,7 +2110,11 @@ const check_if_online = async (topic) => {
         if (i > 4) {
           if (i % 2 === 0) data.hashes = [];
         }
-        conn.connection.write(JSON.stringify(data));
+        try {
+          conn.connection.write(JSON.stringify(data));
+        } catch (e) {
+          console.error('Error writing to connection:', e);
+        }
         i++;
       }
     }
@@ -1645,7 +2125,11 @@ const admin_ban_user = async (address, key) => {
   const active = get_active(key);
   if (!active) return;
   active.connections.forEach((chat) => {
-    chat.connection.write(JSON.stringify({ type: 'ban', address }));
+    try {
+      chat.connection.write(JSON.stringify({ type: 'ban', address }));
+    } catch (e) {
+      console.error('Error writing to connection:', e);
+    }
   });
   await sleep(200);
   ban_user(address, active.topic);

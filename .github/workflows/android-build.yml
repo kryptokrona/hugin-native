@@ -1,0 +1,96 @@
+name: Android Build
+
+on:
+  push:
+    branches:
+      - pow
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Force Android linker flags
+        run: |
+          echo "export LDFLAGS=\"-Wl,-z,max-page-size=16384\"" >> $GITHUB_ENV
+          echo "export CFLAGS=\"\"" >> $GITHUB_ENV
+          echo "export CXXFLAGS=\"\"" >> $GITHUB_ENV
+          echo "export GYP_DEFINES=\"android_max_page_size=16384\"" >> $GITHUB_ENV
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: 📦 Install dependencies
+        run: | 
+          export LDFLAGS="-Wl,-z,max-page-size=16384"
+          npm install
+
+      - name: 🐛 Debug check packages
+        run: npm ls
+        
+      - name: 🩹 Patch NPM packages
+        run: npm run patch
+
+      - name: 📋 Get offline lists
+        run: npm run get-offline-lists
+
+      - name: 🔑 Export private keys file
+        run: npm run create-private-keys
+
+      - name: 📦 Bundle bare
+        run: ./bin/bundle.js -ra
+
+      - name: 🔐 Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/my-release-key.keystore
+
+      - name: 🔐 Export signing vars
+        run: |
+          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "ANDROID_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> $GITHUB_ENV
+
+      - name: Restore google-services.json
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+
+      - name: 🛠️ Build Release APK & AAB
+        run: |
+          export LDFLAGS="-Wl,-z,max-page-size=16384"
+          export CFLAGS=""
+          export CXXFLAGS=""
+          cd android
+          ./gradlew clean
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
+        env:
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+
+      - name: Check alignment
+        run: |
+          unzip android/app/build/outputs/bundle/release/*.aab -d aab
+          find aab -name "libquickbit-native*.so" -exec readelf -l {} \; | grep LOAD
+
+      - name: 📤 Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      - name: 📤 Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab

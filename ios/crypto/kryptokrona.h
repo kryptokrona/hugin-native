@@ -14,6 +14,7 @@ namespace Core
     public:
         /* Hashing Methods */
         static std::string cn_fast_hash(const std::string data);
+        static std::string cn_turtle_lite_slow_hash_v2(const std::string data);
 
         static uint32_t tree_depth(const uint32_t count);
 

@@ -139,19 +139,24 @@ export const RootNavigator = () => {
   useEffect(() => {
     if (started) {  
       setDisplaySplash(false);
+      return;
     }
+
     const isHydrated = hydrated.preferences && hydrated.user && hydrated.theme;
-    
+
     if (isHydrated && minTimeElapsed) {
+      if (!user?.address) {
+        setDisplaySplash(false);
+        return;
+      }
+
       const shouldGoToMain = 
         authenticated && 
         authMethod && 
-        user?.address && 
         user.address.length >= 64;
-        
 
-      if (shouldGoToMain && !started) {
-        return;
+      if (!shouldGoToMain) {
+        setDisplaySplash(false);
       }
     }
   }, [hydrated, authenticated, authMethod, user, started, minTimeElapsed]);

@@ -6,6 +6,10 @@
 #include "StringTools.h"
 #include "hash.h"
 #include "kryptokrona.h"
+#include <algorithm>
+#include <cstdint>
+#include <cstdio>
+#include <vector>
 
 jclass WALLET_BLOCK_INFO;
 jmethodID WALLET_BLOCK_INFO_CONST;
@@ -256,6 +260,215 @@ Java_com_hugin_TurtleCoinModule_cnFastHashJNI(
     const auto hash = Core::Cryptography::cn_fast_hash(value);
 
     return env->NewStringUTF(hash.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_hugin_TurtleCoinModule_cnTurtleLiteSlowHashV2JNI(
+    JNIEnv *env,
+    jobject instance,
+    jstring jHash)
+{
+    std::string value = makeNativeString(env, jHash);
+    const auto hash = Core::Cryptography::cn_turtle_lite_slow_hash_v2(value);
+
+    return env->NewStringUTF(hash.c_str());
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_hugin_TurtleCoinModule_findPowShareJNI(
+    JNIEnv *env,
+    jobject instance,
+    jstring jBlobHex,
+    jstring jTargetHex,
+    jlong startNonce,
+    jlong maxAttempts,
+    jint nonceTagBits,
+    jint nonceTagValue)
+{
+    constexpr size_t MAX_BLOB_HEX_CHARS = 2048; // 1024 bytes
+    constexpr uint64_t MAX_POW_ATTEMPTS = 5000000ULL;
+
+    const std::string blobHex = makeNativeString(env, jBlobHex);
+    const std::string targetHex = makeNativeString(env, jTargetHex);
+
+    if (blobHex.empty() || blobHex.size() > MAX_BLOB_HEX_CHARS)
+    {
+        return env->NewStringUTF("");
+    }
+
+    auto hexNibble = [](char c) -> int {
+        if (c >= '0' && c <= '9') return c - '0';
+        if (c >= 'a' && c <= 'f') return 10 + (c - 'a');
+        if (c >= 'A' && c <= 'F') return 10 + (c - 'A');
+        return -1;
+    };
+
+    auto hexToBytes = [&](const std::string &hex, std::vector<uint8_t> &out) -> bool {
+        if (hex.size() % 2 != 0) return false;
+        out.resize(hex.size() / 2);
+        for (size_t i = 0; i < out.size(); i++)
+        {
+            const int hi = hexNibble(hex[i * 2]);
+            const int lo = hexNibble(hex[(i * 2) + 1]);
+            if (hi < 0 || lo < 0) return false;
+            out[i] = static_cast<uint8_t>((hi << 4) | lo);
+        }
+        return true;
+    };
+
+    auto bytesToHex = [](const std::vector<uint8_t> &bytes) -> std::string {
+        static const char *hex = "0123456789abcdef";
+        std::string out;
+        out.resize(bytes.size() * 2);
+        for (size_t i = 0; i < bytes.size(); i++)
+        {
+            out[i * 2] = hex[(bytes[i] >> 4) & 0x0f];
+            out[(i * 2) + 1] = hex[bytes[i] & 0x0f];
+        }
+        return out;
+    };
+
+    auto readVarint = [](const std::vector<uint8_t> &buffer, size_t offset, uint64_t &value, size_t &consumed) -> bool {
+        value = 0;
+        consumed = 0;
+        int shift = 0;
+        while ((offset + consumed) < buffer.size())
+        {
+            const uint8_t byte = buffer[offset + consumed];
+            value |= static_cast<uint64_t>(byte & 0x7f) << shift;
+            consumed += 1;
+            if ((byte & 0x80) == 0) return true;
+            shift += 7;
+            if (shift > 63) return false;
+        }
+        return false;
+    };
+
+    auto getNonceOffset = [&](const std::vector<uint8_t> &blob) -> size_t {
+        constexpr size_t fallbackOffset = 39;
+        try
+        {
+            size_t offset = 0;
+            uint64_t value = 0;
+            size_t consumed = 0;
+            if (!readVarint(blob, offset, value, consumed)) return fallbackOffset;
+            offset += consumed;
+            if (!readVarint(blob, offset, value, consumed)) return fallbackOffset;
+            offset += consumed;
+            if (!readVarint(blob, offset, value, consumed)) return fallbackOffset;
+            offset += consumed;
+            offset += 32;
+            return offset;
+        }
+        catch (...)
+        {
+            return fallbackOffset;
+        }
+    };
+
+    auto readUint32LE = [](const uint8_t *p) -> uint32_t {
+        return (static_cast<uint32_t>(p[0]) |
+                (static_cast<uint32_t>(p[1]) << 8) |
+                (static_cast<uint32_t>(p[2]) << 16) |
+                (static_cast<uint32_t>(p[3]) << 24));
+    };
+
+    auto readUint64LE = [&](const uint8_t *p) -> uint64_t {
+        const uint64_t lo = static_cast<uint64_t>(readUint32LE(p));
+        const uint64_t hi = static_cast<uint64_t>(readUint32LE(p + 4));
+        return (hi << 32) | lo;
+    };
+
+    auto parseTarget = [&](const std::string &target) -> bool {
+        if (target.size() != 8) return false;
+        std::vector<uint8_t> targetBytes;
+        if (!hexToBytes(target, targetBytes) || targetBytes.size() != 4) return false;
+        const uint32_t raw = readUint32LE(targetBytes.data());
+        if (raw == 0) return false;
+        const uint64_t denom = 0xffffffffULL / static_cast<uint64_t>(raw);
+        if (denom == 0) return false;
+        return true;
+    };
+
+    auto getTargetValue = [&](const std::string &target) -> uint64_t {
+        std::vector<uint8_t> targetBytes;
+        if (!hexToBytes(target, targetBytes) || targetBytes.size() != 4) return 0;
+        const uint32_t raw = readUint32LE(targetBytes.data());
+        if (raw == 0) return 0;
+        const uint64_t denom = 0xffffffffULL / static_cast<uint64_t>(raw);
+        if (denom == 0) return 0;
+        return 0xffffffffffffffffULL / denom;
+    };
+
+    std::vector<uint8_t> blobBytes;
+    if (!hexToBytes(blobHex, blobBytes) || blobBytes.empty())
+    {
+        return env->NewStringUTF("");
+    }
+
+    const size_t nonceOffset = getNonceOffset(blobBytes);
+    if ((nonceOffset + 4) > blobBytes.size())
+    {
+        return env->NewStringUTF("");
+    }
+
+    const bool hasValidTarget = parseTarget(targetHex);
+    if (!hasValidTarget)
+    {
+        return env->NewStringUTF("");
+    }
+    const uint64_t targetValue = getTargetValue(targetHex);
+    (void)nonceTagBits;
+    (void)nonceTagValue;
+    const uint32_t nonceStep = 1u;
+
+    const uint64_t requestedAttempts = maxAttempts > 0 ? static_cast<uint64_t>(maxAttempts) : 1ULL;
+    const uint64_t attempts = std::min(requestedAttempts, MAX_POW_ATTEMPTS);
+    const uint32_t startNonce32 = static_cast<uint32_t>(startNonce);
+    uint32_t nonce = startNonce32;
+    for (uint64_t i = 0; i < attempts; i++)
+    {
+        blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);
+        blobBytes[nonceOffset + 1] = static_cast<uint8_t>((nonce >> 8) & 0xff);
+        blobBytes[nonceOffset + 2] = static_cast<uint8_t>((nonce >> 16) & 0xff);
+        blobBytes[nonceOffset + 3] = static_cast<uint8_t>((nonce >> 24) & 0xff);
+
+        const std::string candidateBlobHex = bytesToHex(blobBytes);
+        const std::string result = Core::Cryptography::cn_turtle_lite_slow_hash_v2(candidateBlobHex);
+
+        std::vector<uint8_t> hashBytes;
+        if (!hexToBytes(result, hashBytes) || hashBytes.size() < 32)
+        {
+            nonce += nonceStep;
+            continue;
+        }
+
+        const uint64_t hashTail = readUint64LE(hashBytes.data() + 24);
+        if (hashTail <= targetValue)
+        {
+            char nonceHex[9];
+            snprintf(
+                nonceHex,
+                sizeof(nonceHex),
+                "%02x%02x%02x%02x",
+                static_cast<unsigned int>(blobBytes[nonceOffset]),
+                static_cast<unsigned int>(blobBytes[nonceOffset + 1]),
+                static_cast<unsigned int>(blobBytes[nonceOffset + 2]),
+                static_cast<unsigned int>(blobBytes[nonceOffset + 3]));
+
+            const std::string json =
+                std::string("{\"job_id\":\"\",\"nonce\":\"") +
+                nonceHex +
+                std::string("\",\"result\":\"") +
+                result +
+                std::string("\"}");
+            return env->NewStringUTF(json.c_str());
+        }
+
+        nonce += nonceStep;
+    }
+
+    return env->NewStringUTF("");
 }
 
 extern "C" JNIEXPORT jobjectArray JNICALL

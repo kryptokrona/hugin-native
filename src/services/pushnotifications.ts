@@ -9,7 +9,8 @@ import {
   requestPermission,
   AuthorizationStatus,
   getToken,
-  setBackgroundMessageHandler
+  setBackgroundMessageHandler,
+  FirebaseMessagingTypes
 } from '@react-native-firebase/messaging';
 import { getApp } from '@react-native-firebase/app';
 import notifee, {
@@ -26,10 +27,11 @@ import * as naclutil from 'tweetnacl-util';
 import { saveMessageToQueue, resetMessageQueue, getMessageQueue } from '../utils/messageQueue';
 import VoipPushNotification from 'react-native-voip-push-notification';
 import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from './zustand';
-import { getRooms, initDB, messageExists, roomMessageExists, saveRoomMessage } from './bare/sqlite';
+import { getRooms, initDB, messageExists, roomMessageExists, saveRoomMessage, addContact, saveMessage } from './bare/sqlite';
 import { Beam, decrypt_sealed_box, Nodes, Rooms } from 'lib/native';
 import { Connection } from './bare/globals';
 import { ConnectionStatus, User } from '../types/user';
+import { setLatestMessages, updateMessage } from './bare/contacts';
 import { WebRTC } from './calls';
 import { Peers } from 'lib/connections';
 import { sleep, waitForCondition } from '../utils/utils';
@@ -38,6 +40,7 @@ import { keychain, saveRoomMessageAndUpdate } from './bare';
 import RNCallKeep from 'react-native-callkeep';
 import tweetnacl from 'tweetnacl';
 import { Linking } from 'react-native';
+// import { check_for_pm } from './hugin/syncer';
 
 
 const answerCall = async () => {
@@ -120,7 +123,7 @@ const answerCall = async () => {
 async function init() {
 
   
-  console.log('☎️ Initing stuff in the background..')
+  console.log('☎️ Initing stuff in the background.. push notifications')
   
     await Rooms.start();
   
@@ -364,12 +367,98 @@ let channelId;
 
   onMessage(messaging, async remoteMessage => {
     console.log('🔔 Foreground message:', remoteMessage);
-    // Notify.new({ 
-    //   name: 'Firebased 🔥', 
-    //   text: 'This is from firebase my guy!' },
-    //   true,
-    //   {}
-    // )
+    // check_for_pm(remoteMessage);
+
+    let message: any;
+    let box: any;
+    let url: string;
+
+    try {
+      box = JSON.parse(remoteMessage?.data?.encryptedPayload as string);
+    } catch (e) {
+      try {
+        box = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload as string));
+      } catch (e) {
+        console.error('Failed to parse box!');
+        return;
+      }
+    }
+
+    try {
+      if (box?.type && box?.type == 'room') {
+        console.log('🔔 Room message received!!');
+        message = await decryptRoomMessage(box.box, box.timestamp);
+
+        if (await roomMessageExists(message.hash)) {
+          console.log('🔕 Room message already exists, skipping synchronization.');
+          return;
+        };
+
+        const newMessage = saveRoomMessage(
+          message.address,
+          message.message,
+          message.roomKey,
+          message.reply,
+          box.timestamp,
+          message.name,
+          message.hash,
+          false,
+          message.tip
+        );
+
+        url = 'hugin://chat/' + encodeURIComponent(message.roomName) + '/' + encodeURIComponent(message.roomKey);
+        message = {
+          msg: message.message,
+          name: message.name + ' in ' + message.roomName
+        }
+
+      } else {
+        const key = await getEncryptionKey();
+        if (!key) return; // Cannot decrypt without key
+        message = decryptMessage(box.box, box.t, key as string);
+
+        console.log('🔔 Direct message received!!', message.from);
+        url = 'hugin://message/' + encodeURIComponent(message.name) + '/' + encodeURIComponent(message.from);
+
+        if (await messageExists(box.t)) return;
+
+        // Sync with syncer logic
+        const knownContacts = (useUserStore.getState() as any).contacts || [];
+        const knownKeys = knownContacts.map((c: any) => c.messagekey);
+
+        if (message.type === 'sealedbox' || message.type === 'box') {
+          if (!knownKeys.some((a: any) => a === message.k)) {
+            const added = await addContact(message?.name || 'Anon', message.from, message.k);
+            if (added) {
+              const bHash = await Wallet.key_derivation_hash(message.from);
+              Beam.connect(bHash, bHash, message.from);
+            }
+          }
+          const saved = await saveMessage(
+            message.from,
+            message.msg,
+            '', //Todo reply
+            box.t,
+            (remoteMessage.messageId as string) || String(box.t),
+            false,
+            undefined,
+            undefined, // profileName
+            undefined  // tip
+          );
+          if (saved) {
+            updateMessage(saved, false);
+          }
+          setLatestMessages();
+        }
+
+        await saveMessageToQueue({
+          ...message,
+          timestamp: box.t,
+        });
+      }
+    } catch (e) {
+      console.log('Error syncing foreground message:', e);
+    }
   });
 
   let deviceId;
@@ -380,7 +469,7 @@ let channelId;
 
   setBackgroundMessageHandler(messaging, async remoteMessage => {
     console.log('🔔 Background message:', remoteMessage);
-    // setTimeout(() => {Rooms.idle(true, true, true)}, 15000);
+    setTimeout(() => {Rooms.idle(true, true, true)}, 10000);
     Rooms.idle(true, true, true);
     let message;
     let error;

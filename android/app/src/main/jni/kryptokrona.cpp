@@ -60,6 +60,17 @@ namespace Core
         return Common::podToHex(hash);
     }
 
+    std::string Cryptography::cn_turtle_lite_slow_hash_v2(const std::string input)
+    {
+        Crypto::Hash hash = Crypto::Hash();
+
+        Crypto::BinaryArray data = toBinaryArray(input);
+
+        Crypto::cn_turtle_lite_slow_hash_v2(data.data(), data.size(), hash);
+
+        return Common::podToHex(hash);
+    }
+
     /* Crypto Methods */
     bool Cryptography::generateRingSignatures(
         const std::string prefixHash,

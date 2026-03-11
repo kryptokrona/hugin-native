@@ -11,9 +11,17 @@
 #include "kryptokrona.h"
 #include "crypto.h"
 #include "TurtleCoinModule.h"
+#include <algorithm>
 #include <unordered_map>
+#include <atomic>
+#include <memory>
+#include <chrono>
 #import <React/RCTLog.h>
 
+
+__thread char g_debug_stage_info[20][256];
+__thread int g_debug_stage_count = 0;
+__thread int g_debug_hash_active = 0;
 
 WalletBlockInfo convertWalletBlockInfo(NSDictionary *block);
 
@@ -426,6 +434,254 @@ RCT_EXPORT_METHOD(cnFastHash:(NSString *)input
                                          userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
         reject(@"cn_fast_hash_failed", @"Unknown error occurred", error);
     }
+}
+
+RCT_EXPORT_METHOD(cnTurtleLiteSlowHashV2:(NSString *)input
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+
+    std::string cppInput = [input UTF8String];
+
+    try {
+        std::string cppHash = Core::Cryptography::cn_turtle_lite_slow_hash_v2(cppInput);
+
+        NSString *hash = [NSString stringWithUTF8String:cppHash.c_str()];
+
+        resolve(hash);
+    } catch (const std::exception &e) {
+        NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+        NSError *error = [NSError errorWithDomain:@"TurtleLiteSlowHashV2Error"
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+        reject(@"cn_turtle_lite_slow_hash_v2_failed", errorMessage, error);
+    } catch (...) {
+        NSError *error = [NSError errorWithDomain:@"TurtleLiteSlowHashV2Error"
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+        reject(@"cn_turtle_lite_slow_hash_v2_failed", @"Unknown error occurred", error);
+    }
+}
+
+RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
+                  targetHex:(NSString *)targetHex
+                  startNonce:(nonnull NSNumber *)startNonce
+                  maxAttempts:(nonnull NSNumber *)maxAttempts
+                  nonceTagBits:(nonnull NSNumber *)nonceTagBits
+                  nonceTagValue:(nonnull NSNumber *)nonceTagValue
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
+        try {
+            constexpr size_t MAX_BLOB_HEX_CHARS = 2048; // 1024 bytes
+            constexpr uint64_t MAX_POW_ATTEMPTS = 5000000ULL;
+
+            const std::string blob = [blobHex UTF8String];
+            const std::string target = [targetHex UTF8String];
+
+            if (blob.empty() || blob.size() > MAX_BLOB_HEX_CHARS) {
+                resolve(nil);
+                return;
+            }
+
+            auto hexNibble = [](char c) -> int {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return 10 + (c - 'a');
+                if (c >= 'A' && c <= 'F') return 10 + (c - 'A');
+                return -1;
+            };
+
+            auto hexToBytes = [&](const std::string &hex, std::vector<uint8_t> &out) -> bool {
+                if (hex.size() % 2 != 0) return false;
+                out.resize(hex.size() / 2);
+                for (size_t i = 0; i < out.size(); i++) {
+                    const int hi = hexNibble(hex[i * 2]);
+                    const int lo = hexNibble(hex[(i * 2) + 1]);
+                    if (hi < 0 || lo < 0) return false;
+                    out[i] = static_cast<uint8_t>((hi << 4) | lo);
+                }
+                return true;
+            };
+
+
+
+            auto readVarint = [](const std::vector<uint8_t> &buffer, size_t offset, uint64_t &value, size_t &consumed) -> bool {
+                value = 0;
+                consumed = 0;
+                int shift = 0;
+                while ((offset + consumed) < buffer.size()) {
+                    const uint8_t byte = buffer[offset + consumed];
+                    value |= static_cast<uint64_t>(byte & 0x7f) << shift;
+                    consumed += 1;
+                    if ((byte & 0x80) == 0) return true;
+                    shift += 7;
+                    if (shift > 63) return false;
+                }
+                return false;
+            };
+
+            auto getNonceOffset = [&](const std::vector<uint8_t> &blobBytes) -> size_t {
+                constexpr size_t fallbackOffset = 39;
+                size_t offset = 0;
+                uint64_t value = 0;
+                size_t consumed = 0;
+                if (!readVarint(blobBytes, offset, value, consumed)) return fallbackOffset;
+                offset += consumed;
+                if (!readVarint(blobBytes, offset, value, consumed)) return fallbackOffset;
+                offset += consumed;
+                if (!readVarint(blobBytes, offset, value, consumed)) return fallbackOffset;
+                offset += consumed;
+                offset += 32;
+                return offset;
+            };
+
+            auto readUint32LE = [](const uint8_t *p) -> uint32_t {
+                return (static_cast<uint32_t>(p[0]) |
+                        (static_cast<uint32_t>(p[1]) << 8) |
+                        (static_cast<uint32_t>(p[2]) << 16) |
+                        (static_cast<uint32_t>(p[3]) << 24));
+            };
+
+
+
+            auto getTargetValue = [&](const std::string &targetHexValue, bool &valid) -> uint64_t {
+                valid = false;
+                if (targetHexValue.size() != 8) return 0;
+                std::vector<uint8_t> targetBytes;
+                if (!hexToBytes(targetHexValue, targetBytes) || targetBytes.size() != 4) return 0;
+                const uint32_t raw = readUint32LE(targetBytes.data());
+                if (raw == 0) return 0;
+                const uint64_t denom = 0xffffffffULL / static_cast<uint64_t>(raw);
+                if (denom == 0) return 0;
+                valid = true;
+                return 0xffffffffffffffffULL / denom;
+            };
+
+            std::vector<uint8_t> blobBytes;
+            if (!hexToBytes(blob, blobBytes) || blobBytes.empty()) {
+                resolve(nil);
+                return;
+            }
+
+            const size_t nonceOffset = getNonceOffset(blobBytes);
+            if ((nonceOffset + 4) > blobBytes.size()) {
+                resolve(nil);
+                return;
+            }
+
+            bool hasValidTarget = false;
+            const uint64_t targetValue = getTargetValue(target, hasValidTarget);
+            if (!hasValidTarget) {
+                resolve(nil);
+                return;
+            }
+            (void)nonceTagBits;
+            (void)nonceTagValue;
+
+            uint64_t attempts = [maxAttempts unsignedLongLongValue];
+            if (attempts == 0) attempts = 1;
+            if (attempts > MAX_POW_ATTEMPTS) attempts = MAX_POW_ATTEMPTS;
+            const uint32_t startNonce32 = [startNonce unsignedIntValue];
+
+            // Determine thread count: use active CPU cores, capped at 8
+            const unsigned int maxThreads = 8;
+            const unsigned int cpuCount = (unsigned int)[[NSProcessInfo processInfo] activeProcessorCount];
+            const unsigned int numThreads = std::min(std::max(cpuCount, 1u), maxThreads);
+
+            // Shared state across threads (use shared_ptr because ObjC blocks copy-capture)
+            auto found = std::make_shared<std::atomic<bool>>(false);
+            auto totalHashes = std::make_shared<std::atomic<uint64_t>>(0);
+            __block NSString *winnerNonce = nil;
+            __block NSString *winnerResult = nil;
+
+            dispatch_group_t group = dispatch_group_create();
+            dispatch_queue_t minerQueue = dispatch_queue_create("pow.miner", DISPATCH_QUEUE_CONCURRENT);
+
+            const uint64_t attemptsPerThread = (attempts + numThreads - 1) / numThreads;
+
+            for (unsigned int t = 0; t < numThreads; t++) {
+                dispatch_group_async(group, minerQueue, ^{
+                    // Each thread gets its own copy of blobBytes
+                    std::vector<uint8_t> localBlob = blobBytes;
+                    uint32_t localNonce = startNonce32 + (uint32_t)(t * attemptsPerThread);
+                    uint64_t localHashes = 0;
+
+                    for (uint64_t i = 0; i < attemptsPerThread; i++) {
+                        if (found->load(std::memory_order_relaxed)) {
+                            break;
+                        }
+
+                        localHashes++;
+
+                        localBlob[nonceOffset]     = static_cast<uint8_t>(localNonce & 0xff);
+                        localBlob[nonceOffset + 1] = static_cast<uint8_t>((localNonce >> 8) & 0xff);
+                        localBlob[nonceOffset + 2] = static_cast<uint8_t>((localNonce >> 16) & 0xff);
+                        localBlob[nonceOffset + 3] = static_cast<uint8_t>((localNonce >> 24) & 0xff);
+
+                        Crypto::Hash hashResult;
+                        Crypto::cn_turtle_lite_slow_hash_v2(localBlob.data(), localBlob.size(), hashResult);
+
+                        uint64_t hashTail;
+                        memcpy(&hashTail, hashResult.data + 24, sizeof(hashTail));
+                        hashTail = CFSwapInt64LittleToHost(hashTail);
+
+                        if (hashTail <= targetValue) {
+                            bool expected = false;
+                            if (found->compare_exchange_strong(expected, true)) {
+                                winnerNonce = [NSString stringWithFormat:@"%02x%02x%02x%02x",
+                                               localBlob[nonceOffset],
+                                               localBlob[nonceOffset + 1],
+                                               localBlob[nonceOffset + 2],
+                                               localBlob[nonceOffset + 3]];
+                                std::vector<uint8_t> hashBytesVec(hashResult.data, hashResult.data + 32);
+                                static const char *hexChars = "0123456789abcdef";
+                                std::string hex;
+                                hex.resize(hashBytesVec.size() * 2);
+                                for (size_t k = 0; k < hashBytesVec.size(); k++) {
+                                    hex[k * 2]     = hexChars[(hashBytesVec[k] >> 4) & 0x0f];
+                                    hex[k * 2 + 1] = hexChars[hashBytesVec[k] & 0x0f];
+                                }
+                                winnerResult = [NSString stringWithUTF8String:hex.c_str()];
+                            }
+                            break;
+                        }
+
+                        localNonce += 1;
+                    }
+
+                    totalHashes->fetch_add(localHashes, std::memory_order_relaxed);
+                });
+            }
+
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+            if (found->load()) {
+                resolve(@{
+                    @"job_id": @"",
+                    @"nonce": winnerNonce,
+                    @"result": winnerResult,
+                    @"hashes_performed": @(totalHashes->load()),
+                    @"threads": @(numThreads)
+                });
+            } else {
+                resolve(@{
+                    @"hashes_performed": @(totalHashes->load()),
+                    @"threads": @(numThreads)
+                });
+            }
+        } catch (const std::exception &e) {
+            NSString *errorMessage = [NSString stringWithUTF8String:e.what()];
+            NSError *error = [NSError errorWithDomain:@"FindPowShareError"
+                                                 code:1
+                                             userInfo:@{NSLocalizedDescriptionKey: errorMessage}];
+            reject(@"find_pow_share_failed", errorMessage, error);
+        } catch (...) {
+            NSError *error = [NSError errorWithDomain:@"FindPowShareError"
+                                                 code:2
+                                             userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred"}];
+            reject(@"find_pow_share_failed", @"Unknown error occurred", error);
+        }
+    });
 }
 
 void processTransactionOutputs(

@@ -38,6 +38,12 @@ class MainApplication : Application(), ReactApplication {
                 }
 
                 override fun getJSMainModuleName(): String = "index"
+
+                override val isHermesEnabled: Boolean
+                    get() = true
+
+                override val isNewArchEnabled: Boolean
+                    get() = true
             }
         )
 
@@ -51,12 +57,12 @@ class MainApplication : Application(), ReactApplication {
         super.onCreate()
 
         SoLoader.init(this, OpenSourceMergedSoMapping)
-        // Install global User-Agent
+
+        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+            load()
+        }
+
         setUserAgent("hugin-messenger-v2.0.0")
-         if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-        // If you opted-in for the New Architecture, we load the native entry point for this app.
-        load()
-    }
 
         ApplicationLifecycleDispatcher.onApplicationCreate(this)
     }

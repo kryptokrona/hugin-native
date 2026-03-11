@@ -24,16 +24,25 @@ import { Notify, notify } from '../services/utils';
 import { MessageSync } from '../services/hugin/syncer';
 import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 import { Nodes } from './native';
-import { getDeviceId } from '../services/pushnotifications';
+import { cnFastHash, cnTurtleLiteSlowHashV2 } from '../services/NativeTest';
+import { findPowShare } from '../services/NativeTest';
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
     this.id = 0;
-    this.sentpush = false;
+    this.basePushRegistered = false;
+    this.callPushRegistered = false;
+    this.registeredRoomKeys = new Set();
+    this.pendingPushRoomKeys = new Set();
+    this.pushRegistrationInFlight = null;
+    this.pushRegistrationTimer = null;
+    this.pushRegistrationDebouncePromise = null;
+    this.pushRegistrationDebounceMs = 750;
     this.rpc = new RPC(IPC, (req, error) => {
       const data = this.parse(b4a.toString(req.data));
       if (!data) {
         console.log('**** ERRR PARSING DATA ***');
+        return;
       }
 
       if (this.pendingRequests.has(data.id)) {
@@ -50,7 +59,7 @@ export class Bridge {
     return new Promise((resolve, reject) => {
       data.id = this.id++;
       this.pendingRequests.set(data.id, { resolve, reject });
-      const resp = this.rpc.request('request');
+      const resp = this.rpc.request(1);
       resp.send(JSON.stringify(data));
     });
   }
@@ -64,8 +73,125 @@ export class Bridge {
   }
 
   send(data) {
-    const req = this.rpc.request('send');
+    const req = this.rpc.request(2);
     req.send(JSON.stringify(data));
+  }
+
+  async send_push_registration(data) {
+    await sleep(5000);
+    const res = await this.request({ type: 'push_registration', data });
+    const sent = res && res.sent;
+    if (!sent || sent.success !== true) {
+      const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
+      console.log('Push registration failed:', reason);
+    }
+    return sent;
+  }
+
+  get_room_keys_from_store() {
+    const rooms = useGlobalStore.getState().rooms;
+    return Object.values(rooms || {})
+      .map((room) => room?.roomKey)
+      .filter((roomKey) => typeof roomKey === 'string' && roomKey.length > 0);
+  }
+
+  get_pending_push_registrations(room_keys = []) {
+    const all_room_keys = [...new Set([...this.get_room_keys_from_store(), ...room_keys])];
+    const pending_room_keys = all_room_keys.filter((room_key) => !this.registeredRoomKeys.has(room_key));
+
+    return {
+      include_device_push: !this.basePushRegistered,
+      include_call_push: !this.callPushRegistered,
+      pending_room_keys,
+    };
+  }
+
+  mark_push_registrations_sent({
+    include_device_push,
+    include_call_push,
+    pending_room_keys,
+  }) {
+    if (include_device_push) this.basePushRegistered = true;
+    if (include_call_push) this.callPushRegistered = true;
+    pending_room_keys.forEach((room_key) => this.registeredRoomKeys.add(room_key));
+  }
+
+  collect_pending_push_room_keys(room_keys = []) {
+    room_keys
+      .filter((room_key) => typeof room_key === 'string' && room_key.length > 0)
+      .forEach((room_key) => this.pendingPushRoomKeys.add(room_key));
+  }
+
+  async run_push_registration_sync(room_keys = []) {
+    const state = this.get_pending_push_registrations(room_keys);
+    const {
+      include_device_push,
+      include_call_push,
+      pending_room_keys,
+    } = state;
+
+    if (!include_device_push && !include_call_push && pending_room_keys.length === 0) {
+      return { success: true, skipped: true };
+    }
+
+    const push_registration_batch = await Wallet.encrypt_push_registration_batch({
+      includeDevicePush: include_device_push,
+      includeCallPush: include_call_push,
+      roomKeys: pending_room_keys,
+    });
+    if (!push_registration_batch) {
+      return { success: true, skipped: true };
+    }
+
+    const sent = await this.send_push_registration(push_registration_batch);
+    if (sent && sent.success === true) {
+      this.mark_push_registrations_sent(state);
+    }
+    return sent;
+  }
+
+  async flush_push_registrations() {
+    const pending_room_keys = [...this.pendingPushRoomKeys];
+    this.pendingPushRoomKeys.clear();
+    return await this.run_push_registration_sync(pending_room_keys);
+  }
+
+  async sync_push_registrations(room_keys = []) {
+    this.collect_pending_push_room_keys(room_keys);
+
+    if (!useGlobalStore.getState().huginNode.connected) {
+      return null;
+    }
+
+    if (this.pushRegistrationInFlight) {
+      return this.pushRegistrationInFlight;
+    }
+
+    if (this.pushRegistrationDebouncePromise) {
+      return this.pushRegistrationDebouncePromise;
+    }
+
+    this.pushRegistrationDebouncePromise = new Promise((resolve, reject) => {
+      this.pushRegistrationTimer = setTimeout(async () => {
+        this.pushRegistrationTimer = null;
+        this.pushRegistrationDebouncePromise = null;
+        this.pushRegistrationInFlight = this.flush_push_registrations();
+
+        try {
+          const result = await this.pushRegistrationInFlight;
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        } finally {
+          this.pushRegistrationInFlight = null;
+          if (this.pendingPushRoomKeys.size > 0) {
+            await this.sync_push_registrations();
+          }
+        }
+      }, this.pushRegistrationDebounceMs);
+    });
+
+    return this.pushRegistrationDebouncePromise;
   }
 
   async on_message(m) {
@@ -81,20 +207,11 @@ export class Bridge {
       }
       switch (json.type) {
         case 'log':
-          console.log(json);
+          console.log("RPC LOG: ", json);
+          break;
         case 'hugin-node-connected':
           useGlobalStore.getState().setHuginNode({connected: true});
-          if (this.sentpush) return;
-          const pushRegistration = await Wallet.encrypt_push_registration();
-          this.send({type: 'push_registration', data: pushRegistration});
-          const callPushRegistration = await Wallet.encrypt_call_push_registration();
-          this.send({type: 'push_registration', data: callPushRegistration});
-          this.sentpush = true;
-          const rooms = useGlobalStore.getState().rooms;
-          for (const room in rooms) {
-            const roomPushRegistration = await Wallet.encrypt_room_push_registration(rooms[room].roomKey);
-            this.send({type: 'push_registration', data: roomPushRegistration});
-          }
+          await this.sync_push_registrations();
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')
@@ -105,9 +222,17 @@ export class Bridge {
           useGlobalStore.getState().setHuginNode({connected: true, address: json.address});
           break;
         case 'new-swarm':
+          if (!json.beam && typeof json.key === 'string' && json.key.length > 0) {
+            await this.sync_push_registrations([json.key]);
+          }
           break;
         case 'beam-message':
           MessageSync.check_for_pm(json.message, json.hash, json.background);
+          break;
+        case 'pool-messages':
+          if (Array.isArray(json.messages) && json.messages.length > 0) {
+            await MessageSync.decrypt(json.messages, false, json.background);
+          }
           break;
         case 'beam-connected':
           //Change state to -> "connected"
@@ -273,6 +398,36 @@ export class Bridge {
           request.data.signature,
         );
         return verify;
+      case 'cn-turtle-lite-slow-hash-v2':
+        return await cnTurtleLiteSlowHashV2(request.blobHex);
+      case 'cn-fast-hash':
+        return await cnFastHash(request.hashInput);
+      case 'pow-find-share':
+        const powStart = Date.now();
+        console.log('Starting PoW search', request)
+        let share = await findPowShare(
+          request.blobHex,
+          request.targetHex,
+          request.startNonce,
+          request.maxAttempts,
+          request.nonceTagBits,
+          request.nonceTagValue,
+        );
+        const powEnd = Date.now();
+        if (share && share.hashes_performed) {
+          const time_ms = powEnd - powStart;
+          if (time_ms > 0) {
+            const hashrate = (share.hashes_performed / time_ms) * 1000;
+            const threads = share.threads || 1;
+            console.log(`[PoW] Hashrate: ${hashrate.toFixed(2)} H/s (${share.hashes_performed} hashes / ${time_ms}ms / ${threads} threads)`);
+            console.log('[PoW] Share', share)
+          }
+        }
+        
+        if (share && !share.nonce) {
+          return null;
+        }
+        return share;
       default:
         return false;
     }

@@ -163,6 +163,11 @@ export const initDB = async () => {
       await db.executeSql(query);
     } catch (err) {}
 
+    query = 'ALTER TABLE roomsmessages ADD status TEXT default "success"';
+    try {
+      await db.executeSql(query);
+    } catch (err) {}
+
     const xkrwallet = `CREATE TABLE IF NOT EXISTS wallet (
       id INTEGER PRIMARY KEY,
       json TEXT
@@ -520,6 +525,18 @@ export async function deleteMessage(hash: string) {
   }
 }
 
+export async function deleteRoomMessage(hash: string) {
+  try {
+    let results = await db.executeSql(
+      'DELETE FROM roomsmessages WHERE hash = ?',
+      [hash],
+    );
+  } catch (err) {
+    console.log('Error removing room message', err);
+    return false;
+  }
+}
+
 export async function markMessageAsRead(hash: string, type: string) {
   try {
     const result = await db.executeSql(
@@ -636,7 +653,7 @@ export async function getLatestMessages() {
   for (const contact of contacts) {
     //Loop through list and get one message from each room
     const results = await db.executeSql(
-      'SELECT * FROM messages WHERE conversation = ? AND message IS NOT "" ORDER BY timestamp DESC LIMIT 1',
+      "SELECT * FROM messages WHERE conversation = ? AND message IS NOT NULL AND message != '' ORDER BY timestamp DESC LIMIT 1",
       [contact.address],
     );
 
@@ -668,7 +685,7 @@ export async function getLatestRoomMessages() {
   for (const room of rooms) {
     //Loop through list and get one message from each room
     const results = await db.executeSql(
-      'SELECT * FROM roomsmessages WHERE room = ? AND message IS NOT "" ORDER BY timestamp DESC LIMIT 1',
+      "SELECT * FROM roomsmessages WHERE room = ? AND message IS NOT NULL AND message != '' ORDER BY timestamp DESC LIMIT 1",
       [room.key],
     );
 
@@ -712,6 +729,17 @@ export async function getMessages(
     offset = page * limit;
   }
   const { name, address } = useUserStore.getState().user;
+
+  // Mark pending messages older than 30 seconds as failed
+  const thirtySecondsAgo = Date.now() - 30000;
+  try {
+    await db.executeSql(
+      `UPDATE messages SET status = 'failed' WHERE status = 'pending' AND timestamp < ?`,
+      [thirtySecondsAgo]
+    );
+  } catch (err) {
+    console.log('Failed to update old pending messages', err);
+  }
 
   const results: [ResultSet] = await db.executeSql(
     `SELECT * FROM messages WHERE conversation = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
@@ -949,7 +977,7 @@ export async function getFeedMessages(page: number, replies=false) {
   console.log('Fetching feed messages, offset ', offset, ' limit: ', limit, ' page: ', page);
 
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM feedmessages ${replies ? '' : 'WHERE reply = ""'} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`
+    `SELECT * FROM feedmessages ${replies ? '' : "WHERE reply = ''"} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`
   );
 
   // const files = Files.all();
@@ -1037,7 +1065,7 @@ export async function saveFeedMessage(
   nickname: string,
   hash: string,
 ) {
-  if ((!message || message?.length === 0) && !tip) {
+  if (!message || message?.length === 0) {
     return false;
   }
   // console.log('saving feed msg: ', address,
@@ -1085,6 +1113,7 @@ export async function saveRoomMessage(
   hash: string,
   sent: boolean,
   tip: TipType | false = false,
+  status: MessageStatus = 'success'
 ) {
 
   if (await roomMessageExists(hash)) return false
@@ -1094,7 +1123,7 @@ export async function saveRoomMessage(
   }
   try {
     await db.executeSql(
-      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, read, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, read, tip, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         address,
         message,
@@ -1106,6 +1135,7 @@ export async function saveRoomMessage(
         sent ? 1 : 0,
         sent ? 1 : 0,
         JSON.stringify(tip),
+        status,
       ],
     );
 
@@ -1119,6 +1149,7 @@ export async function saveRoomMessage(
       room: room,
       sent: sent,
       timestamp: timestamp,
+      status: status,
       tip,
     };
     // console.log('Saved message: ', newMessage);
