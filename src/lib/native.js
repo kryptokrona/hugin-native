@@ -49,13 +49,14 @@ export class Swarm {
 
     const sent_message = await rpc.request(data);
 
-    await this.send_room_message_push(sent_message);
+    const sent_node = await this.send_room_message_push(sent_message);
 
-    return sent_message;
+
+    return {sent_message, sent_node};
   }
 
   async send_room_message_push(message) {
-
+    let sent;
     try {
     const roomKey = message.g.substring(0,64);
     const secretKey = keychain.getNaclKeys(roomKey).secretKey;
@@ -110,12 +111,19 @@ export class Swarm {
     };
     // Convert json to hex
     let payload_hex = toHex(JSON.stringify(payload_box));
-    const sent = await Nodes.message(
+
+    console.log("Sending to node", payload_hex);
+    sent = await Nodes.message(
       payload_hex,
       message.hash,
       await Wallet.generate_room_view_tag(message.g),
       'room',
     );
+
+    console.log("Sent to node", sent);
+
+    if (sent.success === true) return sent;
+
     if (!sent || sent.success !== true) {
       const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
       console.log('❌ Push registration failed:', reason);
@@ -125,6 +133,11 @@ export class Swarm {
     } catch (e) {
       console.log('❌ Error sending push:', e)
     }
+
+    console.log("Returning", sent);
+
+    return sent || { success: false };
+
   }
 
   async feed_message(message, reply, tip) {

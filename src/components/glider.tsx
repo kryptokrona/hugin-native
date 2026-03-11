@@ -1,12 +1,19 @@
 import { useEffect, useRef } from "react";
 import { Animated } from "react-native";
 
-export const GlideInItem = ({ children }) => {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(30)).current;
-  const scale = useRef(new Animated.Value(0.95)).current;
+interface Props {
+  children: React.ReactNode;
+  skipAnimation?: boolean;
+}
+
+export const GlideInItem = ({ children, skipAnimation = false }: Props) => {
+  const opacity = useRef(new Animated.Value(skipAnimation ? 1 : 0)).current;
+  const translateY = useRef(new Animated.Value(skipAnimation ? 0 : 30)).current;
+  const scale = useRef(new Animated.Value(skipAnimation ? 1 : 0.95)).current;
 
   useEffect(() => {
+    if (skipAnimation) return;
+
     Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,

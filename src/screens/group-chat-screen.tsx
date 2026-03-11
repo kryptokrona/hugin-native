@@ -52,6 +52,7 @@ import {
 import { MainScreens } from '@/config';
 import {
   useGlobalStore,
+  useUserStore,
   setStoreCurrentRoom,
   useThemeStore,
   WebRTC,
@@ -71,11 +72,12 @@ import { Header } from '../components/_navigation/header';
 import { GlideInItem } from '../components/glider';
 import {
   onSendGroupMessage,
-  saveRoomMessageAndUpdate,
   onSendGroupMessageWithFile,
   setRoomMessages,
+  saveRoomMessageAndUpdate,
 } from '../services/bare/groups';
-import { getRoomMessages } from '../services/bare/sqlite';
+import { deleteRoomMessage, getRoomMessages } from '../services/bare/sqlite';
+import { randomKey } from '../services/bare/crypto';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { sleep } from '@/utils';
 
@@ -108,6 +110,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const typingUsers = useGlobalStore((state) => state.typingUsers[roomKey]);
+
+  const animatedHashes = useRef<Set<string>>(new Set());
 
   useEffect(() => {
 
@@ -418,38 +422,103 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     reply?: string,
     emoji?: boolean | undefined,
     tip?: TipType | undefined,
+    retryHash?: string,
   ) {
     if (file) {
       onSendGroupMessageWithFile(roomKey, file, text);
-      //If we need to return something... or print something locally
-      // console.log('sent file!', sentFile);
     }
     if (text.length) {
-      const sent = await onSendGroupMessage(
-        roomKey,
-        text,
-        reply ? reply : replyToMessageHash,
-        tip ? tip : false,
-      );
-      const save = sent;
+      const timestamp = Date.now();
+      const tempHash = randomKey();
+      
+      if (retryHash) {
+        // Remove the failed message immediately from db and state
+        await deleteRoomMessage(retryHash);
+        const currentMessages = useGlobalStore.getState().roomMessages;
+        setStoreRoomMessages(currentMessages.filter((m) => m.hash !== retryHash));
+      }
 
+      const nickname = roomUsers?.find(u => u.address === myUserAddress)?.name || useUserStore.getState().user.name || 'Anon';
+
+      // Save as pending locally
       await saveRoomMessageAndUpdate(
-        save.k,
-        save.m,
-        save.g,
-        save.r,
-        save.t,
-        save.n,
-        save.hash,
+        myUserAddress,
+        text,
+        roomKey,
+        reply ? reply : replyToMessageHash,
+        timestamp,
+        nickname,
+        tempHash,
         true,
         undefined,
         undefined,
         tip,
+        undefined,
+        'pending'
       );
       setReplyToMessageHash('');
-    }
-    if (!emoji) {
-      scrollToBottom();
+      
+      if (!emoji) {
+        scrollToBottom();
+      }
+
+      try {
+
+        console.log("Sending message to swarm");
+
+        const {sent_message, sent_node} = await onSendGroupMessage(
+          roomKey,
+          text,
+          reply ? reply : replyToMessageHash,
+          tip ? tip : false,
+        );
+        const save = sent_message;
+
+        console.log('sent_node', sent_node);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Delete the temporary pending record
+        await deleteRoomMessage(tempHash);
+        
+        // Also remove it from Zustand memory so it can be replaced cleanly
+        const currentMessages = useGlobalStore.getState().roomMessages;
+        setStoreRoomMessages(currentMessages.filter((m) => m.hash !== tempHash));
+
+        await saveRoomMessageAndUpdate(
+          save.k,
+          save.m,
+          save.g,
+          save.r,
+          save.t,
+          save.n,
+          save.hash,
+          true,
+          undefined,
+          undefined,
+          tip,
+          undefined,
+          sent_node.success ? 'success' : 'failed'
+        );
+      } catch (err) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // Update local record to failed
+        await saveRoomMessageAndUpdate(
+          myUserAddress,
+          text,
+          roomKey,
+          reply ? reply : replyToMessageHash,
+          timestamp,
+          nickname,
+          tempHash,
+          true,
+          undefined,
+          undefined,
+          tip,
+          undefined,
+          'failed'
+        );
+      }
     }
   }
 
@@ -515,9 +584,13 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           keyExtractor={(item: Message, i) => `${item.address}-${i}`}
           renderItem={({ item, index }) => {
             const previousMessage = messages[index - 1];
+            const nextMessage = messages[index + 1];
+
             const onlyMessage =
-            !!previousMessage &&
-            previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && !item.tip;
+              !!previousMessage &&
+              previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && !item.tip;
+              
+            const isLastInCluster = true;
             const isNewestMessage = index === messages.length - 1;
             const isFirstUnread = index === unreadIndex;
             const content = (
@@ -543,15 +616,24 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 tip={item.tip}
                 read={item.read}
                 scrollToMessage={scrollToMessage}
-                onlyMessage={onlyMessage}
+                status={item.status}
+                isLastInCluster={isLastInCluster}
+                onRetryPress={(hashStr) => onSend(item.message, null, undefined, false, undefined, hashStr)}
               />
                   </>
             );
 
-            return isNewestMessage ? (
-              <GlideInItem>{content}</GlideInItem>
-            ) : (
-              content
+            const isPendingOrUnsent = (item.sent && item.status === "pending") || !item.sent;
+            const shouldAnimate = isNewestMessage && isPendingOrUnsent && !animatedHashes.current.has(item.hash);
+            
+            if (shouldAnimate) {
+              animatedHashes.current.add(item.hash);
+            }
+
+            return (
+              <GlideInItem skipAnimation={!shouldAnimate}>
+                {content}
+              </GlideInItem>
             );
           }}
           contentContainerStyle={styles.flatListContent}

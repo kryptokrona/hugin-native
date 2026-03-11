@@ -104,6 +104,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const inCall = currentCall.room === keyRef.current;
 
   const [callMenuActive, setCallMenuActive] = useState<boolean>(false);
+  const animatedHashes = useRef<Set<string>>(new Set());
 
   function onCloseCallMenu() {
     setCallMenuActive(false);
@@ -375,13 +376,20 @@ useEffect(() => {
         sent: true,
         reactions: [],
         joined: false,
-        status: 'success',
+        status: 'pending',
         file
       };
 
-      const messageList = retryHash ? messages.filter(a => a.hash != retryHash) : messages;
+      const messageList = messages;
 
-      setStoreMessages([...messageList, newMessage]);
+      if (retryHash) {
+        // Remove the failed message immediately from db and state
+        await deleteMessage(retryHash);
+        const filteredMessages = messages.filter(a => a.hash !== retryHash);
+        setStoreMessages([...filteredMessages, newMessage]);
+      } else {
+        setStoreMessages([...messageList, newMessage]);
+      }
 
     if (file) {
       text = file.fileName;
@@ -392,7 +400,6 @@ useEffect(() => {
       //If we need to return something... or print something locally
       // console.log('sent file!', sentFile);
     } else {
-      if (retryHash) await deleteMessage(retryHash);
       const savedOptimistic = await saveMessage(
         roomKey,
         text,
@@ -400,19 +407,47 @@ useEffect(() => {
         timestamp,
         outgoingHash,
         true,
-        address,
+        address as string,
         undefined,
         name,
-        'success'
+        'pending'
       );
       if (savedOptimistic) {
         updateMessage(savedOptimistic, false);
         setLatestMessages();
       }
 
+      const timeoutId = setTimeout(async () => {
+        const currentMessages = useGlobalStore.getState().messages;
+        const msgStillPending = currentMessages.find(m => m.hash === outgoingHash && m.status === 'pending');
+        
+        if (msgStillPending) {
+          msgStillPending.status = 'failed';
+          setStoreMessages([...currentMessages.filter(m => m.hash !== outgoingHash), msgStillPending]);
+          
+          await saveMessage(
+            roomKey,
+            text,
+            '',
+            timestamp,
+            outgoingHash,
+            true,
+            address as string,
+            undefined,
+            name,
+            'failed'
+          );
+          
+          Toast.show({
+            text1: 'Message sending timed out',
+            type: 'error',
+          });
+        }
+      }, 30000);
+
       ///
       // const beam = false; //// *** check if connected to this user in beam.
-      const { success, error } = await Wallet.send_message(
+      const { success, error, hash } = await Wallet.send_message(
         text,
         huginAddress,
         online,
@@ -420,11 +455,18 @@ useEffect(() => {
         outgoingHash
       );
 
+      console.log('Message sent with status: ', success, 'error: ', error, "hash", hash);
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       if (!success) {
           Toast.show({
             text1: error,
             type: 'error',
           });   
+
+        // Clear the timeout since we got an error response
+        clearTimeout(timeoutId);
 
         if (error == 'Not verified.') {
           setModalVisible(true);
@@ -440,7 +482,7 @@ useEffect(() => {
           timestamp,
           outgoingHash,
           true,
-          address,
+          address as string,
           undefined,
           name,
           "failed"
@@ -451,6 +493,35 @@ useEffect(() => {
         }
 
         return;
+      }
+
+      // Clear the timeout since we got a response
+      clearTimeout(timeoutId);
+
+      // First delete the pending message with the old hash
+      await deleteMessage(outgoingHash);
+
+      // Now create the success message with the NEW hash
+      newMessage.hash = hash;
+      newMessage.status = 'success';
+      const updatedMessageList = messageList.filter(m => m.hash !== outgoingHash);
+      setStoreMessages([...updatedMessageList, newMessage]);
+      
+      const savedSuccess = await saveMessage(
+        roomKey,
+        text,
+        '',
+        timestamp,
+        hash,
+        true,
+        address as string,
+        undefined,
+        name,
+        "success"
+      );
+      if (savedSuccess) {
+        updateMessage(savedSuccess, false);
+        setLatestMessages();
       }
 
       setReplyToMessageHash('');
@@ -535,10 +606,19 @@ useEffect(() => {
         renderItem={({ item, index }) => {
           const isNewestMessage = index === messages.length - 1;
           const previousMessage = messages[index - 1];
+          const nextMessage = messages[index + 1];
 
           const onlyMessage =
             !!previousMessage &&
             previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && item.tip != false;
+
+          const nextIsPending = (nextMessage?.sent && nextMessage?.status === "pending") || !nextMessage?.sent;
+          const hasNextInCluster =
+            !!nextMessage &&
+            !nextIsPending &&
+            nextMessage.address === item.address && nextMessage.timestamp - item.timestamp < 500000 && nextMessage.tip != false;
+          
+          const isLastInCluster = !hasNextInCluster;
       
           const messageContent = (
             <MessageItem
@@ -558,13 +638,20 @@ useEffect(() => {
               tip={item.tip}
               status={item.status}
               onlyMessage={onlyMessage}
-              onPress={item.status == 'failed' ? 
-                () => onSend(item.message, item.file, item.reply, false, false, item.hash) : 
-                () => {}}
+              isLastInCluster={isLastInCluster}
+              onRetryPress={(hashStr) => onSend(item.message || '', undefined, '', false, undefined, hashStr)}
             />
           );
-      
-          return isNewestMessage && ((item.sent && item.status == "pending") || (item.sent != true))  ? (
+          const isPendingOrUnsent = (item.sent && item.status === "pending") || !item.sent;
+          const shouldAnimate = isNewestMessage && isPendingOrUnsent && !animatedHashes.current.has(item.hash);
+          
+          if (shouldAnimate) {
+            animatedHashes.current.add(item.hash);
+          }
+
+          const hasBeenAnimated = animatedHashes.current.has(item.hash);
+
+          return hasBeenAnimated ? (
             <GlideInItem>{messageContent}</GlideInItem>
           ) : (
             messageContent

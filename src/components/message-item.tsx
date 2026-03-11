@@ -50,6 +50,8 @@ interface Props extends Partial<Message> {
   status?: MessageStatus;
   scrollToMessage?: (hash: string) => void;
   onlyMessage?: boolean;
+  isLastInCluster?: boolean;
+  onRetryPress?: (hash: string) => void;
 }
 
 export const MessageItem: React.FC<Props> = ({
@@ -71,7 +73,9 @@ export const MessageItem: React.FC<Props> = ({
   dm = false,
   status = 'success',
   onlyMessage = false,
-  scrollToMessage = () => {}
+  scrollToMessage = () => {},
+  isLastInCluster = false,
+  onRetryPress
 }) => {
   try {
     tip = JSON.parse(tip);
@@ -93,6 +97,13 @@ export const MessageItem: React.FC<Props> = ({
 
   const handlePress = () => {
   const now = Date.now();
+
+  if (status === 'failed' && onRetryPress) {
+    if (replyHash) {
+      onRetryPress(replyHash);
+    }
+    return;
+  }
 
   if (now - lastPress.current < DOUBLE_PRESS_DELAY && status === 'success' && !dm) {
     onReaction('👍');
@@ -247,7 +258,6 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
       onPress={handlePress}
       style={[
         styles.container,
-        status === 'pending' && styles.pending,
         onlyMessage && { marginTop: -8, marginBottom: 2 }
       ]}
       onLongPress={handleLongPress}
@@ -395,7 +405,7 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
     {!audioDetails?.isAudioMessage &&
       !imageDetails?.isImageMessage &&
       message && (
-        <TextField size="small" style={styles.message}>
+        <TextField size="small" style={styles.message} color={status === 'failed' ? '#ff4444' : undefined}>
           {cleanedMessage}
         </TextField>
       )}
@@ -406,16 +416,11 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
   </View>
 
       </View>
-      {status == 'failed' &&
-      <View>
-        <TextField size='xsmall'>❌</TextField>
+      {status === 'success' && userAddress === myUserAddress && isLastInCluster && (
+      <View style={{ justifyContent: 'flex-end', paddingBottom: 10, paddingLeft: 2 }}>
+        <CustomIcon type="IO" name="checkmark" size={16} color={theme.mutedForeground} />
       </View>
-      }
-      {status == 'pending' &&
-      <View>
-        <ActivityIndicator size={'small'} /> 
-      </View>
-      }
+      )}
     </TouchableOpacity>
   );
 };
