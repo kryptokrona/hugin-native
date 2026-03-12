@@ -261,7 +261,6 @@ async listen() {
   async node_connection(conn) {
     this.connection = conn
     Hugin.send('hugin-node-connected', {})
-    this.start_job_polling();
     conn.on('error', (error) => {
     if (is_timeout_error(error)) {
       console.log('Node connection timed out, reconnecting');
@@ -395,17 +394,6 @@ sync(data) {
   });
 }
 
-start_job_polling() {
-  if (this.jobPollTimer) return;
-  this.jobPollTimer = setInterval(async () => {
-    if (!this.connection) return;
-    const response = await this.request_job();
-    if (response && response.job) {
-      this.set_job(response.job);
-    }
-  }, 15000);
-}
-
 set_job(job) {
   console.log('job', job)
   if (!job || !job.job_id) return;
@@ -488,7 +476,7 @@ async challenge(message_hash) {
     const all_nonces = new Set();
 
     while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < POW_REQUIRED_SHARES) {
-      let job = this.currentJob;
+      let job = null;
       if (!job) {
         const jobResponse = await this.request_job();
         if (jobResponse && jobResponse.job) {
