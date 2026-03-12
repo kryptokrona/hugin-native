@@ -66,6 +66,8 @@ export const MessagesScreen: React.FC<Props> = () => {
   const [showQR, setShowQR] = useState(false);
   const { hasPermission, requestPermission } = useCameraPermission();
 
+  console.log('contacts', contacts);
+
   function gotQRCode(code: string | undefined) {
     setLink(code ?? null);
     setQrScanner(false);
