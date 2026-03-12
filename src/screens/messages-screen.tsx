@@ -42,7 +42,8 @@ import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
 import { Beam } from '../lib/native';
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
-import { addContact, deleteContact } from '../services/bare/sqlite';
+import { addContact, deleteContact, getContacts } from '../services/bare/sqlite';
+import { MessageSync } from '../services/hugin/syncer';
 
 import 'text-encoding';
 
@@ -120,6 +121,8 @@ export const MessagesScreen: React.FC<Props> = () => {
   function removeContact(contact: { address: string; name: string }) {
     const doRemoveContact = async (address: string) => {
       await deleteContact(address);
+      const contacts = await getContacts();
+      MessageSync.known_keys = contacts.map((entry) => entry.messagekey);
       setLatestMessages();
     };
 

@@ -319,7 +319,7 @@ handle_node_packet(data) {
   if (this.requests.has(data.id)) {
     const { resolve } = this.requests.get(data.id);
     if ('chunks' in data) {
-      this.pending.push(data.repsonse)
+      this.pending.push(data.response)
       return
     }
     if ('done' in data) {
@@ -409,6 +409,7 @@ send_packet(packet) {
 sync(data) {
   if (!this.connection) return [];
   return new Promise((resolve, reject) => {
+    this.pending = [];
     data.id = data.timestamp
     this.requests.set(data.id, { resolve, reject });
     if (!this.send_packet(data)) {
@@ -937,6 +938,22 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
   }
 
   console.log('*********Got new Connection! ************');
+  const incomingPublicKey = peer.publicKey.toString('hex');
+  const duplicateByPublicKey = active.connections.find(
+    (a) => a.connection !== connection && a.publicKey === incomingPublicKey,
+  );
+  if (duplicateByPublicKey) {
+    // Keep an already-joined healthy connection, otherwise replace stale duplicates.
+    if (duplicateByPublicKey.joined && is_connection_healthy(duplicateByPublicKey.connection)) {
+      try {
+        connection.end();
+        connection.destroy();
+      } catch (e) {}
+      return;
+    }
+    connection_closed(duplicateByPublicKey.connection, topic, 'Duplicate public key');
+  }
+
   active.connections.push({
     address: '',
     connection,
@@ -947,7 +964,7 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
     knownHashes: [],
     peer,
     request: true,
-    publicKey: peer.publicKey.toString('hex'),
+    publicKey: incomingPublicKey,
   });
   send_joined_message(topic, dht_keys, connection).catch((error) => {
     console.log('Failed to send joined message', error);
@@ -1250,6 +1267,13 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       con.video = joined.video;
       joined.key = active.key;
       con.request = true;
+      close_duplicate_peer_connections(
+        active,
+        con.connection,
+        (entry) => !!entry.address && entry.address === joined.address,
+        topic,
+        'Duplicate address',
+      );
       active.peers.push(peer.publicKey.toString('hex'));
       let uniq = {};
       const peers = active.peers.filter(
@@ -1931,16 +1955,25 @@ const send_peer_message = (address, topic, message) => {
     errorMessage('Swarm is not active');
     return;
   }
-  const con = active.connections.find((a) => a.address === address);
-  if (!con) {
+  const candidates = active.connections.filter((a) => a.address === address);
+  if (!candidates.length) {
     errorMessage('Connection is closed');
     return;
   }
-  try {
-    con.connection.write(JSON.stringify(message));
-  } catch (e) {
-    console.error('Error writing to connection:', e);
+  const ordered = candidates.sort((a, b) => {
+    const aScore = (a.joined ? 2 : 0) + (is_connection_healthy(a.connection) ? 1 : 0);
+    const bScore = (b.joined ? 2 : 0) + (is_connection_healthy(b.connection) ? 1 : 0);
+    return bScore - aScore;
+  });
+  for (const con of ordered) {
+    try {
+      con.connection.write(JSON.stringify(message));
+      return;
+    } catch (e) {
+      continue;
+    }
   }
+  console.error('Error writing to connection: all candidates failed');
 };
 
 const ban_connection = (conn, topic) => {
@@ -2082,6 +2115,23 @@ const get_active_topic = (topic) => {
     return false;
   }
   return active;
+};
+
+const is_connection_healthy = (connection) => {
+  if (!connection) return false;
+  if (connection.destroyed) return false;
+  if (connection.writable === false) return false;
+  return true;
+};
+
+const close_duplicate_peer_connections = (active, keepConnection, predicate, topic, reason) => {
+  if (!active) return;
+  const duplicates = active.connections.filter(
+    (entry) => entry.connection !== keepConnection && predicate(entry),
+  );
+  for (const duplicate of duplicates) {
+    connection_closed(duplicate.connection, topic, reason);
+  }
 };
 
 const check_if_online = async (topic) => {

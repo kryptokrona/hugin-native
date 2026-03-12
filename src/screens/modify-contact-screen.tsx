@@ -25,9 +25,10 @@ import { setStoreCurrentContact, useGlobalStore } from '@/services';
 import { MainNavigationParamList, MainStackNavigationType } from '@/types';
 
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
-import { deleteContact, updateContact } from '../services/bare/sqlite';
+import { deleteContact, getContacts, updateContact } from '../services/bare/sqlite';
 import { getAvatar } from '../utils/avatar';
 import { Wallet } from '../services/kryptokrona/wallet';
+import { MessageSync } from '../services/hugin/syncer';
 
 interface Props {
   route: RouteProp<
@@ -118,6 +119,8 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
 
   async function onLeave() {
     await deleteContact(roomKey);
+    const contacts = await getContacts();
+    MessageSync.known_keys = contacts.map((entry) => entry.messagekey);
     setLatestMessages();
     // onDeleteGroup(roomKey);
     navigation.navigate(MainScreens.MessagesScreen);
