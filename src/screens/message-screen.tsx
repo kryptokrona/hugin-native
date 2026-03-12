@@ -104,6 +104,7 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const inCall = currentCall.room === keyRef.current;
 
   const [callMenuActive, setCallMenuActive] = useState<boolean>(false);
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const animatedHashes = useRef<Set<string>>(new Set());
 
   function onCloseCallMenu() {
@@ -657,7 +658,7 @@ useEffect(() => {
             messageContent
           );
         }}
-        contentContainerStyle={styles.flatListContent}
+        contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 60 : 40 }]}
         initialNumToRender={messages.length}
         maxToRenderPerBatch={messages.length}
       />
@@ -671,6 +672,7 @@ useEffect(() => {
           replyToName={replyToName}
           onCloseReplyPress={onCloseReplyPress}
           dm={true}
+          onFocusChange={setIsInputFocused}
         />
       </KeyboardAvoidingView>
 
@@ -692,7 +694,7 @@ useEffect(() => {
 const styles = StyleSheet.create({
   flatListContent: {
     flexDirection: 'column-reverse',
-    paddingTop: 60,
+    paddingTop: 75,
   },
   inputWrapper: {
     bottom: 0,
