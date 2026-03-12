@@ -30,6 +30,8 @@ const {
   update_remote_file,
 } = require('./beam');
 const { Storage } = require('./storage.js');
+const RPC = require('bare-rpc');
+const b4a = require('b4a');
 
 const process = require('bare-process');
 
@@ -100,6 +102,10 @@ let idletimer = null;
 
 let last_activity = Date.now();
 
+const RPC_COMMANDS = Object.freeze({
+  PACKET: 1,
+});
+
 const feed_request_process = async () => {
 
   feed_requests_started = true;
@@ -134,6 +140,7 @@ class NodeConnection {
   constructor() {
     this.node = null
     this.connection = null
+    this.rpc = null
     this.requests = new Map()
     this.discovery = null
     this.pending = []
@@ -260,6 +267,13 @@ async listen() {
   }
   async node_connection(conn) {
     this.connection = conn
+    this.rpc = new RPC(conn, (req) => {
+      const packet = this.parse(b4a.toString(req.data));
+      if (packet) {
+        this.handle_node_packet(packet);
+      }
+      req.reply(JSON.stringify({ ok: true, data: null, error: null }));
+    });
     Hugin.send('hugin-node-connected', {})
     conn.on('error', (error) => {
     if (is_timeout_error(error)) {
@@ -273,76 +287,75 @@ async listen() {
         this.reconnect()
    })
 
-   conn.on('data', d => {
-    const string = d.toString()
-    const data = this.parse(string)
-    if (!data) return
-      if (data.type === 'new-message' && Array.isArray(data.messages)) {
-        Hugin.send('pool-messages', {
-          messages: data.messages,
-          background: Hugin.background,
-        })
-        return
-      }
-      if ('address' in data) {
-        if (typeof data.address !== 'string') return
-        if (data.address?.length !== 99) return
-        this.address = data.address
-        Hugin.send('node-address', {address: data.address})
-        return
-      }
+   conn.on('data', () => {})
+}
 
-      if (data.type === 'job' && data.job && !this.requests.has(data.id)) {
-        logPow('job_push', { type: data.type, jobId: data.job && data.job.job_id });
+handle_node_packet(data) {
+  if (data.type === 'new-message' && Array.isArray(data.messages)) {
+    Hugin.send('pool-messages', {
+      messages: data.messages,
+      background: Hugin.background,
+    })
+    return
+  }
+  if ('address' in data) {
+    if (typeof data.address !== 'string') return
+    if (data.address?.length !== 99) return
+    this.address = data.address
+    Hugin.send('node-address', {address: data.address})
+    return
+  }
+
+  if (data.type === 'job' && data.job && !this.requests.has(data.id)) {
+    logPow('job_push', { type: data.type, jobId: data.job && data.job.job_id });
+    const validation = validate_pow_job(data.job);
+    if (validation.ok) {
+      this.set_job(data.job);
+    } else {
+      logPow('job_reject', { reason: validation.reason });
+    }
+    return;
+  }
+  if (this.requests.has(data.id)) {
+    const { resolve } = this.requests.get(data.id);
+    if ('chunks' in data) {
+      this.pending.push(data.repsonse)
+      return
+    }
+    if ('done' in data) {
+      resolve(this.pending);
+      this.requests.delete(data.id);
+      return
+    }
+
+    if ('success' in data) {
+      resolve(data)
+      this.requests.delete(data.id);
+      return
+    }
+
+    if (data.type === 'job' || data.type === 'job_pending') {
+      logPow('job_response', {
+        id: data.id,
+        type: data.type,
+        jobId: data.job && data.job.job_id,
+      });
+      if (data.job) {
         const validation = validate_pow_job(data.job);
         if (validation.ok) {
           this.set_job(data.job);
         } else {
           logPow('job_reject', { reason: validation.reason });
         }
-        return;
       }
-      if (this.requests.has(data.id)) {
-        const { resolve, reject } = this.requests.get(data.id);
-        if ('chunks' in data) {
-          this.pending.push(data.repsonse)
-          return
-        }
-        if ('done' in data) {
-          resolve(this.pending);
-          this.requests.delete(data.id);
-          return
-        }
+      resolve(data);
+      this.requests.delete(data.id);
+      return;
+    }
 
-        if ('success' in data) {
-          resolve(data)
-          this.requests.delete(data.id);
-          return
-        }
-
-        if (data.type === 'job' || data.type === 'job_pending') {
-          logPow('job_response', {
-            id: data.id,
-            type: data.type,
-            jobId: data.job && data.job.job_id,
-          });
-          if (data.job) {
-            const validation = validate_pow_job(data.job);
-            if (validation.ok) {
-              this.set_job(data.job);
-            } else {
-              logPow('job_reject', { reason: validation.reason });
-            }
-          }
-          resolve(data);
-          this.requests.delete(data.id);
-          return;
-        }
-
-        resolve(data.response);
-        this.requests.delete(data.id);
-     }
-    })
+    resolve(data.response);
+    this.requests.delete(data.id);
+  }
 }
 
 async change(address, pub) {
@@ -381,15 +394,27 @@ async reconnect() {
   return;
 }
 
+send_packet(packet) {
+  if (!this.rpc) return false;
+  try {
+    const req = this.rpc.request(RPC_COMMANDS.PACKET);
+    req.send(JSON.stringify(packet));
+    req.reply().catch(() => {});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 sync(data) {
   if (!this.connection) return [];
   return new Promise((resolve, reject) => {
     data.id = data.timestamp
     this.requests.set(data.id, { resolve, reject });
-    try {
-      this.connection.write(JSON.stringify(data));
-    } catch (e) {
-      console.error('Error writing to connection:', e);
+    if (!this.send_packet(data)) {
+      console.error('Error writing to connection: send_packet_failed');
+      this.requests.delete(data.id);
+      resolve([]);
     }
   });
 }
@@ -414,13 +439,14 @@ async request_job() {
   return new Promise((resolve, reject) => {
     const id = random_key().toString('hex');
     this.requests.set(id, { resolve, reject });
-    try {
-      this.connection.write(JSON.stringify({
-        type: 'job_request',
-        id,
-      }));
-    } catch (e) {
-      console.error('Error writing to connection:', e);
+    const sent = this.send_packet({
+      type: 'job_request',
+      id,
+    });
+    if (!sent) {
+      this.requests.delete(id);
+      resolve(null);
+      return;
     }
     logPow('job_request', { id });
     setTimeout(() => {
@@ -606,13 +632,11 @@ async send_pow_packet({
       }
       return await new Promise((resolve, reject) => {
         this.requests.set(request_id, { resolve, reject });
-        try {
-          this.connection.write(JSON.stringify(packet));
-        } catch (e) {
+        if (!this.send_packet(packet)) {
           this.requests.delete(request_id);
           resolve({ success: false, reason: 'write_failed' });
           return;
-        }
+        } 
         setTimeout(() => {
           if (!this.requests.has(request_id)) return;
           this.requests.delete(request_id);
