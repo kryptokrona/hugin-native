@@ -63,12 +63,14 @@ export const PreviewItem: React.FC<Props> = ({
 
 
     useEffect(() => {
-      if (roomKey) {
+      if (roomKey) { // Meaning rooms, not DM
         setOnline(allRoomUsers[mRoomKey]?.length > 1);
         setCallOnline(allRoomUsers[mRoomKey]?.some(a => a.voice === true));
         return;
       }
-      setOnline(allRoomUsers[keyRef.current]?.length > 1);
+      const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current];
+
+      setOnline(currentRoomUsers?.some((a) => a.address === address));
       setCallOnline(allRoomUsers[keyRef.current]?.some(a => a.voice === true));
 
     }, [allRoomUsers]); // Run only when `roomKey` changes

@@ -111,6 +111,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const typingUsers = useGlobalStore((state) => state.typingUsers[roomKey]);
 
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const animatedHashes = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -636,7 +637,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
               </GlideInItem>
             );
           }}
-          contentContainerStyle={styles.flatListContent}
+          contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 50 : 30 }]}
           initialNumToRender={messages.length}
           maxToRenderPerBatch={messages.length}
           onEndReached={loadMoreMessages}
@@ -682,6 +683,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             onSend={onSend}
             replyToName={replyToName}
             onCloseReplyPress={onCloseReplyPress}
+            onFocusChange={setIsInputFocused}
           />
         </KeyboardAvoidingView>
 
@@ -707,7 +709,7 @@ const styles = StyleSheet.create({
   },
   flatListContent: {
     flexDirection: 'column-reverse',
-    paddingTop: 60,
+    paddingTop: 75,
     maxWidth: '100%',
   },
   flatListWrapper: {

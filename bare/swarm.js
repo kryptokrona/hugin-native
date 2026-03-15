@@ -30,6 +30,8 @@ const {
   update_remote_file,
 } = require('./beam');
 const { Storage } = require('./storage.js');
+const RPC = require('bare-rpc');
+const b4a = require('b4a');
 
 const process = require('bare-process');
 
@@ -100,6 +102,10 @@ let idletimer = null;
 
 let last_activity = Date.now();
 
+const RPC_COMMANDS = Object.freeze({
+  PACKET: 1,
+});
+
 const feed_request_process = async () => {
 
   feed_requests_started = true;
@@ -134,6 +140,7 @@ class NodeConnection {
   constructor() {
     this.node = null
     this.connection = null
+    this.rpc = null
     this.requests = new Map()
     this.discovery = null
     this.pending = []
@@ -260,8 +267,14 @@ async listen() {
   }
   async node_connection(conn) {
     this.connection = conn
+    this.rpc = new RPC(conn, (req) => {
+      const packet = this.parse(b4a.toString(req.data));
+      if (packet) {
+        this.handle_node_packet(packet);
+      }
+      req.reply(JSON.stringify({ ok: true, data: null, error: null }));
+    });
     Hugin.send('hugin-node-connected', {})
-    this.start_job_polling();
     conn.on('error', (error) => {
     if (is_timeout_error(error)) {
       console.log('Node connection timed out, reconnecting');
@@ -274,76 +287,75 @@ async listen() {
         this.reconnect()
    })
 
-   conn.on('data', d => {
-    const string = d.toString()
-    const data = this.parse(string)
-    if (!data) return
-      if (data.type === 'new-message' && Array.isArray(data.messages)) {
-        Hugin.send('pool-messages', {
-          messages: data.messages,
-          background: Hugin.background,
-        })
-        return
-      }
-      if ('address' in data) {
-        if (typeof data.address !== 'string') return
-        if (data.address?.length !== 99) return
-        this.address = data.address
-        Hugin.send('node-address', {address: data.address})
-        return
-      }
+   conn.on('data', () => {})
+}
 
-      if (data.type === 'job' && data.job && !this.requests.has(data.id)) {
-        logPow('job_push', { type: data.type, jobId: data.job && data.job.job_id });
+handle_node_packet(data) {
+  if (data.type === 'new-message' && Array.isArray(data.messages)) {
+    Hugin.send('pool-messages', {
+      messages: data.messages,
+      background: Hugin.background,
+    })
+    return
+  }
+  if ('address' in data) {
+    if (typeof data.address !== 'string') return
+    if (data.address?.length !== 99) return
+    this.address = data.address
+    Hugin.send('node-address', {address: data.address})
+    return
+  }
+
+  if (data.type === 'job' && data.job && !this.requests.has(data.id)) {
+    logPow('job_push', { type: data.type, jobId: data.job && data.job.job_id });
+    const validation = validate_pow_job(data.job);
+    if (validation.ok) {
+      this.set_job(data.job);
+    } else {
+      logPow('job_reject', { reason: validation.reason });
+    }
+    return;
+  }
+  if (this.requests.has(data.id)) {
+    const { resolve } = this.requests.get(data.id);
+    if ('chunks' in data) {
+      this.pending.push(data.response)
+      return
+    }
+    if ('done' in data) {
+      resolve(this.pending);
+      this.requests.delete(data.id);
+      return
+    }
+
+    if ('success' in data) {
+      resolve(data)
+      this.requests.delete(data.id);
+      return
+    }
+
+    if (data.type === 'job' || data.type === 'job_pending') {
+      logPow('job_response', {
+        id: data.id,
+        type: data.type,
+        jobId: data.job && data.job.job_id,
+      });
+      if (data.job) {
         const validation = validate_pow_job(data.job);
         if (validation.ok) {
           this.set_job(data.job);
         } else {
           logPow('job_reject', { reason: validation.reason });
         }
-        return;
       }
-      if (this.requests.has(data.id)) {
-        const { resolve, reject } = this.requests.get(data.id);
-        if ('chunks' in data) {
-          this.pending.push(data.repsonse)
-          return
-        }
-        if ('done' in data) {
-          resolve(this.pending);
-          this.requests.delete(data.id);
-          return
-        }
+      resolve(data);
+      this.requests.delete(data.id);
+      return;
+    }
 
-        if ('success' in data) {
-          resolve(data)
-          this.requests.delete(data.id);
-          return
-        }
-
-        if (data.type === 'job' || data.type === 'job_pending') {
-          logPow('job_response', {
-            id: data.id,
-            type: data.type,
-            jobId: data.job && data.job.job_id,
-          });
-          if (data.job) {
-            const validation = validate_pow_job(data.job);
-            if (validation.ok) {
-              this.set_job(data.job);
-            } else {
-              logPow('job_reject', { reason: validation.reason });
-            }
-          }
-          resolve(data);
-          this.requests.delete(data.id);
-          return;
-        }
-
-        resolve(data.response);
-        this.requests.delete(data.id);
-     }
-    })
+    resolve(data.response);
+    this.requests.delete(data.id);
+  }
 }
 
 async change(address, pub) {
@@ -382,28 +394,30 @@ async reconnect() {
   return;
 }
 
+send_packet(packet) {
+  if (!this.rpc) return false;
+  try {
+    const req = this.rpc.request(RPC_COMMANDS.PACKET);
+    req.send(JSON.stringify(packet));
+    req.reply().catch(() => {});
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 sync(data) {
   if (!this.connection) return [];
   return new Promise((resolve, reject) => {
+    this.pending = [];
     data.id = data.timestamp
     this.requests.set(data.id, { resolve, reject });
-    try {
-      this.connection.write(JSON.stringify(data));
-    } catch (e) {
-      console.error('Error writing to connection:', e);
+    if (!this.send_packet(data)) {
+      console.error('Error writing to connection: send_packet_failed');
+      this.requests.delete(data.id);
+      resolve([]);
     }
   });
-}
-
-start_job_polling() {
-  if (this.jobPollTimer) return;
-  this.jobPollTimer = setInterval(async () => {
-    if (!this.connection) return;
-    const response = await this.request_job();
-    if (response && response.job) {
-      this.set_job(response.job);
-    }
-  }, 15000);
 }
 
 set_job(job) {
@@ -426,13 +440,14 @@ async request_job() {
   return new Promise((resolve, reject) => {
     const id = random_key().toString('hex');
     this.requests.set(id, { resolve, reject });
-    try {
-      this.connection.write(JSON.stringify({
-        type: 'job_request',
-        id,
-      }));
-    } catch (e) {
-      console.error('Error writing to connection:', e);
+    const sent = this.send_packet({
+      type: 'job_request',
+      id,
+    });
+    if (!sent) {
+      this.requests.delete(id);
+      resolve(null);
+      return;
     }
     logPow('job_request', { id });
     setTimeout(() => {
@@ -488,7 +503,7 @@ async challenge(message_hash) {
     const all_nonces = new Set();
 
     while (Date.now() - start < POW_MAX_JOB_TIME_MS && shares.length < POW_REQUIRED_SHARES) {
-      let job = this.currentJob;
+      let job = null;
       if (!job) {
         const jobResponse = await this.request_job();
         if (jobResponse && jobResponse.job) {
@@ -618,13 +633,11 @@ async send_pow_packet({
       }
       return await new Promise((resolve, reject) => {
         this.requests.set(request_id, { resolve, reject });
-        try {
-          this.connection.write(JSON.stringify(packet));
-        } catch (e) {
+        if (!this.send_packet(packet)) {
           this.requests.delete(request_id);
           resolve({ success: false, reason: 'write_failed' });
           return;
-        }
+        } 
         setTimeout(() => {
           if (!this.requests.has(request_id)) return;
           this.requests.delete(request_id);
@@ -925,6 +938,22 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
   }
 
   console.log('*********Got new Connection! ************');
+  const incomingPublicKey = peer.publicKey.toString('hex');
+  const duplicateByPublicKey = active.connections.find(
+    (a) => a.connection !== connection && a.publicKey === incomingPublicKey,
+  );
+  if (duplicateByPublicKey) {
+    // Keep an already-joined healthy connection, otherwise replace stale duplicates.
+    if (duplicateByPublicKey.joined && is_connection_healthy(duplicateByPublicKey.connection)) {
+      try {
+        connection.end();
+        connection.destroy();
+      } catch (e) {}
+      return;
+    }
+    connection_closed(duplicateByPublicKey.connection, topic, 'Duplicate public key');
+  }
+
   active.connections.push({
     address: '',
     connection,
@@ -935,7 +964,7 @@ const new_connection = (connection, topic, key, dht_keys, peer, beam) => {
     knownHashes: [],
     peer,
     request: true,
-    publicKey: peer.publicKey.toString('hex'),
+    publicKey: incomingPublicKey,
   });
   send_joined_message(topic, dht_keys, connection).catch((error) => {
     console.log('Failed to send joined message', error);
@@ -1238,6 +1267,13 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       con.video = joined.video;
       joined.key = active.key;
       con.request = true;
+      close_duplicate_peer_connections(
+        active,
+        con.connection,
+        (entry) => !!entry.address && entry.address === joined.address,
+        topic,
+        'Duplicate address',
+      );
       active.peers.push(peer.publicKey.toString('hex'));
       let uniq = {};
       const peers = active.peers.filter(
@@ -1919,16 +1955,25 @@ const send_peer_message = (address, topic, message) => {
     errorMessage('Swarm is not active');
     return;
   }
-  const con = active.connections.find((a) => a.address === address);
-  if (!con) {
+  const candidates = active.connections.filter((a) => a.address === address);
+  if (!candidates.length) {
     errorMessage('Connection is closed');
     return;
   }
-  try {
-    con.connection.write(JSON.stringify(message));
-  } catch (e) {
-    console.error('Error writing to connection:', e);
+  const ordered = candidates.sort((a, b) => {
+    const aScore = (a.joined ? 2 : 0) + (is_connection_healthy(a.connection) ? 1 : 0);
+    const bScore = (b.joined ? 2 : 0) + (is_connection_healthy(b.connection) ? 1 : 0);
+    return bScore - aScore;
+  });
+  for (const con of ordered) {
+    try {
+      con.connection.write(JSON.stringify(message));
+      return;
+    } catch (e) {
+      continue;
+    }
   }
+  console.error('Error writing to connection: all candidates failed');
 };
 
 const ban_connection = (conn, topic) => {
@@ -2070,6 +2115,23 @@ const get_active_topic = (topic) => {
     return false;
   }
   return active;
+};
+
+const is_connection_healthy = (connection) => {
+  if (!connection) return false;
+  if (connection.destroyed) return false;
+  if (connection.writable === false) return false;
+  return true;
+};
+
+const close_duplicate_peer_connections = (active, keepConnection, predicate, topic, reason) => {
+  if (!active) return;
+  const duplicates = active.connections.filter(
+    (entry) => entry.connection !== keepConnection && predicate(entry),
+  );
+  for (const duplicate of duplicates) {
+    connection_closed(duplicate.connection, topic, reason);
+  }
 };
 
 const check_if_online = async (topic) => {

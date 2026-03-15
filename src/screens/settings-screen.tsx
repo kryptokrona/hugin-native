@@ -306,16 +306,6 @@ const doCopyMnemonic = () => {
     },
   ];
 
-  if (Platform.OS == 'android') {
-    items.push(
-      {
-        function: () => setModalVisible(true),
-        icon: { name: 'star-circle', type: 'MCI' },
-        title: 'Upgrade to Hugin +',
-      }
-    )
-  }
-
   const itemMapper = (item: Item) => {
     async function onPress() {
       if (item.function) {

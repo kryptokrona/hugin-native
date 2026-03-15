@@ -44,6 +44,7 @@ interface Props {
   large?: boolean;
   hideExtras?: boolean;
   roomKey?: string;
+  onFocusChange?: (focused: boolean) => void;
 }
 
 export const MessageInput: React.FC<Props> = ({
@@ -53,7 +54,8 @@ export const MessageInput: React.FC<Props> = ({
   dm = false,
   large = false,
   hideExtras = false,
-  roomKey = undefined
+  roomKey = undefined,
+  onFocusChange
 }) => {
   const { t } = useTranslation();
   const theme = useThemeStore((state) => state.theme);
@@ -335,11 +337,13 @@ function onChange(text: string) {
   function onBlur() {
     setFocus(false);
     setDisplayActions(true);
+    if (onFocusChange) onFocusChange(false);
   }
 
   function onFocus() {
     setFocus(true);
     setDisplayActions(false);
+    if (onFocusChange) onFocusChange(true);
   }
 
   function onDisplayActions() {

@@ -375,9 +375,11 @@ let channelId;
 
     try {
       box = JSON.parse(remoteMessage?.data?.encryptedPayload as string);
+      console.log('box', box);
     } catch (e) {
       try {
         box = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload as string));
+        console.log('box', box);
       } catch (e) {
         console.error('Failed to parse box!');
         return;
@@ -418,44 +420,46 @@ let channelId;
         message = decryptMessage(box.box, box.t, key as string);
 
         console.log('🔔 Direct message received!!', message.from);
-        url = 'hugin://message/' + encodeURIComponent(message.name) + '/' + encodeURIComponent(message.from);
 
-        if (await messageExists(box.t)) return;
+        if (await messageExists(box.t)) {
+          console.log('🔕 Message already exists, skipping notification.');
+          return;
+        };
 
-        // Sync with syncer logic
-        const knownContacts = (useUserStore.getState() as any).contacts || [];
-        const knownKeys = knownContacts.map((c: any) => c.messagekey);
-
-        if (message.type === 'sealedbox' || message.type === 'box') {
-          if (!knownKeys.some((a: any) => a === message.k)) {
-            const added = await addContact(message?.name || 'Anon', message.from, message.k);
+        console.log('Message to check', message)
+        if (!message) return false;
+        console.log('FOUND A MESSAGE WOOHP ------->');
+        message.t = box.t;
+        const [text, addr, senderkey, timestamp] = MessageSync.sanitize_pm(message);
+        console.log('Got message?', text);
+        if (!text) return;
+        if (message.type === 'sealedbox' || 'box') {
+          if (MessageSync.known_keys.some((a) => a === senderkey)) {
+            const added = await addContact(message?.name || 'Anon' , addr, senderkey);
             if (added) {
-              const bHash = await Wallet.key_derivation_hash(message.from);
-              Beam.connect(bHash, bHash, message.from);
+              MessageSync.known_keys.push(added.messagekey);
+              const key = await Wallet.key_derivation_hash(addr);
+              Beam.connect(key, key, addr);
             }
           }
           const saved = await saveMessage(
-            message.from,
-            message.msg,
+            addr,
+            text,
             '', //Todo reply
-            box.t,
-            (remoteMessage.messageId as string) || String(box.t),
+            timestamp,
+            message.t,
             false,
             undefined,
-            undefined, // profileName
-            undefined  // tip
           );
           if (saved) {
             updateMessage(saved, false);
           }
           setLatestMessages();
-        }
 
-        await saveMessageToQueue({
-          ...message,
-          timestamp: box.t,
-        });
+
+
       }
+    }
     } catch (e) {
       console.log('Error syncing foreground message:', e);
     }
@@ -499,7 +503,7 @@ let channelId;
           return;
         };
 
-        const newMessage = saveRoomMessage(
+        const newMessage = await saveRoomMessage(
           message.address,
           message.message,
           message.roomKey,
