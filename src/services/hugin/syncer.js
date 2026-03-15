@@ -73,7 +73,7 @@ class Syncer {
       clearInterval(this.sync_interval);
       this.sync_interval = null;
     }
-    console.log('Startup message sync finished, relying on node push updates.');
+    console.log('[syncer.js] Startup message sync finished, relying on node push updates.');
   }
 
   set_node(node) {
@@ -84,6 +84,7 @@ class Syncer {
     const incoming = this.incoming_messages.length > 0 ? true : false;
     //If we already have pending incoming unchecked messages, return
     //So we do not update the latest checked timestmap and miss any messages.
+    console.log('[syncer.js] Fetching messages, do we have incoming?', incoming)
     if (incoming) return false;
     //Latest version, fetch more messages with last checked timestamp
     const lastChecked = this.lastChecked;
@@ -93,12 +94,23 @@ class Syncer {
       type: 'some',
       timestamp: lastChecked,
     }); 
+
+    console.log('[syncer.js] Fetched messages:', resp)
     if (resp.length === 0) {
+      console.log('[syncer.js] No messages fetched.')
       return false;
     }
     this.lastChecked = Date.now();
 
     return {resp, background};
+  }
+
+  restart_sync() {
+    console.log("[syncer.js] Restarting sync..")
+    this.sync_stopped = false;
+    this.startup_sync_runs = 0;
+    this.lastChecked = 0;
+    this.start();
   }
 
   async sync() {
@@ -107,10 +119,12 @@ class Syncer {
       this.stop_sync();
       return;
     }
+    console.log("[syncer.js] Trying to sync messages from node.")
     this.startup_sync_runs += 1;
     const incoming = this.incoming_messages.length > 0 ? true : false;
     //First start, set known pool txs
     const fetched = await this.fetch();
+    console.log("[syncer.js] Fetched msgs:", fetched)
     if (!fetched && !incoming) {
       if (this.startup_sync_runs >= this.max_startup_sync_runs) this.stop_sync();
       return;
@@ -121,7 +135,7 @@ class Syncer {
 
     if (large_batch || (large_batch && incoming)) {
       //Add to que
-      console.log('Adding que:', transactions.length);
+      console.log('[syncer.js] Adding que:', transactions.length);
       this.incoming_messages = transactions;
       //   Hugin.send('incoming-que', true);
     }
@@ -131,7 +145,7 @@ class Syncer {
     }
 
     if (incoming || large_batch) {
-      console.log('Checking incoming messages:', this.incoming_messages.length);
+      console.log('[syncer.js] Checking incoming messages:', this.incoming_messages.length);
       await this.decrypt(this.update_que(), true);
       // if (incoming_group_que.length) {
       //     await clear_group_que()
@@ -140,51 +154,66 @@ class Syncer {
     }
 
     // if (transactions.length < 5) Hugin.send('incoming-que', false);
-    console.log('Incoming transactions', transactions.length);
+    console.log('[syncer.js] Incoming transactions', transactions.length);
     this.decrypt(transactions, false, background);
     if (this.startup_sync_runs >= this.max_startup_sync_runs) this.stop_sync();
   }
 
   async decrypt(list, que = false, background) {
-    console.log('Checking nr of txs:', list.length);
+    console.log('[syncer.js] Checking nr of txs:', list.length);
     for (const message of list) {
+      console.log('[syncer.js] Checking message:', message);
       try {
         const thisHash = message.hash;
         const thisExtra = '99' + thisHash + message.cipher;
 
-        if (!this.validate(thisExtra, thisHash)) continue;
+        if (!this.validate(thisExtra, thisHash)) {
+          console.log('[syncer.js] Message is not valid.')
+          continue;
+        };
         if (thisExtra !== undefined && thisExtra.length > 200) {
           //Check for viewtag
 
+          console.log('[syncer.js] Checking message for viewtag..')
+
           if (await this.check_for_viewtag(thisExtra)) {
-            if (await messageExists(thisHash)) continue;
+            console.log('[syncer.js] Found a message with relevant view tag.')
+            if (await messageExists(thisHash)) {
+              console.log('[syncer.js] Message already exists.')
+              continue;
+            };
+            console.log('[syncer.js] Starting checking message for pm..')
             await this.check_for_pm(thisExtra, thisHash, background);
             continue;
           }
         }
       } catch (err) {
-        console.log('Error decrypting...');
+        console.log('[syncer.js] Error decrypting...');
         console.log(err);
       }
     }
   }
 
   async check_for_pm(thisExtra, thisHash, background) {
+    console.log('[syncer.js] Checking message for pm started..')
     const [privateSpendKey, privateViewKey] = this.keys;
     const keys = { privateSpendKey, privateViewKey };
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
+    console.log('[syncer.js] Message to check', message)
     if (!message) return false;
-    console.log('FOUND A MESSAGE WOOHP ------->');
+    console.log('[syncer.js] FOUND A MESSAGE WOOHP ------->');
     const [text, addr, key, timestamp] = this.sanitize_pm(message);
-    console.log('Got message?', text);
+    console.log('[syncer.js] Got message?', text);
     if (!text) return;
     if (message.type === 'sealedbox' || 'box') {
       if (!this.known_keys.some((a) => a === key)) {
         const added = await addContact(message?.name || 'Anon' , addr, key);
+        console.log('[syncer.js] Added contact:', added);
         if (added) {
           this.known_keys.push(added.messagekey);
           const key = await Wallet.key_derivation_hash(addr);
-          Beam.connect(key, key, addr);
+          console.log('[syncer.js] Connecting to new contact:', key, addr);
+          Beam.new(addr);
         }
       }
       const saved = await saveMessage(
@@ -231,6 +260,7 @@ class Syncer {
       const rawExtra = trimExtra(extra);
       const parsed_box = JSON.parse(rawExtra);
       if (parsed_box.vt) {
+        console.log('[syncer.js] Found a message with view tag:', parsed_box.vt)
         const [privateSpendKey, privateViewKey] = this.keys;
         const derivation = await generateKeyDerivation(
           parsed_box.txKey,
@@ -240,7 +270,7 @@ class Syncer {
         const possibleTag = hashDerivation.substring(0, 2);
         const view_tag = parsed_box.vt;
         if (possibleTag === view_tag) {
-          console.log('**** FOUND VIEWTAG ****');
+          console.log('[syncer.js] **** FOUND VIEWTAG ****');
           return true;
         }
       }
