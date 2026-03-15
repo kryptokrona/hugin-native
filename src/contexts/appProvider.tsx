@@ -434,6 +434,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
         if (useGlobalStore.getState().started && !joining) {
+          MessageSync.restart_sync();
           joining = true;
           Rooms.idle(false, false);
           const room = getThisRoom();

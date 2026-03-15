@@ -324,3 +324,7 @@ export const decrypt_sealed_box = async (data) => {
   const { plaintext } = await rpc.request(send);
   return plaintext
 };
+
+export const sync_push_registrations = (room_keys = []) => {
+  return rpc.sync_push_registrations(room_keys);
+};

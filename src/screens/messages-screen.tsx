@@ -40,12 +40,13 @@ import {
 } from '@/services';
 import type { MainStackNavigationType, MainNavigationParamList } from '@/types';
 
-import { Beam } from '../lib/native';
+import { Beam, sync_push_registrations } from '../lib/native';
 import { setLatestMessages, setMessages } from '../services/bare/contacts';
 import { addContact, deleteContact, getContacts } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
 
 import 'text-encoding';
+import RPC from 'bare-rpc';
 
 interface Props {
   route: RouteProp<MainNavigationParamList, typeof MainScreens.MessagesScreen>;
@@ -91,6 +92,7 @@ export const MessagesScreen: React.FC<Props> = () => {
 
   function onAddGroupPress() {
     setModalVisible(true);
+    sync_push_registrations();
   }
 
   async function onPress(roomKey: string, name: string) {
@@ -174,6 +176,8 @@ export const MessagesScreen: React.FC<Props> = () => {
     await addContact(name, xkrAddr, messageKey, true);
 
     Beam.new(xkrAddr);
+
+    sync_push_registrations()
 
     // Beam.connect(
     //   Wallet.key_derivation_hash(xkrAddr),
