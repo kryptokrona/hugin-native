@@ -136,7 +136,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   // const [inCall, setInCall] = useState<boolean>();
   const myUserAddress = useGlobalStore((state) => state.address);
   const inCall = useGlobalStore((state) => state.currentCall.room) === roomKey;
-  const globalVoiceUsers = useGlobalStore((state) => state.roomUsers);
   const roomUsers = useGlobalStore((state) => state.roomUsers[roomKey]);
   // console.log('currentCall', currentCall);
   const inCallUsers = 0;
@@ -546,12 +545,19 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
-  const scrollToMessage = (hash: string) => {
+  const scrollToMessage = useCallback((hash: string) => {
   const index = messages.findIndex((m) => m.hash === hash);
   if (index !== -1 && flatListRef.current) {
     flatListRef.current.scrollToIndex({ index: index + 1, animated: true });
   }
-};
+}, [messages]);
+
+const handleRetryPress = useCallback((hashStr: string) => {
+  const item = messages.find(m => m.hash === hashStr);
+  if (item) {
+    onSend(item.message, null, undefined, false, undefined, hashStr);
+  }
+}, [messages]);
 
   return (
     <ScreenLayout>
@@ -582,7 +588,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           inverted
           ref={flatListRef}
           data={messages}
-          keyExtractor={(item: Message, i) => `${item.address}-${i}`}
+          keyExtractor={(item: Message) => item.hash}
           renderItem={({ item, index }) => {
             const previousMessage = messages[index - 1];
             const nextMessage = messages[index + 1];
@@ -619,7 +625,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
                 scrollToMessage={scrollToMessage}
                 status={item.status}
                 isLastInCluster={isLastInCluster}
-                onRetryPress={(hashStr) => onSend(item.message, null, undefined, false, undefined, hashStr)}
+                onRetryPress={handleRetryPress}
               />
                   </>
             );
@@ -638,8 +644,9 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
             );
           }}
           contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 50 : 30 }]}
-          initialNumToRender={messages.length}
-          maxToRenderPerBatch={messages.length}
+          initialNumToRender={55}
+          maxToRenderPerBatch={55}
+          windowSize={21}
           onEndReached={loadMoreMessages}
           onEndReachedThreshold={0.1}
           ListHeaderComponent={
