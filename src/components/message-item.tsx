@@ -105,8 +105,8 @@ export const MessageItem: React.FC<Props> = ({
     return;
   }
 
-  if (now - lastPress.current < DOUBLE_PRESS_DELAY && status === 'success' && !dm) {
-    onReaction('👍');
+  if (now - lastPress.current < DOUBLE_PRESS_DELAY && status !== 'failed' && !dm) {
+    onReaction('👍', false);
   }
 
   lastPress.current = now;
@@ -191,8 +191,8 @@ export const MessageItem: React.FC<Props> = ({
     setActions(false);
   }
 
-  function onReaction(emoji: string) {
-    if (emoji === '👍') {
+  function onReaction(emoji: string, showToast: boolean = true) {
+    if (emoji === '👍' && showToast) {
           Toast.show({
             text1: "Info",
             text2: t('thumbsUpInfo'),
