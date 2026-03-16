@@ -499,7 +499,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
           undefined,
           tip,
           undefined,
-          sent_node.success ? 'success' : 'failed'
+          sent_node.success ? 'success' : 'pending'
         );
       } catch (err) {
         await new Promise(resolve => setTimeout(resolve, 500));
