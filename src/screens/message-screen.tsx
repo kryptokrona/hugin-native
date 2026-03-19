@@ -473,8 +473,16 @@ useEffect(() => {
           setModalVisible(true);
         }
 
-        newMessage.status = 'failed';
-        setStoreMessages([...messageList, newMessage]);
+        const currentMessages = useGlobalStore.getState().messages;
+        const msgIndex = currentMessages.findIndex(m => m.hash === outgoingHash);
+        if (msgIndex !== -1) {
+          animatedHashes.current.add(outgoingHash);
+          const replacedMessages = currentMessages.map(m => m.hash === outgoingHash ? { ...m, status: 'failed' as "success" | "pending" | "failed" } : m);
+          setStoreMessages(replacedMessages);
+        } else {
+          newMessage.status = 'failed';
+          setStoreMessages([...currentMessages, newMessage]);
+        }
 
         const saved = await saveMessage(
           roomKey,
@@ -502,11 +510,18 @@ useEffect(() => {
       // First delete the pending message with the old hash
       await deleteMessage(outgoingHash);
 
-      // Now create the success message with the NEW hash
-      newMessage.hash = hash;
-      newMessage.status = 'success';
-      const updatedMessageList = messageList.filter(m => m.hash !== outgoingHash);
-      setStoreMessages([...updatedMessageList, newMessage]);
+      // Optimistically update message in Zustand
+      animatedHashes.current.add(hash);
+      const currentMessages = useGlobalStore.getState().messages;
+      const msgIndex = currentMessages.findIndex(m => m.hash === outgoingHash);
+      if (msgIndex !== -1) {
+        const replacedMessages = currentMessages.map(m => m.hash === outgoingHash ? { ...m, hash: hash, status: 'success' as "success" | "pending" | "failed" } : m);
+        setStoreMessages(replacedMessages);
+      } else {
+        newMessage.hash = hash;
+        newMessage.status = 'success';
+        setStoreMessages([...currentMessages.filter(m => m.hash !== outgoingHash), newMessage]);
+      }
       
       const savedSuccess = await saveMessage(
         roomKey,
@@ -650,12 +665,10 @@ useEffect(() => {
             animatedHashes.current.add(item.hash);
           }
 
-          const hasBeenAnimated = animatedHashes.current.has(item.hash);
-
-          return hasBeenAnimated ? (
-            <GlideInItem>{messageContent}</GlideInItem>
-          ) : (
-            messageContent
+          return (
+            <GlideInItem skipAnimation={!shouldAnimate}>
+              {messageContent}
+            </GlideInItem>
           );
         }}
         contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 60 : 40 }]}

@@ -482,9 +482,17 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         // Delete the temporary pending record
         await deleteRoomMessage(tempHash);
         
-        // Also remove it from Zustand memory so it can be replaced cleanly
+        // Optimistically update Zustand memory so it doesn't pop in and out
+        animatedHashes.current.add(save.hash);
         const currentMessages = useGlobalStore.getState().roomMessages;
-        setStoreRoomMessages(currentMessages.filter((m) => m.hash !== tempHash));
+        const tempMsg = currentMessages.find((m) => m.hash === tempHash);
+        if (tempMsg) {
+          const newMsgObj = { ...tempMsg, hash: save.hash, timestamp: save.t, status: (sent_node.success ? 'success' : 'pending') as "success" | "pending" | "failed" };
+          const replacedMessages = currentMessages.map((m) => m.hash === tempHash ? newMsgObj : m);
+          setStoreRoomMessages(replacedMessages);
+        } else {
+          setStoreRoomMessages(currentMessages.filter((m) => m.hash !== tempHash));
+        }
 
         await saveRoomMessageAndUpdate(
           save.k,
@@ -503,6 +511,15 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         );
       } catch (err) {
         await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const currentMessages = useGlobalStore.getState().roomMessages;
+        const tempMsg = currentMessages.find(m => m.hash === tempHash);
+        if (tempMsg) {
+          animatedHashes.current.add(tempHash);
+          const replacedMessages = currentMessages.map((m) => m.hash === tempHash ? { ...m, status: 'failed' as "success" | "pending" | "failed" } : m);
+          setStoreRoomMessages(replacedMessages);
+        }
+
         // Update local record to failed
         await saveRoomMessageAndUpdate(
           myUserAddress,
