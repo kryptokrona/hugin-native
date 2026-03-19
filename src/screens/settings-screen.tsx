@@ -26,7 +26,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import Toast from 'react-native-toast-message';
 import { t } from 'i18next';
 import { Nodes, Rooms } from 'lib/native';
-import { defaultPreferences, defaultRoom, defaultUser, resetGlobalStore, useAppStoreState, useGlobalStore, usePreferencesStore, useRoomStore, useThemeStore, useUserStore } from '@/services';
+import { defaultPreferences, defaultRoom, defaultUser, resetGlobalStore, useAppStoreState, useGlobalStore, usePreferencesStore, useRoomStore, useThemeStore, useUnreadMessagesStore, useUserStore } from '@/services';
 import DeviceInfo from 'react-native-device-info';
 import { resetDB } from '@/services/bare/sqlite';
 import { defaultTheme, Styles } from '@/styles';
@@ -145,6 +145,8 @@ const doCopyMnemonic = () => {
     usePreferencesStore.setState({ preferences: defaultPreferences, skipBgRefreshWarning: false });
     useThemeStore.setState({ theme: defaultTheme, showFooterMask: false });
     useRoomStore.setState({ thisRoom: defaultRoom });
+    useUnreadMessagesStore.persist.clearStorage();
+    useUnreadMessagesStore.setState({ unreadRoomMessages: [], unreadPrivateMessages: [] });
 
 
     useAppStoreState.getState().resetHydration();
