@@ -795,7 +795,8 @@ export class ActiveWallet {
     const myAddr = await Address.fromAddress(address);
     const pubKey = myAddr.m_keys.m_viewKeys.m_publicKey;
     const weeklyTimestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
-    const hash = await cnFastHash(pubKey + weeklyTimestamp);
+    const hashInput = toHex(String(pubKey) + String(weeklyTimestamp));
+    const hash = await cnFastHash(hashInput);
     return long ? hash : hash.substring(0,3);
   }
 
