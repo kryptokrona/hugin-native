@@ -121,12 +121,13 @@ export const setRoomMessages = async (room: string, page: number) => {
 };
 
 export const onSendGroupMessage = async (
+  hash: string,
   key: string,
   message: string,
   reply: string | null,
   tip: TipType | false,
 ) => {
-  return await Rooms.message(key, message, reply, tip);
+  return await Rooms.message(hash, key, message, reply, tip);
 };
 
 export const onSendGroupMessageWithFile = (

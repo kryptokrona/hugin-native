@@ -467,6 +467,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         console.log("Sending message to swarm");
 
         const {sent_message, sent_node} = await onSendGroupMessage(
+          tempHash,
           roomKey,
           text,
           reply ? reply : replyToMessageHash,
