@@ -90,7 +90,8 @@ export const updateMessages = async (
 
   const roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === message.room)?.name;
   const messageAge = Date.now() - message.timestamp;
-  if (!history && !inRoom && !background && !message.file && messageAge < (1000 * 30)) {
+
+  if (!message.sent && !history && !inRoom && !background && !message.file && messageAge < (1000 * 30)) {
     Toast.show({
       text1: message.nickname + ' in ' + roomName,
       text2: message.message,
@@ -120,12 +121,13 @@ export const setRoomMessages = async (room: string, page: number) => {
 };
 
 export const onSendGroupMessage = async (
+  hash: string,
   key: string,
   message: string,
   reply: string | null,
   tip: TipType | false,
 ) => {
-  return await Rooms.message(key, message, reply, tip);
+  return await Rooms.message(hash, key, message, reply, tip);
 };
 
 export const onSendGroupMessageWithFile = (

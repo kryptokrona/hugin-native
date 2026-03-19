@@ -172,6 +172,7 @@ export class Bridge {
     }
 
     this.pushRegistrationDebouncePromise = new Promise((resolve, reject) => {
+      console.log('[rpc.js] Starting push registration sync')
       this.pushRegistrationTimer = setTimeout(async () => {
         this.pushRegistrationTimer = null;
         this.pushRegistrationDebouncePromise = null;
@@ -202,6 +203,7 @@ export class Bridge {
       return;
     }
     if (json) {
+      console.log('[rpc.js] Got rpc message', json.type)
       if (json.type !== 'room-message-exists') {
         // console.log('Got rpc message', json.type);
       }
@@ -211,6 +213,12 @@ export class Bridge {
           break;
         case 'hugin-node-connected':
           useGlobalStore.getState().setHuginNode({connected: true});
+
+          if (useGlobalStore.getState().contacts.length === 0
+          && useGlobalStore.getState().rooms.length === 0) {
+            console.log('[rpc.js] No contacts or rooms, skipping push registration sync')
+            break;
+          }
           await this.sync_push_registrations();
           break;
         case 'hugin-node-disconnected':
@@ -227,9 +235,11 @@ export class Bridge {
           }
           break;
         case 'beam-message':
+          console.log('beam-message on frontend')
           MessageSync.check_for_pm(json.message, json.hash, json.background);
           break;
         case 'pool-messages':
+          console.log('[syncer.js] Received pool-messages')
           if (Array.isArray(json.messages) && json.messages.length > 0) {
             await MessageSync.decrypt(json.messages, false, json.background);
           }
@@ -239,6 +249,10 @@ export class Bridge {
           break;
         case 'new-beam':
           //Set some state 'started, not connected'
+          console.log('[rpc.js] New beam started')
+          // Only needs to be done once
+          if (useGlobalStore.getState().contacts.length > 1) return;
+          // await this.sync_push_registrations();
           break;
         case 'typing':
           if (json?.datas?.typing) {

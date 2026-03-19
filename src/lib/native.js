@@ -38,15 +38,17 @@ export class Swarm {
       rpc.send(data);
   }
 
-  async message(key, message, reply, tip) {
+  async message(hash, key, message, reply, tip) {
     const data = {
       type: 'send_room_msg',
+      hash,
       key,
       message,
       reply,
       tip,
     };
 
+    console.log("Sending message to node", data)
     const sent_message = await rpc.request(data);
 
     const sent_node = await this.send_room_message_push(sent_message);
@@ -323,4 +325,8 @@ export const decrypt_sealed_box = async (data) => {
   const send = { type: 'decrypt_sealed_box', data };
   const { plaintext } = await rpc.request(send);
   return plaintext
+};
+
+export const sync_push_registrations = (room_keys = []) => {
+  return rpc.sync_push_registrations(room_keys);
 };

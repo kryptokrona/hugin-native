@@ -57,7 +57,7 @@ const onrequest = async (p) => {
     case 'end_swarm':
       return await endSwarm(p.key);
     case 'send_room_msg':
-      const message = sendRoomMessage(p.message, p.key, p.reply, p.tip);
+      const message = sendRoomMessage(p.hash, p.message, p.key, p.reply, p.tip);
       return message;
     case 'send_feed_msg':
       const feed_message = await send_feed_message(p.message, p.reply, p.tip);
@@ -158,10 +158,10 @@ const endSwarm = async (key) => {
   end_swarm(swarm.topic);
 };
 
-const sendRoomMessage = (message, key, reply, tip) => {
+const sendRoomMessage = (hash, message, key, reply, tip) => {
   const swarm = getRoom(key);
   if (!swarm) return { type: 'Error' };
-  return send_message(message, swarm.topic, reply, key, tip);
+  return send_message(hash, message, swarm.topic, reply, key, tip);
 };
 
 const getRoom = (key) => {

@@ -1001,11 +1001,11 @@ async function send_dm_message(address, payload) {
   send_swarm_message(payload, active.topic);
 }
 
-function send_message(message, topic, reply, invite, tip = false) {
+function send_message(hash, message, topic, reply, invite, tip = false) {
   const message_json = {
     c: 'channel in room?',
     g: invite,
-    hash: random_key().toString('hex'),
+    hash,
     k: Hugin.address,
     m: message,
     n: Hugin.name,

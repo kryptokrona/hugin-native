@@ -375,9 +375,11 @@ let channelId;
 
     try {
       box = JSON.parse(remoteMessage?.data?.encryptedPayload as string);
+      console.log('box', box);
     } catch (e) {
       try {
         box = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload as string));
+        console.log('box', box);
       } catch (e) {
         console.error('Failed to parse box!');
         return;
@@ -501,7 +503,7 @@ let channelId;
           return;
         };
 
-        const newMessage = saveRoomMessage(
+        const newMessage = await saveRoomMessage(
           message.address,
           message.message,
           message.roomKey,
