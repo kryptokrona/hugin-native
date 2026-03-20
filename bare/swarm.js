@@ -617,6 +617,16 @@ async send_pow_packet({
   exception_reason,
 }) {
   try {
+
+    let i = 0;
+
+    while (!this.connection && i < 5) {
+      this.reconnect();
+      await sleep(5000);
+      console.log('Reconnecting to node...', this.connection)
+      i++;
+    }
+
     if (!this.connection) return { success: false, reason: 'No connection' };
 
     const max_attempts = 3;
