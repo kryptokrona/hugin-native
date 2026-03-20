@@ -34,7 +34,7 @@ import { ConnectionStatus, User } from '../types/user';
 import { setLatestMessages, updateMessage } from './bare/contacts';
 import { WebRTC } from './calls';
 import { Peers } from 'lib/connections';
-import { sleep, waitForCondition } from '../utils/utils';
+import { sleep, waitForCondition, containsOnlyEmojis } from '../utils/utils';
 import { Wallet } from './kryptokrona';
 import { keychain, saveRoomMessageAndUpdate } from './bare';
 import RNCallKeep from 'react-native-callkeep';
@@ -434,7 +434,7 @@ let channelId;
         console.log('Got message?', text);
         if (!text) return;
         if (message.type === 'sealedbox' || 'box') {
-          if (MessageSync.known_keys.some((a) => a === senderkey)) {
+          if (!MessageSync.known_keys.some((a) => a === senderkey)) {
             const added = await addContact(message?.name || 'Anon' , addr, senderkey);
             if (added) {
               MessageSync.known_keys.push(added.messagekey);
@@ -564,6 +564,12 @@ let channelId;
 
     }
 
+    let notificationBody = message.msg;
+
+    if (containsOnlyEmojis(message.msg) && message.reply) {
+      notificationBody = `${message.name} reacted with ${message.msg}`;
+    }
+
     await notifee.displayNotification({
       android: {
         category: AndroidCategory.MESSAGE,
@@ -579,7 +585,7 @@ let channelId;
         visibility: AndroidVisibility.PUBLIC,
       },
 
-      body: message.msg,//message.msg || 'You\'ve got a new message!',
+      body: notificationBody,
       data: {url},
       ios: {
         sound: 'roommessage.wav',
