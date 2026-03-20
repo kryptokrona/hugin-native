@@ -44,7 +44,7 @@ import { t } from 'i18next';
 import tweetnacl from 'tweetnacl';
 import { getDeviceId } from '../../services/pushnotifications';
 import * as Keychain from 'react-native-keychain';
-import { fetchWithTimeout } from '@/utils';
+import { fetchWithTimeout, sleep } from '@/utils';
 
 const xkrUtils = new CryptoNote();
 export class ActiveWallet {
@@ -488,14 +488,22 @@ export class ActiveWallet {
         return { success: false, error: 'not_connected', hash: '' };
       }
      try {
-      const sent = await Nodes.message(
-        payload_hex,
-        hash,
-        await this.generate_view_tag(address, call),
-        call ? 'call' : 'dm',
-      );
-      console.log('Sent!', sent);
-      if (!sent?.success) {
+      let success = false;
+      let i = 0;
+      let sent;
+      while (success != true && i < 5) {
+        sent = await Nodes.message(
+          payload_hex,
+          hash,
+          await this.generate_view_tag(address, call),
+          call ? 'call' : 'dm',
+        );
+        console.log('Sent!', sent);
+        success = sent?.success;
+        i++;
+        if (success != true) await sleep(3000);
+      }
+      if (success != true) {
         if (typeof sent.reason !== 'string') return;
         if (sent.reason.length > 40) return;
         console.log('Error sending message', sent.reason);
@@ -553,13 +561,26 @@ export class ActiveWallet {
         return { success: false, error: 'not_connected', hash: '' };
       }
      try {
-      const sent = await this.withTimeout(Nodes.message(payload_hex, hash, await this.generate_view_tag(address, true), 'call'), 10000);
-      console.log('Sent!', sent);
-      if (!sent?.success) {
-        if (typeof sent.reason !== 'string') return;
-        if (sent.reason.length > 40) return;
-        console.log('Error sending message', sent.reason);
-        return { success: false, error: sent.reason, hash: '' };
+      let success = false;
+      let i = 0;
+      let sent;
+      while (success != true && i < 5) {
+        sent = await Nodes.message(
+          payload_hex, 
+          hash, 
+          await this.generate_view_tag(address, true), 
+          'call'
+        );
+        console.log('Sent!', sent);
+        success = sent?.success;
+        i++;
+        if (success != true) await sleep(3000);
+      }
+      if (success != true) {
+        if (typeof sent?.reason !== 'string') return;
+        if (sent?.reason?.length > 40) return;
+        console.log('Error sending message', sent?.reason);
+        return { success: false, error: sent?.reason, hash: '' };
       }
     } catch (error) {
       console.log('Error sending message:', error.message);
@@ -795,7 +816,8 @@ export class ActiveWallet {
     const myAddr = await Address.fromAddress(address);
     const pubKey = myAddr.m_keys.m_viewKeys.m_publicKey;
     const weeklyTimestamp = Math.floor(Date.now() / (1000 * 60 * 60 * 24 * 7));
-    const hash = await cnFastHash(pubKey + weeklyTimestamp);
+    const hashInput = toHex(String(pubKey) + String(weeklyTimestamp));
+    const hash = await cnFastHash(hashInput);
     return long ? hash : hash.substring(0,3);
   }
 

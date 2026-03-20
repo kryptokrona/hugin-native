@@ -203,7 +203,7 @@ export class Bridge {
       return;
     }
     if (json) {
-      console.log('[rpc.js] Got rpc message', json.type)
+      // console.log('[rpc.js] Got rpc message', json.type)
       if (json.type !== 'room-message-exists') {
         // console.log('Got rpc message', json.type);
       }

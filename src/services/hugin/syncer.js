@@ -195,9 +195,13 @@ class Syncer {
   }
 
   async check_for_pm(thisExtra, thisHash, background) {
+    try {
     console.log('[syncer.js] Checking message for pm started..')
+    console.log('[syncer.js] Keys:', this.keys)
     const [privateSpendKey, privateViewKey] = this.keys;
+    console.log('[syncer.js] Keys:', privateSpendKey, privateViewKey)
     const keys = { privateSpendKey, privateViewKey };
+    console.log('[syncer.js] Keys:', keys, 'Message:', thisExtra)
     let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
     console.log('[syncer.js] Message to check', message)
     if (!message) return false;
@@ -232,6 +236,10 @@ class Syncer {
       return true;
     }
     return;
+    } catch (e) {
+      console.log('[syncer.js] Error checking message for pm:', e);
+      return false;
+    }
   }
 
   async save_file_message(message) {

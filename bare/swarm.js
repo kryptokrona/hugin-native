@@ -617,6 +617,16 @@ async send_pow_packet({
   exception_reason,
 }) {
   try {
+
+    let i = 0;
+
+    while (!this.connection && i < 5) {
+      this.reconnect();
+      await sleep(5000);
+      console.log('Reconnecting to node...', this.connection)
+      i++;
+    }
+
     if (!this.connection) return { success: false, reason: 'No connection' };
 
     const max_attempts = 3;
@@ -1001,11 +1011,11 @@ async function send_dm_message(address, payload) {
   send_swarm_message(payload, active.topic);
 }
 
-function send_message(message, topic, reply, invite, tip = false) {
+function send_message(hash, message, topic, reply, invite, tip = false) {
   const message_json = {
     c: 'channel in room?',
     g: invite,
-    hash: random_key().toString('hex'),
+    hash,
     k: Hugin.address,
     m: message,
     n: Hugin.name,
@@ -1051,7 +1061,7 @@ const send_joined_message = async (topic, dht_keys, connection) => {
   }
 
   const signature = await sign(dht_keys.get().publicKey.toString('hex'));
-  const messages = await Hugin.request({ type: 'get-room-history', key: active.key });
+  const messages = active.beam ? [] : await Hugin.request({ type: 'get-room-history', key: active.key });
 
   const data = JSON.stringify({
     address: Hugin.address,
@@ -1281,21 +1291,24 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
       );
       active.peers = peers;
       
-      process_request(joined.messages, active.key)
-
       const time = parseInt(joined.time);
-      //Request message history from peer connected before us.
-      if (parseInt(active.time) > time && active.requests < 1) {
-        request_history(joined.address, topic, active.files);
-        active.requests++;
-      }
-      if (!feed_requests.some(a => a.address == joined.address)) {
-        console.log('Adding',joined.address,'to feed sync queue');
-        feed_requests.push({address: joined.address, topic });
-      }
 
-      if (!feed_requests_started) {
-        feed_request_process();
+      if (!active.beam) {
+        process_request(joined.messages, active.key)
+
+        //Request message history from peer connected before us.
+        if (parseInt(active.time) > time && active.requests < 1) {
+          request_history(joined.address, topic, active.files);
+          active.requests++;
+        }
+        if (!feed_requests.some(a => a.address == joined.address)) {
+          console.log('Adding',joined.address,'to feed sync queue');
+          feed_requests.push({address: joined.address, topic });
+        }
+
+        if (!feed_requests_started) {
+          feed_request_process();
+        }
       }
 
       //Send any buffered messages if connection was lost.
@@ -2141,6 +2154,11 @@ const check_if_online = async (topic) => {
     //Check message state every 20seconds if idle
     if (a % 2 !== 0 && Hugin.idle()) return;
     const active = get_active_topic(topic);
+    if (!active) {
+      clearInterval(interval);
+      return;
+    }
+    if (active.beam) return;
     let allFiles = [];
     try {
       allFiles = await Storage.load_meta(topic);
@@ -2152,10 +2170,7 @@ const check_if_online = async (topic) => {
       type: 'get-latest-room-hashes',
       key: active.key,
     });
-    if (!active) {
-      clearInterval(interval);
-      return;
-    } else {
+    {
       active.search = true;
       let i = 0;
       let peers = [];

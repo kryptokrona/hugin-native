@@ -775,20 +775,83 @@ export async function getMessages(
 async function setReplies(results: [ResultSet]) {
   const messages: Message[] = [];
   const files = Files.all();
+  
+  const baseMessages: any[] = [];
   for (const result of results) {
     for (let index = 0; index < result.rows.length; index++) {
       const res = result.rows.item(index);
-      if (res === undefined) {
-        continue;
+      if (res !== undefined) {
+        baseMessages.push(res);
       }
-      //The original message this one is replying to
-      res.replyto = await getRoomReplyMessage(res.reply);
-      const file = files.find((a) => a.hash === res.hash);
+    }
+  }
+
+  if (baseMessages.length === 0) {
+    return [];
+  }
+
+  const hashes = baseMessages.map((m: any) => m.hash);
+  const replyHashesMap = new Map();
+  baseMessages.forEach((m: any) => {
+      if (m.reply && m.reply !== '') {
+          replyHashesMap.set(m.reply, true);
+      }
+  });
+  const replyHashes = Array.from(replyHashesMap.keys());
+
+  const replyToMessagesMap = new Map();
+  if (replyHashes.length > 0) {
+      const placeholders = replyHashes.map(() => '?').join(',');
+      const replyResults = await db.executeSql(
+          `SELECT * FROM roomsmessages WHERE hash IN (${placeholders}) ORDER BY timestamp ASC`,
+          replyHashes
+      );
+      
+      for (const result of replyResults) {
+          for (let index = 0; index < result.rows.length; index++) {
+              const r = result.rows.item(index);
+              if (r !== undefined) {
+                   const file = files.find((a: FileInfo) => a.hash === r.hash);
+                   if (file) {
+                       r.file = file;
+                   }
+                   const res: Message = toMessage(r);
+                   replyToMessagesMap.set(r.hash, [res]);
+              }
+          }
+      }
+  }
+
+  const childrenMessagesMap = new Map();
+  if (hashes.length > 0) {
+      const placeholders = hashes.map(() => '?').join(',');
+      const childResults = await db.executeSql(
+          `SELECT * FROM roomsmessages WHERE reply IN (${placeholders}) ORDER BY timestamp ASC`,
+          hashes
+      );
+      
+      for (const result of childResults) {
+          for (let index = 0; index < result.rows.length; index++) {
+              const r = result.rows.item(index);
+              if (r !== undefined) {
+                  const res: Message = toMessage(r);
+                  if (!childrenMessagesMap.has(r.reply)) {
+                      childrenMessagesMap.set(r.reply, []);
+                  }
+                  childrenMessagesMap.get(r.reply).push(res);
+              }
+          }
+      }
+  }
+
+  for (const res of baseMessages) {
+      res.replyto = replyToMessagesMap.get(res.reply) || [];
+      const file = files.find((a: FileInfo) => a.hash === res.hash);
 
       if (file) {
         res.file = file;
       }
-      //This message is already displayed as a reaction on someone elses message
+      
       if (
         res.replyto.length &&
         containsOnlyEmojis(res.message) &&
@@ -797,15 +860,14 @@ async function setReplies(results: [ResultSet]) {
         continue;
       }
 
-      const replies = await getRoomRepliesToMessage(res.hash);
-      //If we want all replies to one message
+      const replies = childrenMessagesMap.get(res.hash) || [];
       const reactions = addEmoji(replies);
       res.replies = [];
       res.reactions = reactions;
       const r: Message = toMessage(res);
       messages.push(r);
-    }
   }
+  
   return messages.reverse();
 }
 

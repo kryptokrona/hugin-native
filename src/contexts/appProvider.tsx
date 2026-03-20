@@ -103,6 +103,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   }
 
   async function initFrontend() {
+    try {
+    await waitForCondition(() => useGlobalStore.getState().started, 10000);
     console.log('Initing front end..', frontendStartedRef.current)
     if (frontendStartedRef.current) return;
     console.log('Setting latest room messages..')
@@ -124,11 +126,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // Start the interval
     setInterval(updateFiatPrice, 60000);
     frontendStartedRef.current = true;
-
+    console.log('[appProvider.tsx] Getting contacts..')
     const contacts = await getContacts();
+    console.log('[appProvider.tsx] Got contacts..')
     const knownKeys = contacts.map((contact) => contact.messagekey);
+    console.log('[appProvider.tsx] Got known keys..', knownKeys)
     const keys = Wallet.privateKeys();
+    console.log('[appProvider.tsx] Got keys..', keys)
     MessageSync.init('', knownKeys, keys);
+    console.log('[appProvider.tsx] Inited message sync..')
 
     const huginAddress = Wallet.address + keychain.getMsgKey();
     console.log('huginAddress', huginAddress);
@@ -141,6 +147,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       files,
       huginAddress,
     });
+
+    } catch (e) {
+      console.log('[appProvider.tsx] Error in initFrontend:', e);
+    }
 
   }
 
