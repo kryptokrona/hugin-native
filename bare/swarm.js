@@ -1013,15 +1013,14 @@ async function send_dm_message(address, payload) {
 
 function send_message(hash, message, topic, reply, invite, tip = false) {
   const message_json = {
-    c: 'channel in room?',
-    g: invite,
     hash,
-    k: Hugin.address,
-    m: message,
-    n: Hugin.name,
-    r: reply,
-    s: 'sig',
-    t: Date.now(),
+    room: invite,
+    address: Hugin.address,
+    message: message,
+    name: Hugin.name,
+    reply: reply,
+    signature: 'sig',
+    timestamp: Date.now(),
     tip, // {amount, sender, receiver, hash}
   };
 
@@ -1606,18 +1605,7 @@ const process_request = async (messages, key) => {
       i++;
       if (m?.address === Hugin.address) continue;
       if (m?.hash?.length !== 64) continue;
-      const inc = {
-        m: m?.message,
-        k: m?.address,
-        s: m?.signature,
-        t: m?.time ? m.time : m?.timestamp,
-        g: m?.grp ? m?.grp : m?.room,
-        r: m?.reply,
-        n: m?.name ? m?.name : m?.nickname,
-        hash: m?.hash,
-        tip: m?.tip,
-      };
-      const message = sanitize_group_message(inc);
+      const message = sanitize_group_message(m);
       if (!message) continue;
       //Save room message in background mode ??   
       message.history = true;
