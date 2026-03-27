@@ -14,18 +14,25 @@ const App = () => {
   const theme = useThemeStore((state) => state.theme);
   const toastConfig = getToastConfig(theme);
 
-  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
+  const [hasBeenActive, setHasBeenActive] = useState(
+    AppState.currentState === 'active' || Camera.active
+  );
 
   useEffect(() => {
-    const sub = AppState.addEventListener('change', setAppState);
-    return () => sub.remove();
-  }, []);
+    if (hasBeenActive) return;
 
-  const isActive = appState === 'active' || Camera.active;
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        setHasBeenActive(true);
+      }
+    });
+
+    return () => sub.remove();
+  }, [hasBeenActive]);
 
   return (
     <AppProvider>
-      {isActive ? (
+      {hasBeenActive ? (
         <>
           <RootNavigator />
           <Toast config={toastConfig} />
