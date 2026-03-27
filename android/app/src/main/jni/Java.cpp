@@ -7,8 +7,11 @@
 #include "hash.h"
 #include "kryptokrona.h"
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <cstdio>
+#include <mutex>
+#include <thread>
 #include <vector>
 
 jclass WALLET_BLOCK_INFO;
@@ -285,8 +288,9 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
     jint nonceTagBits,
     jint nonceTagValue)
 {
-    constexpr size_t MAX_BLOB_HEX_CHARS = 2048; // 1024 bytes
+    constexpr size_t MAX_BLOB_HEX_CHARS = 2048;
     constexpr uint64_t MAX_POW_ATTEMPTS = 5000000ULL;
+    constexpr unsigned int MAX_THREADS = 8;
 
     const std::string blobHex = makeNativeString(env, jBlobHex);
     const std::string targetHex = makeNativeString(env, jTargetHex);
@@ -314,18 +318,6 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
             out[i] = static_cast<uint8_t>((hi << 4) | lo);
         }
         return true;
-    };
-
-    auto bytesToHex = [](const std::vector<uint8_t> &bytes) -> std::string {
-        static const char *hex = "0123456789abcdef";
-        std::string out;
-        out.resize(bytes.size() * 2);
-        for (size_t i = 0; i < bytes.size(); i++)
-        {
-            out[i * 2] = hex[(bytes[i] >> 4) & 0x0f];
-            out[(i * 2) + 1] = hex[bytes[i] & 0x0f];
-        }
-        return out;
     };
 
     auto readVarint = [](const std::vector<uint8_t> &buffer, size_t offset, uint64_t &value, size_t &consumed) -> bool {
@@ -373,33 +365,6 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
                 (static_cast<uint32_t>(p[3]) << 24));
     };
 
-    auto readUint64LE = [&](const uint8_t *p) -> uint64_t {
-        const uint64_t lo = static_cast<uint64_t>(readUint32LE(p));
-        const uint64_t hi = static_cast<uint64_t>(readUint32LE(p + 4));
-        return (hi << 32) | lo;
-    };
-
-    auto parseTarget = [&](const std::string &target) -> bool {
-        if (target.size() != 8) return false;
-        std::vector<uint8_t> targetBytes;
-        if (!hexToBytes(target, targetBytes) || targetBytes.size() != 4) return false;
-        const uint32_t raw = readUint32LE(targetBytes.data());
-        if (raw == 0) return false;
-        const uint64_t denom = 0xffffffffULL / static_cast<uint64_t>(raw);
-        if (denom == 0) return false;
-        return true;
-    };
-
-    auto getTargetValue = [&](const std::string &target) -> uint64_t {
-        std::vector<uint8_t> targetBytes;
-        if (!hexToBytes(target, targetBytes) || targetBytes.size() != 4) return 0;
-        const uint32_t raw = readUint32LE(targetBytes.data());
-        if (raw == 0) return 0;
-        const uint64_t denom = 0xffffffffULL / static_cast<uint64_t>(raw);
-        if (denom == 0) return 0;
-        return 0xffffffffffffffffULL / denom;
-    };
-
     std::vector<uint8_t> blobBytes;
     if (!hexToBytes(blobHex, blobBytes) || blobBytes.empty())
     {
@@ -412,60 +377,107 @@ Java_com_hugin_TurtleCoinModule_findPowShareJNI(
         return env->NewStringUTF("");
     }
 
-    const bool hasValidTarget = parseTarget(targetHex);
-    if (!hasValidTarget)
+    if (targetHex.size() != 8) return env->NewStringUTF("");
+    std::vector<uint8_t> targetBytes;
+    if (!hexToBytes(targetHex, targetBytes) || targetBytes.size() != 4)
     {
         return env->NewStringUTF("");
     }
-    const uint64_t targetValue = getTargetValue(targetHex);
+    const uint32_t raw = readUint32LE(targetBytes.data());
+    if (raw == 0) return env->NewStringUTF("");
+    const uint64_t denom = 0xffffffffULL / static_cast<uint64_t>(raw);
+    if (denom == 0) return env->NewStringUTF("");
+    const uint64_t targetValue = 0xffffffffffffffffULL / denom;
+
     (void)nonceTagBits;
     (void)nonceTagValue;
-    const uint32_t nonceStep = 1u;
 
     const uint64_t requestedAttempts = maxAttempts > 0 ? static_cast<uint64_t>(maxAttempts) : 1ULL;
     const uint64_t attempts = std::min(requestedAttempts, MAX_POW_ATTEMPTS);
     const uint32_t startNonce32 = static_cast<uint32_t>(startNonce);
-    uint32_t nonce = startNonce32;
-    for (uint64_t i = 0; i < attempts; i++)
+
+    unsigned int cpuCount = std::thread::hardware_concurrency();
+    if (cpuCount == 0) cpuCount = 1;
+    const unsigned int numThreads = std::min(std::max(cpuCount, 1u), MAX_THREADS);
+    const uint64_t attemptsPerThread = (attempts + numThreads - 1) / numThreads;
+
+    std::atomic<bool> found(false);
+    std::mutex resultMutex;
+    std::string winnerNonce;
+    std::string winnerResult;
+
+    auto minerWork = [&](unsigned int threadIdx) {
+        std::vector<uint8_t> localBlob = blobBytes;
+        uint32_t localNonce = startNonce32 + static_cast<uint32_t>(threadIdx * attemptsPerThread);
+
+        static const char *hexChars = "0123456789abcdef";
+
+        for (uint64_t i = 0; i < attemptsPerThread; i++)
+        {
+            if (found.load(std::memory_order_relaxed)) break;
+
+            localBlob[nonceOffset]     = static_cast<uint8_t>(localNonce & 0xff);
+            localBlob[nonceOffset + 1] = static_cast<uint8_t>((localNonce >> 8) & 0xff);
+            localBlob[nonceOffset + 2] = static_cast<uint8_t>((localNonce >> 16) & 0xff);
+            localBlob[nonceOffset + 3] = static_cast<uint8_t>((localNonce >> 24) & 0xff);
+
+            Crypto::Hash hashResult;
+            Crypto::cn_turtle_lite_slow_hash_v2(localBlob.data(), localBlob.size(), hashResult);
+
+            uint64_t hashTail;
+            memcpy(&hashTail, hashResult.data + 24, sizeof(hashTail));
+
+            if (hashTail <= targetValue)
+            {
+                bool expected = false;
+                if (found.compare_exchange_strong(expected, true))
+                {
+                    char nonceHex[9];
+                    snprintf(nonceHex, sizeof(nonceHex), "%02x%02x%02x%02x",
+                             localBlob[nonceOffset],
+                             localBlob[nonceOffset + 1],
+                             localBlob[nonceOffset + 2],
+                             localBlob[nonceOffset + 3]);
+
+                    std::string hex;
+                    hex.resize(64);
+                    for (size_t k = 0; k < 32; k++)
+                    {
+                        hex[k * 2]     = hexChars[(static_cast<uint8_t>(hashResult.data[k]) >> 4) & 0x0f];
+                        hex[k * 2 + 1] = hexChars[static_cast<uint8_t>(hashResult.data[k]) & 0x0f];
+                    }
+
+                    std::lock_guard<std::mutex> lock(resultMutex);
+                    winnerNonce = nonceHex;
+                    winnerResult = hex;
+                }
+                break;
+            }
+
+            localNonce += 1;
+        }
+    };
+
+    std::vector<std::thread> threads;
+    threads.reserve(numThreads);
+    for (unsigned int t = 0; t < numThreads; t++)
     {
-        blobBytes[nonceOffset] = static_cast<uint8_t>(nonce & 0xff);
-        blobBytes[nonceOffset + 1] = static_cast<uint8_t>((nonce >> 8) & 0xff);
-        blobBytes[nonceOffset + 2] = static_cast<uint8_t>((nonce >> 16) & 0xff);
-        blobBytes[nonceOffset + 3] = static_cast<uint8_t>((nonce >> 24) & 0xff);
+        threads.emplace_back(minerWork, t);
+    }
+    for (auto &th : threads)
+    {
+        th.join();
+    }
 
-        const std::string candidateBlobHex = bytesToHex(blobBytes);
-        const std::string result = Core::Cryptography::cn_turtle_lite_slow_hash_v2(candidateBlobHex);
-
-        std::vector<uint8_t> hashBytes;
-        if (!hexToBytes(result, hashBytes) || hashBytes.size() < 32)
-        {
-            nonce += nonceStep;
-            continue;
-        }
-
-        const uint64_t hashTail = readUint64LE(hashBytes.data() + 24);
-        if (hashTail <= targetValue)
-        {
-            char nonceHex[9];
-            snprintf(
-                nonceHex,
-                sizeof(nonceHex),
-                "%02x%02x%02x%02x",
-                static_cast<unsigned int>(blobBytes[nonceOffset]),
-                static_cast<unsigned int>(blobBytes[nonceOffset + 1]),
-                static_cast<unsigned int>(blobBytes[nonceOffset + 2]),
-                static_cast<unsigned int>(blobBytes[nonceOffset + 3]));
-
-            const std::string json =
-                std::string("{\"job_id\":\"\",\"nonce\":\"") +
-                nonceHex +
-                std::string("\",\"result\":\"") +
-                result +
-                std::string("\"}");
-            return env->NewStringUTF(json.c_str());
-        }
-
-        nonce += nonceStep;
+    if (found.load())
+    {
+        const std::string json =
+            std::string("{\"job_id\":\"\",\"nonce\":\"") +
+            winnerNonce +
+            std::string("\",\"result\":\"") +
+            winnerResult +
+            std::string("\"}");
+        return env->NewStringUTF(json.c_str());
     }
 
     return env->NewStringUTF("");
