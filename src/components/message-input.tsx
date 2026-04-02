@@ -5,6 +5,7 @@ import {
   TextInput,
   View,
   Platform,
+  Animated,
 } from 'react-native';
 
 import {
@@ -62,6 +63,23 @@ export const MessageInput: React.FC<Props> = ({
   const [text, setText] = useState('');
   const [focus, setFocus] = useState(large ? true : false);
   const [displayActions, setDisplayActions] = useState(large ? false : true);
+  const animValue = useRef(new Animated.Value(large ? 0 : 1)).current;
+
+  function animateActions(val: boolean) {
+    setDisplayActions(val);
+    Animated.timing(animValue, {
+      toValue: val ? 1 : 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }
+
+  const arrowWidth = animValue.interpolate({ inputRange: [0, 1], outputRange: [40, 0] });
+  const arrowOpacity = animValue.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
+  const arrowTranslateX = animValue.interpolate({ inputRange: [0, 1], outputRange: [0, -20] });
+  const actionsWidth = animValue.interpolate({ inputRange: [0, 1], outputRange: [0, 132] });
+  const actionsOpacity = animValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+  const actionsTranslateX = animValue.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] });
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const color = focus ? theme.accentForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
@@ -300,7 +318,7 @@ export const MessageInput: React.FC<Props> = ({
 const isTypingRef = useRef(false);
 function onChange(text: string) {
   setText(text);
-  if (text.length > 0) setDisplayActions(false);
+  if (text.length > 0) animateActions(false);
 
   if (text.length > 0 && !isTypingRef.current) {
     sendTypingStatus(true);
@@ -337,18 +355,18 @@ function onChange(text: string) {
 
   function onBlur() {
     setFocus(false);
-    if (text.length === 0) setDisplayActions(true);
+    if (text.length === 0) animateActions(true);
     if (onFocusChange) onFocusChange(false);
   }
 
   function onFocus() {
     setFocus(true);
-    setDisplayActions(false);
+    animateActions(false);
     if (onFocusChange) onFocusChange(true);
   }
 
   function onDisplayActions() {
-    setDisplayActions(true);
+    animateActions(true);
   }
 
   function onRemoveFile() {
@@ -382,25 +400,30 @@ function onChange(text: string) {
             borderColor: color,
           },
         ]}>
-        {!displayActions && !hideExtras && (
-          <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
-            <CustomIcon
-              name="arrow-forward-ios"
-              type="MI"
-              size={20}
-              color={theme.primary}
-            />
-          </TouchableOpacity>
+        {!hideExtras && (
+          <Animated.View style={{ width: arrowWidth, opacity: arrowOpacity, transform: [{ translateX: arrowTranslateX }], overflow: 'hidden' }}>
+            <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
+              <CustomIcon
+                name="arrow-forward-ios"
+                type="MI"
+                size={20}
+                color={theme.primary}
+              />
+            </TouchableOpacity>
+          </Animated.View>
         )}
-        {displayActions && !hideExtras &&
-          Actions(
-            onCameraPress,
-            onFilePress,
-            onRecordAudio,
-            onStopRecordAudio,
-            theme.primary,
-            styles,
-          )}
+        {!hideExtras && (
+          <Animated.View style={{ width: actionsWidth, opacity: actionsOpacity, transform: [{ translateX: actionsTranslateX }], overflow: 'hidden', flexDirection: 'row' }}>
+            {Actions(
+              onCameraPress,
+              onFilePress,
+              onRecordAudio,
+              onStopRecordAudio,
+              theme.primary,
+              styles,
+            )}
+          </Animated.View>
+        )}
         {!isRecording ? (
           <TextInput
             style={[
@@ -481,6 +504,8 @@ function Actions(
 const styles = StyleSheet.create({
   btn: {
     paddingHorizontal: 10,
+    height: 40,
+    justifyContent: 'center',
   },
   container: {
     width: '100%',
