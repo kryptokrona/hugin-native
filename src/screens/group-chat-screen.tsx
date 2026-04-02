@@ -661,7 +661,7 @@ const handleRetryPress = useCallback((hashStr: string) => {
               </GlideInItem>
             );
           }}
-          contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 50 : 30 }]}
+          contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 70 : 40 }]}
           initialNumToRender={55}
           maxToRenderPerBatch={55}
           windowSize={21}

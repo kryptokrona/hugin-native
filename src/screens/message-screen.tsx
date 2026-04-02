@@ -671,7 +671,7 @@ useEffect(() => {
             </GlideInItem>
           );
         }}
-        contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 60 : 40 }]}
+        contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 70 : 40 }]}
         initialNumToRender={messages.length}
         maxToRenderPerBatch={messages.length}
       />
