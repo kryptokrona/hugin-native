@@ -615,6 +615,7 @@ useEffect(() => {
         </TouchableOpacity>
       )}
       <FlatList
+        style={{ flex: 1 }}
         inverted
         ref={flatListRef}
         data={messages}
@@ -671,7 +672,7 @@ useEffect(() => {
             </GlideInItem>
           );
         }}
-        contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 70 : 40 }]}
+        contentContainerStyle={[styles.flatListContent, { paddingTop: 0 }]}
         initialNumToRender={messages.length}
         maxToRenderPerBatch={messages.length}
       />
@@ -710,12 +711,8 @@ const styles = StyleSheet.create({
     paddingTop: 75,
   },
   inputWrapper: {
-    bottom: 0,
-    left: 0,
     // marginBottom: 10,
     paddingBottom: 10,
-    position: 'absolute',
-    right: 0,
   },
   modal: {
     alignSelf: 'center',

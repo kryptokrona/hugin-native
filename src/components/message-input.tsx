@@ -300,6 +300,7 @@ export const MessageInput: React.FC<Props> = ({
 const isTypingRef = useRef(false);
 function onChange(text: string) {
   setText(text);
+  if (text.length > 0) setDisplayActions(false);
 
   if (text.length > 0 && !isTypingRef.current) {
     sendTypingStatus(true);
@@ -336,7 +337,7 @@ function onChange(text: string) {
 
   function onBlur() {
     setFocus(false);
-    setDisplayActions(true);
+    if (text.length === 0) setDisplayActions(true);
     if (onFocusChange) onFocusChange(false);
   }
 
@@ -375,13 +376,13 @@ function onChange(text: string) {
         style={[
           styles.inputContainer,
           {
-            maxHeight: large ? undefined : 80,
+            maxHeight: large ? undefined : 160,
             height: large ? 300 : undefined,
             backgroundColor,
             borderColor: color,
           },
         ]}>
-        {focus && !displayActions && !hideExtras && (
+        {!displayActions && !hideExtras && (
           <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
             <CustomIcon
               name="arrow-forward-ios"
@@ -404,7 +405,7 @@ function onChange(text: string) {
           <TextInput
             style={[
               styles.inputField,
-              { borderColor: theme.input, color, height: large ? 200 : Math.min(height, 60) },
+              { borderColor: theme.input, color, height: large ? 200 : undefined, maxHeight: large ? 200 : 130, minHeight: large ? 200 : 40 },
             ]}
             value={text}
             onChangeText={onChange}
@@ -417,11 +418,7 @@ function onChange(text: string) {
             autoCapitalize="sentences"
             autoCorrect
             returnKeyLabel={t('send')}
-            returnKeyType="send"
-            onContentSizeChange={(event) => {
-              if (large) return;
-              setHeight(event.nativeEvent.contentSize.height);
-            }}
+            returnKeyType="default"
             {...commonInputProps}
           />
         ) : (
@@ -486,22 +483,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   container: {
-    flex: 1,
     width: '100%',
   },
   indicator: {
-    flex: 1,
     flexDirection: 'row',
     padding: 10,
     paddingBottom: 0,
   },
   inputContainer: {
-    flex: 1,
-    alignItems: 'center',
+    alignItems: 'flex-end',
     flexDirection: 'row',
-    maxHeight: 80,
+    maxHeight: 160,
     padding: 10,
-    paddingTop: 0
+    paddingTop: 0,
+    paddingBottom: 15
   },
   inputField: {
     borderRadius: Styles.borderRadius.medium,
