@@ -487,20 +487,22 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         const currentMessages = useGlobalStore.getState().roomMessages;
         const tempMsg = currentMessages.find((m) => m.hash === tempHash);
         if (tempMsg) {
-          const newMsgObj = { ...tempMsg, hash: save.hash, timestamp: save.t, status: (sent_node.success ? 'success' : 'pending') as "success" | "pending" | "failed" };
+          const newMsgObj = { ...tempMsg, hash: save.hash, timestamp: save.timestamp, status: (sent_node.success ? 'success' : 'pending') as "success" | "pending" | "failed" };
           const replacedMessages = currentMessages.map((m) => m.hash === tempHash ? newMsgObj : m);
           setStoreRoomMessages(replacedMessages);
         } else {
           setStoreRoomMessages(currentMessages.filter((m) => m.hash !== tempHash));
         }
 
+        console.log('save', save);
+
         await saveRoomMessageAndUpdate(
-          save.k,
-          save.m,
-          save.g,
-          save.r,
-          save.t,
-          save.n,
+          save.address,
+          save.message,
+          save.room,
+          save.reply,
+          save.timestamp,
+          save.name,
           save.hash,
           true,
           undefined,
