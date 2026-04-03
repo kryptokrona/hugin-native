@@ -487,20 +487,22 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         const currentMessages = useGlobalStore.getState().roomMessages;
         const tempMsg = currentMessages.find((m) => m.hash === tempHash);
         if (tempMsg) {
-          const newMsgObj = { ...tempMsg, hash: save.hash, timestamp: save.t, status: (sent_node.success ? 'success' : 'pending') as "success" | "pending" | "failed" };
+          const newMsgObj = { ...tempMsg, hash: save.hash, timestamp: save.timestamp, status: (sent_node.success ? 'success' : 'pending') as "success" | "pending" | "failed" };
           const replacedMessages = currentMessages.map((m) => m.hash === tempHash ? newMsgObj : m);
           setStoreRoomMessages(replacedMessages);
         } else {
           setStoreRoomMessages(currentMessages.filter((m) => m.hash !== tempHash));
         }
 
+        console.log('save', save);
+
         await saveRoomMessageAndUpdate(
-          save.k,
-          save.m,
-          save.g,
-          save.r,
-          save.t,
-          save.n,
+          save.address,
+          save.message,
+          save.room,
+          save.reply,
+          save.timestamp,
+          save.name,
           save.hash,
           true,
           undefined,
@@ -603,6 +605,7 @@ const handleRetryPress = useCallback((hashStr: string) => {
         </ModalCenter>
         {messages?.length && 
         <FlatList
+          style={{ flex: 1 }}
           inverted
           ref={flatListRef}
           data={messages}
@@ -661,7 +664,7 @@ const handleRetryPress = useCallback((hashStr: string) => {
               </GlideInItem>
             );
           }}
-          contentContainerStyle={[styles.flatListContent, { paddingTop: isInputFocused ? 50 : 30 }]}
+          contentContainerStyle={[styles.flatListContent, { paddingTop: 0 }]}
           initialNumToRender={55}
           maxToRenderPerBatch={55}
           windowSize={21}
@@ -741,12 +744,8 @@ const styles = StyleSheet.create({
     minHeight: 200
   },
   inputWrapper: {
-    bottom: 0,
-    left: 0,
     // marginBottom: 10,
     paddingBottom: 10,
-    position: 'absolute',
-    right: 0
   },
   onlineUsersText: {
     marginBottom: 10,

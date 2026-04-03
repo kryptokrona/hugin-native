@@ -5,6 +5,7 @@ import {
   TextInput,
   View,
   Platform,
+  Animated,
 } from 'react-native';
 
 import {
@@ -62,6 +63,23 @@ export const MessageInput: React.FC<Props> = ({
   const [text, setText] = useState('');
   const [focus, setFocus] = useState(large ? true : false);
   const [displayActions, setDisplayActions] = useState(large ? false : true);
+  const animValue = useRef(new Animated.Value(large ? 0 : 1)).current;
+
+  function animateActions(val: boolean) {
+    setDisplayActions(val);
+    Animated.timing(animValue, {
+      toValue: val ? 1 : 0,
+      duration: 250,
+      useNativeDriver: false,
+    }).start();
+  }
+
+  const arrowWidth = animValue.interpolate({ inputRange: [0, 1], outputRange: [40, 0] });
+  const arrowOpacity = animValue.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
+  const arrowTranslateX = animValue.interpolate({ inputRange: [0, 1], outputRange: [0, -20] });
+  const actionsWidth = animValue.interpolate({ inputRange: [0, 1], outputRange: [0, 132] });
+  const actionsOpacity = animValue.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
+  const actionsTranslateX = animValue.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] });
   const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
   const color = focus ? theme.accentForeground : theme.mutedForeground;
   const backgroundColor = theme.background;
@@ -300,6 +318,7 @@ export const MessageInput: React.FC<Props> = ({
 const isTypingRef = useRef(false);
 function onChange(text: string) {
   setText(text);
+  if (text.length > 0) animateActions(false);
 
   if (text.length > 0 && !isTypingRef.current) {
     sendTypingStatus(true);
@@ -336,18 +355,18 @@ function onChange(text: string) {
 
   function onBlur() {
     setFocus(false);
-    setDisplayActions(true);
+    if (text.length === 0) animateActions(true);
     if (onFocusChange) onFocusChange(false);
   }
 
   function onFocus() {
     setFocus(true);
-    setDisplayActions(false);
+    animateActions(false);
     if (onFocusChange) onFocusChange(true);
   }
 
   function onDisplayActions() {
-    setDisplayActions(true);
+    animateActions(true);
   }
 
   function onRemoveFile() {
@@ -375,36 +394,41 @@ function onChange(text: string) {
         style={[
           styles.inputContainer,
           {
-            maxHeight: large ? undefined : 80,
+            maxHeight: large ? undefined : 160,
             height: large ? 300 : undefined,
             backgroundColor,
             borderColor: color,
           },
         ]}>
-        {focus && !displayActions && !hideExtras && (
-          <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
-            <CustomIcon
-              name="arrow-forward-ios"
-              type="MI"
-              size={20}
-              color={theme.primary}
-            />
-          </TouchableOpacity>
+        {!hideExtras && (
+          <Animated.View style={{ width: arrowWidth, opacity: arrowOpacity, transform: [{ translateX: arrowTranslateX }], overflow: 'hidden' }}>
+            <TouchableOpacity onPress={onDisplayActions} style={styles.btn}>
+              <CustomIcon
+                name="arrow-forward-ios"
+                type="MI"
+                size={20}
+                color={theme.primary}
+              />
+            </TouchableOpacity>
+          </Animated.View>
         )}
-        {displayActions && !hideExtras &&
-          Actions(
-            onCameraPress,
-            onFilePress,
-            onRecordAudio,
-            onStopRecordAudio,
-            theme.primary,
-            styles,
-          )}
+        {!hideExtras && (
+          <Animated.View style={{ width: actionsWidth, opacity: actionsOpacity, transform: [{ translateX: actionsTranslateX }], overflow: 'hidden', flexDirection: 'row' }}>
+            {Actions(
+              onCameraPress,
+              onFilePress,
+              onRecordAudio,
+              onStopRecordAudio,
+              theme.primary,
+              styles,
+            )}
+          </Animated.View>
+        )}
         {!isRecording ? (
           <TextInput
             style={[
               styles.inputField,
-              { borderColor: theme.input, color, height: large ? 200 : Math.min(height, 60) },
+              { borderColor: theme.input, color, height: large ? 200 : undefined, maxHeight: large ? 200 : 130, minHeight: large ? 200 : 40 },
             ]}
             value={text}
             onChangeText={onChange}
@@ -417,11 +441,7 @@ function onChange(text: string) {
             autoCapitalize="sentences"
             autoCorrect
             returnKeyLabel={t('send')}
-            returnKeyType="send"
-            onContentSizeChange={(event) => {
-              if (large) return;
-              setHeight(event.nativeEvent.contentSize.height);
-            }}
+            returnKeyType="default"
             {...commonInputProps}
           />
         ) : (
@@ -484,24 +504,24 @@ function Actions(
 const styles = StyleSheet.create({
   btn: {
     paddingHorizontal: 10,
+    height: 40,
+    justifyContent: 'center',
   },
   container: {
-    flex: 1,
     width: '100%',
   },
   indicator: {
-    flex: 1,
     flexDirection: 'row',
     padding: 10,
     paddingBottom: 0,
   },
   inputContainer: {
-    flex: 1,
-    alignItems: 'center',
+    alignItems: 'flex-end',
     flexDirection: 'row',
-    maxHeight: 80,
+    maxHeight: 160,
     padding: 10,
-    paddingTop: 0
+    paddingTop: 0,
+    paddingBottom: 15
   },
   inputField: {
     borderRadius: Styles.borderRadius.medium,

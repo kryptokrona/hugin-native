@@ -60,23 +60,16 @@ export class Swarm {
   async send_room_message_push(message) {
     let sent;
     try {
-    const roomKey = message.g.substring(0,64);
+    const roomKey = message.room.substring(0,64);
     const secretKey = keychain.getNaclKeys(roomKey).secretKey;
 
-    let payload_message = {
-      message: message.m, 
-      reply: message.r, 
-      tip: message.tip || '', 
-      hash: message.hash,
-      name: message.n,
-      address: message.k
-    };
+    let payload_message = message;
 
     let payload_message_decoded = naclUtil.decodeUTF8(
       JSON.stringify(payload_message),
     );
 
-    const timestamp = message.t;
+    const timestamp = message.timestamp;
     const nonce = nonceFromTimestamp(timestamp);
 
     let secretbox = tweetnacl.secretbox(
@@ -87,7 +80,7 @@ export class Swarm {
 
     let payload_json = {
       box: Buffer.from(secretbox).toString('hex'),
-      viewTag: await Wallet.generate_room_view_tag(message.g)
+      viewTag: await Wallet.generate_room_view_tag(message.room)
     };
 
     console.log('🔑 Secretbox encrypted..', payload_json);
@@ -118,7 +111,7 @@ export class Swarm {
     sent = await Nodes.message(
       payload_hex,
       message.hash,
-      await Wallet.generate_room_view_tag(message.g),
+      await Wallet.generate_room_view_tag(message.room),
       'room',
     );
 
