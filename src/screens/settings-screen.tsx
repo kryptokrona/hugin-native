@@ -119,6 +119,13 @@ const doCopyMnemonic = () => {
     Wallet.copyMnemonic();
   };
 
+  const authMethod = usePreferencesStore.getState().preferences?.authMethod;
+
+  if (authMethod === AuthMethods.reckless) {
+    Wallet.copyMnemonic();
+    return;
+  }
+
   useGlobalStore.getState().setAuthTarget({
     stack: Stacks.MainStack,
     parent: MainScreens.SettingsStack,
