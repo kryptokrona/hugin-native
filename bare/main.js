@@ -14,6 +14,7 @@ const {
   send_dm_message,
   send_dm_file,
   send_feed_message,
+  download_file,
   Nodes
 } = require('./swarm');
 const { Hugin } = require('./account');
@@ -82,6 +83,9 @@ const onrequest = async (p) => {
       break;
     case 'request_download':
       request_download(p.file);
+      break;
+    case 'group_download':
+      download_file(p.file);
       break;
     case 'keep_alive':
       break;

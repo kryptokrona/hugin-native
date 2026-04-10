@@ -193,6 +193,11 @@ export class Swarm {
     return rpc.send(data);
   }
 
+  download(file) {
+    const data = { type: 'group_download', file };
+    rpc.send(data);
+  }
+
   leave(key) {
     const data = { type: 'end_swarm', key };
     return rpc.send(data);

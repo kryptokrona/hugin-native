@@ -360,10 +360,14 @@ export class Bridge {
         case 'save-file-info':
           break;
         case 'room-remote-file-added':
-          //Maybe add a global state for remote files?
-          //Update remote file list. We need to replace the message in the chat-window with a download button.
-          //That message is a normal swarm-message with the correct Message format.
-          //Both have the same hash as identifier.
+          for (const file of (json.remoteFiles ?? [])) {
+            useGlobalStore.getState().addRemoteRoomFile(file);
+          }
+          break;
+        case 'remote-dm-file-added':
+          for (const file of (json.remoteFiles ?? [])) {
+            useGlobalStore.getState().addRemoteDmFile(file);
+          }
           break;
         case 'download-complete':
         //path, chat, hash, filename

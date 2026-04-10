@@ -34,6 +34,7 @@ import {
   useUnreadMessagesStore,
   useUserStore,
 } from '../zustand';
+import { RemoteFile } from '@/types';
 
 import { navigationRef } from '@/contexts';
 
@@ -223,7 +224,19 @@ export const saveRoomMessageAndUpdate = async (
     useUnreadMessagesStore.getState().addUnreadRoomMessage(newMessage);
   }
 
-  if (!newMessage) return
+  if (!newMessage) {
+    // Message already existed — if a file just downloaded, update the in-store message with file data
+    if (isFile && file) {
+      const messages = getRoomsMessages();
+      const existing = messages.find((m) => m.hash === hash);
+      if (existing && !existing.file) {
+        const updated = messages.map((m) => m.hash === hash ? { ...m, file } : m);
+        setStoreRoomMessages(updated);
+      }
+      useGlobalStore.getState().removeRemoteRoomFile(hash);
+    }
+    return;
+  }
   setLatestRoomMessages(history);
 };
 

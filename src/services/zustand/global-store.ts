@@ -2,7 +2,7 @@ import type { Transaction } from 'kryptokrona-wallet-backend-js';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { Balance, Message, Room, User, Contact, Call, HuginNode } from '@/types';
+import type { Balance, Message, RemoteFile, Room, User, Contact, Call, HuginNode } from '@/types';
 import { AppStateStatus } from 'react-native';
 
 type GlobalStore = {
@@ -67,6 +67,12 @@ type GlobalStore = {
   setTalkingUser: (address: string, talking: boolean) => void;
   loadingStatus: string;
   setLoadingStatus: (payload: string) => void;
+  remoteRoomFiles: RemoteFile[];
+  remoteDmFiles: RemoteFile[];
+  addRemoteRoomFile: (file: RemoteFile) => void;
+  addRemoteDmFile: (file: RemoteFile) => void;
+  removeRemoteRoomFile: (hash: string) => void;
+  removeRemoteDmFile: (hash: string) => void;
 };
 
 const defaultCall: Call = { 
@@ -102,7 +108,25 @@ export const useGlobalStore = create<
     started: false,
     loadingStatus: 'Starting...',
     pendingLink: null,
+    remoteRoomFiles: [],
+    remoteDmFiles: [],
     setLoadingStatus: (loadingStatus: string) => set({ loadingStatus }),
+    addRemoteRoomFile: (file: RemoteFile) => set((state) => ({
+      remoteRoomFiles: state.remoteRoomFiles.some((f) => f.hash === file.hash)
+        ? state.remoteRoomFiles
+        : [...state.remoteRoomFiles, file],
+    })),
+    addRemoteDmFile: (file: RemoteFile) => set((state) => ({
+      remoteDmFiles: state.remoteDmFiles.some((f) => f.hash === file.hash)
+        ? state.remoteDmFiles
+        : [...state.remoteDmFiles, file],
+    })),
+    removeRemoteRoomFile: (hash: string) => set((state) => ({
+      remoteRoomFiles: state.remoteRoomFiles.filter((f) => f.hash !== hash),
+    })),
+    removeRemoteDmFile: (hash: string) => set((state) => ({
+      remoteDmFiles: state.remoteDmFiles.filter((f) => f.hash !== hash),
+    })),
     appState: 'inactive',
     talkingUsers: {},
     setAppState: (appState) => set({appState}),
