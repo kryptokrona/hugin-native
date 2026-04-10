@@ -52,6 +52,8 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
   const talkingUsers = useGlobalStore(state => state.talkingUsers);
   const room = useGlobalStore(state => state.currentCall.room);
 
+  console.log('[call-screen.tsx] users:', users)
+
   function OnlineUserMapper({ item }: { item: User }) {
     return <CallUserItem 
     {...item} 
@@ -76,6 +78,7 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
     });
   }, []);
 
+  const numColumns = users.length > 2 ? 2 : 2;
 
   return (
     <ScreenLayout>
@@ -92,10 +95,11 @@ export const CallScreen: React.FC<Props> = ({ route }) => {
               <View style={styles.flatListContainer}>
                 <View style={styles.flatListWrapper}>
                   <FlatList
+                    key={`flatlist-${numColumns}`}
                     nestedScrollEnabled={true}
-                    columnWrapperStyle={{ gap: 10 }}
+                    columnWrapperStyle={numColumns > 1 ? { gap: 10 } : undefined}
                     contentContainerStyle={{ gap: 10 }}
-                    numColumns={2}
+                    numColumns={numColumns}
                     data={users}
                     renderItem={OnlineUserMapper}
                     keyExtractor={(item, i) => `${item.name}-${i}`}

@@ -391,13 +391,12 @@ class VoiceChannel {
     });
 
     peerConnection.addEventListener('track', async (event) => {
+      console.log('[webrtc.js] Track received from:', address, event);
       remoteMediaStream = remoteMediaStream || new MediaStream();
       await remoteMediaStream.addTrack(event.track);
       const currentCall = useGlobalStore.getState().currentCall;
       const user = currentCall.users.find(a => a.address === address);
-      user.video = false;
-      useGlobalStore.getState().setCurrentCall({ ...currentCall });
-      user.video = true;
+      user.video = event?.track?.kind === 'video' ? true : false;
       useGlobalStore.getState().setCurrentCall({ ...currentCall });
     });
   }

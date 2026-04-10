@@ -31,6 +31,8 @@ export const CallUserItem: React.FC<Props> = (props) => {
 
   const { address, name, avatar, video, isTalking, online } = props;
 
+  console.log('[call-user-item.tsx] props:', video, address, avatar)
+
 
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -51,17 +53,24 @@ export const CallUserItem: React.FC<Props> = (props) => {
 
     async function getUserColor() {
 
-      const thisUserColor = await getColors('data:image/png;base64,'+avatar, {
+      let avatarColor = avatar?.length > 0 ? avatar : getAvatar(address);
+
+      try {
+      const thisUserColor = await getColors('data:image/png;base64,'+avatarColor, {
         fallback: '#228B22',
         cache: true,
-        key: avatar,
+        key: avatarColor?.substring(-10),
       });
       let backgroundColor = thisUserColor?.background || thisUserColor?.dominant;
-      if (!hadAvatar) {
-        backgroundColor = lightenHexColor(backgroundColor, 60)
+      if (!avatar) {
+        backgroundColor = lightenHexColor(backgroundColor, -80)
 
       }
       setUserColor(backgroundColor);
+
+    } catch (error) {
+      console.error('[call-user-item.tsx] error:', error)
+    }
       
     }
 
@@ -115,7 +124,7 @@ export const CallUserItem: React.FC<Props> = (props) => {
         {!stream && !video &&
         <ModalCenter visible={modalVisible} closeModal={onClose}>
           <View style={styles.modalInner}>
-            <Avatar size={200} base64={avatar} />
+            <Avatar size={200} address={address} />
             <View style={styles.userInfo}>
             <TextField style={{ marginVertical: 12 }}>{name}</TextField>
             {(props.connectionStatus !== 'connected' && myUserAddress !== address) && <ActivityIndicator size={'small'} />}
@@ -143,7 +152,7 @@ export const CallUserItem: React.FC<Props> = (props) => {
         {video && stream ? (
         <View style={styles.inlineContainer}>
           <View style={styles.userInfo}>
-          <Avatar size={24} base64={avatar} />
+          <Avatar size={24} address={address} />
           <TextField size="xsmall" maxLength={nameMaxLength} style={styles.inlineName}>
             {name}
           </TextField>
@@ -156,7 +165,7 @@ export const CallUserItem: React.FC<Props> = (props) => {
       ) : (
         <>
           <View style={styles.avatar}>
-            <Avatar size={48} base64={avatar} />
+            <Avatar size={48} address={address} />
           </View>
           <View style={styles.userInfo}>
             <TextField size="xsmall" maxLength={nameMaxLength} style={styles.name}>
