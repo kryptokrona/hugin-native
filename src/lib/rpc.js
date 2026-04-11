@@ -26,6 +26,23 @@ import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 import { Nodes } from './native';
 import { cnFastHash, cnTurtleLiteSlowHashV2 } from '../services/NativeTest';
 import { findPowShare } from '../services/NativeTest';
+const IMAGE_EXTS = ['.png', '.jpg', '.gif', '.jpeg', '.jfif', '.webp'];
+const VIDEO_EXTS = ['.mp4', '.webm', '.avi', '.mov', '.wmv', '.mkv', '.mpeg'];
+const AUDIO_EXTS = ['.m4a', '.mp3', '.wav'];
+
+function getImageFlag(fileName) {
+  const lower = (fileName ?? '').toLowerCase();
+  return IMAGE_EXTS.some((e) => lower.endsWith(e));
+}
+
+function getMediaType(fileName) {
+  const lower = (fileName ?? '').toLowerCase();
+  if (IMAGE_EXTS.some((e) => lower.endsWith(e))) return 'image';
+  if (VIDEO_EXTS.some((e) => lower.endsWith(e))) return 'video';
+  if (AUDIO_EXTS.some((e) => lower.endsWith(e))) return 'audio';
+  return 'file';
+}
+
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -357,6 +374,23 @@ export class Bridge {
         case 'error-message':
           console.log('HUGE ERROR:', json.data)
           break;
+        case 'file-downloaded': {
+          const { fileName, hash, address, time, name, filePath, roomKey, topic } = json;
+          const fileInfo = {
+            fileName,
+            hash,
+            timestamp: parseInt(time),
+            sent: false,
+            path: filePath,
+            image: getImageFlag(fileName),
+            topic,
+            type: getMediaType(fileName),
+          };
+          await saveRoomMessageAndUpdate(
+            address, fileName, roomKey, '', parseInt(time), name, hash, false, false, fileInfo,
+          );
+          break;
+        }
         case 'save-file-info':
           break;
         case 'room-remote-file-added':

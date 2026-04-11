@@ -140,7 +140,6 @@ class HyperStorage {
 
   async save_from_peer(topic, file, peerDriveKeyHex, roomKey, dm = false) {
     if (Hugin.files.includes(file.hash)) return;
-    Hugin.files.push(file.hash);
     const room = this.get_room(topic);
     if (!room) return;
     const peerDrive = room.peerDrives.get(peerDriveKeyHex);
@@ -172,8 +171,8 @@ class HyperStorage {
         console.log('Error writing file to downloadDir:', e);
       }
       Hugin.files.push(file.hash);
-      Hugin.send('file-downloaded', file);
-      this.done(file, topic, roomKey, dm, filePath);
+      Hugin.send('file-downloaded', { ...file, filePath, roomKey, dm });
+      if (dm) this.done(file, topic, roomKey, dm, filePath);
       console.log('File saved from peer:', file.fileName);
     } catch (e) {
       console.log('Error saving file from peer:', e);
@@ -181,6 +180,7 @@ class HyperStorage {
   }
 
   done(file, topic, room, dm, filePath) {
+    if (!dm) return;
     const [media, fileType] = check_if_media(file.fileName, file.size);
     const message = {
       message: file.fileName,
@@ -204,13 +204,8 @@ class HyperStorage {
       },
       tip: false,
     };
-
-    if (dm) {
-      message.conversation = file.address;
-      Hugin.send('dm-file', { message });
-    } else {
-      Hugin.send('swarm-message', { message });
-    }
+    message.conversation = file.address;
+    Hugin.send('dm-file', { message });
   }
 
   async load_meta(topic) {
