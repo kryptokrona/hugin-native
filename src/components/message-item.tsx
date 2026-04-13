@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -251,6 +251,16 @@ const MessageItemInner: React.FC<Props> = ({
   useEffect(() => {
     setWaveformError(false);
   }, [audioDetails?.audioPath]);
+
+  const onWaveformLoadState = useCallback((loading: boolean) => {
+    setIsLoading(loading);
+  }, []);
+
+  const onWaveformError = useCallback((error: any) => {
+    console.log('Waveform error:', error);
+    setIsLoading(false);
+    setWaveformError(true);
+  }, []);
 
   const handlePlayPauseAction = async () => {
     if (ref.current?.currentState === PlayerState.paused) {
@@ -511,18 +521,8 @@ const MessageItemInner: React.FC<Props> = ({
                     waveColor={color}
                     candleHeightScale={4}
                     onPlayerStateChange={setPlayerState}
-                    onChangeWaveformLoadState={(loading) =>
-                      setIsLoading(loading)
-                    }
-                    onError={(error) => {
-                      console.log('Waveform error:', error);
-                      setIsLoading(false);
-                      setWaveformError(true);
-                    }}
-                    onCurrentProgressChange={(
-                      _currentProgress,
-                      _songDuration,
-                    ) => {}}
+                    onChangeWaveformLoadState={onWaveformLoadState}
+                    onError={onWaveformError}
                   />
                 </>
               )}

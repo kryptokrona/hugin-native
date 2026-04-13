@@ -681,9 +681,8 @@ useEffect(() => {
           );
         }}
         contentContainerStyle={[styles.flatListContent, { paddingTop: 0 }]}
-        initialNumToRender={20}
-        maxToRenderPerBatch={15}
-        windowSize={11}
+        initialNumToRender={messages.length}
+        maxToRenderPerBatch={messages.length}
       />
 
       <KeyboardAvoidingView
