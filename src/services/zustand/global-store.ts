@@ -2,7 +2,7 @@ import type { Transaction } from 'kryptokrona-wallet-backend-js';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
-import type { Balance, Message, Room, User, Contact, Call, HuginNode } from '@/types';
+import type { Balance, Message, RemoteFile, Room, User, Contact, Call, HuginNode } from '@/types';
 import { AppStateStatus } from 'react-native';
 
 type GlobalStore = {
@@ -67,6 +67,27 @@ type GlobalStore = {
   setTalkingUser: (address: string, talking: boolean) => void;
   loadingStatus: string;
   setLoadingStatus: (payload: string) => void;
+  remoteRoomFiles: RemoteFile[];
+  remoteDmFiles: RemoteFile[];
+  addRemoteRoomFile: (file: RemoteFile) => void;
+  addRemoteDmFile: (file: RemoteFile) => void;
+  removeRemoteRoomFile: (hash: string) => void;
+  removeRemoteDmFile: (hash: string) => void;
+  fileDownloads: Array<{
+    hash: string;
+    fileName: string;
+    time: number;
+    progress: number;
+    chat?: string;
+  }>;
+  patchFileDownload: (p: {
+    hash: string;
+    fileName?: string;
+    time?: number;
+    chat?: string;
+    progress?: number;
+  }) => void;
+  clearFileDownload: (hash: string) => void;
 };
 
 const defaultCall: Call = { 
@@ -102,7 +123,49 @@ export const useGlobalStore = create<
     started: false,
     loadingStatus: 'Starting...',
     pendingLink: null,
+    remoteRoomFiles: [],
+    remoteDmFiles: [],
     setLoadingStatus: (loadingStatus: string) => set({ loadingStatus }),
+    addRemoteRoomFile: (file: RemoteFile) => set((state) => ({
+      remoteRoomFiles: state.remoteRoomFiles.some((f) => f.hash === file.hash)
+        ? state.remoteRoomFiles
+        : [...state.remoteRoomFiles, file],
+    })),
+    addRemoteDmFile: (file: RemoteFile) => set((state) => ({
+      remoteDmFiles: state.remoteDmFiles.some((f) => f.hash === file.hash)
+        ? state.remoteDmFiles
+        : [...state.remoteDmFiles, file],
+    })),
+    removeRemoteRoomFile: (hash: string) => set((state) => ({
+      remoteRoomFiles: state.remoteRoomFiles.filter((f) => f.hash !== hash),
+    })),
+    removeRemoteDmFile: (hash: string) => set((state) => ({
+      remoteDmFiles: state.remoteDmFiles.filter((f) => f.hash !== hash),
+    })),
+    fileDownloads: [],
+    patchFileDownload: (p) =>
+      set((state) => {
+        const i = state.fileDownloads.findIndex((f) => f.hash === p.hash);
+        const prev = i >= 0 ? state.fileDownloads[i] : null;
+        const entry = {
+          hash: p.hash,
+          fileName: p.fileName ?? prev?.fileName ?? '',
+          time: p.time ?? prev?.time ?? 0,
+          chat: p.chat ?? prev?.chat,
+          progress:
+            p.progress !== undefined ? p.progress : prev?.progress ?? 0,
+        };
+        if (i >= 0) {
+          const next = [...state.fileDownloads];
+          next[i] = entry;
+          return { fileDownloads: next };
+        }
+        return { fileDownloads: [...state.fileDownloads, entry] };
+      }),
+    clearFileDownload: (hash: string) =>
+      set((state) => ({
+        fileDownloads: state.fileDownloads.filter((f) => f.hash !== hash),
+      })),
     appState: 'inactive',
     talkingUsers: {},
     setAppState: (appState) => set({appState}),

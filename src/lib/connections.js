@@ -31,46 +31,55 @@ class Connections extends EventEmitter {
 
   voicestatus(peer) {
     try {
-    console.log('Voice status changed for ', peer );
-    const thisRoomUsers = this.active()[peer.room];
-    useGlobalStore.getState().updateRoomUser(peer)
-
-    const peerPreviousCallStatus = false;
-    try {
-      peerPreviousCallStatus = thisRoomUsers.find(a => a.address == peer.address).voice;
-    } catch (e) {
-
-    }
-
-    console.log('State is true?', peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address)
-
-    if (peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address ) {
-      let roomName;
-      let message;
-      try {
-        roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === peer.room)?.name;
-      } catch (e) {
-        console.log('Failed to get room name:', e)
-      }
-      // if (!roomName) {
-      //   message = `Has started a call`;
-      //   Notify.new({ name: peer.name, text: message }, true);
-      // } else {
-      if (roomName) {
-        message = `Has joined the voice channel${roomName ? ' in ' +roomName : ''}.`;
-        Notify.new({ name: peer.name, text: message }, true, {roomKey: peer.room, type: 'roomcall', name: roomName});
-      }
+      console.log('Voice status changed for ', peer);
+      const activeRooms = this.active();
+      const thisRoomUsers = activeRooms[peer.room] || [];
       
-      
-    }
+      const existingUser = thisRoomUsers.find(a => a.address === peer.address);
+      const peerPreviousCallStatus = existingUser ? (existingUser.voice === true) : false;
 
-    let list = this.active();
-    this.update(list);
+      useGlobalStore.getState().updateRoomUser(peer);
+
+      console.log('State is true?', peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address);
+
+      if (peerPreviousCallStatus === false && peer.voice === true && useGlobalStore.getState().address !== peer.address) {
+        let roomName;
+        let message;
+        try {
+          roomName = useGlobalStore.getState().rooms.find(room => room.roomKey === peer.room)?.name;
+        } catch (e) {
+          console.log('Failed to get room name:', e);
+        }
+        if (roomName) {
+          message = `Has joined the voice channel${roomName ? ' in ' + roomName : ''}.`;
+          Notify.new({ name: peer.name, text: message }, true, { roomKey: peer.room, type: 'roomcall', name: roomName });
+        }
+      }
+
+      let list = this.active();
+      this.update(list);
+
+      const currentCall = useGlobalStore.getState().currentCall;
+      if (currentCall && currentCall.room === peer.room) {
+        const updatedUsers = currentCall.users.map(u => {
+          if (u.address === peer.address) {
+            return {
+              ...u,
+              video: peer.video !== undefined ? peer.video : (existingUser ? existingUser.video : false)
+            };
+          }
+          return u;
+        });
+
+        useGlobalStore.getState().setCurrentCall({
+          ...currentCall,
+          users: updatedUsers
+        });
+      }
 
     } catch (e) {
-      console.log('❌ BIG ERROR', e)
+      console.log('❌ BIG ERROR', e);
     }
-
   }
 
   left(peer) {

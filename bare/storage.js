@@ -23,8 +23,22 @@ const MEDIA_TYPES = [
   { file: '.mp3', type: 'audio' },
   { file: '.wav', type: 'audio' },
 ];
-const { get_new_peer_keys, sleep } = require('./utils.js');
+const { get_new_peer_keys, sleep, check_if_media } = require('./utils.js');
 const { Hugin } = require('./account.js');
+
+function uniqueFilePath(dir, fileName) {
+  let dest = dir + '/' + fileName;
+  if (!fs.existsSync(dest)) return dest;
+  const dotIdx = fileName.lastIndexOf('.');
+  const base = dotIdx > 0 ? fileName.substring(0, dotIdx) : fileName;
+  const ext = dotIdx > 0 ? fileName.substring(dotIdx) : '';
+  let n = 1;
+  while (fs.existsSync(dest)) {
+    dest = dir + '/' + base + ' (' + n + ')' + ext;
+    n++;
+  }
+  return dest;
+}
 
 ///Storage module to keep fast access from the bare moduke
 //  to forward saved files to others in the group.
@@ -34,9 +48,12 @@ const { Hugin } = require('./account.js');
 class HyperStorage {
   constructor() {
     this.drives = [];
-    this.limit = 100000000; //100 mb per session
+    this.limit = 100000000000; //100 gb per session
     this.saved = 0;
     this.beams = [];
+    this.downloading = new Set();
+    this.savedFiles = new Set();
+    this._purgeStarted = false;
   }
 
   async load_drive(topic) {
@@ -48,8 +65,12 @@ class HyperStorage {
     console.log('Loaded store path');
     console.log('Loading drive');
     const drive = new Hyperdrive(fileStore);
-    this.add(drive, topic);
+    this.add(drive, topic, fileStore);
     await drive.ready();
+    if (!this._purgeStarted) {
+      this._purgeStarted = true;
+      this.startPurgeInterval();
+    }
   }
 
   loaded(topic) {
@@ -59,16 +80,67 @@ class HyperStorage {
     return false;
   }
 
-  add(drive, topic) {
+  add(drive, topic, store) {
     if (this.loaded(topic)) return;
     console.log('Drive added');
-    this.drives.push({ drive, topic });
+    this.drives.push({ drive, topic, store, peerDrives: new Map(), notifiedFiles: new Set() });
   }
 
   async purge() {
     for (const a of this.drives) {
       await a.drive.purge();
     }
+  }
+
+  async purgeOldFiles() {
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    const MAX_STORAGE = 500 * 1024 * 1024; // 500 MB
+    const now = Date.now();
+    let purged = 0;
+    const allEntries = [];
+
+    for (const room of this.drives) {
+      try {
+        for await (const entry of room.drive.entries()) {
+          const meta = entry.value?.metadata;
+          if (!meta?.hash) continue;
+          const size = parseInt(meta.size) || 0;
+          const syncedAt = meta.syncedAt || meta.time || 0;
+          allEntries.push({ hash: meta.hash, size, syncedAt, drive: room.drive });
+        }
+      } catch (e) {
+        console.log('[storage.js] Purge scan error:', e);
+      }
+    }
+
+    // Pass 1: purge unsaved files older than 1 week
+    for (const entry of allEntries) {
+      if (this.savedFiles.has(entry.hash)) continue;
+      if (now - entry.syncedAt > ONE_WEEK) {
+        try { await entry.drive.del(entry.hash); purged++; entry.deleted = true; } catch (e) {}
+      }
+    }
+
+    // Pass 2: if still over storage cap, remove oldest unsaved files first
+    const remaining = allEntries.filter(e => !e.deleted);
+    const totalSize = remaining.reduce((sum, e) => sum + e.size, 0);
+    if (totalSize > MAX_STORAGE) {
+      const purgeable = remaining.filter(e => !this.savedFiles.has(e.hash));
+      purgeable.sort((a, b) => a.syncedAt - b.syncedAt);
+      let freed = 0;
+      const excess = totalSize - MAX_STORAGE;
+      for (const entry of purgeable) {
+        if (freed >= excess) break;
+        try { await entry.drive.del(entry.hash); purged++; freed += entry.size; } catch (e) {}
+      }
+    }
+
+    if (purged > 0) console.log(`[storage.js] Purged ${purged} files`);
+  }
+
+  startPurgeInterval() {
+    this.purgeOldFiles();
+    setInterval(() => this.purgeOldFiles(), 60 * 60 * 1000);
   }
 
   async load_files(topic) {
@@ -82,6 +154,210 @@ class HyperStorage {
     const found = this.drives.find((a) => a.topic === topic);
     if (!found) return false;
     return found.drive;
+  }
+
+  get_room(topic) {
+    return this.drives.find((a) => a.topic === topic);
+  }
+
+  get_drive_key(topic) {
+    const room = this.get_room(topic);
+    if (!room) return null;
+    return room.drive.key.toString('hex');
+  }
+
+  replicate(conn, topic) {
+    const room = this.get_room(topic);
+    if (!room) return;
+    try {
+      room.store.replicate(conn);
+      console.log('Corestore replication started for topic', topic);
+    } catch (e) {
+      console.log('Replicate error', e);
+    }
+  }
+
+  async add_peer_drive(topic, peerDriveKeyHex, roomKey, dm = false) {
+    const room = this.get_room(topic);
+    if (!room) return;
+    if (room.peerDrives.has(peerDriveKeyHex)) return;
+    try {
+      const peerDrive = new Hyperdrive(room.store, Buffer.from(peerDriveKeyHex, 'hex'));
+      await peerDrive.ready();
+      room.peerDrives.set(peerDriveKeyHex, peerDrive);
+      console.log('Peer drive added:', peerDriveKeyHex.slice(0, 8));
+
+      const self = this;
+
+      // Startup scan: process entries already replicated from previous sessions
+      ;(async () => {
+        try {
+          for await (const entry of peerDrive.entries()) {
+            const meta = entry.value.metadata;
+            await self.process_entry(meta, topic, peerDriveKeyHex, roomKey, dm, room);
+          }
+        } catch (e) {
+          console.log('[storage.js] Startup scan error:', e);
+        }
+      })();
+
+      // Live sync: watch for new entries as they replicate
+      ;(async () => {
+        try {
+          for await (const [current, previous] of peerDrive.watch('/')) {
+            for await (const entry of current.diff(previous.version, '/')) {
+              if (!entry.left) continue;
+              const meta = entry.left.value.metadata;
+              await self.process_entry(meta, topic, peerDriveKeyHex, roomKey, dm, room);
+            }
+          }
+        } catch {}
+      })();
+    } catch (e) {
+      console.log('Error adding peer drive', e);
+    }
+  }
+
+  async process_entry(meta, topic, peerDriveKeyHex, roomKey, dm, room) {
+    if (!meta || !meta.hash) return;
+    if (Hugin.files.includes(meta.hash)) return;
+    if (this.downloading.has(meta.hash)) return;
+
+    const autoSync = dm || Hugin.syncImages;
+
+    if (autoSync) {
+      console.log('[storage.js] Auto-syncing:', meta.fileName);
+      await this.save_from_peer(topic, meta, peerDriveKeyHex, roomKey, dm);
+    } else if (!room.notifiedFiles.has(meta.hash)) {
+      // Show download button for non-media or when sync is disabled
+      room.notifiedFiles.add(meta.hash);
+      const remoteFile = {
+        fileName: meta.fileName,
+        address: meta.address,
+        size: meta.size,
+        topic,
+        key: dm ? meta.address : roomKey,
+        chat: meta.address,
+        hash: meta.hash,
+        name: meta.name,
+        time: meta.time,
+        driveKey: peerDriveKeyHex,
+      };
+      if (dm) {
+        Hugin.send('remote-dm-file-added', { chat: meta.address, remoteFiles: [remoteFile] });
+      } else {
+        Hugin.send('room-remote-file-added', { chat: roomKey, remoteFiles: [remoteFile] });
+      }
+    }
+  }
+
+  async save_from_peer(topic, file, peerDriveKeyHex, roomKey, dm = false) {
+    if (Hugin.files.includes(file.hash)) return;
+    if (this.downloading.has(file.hash)) return;
+    this.downloading.add(file.hash);
+    const room = this.get_room(topic);
+    if (!room) { this.downloading.delete(file.hash); return; }
+    const peerDrive = room.peerDrives.get(peerDriveKeyHex);
+    if (!peerDrive) { this.downloading.delete(file.hash); return; }
+    Hugin.send('downloading', {
+      fileName: file.fileName,
+      chat: file.address,
+      time: file.time,
+      size: file.size,
+      hash: file.hash,
+    });
+    try {
+      console.log('Fetching file from peer drive:', file.fileName);
+      const buf = await peerDrive.get(file.hash, { timeout: 30000 });
+      if (!buf) { this.downloading.delete(file.hash); return; }
+      if (this.saved + file.size > this.limit) { this.downloading.delete(file.hash); return; }
+      this.saved += file.size;
+      await room.drive.put(file.hash, buf, {
+        metadata: {
+          name: file.name,
+          topic,
+          time: file.time,
+          size: file.size,
+          hash: file.hash,
+          fileName: file.fileName,
+          address: file.address,
+          signature: file.signature,
+          info: 'file-shared',
+          type: 'file',
+          syncedAt: Date.now(),
+        },
+      });
+      Hugin.files.push(file.hash);
+      this.downloading.delete(file.hash);
+      Hugin.send('download-file-progress', {
+        fileName: file.fileName,
+        chat: file.address,
+        time: file.time,
+        progress: 100,
+        hash: file.hash,
+      });
+      Hugin.send('file-downloaded', {
+        fileName: file.fileName,
+        hash: file.hash,
+        address: file.address,
+        name: file.name,
+        time: file.time,
+        size: file.size,
+        topic,
+        filePath: 'storage',
+        roomKey,
+        dm,
+      });
+      if (dm) this.done(file, topic, roomKey, dm, 'storage');
+      console.log('File saved from peer:', file.fileName);
+    } catch (e) {
+      this.downloading.delete(file.hash);
+      console.log('Error saving file from peer:', e);
+    }
+  }
+
+  async save_to_downloads(hash, fileName, topic) {
+    const room = this.get_room(topic);
+    if (!room) return { success: false, error: 'Room not found' };
+    try {
+      const buf = await room.drive.get(hash);
+      if (!buf) return { success: false, error: 'File not found in storage' };
+      const filePath = uniqueFilePath(Hugin.downloadDir, fileName);
+      fs.writeFileSync(filePath, buf);
+      this.savedFiles.add(hash);
+      return { success: true, filePath };
+    } catch (e) {
+      console.log('[storage.js] Error saving to downloads:', e);
+      return { success: false, error: e.message };
+    }
+  }
+
+  done(file, topic, room, dm, filePath) {
+    if (!dm) return;
+    const [media, fileType] = check_if_media(file.fileName, file.size);
+    const message = {
+      message: file.fileName,
+      address: file.address,
+      name: file.name,
+      hash: file.hash,
+      timestamp: file.time,
+      room,
+      reply: '',
+      sent: false,
+      history: false,
+      file: {
+        fileName: file.fileName,
+        address: file.address,
+        hash: file.hash,
+        timestamp: file.time,
+        image: media,
+        path: filePath || 'storage',
+        topic,
+        type: fileType,
+      },
+      tip: false,
+    };
+    Hugin.send('dm-file', { message });
   }
 
   async load_meta(topic) {

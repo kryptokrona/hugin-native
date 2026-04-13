@@ -107,6 +107,8 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
   // const [messages, setMessages] = useState<Message[]>(globalMessages || []);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [isLoadingRoom, setIsLoadingRoom] = useState<boolean>(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState<boolean>(false);
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const typingUsers = useGlobalStore((state) => state.typingUsers[roomKey]);
@@ -147,21 +149,18 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   }
 
   useEffect(() => {
-
-    async function changeDots() {
-      while (typingUsers?.length > 0 && someoneTyping) {
-        await sleep(500);
-        setDots('.')
-        await sleep(500);
-        setDots('..')
-        await sleep(500);
-        setDots('...')
-      }
+    const isTyping = typingUsers?.length > 0;
+    setSomeoneTyping(isTyping);
+    if (!isTyping) {
+      setDots('');
+      return;
     }
-    if (typingUsers?.length === 0) setSomeoneTyping(false);
-    if (typingUsers?.length > 0) setSomeoneTyping(true);
-    if (someoneTyping) changeDots();
-
+    let frame = 0;
+    const id = setInterval(() => {
+      frame = (frame + 1) % 3;
+      setDots('.'.repeat(frame + 1));
+    }, 500);
+    return () => clearInterval(id);
   }, [typingUsers]);
 
   useEffect(() => {
@@ -267,12 +266,12 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
   };
 
-  const showBigImage = (path?: string) => {
+  const showBigImage = useCallback((path?: string) => {
     if (!path) {
       return;
     }
     setImagePath(path);
-  };
+  }, []);
 
   async function sendTip() {
     const normalizedTipAmount = tipAmount.replace(/,/g, '');
@@ -328,9 +327,27 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      let cancelled = false;
+      setStoreRoomMessages([]);
       setStoreCurrentRoom(roomKey);
-      setRoomMessages(roomKey, 0);
+      setIsLoadingRoom(true);
+      setRoomMessages(roomKey, 0)
+        .catch((e) => console.log('[group-chat] Error loading messages:', e))
+        .finally(() => {
+          if (!cancelled) {
+            setIsLoadingRoom(false);
+            setHasLoadedOnce(true);
+          }
+        });
+      const timeout = setTimeout(() => {
+        if (!cancelled) {
+          setIsLoadingRoom(false);
+          setHasLoadedOnce(true);
+        }
+      }, 5000);
       return () => {
+        cancelled = true;
+        clearTimeout(timeout);
         setStoreRoomMessages([]);
       };
     }, [roomKey]),
@@ -416,7 +433,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     });
   }, [roomKey, name, inCall, roomUsers, voiceUsers]);
 
-  async function onSend(
+  const onSend = useCallback(async function onSend(
     text: string,
     file: SelectedFile | null,
     reply?: string,
@@ -540,44 +557,46 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
         );
       }
     }
-  }
+  }, [roomKey, myUserAddress, replyToMessageHash]);
 
-  function onReplyToMessagePress(hash: string) {
+  const onReplyToMessagePress = useCallback((hash: string) => {
     setReplyToMessageHash(hash);
-  }
+  }, []);
 
-  async function onEmojiReactionPress(emoji: string, hash: string) {
-    //Send hash because of race condition with onCloseReplyPress
+  const onEmojiReactionPress = useCallback(async (emoji: string, hash: string) => {
     onSend(emoji, null, hash, true);
-  }
+  }, [onSend]);
 
-  function onCloseReplyPress() {
+  const onCloseReplyPress = useCallback(() => {
     setReplyToMessageHash('');
-  }
+  }, []);
 
-  function onTip(address: string) {
+  const onTip = useCallback((address: string) => {
     setTipping(true);
     setTipAddress(address);
-  }
+  }, []);
 
   function onCloseTipping() {
     setTipping(false);
     setTipAmount('0');
   }
 
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
   const scrollToMessage = useCallback((hash: string) => {
-  const index = messages.findIndex((m) => m.hash === hash);
-  if (index !== -1 && flatListRef.current) {
-    flatListRef.current.scrollToIndex({ index: index + 1, animated: true });
-  }
-}, [messages]);
+    const index = messagesRef.current.findIndex((m) => m.hash === hash);
+    if (index !== -1 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index: index + 1, animated: true });
+    }
+  }, []);
 
 const handleRetryPress = useCallback((hashStr: string) => {
-  const item = messages.find(m => m.hash === hashStr);
+  const item = messagesRef.current.find(m => m.hash === hashStr);
   if (item) {
     onSend(item.message, null, undefined, false, undefined, hashStr);
   }
-}, [messages]);
+}, [onSend]);
 
   return (
     <ScreenLayout>
@@ -603,7 +622,17 @@ const handleRetryPress = useCallback((hashStr: string) => {
             {t('close')}
           </TextButton>
         </ModalCenter>
-        {messages?.length && 
+        {isLoadingRoom ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={color} />
+          </View>
+        ) : hasLoadedOnce && !messages?.length ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <TextField size="xsmall" type="muted">{'No messages yet'}</TextField>
+          </View>
+        ) : null}
+
+        {!isLoadingRoom && messages?.length > 0 &&
         <FlatList
           style={{ flex: 1 }}
           inverted

@@ -1,11 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { ActivityIndicator, Image, Platform, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore, useThemeStore } from '@/services';
 import { Message, MessageStatus, TipType } from '@/types';
+import { Rooms } from '../lib/native';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
 import {
@@ -32,9 +41,9 @@ import {
 } from './_elements';
 import { ModalBottom } from './_layout';
 import { EmojiPicker } from './emoji-picker';
-import { GroupInvite } from '.';
-import { extractHuginLinkAndClean } from '@/services/utils';
-import { markMessageAsRead } from '@/services/bare/sqlite';
+import { GroupInvite, VideoPlayer } from '.';
+import { extractHuginLinkAndClean } from '../services/utils';
+import { markMessageAsRead } from '../services/bare/sqlite';
 import Toast from 'react-native-toast-message';
 
 interface Props extends Partial<Message> {
@@ -54,7 +63,7 @@ interface Props extends Partial<Message> {
   onRetryPress?: (hash: string) => void;
 }
 
-export const MessageItem: React.FC<Props> = ({
+const MessageItemInner: React.FC<Props> = ({
   message,
   timestamp,
   nickname,
@@ -75,7 +84,7 @@ export const MessageItem: React.FC<Props> = ({
   onlyMessage = false,
   scrollToMessage = () => {},
   isLastInCluster = false,
-  onRetryPress
+  onRetryPress,
 }) => {
   try {
     tip = JSON.parse(tip);
@@ -87,36 +96,39 @@ export const MessageItem: React.FC<Props> = ({
   const [actions, setActions] = useState(true);
   const ref = useRef<IWaveformRef>(null);
   const [playerState, setPlayerState] = useState(PlayerState.stopped);
-  const [isLoading, setIsLoading] = useState(true);
+  const [waveformError, setWaveformError] = useState(false);
   const lastPress = useRef<number>(0);
   const DOUBLE_PRESS_DELAY = 300;
 
-  if(!read) {
+  if (!read) {
     markMessageAsRead(replyHash, 'roomsmessages');
   }
 
   const handlePress = () => {
-  const now = Date.now();
+    const now = Date.now();
 
-  if (status === 'failed' && onRetryPress) {
-    if (replyHash) {
-      onRetryPress(replyHash);
+    if (status === 'failed' && onRetryPress) {
+      if (replyHash) {
+        onRetryPress(replyHash);
+      }
+      return;
     }
-    return;
-  }
 
-  if (now - lastPress.current < DOUBLE_PRESS_DELAY && status !== 'failed' && !dm) {
-    onReaction('👍', false);
-  }
+    if (
+      now - lastPress.current < DOUBLE_PRESS_DELAY &&
+      status !== 'failed' &&
+      !dm
+    ) {
+      onReaction('👍', false);
+    }
 
-  lastPress.current = now;
-};
-
+    lastPress.current = now;
+  };
 
   const dateString = prettyPrintDate(timestamp ?? 0); // TODO Not sure this will ever be undefined, add ! if not.
   const color = getColorFromHash(userAddress);
   let name = nickname ?? 'Anon';
-  name = name.substring(0,10) + (name.length > 10 ? '...' : '');
+  name = name.substring(0, 10) + (name.length > 10 ? '...' : '');
 
   // Parse the message to see if it's JSON with a "path" property
   const imageDetails = useMemo(() => {
@@ -127,11 +139,12 @@ export const MessageItem: React.FC<Props> = ({
       if (file?.path && file?.image && file?.type === 'image') {
         isImageMessage = true;
         imagePath = 'file://' + file.path;
+        console.log('file path image', file.path);
       }
 
       return { imagePath, isImageMessage };
     } catch (e) {}
-  }, [message]);
+  }, [file]);
 
   const replyImageDetails = useMemo(() => {
     try {
@@ -139,7 +152,11 @@ export const MessageItem: React.FC<Props> = ({
       let imagePath = '';
 
       const parsedMessage = replyto?.[0].file;
-      if (parsedMessage?.path && parsedMessage?.image && file?.type === 'image') {
+      if (
+        parsedMessage?.path &&
+        parsedMessage?.image &&
+        file?.type === 'image'
+      ) {
         isImageMessage = true;
         imagePath = 'file://' + parsedMessage.path;
       }
@@ -156,23 +173,107 @@ export const MessageItem: React.FC<Props> = ({
       if (file?.path && file?.type === 'audio') {
         isAudioMessage = true;
         audioPath = file.path;
+        console.log('file', file);
+        console.log('Audio path', file.path);
       }
       return { audioPath, isAudioMessage };
     } catch (e) {}
-  }, [message]);
+  }, [file]);
 
-  setTimeout(() => {setIsLoading(false)}, 100)
+  const videoDetails = useMemo(() => {
+    if (file?.path && file?.type === 'video') {
+      return { isVideoMessage: true, videoPath: file.path };
+    }
+    return { isVideoMessage: false, videoPath: '' };
+  }, [file]);
+
+  const pendingRemoteFile = useGlobalStore((state) => {
+    const list = dm ? state.remoteDmFiles : state.remoteRoomFiles;
+    return list.find(
+      (f) =>
+        f.hash === replyHash ||
+        (!!message &&
+          f.fileName === message &&
+          Number(f.time) === Number(timestamp)),
+    );
+  });
+  const fileDl = useGlobalStore((state) =>
+    replyHash
+      ? state.fileDownloads.find((d) => d.hash === replyHash)
+      : undefined,
+  );
+
+  const isNonMediaFile =
+    !!file &&
+    file.type === 'file' &&
+    !imageDetails?.isImageMessage &&
+    !audioDetails?.isAudioMessage &&
+    !videoDetails.isVideoMessage;
+
+  const isSyncedInStorage = isNonMediaFile && file?.path === 'storage';
+  const isStillSyncing = isNonMediaFile && !file?.path;
+
+  const [downloadStarted, setDownloadStarted] = useState(false);
+
+  const handleSaveToDownloads = useCallback(() => {
+    if (!file) return;
+    const topic = pendingRemoteFile?.topic || '';
+    Rooms.saveToDownloads(replyHash || file.hash || '', file.fileName || '', topic);
+    Toast.show({ text1: 'Saving...', type: 'info' });
+  }, [file, pendingRemoteFile, replyHash]);
+
+  const handleDownload = () => {
+    setDownloadStarted(true);
+    if (pendingRemoteFile) Rooms.download(pendingRemoteFile);
+  };
+
+  const [visualProgress, setVisualProgress] = useState(0);
+
+  useEffect(() => {
+    if (file?.path) setDownloadStarted(false);
+  }, [file?.path]);
+
+  useEffect(() => {
+    const active =
+      isStillSyncing ||
+      (!!pendingRemoteFile &&
+        !file?.path &&
+        (downloadStarted || !!fileDl));
+    if (!active) {
+      setVisualProgress(0);
+      return;
+    }
+    const id = setInterval(() => {
+      setVisualProgress((p) => p + (95 - p) * 0.04);
+    }, 200);
+    return () => clearInterval(id);
+  }, [
+    isStillSyncing,
+    pendingRemoteFile,
+    fileDl?.hash,
+    fileDl?.progress,
+    file?.path,
+    downloadStarted,
+  ]);
+
+  useEffect(() => {
+    setWaveformError(false);
+  }, [audioDetails?.audioPath]);
+
+  const onWaveformError = useCallback((error: any) => {
+    console.log('Waveform error:', error);
+    setWaveformError(true);
+  }, []);
 
   const handlePlayPauseAction = async () => {
-
-      if (ref.current?.currentState === PlayerState.paused) {
-        await ref.current?.resumePlayer();
-      } else if (ref.current?.currentState === PlayerState.playing) {
-        await ref.current?.pausePlayer();
-      } else if (ref.current?.currentState === PlayerState.stopped) {
-        await ref.current?.startPlayer();
-      }
-    };
+    if (ref.current?.currentState === PlayerState.paused) {
+      await ref.current?.resumePlayer();
+    } else if (ref.current?.currentState === PlayerState.playing) {
+      await ref.current?.pausePlayer();
+    } else if (ref.current?.currentState === PlayerState.stopped) {
+      await ref.current?.startPlayer();
+    }
+  };
 
   function handleLongPress() {
     setActionsModal(true);
@@ -193,12 +294,12 @@ export const MessageItem: React.FC<Props> = ({
 
   function onReaction(emoji: string, showToast: boolean = true) {
     if (emoji === '👍' && showToast) {
-          Toast.show({
-            text1: "Info",
-            text2: t('thumbsUpInfo'),
-            type: 'info'
-          });
-        }
+      Toast.show({
+        text1: 'Info',
+        text2: t('thumbsUpInfo'),
+        type: 'info',
+      });
+    }
     onEmojiReactionPress(emoji, replyHash!);
     setActionsModal(false);
   }
@@ -208,12 +309,12 @@ export const MessageItem: React.FC<Props> = ({
     setActionsModal(false);
   }
 
-function handleReplyPress() {
-  const replyToHash = replyto?.[0]?.hash;
-  if (replyToHash) {
-    scrollToMessage(replyToHash);
+  function handleReplyPress() {
+    const replyToHash = replyto?.[0]?.hash;
+    if (replyToHash) {
+      scrollToMessage(replyToHash);
+    }
   }
-}
 
   function onDmUser() {
     setActionsModal(false);
@@ -233,8 +334,7 @@ function handleReplyPress() {
     onShowImagePress(imageDetails?.imagePath);
   }
 
-const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
-
+  const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
 
   useEffect(() => {
     return () => {
@@ -243,7 +343,6 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
   }, []);
 
   const [imageAspectRatio, setImageAspectRatio] = useState(1);
-
 
   useEffect(() => {
     if (imageDetails?.imagePath) {
@@ -258,22 +357,30 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
       onPress={handlePress}
       style={[
         styles.container,
-        onlyMessage && { marginTop: -8, marginBottom: 2 }
+        onlyMessage && { marginTop: -8, marginBottom: 2 },
       ]}
-      onLongPress={handleLongPress}
-    >
+      onLongPress={handleLongPress}>
       <ModalBottom visible={actionsModal} closeModal={onCloseActionsModal}>
-        {!dm && <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />}
+        {!dm && (
+          <EmojiPicker hideActions={hideActions} emojiPressed={onReaction} />
+        )}
         {actions && (
           <View>
-            {!dm &&
-            <TextButton
-              small
-              onPress={onReplyPess}
-              icon={<CustomIcon name="reply" color={theme.primaryForeground} type="MI" size={16} />}>
-              {t('reply')}
-            </TextButton>
-            }
+            {!dm && (
+              <TextButton
+                small
+                onPress={onReplyPess}
+                icon={
+                  <CustomIcon
+                    name="reply"
+                    color={theme.primaryForeground}
+                    type="MI"
+                    size={16}
+                  />
+                }>
+                {t('reply')}
+              </TextButton>
+            )}
             <CopyButton
               small
               data={message ?? ''}
@@ -290,21 +397,30 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
               }>
               {t('messageUser')}
             </TextButton> */}
-            {Platform.OS == 'android' && 
-            <TextButton
-              small
-              onPress={onTipUser}
-              icon={<CustomIcon color={theme.primaryForeground} name="attach-money" type="MI" size={16} />}>
-              {t('tipUser')}
-            </TextButton>
-            }
+            {Platform.OS == 'android' && (
+              <TextButton
+                small
+                onPress={onTipUser}
+                icon={
+                  <CustomIcon
+                    color={theme.primaryForeground}
+                    name="attach-money"
+                    type="MI"
+                    size={16}
+                  />
+                }>
+                {t('tipUser')}
+              </TextButton>
+            )}
           </View>
         )}
       </ModalBottom>
       {/* REPLY STUFF */}
       <View style={styles.content}>
         {replyto?.[0]?.nickname && (
-          <TouchableOpacity onPress={handleReplyPress} style={styles.replyContainer}>
+          <TouchableOpacity
+            onPress={handleReplyPress}
+            style={styles.replyContainer}>
             <View style={styles.replyIcon}>
               <CustomIcon
                 type="FI"
@@ -314,7 +430,8 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
               />
             </View>
             <TextField style={{ marginRight: 10 }} size="xsmall" type="muted">
-              {replyto[0].nickname.substring(0,10) + (replyto[0].nickname.length > 10 ? '...' : '')}
+              {replyto[0].nickname.substring(0, 10) +
+                (replyto[0].nickname.length > 10 ? '...' : '')}
             </TextField>
             {replyImageDetails?.isImageMessage ? (
               <Image
@@ -323,107 +440,165 @@ const { link: huginLink, cleanedMessage } = extractHuginLinkAndClean(message);
                 resizeMode="contain"
               />
             ) : (
-              <TextField maxLength={35} size="xsmall" style={styles.replyMessage}>
+              <TextField
+                maxLength={35}
+                size="xsmall"
+                style={styles.replyMessage}>
                 {replyto?.[0]?.message ?? ''}
               </TextField>
             )}
           </TouchableOpacity>
         )}
 
-  {/* HEADER ROW */}
-  {!onlyMessage && (
-    <View style={styles.headerRow}>
-      <Avatar base64={getAvatar(userAddress)} size={18} />
-      <View style={styles.headerText}>
-        <TextField bold size="xsmall" style={{ color }}>
-          {name}
-        </TextField>
-        <TextField type="muted" size="xsmall">
-          {dateString}
-        </TextField>
-      </View>
-    </View>
-  )}
+        {/* HEADER ROW */}
+        {!onlyMessage && (
+          <View style={styles.headerRow}>
+            <Avatar base64={getAvatar(userAddress)} size={18} />
+            <View style={styles.headerText}>
+              <TextField bold size="xsmall" style={{ color }}>
+                {name}
+              </TextField>
+              <TextField type="muted" size="xsmall">
+                {dateString}
+              </TextField>
+            </View>
+          </View>
+        )}
 
-  {/* MESSAGE ROW (FULL WIDTH) */}
-  <View style={styles.bodyRow}>
-    {imageDetails?.isImageMessage && (
-      <TouchableOpacity onPress={handleImagePress}>
-        <Image
-          style={[{ aspectRatio: imageAspectRatio }, styles.image]}
-          source={{ uri: imageDetails.imagePath }}
-          resizeMode="cover"
-        />
-      </TouchableOpacity>
-    )}
+        {/* MESSAGE ROW (FULL WIDTH) */}
+         <View style={styles.bodyRow}>
+          {imageDetails?.isImageMessage && (
+            <TouchableOpacity onPress={handleImagePress}>
+              <Image
+                style={[{ aspectRatio: imageAspectRatio }, styles.image]}
+                source={{ uri: imageDetails.imagePath }}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          )}
 
-    {!isLoading && audioDetails?.isAudioMessage && (
-      <View style={styles.waveFormWrapper}>
-        <Pressable
-          onPress={handlePlayPauseAction}
-          style={{ padding: 4 }}>
-            {playerState !== PlayerState.playing
-                  ? <CustomIcon
-                  type="FI"
-                  name="play"
-                  color={color}
-                  size={20}
+          {audioDetails?.isAudioMessage && (
+            <View style={styles.waveFormWrapper}>
+              <Pressable
+                onPress={handlePlayPauseAction}
+                style={{ padding: 4 }}>
+                  {playerState !== PlayerState.playing
+                        ? <CustomIcon
+                        type="FI"
+                        name="play"
+                        color={color}
+                        size={20}
+                      />
+                        : <CustomIcon
+                        type="FI"
+                        name="pause"
+                        color={color}
+                        size={20}
+                      />}
+                        
+              </Pressable>
+            <Waveform
+            containerStyle={styles.staticWaveformView}
+            mode="static"
+            key={audioDetails?.audioPath}
+            playbackSpeed={1}
+            ref={ref}
+            path={audioDetails?.audioPath}
+            candleSpace={2}
+            candleWidth={4}
+            scrubColor={'#fff'}
+            waveColor={color}
+            candleHeightScale={4}
+            onPlayerStateChange={setPlayerState}
+            onChangeWaveformLoadState={state => {
+            }}
+            onError={error => {
+              console.log('Error in static player:', error);
+            }}
+            onCurrentProgressChange={(_currentProgress, _songDuration) => {
+              }}
+              />
+              
+              </View>
+          )}
+
+          {videoDetails.isVideoMessage && (
+            <VideoPlayer path={videoDetails.videoPath} />
+          )}
+
+          {isStillSyncing && (
+            <View style={styles.filePendingBox}>
+              <TextField size="xsmall" type="muted">
+                {t('syncingFileFromPeers', 'Syncing file…')}
+              </TextField>
+              <View style={styles.progressTrack}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${Math.min(visualProgress, 95)}%` },
+                  ]}
                 />
-                  : <CustomIcon
-                  type="FI"
-                  name="pause"
-                  color={color}
-                  size={20}
-                />}
-                  
-        </Pressable>
-      <Waveform
-      containerStyle={styles.staticWaveformView}
-      mode="static"
-      key={audioDetails?.audioPath}
-      playbackSpeed={1}
-      ref={ref}
-      path={audioDetails?.audioPath}
-      candleSpace={2}
-      candleWidth={4}
-      scrubColor={'#fff'}
-      waveColor={color}
-      candleHeightScale={4}
-      onPlayerStateChange={setPlayerState}
-      onChangeWaveformLoadState={state => {
-      }}
-      onError={error => {
-        console.log('Error in static player:', error);
-      }}
-      onCurrentProgressChange={(_currentProgress, _songDuration) => {
-        }}
-        />
-        
+              </View>
+              <TextField size="xsmall">{file?.fileName || message}</TextField>
+            </View>
+          )}
+
+          {isSyncedInStorage && (
+            <TouchableOpacity
+              onPress={handleSaveToDownloads}
+              style={styles.downloadButton}>
+              <CustomIcon
+                type="FI"
+                name="download"
+                color={theme.primaryForeground}
+                size={16}
+              />
+              <TextField size="xsmall" style={styles.downloadText}>
+                {t('saveToDownloads', 'Save')} — {file?.fileName || message}
+              </TextField>
+            </TouchableOpacity>
+          )}
+
+          {!audioDetails?.isAudioMessage &&
+            !imageDetails?.isImageMessage &&
+            !videoDetails.isVideoMessage &&
+            !isNonMediaFile &&
+            message && (
+              <TextField
+                size="small"
+                style={styles.message}
+                color={status === 'failed' ? '#ff4444' : undefined}>
+                {cleanedMessage}
+              </TextField>
+            )}
+
+          {huginLink && <GroupInvite invite={huginLink} />}
+          {tip && <Tip tip={tip as TipType} />}
+          <Reactions items={reactions} onReact={onPressReaction} />
         </View>
-    )}
-
-    {!audioDetails?.isAudioMessage &&
-      !imageDetails?.isImageMessage &&
-      message && (
-        <TextField size="small" style={styles.message} color={status === 'failed' ? '#ff4444' : undefined}>
-          {cleanedMessage}
-        </TextField>
-      )}
-
-    {huginLink && <GroupInvite invite={huginLink} />}
-    {tip && <Tip tip={tip as TipType} />}
-    <Reactions items={reactions} onReact={onPressReaction} />
-  </View>
-
       </View>
-      {status === 'success' && userAddress === myUserAddress && isLastInCluster && (
-      <View style={{ justifyContent: 'flex-end', paddingBottom: 10, paddingLeft: 2 }}>
-        <CustomIcon type="IO" name="checkmark" size={16} color={theme.mutedForeground} />
-      </View>
-      )}
+      {status === 'success' &&
+        userAddress === myUserAddress &&
+        isLastInCluster && (
+          <View
+            style={{
+              justifyContent: 'flex-end',
+              paddingBottom: 10,
+              paddingLeft: 2,
+            }}>
+            <CustomIcon
+              type="IO"
+              name="checkmark"
+              size={16}
+              color={theme.mutedForeground}
+            />
+          </View>
+        )}
     </TouchableOpacity>
   );
 };
+
+export const MessageItem = React.memo(MessageItemInner);
 
 const styles = StyleSheet.create({
   waveFormWrapper: {
@@ -436,14 +611,14 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     gap: 10,
     width: '100%',
-  alignSelf: 'stretch',
+    alignSelf: 'stretch',
   },
   avatar: { marginRight: 10 },
   container: {
     flexDirection: 'row',
     marginRight: 8,
     // marginVertical: 8,
-    marginTop: 8
+    marginTop: 8,
   },
   content: {
     flex: 1,
@@ -473,7 +648,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     overflow: 'visible',
     flex: 1,
-    maxWidth: '98%'
+    maxWidth: '98%',
   },
 
   replyContainer: {
@@ -499,7 +674,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pending: {
-    opacity: 0.4
+    opacity: 0.4,
   },
   headerRow: {
     flexDirection: 'row',
@@ -518,4 +693,38 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
+  downloadButton: {
+    alignItems: 'center',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(128,128,128,0.3)',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+    marginRight: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+
+  downloadText: {
+    flexShrink: 1,
+  },
+  filePendingBox: {
+    marginBottom: 8,
+    marginRight: 8,
+    maxWidth: '92%',
+  },
+  progressTrack: {
+    backgroundColor: 'rgba(128,128,128,0.25)',
+    borderRadius: 4,
+    height: 5,
+    marginVertical: 6,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  progressFill: {
+    backgroundColor: '#4caf50',
+    borderRadius: 4,
+    height: '100%',
+  },
 });

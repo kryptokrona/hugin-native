@@ -7,6 +7,7 @@ export * from './empty-placeholder';
 export * from './feed-message-item';
 export * from './full-screen-image';
 export * from './full-screen-video';
+export * from './video-player';
 export * from './group-invite';
 
 export * from './group-online-indicator';

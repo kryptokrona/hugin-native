@@ -90,6 +90,19 @@ export interface FileInfo {
   type?: string | null;
 }
 
+export interface RemoteFile {
+  fileName: string;
+  hash: string;
+  size: number;
+  address: string;
+  topic: string;
+  key: string;
+  chat: string;
+  name: string;
+  time: number;
+  driveKey: string | null;
+}
+
 export interface TipType {
   receiver?: string;
   amount: number;

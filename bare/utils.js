@@ -258,6 +258,11 @@ const sanitize_join_swarm_data = (data) => {
   }
   const channels = [];
 
+  let driveKey = null;
+  if (typeof data?.driveKey === 'string' && data.driveKey.length === 64) {
+    driveKey = data.driveKey;
+  }
+
   const clean_object = {
     address: address,
     avatar: avatar,
@@ -274,7 +279,8 @@ const sanitize_join_swarm_data = (data) => {
     audioMute,
     videoMute,
     screenshare,
-    messages
+    messages,
+    driveKey,
   };
 
   return clean_object;

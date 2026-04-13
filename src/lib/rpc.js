@@ -26,6 +26,23 @@ import { saveFeedMessageAndUpdate } from '../services/bare/feed';
 import { Nodes } from './native';
 import { cnFastHash, cnTurtleLiteSlowHashV2 } from '../services/NativeTest';
 import { findPowShare } from '../services/NativeTest';
+const IMAGE_EXTS = ['.png', '.jpg', '.gif', '.jpeg', '.jfif', '.webp'];
+const VIDEO_EXTS = ['.mp4', '.webm', '.avi', '.mov', '.wmv', '.mkv', '.mpeg'];
+const AUDIO_EXTS = ['.m4a', '.mp3', '.wav'];
+
+function getImageFlag(fileName) {
+  const lower = (fileName ?? '').toLowerCase();
+  return IMAGE_EXTS.some((e) => lower.endsWith(e));
+}
+
+function getMediaType(fileName) {
+  const lower = (fileName ?? '').toLowerCase();
+  if (IMAGE_EXTS.some((e) => lower.endsWith(e))) return 'image';
+  if (VIDEO_EXTS.some((e) => lower.endsWith(e))) return 'video';
+  if (AUDIO_EXTS.some((e) => lower.endsWith(e))) return 'audio';
+  return 'file';
+}
+
 export class Bridge {
   constructor(IPC) {
     this.pendingRequests = new Map();
@@ -355,15 +372,65 @@ export class Bridge {
           WebRTC.signal(key, topic, address, data);
           break;
         case 'error-message':
-          console.log('HUGE ERROR:', json.data)
+          console.log('Error:', json.data);
+          Toast.show({ text1: json.data?.message || 'Error', type: 'error' });
           break;
+        case 'file-saved-to-downloads':
+          Toast.show({ text1: `Saved ${json.data?.fileName || 'file'}`, type: 'success' });
+          break;
+        case 'downloading': {
+          useGlobalStore.getState().patchFileDownload({
+            hash: json.hash,
+            fileName: json.fileName,
+            time: json.time,
+            chat: json.chat,
+            progress: 0,
+          });
+          break;
+        }
+        case 'download-file-progress': {
+          useGlobalStore.getState().patchFileDownload({
+            hash: json.hash,
+            fileName: json.fileName,
+            time: json.time,
+            chat: json.chat,
+            progress: json.progress ?? 0,
+          });
+          if (json.progress === 100 && json.hash) {
+            useGlobalStore.getState().clearFileDownload(json.hash);
+          }
+          break;
+        }
+        case 'file-downloaded': {
+          const { fileName, hash, address, time, name, filePath, roomKey, topic, dm } = json;
+          if (hash) useGlobalStore.getState().clearFileDownload(hash);
+          if (dm) break; // DM files are handled by the dm-file event
+          const fileInfo = {
+            fileName,
+            hash,
+            timestamp: parseInt(time),
+            sent: false,
+            path: filePath,
+            image: getImageFlag(fileName),
+            topic,
+            type: getMediaType(fileName),
+          };
+          await saveRoomMessageAndUpdate(
+            address, fileName, roomKey, '', parseInt(time), name, hash, false, false, fileInfo,
+          );
+          break;
+        }
         case 'save-file-info':
           break;
         case 'room-remote-file-added':
-          //Maybe add a global state for remote files?
-          //Update remote file list. We need to replace the message in the chat-window with a download button.
-          //That message is a normal swarm-message with the correct Message format.
-          //Both have the same hash as identifier.
+          for (const file of (json.remoteFiles ?? [])) {
+            useGlobalStore.getState().addRemoteRoomFile(file);
+          }
+          break;
+        case 'remote-dm-file-added':
+          for (const file of (json.remoteFiles ?? [])) {
+            useGlobalStore.getState().addRemoteDmFile(file);
+          }
           break;
         case 'download-complete':
         //path, chat, hash, filename
