@@ -243,16 +243,16 @@ useEffect(() => {
       WebRTC.exit();
     }
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     flatListRef.current?.scrollToOffset({ animated: true, offset: 0 });
-  };
+  }, []);
 
-  const showBigImage = (path: string | undefined) => {
+  const showBigImage = useCallback((path: string | undefined) => {
     if (path) {
       setImagePath(path);
     }
     setShowImage(true);
-  };
+  }, []);
 
   async function sendTip() {
     const amount = parseInt(tipAmount * 100000);
@@ -356,14 +356,17 @@ useEffect(() => {
   //   };
   // }, []);
 
-  async function onSend(
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+
+  const onSend = useCallback(async (
     text: string,
     file: SelectedFile | undefined,
     reply: string,
     emoji: boolean | undefined,
     tip?: JSON | undefined,
     retryHash?: string | undefined
-  ) {
+  ) => {
 
       const timestamp = Date.now();
       const outgoingHash = randomKey();
@@ -381,12 +384,11 @@ useEffect(() => {
         file
       };
 
-      const messageList = messages;
+      const messageList = useGlobalStore.getState().messages;
 
       if (retryHash) {
-        // Remove the failed message immediately from db and state
         await deleteMessage(retryHash);
-        const filteredMessages = messages.filter(a => a.hash !== retryHash);
+        const filteredMessages = messageList.filter(a => a.hash !== retryHash);
         setStoreMessages([...filteredMessages, newMessage]);
       } else {
         setStoreMessages([...messageList, newMessage]);
@@ -545,25 +547,31 @@ useEffect(() => {
     if (!emoji) {
       scrollToBottom();
     }
-  }
+  }, [roomKey, myUserAddress, huginAddress, online, scrollToBottom]);
 
-  function onReplyToMessagePress(hash: string) {
+  const onReplyToMessagePress = useCallback((hash: string) => {
     setReplyToMessageHash(hash);
-  }
+  }, []);
 
-  async function onEmojiReactionPress(emoji: string, hash: string) {
-    //Send hash because of race condition with onCloseReplyPress
+  const onEmojiReactionPress = useCallback(async (emoji: string, hash: string) => {
     onSend(emoji, null, hash, true);
-  }
+  }, [onSend]);
 
-  function onCloseReplyPress() {
+  const onCloseReplyPress = useCallback(() => {
     setReplyToMessageHash('');
-  }
+  }, []);
 
-  function onTip(address: string) {
+  const onTip = useCallback((address: string) => {
     setTipping(true);
     setTipAddress(address);
-  }
+  }, []);
+
+  const handleRetryPress = useCallback((hashStr: string) => {
+    const item = messagesRef.current.find(m => m.hash === hashStr);
+    if (item) {
+      onSend(item.message || '', undefined, '', false, undefined, hashStr);
+    }
+  }, [onSend]);
 
   return (
     <ScreenLayout>
@@ -656,7 +664,7 @@ useEffect(() => {
               status={item.status}
               onlyMessage={onlyMessage}
               isLastInCluster={isLastInCluster}
-              onRetryPress={(hashStr) => onSend(item.message || '', undefined, '', false, undefined, hashStr)}
+              onRetryPress={handleRetryPress}
             />
           );
           const isPendingOrUnsent = (item.sent && item.status === "pending") || !item.sent;
@@ -673,8 +681,9 @@ useEffect(() => {
           );
         }}
         contentContainerStyle={[styles.flatListContent, { paddingTop: 0 }]}
-        initialNumToRender={messages.length}
-        maxToRenderPerBatch={messages.length}
+        initialNumToRender={20}
+        maxToRenderPerBatch={15}
+        windowSize={11}
       />
 
       <KeyboardAvoidingView

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -13,7 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { useGlobalStore, useThemeStore } from '@/services';
-import { Message, MessageStatus, RemoteFile, TipType } from '@/types';
+import { Message, MessageStatus, TipType } from '@/types';
 import { Rooms } from '../lib/native';
 import { getAvatar, getColorFromHash, prettyPrintDate } from '@/utils';
 
@@ -63,7 +63,7 @@ interface Props extends Partial<Message> {
   onRetryPress?: (hash: string) => void;
 }
 
-export const MessageItem: React.FC<Props> = ({
+const MessageItemInner: React.FC<Props> = ({
   message,
   timestamp,
   nickname,
@@ -188,16 +188,8 @@ export const MessageItem: React.FC<Props> = ({
     return { isVideoMessage: false, videoPath: '' };
   }, [file]);
 
-  const remoteRoomFiles = useGlobalStore((state) => state.remoteRoomFiles);
-  const remoteDmFiles = useGlobalStore((state) => state.remoteDmFiles);
-  const fileDl = useGlobalStore((state) =>
-    replyHash
-      ? state.fileDownloads.find((d) => d.hash === replyHash)
-      : undefined,
-  );
-
-  const pendingRemoteFile = useMemo(() => {
-    const list = dm ? remoteDmFiles : remoteRoomFiles;
+  const pendingRemoteFile = useGlobalStore((state) => {
+    const list = dm ? state.remoteDmFiles : state.remoteRoomFiles;
     return list.find(
       (f) =>
         f.hash === replyHash ||
@@ -205,7 +197,12 @@ export const MessageItem: React.FC<Props> = ({
           f.fileName === message &&
           Number(f.time) === Number(timestamp)),
     );
-  }, [dm, remoteDmFiles, remoteRoomFiles, replyHash, message, timestamp]);
+  });
+  const fileDl = useGlobalStore((state) =>
+    replyHash
+      ? state.fileDownloads.find((d) => d.hash === replyHash)
+      : undefined,
+  );
 
   const isUndownloadedFile =
     !!file &&
@@ -629,6 +626,8 @@ export const MessageItem: React.FC<Props> = ({
     </TouchableOpacity>
   );
 };
+
+export const MessageItem = React.memo(MessageItemInner);
 
 const styles = StyleSheet.create({
   waveformSpinner: {

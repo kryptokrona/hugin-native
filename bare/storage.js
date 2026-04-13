@@ -48,7 +48,7 @@ function uniqueFilePath(dir, fileName) {
 class HyperStorage {
   constructor() {
     this.drives = [];
-    this.limit = 10000000000; //10 gb per session
+    this.limit = 100000000000; //100 gb per session
     this.saved = 0;
     this.beams = [];
     this.downloading = new Set(); // prevents concurrent downloads of same hash
