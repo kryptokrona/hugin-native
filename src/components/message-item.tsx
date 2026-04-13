@@ -207,7 +207,13 @@ export const MessageItem: React.FC<Props> = ({
     );
   }, [dm, remoteDmFiles, remoteRoomFiles, replyHash, message, timestamp]);
 
-  const waitingForPeerSync = false;
+  const isUndownloadedFile =
+    !!file &&
+    !file.path &&
+    file.type === 'file' &&
+    !imageDetails?.isImageMessage &&
+    !audioDetails?.isAudioMessage &&
+    !videoDetails.isVideoMessage;
 
   const [downloadStarted, setDownloadStarted] = useState(false);
 
@@ -224,7 +230,7 @@ export const MessageItem: React.FC<Props> = ({
 
   useEffect(() => {
     const active =
-      waitingForPeerSync ||
+      (isUndownloadedFile && !pendingRemoteFile) ||
       (!!pendingRemoteFile &&
         !file?.path &&
         (downloadStarted || !!fileDl));
@@ -237,7 +243,7 @@ export const MessageItem: React.FC<Props> = ({
     }, 200);
     return () => clearInterval(id);
   }, [
-    waitingForPeerSync,
+    isUndownloadedFile,
     pendingRemoteFile,
     fileDl?.hash,
     fileDl?.progress,
@@ -530,10 +536,10 @@ export const MessageItem: React.FC<Props> = ({
             <VideoPlayer path={videoDetails.videoPath} />
           )}
 
-          {waitingForPeerSync && (
+          {isUndownloadedFile && !pendingRemoteFile && (
             <View style={styles.filePendingBox}>
               <TextField size="xsmall" type="muted">
-                {t('syncingFileFromPeers', 'Syncing file from peers…')}
+                {t('syncingFileFromPeers', 'Waiting for peer…')}
               </TextField>
               <View style={styles.progressTrack}>
                 <View
@@ -543,7 +549,7 @@ export const MessageItem: React.FC<Props> = ({
                   ]}
                 />
               </View>
-              <TextField size="xsmall">{message}</TextField>
+              <TextField size="xsmall">{file?.fileName || message}</TextField>
             </View>
           )}
 
@@ -551,7 +557,7 @@ export const MessageItem: React.FC<Props> = ({
             !imageDetails?.isImageMessage &&
             !videoDetails.isVideoMessage &&
             !pendingRemoteFile &&
-            !waitingForPeerSync &&
+            !isUndownloadedFile &&
             message && (
               <TextField
                 size="small"

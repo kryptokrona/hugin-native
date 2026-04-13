@@ -1677,7 +1677,16 @@ const save_file_info = (data, topic, address, time, sent, name) => {
     hash: data.hash,
     reply: '',
     sent: sent,
-    file: false,
+    file: {
+      fileName: data.fileName,
+      hash: data.hash,
+      timestamp: time,
+      sent: sent,
+      path: '',
+      image: false,
+      topic,
+      type: 'file',
+    },
   };
   Hugin.send('swarm-message', { message });
 };
