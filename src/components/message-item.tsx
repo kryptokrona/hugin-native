@@ -463,7 +463,7 @@ const MessageItemInner: React.FC<Props> = ({
         )}
 
         {/* MESSAGE ROW (FULL WIDTH) */}
-        <View style={styles.bodyRow}>
+         <View style={styles.bodyRow}>
           {imageDetails?.isImageMessage && (
             <TouchableOpacity onPress={handleImagePress}>
               <Image
@@ -474,59 +474,49 @@ const MessageItemInner: React.FC<Props> = ({
             </TouchableOpacity>
           )}
 
-          {audioDetails?.isAudioMessage && audioDetails.audioPath && (
+          {!isLoading && audioDetails?.isAudioMessage && (
             <View style={styles.waveFormWrapper}>
-              {isLoading && (
-                <ActivityIndicator
-                  size="small"
-                  color={color}
-                  style={styles.waveformSpinner}
-                />
-              )}
-              {waveformError ? (
-                <TextField size="xsmall" type="muted">
-                  Audio unavailable
-                </TextField>
-              ) : (
-                <>
-                  <Pressable
-                    onPress={handlePlayPauseAction}
-                    style={{ padding: 4 }}>
-                    {playerState !== PlayerState.playing ? (
-                      <CustomIcon
+              <Pressable
+                onPress={handlePlayPauseAction}
+                style={{ padding: 4 }}>
+                  {playerState !== PlayerState.playing
+                        ? <CustomIcon
                         type="FI"
                         name="play"
                         color={color}
                         size={20}
                       />
-                    ) : (
-                      <CustomIcon
+                        : <CustomIcon
                         type="FI"
                         name="pause"
                         color={color}
                         size={20}
-                      />
-                    )}
-                  </Pressable>
-                  <Waveform
-                    containerStyle={styles.staticWaveformView}
-                    mode="static"
-                    key={audioDetails.audioPath}
-                    playbackSpeed={1}
-                    ref={ref}
-                    path={audioDetails.audioPath}
-                    candleSpace={2}
-                    candleWidth={4}
-                    scrubColor={'#fff'}
-                    waveColor={color}
-                    candleHeightScale={4}
-                    onPlayerStateChange={setPlayerState}
-                    onChangeWaveformLoadState={onWaveformLoadState}
-                    onError={onWaveformError}
-                  />
-                </>
-              )}
-            </View>
+                      />}
+                        
+              </Pressable>
+            <Waveform
+            containerStyle={styles.staticWaveformView}
+            mode="static"
+            key={audioDetails?.audioPath}
+            playbackSpeed={1}
+            ref={ref}
+            path={audioDetails?.audioPath}
+            candleSpace={2}
+            candleWidth={4}
+            scrubColor={'#fff'}
+            waveColor={color}
+            candleHeightScale={4}
+            onPlayerStateChange={setPlayerState}
+            onChangeWaveformLoadState={state => {
+            }}
+            onError={error => {
+              console.log('Error in static player:', error);
+            }}
+            onCurrentProgressChange={(_currentProgress, _songDuration) => {
+              }}
+              />
+              
+              </View>
           )}
 
           {videoDetails.isVideoMessage && (
