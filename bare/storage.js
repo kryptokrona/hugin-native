@@ -26,6 +26,20 @@ const MEDIA_TYPES = [
 const { get_new_peer_keys, sleep, check_if_media } = require('./utils.js');
 const { Hugin } = require('./account.js');
 
+function uniqueFilePath(dir, fileName) {
+  let dest = dir + '/' + fileName;
+  if (!fs.existsSync(dest)) return dest;
+  const dotIdx = fileName.lastIndexOf('.');
+  const base = dotIdx > 0 ? fileName.substring(0, dotIdx) : fileName;
+  const ext = dotIdx > 0 ? fileName.substring(dotIdx) : '';
+  let n = 1;
+  while (fs.existsSync(dest)) {
+    dest = dir + '/' + base + ' (' + n + ')' + ext;
+    n++;
+  }
+  return dest;
+}
+
 ///Storage module to keep fast access from the bare moduke
 //  to forward saved files to others in the group.
 
@@ -216,7 +230,7 @@ class HyperStorage {
           type: 'file',
         },
       });
-      const filePath = Hugin.downloadDir + '/' + file.fileName;
+      const filePath = uniqueFilePath(Hugin.downloadDir, file.fileName);
       let writeOk = false;
       try {
         fs.writeFileSync(filePath, buf);
