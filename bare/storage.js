@@ -34,9 +34,10 @@ const { Hugin } = require('./account.js');
 class HyperStorage {
   constructor() {
     this.drives = [];
-    this.limit = 100000000; //100 mb per session
+    this.limit = 10000000000; //10 gb per session
     this.saved = 0;
     this.beams = [];
+    this.downloading = new Set(); // prevents concurrent downloads of same hash
   }
 
   async load_drive(topic) {
@@ -62,7 +63,7 @@ class HyperStorage {
   add(drive, topic, store) {
     if (this.loaded(topic)) return;
     console.log('Drive added');
-    this.drives.push({ drive, topic, store, peerDrives: new Map() });
+    this.drives.push({ drive, topic, store, peerDrives: new Map(), notifiedFiles: new Set() });
   }
 
   async purge() {
@@ -116,19 +117,27 @@ class HyperStorage {
       console.log('Peer drive added:', peerDriveKeyHex.slice(0, 8));
 
       const self = this;
+
+      // Startup scan: process entries already replicated from previous sessions
+      ;(async () => {
+        try {
+          for await (const entry of peerDrive.entries()) {
+            const meta = entry.value.metadata;
+            await self.process_entry(meta, topic, peerDriveKeyHex, roomKey, dm, room);
+          }
+        } catch (e) {
+          console.log('[storage.js] Startup scan error:', e);
+        }
+      })();
+
+      // Live sync: watch for new entries as they replicate
       ;(async () => {
         try {
           for await (const [current, previous] of peerDrive.watch('/')) {
             for await (const entry of current.diff(previous.version, '/')) {
               if (!entry.left) continue;
               const meta = entry.left.value.metadata;
-              if (!meta || !meta.hash) continue;
-              if (Hugin.files.includes(meta.hash)) continue;
-              const [isMedia] = check_if_media(meta.fileName, meta.size);
-              if (!isMedia) continue;
-              if (!dm && !Hugin.syncImages) continue;
-              console.log('[storage.js] Watch triggered download:', meta.fileName);
-              await self.save_from_peer(topic, meta, peerDriveKeyHex, roomKey, dm);
+              await self.process_entry(meta, topic, peerDriveKeyHex, roomKey, dm, room);
             }
           }
         } catch {}
@@ -138,17 +147,60 @@ class HyperStorage {
     }
   }
 
+  async process_entry(meta, topic, peerDriveKeyHex, roomKey, dm, room) {
+    if (!meta || !meta.hash) return;
+    if (Hugin.files.includes(meta.hash)) return;
+    if (this.downloading.has(meta.hash)) return;
+
+    const [isMedia, fileType] = check_if_media(meta.fileName, meta.size);
+    const autoSync = isMedia && (dm || Hugin.syncImages);
+
+    if (autoSync) {
+      console.log('[storage.js] Auto-syncing:', meta.fileName);
+      await this.save_from_peer(topic, meta, peerDriveKeyHex, roomKey, dm);
+    } else if (!room.notifiedFiles.has(meta.hash)) {
+      // Show download button for non-media or when sync is disabled
+      room.notifiedFiles.add(meta.hash);
+      const remoteFile = {
+        fileName: meta.fileName,
+        address: meta.address,
+        size: meta.size,
+        topic,
+        key: dm ? meta.address : roomKey,
+        chat: meta.address,
+        hash: meta.hash,
+        name: meta.name,
+        time: meta.time,
+        driveKey: peerDriveKeyHex,
+      };
+      if (dm) {
+        Hugin.send('remote-dm-file-added', { chat: meta.address, remoteFiles: [remoteFile] });
+      } else {
+        Hugin.send('room-remote-file-added', { chat: roomKey, remoteFiles: [remoteFile] });
+      }
+    }
+  }
+
   async save_from_peer(topic, file, peerDriveKeyHex, roomKey, dm = false) {
     if (Hugin.files.includes(file.hash)) return;
+    if (this.downloading.has(file.hash)) return;
+    this.downloading.add(file.hash);
     const room = this.get_room(topic);
-    if (!room) return;
+    if (!room) { this.downloading.delete(file.hash); return; }
     const peerDrive = room.peerDrives.get(peerDriveKeyHex);
-    if (!peerDrive) return;
+    if (!peerDrive) { this.downloading.delete(file.hash); return; }
+    Hugin.send('downloading', {
+      fileName: file.fileName,
+      chat: file.address,
+      time: file.time,
+      size: file.size,
+      hash: file.hash,
+    });
     try {
       console.log('Fetching file from peer drive:', file.fileName);
       const buf = await peerDrive.get(file.hash, { timeout: 30000 });
-      if (!buf) return;
-      if (this.saved + file.size > this.limit) return;
+      if (!buf) { this.downloading.delete(file.hash); return; }
+      if (this.saved + file.size > this.limit) { this.downloading.delete(file.hash); return; }
       this.saved += file.size;
       await room.drive.put(file.hash, buf, {
         metadata: {
@@ -165,16 +217,40 @@ class HyperStorage {
         },
       });
       const filePath = Hugin.downloadDir + '/' + file.fileName;
+      let writeOk = false;
       try {
         fs.writeFileSync(filePath, buf);
+        writeOk = true;
+        console.log('[storage.js] File written to:', filePath);
       } catch (e) {
-        console.log('Error writing file to downloadDir:', e);
+        console.log('[storage.js] ERROR writing file to downloadDir:', filePath, e);
       }
+      if (!writeOk) { this.downloading.delete(file.hash); return; }
       Hugin.files.push(file.hash);
-      Hugin.send('file-downloaded', { ...file, filePath, roomKey, dm });
+      this.downloading.delete(file.hash);
+      Hugin.send('download-file-progress', {
+        fileName: file.fileName,
+        chat: file.address,
+        time: file.time,
+        progress: 100,
+        hash: file.hash,
+      });
+      Hugin.send('file-downloaded', {
+        fileName: file.fileName,
+        hash: file.hash,
+        address: file.address,
+        name: file.name,
+        time: file.time,
+        size: file.size,
+        topic,
+        filePath,
+        roomKey,
+        dm,
+      });
       if (dm) this.done(file, topic, roomKey, dm, filePath);
       console.log('File saved from peer:', file.fileName);
     } catch (e) {
+      this.downloading.delete(file.hash);
       console.log('Error saving file from peer:', e);
     }
   }
@@ -204,7 +280,6 @@ class HyperStorage {
       },
       tip: false,
     };
-    message.conversation = file.address;
     Hugin.send('dm-file', { message });
   }
 

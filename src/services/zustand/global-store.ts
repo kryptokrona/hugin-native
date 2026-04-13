@@ -73,6 +73,21 @@ type GlobalStore = {
   addRemoteDmFile: (file: RemoteFile) => void;
   removeRemoteRoomFile: (hash: string) => void;
   removeRemoteDmFile: (hash: string) => void;
+  fileDownloads: Array<{
+    hash: string;
+    fileName: string;
+    time: number;
+    progress: number;
+    chat?: string;
+  }>;
+  patchFileDownload: (p: {
+    hash: string;
+    fileName?: string;
+    time?: number;
+    chat?: string;
+    progress?: number;
+  }) => void;
+  clearFileDownload: (hash: string) => void;
 };
 
 const defaultCall: Call = { 
@@ -127,6 +142,30 @@ export const useGlobalStore = create<
     removeRemoteDmFile: (hash: string) => set((state) => ({
       remoteDmFiles: state.remoteDmFiles.filter((f) => f.hash !== hash),
     })),
+    fileDownloads: [],
+    patchFileDownload: (p) =>
+      set((state) => {
+        const i = state.fileDownloads.findIndex((f) => f.hash === p.hash);
+        const prev = i >= 0 ? state.fileDownloads[i] : null;
+        const entry = {
+          hash: p.hash,
+          fileName: p.fileName ?? prev?.fileName ?? '',
+          time: p.time ?? prev?.time ?? 0,
+          chat: p.chat ?? prev?.chat,
+          progress:
+            p.progress !== undefined ? p.progress : prev?.progress ?? 0,
+        };
+        if (i >= 0) {
+          const next = [...state.fileDownloads];
+          next[i] = entry;
+          return { fileDownloads: next };
+        }
+        return { fileDownloads: [...state.fileDownloads, entry] };
+      }),
+    clearFileDownload: (hash: string) =>
+      set((state) => ({
+        fileDownloads: state.fileDownloads.filter((f) => f.hash !== hash),
+      })),
     appState: 'inactive',
     talkingUsers: {},
     setAppState: (appState) => set({appState}),

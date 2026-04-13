@@ -374,8 +374,33 @@ export class Bridge {
         case 'error-message':
           console.log('HUGE ERROR:', json.data)
           break;
+        case 'downloading': {
+          useGlobalStore.getState().patchFileDownload({
+            hash: json.hash,
+            fileName: json.fileName,
+            time: json.time,
+            chat: json.chat,
+            progress: 0,
+          });
+          break;
+        }
+        case 'download-file-progress': {
+          useGlobalStore.getState().patchFileDownload({
+            hash: json.hash,
+            fileName: json.fileName,
+            time: json.time,
+            chat: json.chat,
+            progress: json.progress ?? 0,
+          });
+          if (json.progress === 100 && json.hash) {
+            useGlobalStore.getState().clearFileDownload(json.hash);
+          }
+          break;
+        }
         case 'file-downloaded': {
-          const { fileName, hash, address, time, name, filePath, roomKey, topic } = json;
+          const { fileName, hash, address, time, name, filePath, roomKey, topic, dm } = json;
+          if (hash) useGlobalStore.getState().clearFileDownload(hash);
+          if (dm) break; // DM files are handled by the dm-file event
           const fileInfo = {
             fileName,
             hash,

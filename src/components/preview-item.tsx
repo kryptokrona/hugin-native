@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { getAvatar, prettyPrintDate } from '@/utils';
 import { useGlobalStore, useThemeStore, useUnreadMessagesStore, Wallet } from '@/services';
 import { t } from 'i18next';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GroupOnlineIndicator } from './group-online-indicator';
 import { Styles } from '@/styles';
 import { CallIndicator } from './_elements/call-indicator';
@@ -49,31 +49,28 @@ export const PreviewItem: React.FC<Props> = ({
 
   const dateString = prettyPrintDate(timestamp ?? 0);
 
-  const keyRef = useRef('null');
-  
-    useEffect(() => {
-      if (roomKey) return;
-      if (keyRef.current != 'null') return;
-      const deriveKey = async () => {
-        const derivedKey = await Wallet.key_derivation_hash(address);
-        keyRef.current = derivedKey;
-      };
-      deriveKey();
-    }, [mRoomKey]); // Run only when `roomKey` changes
+  const [derivedKey, setDerivedKey] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (roomKey) return;
+    let cancelled = false;
+    Wallet.key_derivation_hash(address).then((key: string) => {
+      if (!cancelled) setDerivedKey(key);
+    });
+    return () => { cancelled = true; };
+  }, [address]);
 
-    useEffect(() => {
-      if (roomKey) { // Meaning rooms, not DM
-        setOnline(allRoomUsers[mRoomKey]?.length > 1);
-        setCallOnline(allRoomUsers[mRoomKey]?.some(a => a.voice === true));
-        return;
-      }
-      const currentRoomUsers = useGlobalStore.getState().roomUsers[keyRef.current];
-
-      setOnline(currentRoomUsers?.some((a) => a.address === address));
-      setCallOnline(allRoomUsers[keyRef.current]?.some(a => a.voice === true));
-
-    }, [allRoomUsers]); // Run only when `roomKey` changes
+  useEffect(() => {
+    if (roomKey) {
+      setOnline(allRoomUsers[mRoomKey]?.length > 1);
+      setCallOnline(allRoomUsers[mRoomKey]?.some(a => a.voice === true));
+      return;
+    }
+    if (!derivedKey) return;
+    const currentRoomUsers = allRoomUsers[derivedKey];
+    setOnline(currentRoomUsers?.some((a) => a.address === address) ?? false);
+    setCallOnline(currentRoomUsers?.some(a => a.voice === true) ?? false);
+  }, [allRoomUsers, derivedKey]);
 
 
   function handlePress() {

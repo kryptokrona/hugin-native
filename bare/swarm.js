@@ -1621,8 +1621,28 @@ const process_files = async (data, active, con, topic) => {
       if (old) continue
       if (Hugin.files.some((a) => a === file.hash)) continue;
       if (!check_hash(file.hash)) continue;
+      const [isMedia] = check_if_media(file.fileName, file.size);
       await sleep(50);
-      request_file(con.address, topic, file, active.key);
+      if (isMedia) {
+        request_file(con.address, topic, file, active.key);
+        continue;
+      }
+      if (!con.driveKey) continue;
+      const fromAddr = file.address || con.address;
+      const remoteFile = {
+        fileName: file.fileName,
+        address: fromAddr,
+        size: file.size,
+        topic,
+        key: active.key,
+        chat: fromAddr,
+        hash: file.hash,
+        name: file.name || con.name,
+        time: file.time,
+        driveKey: con.driveKey,
+      };
+      Hugin.send('room-remote-file-added', { chat: active.key, remoteFiles: [remoteFile] });
+      save_file_info(file, topic, fromAddr, file.time, false, con.name);
     }
   }
 };
@@ -1670,28 +1690,19 @@ const check_file_message = async (data, topic, address, name, dm, driveKey = nul
   if (!active) return;
 
   if (data.info === 'file-shared') {
-    const file = {
-      address,
-      topic,
-      name: data.name,
-      time: data.time,
-      hash: data.hash,
-      size: data.size,
-      fileName: data.fileName,
-      signature: data.sig,
-      type: data.type,
-      info: data.info,
-    };
+    const [isMedia] = check_if_media(data.fileName, data.size);
+    const autoSync = driveKey && isMedia && (Hugin.syncImages || dm);
 
-    const [media] = check_if_media(data.fileName, data.size);
-
-    if (driveKey && media && (Hugin.syncImages || dm)) {
-      console.log('[swarm.js] Auto-syncing file via Hyperdrive:', file.fileName);
-      Storage.save_from_peer(topic, file, driveKey, active.key, dm);
+    if (autoSync) {
+      // Watcher in storage.js handles download; file-downloaded → rpc.js creates the
+      // message with full FileInfo after download completes. Nothing shown until then.
       return;
     }
 
-    // Non-auto-synced: show filename as text, then notify frontend so it can show a download button
+    // Non-auto-sync: show a download button.
+    // Send room-remote-file-added FIRST so remoteRoomFiles store is populated before
+    // the swarm-message arrives; MessageItem then finds pendingRemoteFile and shows
+    // the button instead of plain text.
     const remoteFile = {
       fileName: data.fileName,
       address,
@@ -1705,11 +1716,11 @@ const check_file_message = async (data, topic, address, name, dm, driveKey = nul
       driveKey,
     };
     if (dm) {
-      save_file_info(data, topic, address, data.time, false, name);
       Hugin.send('remote-dm-file-added', { chat: address, remoteFiles: [remoteFile] });
     } else {
-      save_file_info(data, topic, address, data.time, false, name);
       Hugin.send('room-remote-file-added', { chat: active.key, remoteFiles: [remoteFile] });
+      // Create the chat message so the download button has something to render on
+      save_file_info(data, topic, address, data.time, false, name);
     }
   }
 

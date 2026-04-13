@@ -107,6 +107,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const [voiceUsers, setVoiceUsers] = useState<User[]>([]);
   // const [messages, setMessages] = useState<Message[]>(globalMessages || []);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [isLoadingRoom, setIsLoadingRoom] = useState<boolean>(false);
   const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const typingUsers = useGlobalStore((state) => state.typingUsers[roomKey]);
@@ -328,8 +329,11 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
+      // Clear immediately so stale messages from another room never flash
+      setStoreRoomMessages([]);
       setStoreCurrentRoom(roomKey);
-      setRoomMessages(roomKey, 0);
+      setIsLoadingRoom(true);
+      setRoomMessages(roomKey, 0).finally(() => setIsLoadingRoom(false));
       return () => {
         setStoreRoomMessages([]);
       };
@@ -603,7 +607,13 @@ const handleRetryPress = useCallback((hashStr: string) => {
             {t('close')}
           </TextButton>
         </ModalCenter>
-        {messages?.length && 
+        {isLoadingRoom && (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={color} />
+          </View>
+        )}
+
+        {!isLoadingRoom && messages?.length &&
         <FlatList
           style={{ flex: 1 }}
           inverted
