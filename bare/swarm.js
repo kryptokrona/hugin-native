@@ -1612,38 +1612,35 @@ const request_file = async (address, topic, file, room, dm = false) => {
 };
 
 const process_files = async (data, active, con, topic) => {
-  //Check if the latest 10 files are in sync
-  if (Hugin.syncImages) {
-    if (!Array.isArray(data.files)) return 'Ban';
-    if (data.files.length > 10) return 'Ban';
-    for (const file of data.files) {
-      const old = (Date.now() - file.time) > ONE_DAY
-      if (old) continue
-      if (Hugin.files.some((a) => a === file.hash)) continue;
-      if (!check_hash(file.hash)) continue;
-      const [isMedia] = check_if_media(file.fileName, file.size);
-      await sleep(50);
-      if (isMedia) {
-        request_file(con.address, topic, file, active.key);
-        continue;
-      }
-      if (!con.driveKey) continue;
-      const fromAddr = file.address || con.address;
-      const remoteFile = {
-        fileName: file.fileName,
-        address: fromAddr,
-        size: file.size,
-        topic,
-        key: active.key,
-        chat: fromAddr,
-        hash: file.hash,
-        name: file.name || con.name,
-        time: file.time,
-        driveKey: con.driveKey,
-      };
-      Hugin.send('room-remote-file-added', { chat: active.key, remoteFiles: [remoteFile] });
-      save_file_info(file, topic, fromAddr, file.time, false, con.name);
+  if (!Array.isArray(data.files)) return 'Ban';
+  if (data.files.length > 10) return 'Ban';
+  for (const file of data.files) {
+    const old = (Date.now() - file.time) > ONE_DAY
+    if (old) continue
+    if (Hugin.files.some((a) => a === file.hash)) continue;
+    if (!check_hash(file.hash)) continue;
+    const [isMedia] = check_if_media(file.fileName, file.size);
+    await sleep(50);
+    if (isMedia && Hugin.syncImages) {
+      request_file(con.address, topic, file, active.key);
+      continue;
     }
+    if (!con.driveKey) continue;
+    const fromAddr = file.address || con.address;
+    const remoteFile = {
+      fileName: file.fileName,
+      address: fromAddr,
+      size: file.size,
+      topic,
+      key: active.key,
+      chat: fromAddr,
+      hash: file.hash,
+      name: file.name || con.name,
+      time: file.time,
+      driveKey: con.driveKey,
+    };
+    Hugin.send('room-remote-file-added', { chat: active.key, remoteFiles: [remoteFile] });
+    save_file_info(file, topic, fromAddr, file.time, false, con.name);
   }
 };
 

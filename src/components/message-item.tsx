@@ -207,19 +207,7 @@ export const MessageItem: React.FC<Props> = ({
     );
   }, [dm, remoteDmFiles, remoteRoomFiles, replyHash, message, timestamp]);
 
-  const looksLikeSharedFile = (msg?: string, h?: string) => {
-    if (!h || h.length !== 64) return false;
-    const m = (msg || '').trim();
-    return /^[^\n\r/\\]+\.[A-Za-z0-9]{1,12}$/.test(m);
-  };
-
-  const waitingForPeerSync =
-    !file?.path &&
-    looksLikeSharedFile(message, replyHash) &&
-    !pendingRemoteFile &&
-    !imageDetails?.isImageMessage &&
-    !audioDetails?.isAudioMessage &&
-    !videoDetails.isVideoMessage;
+  const waitingForPeerSync = false;
 
   const [downloadStarted, setDownloadStarted] = useState(false);
 
