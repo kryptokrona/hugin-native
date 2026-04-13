@@ -96,7 +96,6 @@ const MessageItemInner: React.FC<Props> = ({
   const [actions, setActions] = useState(true);
   const ref = useRef<IWaveformRef>(null);
   const [playerState, setPlayerState] = useState(PlayerState.stopped);
-  const [isLoading, setIsLoading] = useState(false);
   const [waveformError, setWaveformError] = useState(false);
   const lastPress = useRef<number>(0);
   const DOUBLE_PRESS_DELAY = 300;
@@ -204,15 +203,24 @@ const MessageItemInner: React.FC<Props> = ({
       : undefined,
   );
 
-  const isUndownloadedFile =
+  const isNonMediaFile =
     !!file &&
-    !file.path &&
     file.type === 'file' &&
     !imageDetails?.isImageMessage &&
     !audioDetails?.isAudioMessage &&
     !videoDetails.isVideoMessage;
 
+  const isSyncedInStorage = isNonMediaFile && file?.path === 'storage';
+  const isStillSyncing = isNonMediaFile && !file?.path;
+
   const [downloadStarted, setDownloadStarted] = useState(false);
+
+  const handleSaveToDownloads = useCallback(() => {
+    if (!file) return;
+    const topic = pendingRemoteFile?.topic || '';
+    Rooms.saveToDownloads(replyHash || file.hash || '', file.fileName || '', topic);
+    Toast.show({ text1: 'Saving...', type: 'info' });
+  }, [file, pendingRemoteFile, replyHash]);
 
   const handleDownload = () => {
     setDownloadStarted(true);
@@ -227,7 +235,7 @@ const MessageItemInner: React.FC<Props> = ({
 
   useEffect(() => {
     const active =
-      (isUndownloadedFile && !pendingRemoteFile) ||
+      isStillSyncing ||
       (!!pendingRemoteFile &&
         !file?.path &&
         (downloadStarted || !!fileDl));
@@ -240,7 +248,7 @@ const MessageItemInner: React.FC<Props> = ({
     }, 200);
     return () => clearInterval(id);
   }, [
-    isUndownloadedFile,
+    isStillSyncing,
     pendingRemoteFile,
     fileDl?.hash,
     fileDl?.progress,
@@ -252,13 +260,8 @@ const MessageItemInner: React.FC<Props> = ({
     setWaveformError(false);
   }, [audioDetails?.audioPath]);
 
-  const onWaveformLoadState = useCallback((loading: boolean) => {
-    setIsLoading(loading);
-  }, []);
-
   const onWaveformError = useCallback((error: any) => {
     console.log('Waveform error:', error);
-    setIsLoading(false);
     setWaveformError(true);
   }, []);
 
@@ -474,7 +477,7 @@ const MessageItemInner: React.FC<Props> = ({
             </TouchableOpacity>
           )}
 
-          {!isLoading && audioDetails?.isAudioMessage && (
+          {audioDetails?.isAudioMessage && (
             <View style={styles.waveFormWrapper}>
               <Pressable
                 onPress={handlePlayPauseAction}
@@ -523,10 +526,10 @@ const MessageItemInner: React.FC<Props> = ({
             <VideoPlayer path={videoDetails.videoPath} />
           )}
 
-          {isUndownloadedFile && !pendingRemoteFile && (
+          {isStillSyncing && (
             <View style={styles.filePendingBox}>
               <TextField size="xsmall" type="muted">
-                {t('syncingFileFromPeers', 'Waiting for peer…')}
+                {t('syncingFileFromPeers', 'Syncing file…')}
               </TextField>
               <View style={styles.progressTrack}>
                 <View
@@ -540,11 +543,26 @@ const MessageItemInner: React.FC<Props> = ({
             </View>
           )}
 
+          {isSyncedInStorage && (
+            <TouchableOpacity
+              onPress={handleSaveToDownloads}
+              style={styles.downloadButton}>
+              <CustomIcon
+                type="FI"
+                name="download"
+                color={theme.primaryForeground}
+                size={16}
+              />
+              <TextField size="xsmall" style={styles.downloadText}>
+                {t('saveToDownloads', 'Save')} — {file?.fileName || message}
+              </TextField>
+            </TouchableOpacity>
+          )}
+
           {!audioDetails?.isAudioMessage &&
             !imageDetails?.isImageMessage &&
             !videoDetails.isVideoMessage &&
-            !pendingRemoteFile &&
-            !isUndownloadedFile &&
+            !isNonMediaFile &&
             message && (
               <TextField
                 size="small"
@@ -553,43 +571,6 @@ const MessageItemInner: React.FC<Props> = ({
                 {cleanedMessage}
               </TextField>
             )}
-
-          {pendingRemoteFile && !file?.path && (
-            <>
-              {downloadStarted || fileDl ? (
-                <View style={styles.filePendingBox}>
-                  <TextField size="xsmall" type="muted">
-                    {t('downloading', 'Downloading…')}
-                  </TextField>
-                  <View style={styles.progressTrack}>
-                    <View
-                      style={[
-                        styles.progressFill,
-                        { width: `${Math.min(visualProgress, 95)}%` },
-                      ]}
-                    />
-                  </View>
-                  <TextField size="xsmall">
-                    {pendingRemoteFile.fileName}
-                  </TextField>
-                </View>
-              ) : (
-                <TouchableOpacity
-                  onPress={handleDownload}
-                  style={styles.downloadButton}>
-                  <CustomIcon
-                    type="FI"
-                    name="download"
-                    color={theme.primaryForeground}
-                    size={16}
-                  />
-                  <TextField size="xsmall" style={styles.downloadText}>
-                    {pendingRemoteFile.fileName}
-                  </TextField>
-                </TouchableOpacity>
-              )}
-            </>
-          )}
 
           {huginLink && <GroupInvite invite={huginLink} />}
           {tip && <Tip tip={tip as TipType} />}
@@ -620,9 +601,6 @@ const MessageItemInner: React.FC<Props> = ({
 export const MessageItem = React.memo(MessageItemInner);
 
 const styles = StyleSheet.create({
-  waveformSpinner: {
-    marginRight: 8,
-  },
   waveFormWrapper: {
     flex: 1,
     flexDirection: 'row',

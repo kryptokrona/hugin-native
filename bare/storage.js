@@ -51,7 +51,9 @@ class HyperStorage {
     this.limit = 100000000000; //100 gb per session
     this.saved = 0;
     this.beams = [];
-    this.downloading = new Set(); // prevents concurrent downloads of same hash
+    this.downloading = new Set();
+    this.savedFiles = new Set();
+    this._purgeStarted = false;
   }
 
   async load_drive(topic) {
@@ -65,6 +67,10 @@ class HyperStorage {
     const drive = new Hyperdrive(fileStore);
     this.add(drive, topic, fileStore);
     await drive.ready();
+    if (!this._purgeStarted) {
+      this._purgeStarted = true;
+      this.startPurgeInterval();
+    }
   }
 
   loaded(topic) {
@@ -84,6 +90,57 @@ class HyperStorage {
     for (const a of this.drives) {
       await a.drive.purge();
     }
+  }
+
+  async purgeOldFiles() {
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    const MAX_STORAGE = 500 * 1024 * 1024; // 500 MB
+    const now = Date.now();
+    let purged = 0;
+    const allEntries = [];
+
+    for (const room of this.drives) {
+      try {
+        for await (const entry of room.drive.entries()) {
+          const meta = entry.value?.metadata;
+          if (!meta?.hash) continue;
+          const size = parseInt(meta.size) || 0;
+          const syncedAt = meta.syncedAt || meta.time || 0;
+          allEntries.push({ hash: meta.hash, size, syncedAt, drive: room.drive });
+        }
+      } catch (e) {
+        console.log('[storage.js] Purge scan error:', e);
+      }
+    }
+
+    // Pass 1: purge unsaved files older than 1 week
+    for (const entry of allEntries) {
+      if (this.savedFiles.has(entry.hash)) continue;
+      if (now - entry.syncedAt > ONE_WEEK) {
+        try { await entry.drive.del(entry.hash); purged++; entry.deleted = true; } catch (e) {}
+      }
+    }
+
+    // Pass 2: if still over storage cap, remove oldest unsaved files first
+    const remaining = allEntries.filter(e => !e.deleted);
+    const totalSize = remaining.reduce((sum, e) => sum + e.size, 0);
+    if (totalSize > MAX_STORAGE) {
+      const purgeable = remaining.filter(e => !this.savedFiles.has(e.hash));
+      purgeable.sort((a, b) => a.syncedAt - b.syncedAt);
+      let freed = 0;
+      const excess = totalSize - MAX_STORAGE;
+      for (const entry of purgeable) {
+        if (freed >= excess) break;
+        try { await entry.drive.del(entry.hash); purged++; freed += entry.size; } catch (e) {}
+      }
+    }
+
+    if (purged > 0) console.log(`[storage.js] Purged ${purged} files`);
+  }
+
+  startPurgeInterval() {
+    this.purgeOldFiles();
+    setInterval(() => this.purgeOldFiles(), 60 * 60 * 1000);
   }
 
   async load_files(topic) {
@@ -166,8 +223,7 @@ class HyperStorage {
     if (Hugin.files.includes(meta.hash)) return;
     if (this.downloading.has(meta.hash)) return;
 
-    const [isMedia, fileType] = check_if_media(meta.fileName, meta.size);
-    const autoSync = isMedia && (dm || Hugin.syncImages);
+    const autoSync = dm || Hugin.syncImages;
 
     if (autoSync) {
       console.log('[storage.js] Auto-syncing:', meta.fileName);
@@ -228,18 +284,9 @@ class HyperStorage {
           signature: file.signature,
           info: 'file-shared',
           type: 'file',
+          syncedAt: Date.now(),
         },
       });
-      const filePath = uniqueFilePath(Hugin.downloadDir, file.fileName);
-      let writeOk = false;
-      try {
-        fs.writeFileSync(filePath, buf);
-        writeOk = true;
-        console.log('[storage.js] File written to:', filePath);
-      } catch (e) {
-        console.log('[storage.js] ERROR writing file to downloadDir:', filePath, e);
-      }
-      if (!writeOk) { this.downloading.delete(file.hash); return; }
       Hugin.files.push(file.hash);
       this.downloading.delete(file.hash);
       Hugin.send('download-file-progress', {
@@ -257,15 +304,31 @@ class HyperStorage {
         time: file.time,
         size: file.size,
         topic,
-        filePath,
+        filePath: 'storage',
         roomKey,
         dm,
       });
-      if (dm) this.done(file, topic, roomKey, dm, filePath);
+      if (dm) this.done(file, topic, roomKey, dm, 'storage');
       console.log('File saved from peer:', file.fileName);
     } catch (e) {
       this.downloading.delete(file.hash);
       console.log('Error saving file from peer:', e);
+    }
+  }
+
+  async save_to_downloads(hash, fileName, topic) {
+    const room = this.get_room(topic);
+    if (!room) return { success: false, error: 'Room not found' };
+    try {
+      const buf = await room.drive.get(hash);
+      if (!buf) return { success: false, error: 'File not found in storage' };
+      const filePath = uniqueFilePath(Hugin.downloadDir, fileName);
+      fs.writeFileSync(filePath, buf);
+      this.savedFiles.add(hash);
+      return { success: true, filePath };
+    } catch (e) {
+      console.log('[storage.js] Error saving to downloads:', e);
+      return { success: false, error: e.message };
     }
   }
 

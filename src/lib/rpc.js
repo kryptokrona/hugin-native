@@ -372,7 +372,11 @@ export class Bridge {
           WebRTC.signal(key, topic, address, data);
           break;
         case 'error-message':
-          console.log('HUGE ERROR:', json.data)
+          console.log('Error:', json.data);
+          Toast.show({ text1: json.data?.message || 'Error', type: 'error' });
+          break;
+        case 'file-saved-to-downloads':
+          Toast.show({ text1: `Saved ${json.data?.fileName || 'file'}`, type: 'success' });
           break;
         case 'downloading': {
           useGlobalStore.getState().patchFileDownload({

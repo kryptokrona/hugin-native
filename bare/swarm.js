@@ -1619,9 +1619,8 @@ const process_files = async (data, active, con, topic) => {
     if (old) continue
     if (Hugin.files.some((a) => a === file.hash)) continue;
     if (!check_hash(file.hash)) continue;
-    const [isMedia] = check_if_media(file.fileName, file.size);
     await sleep(50);
-    if (isMedia && Hugin.syncImages) {
+    if (Hugin.syncImages && con.driveKey) {
       request_file(con.address, topic, file, active.key);
       continue;
     }
@@ -1696,8 +1695,7 @@ const check_file_message = async (data, topic, address, name, dm, driveKey = nul
   if (!active) return;
 
   if (data.info === 'file-shared') {
-    const [isMedia] = check_if_media(data.fileName, data.size);
-    const autoSync = driveKey && isMedia && (Hugin.syncImages || dm);
+    const autoSync = driveKey && (Hugin.syncImages || dm);
 
     if (autoSync) {
       // Watcher in storage.js handles download; file-downloaded → rpc.js creates the

@@ -87,6 +87,15 @@ const onrequest = async (p) => {
     case 'group_download':
       download_file(p.file);
       break;
+    case 'save_to_downloads':
+      const saveResult = await Storage.save_to_downloads(p.hash, p.fileName, p.topic);
+      if (saveResult.success) {
+        Hugin.send('file-saved-to-downloads', { hash: p.hash, filePath: saveResult.filePath, fileName: p.fileName });
+      } else {
+        Hugin.send('error-message', { message: saveResult.error || 'Failed to save file' });
+      }
+      return saveResult;
+
     case 'keep_alive':
       break;
     case 'idle_status':
