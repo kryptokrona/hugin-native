@@ -23,6 +23,8 @@ Todo:
     ✔ Update react-native-bare-kit @done(25-05-11 20:48)
     ☐ Add search
     ☐ Clicking some notifications do not send user to the right part of the app
+    ☐ Room invites look scuffed on feed
+    ☐ Can't open links in messages
 
 Optimizations:
     ☐ Add "type" property to messages - i.e. message, reaction, reply, tip etc.
