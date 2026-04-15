@@ -326,7 +326,7 @@ export const FeedMessageItem: React.FC<Props> = ({
               <Avatar address={userAddress} size={36} />
             )}
           </View>
-          <View>
+          <View style={{ flex: 1 }}>
             <View style={styles.info}>
               <TextField bold size="xsmall" style={{ color }}>
                 {name}
