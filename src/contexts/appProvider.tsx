@@ -447,10 +447,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           MessageSync.restart_sync();
           joining = true;
           Rooms.idle(false, false);
+          
           const room = getThisRoom();
+          const currentState = useGlobalStore.getState();
+          const shouldRefetchMessages = currentState.thisRoom !== room || !currentState.roomMessages?.length;
+
           setStoreCurrentRoom(room);
           setThisRoom(room);
-          setRoomMessages(room, 0);
+          
+          if (shouldRefetchMessages) {
+            setRoomMessages(room, 0);
+          }
+          
           Wallet.active?.start();
           joining = false;
           console.log('**** Successfully joined rooms after inactivity ****');

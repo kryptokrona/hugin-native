@@ -315,7 +315,11 @@ export class Bridge {
         case 'history-update':
           await sleep(500);
           if (getCurrentRoom() === json.key) {
-            setRoomMessages(json.key, 0);
+            const currentState = useGlobalStore.getState();
+            // This might need to be checked, may cause history sync not to show messages immediately
+            if (!currentState.roomMessages || currentState.roomMessages.length === 0) {
+              setRoomMessages(json.key, 0);
+            }
             if (json.history && !json.background) {
               Toast.show({
                 type: 'success',

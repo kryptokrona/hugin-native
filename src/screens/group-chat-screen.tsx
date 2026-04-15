@@ -96,6 +96,10 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   const { roomKey, name, call } = route.params;
   const messages = useGlobalStore((state) => state.roomMessages);//.filter((a) => a.room === roomKey,
   
+  const reversedMessages = useMemo(() => {
+    return messages ? [...messages].reverse() : [];
+  }, [messages]);
+  
   const [imagePath, setImagePath] = useState<string | null>(null);
   const [tipping, setTipping] = useState(false);
   const [tipAmount, setTipAmount] = useState<string>('0');
@@ -122,16 +126,23 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     if (!messages?.length) return;
     setUnreadCounted(true);
 
-    setUnreadIndex(messages.findIndex(m => !m.read) - 1);
-    if (messages.findIndex(m => !m.read) !== -1) {
-      flatListRef.current?.scrollToIndex({
-        index: messages.findIndex(m => !m.read),
-        animated: false,
-        viewPosition: 0.5
-      });
-      } else {
-        scrollToBottom();
-      }
+    const firstUnreadOriginal = messages.findIndex(m => !m.read);
+    
+    if (firstUnreadOriginal !== -1) {
+      const revIndex = messages.length - 1 - firstUnreadOriginal;
+      setUnreadIndex(revIndex);
+      
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: revIndex,
+          animated: false,
+          viewPosition: 0.5
+        });
+      }, 100);
+    } else {
+      setUnreadIndex(-1);
+      scrollToBottom();
+    }
   }, [messages])
   
   
@@ -284,10 +295,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
 
     setTipping(false);
     if (sent.success) {
-      const to = messages
-        .slice()
-        .reverse()
-        .find((a) => a.address === tipAddress);
+      const to = reversedMessages.find((a) => a.address === tipAddress);
 
       onSend('', null, '', false, {
         amount, // TODO fix this
@@ -328,17 +336,27 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       let cancelled = false;
-      setStoreRoomMessages([]);
-      setStoreCurrentRoom(roomKey);
-      setIsLoadingRoom(true);
-      setRoomMessages(roomKey, 0)
-        .catch((e) => console.log('[group-chat] Error loading messages:', e))
-        .finally(() => {
-          if (!cancelled) {
-            setIsLoadingRoom(false);
-            setHasLoadedOnce(true);
-          }
-        });
+      
+      const currentState = useGlobalStore.getState();
+      const needsReload = currentState.thisRoom !== roomKey || !currentState.roomMessages?.length;
+
+      if (needsReload) {
+        setStoreRoomMessages([]);
+        setStoreCurrentRoom(roomKey);
+        setIsLoadingRoom(true);
+        setRoomMessages(roomKey, 0)
+          .catch((e) => console.log('[group-chat] Error loading messages:', e))
+          .finally(() => {
+            if (!cancelled) {
+              setIsLoadingRoom(false);
+              setHasLoadedOnce(true);
+            }
+          });
+      } else {
+        setIsLoadingRoom(false);
+        setHasLoadedOnce(true);
+      }
+
       const timeout = setTimeout(() => {
         if (!cancelled) {
           setIsLoadingRoom(false);
@@ -348,7 +366,6 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
       return () => {
         cancelled = true;
         clearTimeout(timeout);
-        setStoreRoomMessages([]);
       };
     }, [roomKey]),
   );
@@ -581,22 +598,22 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     setTipAmount('0');
   }
 
-  const messagesRef = useRef(messages);
-  messagesRef.current = messages;
+  const reversedMessagesRef = useRef(reversedMessages);
+  reversedMessagesRef.current = reversedMessages;
 
   const scrollToMessage = useCallback((hash: string) => {
-    const index = messagesRef.current.findIndex((m) => m.hash === hash);
+    const index = reversedMessagesRef.current.findIndex((m) => m.hash === hash);
     if (index !== -1 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({ index: index + 1, animated: true });
+      flatListRef.current.scrollToIndex({ index: index, animated: true });
     }
   }, []);
 
-const handleRetryPress = useCallback((hashStr: string) => {
-  const item = messagesRef.current.find(m => m.hash === hashStr);
-  if (item) {
-    onSend(item.message, null, undefined, false, undefined, hashStr);
-  }
-}, [onSend]);
+  const handleRetryPress = useCallback((hashStr: string) => {
+    const item = reversedMessagesRef.current.find(m => m.hash === hashStr);
+    if (item) {
+      onSend(item.message, null, undefined, false, undefined, hashStr);
+    }
+  }, [onSend]);
 
   return (
     <ScreenLayout>
@@ -637,18 +654,17 @@ const handleRetryPress = useCallback((hashStr: string) => {
           style={{ flex: 1 }}
           inverted
           ref={flatListRef}
-          data={messages}
+          data={reversedMessages}
           keyExtractor={(item: Message) => item.hash}
           renderItem={({ item, index }) => {
-            const previousMessage = messages[index - 1];
-            const nextMessage = messages[index + 1];
+            const olderMessage = reversedMessages[index + 1];
 
             const onlyMessage =
-              !!previousMessage &&
-              previousMessage.address === item.address && item.timestamp - previousMessage.timestamp < 500000 && !item.tip;
+              !!olderMessage &&
+              olderMessage.address === item.address && item.timestamp - olderMessage.timestamp < 500000 && !item.tip;
               
             const isLastInCluster = true;
-            const isNewestMessage = index === messages.length - 1;
+            const isNewestMessage = index === 0;
             const isFirstUnread = index === unreadIndex;
             const content = (
                   <>
@@ -699,13 +715,8 @@ const handleRetryPress = useCallback((hashStr: string) => {
           windowSize={21}
           onEndReached={loadMoreMessages}
           onEndReachedThreshold={0.1}
+          ListHeaderComponentStyle={{height: 20}}
           ListHeaderComponent={
-            isLoadingMore ? (
-              <ActivityIndicator size="small" color={color} />
-            ) : null
-          }
-          ListFooterComponentStyle={{height: 20}}
-          ListFooterComponent={
             typingUsers?.length > 0 ? 
             (
               <View style={{height: 20, justifyContent: 'center', alignItems: 'center' }}>
@@ -718,7 +729,14 @@ const handleRetryPress = useCallback((hashStr: string) => {
             ) : 
             <View style={{height: 20}}>
             </View>
-            }
+          }
+          ListFooterComponent={
+            isLoadingMore ? (
+              <View style={{ marginVertical: 10 }}>
+                <ActivityIndicator size="small" color={color} />
+              </View>
+            ) : null
+          }
               onScrollToIndexFailed={info => {
               setTimeout(() => {
                 flatListRef.current?.scrollToIndex({
@@ -765,7 +783,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   flatListContent: {
-    flexDirection: 'column-reverse',
     paddingTop: 75,
     maxWidth: '100%',
   },
