@@ -569,37 +569,73 @@ export async function addContact(
   messagekey: string,
   add: boolean = false,
 ) {
-  try {
-    const contactExists = await getContact(address);
+  return new Promise<any>((resolve) => {
+    let returnVal: any;
 
-    if (contactExists) {
-      return false;
-    }
+    db.transaction(
+      tx => {
+        tx.executeSql(
+          'SELECT * FROM contacts WHERE address = ?',
+          [address],
+          (tx, results) => {
+            if (results.rows.length > 0) {
+              console.log('[sqlite.ts] Contact already exists:', name);
+              returnVal = false;
+              return;
+            }
 
-    const result = await db.executeSql(
-      'INSERT INTO contacts (name, address, messagekey, latestmessage) VALUES (?, ?, ?, ?)',
-      [name, address, messagekey, Date.now()],
+            const timestamp = Date.now();
+            tx.executeSql(
+              'INSERT INTO contacts (name, address, messagekey, latestmessage) VALUES (?, ?, ?, ?)',
+              [name, address, messagekey, timestamp],
+              (tx, insertResult) => {
+                console.log('Added contact: ', address, messagekey, name);
+                returnVal = { address, messagekey, name };
+
+                if (add) {
+                  const hash = timestamp.toString();
+                  const message = 'Conversation started';
+                  const reply = '';
+                  const sent = true;
+                  const tip = false;
+
+                  tx.executeSql(
+                    `SELECT * FROM messages WHERE timestamp = '${timestamp}'`,
+                    [],
+                    (tx, msgExistsResult) => {
+                      if (msgExistsResult.rows.length === 0) {
+                        tx.executeSql(
+                          'REPLACE INTO messages (conversation, message, reply, timestamp, hash, sent, read, status, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                          [
+                            address,
+                            message,
+                            reply,
+                            timestamp,
+                            hash,
+                            sent ? 1 : 0,
+                            sent ? 1 : 0,
+                            'success',
+                            JSON.stringify(tip),
+                          ]
+                        );
+                      }
+                    }
+                  );
+                }
+              }
+            );
+          }
+        );
+      },
+      error => {
+        console.log('Failed to add contact: ', error);
+        resolve(undefined);
+      },
+      () => {
+        resolve(returnVal);
+      }
     );
-    console.log('Added contact: ', address, messagekey, name);
-
-    if (add) {
-      await saveMessage(
-        address,
-        'Conversation started',
-        '',
-        Date.now(),
-        Date.now().toString(),
-        true,
-        'me',
-        false,
-        'Me',
-      );
-    }
-
-    return { address, messagekey, name };
-  } catch (err) {
-    console.log('Failed to add contact: ', err);
-  }
+  });
 }
 
 export async function updateContact(name: string, address: string) {

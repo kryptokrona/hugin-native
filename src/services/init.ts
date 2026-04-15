@@ -37,13 +37,13 @@ export async function init() {
       await Wallet.init(node);
       console.log('☎️ Trying to rehydrate user..')
       await useUserStore.persist.rehydrate();
-      const user = useUserStore.getState().user;
+      let user = useUserStore.getState().user;
       console.log('☎️ Got user')
 
       const currentStorePath = Platform.OS === 'ios' ? RNFS.LibraryDirectoryPath : RNFS.DocumentDirectoryPath;
       console.log('Current store path:', currentStorePath);
       updateUser({ store: currentStorePath, downloadDir: currentStorePath });
-
+      user = useUserStore.getState().user;
       Rooms.init(user);
       Rooms.join();
       Beam.join();

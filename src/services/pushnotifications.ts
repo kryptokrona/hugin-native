@@ -437,9 +437,9 @@ let channelId;
           if (!MessageSync.known_keys.some((a) => a === senderkey)) {
             const added = await addContact(message?.name || 'Anon' , addr, senderkey);
             if (added) {
+              console.log('[pushnotifications.ts] Added contact:', added);
               MessageSync.known_keys.push(added.messagekey);
-              const key = await Wallet.key_derivation_hash(addr);
-              Beam.connect(key, key, addr);
+              Beam.new(addr);
             }
           }
           const saved = await saveMessage(
