@@ -6,6 +6,7 @@ import {
   Platform,
   StyleSheet,
   View,
+  ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -56,7 +57,7 @@ import { Header } from '../components/_navigation/header';
 import { Peers } from '../lib/connections';
 import { setLatestMessages, updateMessage } from '../services/bare/contacts';
 import { randomKey } from '../services/bare/crypto';
-import { deleteMessage, saveMessage } from '../services/bare/sqlite';
+import { deleteMessage, saveMessage, getMessages } from '../services/bare/sqlite';
 import { Wallet } from '../services/kryptokrona/wallet';
 import { Beam, Rooms } from 'lib/native';
 import { textType } from '@/styles';
@@ -80,6 +81,27 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const messages = useGlobalStore((state) => state.messages);
   const messageKey = contacts.find((a) => a.address === roomKey)?.messagekey;
   const huginAddress = roomKey + messageKey;
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [noMoreMessages, setNoMoreMessages] = useState<boolean>(false);
+
+  const reversedMessages = useMemo(() => {
+    return [...messages].reverse();
+  }, [messages]);
+
+  const loadMoreMessages = async () => {
+    if (isLoadingMore || noMoreMessages) return;
+    setIsLoadingMore(true);
+    const nextPageMessages = await getMessages(roomKey, currentPage);
+    if (nextPageMessages.length === 0) {
+      setNoMoreMessages(true);
+    }
+    const newMessages = [...nextPageMessages, ...messages];
+    setStoreMessages(newMessages);
+    setCurrentPage(currentPage + 1);
+    setIsLoadingMore(false);
+  };
 
   const [showImage, setShowImage] = useState<boolean>(false);
   const [showImagePath, setImagePath] = useState<string>(false);
@@ -626,12 +648,16 @@ useEffect(() => {
         style={{ flex: 1 }}
         inverted
         ref={flatListRef}
-        data={messages}
-        keyExtractor={(item: Message, i) => `${item.address}-${i}`}
+        data={reversedMessages}
+        keyExtractor={(item: Message, i) => `${item.address}-${item.hash || i}`}
+        onEndReached={loadMoreMessages}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={isLoadingMore ? <ActivityIndicator size="small" style={{ marginVertical: 20 }} color={theme.foreground} /> : <View style={{ height: 20 }} />}
+        ListHeaderComponent={<View style={{ height: 10 }} />}
         renderItem={({ item, index }) => {
-          const isNewestMessage = index === messages.length - 1;
-          const previousMessage = messages[index - 1];
-          const nextMessage = messages[index + 1];
+          const isNewestMessage = index === 0;
+          const previousMessage = reversedMessages[index + 1];
+          const nextMessage = reversedMessages[index - 1];
 
           const onlyMessage =
             !!previousMessage &&
@@ -715,7 +741,6 @@ useEffect(() => {
 
 const styles = StyleSheet.create({
   flatListContent: {
-    flexDirection: 'column-reverse',
     paddingTop: 75,
   },
   inputWrapper: {
