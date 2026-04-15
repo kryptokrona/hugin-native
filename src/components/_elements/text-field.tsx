@@ -1,8 +1,10 @@
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, Linking, Alert } from 'react-native';
 import { Styles, textType } from '@/styles';
 
 import type { ElementType } from '@/types';
 import { useThemeStore } from '@/services';
+
+import { t } from 'i18next';
 
 type SizeType = 'xxsmall' |'xsmall' | 'small' | 'medium' | 'large';
 
@@ -40,6 +42,37 @@ export const TextField: React.FC<Props> = ({
       ? `${children.substring(0, maxLength)}...`
       : children;
 
+  const renderText = (text: string) => {
+    if (typeof text !== 'string') return text;
+    
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <Text
+            key={index}
+            style={{ textDecorationLine: 'underline' }}
+            onPress={() => {
+              Alert.alert(
+                'Open Link',
+                `${t('openLink')}\n\n${part}`,
+                [
+                  { text: t('cancel'), style: 'cancel' },
+                  { text: t('open'), onPress: () => Linking.openURL(part).catch(err => console.error("Couldn't load page", err)) }
+                ]
+              );
+            }}
+          >
+            {part}
+          </Text>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <Text
       textBreakStrategy="highQuality"
@@ -54,7 +87,7 @@ export const TextField: React.FC<Props> = ({
       ]}
       {...rest}
       >
-      {truncatedText}
+      {renderText(truncatedText)}
     </Text>
   );
 };

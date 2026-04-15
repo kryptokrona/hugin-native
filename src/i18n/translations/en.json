@@ -141,5 +141,7 @@
   "decentralized": "Decentralized",
   "thumbsUpInfo": "Double tap to react with 👍",
   "newMessage": "new message",
-  "newMessages": "new messages"
+  "newMessages": "new messages",
+  "openLink": "Are you sure you want to open this link?",
+  "open": "Open"
 }
