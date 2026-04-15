@@ -43,7 +43,7 @@ import { GroupInvite } from './group-invite';
 
 interface Props extends Partial<Message> {
   userAddress: string;
-  reactions: string[];
+  reactions: any[];
   replyHash?: string;
   onReplyToMessagePress: (val: string) => void;
   onEmojiReactionPress: (val: string, val2: string) => void;
@@ -102,7 +102,7 @@ export const FeedMessageItem: React.FC<Props> = ({
 
     for (const reply of replies) {
       if (containsOnlyEmojis(reply.message) && reply.message.length < 9) continue;
-      reactions.push('💬');
+      reactions.push({ emoji: '💬', sender: reply.address } as any);
     }
 
   }
@@ -208,6 +208,18 @@ export const FeedMessageItem: React.FC<Props> = ({
   }
 
   function onReaction(emoji: string) {
+    if (
+      reactions &&
+      reactions.some(
+        (r) =>
+          typeof r !== 'string' &&
+          r.emoji === emoji &&
+          r.sender === myUserAddress
+      )
+    ) {
+      setActionsModal(false);
+      return;
+    }
     onEmojiReactionPress(emoji, replyHash!);
     setActionsModal(false);
   }
@@ -398,7 +410,11 @@ export const FeedMessageItem: React.FC<Props> = ({
                 {cleanedMessage.replace(/(\r\n|\r|\n){2,}/g, '$1\n') ?? ''}
               </TextField>
             )}
-            {huginLink && <GroupInvite invite={huginLink} />}
+            {huginLink && (
+              <View style={{flex: 1, marginLeft: -45}}>
+                <GroupInvite invite={huginLink} />
+              </View>
+              )}
             {tip && (
               <View>
                 <Tip tip={tip as unknown as TipType} />

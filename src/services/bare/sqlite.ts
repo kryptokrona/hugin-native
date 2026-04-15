@@ -911,7 +911,7 @@ export function addEmoji(replies: Message[]) {
   const reactions = [];
   for (const m of replies) {
     if (containsOnlyEmojis(m.message) && m.message.length < 9) {
-      reactions.push(m.message);
+      reactions.push({ emoji: m.message, sender: m.address });
     }
   }
   return reactions;

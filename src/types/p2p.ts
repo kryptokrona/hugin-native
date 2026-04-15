@@ -36,7 +36,7 @@ export interface Message {
   nickname: string;
   hash: string;
   sent?: boolean;
-  reactions?: string[];
+  reactions?: any[];
   joined?: boolean;
   file?: FileInfo;
   replyto?: Message[] | undefined;

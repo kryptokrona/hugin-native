@@ -13,7 +13,7 @@ import { TouchableOpacity } from './touchable-opacity';
 import { useThemeStore } from '@/services';
 
 interface Props {
-  items: string[];
+  items: any[];
   onReact: (val: string) => void;
 }
 
@@ -27,7 +27,9 @@ export const Reactions: React.FC<Props> = ({ items, onReact }) => {
 
   const sortedItems: Item[] = useMemo(() => {
     const emojiCountMap: { [key: string]: number } = items.reduce(
-      (acc: { [key: string]: number }, emoji: string) => {
+      (acc: { [key: string]: number }, item: any) => {
+        const emoji = typeof item === 'string' ? item : item.emoji;
+        if (!emoji) return acc;
         acc[emoji] = (acc[emoji] || 0) + 1;
         return acc;
       },
