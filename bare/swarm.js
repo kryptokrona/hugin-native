@@ -24,13 +24,6 @@ const {
 const {
   extractPrevIdFromBlob,
 } = require('./pow-utils');
-const {
-  send_file,
-  start_download,
-  add_remote_file,
-  add_local_file,
-  update_remote_file,
-} = require('./beam');
 const { Storage } = require('./storage.js');
 const RPC = require('bare-rpc');
 const b4a = require('b4a');
@@ -62,7 +55,6 @@ const REQUEST_FEED = 'request-feed';
 const SEND_HISTORY = 'send-history';
 const SEND_FEED_HISTORY = 'send-feed-history';
 const PING_SYNC = 'Ping';
-const REQUEST_FILE = 'request-file';
 
 const ONE_DAY = 24 * 60 * 60 * 1000
 const MAX_NATIVE_POW_ATTEMPTS = 5000000;
@@ -1463,18 +1455,6 @@ const check_data_message = async (data, connection, topic, peer, beam) => {
         active.search = false;
         con.request = false;
         process_request(data.messages, active.key);
-      } else if (data.type === REQUEST_FILE) {
-        const file = sanitize_file_message(data.file);
-        if (!file) return 'Error';
-        await Storage.start_beam(
-          true,
-          file.key,
-          file,
-          topic,
-          con.name,
-          active.key,
-          beam,
-        );
       }
       return true;
     }
@@ -1585,43 +1565,18 @@ const save_feed_history = async (messages, address, topic) => {
   }
 }
 
-const request_file = async (address, topic, file, room, dm = false) => {
-  //request a missing file, open a hugin beam
-  console.log('-----------------------------');
-  console.log('*** WANT TO REQUEST FILE  ***');
-  console.log('-----------------------------');
-  const verify = await Hugin.request({
-    type: 'verify-signature',
-    data: {
-      message:
-        file.hash + file.size.toString() + file.time.toString() + file.fileName,
-      address: file.address,
-      signature: file.signature,
-    },
-  });
-  if (!verify) return;
-  const key = random_key().toString('hex');
-  await Storage.start_beam(false, key, file, topic, room, dm);
-  file.key = key;
-  const message = {
-    file,
-    type: REQUEST_FILE,
-  };
-  await sleep(200);
-  send_peer_message(address, topic, message);
-};
 
 const process_files = async (data, active, con, topic) => {
   if (!Array.isArray(data.files)) return 'Ban';
   if (data.files.length > 10) return 'Ban';
   for (const file of data.files) {
-    const old = (Date.now() - file.time) > ONE_DAY
-    if (old) continue
-    if (Hugin.files.some((a) => a === file.hash)) continue;
+    const old = (Date.now() - file.time) > ONE_DAY;
+    if (old) continue;
     if (!check_hash(file.hash)) continue;
+    if (Hugin.files.some((a) => a === file.hash)) continue;
     await sleep(50);
     if (Hugin.syncImages && con.driveKey) {
-      request_file(con.address, topic, file, active.key);
+      await Storage.save_from_peer(topic, file, con.driveKey, active.key);
       continue;
     }
     if (!con.driveKey) continue;
@@ -1639,7 +1594,9 @@ const process_files = async (data, active, con, topic) => {
       driveKey: con.driveKey,
     };
     Hugin.send('room-remote-file-added', { chat: active.key, remoteFiles: [remoteFile] });
-    save_file_info(file, topic, fromAddr, file.time, false, con.name);
+    if (!(await room_message_exists(file.hash))) {
+      save_file_info(file, topic, fromAddr, file.time, false, con.name);
+    }
   }
 };
 
@@ -1834,40 +1791,6 @@ const download_file = (download) => {
   Storage.save_from_peer(active.topic, download, download.driveKey, active.key, isDm);
 };
 
-const start_upload = async (file, topic) => {
-  const sendFile = localFiles.find(
-    (a) => a.fileName === file.fileName && file.topic === topic,
-  );
-  console.log('Start uploading this file:', sendFile);
-  if (!sendFile) {
-    errorMessage('File not found');
-    return;
-  }
-  return await upload_ready(sendFile, topic, file.address);
-};
-
-const upload_ready = async (file, topic, address) => {
-  const beam_key = await add_local_file(
-    file.fileName,
-    file.path,
-    address,
-    file.size,
-    file.time,
-    true,
-  );
-  const info = {
-    fileName: file.fileName,
-    address,
-    topic,
-    info: 'file',
-    type: 'upload-ready',
-    size: file.size,
-    time: file.time,
-    key: beam_key,
-  };
-  send_peer_message(address, topic, info);
-  return beam_key;
-};
 
 async function send_voice_channel_sdp(data) {
   const active = active_swarms.find((a) => a.topic === data.topic);

@@ -289,26 +289,33 @@ class HyperStorage {
       });
       Hugin.files.push(file.hash);
       this.downloading.delete(file.hash);
+      const filePath = uniqueFilePath(Hugin.downloadDir, file.fileName);
+      const savedFileName = filePath.split('/').pop();
+      try {
+        fs.writeFileSync(filePath, buf);
+      } catch (err) {
+        console.log('[storage.js] Error writing file to downloads:', err);
+      }
       Hugin.send('download-file-progress', {
-        fileName: file.fileName,
+        fileName: savedFileName,
         chat: file.address,
         time: file.time,
         progress: 100,
         hash: file.hash,
       });
       Hugin.send('file-downloaded', {
-        fileName: file.fileName,
+        fileName: savedFileName,
         hash: file.hash,
         address: file.address,
         name: file.name,
         time: file.time,
         size: file.size,
         topic,
-        filePath: 'storage',
+        filePath,
         roomKey,
         dm,
       });
-      if (dm) this.done(file, topic, roomKey, dm, 'storage');
+      if (dm) this.done(file, topic, roomKey, dm, filePath);
       console.log('File saved from peer:', file.fileName);
     } catch (e) {
       this.downloading.delete(file.hash);
@@ -334,9 +341,10 @@ class HyperStorage {
 
   done(file, topic, room, dm, filePath) {
     if (!dm) return;
-    const [media, fileType] = check_if_media(file.fileName, file.size);
+    const savedFileName = filePath && filePath !== 'storage' ? filePath.split('/').pop() : file.fileName;
+    const [media, fileType] = check_if_media(savedFileName, file.size);
     const message = {
-      message: file.fileName,
+      message: savedFileName,
       address: file.address,
       name: file.name,
       hash: file.hash,
@@ -346,7 +354,7 @@ class HyperStorage {
       sent: false,
       history: false,
       file: {
-        fileName: file.fileName,
+        fileName: savedFileName,
         address: file.address,
         hash: file.hash,
         timestamp: file.time,
@@ -594,7 +602,8 @@ class HyperStorage {
         ////*******TEMP*********////
         // Wrtite file to normal download path until we fixed bridge stream from bare -> React
         // To load files from storage
-        const filePath = Hugin.downloadDir + '/' + file.fileName;
+        const filePath = uniqueFilePath(Hugin.downloadDir, file.fileName);
+        const savedFileName = filePath.split('/').pop();
         try {
           // Write buffer to file synchronously
           fs.writeFileSync(filePath, buffer);
@@ -609,7 +618,7 @@ class HyperStorage {
         Hugin.send('file-downloaded', file);
 
         const message = {
-          message: file.fileName,
+          message: savedFileName,
           address: file.address,
           room,
           timestamp: file.time,
@@ -619,7 +628,7 @@ class HyperStorage {
           sent: false,
           history: false, //????
           file: {
-            fileName: file.fileName,
+            fileName: savedFileName,
             address: file.address,
             hash: file.hash,
             timestamp: file.time,
