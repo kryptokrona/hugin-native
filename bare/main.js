@@ -91,8 +91,6 @@ const onrequest = async (p) => {
       const saveResult = await Storage.save_to_downloads(p.hash, p.fileName, p.topic);
       if (saveResult.success) {
         Hugin.send('file-saved-to-downloads', { hash: p.hash, filePath: saveResult.filePath, fileName: p.fileName });
-      } else {
-        Hugin.send('error-message', { message: saveResult.error || 'Failed to save file' });
       }
       return saveResult;
 
