@@ -28,7 +28,7 @@ import { saveMessageToQueue, resetMessageQueue, getMessageQueue } from '../utils
 import VoipPushNotification from 'react-native-voip-push-notification';
 import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from './zustand';
 import { getRooms, initDB, messageExists, roomMessageExists, saveRoomMessage, addContact, saveMessage } from './bare/sqlite';
-import { Beam, decrypt_sealed_box, Nodes, Rooms } from 'lib/native';
+import { Beam, decrypt_sealed_box, Nodes, Rooms, sync_push_registrations } from 'lib/native';
 import { Connection } from './bare/globals';
 import { ConnectionStatus, User } from '../types/user';
 import { setLatestMessages, updateMessage } from './bare/contacts';
@@ -344,6 +344,13 @@ async function getEncryptionKey(): Promise<string | null> {
     const firebaseToken = await getToken(messaging);
     console.log('✅ Firebase Token:', firebaseToken);
     deviceId = firebaseToken;
+
+    const prefToken = usePreferencesStore.getState().preferences?.lastRegisteredDeviceToken;
+    if (firebaseToken && firebaseToken !== prefToken) {
+      console.log('🔄 Device token changed or not registered yet, triggering sync...');
+      sync_push_registrations();
+    }
+
     return firebaseToken;
   } catch (err) {
     console.error('❌ Failed to get FCM token:', err);
@@ -390,6 +397,9 @@ let channelId;
       if (box?.type && box?.type == 'room') {
         console.log('🔔 Room message received!!');
         message = await decryptRoomMessage(box.box, box.timestamp);
+        if (message && message.roomKey) {
+          usePreferencesStore.getState().addRegisteredRoomKeys([message.roomKey]);
+        }
 
         if (await roomMessageExists(message.hash)) {
           console.log('🔕 Room message already exists, skipping synchronization.');
@@ -418,6 +428,9 @@ let channelId;
         const key = await getEncryptionKey();
         if (!key) return; // Cannot decrypt without key
         message = decryptMessage(box.box, box.t, key as string);
+        if (message) {
+          usePreferencesStore.getState().setBasePushVerified(true);
+        }
 
         console.log('🔔 Direct message received!!', message.from);
 
@@ -497,6 +510,9 @@ let channelId;
         console.log('🔔 Room message received!!');
 
         message = await decryptRoomMessage(box.box, box.timestamp);
+        if (message && message.roomKey) {
+          usePreferencesStore.getState().addRegisteredRoomKeys([message.roomKey]);
+        }
 
         if (await roomMessageExists(message.hash)) {
           console.log('🔕 Room message already exists, skipping notification.');
@@ -528,6 +544,9 @@ let channelId;
         const key = await getEncryptionKey();
         
         message = decryptMessage(box.box, box.t, key);
+        if (message) {
+          usePreferencesStore.getState().setBasePushVerified(true);
+        }
 
         console.log('Displaying notification for message:', message);
 

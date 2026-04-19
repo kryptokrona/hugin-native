@@ -19,7 +19,9 @@ export interface Preferences {
   node: string;
   huginNodeMode?: 'automatic' | 'manual';
   huginNode?: string;
-
+  lastRegisteredDeviceToken?: string;
+  registeredRoomKeys?: string[];
+  basePushVerified?: boolean;
 }
 
 export interface Payee {

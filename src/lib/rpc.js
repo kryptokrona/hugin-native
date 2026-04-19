@@ -1,9 +1,11 @@
 import {
   saveRoomMessageAndUpdate,
   setRoomMessages,
+  syncRoomMessages,
   setLatestRoomMessages,
 } from '@/services/bare';
-import { getCurrentRoom, useGlobalStore } from '@/services/zustand';
+import { getCurrentRoom, useGlobalStore, usePreferencesStore } from '@/services/zustand';
+import { getDeviceId } from '../services/pushnotifications';
 import { sleep } from '@/utils';
 import Toast from 'react-native-toast-message';
 import { Peers } from 'lib/connections';
@@ -55,6 +57,7 @@ export class Bridge {
     this.pushRegistrationTimer = null;
     this.pushRegistrationDebouncePromise = null;
     this.pushRegistrationDebounceMs = 750;
+    this.pushRegistrationDone = false;
     this.rpc = new RPC(IPC, (req, error) => {
       const data = this.parse(b4a.toString(req.data));
       if (!data) {
@@ -114,11 +117,13 @@ export class Bridge {
 
   get_pending_push_registrations(room_keys = []) {
     const all_room_keys = [...new Set([...this.get_room_keys_from_store(), ...room_keys])];
-    const pending_room_keys = all_room_keys.filter((room_key) => !this.registeredRoomKeys.has(room_key));
+    const prefs = usePreferencesStore.getState().preferences;
+    const prefs_registered = prefs?.registeredRoomKeys || [];
+    const pending_room_keys = all_room_keys.filter((room_key) => !this.registeredRoomKeys.has(room_key) && !prefs_registered.includes(room_key));
 
     return {
-      include_device_push: !this.basePushRegistered,
-      include_call_push: !this.callPushRegistered,
+      include_device_push: !this.basePushRegistered && !prefs?.basePushVerified,
+      include_call_push: !this.callPushRegistered && !prefs?.basePushVerified,
       pending_room_keys,
     };
   }
@@ -161,8 +166,13 @@ export class Bridge {
     }
 
     const sent = await this.send_push_registration(push_registration_batch);
+    console.log('[rpc.js] Push registration sent:', sent);
     if (sent && sent.success === true) {
       this.mark_push_registrations_sent(state);
+      const currentFirebaseToken = getDeviceId();
+      if (currentFirebaseToken) {
+        usePreferencesStore.getState().setLastRegisteredDeviceToken(currentFirebaseToken);
+      }
     }
     return sent;
   }
@@ -175,6 +185,24 @@ export class Bridge {
 
   async sync_push_registrations(room_keys = []) {
     this.collect_pending_push_room_keys(room_keys);
+
+    const prefs = usePreferencesStore.getState().preferences;
+    const currentFirebaseToken = getDeviceId();
+    const tokenIsSame = currentFirebaseToken && currentFirebaseToken === prefs?.lastRegisteredDeviceToken;
+
+    if (!tokenIsSame && currentFirebaseToken) {
+      usePreferencesStore.getState().clearRegisteredRoomKeys();
+    }
+
+    const state = this.get_pending_push_registrations([...this.pendingPushRoomKeys]);
+
+    console.log('[rpc.js] Push registration rooms number:' + state.pending_room_keys?.length);
+    console.log('[rpc.js] Push registration token is same:' + tokenIsSame);
+
+    if (state.pending_room_keys.length === 0 && tokenIsSame && !state.include_device_push && !state.include_call_push) {
+      this.pendingPushRoomKeys.clear();
+      return { success: true, skipped: true };
+    }
 
     if (!useGlobalStore.getState().huginNode.connected) {
       return null;
@@ -231,12 +259,33 @@ export class Bridge {
         case 'hugin-node-connected':
           useGlobalStore.getState().setHuginNode({connected: true});
 
+          if (useGlobalStore.getState().appState !== 'active') {
+             console.log('[rpc.js] App not active, skipping push registration sync');
+             break;
+          }
+
+          if (this.pushRegistrationDone) {
+             console.log('[rpc.js] Push registration already done this run, skipping');
+             break;
+          }
+
           if (useGlobalStore.getState().contacts.length === 0
           && useGlobalStore.getState().rooms.length === 0) {
             console.log('[rpc.js] No contacts or rooms, skipping push registration sync')
             break;
           }
+
+          const prefs = usePreferencesStore.getState().preferences;
+          const currentFirebaseToken = getDeviceId();
+          if (currentFirebaseToken && currentFirebaseToken === prefs?.lastRegisteredDeviceToken) {
+            console.log('[rpc.js] Push token has not changed since last registration, skipping');
+            this.pushRegistrationDone = true;
+            break;
+          }
+
           await this.sync_push_registrations();
+          console.log('[rpc.js] Push registration sync completed');
+          this.pushRegistrationDone = true;
           break;
         case 'hugin-node-disconnected':
           console.log('Hugin node disconnected!')
@@ -248,6 +297,7 @@ export class Bridge {
           break;
         case 'new-swarm':
           if (!json.beam && typeof json.key === 'string' && json.key.length > 0) {
+            console.log('[rpc.js] New swarm started, syncing push registrations')
             await this.sync_push_registrations([json.key]);
           }
           break;
@@ -315,11 +365,7 @@ export class Bridge {
         case 'history-update':
           await sleep(500);
           if (getCurrentRoom() === json.key) {
-            const currentState = useGlobalStore.getState();
-            // This might need to be checked, may cause history sync not to show messages immediately
-            if (!currentState.roomMessages || currentState.roomMessages.length === 0) {
-              setRoomMessages(json.key, 0);
-            }
+            syncRoomMessages(json.key);
             if (json.history && !json.background) {
               Toast.show({
                 type: 'success',
@@ -376,7 +422,7 @@ export class Bridge {
           WebRTC.signal(key, topic, address, data);
           break;
         case 'error-message':
-          console.log('Error:', json.data);
+          console.log('Error:', json);
           Toast.show({ text1: json.data?.message || 'Error', type: 'error' });
           break;
         case 'file-saved-to-downloads':
