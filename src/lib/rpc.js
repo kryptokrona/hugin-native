@@ -423,7 +423,9 @@ export class Bridge {
           break;
         case 'error-message':
           console.log('Error:', json);
-          Toast.show({ text1: json.data?.message || 'Error', type: 'error' });
+          if (json.data?.message?.length > 0) {
+            Toast.show({ text1: json.data?.message, type: 'error' });
+          }
           break;
         case 'file-saved-to-downloads':
           Toast.show({ text1: `Saved ${json.data?.fileName || 'file'}`, type: 'success' });
