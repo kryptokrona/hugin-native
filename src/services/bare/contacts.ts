@@ -57,9 +57,9 @@ export const updateMessage = async (message: Message, background: boolean) => {
   if (inRoom) {
     setStoreMessages(messages);
   } else {
-     useUnreadMessagesStore.getState().addUnreadPrivateMessage(message)
+     if (!message?.sent)useUnreadMessagesStore.getState().addUnreadPrivateMessage(message)
      const messageAge = Date.now() - message.timestamp;
-     if (!background && messageAge < (1000 * 30)) {
+     if (!background && messageAge < (1000 * 30) && !message?.sent) {
 
          Toast.show({
            text1: message.nickname,
@@ -81,7 +81,7 @@ export const updateMessage = async (message: Message, background: boolean) => {
          });
        }
   }
-  if (background) {
+  if (background && !message?.sent) {
     const contacts = useGlobalStore.getState().contacts;
     for (const contact of contacts) {
       if (contact.address === message.address) {
