@@ -126,7 +126,7 @@ export const GroupChatScreen: React.FC<Props> = ({ route }) => {
     if (!messages?.length) return;
     setUnreadCounted(true);
 
-    const firstUnreadOriginal = messages.findIndex(m => !m.read);
+    const firstUnreadOriginal = messages.findIndex(m => !m.read && !m.sent);
     
     if (firstUnreadOriginal !== -1) {
       const revIndex = messages.length - 1 - firstUnreadOriginal;
