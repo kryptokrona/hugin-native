@@ -105,9 +105,10 @@ export const updateMessages = async (
       },
 
     });
-  } else if (background) {
-    Notify.new({ name: message.nickname + " in " + roomName, text: message.message }, background, {roomKey: message.room, type: 'room', name: roomName});
-  }
+  } 
+  // else if (background && message.timestamp > Date.now() - (1000 * 60 * 10)) {
+  //   Notify.new({ name: message.nickname + " in " + roomName, text: message.message }, background, {roomKey: message.room, type: 'room', name: roomName});
+  // }
 };
 
 export const updateVoiceChannelStatus = (status: any) => {
@@ -119,6 +120,26 @@ export const setRoomMessages = async (room: string, page: number) => {
   const messages = await getRoomMessages(room, page);
 
   setStoreRoomMessages(messages);
+};
+
+export const syncRoomMessages = async (room: string) => {
+  const currentMessages = getRoomsMessages();
+  if (!currentMessages || currentMessages.length === 0) {
+    await setRoomMessages(room, 0);
+    return;
+  }
+
+  const fetchedMessages = await getRoomMessages(room, 0);
+  const existingHashes = new Set(currentMessages.map(m => m.hash));
+  
+  const messagesToAdd = fetchedMessages.filter(m => !existingHashes.has(m.hash));
+  
+  if (messagesToAdd.length > 0) {
+    const updatedMessages = [...currentMessages, ...messagesToAdd].sort(
+      (a, b) => a.timestamp - b.timestamp,
+    );
+    setStoreRoomMessages(updatedMessages);
+  }
 };
 
 export const onSendGroupMessage = async (
