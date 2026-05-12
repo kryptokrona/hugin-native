@@ -11,7 +11,7 @@ import { Rooms } from 'lib/native';
 
 import InCallManager from 'react-native-incall-manager';
 
-import RNCallKeep from 'react-native-callkeep';
+// import RNCallKeep from 'react-native-callkeep';
 
 class VoiceChannel {
   constructor() {
@@ -88,19 +88,11 @@ class VoiceChannel {
     InCallManager.setSpeakerphoneOn(true);
     InCallManager.setKeepScreenOn(true);
 
-    // RNCallKeep.setup(this.options);
-    // RNCallKeep.setup(this.options).then(accepted => {
-    //     console.log('CallKeep: ', accepted);
-    // });
-    // RNCallKeep.setAvailable(true);
-
-    // //
-    // RNCallKeep.displayIncomingCall('3d9ba084-1ee0-48be-b468-fce6933c24db', 'dudeman');
   }
 
   async exit() {
     InCallManager.stop();
-    RNCallKeep.endAllCalls();
+    // RNCallKeep.endAllCalls();
     useGlobalStore.getState().clearVoipPayload();
     for (const con of this.connections) {
       try {
