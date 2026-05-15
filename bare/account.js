@@ -18,13 +18,14 @@ class Account {
   }
 
   init(data, rpc) {
+    console.log('[account.js] Init bare user:', data);
     this.name = data.name;
     this.address = data.address;
     this.avatar = data.avatar;
     this.rpc = rpc;
     this.downloadDir = data.downloadDir;
     this.keys = data.keys;
-    this.store = data.store ?? data.downloadDir;
+    this.store = data.store;
     this.files = data.files ?? [];
   }
 

@@ -48,7 +48,7 @@ import Toast from 'react-native-toast-message';
 
 interface Props extends Partial<Message> {
   userAddress: string;
-  reactions: string[];
+  reactions: any[];
   replyHash?: string;
   onReplyToMessagePress: (val: string) => void;
   onEmojiReactionPress: (val: string, val2: string) => void;
@@ -293,6 +293,19 @@ const MessageItemInner: React.FC<Props> = ({
   }
 
   function onReaction(emoji: string, showToast: boolean = true) {
+    if (
+      reactions &&
+      reactions.some(
+        (r) =>
+          typeof r !== 'string' &&
+          r.emoji === emoji &&
+          r.sender === myUserAddress
+      )
+    ) {
+      setActionsModal(false);
+      return;
+    }
+
     if (emoji === '👍' && showToast) {
       Toast.show({
         text1: 'Info',

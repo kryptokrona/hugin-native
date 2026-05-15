@@ -209,6 +209,10 @@ interface PreferencesStore {
   setAuthMethod: (authMethod: AuthMethods | null) => void;
   setSkipBgRefreshWarning: (skip: boolean) => void;
   skipBgRefreshWarning: boolean;
+  setLastRegisteredDeviceToken: (token: string) => void;
+  addRegisteredRoomKeys: (keys: string[]) => void;
+  clearRegisteredRoomKeys: () => void;
+  setBasePushVerified: (verified: boolean) => void;
 }
 
 export const usePreferencesStore = create<PreferencesStore>()(
@@ -226,6 +230,25 @@ export const usePreferencesStore = create<PreferencesStore>()(
         })),
       skipBgRefreshWarning: false,
       setSkipBgRefreshWarning: (skip) => set({ skipBgRefreshWarning: skip }),
+      setLastRegisteredDeviceToken: (token: string) =>
+        set((state) => ({
+          preferences: { ...state.preferences, lastRegisteredDeviceToken: token },
+        })),
+      addRegisteredRoomKeys: (keys: string[]) =>
+        set((state) => ({
+          preferences: {
+            ...state.preferences,
+            registeredRoomKeys: [...new Set([...(state.preferences.registeredRoomKeys || []), ...keys])],
+          },
+        })),
+      clearRegisteredRoomKeys: () =>
+        set((state) => ({
+          preferences: { ...state.preferences, registeredRoomKeys: [], basePushVerified: false },
+        })),
+      setBasePushVerified: (verified: boolean) =>
+        set((state) => ({
+          preferences: { ...state.preferences, basePushVerified: verified },
+        })),
     }),
     {
       merge: (persistedState: unknown, currentState: PreferencesStore) => {
@@ -236,6 +259,11 @@ export const usePreferencesStore = create<PreferencesStore>()(
           typedPersistedState?.preferences ?? defaultPreferences;
         const skipBgRefreshWarning =
           typedPersistedState?.skipBgRefreshWarning ?? false;
+        const lastRegisteredDeviceToken =
+          typedPersistedState?.preferences?.lastRegisteredDeviceToken;
+        // Merge preferences with whatever was persisted plus any top-level things
+        // Wait, preferences is already extracted above
+        
         return { ...currentState, preferences, skipBgRefreshWarning }
       },
       name: ASYNC_STORAGE_KEYS.PREFERENCES,

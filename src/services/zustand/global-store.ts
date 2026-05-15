@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 import type { Balance, Message, RemoteFile, Room, User, Contact, Call, HuginNode } from '@/types';
-import { AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus } from 'react-native';
 
 type GlobalStore = {
   balance: Balance;
@@ -166,7 +166,7 @@ export const useGlobalStore = create<
       set((state) => ({
         fileDownloads: state.fileDownloads.filter((f) => f.hash !== hash),
       })),
-    appState: 'inactive',
+    appState: AppState.currentState || 'active',
     talkingUsers: {},
     setAppState: (appState) => set({appState}),
     setVoipPayload: (voipPayload) => set({ voipPayload }),

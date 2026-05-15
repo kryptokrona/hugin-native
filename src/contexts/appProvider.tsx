@@ -31,8 +31,8 @@ import {
 
 import { MainScreens } from '@/config';
 
-import VoipPushNotification from 'react-native-voip-push-notification';
-import RNCallKeep from 'react-native-callkeep';
+// import VoipPushNotification from 'react-native-voip-push-notification';
+// import RNCallKeep from 'react-native-callkeep';
 
 import { Peers } from '../lib/connections';
 
@@ -272,13 +272,13 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     let incomingCall = null;
     let currentAppState = 'active';
 
-    VoipPushNotification.registerVoipToken();
+    // VoipPushNotification.registerVoipToken();
 
-    VoipPushNotification.addEventListener('register', (t) => {
-      token = t; // Send token to the APN server
-      console.log('voiptoken', token)
-      useGlobalStore.getState().setDeviceToken(token);
-    });
+    // VoipPushNotification.addEventListener('register', (t) => {
+    //   token = t; // Send token to the APN server
+    //   console.log('voiptoken', token)
+    //   useGlobalStore.getState().setDeviceToken(token);
+    // });
 
     // async function getInitialEvents() {
 
@@ -305,28 +305,28 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     // getInitialEvents();
 
   // ===== Step 3: subscribe `didLoadWithEvents` event =====
-    VoipPushNotification.addEventListener('didLoadWithEvents', async (events) => {
-        // --- this will fire when there are events occured before js bridge initialized
-        // --- use this event to execute your event handler manually by event type
+    // VoipPushNotification.addEventListener('didLoadWithEvents', async (events) => {
+    //     // --- this will fire when there are events occured before js bridge initialized
+    //     // --- use this event to execute your event handler manually by event type
 
-        if (!events || !Array.isArray(events) || events.length < 1) {
-            return;
-        }
-        for (let voipPushEvent of events) {
-            let { name, data } = voipPushEvent;
-            if (name === VoipPushNotification.RNVoipPushRemoteNotificationReceivedEvent) {
-              await waitForCondition(() => started, 10000);
-              const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
-              const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
-              const box = JSON.parse(fromHex(data?.payload)).box;
-              const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: box});
-              const json = JSON.parse(plaintext);
-              useGlobalStore.getState().setVoipPayload(json);
-              // RNCallKeep.endAllCalls();
-              answerCall();
-            }
-        }
-    });
+    //     if (!events || !Array.isArray(events) || events.length < 1) {
+    //         return;
+    //     }
+    //     for (let voipPushEvent of events) {
+    //         let { name, data } = voipPushEvent;
+    //         if (name === VoipPushNotification.RNVoipPushRemoteNotificationReceivedEvent) {
+    //           await waitForCondition(() => started, 10000);
+    //           const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
+    //           const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
+    //           const box = JSON.parse(fromHex(data?.payload)).box;
+    //           const plaintext = await decrypt_sealed_box({skHex: key, pkHex: pubKey, cipherHex: box});
+    //           const json = JSON.parse(plaintext);
+    //           useGlobalStore.getState().setVoipPayload(json);
+    //           // RNCallKeep.endAllCalls();
+    //           answerCall();
+    //         }
+    //     }
+    // });
 
     // const options = {
     //   ios: {
@@ -341,51 +341,51 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
     // RNCallKeep.setup(options);
 
-    RNCallKeep.addEventListener('endCall', ({ callUUID }) => {
+    // RNCallKeep.addEventListener('endCall', ({ callUUID }) => {
 
-      incomingCall = null;
+    //   incomingCall = null;
 
-      if (currentAppState != 'active') Rooms.idle(true, true, true);
+    //   if (currentAppState != 'active') Rooms.idle(true, true, true);
 
-      Rooms.voice(
-              {
-                audioMute: false,
-                key: incomingCall?.call,
-                screenshare: false,
-                video: false,
-                videoMute: false,
-                voice: false,
-              },
-              false,
-            );
+    //   Rooms.voice(
+    //           {
+    //             audioMute: false,
+    //             key: incomingCall?.call,
+    //             screenshare: false,
+    //             video: false,
+    //             videoMute: false,
+    //             voice: false,
+    //           },
+    //           false,
+    //         );
         
-            const peer = {
-              address: Wallet.address,
-              audioMute: false,
-              screenshare: false,
-              video: false,
-              voice: false,
-              room: incomingCall?.call
-            };
+    //         const peer = {
+    //           address: Wallet.address,
+    //           audioMute: false,
+    //           screenshare: false,
+    //           video: false,
+    //           voice: false,
+    //           room: incomingCall?.call
+    //         };
         
-            // Peers.voicestatus(peer);
-            useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
-            WebRTC.exit();
+    //         // Peers.voicestatus(peer);
+    //         useGlobalStore.getState().setCurrentCall({ room: '', users: [] });
+    //         WebRTC.exit();
 
 
-    });
+    // });
 
-    RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
+    // RNCallKeep.addEventListener('didDisplayIncomingCall', ({ payload }) => {
 
-      console.log('☎️ didDisplayIncomingCall')
+    //   console.log('☎️ didDisplayIncomingCall')
 
-      useGlobalStore.getState().setVoipPayload(payload);
+    //   useGlobalStore.getState().setVoipPayload(payload);
       
-    });
+    // });
 
-    RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
-      answerCall();
-    });
+    // RNCallKeep.addEventListener('answerCall', async ({ callUUID }) => {
+    //   answerCall();
+    // });
 
     let timeoutId = null;
     const onAppStateChange = async (state: AppStateStatus) => {
@@ -447,10 +447,18 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           MessageSync.restart_sync();
           joining = true;
           Rooms.idle(false, false);
+          
           const room = getThisRoom();
+          const currentState = useGlobalStore.getState();
+          const shouldRefetchMessages = currentState.thisRoom !== room || !currentState.roomMessages?.length;
+
           setStoreCurrentRoom(room);
           setThisRoom(room);
-          setRoomMessages(room, 0);
+          
+          if (shouldRefetchMessages) {
+            setRoomMessages(room, 0);
+          }
+          
           Wallet.active?.start();
           joining = false;
           console.log('**** Successfully joined rooms after inactivity ****');

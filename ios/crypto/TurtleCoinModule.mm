@@ -583,10 +583,12 @@ RCT_EXPORT_METHOD(findPowShare:(NSString *)blobHex
             if (attempts > MAX_POW_ATTEMPTS) attempts = MAX_POW_ATTEMPTS;
             const uint32_t startNonce32 = [startNonce unsignedIntValue];
 
-            // Determine thread count: use active CPU cores, capped at 8
+            // Determine thread count: use 80% of active CPU cores, capped at 8
+            // This reduces intensity to prevent main thread locks
             const unsigned int maxThreads = 8;
             const unsigned int cpuCount = (unsigned int)[[NSProcessInfo processInfo] activeProcessorCount];
-            const unsigned int numThreads = std::min(std::max(cpuCount, 1u), maxThreads);
+            const unsigned int targetThreads = std::max(1u, (unsigned int)(cpuCount * 0.8));
+            const unsigned int numThreads = std::min(targetThreads, maxThreads);
 
             // Shared state across threads (use shared_ptr because ObjC blocks copy-capture)
             auto found = std::make_shared<std::atomic<bool>>(false);

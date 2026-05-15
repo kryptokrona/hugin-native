@@ -215,8 +215,7 @@ class Syncer {
         console.log('[syncer.js] Added contact:', added);
         if (added) {
           this.known_keys.push(added.messagekey);
-          const key = await Wallet.key_derivation_hash(addr);
-          console.log('[syncer.js] Connecting to new contact:', key, addr);
+          console.log('[syncer.js] Connecting to new contact:', addr);
           Beam.new(addr);
         }
       }
