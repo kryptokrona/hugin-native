@@ -23,4 +23,6 @@ export const languages = [
   { code: 'ur', name: 'Urdu' },
   { code: 'zh', name: 'Chinese' },
   { code: 'es', name: 'Spanish' },
+  { code: 'it', name: 'Italian' },
+  { code: 'ko', name: 'Korean' },
 ];

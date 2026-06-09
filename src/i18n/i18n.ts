@@ -25,6 +25,7 @@ import ur from './translations/ur.json';
 import zh from './translations/zh.json';
 import es from './translations/es.json';
 import it from './translations/it.json';
+import ko from './translations/ko.json';
 
 i18next
   // .use(languageDetector)
@@ -106,6 +107,9 @@ i18next
       },
       it: {
         translation: it,
+      },
+      ko: {
+        translation: ko,
       },
     },
   });
