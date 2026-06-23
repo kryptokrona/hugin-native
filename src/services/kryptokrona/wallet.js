@@ -617,24 +617,8 @@ export class ActiveWallet {
       let payload_json_decoded = naclUtil.decodeUTF8(
         JSON.stringify(payload_json),
       );
-      box = new NaclSealed.sealedbox(
-        payload_json_decoded,
-        nonceFromTimestamp(timestamp),
-        hexToUint(messageKey),
-      );
-    } else if (!sealed) {
-      console.log('Has history, not using sealedbox');
-      let payload_json = { from: my_address, msg: message };
-      let payload_json_decoded = naclUtil.decodeUTF8(
-        JSON.stringify(payload_json),
-      );
 
-      box = tweetnacl.box(
-        payload_json_decoded,
-        nonceFromTimestamp(timestamp),
-        hexToUint(messageKey),
-        keychain.getKeyPair().secretKey,
-      );
+      box = nacl.secretbox(payload_json_decoded, nonceFromTimestamp(timestamp), hexToUint(outDerivation));
     }
     //Box object
     let payload_box = {

@@ -165,7 +165,7 @@ class Syncer {
       console.log('[syncer.js] Checking message:', message);
       try {
         const thisHash = message.hash;
-        const thisExtra = '99' + thisHash + message.cipher;
+        const thisExtra = message.cipher;
 
         if (!this.validate(thisExtra, thisHash)) {
           console.log('[syncer.js] Message is not valid.')
