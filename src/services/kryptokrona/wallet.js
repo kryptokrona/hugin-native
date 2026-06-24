@@ -478,7 +478,7 @@ export class ActiveWallet {
     const hash = messageHash && typeof messageHash === 'string' ? messageHash : randomKey();
 
     if (beam) {
-      const send = hash + '99' + payload_hex;
+      const send = payload_hex;
       Beam.message(address, send);
     } else {
       try {
@@ -604,22 +604,19 @@ export class ActiveWallet {
     const hashDerivation = await cnFastHash(outDerivation);
     const viewTag = hashDerivation.substring(0, 2);
 
-    if (sealed) {
-      let signature = await this.sign(message, true);
-      let payload_json = {
-        from: my_address,
-        k: Buffer.from(keychain.getKeyPair().publicKey).toString('hex'),
-        msg: message,
-        s: signature,
-        name: useUserStore.getState().user.name
-      };
-      console.log(payload_json);
-      let payload_json_decoded = naclUtil.decodeUTF8(
-        JSON.stringify(payload_json),
-      );
+    let signature = await this.sign(message, true);
+    let payload_json = {
+      from: my_address,
+      k: Buffer.from(keychain.getKeyPair().publicKey).toString('hex'),
+      msg: message,
+      s: signature,
+      name: useUserStore.getState().user.name
+    };
+    let payload_json_decoded = naclUtil.decodeUTF8(
+      JSON.stringify(payload_json),
+    );
 
-      box = nacl.secretbox(payload_json_decoded, nonceFromTimestamp(timestamp), hexToUint(outDerivation));
-    }
+    box = tweetnacl.secretbox(payload_json_decoded, nonceFromTimestamp(timestamp), hexToUint(outDerivation));
     //Box object
     let payload_box = {
       box: Buffer.from(box).toString('hex'),
