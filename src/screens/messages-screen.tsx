@@ -123,8 +123,6 @@ export const MessagesScreen: React.FC<Props> = () => {
   function removeContact(contact: { address: string; name: string }) {
     const doRemoveContact = async (address: string) => {
       await deleteContact(address);
-      const contacts = await getContacts();
-      MessageSync.known_keys = contacts.map((entry) => entry.messagekey);
       setLatestMessages();
     };
 
@@ -170,20 +168,16 @@ export const MessagesScreen: React.FC<Props> = () => {
       return;
     }
 
+    // xkr address only (99 chars). The trailing nacl message-key in legacy
+    // 163-char pastes is ignored — the contacts.messagekey column is kept
+    // as '' for now, reserved for a future ML-KEM public key.
     const xkrAddr = link?.substring(0, 99);
-    const messageKey = link?.slice(-64);
 
-    await addContact(name, xkrAddr, messageKey, true);
+    await addContact(name, xkrAddr, '', true);
 
     Beam.new(xkrAddr);
 
-    sync_push_registrations()
-
-    // Beam.connect(
-    //   Wallet.key_derivation_hash(xkrAddr),
-    //   xkrAddr + messageKey,
-    //   false,
-    // );
+    sync_push_registrations();
 
     setLatestMessages();
 
@@ -218,7 +212,7 @@ export const MessagesScreen: React.FC<Props> = () => {
               onSubmitEditing={onJoinpress}
             />
             <TextButton onPress={onScanPress}>{t('scanQR')}</TextButton>
-            <TextButton disabled={link?.length !== 163} onPress={onJoinpress}>
+            <TextButton disabled={link?.length !== 99} onPress={onJoinpress}>
               {t('addUser')}
             </TextButton>
           </View>

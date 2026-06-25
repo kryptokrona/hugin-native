@@ -24,9 +24,20 @@ class Account {
     this.avatar = data.avatar;
     this.rpc = rpc;
     this.downloadDir = data.downloadDir;
-    this.keys = data.keys;
+    // Private keys live on the wallet side; RN ships them ONCE during init so
+    // Bare can sign + encrypt PMs locally without Bare→RN→Bare round-trips on
+    // every message. Shape:
+    //   { privateSpendKey, privateViewKey, messageSignKey?, messagePublicKey? }
+    this.keys = data.keys || {};
     this.store = data.store;
     this.files = data.files ?? [];
+  }
+
+  // After init, RN may push additional keys (e.g. the deterministic
+  // subwallet sign keypair that gets computed asynchronously during wallet
+  // start). Merge rather than replace so we don't clobber spend/view.
+  setKeys(more) {
+    this.keys = { ...(this.keys || {}), ...(more || {}) };
   }
 
   update(data) {

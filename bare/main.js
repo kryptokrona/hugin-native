@@ -20,6 +20,8 @@ const {
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
 const { new_beam, send_beam_message } = require('./beam');
+const messages = require('./messages');
+const syncer = require('./syncer');
 const { IPC } = BareKit;
 
 const rpc = new Bridge(IPC);
@@ -40,8 +42,124 @@ const onrequest = async (p) => {
     case 'push_registration':
       const pushRegistered = await Nodes.register(p.data);
       return { sent: pushRegistered };
+    case 'pm_encrypt': {
+      // RN composes a PM; Bare encrypts it with hugin-crypto and hands the
+      // wire hex back so RN can pick whether to relay (node) or beam (p2p).
+      // RN may also call `pm_send` instead to ship in one step.
+      const { wireHex, hash } = await messages.encrypt_pm({
+        message: p.message,
+        toAddress: p.toAddress,
+        name: p.name,
+      });
+      return { wireHex, hash };
+    }
+    case 'pm_decrypt': {
+      // Used by push notifications (cold app wake): pass the wire bytes, get
+      // back plaintext + the deterministic content-addressed hash.
+      const result = await messages.decrypt_pm(p.wireHex);
+      if (!result) return { failed: true };
+      return result;
+    }
+    case 'push_encrypt': {
+      // Wallet/syncer used to do this with tweetnacl-sealed-box on the RN
+      // side. Now: ship the small descriptor here, get the wire hex back.
+      const wireHex = messages.encrypt_push_registration({
+        deviceId: p.deviceId,
+        viewTag: p.viewTag,
+        type: p.kind === 'call' ? 'call' : undefined,
+      });
+      return { wireHex };
+    }
+    case 'room_push_encrypt': {
+      const wireHex = messages.encrypt_room_push({
+        roomKey: p.roomKey,
+        payload: p.payload,
+        timestamp: p.timestamp,
+        viewTag: p.viewTag,
+      });
+      return { wireHex };
+    }
+    case 'room_push_send': {
+      // One RPC instead of two: previously RN called room_push_encrypt
+      // (Bare→RN→Bare), then send_node_msg (Bare→RN→Bare again). Now we
+      // encrypt and ship to the node inside a single Bare round-trip.
+      const wireHex = messages.encrypt_room_push({
+        roomKey: p.roomKey,
+        payload: p.payload,
+        timestamp: p.timestamp,
+        viewTag: p.viewTag,
+      });
+      const sent = await Nodes.message(wireHex, p.hash, p.viewTag, 'room');
+      return { sent: sent || { success: false } };
+    }
+    case 'push_register_all': {
+      // Consolidates what used to be N+1 round-trips for N rooms:
+      //   N × push_encrypt   (one per device/call/room registration)
+      // + 1 × push_registration (ship the batch to the node)
+      // into a single trip. RN passes the device id, the flags, the
+      // pre-computed view tags, and the list of rooms — Bare builds every
+      // sealedbox and ships the JSON batch.
+      const registrations = [];
+      if (p.includeDevicePush) {
+        registrations.push(
+          messages.encrypt_push_registration({
+            deviceId: p.deviceId,
+            viewTag: p.deviceViewTag,
+          }),
+        );
+      }
+      if (p.includeCallPush) {
+        registrations.push(
+          messages.encrypt_push_registration({
+            deviceId: p.deviceId,
+            viewTag: p.callViewTag,
+            type: 'call',
+          }),
+        );
+      }
+      for (const room of p.rooms || []) {
+        registrations.push(
+          messages.encrypt_push_registration({
+            deviceId: p.deviceId,
+            viewTag: room.viewTag,
+          }),
+        );
+      }
+      if (registrations.length === 0) {
+        return { sent: { success: true, skipped: true } };
+      }
+      const sent = await Nodes.register(JSON.stringify(registrations));
+      return { sent };
+    }
+    case 'dm_push_decrypt': {
+      // Push wakeup path: RN hands in the device sealedbox + the keypair it
+      // pulled from Keychain; we open with sodium and return the plaintext.
+      const plain = messages.decrypt_dm_push({
+        cipherHex: p.cipherHex,
+        skHex: p.skHex,
+        pkHex: p.pkHex,
+      });
+      if (!plain) return { failed: true };
+      return { plaintext: plain };
+    }
+    case 'room_push_decrypt': {
+      const plain = messages.decrypt_room_push({
+        cipherHex: p.cipherHex,
+        timestamp: p.timestamp,
+        roomKeys: p.roomKeys || [],
+      });
+      if (!plain) return { failed: true };
+      return { plaintext: plain };
+    }
     case 'init_bare':
+      // p.user.keys carries privateSpendKey + privateViewKey so Bare can
+      // sign and PM-encrypt without Bare→RN→Bare round-trips per message.
       initBareMain(p.user);
+      break;
+    case 'set_bare_keys':
+      // Top-up call for keys computed asynchronously (e.g. the deterministic
+      // subwallet sign keypair). Merges into Hugin.keys.
+      Hugin.setKeys(p.keys);
       break;
     case 'update_bare_user':
       updateBareUser(p.user);
@@ -66,6 +184,26 @@ const onrequest = async (p) => {
     case 'send_node_msg':
       const sent = await Nodes.message(p.payload, p.hash, p.viewtag, p.kind);
       return {sent};
+    case 'pm_send': {
+      // RN ships plaintext + intent (beam vs node), Bare encrypts and ships.
+      // One RPC, no round-trip back to RN before the network call.
+      const { wireHex, hash } = await messages.encrypt_pm({
+        message: p.message,
+        toAddress: p.toAddress,
+        name: p.name,
+      });
+      if (p.beam) {
+        send_dm_message(p.toAddress, wireHex);
+        return { success: true, hash };
+      }
+      const result = await Nodes.message(
+        wireHex,
+        hash,
+        p.viewtag,
+        p.call ? 'call' : 'dm',
+      );
+      return { success: result?.success === true, hash, error: result?.reason };
+    }
     case 'sync_from_node':
       const resp = await Nodes.sync(p.request)
       return {resp, background: Hugin.background}
@@ -75,6 +213,39 @@ const onrequest = async (p) => {
     case 'group_random_key':
       const keys = create_room_invite();
       return { keys };
+    case 'create_account_keypair': {
+      // Account identity Ed25519 keypair (used to identify the user inside
+      // swarms). Was tweetnacl.sign.keyPair() on the RN side; now sodium.
+      const sodium = require('sodium-native');
+      const publicKey = Buffer.alloc(sodium.crypto_sign_PUBLICKEYBYTES);
+      const secretKey = Buffer.alloc(sodium.crypto_sign_SECRETKEYBYTES);
+      sodium.crypto_sign_keypair(publicKey, secretKey);
+      return {
+        publicKey: publicKey.toString('hex'),
+        secretKey: secretKey.toString('hex'),
+      };
+    }
+    case 'derive_box_keypair': {
+      // X25519 (curve25519) keypair derived from the user's spend key.
+      // Byte-equivalent to the old tweetnacl.box.keyPair.fromSecretKey path:
+      // both libraries call crypto_scalarmult_base on the raw 32-byte secret
+      // without extra clamping, so previously-registered push pubkeys stay
+      // valid across the migration.
+      const sodium = require('sodium-native');
+      const sk = Buffer.from(p.secretKeyHex, 'hex');
+      const pk = Buffer.alloc(sodium.crypto_scalarmult_BYTES);
+      sodium.crypto_scalarmult_base(pk, sk);
+      return { sk: sk.toString('hex'), pk: pk.toString('hex') };
+    }
+    case 'sha512_hex': {
+      // Replaces tweetnacl.hash. Returns comma-separated bytes so existing
+      // callers (swarm topic derivation) get an identical-shape string.
+      const { createHash } = require('crypto');
+      const buf = createHash('sha512')
+        .update(Buffer.from(p.hex, 'hex'))
+        .digest();
+      return { bytes: Array.from(buf).join(',') };
+    }
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
       break;
@@ -142,6 +313,9 @@ async function response(request) {
 // Function implementations
 const initBareMain = async (user) => {
   Hugin.init(user, rpc);
+  // Bare owns the message-sync loop now. It polls Nodes, decrypts PMs with
+  // hugin-crypto, and emits `new-message` events to RN with plaintext.
+  syncer.init(Nodes);
 };
 
 const updateBareUser = (user) => {

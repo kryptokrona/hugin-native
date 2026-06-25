@@ -85,7 +85,7 @@ function create_signer(kp) {
 
 
 const { Hugin } = require('./account');
-//const nacl = require('tweetnacl');
+const hc = require('hugin-crypto');
 
 function encrypt_sealed_box(pk, data) {
   console.log('Received m: ', data)
@@ -158,7 +158,14 @@ function create_room_invite() {
 }
 
 async function sign(message, signkey = false) {
-  return await Hugin.request({ type: 'sign-message', message, signkey });
+  // signkey is a holdover toggle from the old RPC interface (RN-side always
+  // signed with the spend key anyway). Now we sign locally in Bare using the
+  // cached spend key — no Bare→RN→Bare round-trip per swarm message.
+  const spendKey = Hugin.keys?.privateSpendKey;
+  if (!spendKey) {
+    throw new Error('Bare keys not initialized — sign() called before init_bare');
+  }
+  return await hc.sign(message, spendKey);
 }
 
 function check_hash(hash) {
@@ -487,7 +494,11 @@ const sign_admin_message = (dht_keys, admin) => {
 };
 
 async function sign_joined_message(dht_keys) {
-  const key = await Hugin.request({ type: 'get-priv-key' });
+  // Spend key cached at init — no Bare→RN→Bare per peer join.
+  const key = Hugin.keys?.privateSpendKey;
+  if (!key) {
+    throw new Error('Bare keys not initialized — sign_joined_message() before init_bare');
+  }
   const keys = create_keys_from_seed(key);
   return [
     keys.get().sign(dht_keys.get().publicKey).toString('hex'),

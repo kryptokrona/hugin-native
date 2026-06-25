@@ -1,7 +1,11 @@
-import * as NaclSealed from 'tweetnacl-sealed-box';
-
 import { Address, CryptoNote } from 'kryptokrona-utils';
-import { Beam, get_sealed_box, Nodes } from '../../lib/native';
+import {
+  Beam,
+  Nodes,
+  pm_send,
+  derive_box_keypair,
+} from '../../lib/native';
+import * as Keychain from 'react-native-keychain';
 import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import {
   cnFastHash,
@@ -11,13 +15,12 @@ import {
   makePostRequest,
   processBlockOutputs,
 } from '../NativeTest';
-import { hexToUint, parse, toHex } from '../utils';
+import { parse, toHex } from '../utils';
 import {
   joinAndSaveRoom,
   saveRoomMessageAndUpdate,
   setRoomMessages,
 } from '../bare';
-import { keychain, nonceFromTimestamp, randomKey } from '../bare/crypto';
 import {
   loadWallet,
   saveRoomToDatabase,
@@ -38,12 +41,9 @@ import { MessageSync } from '../hugin/syncer';
 import { Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
-import naclUtil from 'tweetnacl-util';
 import { privateKeys } from './privates';
 import { t } from 'i18next';
-import tweetnacl from 'tweetnacl';
 import { getDeviceId } from '../../services/pushnotifications';
-import * as Keychain from 'react-native-keychain';
 import { fetchWithTimeout, sleep } from '@/utils';
 
 const xkrUtils = new CryptoNote();
@@ -306,6 +306,22 @@ export class ActiveWallet {
     console.log('Wallet started');
 
     setInterval(() => this.save(), 30000);
+
+    // Persist the device-push keypair (X25519, derived from the spend key)
+    // in the OS Keychain. pushnotifications.ts reads this on a cold push to
+    // hand both halves to Bare's dm_push_decrypt RPC. The bytes are
+    // byte-equivalent to the previous tweetnacl derivation, so push pubkeys
+    // we already registered with the server still match.
+    try {
+      const { sk, pk } = await derive_box_keypair(this.spendKey());
+      await Keychain.setGenericPassword('encryption', sk + pk, {
+        accessible: Keychain.ACCESSIBLE.ALWAYS,
+      });
+      console.log('🔐 Device-push keypair stored.');
+    } catch (err) {
+      console.error('❌ Failed to store encryption key:', err);
+    }
+
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
       console.log('Incoming tx!', transaction);
@@ -347,16 +363,6 @@ export class ActiveWallet {
         }
       },
     );
-    try {
-        const key = Buffer.from(keychain.getKeyPair().secretKey).toString('hex');
-        const pubKey = Buffer.from(keychain.getKeyPair().publicKey).toString('hex');
-        await Keychain.setGenericPassword('encryption', key+pubKey, {
-          accessible: Keychain.ACCESSIBLE.ALWAYS,
-        });
-        console.log('🔐 Key saved securely.');
-    } catch (err) {
-      console.error('❌ Failed to store encryption key:', err);
-    }
   }
 
   async send(tx) {
@@ -450,358 +456,150 @@ export class ActiveWallet {
 }
 
   async send_message(message, receiver, beam = false, call = false, messageHash = '') {
-    //Assert address length
-    if (receiver.length !== 163) {
-      console.log('Error: Address too long/short');
-      return { error: 'address', success: false, hash: '' };
-    }
     if (message.length === 0) {
       console.log('Error: No message to send');
       return { error: 'message', success: false, hash: '' };
     }
 
-    //Split address and check history
-    let address = receiver.substring(0, 99);
-    let messageKey = receiver.substring(99, 163);
-    let has_history = await this.check_history(messageKey, address);
-
-    let payload_hex;
-    const seal = has_history && beam ? false : true;
-
-    payload_hex = await this.encrypt_hugin_message(
-      message,
-      messageKey,
-      seal,
-      address,
-    );
-
-    const hash = messageHash && typeof messageHash === 'string' ? messageHash : randomKey();
-
-    if (beam) {
-      const send = hash + '99' + payload_hex;
-      Beam.message(address, send);
-    } else {
-      try {
-        await this.waitForCondition(() => useGlobalStore.getState().huginNode.connected, 10000);
-      } catch (err) {
-        console.log('Error: Hugin node not connected in time', error);
-        return { success: false, error: 'not_connected', hash: '' };
-      }
-     try {
-      let success = false;
-      let i = 0;
-      let sent;
-      while (success != true && i < 5) {
-        sent = await Nodes.message(
-          payload_hex,
-          hash,
-          await this.generate_view_tag(address, call),
-          call ? 'call' : 'dm',
-        );
-        console.log('Sent!', sent);
-        success = sent?.success;
-        i++;
-        if (success != true) await sleep(3000);
-      }
-      if (success != true) {
-        if (typeof sent.reason !== 'string') return;
-        if (sent.reason.length > 40) return;
-        console.log('Error sending message', sent.reason);
-        return { success: false, error: sent.reason, hash: '' };
-      }
-    } catch (error) {
-      console.log('Error sending message:', error.message);
-      return { success: false, error: error.message, hash: '' };
-    }
-    }
-
-    return { success: true, error: 'success', hash };
-  }
-
-  async start_call(roomKey, receiver) {
-
-    //Assert address length
-    if (receiver.length !== 163) {
+    // xkr address only (99 chars). Tolerate a legacy 163-char string by
+    // taking the address part — the trailing nacl message-key is gone.
+    const address = typeof receiver === 'string' ? receiver.substring(0, 99) : '';
+    if (address.length !== 99) {
       console.log('Error: Address too long/short');
       return { error: 'address', success: false, hash: '' };
     }
+
+    if (!beam) {
+      try {
+        await this.waitForCondition(
+          () => useGlobalStore.getState().huginNode.connected,
+          10000,
+        );
+      } catch (err) {
+        console.log('Error: Hugin node not connected in time');
+        return { success: false, error: 'not_connected', hash: '' };
+      }
+    }
+
+    const viewtag = await this.generate_view_tag(address, call);
+    const name = useUserStore.getState().user.name;
+
+    // Bare owns the cipher: it builds the wire, computes the deterministic
+    // hash, and ships via beam or node in a single RPC. RN no longer touches
+    // tweetnacl / sodium / kryptokrona key derivation on the send path.
+    let attempt = 0;
+    let result;
+    while (attempt < (beam ? 1 : 5)) {
+      result = await pm_send({
+        message,
+        toAddress: address,
+        name,
+        beam,
+        call,
+        viewtag,
+      });
+      if (result?.success) break;
+      attempt += 1;
+      if (!beam && attempt < 5) await sleep(3000);
+    }
+
+    if (!result?.success) {
+      const reason = result?.error;
+      if (typeof reason === 'string' && reason.length <= 40) {
+        console.log('Error sending message', reason);
+      }
+      return { success: false, error: reason || 'send_failed', hash: '' };
+    }
+
+    return { success: true, error: 'success', hash: result.hash };
+  }
+
+  async start_call(roomKey, receiver) {
     if (roomKey.length === 0) {
-      console.log('Error: No message to send');
+      console.log('Error: No call key to send');
       return { error: 'message', success: false, hash: '' };
     }
 
-    //Split address
-    let address = receiver.substring(0, 99);
-    let messageKey = receiver.substring(99, 163);
-
-    let my_address = this.address;
-    
-    let payload_json = {
-      from: my_address,
-      name: useUserStore.getState().user.name,
-      call: roomKey
+    // xkr address only — tolerate a legacy 163-char string.
+    const address = typeof receiver === 'string' ? receiver.substring(0, 99) : '';
+    if (address.length !== 99) {
+      console.log('Error: Address too long/short');
+      return { error: 'address', success: false, hash: '' };
     }
-
-    console.log('Payload to send:', payload_json);
-
-    const sealed_box = await get_sealed_box({data: JSON.stringify(payload_json), messageKey});
-
-    console.log('sealed_box', sealed_box);
-
-    let payload_box = { box: sealed_box };
-    // Convert json to hex
-    let payload_hex = toHex(JSON.stringify(payload_box))
-
-    const hash = randomKey();
 
     try {
-        await this.waitForCondition(() => useGlobalStore.getState().huginNode.connected, 10000);
-      } catch (err) {
-        console.log('Error: Hugin node not connected in time', error);
-        return { success: false, error: 'not_connected', hash: '' };
-      }
-     try {
-      let success = false;
-      let i = 0;
-      let sent;
-      while (success != true && i < 5) {
-        sent = await Nodes.message(
-          payload_hex, 
-          hash, 
-          await this.generate_view_tag(address, true), 
-          'call'
-        );
-        console.log('Sent!', sent);
-        success = sent?.success;
-        i++;
-        if (success != true) await sleep(3000);
-      }
-      if (success != true) {
-        if (typeof sent?.reason !== 'string') return;
-        if (sent?.reason?.length > 40) return;
-        console.log('Error sending message', sent?.reason);
-        return { success: false, error: sent?.reason, hash: '' };
-      }
-    } catch (error) {
-      console.log('Error sending message:', error.message);
-      return { success: false, error: error.message, hash: '' };
+      await this.waitForCondition(
+        () => useGlobalStore.getState().huginNode.connected,
+        10000,
+      );
+    } catch (err) {
+      console.log('Error: Hugin node not connected in time');
+      return { success: false, error: 'not_connected', hash: '' };
     }
 
+    const viewtag = await this.generate_view_tag(address, true);
+    const name = useUserStore.getState().user.name;
+    // The call payload IS the message body — Bare wraps it in the same
+    // ephemeral friend-request envelope as a normal PM, plus a `call: roomKey`
+    // hint inside. Receiver decrypts via the same pm_decrypt path.
+    let attempt = 0;
+    let result;
+    while (attempt < 5) {
+      result = await pm_send({
+        message: JSON.stringify({ call: roomKey }),
+        toAddress: address,
+        name,
+        beam: false,
+        call: true,
+        viewtag,
+      });
+      if (result?.success) break;
+      attempt += 1;
+      if (attempt < 5) await sleep(3000);
+    }
+
+    if (!result?.success) {
+      console.log('Error sending call', result?.error);
+      return { success: false, error: result?.error || 'call_failed', hash: '' };
+    }
+    return { success: true, error: 'success', hash: result.hash };
   }
 
-  async encrypt_hugin_message(message, messageKey, sealed = false, toAddr) {
-    let timestamp = Date.now();
-    let my_address = this.address;
-    const addr = await Address.fromAddress(toAddr);
-    const [privateSpendKey, privateViewKey] = this.privateKeys();
-    let xkr_private_key = privateSpendKey;
-    let box;
+  /**
+   * Returns the descriptor RN ships to Bare's push_register_all RPC. RN only
+   * computes the (cheap, native-module) view tags; Bare builds + ships every
+   * sealedbox in a single round-trip.
+   */
+  async build_push_registration_descriptor(options = {}) {
+    const includeDevicePush = options.includeDevicePush !== false;
+    const includeCallPush = options.includeCallPush !== false;
+    const roomKeys = Array.isArray(options.roomKeys)
+      ? [...new Set(options.roomKeys.filter((k) => typeof k === 'string' && k.length > 0))]
+      : [];
 
-    //Create the view tag using a one time private key and the receiver view key
-    const keys = await generateKeys();
-    const toKey = addr.m_keys.m_viewKeys.m_publicKey;
-    const outDerivation = await generateKeyDerivation(toKey, keys.private_key);
-    const hashDerivation = await cnFastHash(outDerivation);
-    const viewTag = hashDerivation.substring(0, 2);
-
-    if (sealed) {
-      let signature = await this.sign(message, true);
-      let payload_json = {
-        from: my_address,
-        k: Buffer.from(keychain.getKeyPair().publicKey).toString('hex'),
-        msg: message,
-        s: signature,
-        name: useUserStore.getState().user.name
-      };
-      console.log(payload_json);
-      let payload_json_decoded = naclUtil.decodeUTF8(
-        JSON.stringify(payload_json),
-      );
-      box = new NaclSealed.sealedbox(
-        payload_json_decoded,
-        nonceFromTimestamp(timestamp),
-        hexToUint(messageKey),
-      );
-    } else if (!sealed) {
-      console.log('Has history, not using sealedbox');
-      let payload_json = { from: my_address, msg: message };
-      let payload_json_decoded = naclUtil.decodeUTF8(
-        JSON.stringify(payload_json),
-      );
-
-      box = tweetnacl.box(
-        payload_json_decoded,
-        nonceFromTimestamp(timestamp),
-        hexToUint(messageKey),
-        keychain.getKeyPair().secretKey,
-      );
-    }
-    //Box object
-    let payload_box = {
-      box: Buffer.from(box).toString('hex'),
-      t: timestamp,
-      txKey: keys.public_key,
-      vt: viewTag,
-    };
-    // Convert json to hex
-    let payload_hex = toHex(JSON.stringify(payload_box));
-    return payload_hex;
-  }
-
-  async encrypt_push_registration() {
-
-    let timestamp = Date.now();
-    let box;
-
-    //Create the view tag using a one time private key and the receiver view key
-    const keys = await generateKeys();
-
-    let payload_json = {
-      deviceId: getDeviceId(),
-      viewTag: await Wallet.generate_view_tag()
-    };
-    let payload_json_decoded = naclUtil.decodeUTF8(
-      JSON.stringify(payload_json),
-    );
-
-    box = new NaclSealed.sealedbox(
-      payload_json_decoded,
-      nonceFromTimestamp(timestamp),
-      hexToUint('6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345'),
-    );
-
-    //Box object
-    let payload_box = {
-      box: Buffer.from(box).toString('hex'),
-      t: timestamp
-    };
-    // Convert json to hex
-    let payload_hex = toHex(JSON.stringify(payload_box));
-    return payload_hex;
-  }
-
-  async encrypt_push_registration_batch(options = {}) {
-    const config = Array.isArray(options)
-      ? {
-          includeDevicePush: true,
-          includeCallPush: true,
-          roomKeys: options,
-        }
-      : {
-          includeDevicePush: options.includeDevicePush !== false,
-          includeCallPush: options.includeCallPush !== false,
-          roomKeys: Array.isArray(options.roomKeys) ? options.roomKeys : [],
-        };
-    const registrations = [];
-
-    if (config.includeDevicePush) {
-      const deviceRegistration = await this.encrypt_push_registration();
-      if (typeof deviceRegistration === 'string' && deviceRegistration.length > 0) {
-        registrations.push(deviceRegistration);
-      }
-    }
-
-    if (config.includeCallPush) {
-      const callRegistration = await this.encrypt_call_push_registration();
-      if (typeof callRegistration === 'string' && callRegistration.length > 0) {
-        registrations.push(callRegistration);
-      }
-    }
-
-    const uniqueRoomKeys = [...new Set(
-      config.roomKeys.filter((roomKey) => typeof roomKey === 'string' && roomKey.length > 0),
-    )];
-    for (const roomKey of uniqueRoomKeys) {
-      const roomRegistration = await this.encrypt_room_push_registration(roomKey);
-      if (typeof roomRegistration === 'string' && roomRegistration.length > 0) {
-        registrations.push(roomRegistration);
-      }
-    }
-
-    if (registrations.length === 0) {
+    if (!includeDevicePush && !includeCallPush && roomKeys.length === 0) {
       return null;
     }
 
-    return JSON.stringify(registrations);
-  }
-
-  async encrypt_call_push_registration() {
-
-    let timestamp = Date.now();
-    let box;
-
-    //Create the view tag using a one time private key and the receiver view key
-    const keys = await generateKeys();
-
-    try {
-    let payload_json = {
-      deviceId: useGlobalStore.getState().deviceToken,
-      viewTag: await Wallet.generate_view_tag(undefined, true),
-      type: 'call'
-    };
-    let payload_json_decoded = naclUtil.decodeUTF8(
-      JSON.stringify(payload_json),
-    );
-
-    box = new NaclSealed.sealedbox(
-      payload_json_decoded,
-      nonceFromTimestamp(timestamp),
-      hexToUint('6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345'),
-    );
-
-    //Box object
-    let payload_box = {
-      box: Buffer.from(box).toString('hex'),
-      t: timestamp
-    };
-    // Convert json to hex
-    let payload_hex = toHex(JSON.stringify(payload_box));
-    return payload_hex;
-    } catch (e) {
-      console.error('Error making callkit shit:', e)
+    const deviceViewTag = includeDevicePush ? await this.generate_view_tag() : null;
+    const callViewTag = includeCallPush
+      ? await this.generate_view_tag(undefined, true)
+      : null;
+    const rooms = [];
+    for (const roomKey of roomKeys) {
+      rooms.push({
+        roomKey,
+        viewTag: await this.generate_room_view_tag(roomKey),
+      });
     }
-  }
-
-  async encrypt_room_push_registration(room) {
-
-    let timestamp = Date.now();
-    let box;
-
-    //Create the view tag using a one time private key and the receiver view key
-    const keys = await generateKeys();
-
-    let payload_json = {
+    return {
       deviceId: getDeviceId(),
-      viewTag: await this.generate_room_view_tag(room)
+      includeDevicePush,
+      includeCallPush,
+      deviceViewTag,
+      callViewTag,
+      rooms,
     };
-    let payload_json_decoded = naclUtil.decodeUTF8(
-      JSON.stringify(payload_json),
-    );
-
-    box = new NaclSealed.sealedbox(
-      payload_json_decoded,
-      nonceFromTimestamp(timestamp),
-      hexToUint('6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345'),
-    );
-
-    //Box object
-    let payload_box = {
-      box: Buffer.from(box).toString('hex'),
-      t: timestamp
-    };
-    // Convert json to hex
-    let payload_hex = toHex(JSON.stringify(payload_box));
-    return payload_hex;
-  }
-
-  async check_history(messageKey) {
-    //Check history
-    if (MessageSync.known_keys.indexOf(messageKey) > -1) {
-      return true;
-    } else {
-      MessageSync.known_keys.push(messageKey);
-      return false;
-    }
   }
 
   async key_derivation_hash(chat) {

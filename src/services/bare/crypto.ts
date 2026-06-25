@@ -1,70 +1,51 @@
-import tweetnacl from 'tweetnacl';
-
-import { loadAccount } from './sqlite';
+// RN-side crypto helpers — kept intentionally tiny.
+//
+// All real crypto (PM encrypt/decrypt, push encrypt/decrypt, room secretbox,
+// account keypair generation) lives in Bare with hugin-crypto + sodium-native.
+// What stays here is just bytes-shuffling polyfilled by `react-native-crypto`
+// plus thin wrappers around two Bare RPCs.
 
 import { hexToUint } from '../../services/utils';
-import { Wallet } from '../kryptokrona';
-import { generateDeterministicSubwalletKeys } from 'services/NativeTest';
+import { randomBytes, createHash } from 'crypto';
+import { create_account_keypair, sha512_hex } from 'lib/native';
 
-export const keychain = {
-  getKeyPair() {
-    const privateSpendKey = Wallet.spendKey();
-    return keychain.getNaclKeys(privateSpendKey);
-  },
-
-  getMsgKey() {
-    const naclPubKey = keychain.getKeyPair().publicKey;
-    return Buffer.from(naclPubKey).toString('hex');
-  },
-
-  getNaclKeys(privateSpendKey: string) {
-    const secretKey = hexToUint(privateSpendKey);
-    const keyPair = tweetnacl.box.keyPair.fromSecretKey(secretKey);
-    return keyPair;
-  },
-};
-
+/**
+ * 24-byte nonce derived from a timestamp. Matches the desktop + Bare scheme
+ * exactly so boxes encrypted on either client are decryptable by the other.
+ */
 export function nonceFromTimestamp(tmstmp: number) {
   let nonce = hexToUint(String(tmstmp));
-
-  while (nonce.length < tweetnacl.box.nonceLength) {
-    const tmp_nonce = Array.from(nonce);
-
-    tmp_nonce.push(0);
-
-    nonce = Uint8Array.from(tmp_nonce);
+  while (nonce.length < 24) {
+    const tmp = Array.from(nonce);
+    tmp.push(0);
+    nonce = Uint8Array.from(tmp);
   }
-
   return nonce;
 }
 
-export function naclHash(val: string) {
-  const hash = tweetnacl.hash(hexToUint(val));
-  return hash.toString();
+/**
+ * SHA-512 over hex bytes, returned in the comma-separated-bytes shape the
+ * swarm topic derivation expects. Byte-identical to the old tweetnacl.hash
+ * output so existing swarm topics keep resolving to the same peers.
+ *
+ * Bare can compute this via `sha512_hex` RPC; we use the local `crypto`
+ * polyfill so this stays synchronous (some callers are sync).
+ */
+export function naclHash(val: string): string {
+  const buf = createHash('sha512').update(Buffer.from(hexToUint(val))).digest();
+  return Array.from(buf).join(',');
 }
 
-export function randomKey() {
-  return Buffer.from(tweetnacl.randomBytes(32)).toString('hex');
+/** 32 random bytes, hex. */
+export function randomKey(): string {
+  return randomBytes(32).toString('hex');
 }
 
-export function newKeyPair() {
-  const { publicKey, secretKey } = tweetnacl.sign.keyPair();
-
-  return {
-    publicKey: Buffer.from(publicKey).toString('hex'),
-    secretKey: Buffer.from(secretKey).toString('hex'),
-  };
+/**
+ * Account identity Ed25519 keypair. Was tweetnacl.sign.keyPair() before;
+ * now generated in Bare with sodium so the JS keychain has no tweetnacl.
+ * Used once during onboarding (createUserAddress).
+ */
+export async function newKeyPair(): Promise<{ publicKey: string; secretKey: string }> {
+  return await create_account_keypair();
 }
-
-export async function signMessage(message: string) {
-  const keys = await loadAccount();
-  const secret = hexToUint(keys.secretKey);
-  const sig = tweetnacl.sign.detached(hexToUint(message), secret);
-  return Buffer.from(sig).toString('hex');
-}
-
-// export async function getPrivKey() {
-//   const keys = await loadAccount();
-//   console.log('Got keys', keys);
-//   return keys.secretKey;
-// }

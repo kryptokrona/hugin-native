@@ -42,8 +42,8 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
   const { name, roomKey } = route.params;
   const navigation = useNavigation<MainStackNavigationType>();
   const contacts = useGlobalStore((state) => state.contacts);
-  const messageKey = contacts.find((a) => a.address === roomKey)?.messagekey;
-  const huginAddress = roomKey + messageKey;
+  // hugin address is just the 99-char xkr address now.
+  const huginAddress = roomKey;
   const [modalVisible, setModalVisible] = useState(false);
   const [newName, setNewName] = useState(name);
 
@@ -119,10 +119,7 @@ export const ModifyContactScreen: React.FC<Props> = ({ route }) => {
 
   async function onLeave() {
     await deleteContact(roomKey);
-    const contacts = await getContacts();
-    MessageSync.known_keys = contacts.map((entry) => entry.messagekey);
     setLatestMessages();
-    // onDeleteGroup(roomKey);
     navigation.navigate(MainScreens.MessagesScreen);
   }
 

@@ -1,14 +1,10 @@
 import { Bridge } from './rpc';
 import { Worklet } from 'react-native-bare-kit';
 import bundle from '../../app.bundle';
-import { keychain, naclHash, nonceFromTimestamp } from '../services/bare';
+import { naclHash } from '../services/bare/crypto';
 import { getLatestMessages, getRooms } from '../services/bare/sqlite';
 import { sleep } from '@/utils';
 import { Wallet } from '../services/kryptokrona';
-import { fromHex, hexToUint, toHex } from '../services/utils';
-import * as NaclSealed from 'tweetnacl-sealed-box';
-import tweetnacl from 'tweetnacl';
-import naclUtil from 'tweetnacl-util';
 import { cnFastHash } from '../services/NativeTest';
 const worklet = new Worklet();
 const { IPC } = worklet;
@@ -58,81 +54,30 @@ export class Swarm {
   }
 
   async send_room_message_push(message) {
-    let sent;
+    // Single Bare round-trip: it encrypts (room-key secretbox → sealedbox to
+    // push server) AND ships to the node. Previously this was two trips
+    // (room_push_encrypt then send_node_msg). RN just computes the view tag
+    // up front (uses the RN-side native module, fast + sync).
     try {
-    const roomKey = message.room.substring(0,64);
-    const secretKey = keychain.getNaclKeys(roomKey).secretKey;
-
-    let payload_message = message;
-
-    let payload_message_decoded = naclUtil.decodeUTF8(
-      JSON.stringify(payload_message),
-    );
-
-    const timestamp = message.timestamp;
-    const nonce = nonceFromTimestamp(timestamp);
-
-    let secretbox = tweetnacl.secretbox(
-      payload_message_decoded,
-      nonce,
-      secretKey
-    );
-
-    let payload_json = {
-      box: Buffer.from(secretbox).toString('hex'),
-      viewTag: await Wallet.generate_room_view_tag(message.room)
-    };
-
-    console.log('🔑 Secretbox encrypted..', payload_json);
-
-    let payload_json_decoded = naclUtil.decodeUTF8(
-      JSON.stringify(payload_json),
-    );
-
-    console.log('🔑 Encrypting sealed box..');
-
-    let box = new NaclSealed.sealedbox(
-      payload_json_decoded,
-      nonceFromTimestamp(timestamp),
-      hexToUint('6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345'),
-    );
-
-    console.log('🔑 Sealedbox encrypted..');
-
-    //Box object
-    let payload_box = {
-      box: Buffer.from(box).toString('hex'),
-      t: timestamp
-    };
-    // Convert json to hex
-    let payload_hex = toHex(JSON.stringify(payload_box));
-
-    console.log("Sending to node", payload_hex);
-    sent = await Nodes.message(
-      payload_hex,
-      message.hash,
-      await Wallet.generate_room_view_tag(message.room),
-      'room',
-    );
-
-    console.log("Sent to node", sent);
-
-    if (sent.success === true) return sent;
-
-    if (!sent || sent.success !== true) {
-      const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
-      console.log('❌ Push registration failed:', reason);
-    }
-
-
+      const roomKey = message.room.substring(0, 64);
+      const viewTag = await Wallet.generate_room_view_tag(message.room);
+      const { sent } = await rpc.request({
+        type: 'room_push_send',
+        roomKey,
+        payload: message,
+        timestamp: message.timestamp,
+        viewTag,
+        hash: message.hash,
+      });
+      if (sent?.success !== true) {
+        const reason = typeof sent?.reason === 'string' ? sent.reason : 'push_registration_failed';
+        console.log('❌ Push registration failed:', reason);
+      }
+      return sent || { success: false };
     } catch (e) {
-      console.log('❌ Error sending push:', e)
+      console.log('❌ Error sending push:', e);
+      return { success: false };
     }
-
-    console.log("Returning", sent);
-
-    return sent || { success: false };
-
   }
 
   async feed_message(message, reply, tip) {
@@ -169,11 +114,21 @@ export class Swarm {
   }
 
   init(user) {
+    // Ship the private keys at init time so Bare can sign + encrypt locally
+    // without Bare→RN→Bare round-trips on every PM or swarm message.
+    // user.keys is populated by Wallet.init / pushnotifications.init before
+    // this is called.
     const data = {
       type: 'init_bare',
       user,
     };
     rpc.send(data);
+  }
+
+  // Top-up call for keys computed asynchronously after Bare boots (e.g. the
+  // deterministic subwallet sign keypair derived during wallet start).
+  setKeys(keys) {
+    rpc.send({ type: 'set_bare_keys', keys });
   }
 
   new(hashkey, key, admin) {
@@ -332,4 +287,91 @@ export const decrypt_sealed_box = async (data) => {
 
 export const sync_push_registrations = (room_keys = []) => {
   return rpc.sync_push_registrations(room_keys);
+};
+
+// --------------------------------------------------------------------------
+// New Bare-owned crypto RPCs. RN ships intent + plaintext (on send) or
+// ciphertext (on push-wakeup decrypt); Bare uses hugin-crypto + sodium and
+// returns the result. No tweetnacl on the RN side.
+// --------------------------------------------------------------------------
+
+/**
+ * Compose + encrypt + ship a PM in a single Bare round-trip. `beam: true`
+ * routes via the p2p swarm; otherwise via the push node.
+ */
+export const pm_send = async ({ message, toAddress, name, beam, call, viewtag }) => {
+  return await rpc.request({
+    type: 'pm_send',
+    message,
+    toAddress,
+    name,
+    beam: !!beam,
+    call: !!call,
+    viewtag,
+  });
+};
+
+/**
+ * Cold-push decrypt: RN hands a wire-format payload to Bare, gets plaintext
+ * back. Used by the notifee handler after Bare is up.
+ */
+export const pm_decrypt = async (wireHex) => {
+  return await rpc.request({ type: 'pm_decrypt', wireHex });
+};
+
+/**
+ * Build + ship every push registration (device + call + N rooms) in a single
+ * Bare round-trip. Replaces N+1 trips (`push_encrypt` per registration + one
+ * `push_registration` for the batch).
+ */
+export const push_register_all = async ({
+  deviceId,
+  includeDevicePush,
+  includeCallPush,
+  deviceViewTag,
+  callViewTag,
+  rooms,
+}) => {
+  return await rpc.request({
+    type: 'push_register_all',
+    deviceId,
+    includeDevicePush,
+    includeCallPush,
+    deviceViewTag,
+    callViewTag,
+    rooms,
+  });
+};
+
+export const dm_push_decrypt = async ({ cipherHex, skHex, pkHex }) => {
+  return await rpc.request({ type: 'dm_push_decrypt', cipherHex, skHex, pkHex });
+};
+
+export const room_push_decrypt = async ({ cipherHex, timestamp, roomKeys }) => {
+  return await rpc.request({
+    type: 'room_push_decrypt',
+    cipherHex,
+    timestamp,
+    roomKeys,
+  });
+};
+
+/** Generate the user's account-identity Ed25519 keypair (was tweetnacl). */
+export const create_account_keypair = async () => {
+  return await rpc.request({ type: 'create_account_keypair' });
+};
+
+/**
+ * Derive the X25519 device-push keypair from the user's spend key.
+ * Byte-equivalent to the previous tweetnacl-based derivation so existing
+ * push registrations stay valid.
+ */
+export const derive_box_keypair = async (secretKeyHex) => {
+  return await rpc.request({ type: 'derive_box_keypair', secretKeyHex });
+};
+
+/** SHA-512 in the comma-bytes shape the swarm topic derivation expects. */
+export const sha512_hex = async (hex) => {
+  const { bytes } = await rpc.request({ type: 'sha512_hex', hex });
+  return bytes;
 };

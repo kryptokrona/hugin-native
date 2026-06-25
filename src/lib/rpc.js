@@ -97,9 +97,14 @@ export class Bridge {
     req.send(JSON.stringify(data));
   }
 
-  async send_push_registration(data) {
+  async send_push_registration(descriptor) {
+    // Single RPC: Bare encrypts every sealedbox (device + call + N rooms)
+    // and ships the batch to the node. Previously this was N+1 round-trips.
     await sleep(5000);
-    const res = await this.request({ type: 'push_registration', data });
+    const res = await this.request({
+      type: 'push_register_all',
+      ...descriptor,
+    });
     const sent = res && res.sent;
     if (!sent || sent.success !== true) {
       const reason = sent && typeof sent.reason === 'string' ? sent.reason : 'push_registration_failed';
@@ -156,16 +161,16 @@ export class Bridge {
       return { success: true, skipped: true };
     }
 
-    const push_registration_batch = await Wallet.encrypt_push_registration_batch({
+    const descriptor = await Wallet.build_push_registration_descriptor({
       includeDevicePush: include_device_push,
       includeCallPush: include_call_push,
       roomKeys: pending_room_keys,
     });
-    if (!push_registration_batch) {
+    if (!descriptor) {
       return { success: true, skipped: true };
     }
 
-    const sent = await this.send_push_registration(push_registration_batch);
+    const sent = await this.send_push_registration(descriptor);
     console.log('[rpc.js] Push registration sent:', sent);
     if (sent && sent.success === true) {
       this.mark_push_registrations_sent(state);
@@ -301,15 +306,16 @@ export class Bridge {
             await this.sync_push_registrations([json.key]);
           }
           break;
-        case 'beam-message':
-          console.log('beam-message on frontend')
-          MessageSync.check_for_pm(json.message, json.hash, json.background);
+        case 'new-message':
+          // Bare decrypted a PM (either from the node-poll syncer or from a
+          // beam) and is handing us plaintext. Just save + update UI.
+          await MessageSync.on_new_message(json);
           break;
-        case 'pool-messages':
-          console.log('[syncer.js] Received pool-messages')
-          if (Array.isArray(json.messages) && json.messages.length > 0) {
-            await MessageSync.decrypt(json.messages, false, json.background);
-          }
+        case 'beam-message':
+          // Legacy path: if Bare hands us a still-encrypted beam message we
+          // round-trip back through pm_decrypt; the typical path now is for
+          // Bare to decrypt inline and fire `new-message` directly.
+          await MessageSync.check_for_pm(json.message, json.hash, json.background);
           break;
         case 'beam-connected':
           //Change state to -> "connected"

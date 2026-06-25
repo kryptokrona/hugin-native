@@ -47,7 +47,6 @@ import {
   setRoomMessages,
   updateMessage,
 } from '../services/bare';
-import { keychain } from '../services/bare/crypto';
 import { Camera, Connection, Files } from '../services/bare/globals';
 import { getContacts, getFeedMessages, initDB, loadSavedFiles, saveMessage } from '../services/bare/sqlite';
 import { MessageSync } from '../services/hugin/syncer';
@@ -127,16 +126,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     setInterval(updateFiatPrice, 60000);
     frontendStartedRef.current = true;
     console.log('[appProvider.tsx] Getting contacts..')
-    const contacts = await getContacts();
-    console.log('[appProvider.tsx] Got contacts..')
-    const knownKeys = contacts.map((contact) => contact.messagekey);
-    console.log('[appProvider.tsx] Got known keys..', knownKeys)
-    const keys = Wallet.privateKeys();
-    console.log('[appProvider.tsx] Got keys..', keys)
-    MessageSync.init('', knownKeys, keys);
-    console.log('[appProvider.tsx] Inited message sync..')
-
-    const huginAddress = Wallet.address + keychain.getMsgKey();
+    // The poll/decrypt loop now lives in Bare (bare/syncer.js). RN no longer
+    // needs to seed a sync state — bare/main.js starts the syncer on init_bare.
+    const huginAddress = Wallet.address;
     console.log('huginAddress', huginAddress);
 
     const files = Files.all().map((a) => {
