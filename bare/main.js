@@ -238,13 +238,14 @@ const onrequest = async (p) => {
       return { sk: sk.toString('hex'), pk: pk.toString('hex') };
     }
     case 'sha512_hex': {
-      // Replaces tweetnacl.hash. Returns comma-separated bytes so existing
-      // callers (swarm topic derivation) get an identical-shape string.
-      const { createHash } = require('crypto');
-      const buf = createHash('sha512')
-        .update(Buffer.from(p.hex, 'hex'))
-        .digest();
-      return { bytes: Array.from(buf).join(',') };
+      // Replaces tweetnacl.hash. SHA-512 is SHA-512 — sodium's
+      // crypto_hash_sha512 produces the exact same 64 bytes tweetnacl did,
+      // so existing swarm-topic derivations resolve to the same peers.
+      // Returns comma-separated bytes to match the old return shape.
+      const sodium = require('sodium-native');
+      const out = Buffer.alloc(sodium.crypto_hash_sha512_BYTES);
+      sodium.crypto_hash_sha512(out, Buffer.from(p.hex, 'hex'));
+      return { bytes: Array.from(out).join(',') };
     }
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
