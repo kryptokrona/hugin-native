@@ -535,10 +535,20 @@ export class Bridge {
         return await cnTurtleLiteSlowHashV2(request.blobHex);
       case 'cn-fast-hash':
         return await cnFastHash(request.hashInput);
-      case 'pow-find-share':
+      case 'pow-find-share': {
+        console.log('[rpc.js] Starting pow share')
+        if (useGlobalStore.getState().appState !== 'active') {
+          console.log('[rpc.js] Cancel pow find shar due to app state:', useGlobalStore.getState().appState)
+          return null;
+        }
         const powStart = Date.now();
         console.log('Starting PoW search', request)
-        let share = await findPowShare(
+
+        let backgroundTimeout = null;
+        let unsubscribe = null;
+        let isCancelled = false;
+
+        const findPowPromise = findPowShare(
           request.blobHex,
           request.targetHex,
           request.startNonce,
@@ -546,6 +556,42 @@ export class Bridge {
           request.nonceTagBits,
           request.nonceTagValue,
         );
+
+        const cancelPromise = new Promise((resolve) => {
+          const checkAppState = (appState) => {
+            if (appState !== 'active') {
+              if (!backgroundTimeout) {
+                backgroundTimeout = setTimeout(() => {
+                  isCancelled = true;
+                  resolve(null);
+                }, 5000);
+              }
+            } else {
+              if (backgroundTimeout) {
+                clearTimeout(backgroundTimeout);
+                backgroundTimeout = null;
+              }
+            }
+          };
+
+          unsubscribe = useGlobalStore.subscribe(
+            (state) => state.appState,
+            checkAppState
+          );
+
+          checkAppState(useGlobalStore.getState().appState);
+        });
+
+        let share = await Promise.race([findPowPromise, cancelPromise]);
+
+        if (unsubscribe) unsubscribe();
+        if (backgroundTimeout) clearTimeout(backgroundTimeout);
+
+        if (isCancelled) {
+          console.log('[PoW] Search cancelled due to app backgrounding');
+          return null;
+        }
+
         const powEnd = Date.now();
         if (share && share.hashes_performed) {
           const time_ms = powEnd - powStart;
@@ -561,6 +607,7 @@ export class Bridge {
           return null;
         }
         return share;
+      }
       default:
         return false;
     }

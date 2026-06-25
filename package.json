@@ -13,8 +13,7 @@
     "sodium-secretstream": "1.2.0",
     "blind-relay": "1.4.0",
     "dht-rpc": "6.26.3",
-    "simdle-native": "1.3.9",
-    "bare-os": "3.7.0"
+    "simdle-native": "1.3.9"
   },
   "bin": {
     "bundle": "./bin/bundle.js"
@@ -51,7 +50,9 @@
     "@tradle/react-native-http": "^2.0.0",
     "assert": "^1.1.1",
     "b4a": "^1.6.6",
+    "bare-addon-resolve": "^1.10.0",
     "bare-fs": "4.5.3",
+    "bare-os": "^3.7.0",
     "bare-process": "^4.3.0",
     "bare-rpc": "^1.1.0",
     "base-64": "^1.0.0",
@@ -90,7 +91,6 @@
     "react-native-background-fetch": "^4.2.7",
     "react-native-bare-kit": "^0.12.0",
     "react-native-biometrics": "^3.0.1",
-    "react-native-callkeep": "^4.3.16",
     "react-native-crypto": "^2.1.0",
     "react-native-device-info": "^14.0.4",
     "react-native-fs": "^2.20.0",
@@ -120,7 +120,6 @@
     "react-native-udp": "^4.1.7",
     "react-native-vector-icons": "10.0.0",
     "react-native-vision-camera": "^4.6.4",
-    "react-native-voip-push-notification": "^3.3.3",
     "react-native-webrtc": "^124.0.5",
     "react-native-worklets": "^0.4.1",
     "readable-stream": "1.0.33",

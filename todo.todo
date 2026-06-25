@@ -23,6 +23,17 @@ Todo:
     ✔ Update react-native-bare-kit @done(25-05-11 20:48)
     ☐ Add search
     ☐ Clicking some notifications do not send user to the right part of the app
+    ☐ Try to resend pending room messages at hugin-node-connected
+
+Todo PoW release:
+    ✔ Use foreground notifications @done(26-03-19 21:42)
+    ✔ Print sent room messages faster @done(26-03-19 21:42)
+    ☐ Fix issue where dms cant go back when openeded from notification
+    ☐ When joining/creating a room something goes wrong and it sets 0 users online
+    ☐ DMs & room messages not arriving due to no P2P connection and also foreground notifications not arriving
+    ☐ Beams not starting
+    ☐ At first open camera permission sends you back to rooms list
+    ☐ Beam messages lot arriving
 
 Optimizations:
     ☐ Add "type" property to messages - i.e. message, reaction, reply, tip etc.
