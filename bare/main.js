@@ -20,8 +20,11 @@ const {
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
 const { new_beam, send_beam_message } = require('./beam');
+// PUSH-ONLY crypto wrappers live in bare/messages.js. All PM encrypt/decrypt
+// (and the syncer) moved back to RN so they can use the noble-based
+// hugin-crypto (ML-KEM + double-encrypt) directly without RPC round-trips
+// during the protocol's handshake.
 const messages = require('./messages');
-const syncer = require('./syncer');
 const { IPC } = BareKit;
 
 const rpc = new Bridge(IPC);
@@ -42,24 +45,6 @@ const onrequest = async (p) => {
     case 'push_registration':
       const pushRegistered = await Nodes.register(p.data);
       return { sent: pushRegistered };
-    case 'pm_encrypt': {
-      // RN composes a PM; Bare encrypts it with hugin-crypto and hands the
-      // wire hex back so RN can pick whether to relay (node) or beam (p2p).
-      // RN may also call `pm_send` instead to ship in one step.
-      const { wireHex, hash } = await messages.encrypt_pm({
-        message: p.message,
-        toAddress: p.toAddress,
-        name: p.name,
-      });
-      return { wireHex, hash };
-    }
-    case 'pm_decrypt': {
-      // Used by push notifications (cold app wake): pass the wire bytes, get
-      // back plaintext + the deterministic content-addressed hash.
-      const result = await messages.decrypt_pm(p.wireHex);
-      if (!result) return { failed: true };
-      return result;
-    }
     case 'push_encrypt': {
       // Wallet/syncer used to do this with tweetnacl-sealed-box on the RN
       // side. Now: ship the small descriptor here, get the wire hex back.
@@ -131,17 +116,6 @@ const onrequest = async (p) => {
       const sent = await Nodes.register(JSON.stringify(registrations));
       return { sent };
     }
-    case 'dm_push_decrypt': {
-      // Push wakeup path: RN hands in the device sealedbox + the keypair it
-      // pulled from Keychain; we open with sodium and return the plaintext.
-      const plain = messages.decrypt_dm_push({
-        cipherHex: p.cipherHex,
-        skHex: p.skHex,
-        pkHex: p.pkHex,
-      });
-      if (!plain) return { failed: true };
-      return { plaintext: plain };
-    }
     case 'room_push_decrypt': {
       const plain = messages.decrypt_room_push({
         cipherHex: p.cipherHex,
@@ -152,14 +126,7 @@ const onrequest = async (p) => {
       return { plaintext: plain };
     }
     case 'init_bare':
-      // p.user.keys carries privateSpendKey + privateViewKey so Bare can
-      // sign and PM-encrypt without Bare→RN→Bare round-trips per message.
       initBareMain(p.user);
-      break;
-    case 'set_bare_keys':
-      // Top-up call for keys computed asynchronously (e.g. the deterministic
-      // subwallet sign keypair). Merges into Hugin.keys.
-      Hugin.setKeys(p.keys);
       break;
     case 'update_bare_user':
       updateBareUser(p.user);
@@ -184,26 +151,6 @@ const onrequest = async (p) => {
     case 'send_node_msg':
       const sent = await Nodes.message(p.payload, p.hash, p.viewtag, p.kind);
       return {sent};
-    case 'pm_send': {
-      // RN ships plaintext + intent (beam vs node), Bare encrypts and ships.
-      // One RPC, no round-trip back to RN before the network call.
-      const { wireHex, hash } = await messages.encrypt_pm({
-        message: p.message,
-        toAddress: p.toAddress,
-        name: p.name,
-      });
-      if (p.beam) {
-        send_dm_message(p.toAddress, wireHex);
-        return { success: true, hash };
-      }
-      const result = await Nodes.message(
-        wireHex,
-        hash,
-        p.viewtag,
-        p.call ? 'call' : 'dm',
-      );
-      return { success: result?.success === true, hash, error: result?.reason };
-    }
     case 'sync_from_node':
       const resp = await Nodes.sync(p.request)
       return {resp, background: Hugin.background}
@@ -224,18 +171,6 @@ const onrequest = async (p) => {
         publicKey: publicKey.toString('hex'),
         secretKey: secretKey.toString('hex'),
       };
-    }
-    case 'derive_box_keypair': {
-      // X25519 (curve25519) keypair derived from the user's spend key.
-      // Byte-equivalent to the old tweetnacl.box.keyPair.fromSecretKey path:
-      // both libraries call crypto_scalarmult_base on the raw 32-byte secret
-      // without extra clamping, so previously-registered push pubkeys stay
-      // valid across the migration.
-      const sodium = require('sodium-native');
-      const sk = Buffer.from(p.secretKeyHex, 'hex');
-      const pk = Buffer.alloc(sodium.crypto_scalarmult_BYTES);
-      sodium.crypto_scalarmult_base(pk, sk);
-      return { sk: sk.toString('hex'), pk: pk.toString('hex') };
     }
     case 'sha512_hex': {
       // Replaces tweetnacl.hash. SHA-512 is SHA-512 — sodium's
@@ -314,9 +249,9 @@ async function response(request) {
 // Function implementations
 const initBareMain = async (user) => {
   Hugin.init(user, rpc);
-  // Bare owns the message-sync loop now. It polls Nodes, decrypts PMs with
-  // hugin-crypto, and emits `new-message` events to RN with plaintext.
-  syncer.init(Nodes);
+  // Message sync (poll node + decrypt) lives on the RN side now — Hermes can
+  // run noble pure-JS, so there's no reason to ferry encrypted bytes across
+  // the bridge for crypto work.
 };
 
 const updateBareUser = (user) => {

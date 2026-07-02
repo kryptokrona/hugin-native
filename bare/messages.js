@@ -1,27 +1,27 @@
-// All PM + push crypto for the Bare side. One place that owns the cipher.
+// Push-only crypto wrappers, kept in Bare so the push pipeline can stay
+// hugin-push-node-compatible without round-tripping into RN.
 //
-// RN never imports crypto code; it ships plaintext + intent here via RPC, we
-// build the wire shape, and we either ship to node or hand the cipher back.
+// All PM encrypt/decrypt + the syncer moved back to RN — those use the
+// noble-based hugin-crypto (ML-KEM-512 + double-encrypt). Push payloads
+// don't need PQ today (they're delivered by the push server, which lives
+// outside the device's threat model).
 //
-// On receive (node-poll or beam or push wakeup), the wire bytes come in here,
-// we decrypt with the user's view key, and a plaintext object is what leaves
-// this module. Both sides of the wire are deterministic — sender and receiver
-// compute the same hugin-crypto `messageHash` from the cipher bytes.
+// What's here:
+//   - `encrypt_push_registration`  (device / call / room registration sealedbox)
+//   - `encrypt_room_push`          (two-layer: room secretbox -> push-server sealedbox)
+//   - `decrypt_dm_push`            (open the device's per-user sealedbox)
+//   - `decrypt_room_push`          (try each known room key against the inner)
+//
+// The fixed push-server public key is shared with hugin-desktop + hugin-push-node;
+// rotating it requires a coordinated server + client update.
 
 const sodium = require('sodium-native');
-const hc = require('hugin-crypto');
-const { Hugin } = require('./account');
 
-// Fixed curve25519 public key owned by hugin-push-node. Mobile and desktop both
-// encrypt push registrations / room push payloads to this key; the push server
-// decrypts with the matching secret.
 const PUSH_SERVER_PUBKEY_HEX =
   '6e18d19b3c94f7c2c4da5dc6f17305f8ab6da33f8beb18e63a0f048d2a21c345';
 
 const FIXED_NONCE_LEN = 24;
 
-// Pad a timestamp to a 24-byte nonce. Matches the desktop scheme exactly so
-// boxes encrypted on either client are decryptable by the other.
 function nonceFromTimestamp(tmstmp) {
   const hex = String(tmstmp);
   const bytes = [];
@@ -34,53 +34,6 @@ function nonceFromTimestamp(tmstmp) {
 
 function toHexUtf8(str) {
   return Buffer.from(str, 'utf-8').toString('hex');
-}
-
-// --------------------------------------------------------------------------
-// Private messages (PMs) — every PM is a signed, ephemeral friend-request box.
-// Fresh ephemeral key per message means: a fresh view tag each time
-// (unlinkable on-chain), the receiver only needs its own view key to open,
-// and the sender's xkr signature inside binds the message to the claimed
-// `from` address.
-// --------------------------------------------------------------------------
-
-/** Encrypt a PM to `toAddress`. Returns the wire hex (encodeExtra format). */
-async function encrypt_pm({ message, toAddress, name }) {
-  const fromAddress = Hugin.address;
-  // Spend key cached in Hugin.keys at init_bare — no Bare→RN round-trip
-  // per send. (Was `await Hugin.request({type: 'get-priv-key'})` before.)
-  const fromSpendKey = Hugin.keys?.privateSpendKey;
-  if (!fromSpendKey) {
-    throw new Error('Bare keys not initialized — call init_bare with keys first');
-  }
-  const wire = await hc.createFriendRequest({
-    message,
-    sender: { address: fromAddress, privateSpendKey: fromSpendKey },
-    toAddress,
-    name: name ?? Hugin.name,
-  });
-  const wireHex = hc.encodeExtra(wire);
-  const hash = hc.messageHash(wireHex);
-  return { wireHex, hash };
-}
-
-/**
- * Decrypt a PM from on-the-wire bytes. Both node-pool sync hits and
- * beam-delivered messages funnel through here.
- *
- * Returns { plaintext: { from, msg, name, t, verified }, hash } or false.
- */
-async function decrypt_pm(wireHex, opts = {}) {
-  const wire = hc.decodeExtra(wireHex);
-  if (!wire || !wire.vt || !wire.txKey) return false;
-  const privateViewKey = opts.privateViewKey || Hugin.keys?.privateViewKey;
-  if (!privateViewKey) return false;
-  const opened = await hc.openFriendRequest(wire, { privateViewKey });
-  if (!opened) return false;
-  return {
-    plaintext: opened,
-    hash: hc.messageHash(wireHex),
-  };
 }
 
 // --------------------------------------------------------------------------
@@ -112,7 +65,6 @@ function seal_to_push_server(payloadObj, timestamp) {
 // --------------------------------------------------------------------------
 
 function encrypt_room_push({ roomKey, payload, timestamp, viewTag }) {
-  // Inner secretbox
   const innerKey = Buffer.from(roomKey, 'hex');
   if (innerKey.length !== sodium.crypto_secretbox_KEYBYTES) {
     throw new Error('room key must be 32 bytes (64 hex chars)');
@@ -122,31 +74,22 @@ function encrypt_room_push({ roomKey, payload, timestamp, viewTag }) {
   const innerBox = Buffer.alloc(innerPlain.length + sodium.crypto_secretbox_MACBYTES);
   sodium.crypto_secretbox_easy(innerBox, innerPlain, innerNonce, innerKey);
   const innerEnvelope = { box: innerBox.toString('hex'), viewTag };
-  // Outer sealedbox to the push server
   return seal_to_push_server(innerEnvelope, timestamp);
 }
 
 // --------------------------------------------------------------------------
-// Push decryption (called when the app is woken by notifee and init runs Bare).
+// Push decryption — room only.
 //
-//   dm_push: decrypt the device's sealedbox using the wallet-derived keypair.
-//   room_push: try each known room key against the inner secretbox.
+// DM pushes are NOT sealed by the push server. The server just routes the
+// sender's hugin-crypto v0.2 wire bytes to subscribers based on viewTag,
+// so RN decrypts them directly via hugin-crypto (noble + ML-KEM). No
+// Bare round-trip needed.
+//
+// Rooms still seal-then-route through the push server today (the server
+// peels the outer sealedbox to learn viewTag, then forwards the inner
+// secretbox). Eventually that could move to "ship viewTag alongside the
+// inner box" so the server stops decrypting too — out of scope for now.
 // --------------------------------------------------------------------------
-
-function decrypt_dm_push({ cipherHex, skHex, pkHex }) {
-  const sk = Buffer.from(skHex, 'hex');
-  const pk = Buffer.from(pkHex, 'hex');
-  const cipher = Buffer.from(cipherHex, 'hex');
-  if (cipher.length <= sodium.crypto_box_SEALBYTES) return false;
-  const plain = Buffer.alloc(cipher.length - sodium.crypto_box_SEALBYTES);
-  const ok = sodium.crypto_box_seal_open(plain, cipher, pk, sk);
-  if (!ok) return false;
-  try {
-    return JSON.parse(plain.toString('utf-8'));
-  } catch (e) {
-    return false;
-  }
-}
 
 function decrypt_room_push({ cipherHex, timestamp, roomKeys }) {
   const cipher = Buffer.from(cipherHex, 'hex');
@@ -173,10 +116,7 @@ function decrypt_room_push({ cipherHex, timestamp, roomKeys }) {
 module.exports = {
   PUSH_SERVER_PUBKEY_HEX,
   nonceFromTimestamp,
-  encrypt_pm,
-  decrypt_pm,
   encrypt_push_registration,
   encrypt_room_push,
-  decrypt_dm_push,
   decrypt_room_push,
 };

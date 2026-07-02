@@ -7,7 +7,6 @@ const {
   get_new_peer_keys,
 } = require('./utils');
 const { Hugin } = require('./account');
-const hc = require('hugin-crypto');
 
 let active_beams = [];
 let localFiles = [];
@@ -147,12 +146,9 @@ const beam_event = (beam, chat, key) => {
     if (check_data_message(str, chat)) {
       return;
     }
-    // Beam wire used to carry `randomKey(64 hex) + '99' + cipher` so the
-    // receiver could read the id off the front. Now the wire IS the cipher
-    // (hugin-crypto encodeExtra output); both sides derive the same id from
-    // it via BLAKE2b. Saves 66 chars per message and is tamper-evident.
-    const hash = hc.messageHash(str);
-    Hugin.send('beam-message', { message: str, hash });
+    // Beam wire IS the cipher (hugin-crypto encodeExtra output). RN computes
+    // the content-addressed id with hugin-crypto.messageHash on receive.
+    Hugin.send('beam-message', { message: str });
   });
 
   beam.on('end', () => {

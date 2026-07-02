@@ -306,15 +306,9 @@ export class Bridge {
             await this.sync_push_registrations([json.key]);
           }
           break;
-        case 'new-message':
-          // Bare decrypted a PM (either from the node-poll syncer or from a
-          // beam) and is handing us plaintext. Just save + update UI.
-          await MessageSync.on_new_message(json);
-          break;
         case 'beam-message':
-          // Legacy path: if Bare hands us a still-encrypted beam message we
-          // round-trip back through pm_decrypt; the typical path now is for
-          // Bare to decrypt inline and fire `new-message` directly.
+          // Bare ferries raw cipher hex from a p2p beam. RN does the noble
+          // outer+inner decrypt (handles double-encrypt + KEM handshake).
           await MessageSync.check_for_pm(json.message, json.hash, json.background);
           break;
         case 'beam-connected':

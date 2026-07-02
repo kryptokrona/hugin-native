@@ -1,8 +1,11 @@
-// Thin subscriber. The actual poll/decrypt loop now lives in Bare
-// (bare/syncer.js); Bare emits `new-message` events with plaintext via the
-// RPC bridge. This file just exposes the handler the bridge calls, plus a
-// few small helpers other RN code still pokes at (file message save,
-// set_node compatibility wrapper).
+// RN-side poll + decrypt loop. Crypto runs in Hermes via the noble-based
+// hugin-crypto package (ML-KEM-512 + double-encrypt). Bare just ferries
+// network bytes; it doesn't see plaintext.
+//
+// Two entry points hit `check_for_pm`:
+//   1. The periodic node poll below (this file's `tick`).
+//   2. The bridge's `beam-message` event handler (rpc.js), which forwards
+//      raw cipher hex it received over a p2p beam.
 
 import {
   saveMessage,
@@ -12,57 +15,180 @@ import {
   saveFileInfo,
 } from '../bare/sqlite';
 import { setLatestMessages, updateMessage } from '../bare/contacts';
-import { Beam } from 'lib/native';
+import {
+  openFriendRequest,
+  decodeExtra,
+  messageHash,
+  hexToUint,
+} from 'hugin-crypto';
+import { sleep } from '@/utils';
+import { Nodes, Beam } from 'lib/native';
+import {
+  identitySecretKeyBytes,
+  getContactCrypto,
+  onReceivedPeerKemPub,
+  onReceivedKemCapsule,
+} from './identity';
+
+const SYNC_INTERVAL_MS = 3000;
+const MAX_STARTUP_RUNS = 10;
+const MAX_BATCH = 299;
 
 class Syncer {
   constructor() {
     this.node = {};
+    this.keys = {}; // { privateSpendKey, privateViewKey }
+    this.lastChecked = 0;
+    this.startup_runs = 0;
+    this.sync_stopped = false;
+    this.sync_interval = null;
+    this.incoming = [];
   }
 
-  // Kept for back-compat with callers that still poke at the syncer:
-  //   - wallet.js node() updates the node info
-  // The actual Nodes connection lives in Bare and is set via init_bare;
-  // RN doesn't need to re-init the loop.
+  async init(node, keys) {
+    this.node = node;
+    this.keys = keys;
+    this.lastChecked = 0;
+    this.startup_runs = 0;
+    this.sync_stopped = false;
+    this.incoming = [];
+    this.start();
+  }
+
   set_node(node) {
     this.node = node;
   }
 
-  // The bridge (src/lib/rpc.js) calls this when Bare emits `new-message`.
-  // Plaintext is already decrypted by hugin-crypto in Bare.
-  async on_new_message({ from, msg, name, t, hash, background }) {
-    try {
-      if (await messageExists(hash)) return;
+  start() {
+    if (this.sync_interval) clearInterval(this.sync_interval);
+    this.sync_interval = setInterval(() => this.tick(), SYNC_INTERVAL_MS);
+  }
 
-      const contacts = await getContacts();
-      const known = contacts.some((c) => c.address === from);
-      if (!known) {
-        const added = await addContact(name || 'Anon', from, '');
-        if (added) {
-          // Open the p2p beam to this contact so future messages can travel
-          // direct without going through the node.
-          Beam.new(from);
-        }
-      }
-
-      const saved = await saveMessage(from, msg, '', t, hash, false, undefined);
-      if (saved) updateMessage(saved, background);
-      setLatestMessages();
-    } catch (e) {
-      console.log('[syncer] on_new_message error:', e);
+  stop() {
+    if (this.sync_stopped) return;
+    this.sync_stopped = true;
+    if (this.sync_interval) {
+      clearInterval(this.sync_interval);
+      this.sync_interval = null;
     }
   }
 
-  // Beam-delivered messages (incoming) used to need RN-side decrypt;
-  // Bare now decrypts via decrypt_pm before emitting beam-message events,
-  // so this path is also just a save. Kept as a method so the bridge file
-  // can call MessageSync.check_for_pm(...) without an interface change.
-  async check_for_pm(plaintext, hash, background) {
-    // For backwards-compat: if Bare ever still hands us a raw cipher string
-    // (e.g. during the transition), forward it to the new event handler with
-    // the same shape. The new bridge wires Bare's beam-message directly into
-    // on_new_message, but we keep this here so legacy call sites don't crash.
-    if (typeof plaintext === 'string') return;
-    return this.on_new_message({ ...plaintext, hash, background });
+  restart() {
+    this.sync_stopped = false;
+    this.startup_runs = 0;
+    this.lastChecked = 0;
+    this.start();
+  }
+
+  async fetch() {
+    if (this.incoming.length > 0) return false;
+    const { resp, background } = await Nodes.sync({
+      request: true,
+      type: 'some',
+      timestamp: this.lastChecked,
+    });
+    if (!resp || resp.length === 0) return false;
+    this.lastChecked = Date.now();
+    return { resp, background };
+  }
+
+  async tick() {
+    if (this.sync_stopped) return;
+    if (this.startup_runs >= MAX_STARTUP_RUNS) {
+      this.stop();
+      return;
+    }
+    this.startup_runs += 1;
+
+    const had_backlog = this.incoming.length > 0;
+    const fetched = await this.fetch();
+    if (!fetched && !had_backlog) return;
+    const { resp = [], background } = fetched || {};
+    const txs = resp;
+
+    if (txs.length > MAX_BATCH) {
+      this.incoming = txs;
+      await this.decrypt_batch(this.take(MAX_BATCH), background);
+      return;
+    }
+    await this.decrypt_batch(txs, background);
+  }
+
+  take(n) {
+    const out = this.incoming.slice(0, n);
+    this.incoming = this.incoming.slice(out.length);
+    return out;
+  }
+
+  async decrypt_batch(list, background) {
+    for (const tx of list) {
+      try {
+        const wireHex = '99' + tx.hash + tx.cipher;
+        await this.check_for_pm(wireHex, tx.hash, background);
+      } catch (e) {
+        // Never let one bad message kill the loop.
+      }
+    }
+  }
+
+  /**
+   * Decrypt one wire payload + persist. Shared between the poll path and
+   * the beam-message bridge handler.
+   */
+  async check_for_pm(extraOrWire, hashHint, background) {
+    if (typeof extraOrWire !== 'string') return false;
+    const wire = decodeExtra(extraOrWire);
+    if (!wire) return false;
+
+    const identitySecret = await identitySecretKeyBytes();
+    const messageKeyResolver = async (from) => {
+      const c = await getContactCrypto(from);
+      return c.messageKey || null;
+    };
+
+    const opened = await openFriendRequest(
+      wire,
+      {
+        privateViewKey: this.keys.privateViewKey,
+        getMessageKey: messageKeyResolver,
+      },
+      identitySecret,
+    );
+    if (!opened) return false;
+
+    // Persist any handshake progress BEFORE saving the message, so a later
+    // outgoing send picks up the new state (pending kem_ct, fresh messageKey).
+    if (opened.handshake?.peerKemPub) {
+      // Peer's initial — encapsulate, save shared secret + pending ct.
+      await onReceivedPeerKemPub(opened.from, opened.handshake.peerKemPub);
+    } else if (opened.handshake?.sharedSecret) {
+      // Peer's first reply — they shipped us a kem capsule, hugin-crypto
+      // decapsulated for us. Persist the derived secret as their messageKey.
+      await onReceivedKemCapsule(opened.from, opened.handshake.sharedSecret);
+    }
+
+    // First contact: save them as a contact + open the direct beam.
+    const known = (await getContacts()).some((c) => c.address === opened.from);
+    if (!known) {
+      const added = await addContact(opened.name || 'Anon', opened.from, '');
+      if (added) Beam.new(opened.from);
+    }
+
+    const hash = hashHint || messageHash(extraOrWire);
+    if (await messageExists(hash)) return true;
+
+    const saved = await saveMessage(
+      opened.from,
+      opened.msg,
+      '',
+      opened.t,
+      hash,
+      false,
+      undefined,
+    );
+    if (saved) updateMessage(saved, !!background);
+    setLatestMessages();
+    return true;
   }
 
   async save_file_message(message) {

@@ -45,10 +45,13 @@ export async function init() {
       updateUser({ store: currentStorePath, downloadDir: currentStorePath });
       user = useUserStore.getState().user;
       Rooms.init(user);
-      // Ship private keys to Bare once so PM encrypt + swarm-message sign
-      // don't have to Bare→RN→Bare round-trip per call.
+      // Boot the RN-side PM syncer (poll + noble decrypt + ML-KEM handshake).
       const [privateSpendKey, privateViewKey] = Wallet.privateKeys();
-      Rooms.setKeys({ privateSpendKey, privateViewKey });
+      const { MessageSync } = await import('./hugin/syncer');
+      MessageSync.init(node, { privateSpendKey, privateViewKey });
+      // Pre-warm the ML-KEM identity (generate on first launch).
+      const { loadOrCreateIdentity } = await import('./hugin/identity');
+      await loadOrCreateIdentity();
       Rooms.join();
       Beam.join();
 

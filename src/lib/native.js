@@ -114,21 +114,11 @@ export class Swarm {
   }
 
   init(user) {
-    // Ship the private keys at init time so Bare can sign + encrypt locally
-    // without Bare→RN→Bare round-trips on every PM or swarm message.
-    // user.keys is populated by Wallet.init / pushnotifications.init before
-    // this is called.
     const data = {
       type: 'init_bare',
       user,
     };
     rpc.send(data);
-  }
-
-  // Top-up call for keys computed asynchronously after Bare boots (e.g. the
-  // deterministic subwallet sign keypair derived during wallet start).
-  setKeys(keys) {
-    rpc.send({ type: 'set_bare_keys', keys });
   }
 
   new(hashkey, key, admin) {
@@ -290,39 +280,14 @@ export const sync_push_registrations = (room_keys = []) => {
 };
 
 // --------------------------------------------------------------------------
-// New Bare-owned crypto RPCs. RN ships intent + plaintext (on send) or
-// ciphertext (on push-wakeup decrypt); Bare uses hugin-crypto + sodium and
-// returns the result. No tweetnacl on the RN side.
+// PUSH-ONLY Bare RPCs. PM crypto lives in RN now (noble + ML-KEM).
+// These wrappers stay because the push pipeline is hugin-push-node-bound and
+// we don't want to renegotiate that envelope yet.
 // --------------------------------------------------------------------------
 
 /**
- * Compose + encrypt + ship a PM in a single Bare round-trip. `beam: true`
- * routes via the p2p swarm; otherwise via the push node.
- */
-export const pm_send = async ({ message, toAddress, name, beam, call, viewtag }) => {
-  return await rpc.request({
-    type: 'pm_send',
-    message,
-    toAddress,
-    name,
-    beam: !!beam,
-    call: !!call,
-    viewtag,
-  });
-};
-
-/**
- * Cold-push decrypt: RN hands a wire-format payload to Bare, gets plaintext
- * back. Used by the notifee handler after Bare is up.
- */
-export const pm_decrypt = async (wireHex) => {
-  return await rpc.request({ type: 'pm_decrypt', wireHex });
-};
-
-/**
  * Build + ship every push registration (device + call + N rooms) in a single
- * Bare round-trip. Replaces N+1 trips (`push_encrypt` per registration + one
- * `push_registration` for the batch).
+ * Bare round-trip.
  */
 export const push_register_all = async ({
   deviceId,
@@ -343,10 +308,6 @@ export const push_register_all = async ({
   });
 };
 
-export const dm_push_decrypt = async ({ cipherHex, skHex, pkHex }) => {
-  return await rpc.request({ type: 'dm_push_decrypt', cipherHex, skHex, pkHex });
-};
-
 export const room_push_decrypt = async ({ cipherHex, timestamp, roomKeys }) => {
   return await rpc.request({
     type: 'room_push_decrypt',
@@ -359,15 +320,6 @@ export const room_push_decrypt = async ({ cipherHex, timestamp, roomKeys }) => {
 /** Generate the user's account-identity Ed25519 keypair (was tweetnacl). */
 export const create_account_keypair = async () => {
   return await rpc.request({ type: 'create_account_keypair' });
-};
-
-/**
- * Derive the X25519 device-push keypair from the user's spend key.
- * Byte-equivalent to the previous tweetnacl-based derivation so existing
- * push registrations stay valid.
- */
-export const derive_box_keypair = async (secretKeyHex) => {
-  return await rpc.request({ type: 'derive_box_keypair', secretKeyHex });
 };
 
 /** SHA-512 in the comma-bytes shape the swarm topic derivation expects. */

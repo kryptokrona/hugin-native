@@ -1,11 +1,15 @@
 import { Address, CryptoNote } from 'kryptokrona-utils';
+import { Beam, Nodes } from '../../lib/native';
 import {
-  Beam,
-  Nodes,
-  pm_send,
-  derive_box_keypair,
-} from '../../lib/native';
-import * as Keychain from 'react-native-keychain';
+  createFriendRequest,
+  encodeExtra,
+  messageHash,
+} from 'hugin-crypto';
+import {
+  identityPublicKeyBytes,
+  getContactCrypto,
+  markKemCapsuleDelivered,
+} from '../hugin/identity';
 import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import {
   cnFastHash,
@@ -307,20 +311,11 @@ export class ActiveWallet {
 
     setInterval(() => this.save(), 30000);
 
-    // Persist the device-push keypair (X25519, derived from the spend key)
-    // in the OS Keychain. pushnotifications.ts reads this on a cold push to
-    // hand both halves to Bare's dm_push_decrypt RPC. The bytes are
-    // byte-equivalent to the previous tweetnacl derivation, so push pubkeys
-    // we already registered with the server still match.
-    try {
-      const { sk, pk } = await derive_box_keypair(this.spendKey());
-      await Keychain.setGenericPassword('encryption', sk + pk, {
-        accessible: Keychain.ACCESSIBLE.ALWAYS,
-      });
-      console.log('🔐 Device-push keypair stored.');
-    } catch (err) {
-      console.error('❌ Failed to store encryption key:', err);
-    }
+    // Device-push curve25519 keypair / Keychain `encryption` entry is gone:
+    // DMs to mobile now arrive as standard hugin-crypto v0.2 wire bytes
+    // (push server only routes by viewTag, doesn't sealedbox-wrap), so RN
+    // decrypts via openFriendRequest + the ML-KEM identity keypair stored
+    // by services/hugin/identity.ts under Keychain service 'kem-identity'.
 
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
@@ -455,17 +450,14 @@ export class ActiveWallet {
   });
 }
 
-  async send_message(message, receiver, beam = false, call = false, messageHash = '') {
+  async send_message(message, receiver, beam = false, call = false, _ignored = '') {
     if (message.length === 0) {
-      console.log('Error: No message to send');
       return { error: 'message', success: false, hash: '' };
     }
 
-    // xkr address only (99 chars). Tolerate a legacy 163-char string by
-    // taking the address part — the trailing nacl message-key is gone.
+    // xkr address only (99 chars). Tolerate a legacy 163-char string.
     const address = typeof receiver === 'string' ? receiver.substring(0, 99) : '';
     if (address.length !== 99) {
-      console.log('Error: Address too long/short');
       return { error: 'address', success: false, hash: '' };
     }
 
@@ -476,93 +468,89 @@ export class ActiveWallet {
           10000,
         );
       } catch (err) {
-        console.log('Error: Hugin node not connected in time');
         return { success: false, error: 'not_connected', hash: '' };
       }
     }
 
     const viewtag = await this.generate_view_tag(address, call);
     const name = useUserStore.getState().user.name;
+    const wireHex = await this.encrypt_hugin_message(message, address, name);
+    const hash = messageHash(wireHex);
 
-    // Bare owns the cipher: it builds the wire, computes the deterministic
-    // hash, and ships via beam or node in a single RPC. RN no longer touches
-    // tweetnacl / sodium / kryptokrona key derivation on the send path.
-    let attempt = 0;
-    let result;
-    while (attempt < (beam ? 1 : 5)) {
-      result = await pm_send({
-        message,
-        toAddress: address,
-        name,
-        beam,
-        call,
-        viewtag,
-      });
-      if (result?.success) break;
-      attempt += 1;
-      if (!beam && attempt < 5) await sleep(3000);
+    if (beam) {
+      Beam.message(address, wireHex);
+      // Beam delivers without a node ack; treat as best-effort but mark
+      // the kem_ct as delivered (peer will get it next time they sync).
+      await markKemCapsuleDelivered(address);
+      return { success: true, error: 'success', hash };
     }
 
-    if (!result?.success) {
-      const reason = result?.error;
+    // Node path: retry-with-backoff like the original behavior.
+    let attempt = 0;
+    let sent;
+    while (attempt < 5) {
+      sent = await Nodes.message(wireHex, hash, viewtag, call ? 'call' : 'dm');
+      if (sent?.success === true) break;
+      attempt += 1;
+      if (attempt < 5) await sleep(3000);
+    }
+    if (sent?.success !== true) {
+      const reason = sent?.reason;
       if (typeof reason === 'string' && reason.length <= 40) {
         console.log('Error sending message', reason);
       }
       return { success: false, error: reason || 'send_failed', hash: '' };
     }
+    await markKemCapsuleDelivered(address);
+    return { success: true, error: 'success', hash };
+  }
 
-    return { success: true, error: 'success', hash: result.hash };
+  /**
+   * Build a hugin-crypto wire payload for `address`. Three branches depending
+   * on per-contact handshake state:
+   *
+   *   - no messageKey yet  → INITIAL: include our ML-KEM pub so the peer can
+   *                          encapsulate.
+   *   - messageKey present + pendingKemCt → FIRST REPLY: include the capsule
+   *                          we owe + inner-encrypt with the shared secret.
+   *   - messageKey only    → ESTABLISHED: inner-encrypt only.
+   */
+  async encrypt_hugin_message(message, toAddress, name) {
+    const opts = {
+      message,
+      sender: { address: this.address, privateSpendKey: this.spendKey() },
+      toAddress,
+      name,
+    };
+    const contactState = await getContactCrypto(toAddress);
+    if (contactState.messageKey) {
+      opts.messageKey = contactState.messageKey;
+      if (contactState.pendingKemCapsule) {
+        opts.kemCiphertext = contactState.pendingKemCapsule;
+      }
+    } else {
+      // Pre-handshake — initiator path. Always include our identity pub so
+      // peers that lost our previous send-attempt can still close out.
+      opts.myKemPub = await identityPublicKeyBytes();
+    }
+    const wire = await createFriendRequest(opts);
+    return encodeExtra(wire);
   }
 
   async start_call(roomKey, receiver) {
-    if (roomKey.length === 0) {
-      console.log('Error: No call key to send');
+    if (!roomKey || roomKey.length === 0) {
       return { error: 'message', success: false, hash: '' };
     }
-
-    // xkr address only — tolerate a legacy 163-char string.
-    const address = typeof receiver === 'string' ? receiver.substring(0, 99) : '';
-    if (address.length !== 99) {
-      console.log('Error: Address too long/short');
-      return { error: 'address', success: false, hash: '' };
-    }
-
-    try {
-      await this.waitForCondition(
-        () => useGlobalStore.getState().huginNode.connected,
-        10000,
-      );
-    } catch (err) {
-      console.log('Error: Hugin node not connected in time');
-      return { success: false, error: 'not_connected', hash: '' };
-    }
-
-    const viewtag = await this.generate_view_tag(address, true);
-    const name = useUserStore.getState().user.name;
-    // The call payload IS the message body — Bare wraps it in the same
-    // ephemeral friend-request envelope as a normal PM, plus a `call: roomKey`
-    // hint inside. Receiver decrypts via the same pm_decrypt path.
-    let attempt = 0;
-    let result;
-    while (attempt < 5) {
-      result = await pm_send({
-        message: JSON.stringify({ call: roomKey }),
-        toAddress: address,
-        name,
-        beam: false,
-        call: true,
-        viewtag,
-      });
-      if (result?.success) break;
-      attempt += 1;
-      if (attempt < 5) await sleep(3000);
-    }
-
-    if (!result?.success) {
-      console.log('Error sending call', result?.error);
-      return { success: false, error: result?.error || 'call_failed', hash: '' };
-    }
-    return { success: true, error: 'success', hash: result.hash };
+    // The call payload IS the message body wrapped in JSON; it travels
+    // through the same encrypt_hugin_message path as a normal PM, so the
+    // receiver decrypts it identically and notices `call: roomKey` after
+    // JSON.parse on the plaintext.
+    return await this.send_message(
+      JSON.stringify({ call: roomKey }),
+      receiver,
+      false,
+      true,
+    );
   }
 
   /**

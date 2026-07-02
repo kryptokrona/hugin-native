@@ -1148,9 +1148,12 @@ const incoming_message = async (data, topic, connection, peer, beam) => {
   if (check) return;
 
   if (beam) {
-    const hash = str.substring(0, 64);
+    // Beam wire IS the hugin-crypto encodeExtra output (ML-KEM v0.2). The
+    // old `randomKey(64 hex) + cipher` prefix is gone — both sides derive
+    // the same content-addressed id with hc.messageHash on receive. RN's
+    // syncer computes it; we just forward the cipher.
     console.log('beam-message fired 🔥🔥 🔥')
-    Hugin.send('beam-message', { message: str, hash, background: Hugin.background });
+    Hugin.send('beam-message', { message: str, background: Hugin.background });
     return;
   }
   const message = sanitize_group_message(JSON.parse(str));
