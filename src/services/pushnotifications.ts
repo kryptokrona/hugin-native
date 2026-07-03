@@ -19,16 +19,25 @@ import notifee, {
   AndroidVisibility,
   EventType,
 } from '@notifee/react-native';
-import { MessageSync } from './hugin/syncer';
-import * as Keychain from 'react-native-keychain';
-import * as naclSealed from 'tweetnacl-sealed-box';
-import * as nacl from 'tweetnacl';
-import * as naclutil from 'tweetnacl-util';
 import { saveMessageToQueue, resetMessageQueue, getMessageQueue } from '../utils/messageQueue';
 // import VoipPushNotification from 'react-native-voip-push-notification';
 import { updateUser, useGlobalStore, usePreferencesStore, useUserStore } from './zustand';
 import { getRooms, initDB, messageExists, roomMessageExists, saveRoomMessage, addContact, saveMessage } from './bare/sqlite';
-import { Beam, decrypt_sealed_box, Nodes, Rooms, sync_push_registrations } from 'lib/native';
+import {
+  Beam,
+  decrypt_sealed_box,
+  Nodes,
+  Rooms,
+  room_push_decrypt,
+  sync_push_registrations,
+} from 'lib/native';
+import * as hc from 'hugin-crypto';
+import {
+  identitySecretKeyBytes,
+  getContactCrypto,
+  onReceivedPeerKemPub,
+  onReceivedKemCapsule,
+} from './hugin/identity';
 import { Connection } from './bare/globals';
 import { ConnectionStatus, User } from '../types/user';
 import { setLatestMessages, updateMessage } from './bare/contacts';
@@ -36,11 +45,9 @@ import { WebRTC } from './calls';
 import { Peers } from 'lib/connections';
 import { sleep, waitForCondition, containsOnlyEmojis } from '../utils/utils';
 import { Wallet } from './kryptokrona';
-import { keychain, saveRoomMessageAndUpdate } from './bare';
+import { saveRoomMessageAndUpdate } from './bare';
 // import RNCallKeep from 'react-native-callkeep';
-import tweetnacl from 'tweetnacl';
 import { Linking } from 'react-native';
-// import { check_for_pm } from './hugin/syncer';
 
 
 const answerCall = async () => {
@@ -152,6 +159,12 @@ async function init() {
       console.log('☎️ Got user')
 
       Rooms.init(user);
+      // Boot the RN-side PM syncer (poll + noble decrypt + ML-KEM handshake).
+      const [privateSpendKey, privateViewKey] = Wallet.privateKeys();
+      const { MessageSync } = await import('./hugin/syncer');
+      MessageSync.init(node, { privateSpendKey, privateViewKey });
+      const { loadOrCreateIdentity } = await import('./hugin/identity');
+      await loadOrCreateIdentity();
       Rooms.join();
       Beam.join();
       Nodes.connect('', true);
@@ -210,111 +223,82 @@ async function init() {
 //     });
 
 
-function hexToUint(hexString: string) {
-  return new Uint8Array(hexString.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-}
-
 function fromHex(hex: string) {
   let str;
   try {
     str = decodeURIComponent(hex.replace(/(..)/g, '%$1'));
   } catch (e) {
     str = hex;
-    // console.log('invalid hex input: ' + hex)
   }
   return str;
 }
 
-const nonceFromTimestamp  = (tmstmp: number) => {
-  // Converts a timestamp to a nonce used for encryption
-  let nonce = hexToUint(String(tmstmp));
-
-  while ( nonce.length < nacl.box.nonceLength ) {
-
-    let tmp_nonce = Array.from(nonce);
-
-    tmp_nonce.push(0);
-
-    nonce = Uint8Array.from(tmp_nonce);
-
+/**
+ * Decrypt a DM push payload. The push server forwards the original sender's
+ * hugin-crypto v0.2 wire bytes verbatim (it does NOT wrap them in a
+ * sodium sealedbox — it only routes by viewTag). So this runs through the
+ * exact same noble pipeline the in-app syncer uses: outer ephemeral-ECDH
+ * unwrap → optional ML-KEM handshake step → optional inner messageKey
+ * decrypt. Any handshake progress observed gets persisted so the next
+ * outgoing message picks it up.
+ */
+async function decryptMessage(wireHex: string) {
+  const wire = hc.decodeExtra(wireHex);
+  if (!wire) return null;
+  const [, privateViewKey] = Wallet.privateKeys();
+  const identitySecret = await identitySecretKeyBytes();
+  const decrypted = await hc.openFriendRequest(
+    wire,
+    {
+      privateViewKey,
+      getMessageKey: async (from: string) => {
+        const c = await getContactCrypto(from);
+        return c.messageKey || null;
+      },
+    },
+    identitySecret,
+  );
+  if (!decrypted) {
+    console.log('Failed to decrypt DM push');
+    return null;
   }
-  return nonce;
+  // Persist handshake progress before we save anything else — so the next
+  // outgoing send to this contact uses the fresh messageKey / capsule.
+  if (decrypted.handshake?.peerKemPub) {
+    await onReceivedPeerKemPub(decrypted.from, decrypted.handshake.peerKemPub);
+  } else if (decrypted.handshake?.sharedSecret) {
+    await onReceivedKemCapsule(decrypted.from, decrypted.handshake.sharedSecret);
+  }
+  return decrypted;
 }
 
-function decryptMessage(box: string, timestamp: number, key: string) {
-  let decryptBox;
-  try {
-
-    decryptBox = naclSealed.sealedbox.open(
-      hexToUint(box),
-      nonceFromTimestamp(timestamp),
-      hexToUint(key)
-    );
-    
-  } catch (e) {
-    console.log('Failed to decrypt:', e);
-  }
-  decryptBox = naclutil.encodeUTF8(decryptBox);
-  console.log('decryptbox: ', decryptBox)
-  return JSON.parse(decryptBox);
-
-}
-
+/**
+ * Decrypt a room-push payload. Bare tries each known room key against the
+ * inner secretbox and returns the first that opens.
+ */
 async function decryptRoomMessage(box: string, timestamp: number) {
-  let decryptBox;
-  let rooms = undefined;
-  let roomName = undefined;
+  let rooms: any = undefined;
   let tries = 0;
   while (rooms === undefined && tries < 10) {
     try {
       rooms = await getRooms();
     } catch (e) {
-      console.log('failed to get rooms..:', e)
+      console.log('failed to get rooms..:', e);
     }
     await sleep(500);
     tries += 1;
   }
-  
-          for (const room in rooms) {
-            try {
-              console.log('🔐 Trying room:', rooms[room].name);
-              const roomKey = rooms[room].key.substring(0,64);
-              const secretKey = keychain.getNaclKeys(roomKey).secretKey;
-              decryptBox = tweetnacl.secretbox.open(
-                hexToUint(box),
-                nonceFromTimestamp(timestamp),
-                secretKey
-              );
-              roomName = rooms[room].name;
-              if (decryptBox) {
-                decryptBox = naclutil.encodeUTF8(decryptBox);
-                decryptBox = JSON.parse(decryptBox);
-                decryptBox.roomName = roomName;
-                decryptBox.roomKey = rooms[room].key;
-                return decryptBox;
-              }
-            } catch (e) {
-              console.log('Failed to decrypt:', e);
-            }
-          } 
-          
-        
-        return false;
-
-}
-
-async function getEncryptionKey(): Promise<string | null> {
-  try {
-    const credentials = await Keychain.getGenericPassword();
-    if (credentials) {
-      return credentials.password.substring(0,64); // This is the stored key
-    }
-    console.warn('🔑 No key found in Keychain.');
-    return null;
-  } catch (error) {
-    console.error('❌ Error retrieving encryption key:', error);
-    return null;
-  }
+  const roomKeys = Object.values(rooms || {}).map((r: any) => ({
+    key: r.key,
+    name: r.name,
+  }));
+  const result = await room_push_decrypt({
+    cipherHex: box,
+    timestamp,
+    roomKeys,
+  });
+  if (!result || (result as any).failed) return false;
+  return (result as any).plaintext;
 }
 
   async function requestPermissionAndGetToken(messaging: any) {
@@ -377,21 +361,24 @@ let channelId;
     let box: any;
     let url: string;
 
+    // Push-server payload formats:
+    //   - DM: the hex string of hugin-crypto encodeExtra output (NOT JSON).
+    //   - Room: JSON `{box, timestamp, type: 'room'}` the server built when
+    //     it unwrapped the outer sealedbox to extract the room viewTag.
+    // Try JSON first (room shape); if it fails AND looks like hex, treat as
+    // a DM wire payload.
+    const encryptedPayload = remoteMessage?.data?.encryptedPayload as string;
+    let isRoom = false;
     try {
-      box = JSON.parse(remoteMessage?.data?.encryptedPayload as string);
-      console.log('box', box);
-    } catch (e) {
-      try {
-        box = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload as string));
-        console.log('box', box);
-      } catch (e) {
-        console.error('Failed to parse box!');
-        return;
-      }
+      box = JSON.parse(encryptedPayload);
+      isRoom = box?.type === 'room';
+    } catch {
+      // Bare hex — that's a DM. Keep `box` undefined; we use the hex
+      // directly below when decrypting the v0.2 wire.
     }
 
     try {
-      if (box?.type && box?.type == 'room') {
+      if (isRoom) {
         console.log('🔔 Room message received!!');
         message = await decryptRoomMessage(box.box, box.timestamp);
         if (message && message.roomKey) {
@@ -422,16 +409,15 @@ let channelId;
         }
 
       } else {
-        const key = await getEncryptionKey();
-        if (!key) return; // Cannot decrypt without key
-        message = decryptMessage(box.box, box.t, key as string);
-        if (message) {
-          usePreferencesStore.getState().setBasePushVerified(true);
-        }
+        // DM push: encryptedPayload IS the hugin-crypto v0.2 wire (no sodium
+        // wrapper). Same noble pipeline as the in-app syncer.
+        message = await decryptMessage(encryptedPayload);
+        if (!message) return;
+        usePreferencesStore.getState().setBasePushVerified(true);
 
         console.log('🔔 Direct message received!!', message.from);
 
-        if (await messageExists(box.t)) {
+        if (await messageExists(message.t)) {
           console.log('🔕 Message already exists, skipping notification.');
           return;
         };
@@ -439,16 +425,21 @@ let channelId;
         console.log('Message to check', message)
         if (!message) return false;
         console.log('FOUND A MESSAGE WOOHP ------->');
-        message.t = box.t;
-        const [text, addr, senderkey, timestamp] = MessageSync.sanitize_pm(message);
+        // hugin-crypto already validated + decrypted (signature verified
+        // inside openFriendRequest). Just read the fields.
+        const text = message?.msg;
+        const addr = message?.from;
+        const timestamp = message?.t;
         console.log('Got message?', text);
         if (!text) return;
         if (message.type === 'sealedbox' || 'box') {
-          if (!MessageSync.known_keys.some((a) => a === senderkey)) {
-            const added = await addContact(message?.name || 'Anon' , addr, senderkey);
+          // Cold-push: save contact if it's new. The in-app syncer will
+          // dedup on next sync; Bare already verified the signature.
+          const _existing = await getContacts();
+          if (!_existing.some((c: any) => c.address === addr)) {
+            const added = await addContact(message?.name || 'Anon', addr, '');
             if (added) {
               console.log('[pushnotifications.ts] Added contact:', added);
-              MessageSync.known_keys.push(added.messagekey);
               Beam.new(addr);
             }
           }
@@ -490,19 +481,19 @@ let channelId;
     let box;
     let url;
 
+    // DM = raw hex (hugin-crypto v0.2 wire); room = JSON {box, timestamp, type}.
+    const encryptedPayload = remoteMessage?.data?.encryptedPayload as string;
+    let isRoom = false;
     try {
-      box = JSON.parse(remoteMessage?.data?.encryptedPayload);
-    } catch (e) {
-      try {
-        box = JSON.parse(fromHex(remoteMessage?.data?.encryptedPayload));
-      } catch (e) {
-        console.error('Failed to parse box!');
-      }
+      box = JSON.parse(encryptedPayload);
+      isRoom = box?.type === 'room';
+    } catch {
+      // Bare hex — DM. Decode below.
     }
 
     try {
 
-      if (box?.type && box?.type == 'room') {
+      if (isRoom) {
 
         console.log('🔔 Room message received!!');
 
@@ -527,7 +518,7 @@ let channelId;
           false,
           message.tip
         );
-        
+
         url = 'hugin://chat/' + encodeURIComponent(message.roomName) + '/' + encodeURIComponent(message.roomKey);
 
         message = {
@@ -538,12 +529,9 @@ let channelId;
 
       } else {
 
-        const key = await getEncryptionKey();
-        
-        message = decryptMessage(box.box, box.t, key);
-        if (message) {
-          usePreferencesStore.getState().setBasePushVerified(true);
-        }
+        message = await decryptMessage(encryptedPayload);
+        if (!message) return;
+        usePreferencesStore.getState().setBasePushVerified(true);
 
         console.log('Displaying notification for message:', message);
 
@@ -551,11 +539,11 @@ let channelId;
 
         url = 'hugin://message/' + encodeURIComponent(message.name) + '/' + encodeURIComponent(message.from);
 
-        if (await messageExists(box.t)) return;
+        if (await messageExists(message.t)) return;
 
         await saveMessageToQueue({
           ...message,
-          timestamp: box.t,
+          timestamp: message.t,
         });
 
 

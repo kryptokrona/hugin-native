@@ -85,7 +85,6 @@ function create_signer(kp) {
 
 
 const { Hugin } = require('./account');
-//const nacl = require('tweetnacl');
 
 function encrypt_sealed_box(pk, data) {
   console.log('Received m: ', data)
@@ -158,6 +157,10 @@ function create_room_invite() {
 }
 
 async function sign(message, signkey = false) {
+  // Crypto + key custody live on the RN side after the noble migration.
+  // Bare round-trips for the signature — acceptable: swarm sends are
+  // throttled by the network anyway, and keeping the wallet key custody on
+  // the RN side mirrors how the desktop client treats its wallet.
   return await Hugin.request({ type: 'sign-message', message, signkey });
 }
 

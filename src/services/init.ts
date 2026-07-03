@@ -45,6 +45,13 @@ export async function init() {
       updateUser({ store: currentStorePath, downloadDir: currentStorePath });
       user = useUserStore.getState().user;
       Rooms.init(user);
+      // Boot the RN-side PM syncer (poll + noble decrypt + ML-KEM handshake).
+      const [privateSpendKey, privateViewKey] = Wallet.privateKeys();
+      const { MessageSync } = await import('./hugin/syncer');
+      MessageSync.init(node, { privateSpendKey, privateViewKey });
+      // Pre-warm the ML-KEM identity (generate on first launch).
+      const { loadOrCreateIdentity } = await import('./hugin/identity');
+      await loadOrCreateIdentity();
       Rooms.join();
       Beam.join();
 

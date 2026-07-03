@@ -20,6 +20,11 @@ const {
 const { Hugin } = require('./account');
 const { Bridge } = require('./rpc');
 const { new_beam, send_beam_message } = require('./beam');
+// PUSH-ONLY crypto wrappers live in bare/messages.js. All PM encrypt/decrypt
+// (and the syncer) moved back to RN so they can use the noble-based
+// hugin-crypto (ML-KEM + double-encrypt) directly without RPC round-trips
+// during the protocol's handshake.
+const messages = require('./messages');
 const { IPC } = BareKit;
 
 const rpc = new Bridge(IPC);
@@ -40,6 +45,86 @@ const onrequest = async (p) => {
     case 'push_registration':
       const pushRegistered = await Nodes.register(p.data);
       return { sent: pushRegistered };
+    case 'push_encrypt': {
+      // Wallet/syncer used to do this with tweetnacl-sealed-box on the RN
+      // side. Now: ship the small descriptor here, get the wire hex back.
+      const wireHex = messages.encrypt_push_registration({
+        deviceId: p.deviceId,
+        viewTag: p.viewTag,
+        type: p.kind === 'call' ? 'call' : undefined,
+      });
+      return { wireHex };
+    }
+    case 'room_push_encrypt': {
+      const wireHex = messages.encrypt_room_push({
+        roomKey: p.roomKey,
+        payload: p.payload,
+        timestamp: p.timestamp,
+        viewTag: p.viewTag,
+      });
+      return { wireHex };
+    }
+    case 'room_push_send': {
+      // One RPC instead of two: previously RN called room_push_encrypt
+      // (Bare→RN→Bare), then send_node_msg (Bare→RN→Bare again). Now we
+      // encrypt and ship to the node inside a single Bare round-trip.
+      const wireHex = messages.encrypt_room_push({
+        roomKey: p.roomKey,
+        payload: p.payload,
+        timestamp: p.timestamp,
+        viewTag: p.viewTag,
+      });
+      const sent = await Nodes.message(wireHex, p.hash, p.viewTag, 'room');
+      return { sent: sent || { success: false } };
+    }
+    case 'push_register_all': {
+      // Consolidates what used to be N+1 round-trips for N rooms:
+      //   N × push_encrypt   (one per device/call/room registration)
+      // + 1 × push_registration (ship the batch to the node)
+      // into a single trip. RN passes the device id, the flags, the
+      // pre-computed view tags, and the list of rooms — Bare builds every
+      // sealedbox and ships the JSON batch.
+      const registrations = [];
+      if (p.includeDevicePush) {
+        registrations.push(
+          messages.encrypt_push_registration({
+            deviceId: p.deviceId,
+            viewTag: p.deviceViewTag,
+          }),
+        );
+      }
+      if (p.includeCallPush) {
+        registrations.push(
+          messages.encrypt_push_registration({
+            deviceId: p.deviceId,
+            viewTag: p.callViewTag,
+            type: 'call',
+          }),
+        );
+      }
+      for (const room of p.rooms || []) {
+        registrations.push(
+          messages.encrypt_push_registration({
+            deviceId: p.deviceId,
+            viewTag: room.viewTag,
+          }),
+        );
+      }
+      if (registrations.length === 0) {
+        return { sent: { success: true, skipped: true } };
+      }
+      const sent = await Nodes.register(JSON.stringify(registrations));
+      return { sent };
+    }
+    case 'room_push_decrypt': {
+      const plain = messages.decrypt_room_push({
+        cipherHex: p.cipherHex,
+        timestamp: p.timestamp,
+        roomKeys: p.roomKeys || [],
+      });
+      if (!plain) return { failed: true };
+      return { plaintext: plain };
+    }
     case 'init_bare':
       initBareMain(p.user);
       break;
@@ -75,6 +160,28 @@ const onrequest = async (p) => {
     case 'group_random_key':
       const keys = create_room_invite();
       return { keys };
+    case 'create_account_keypair': {
+      // Account identity Ed25519 keypair (used to identify the user inside
+      // swarms). Was tweetnacl.sign.keyPair() on the RN side; now sodium.
+      const sodium = require('sodium-native');
+      const publicKey = Buffer.alloc(sodium.crypto_sign_PUBLICKEYBYTES);
+      const secretKey = Buffer.alloc(sodium.crypto_sign_SECRETKEYBYTES);
+      sodium.crypto_sign_keypair(publicKey, secretKey);
+      return {
+        publicKey: publicKey.toString('hex'),
+        secretKey: secretKey.toString('hex'),
+      };
+    }
+    case 'sha512_hex': {
+      // Replaces tweetnacl.hash. SHA-512 is SHA-512 — sodium's
+      // crypto_hash_sha512 produces the exact same 64 bytes tweetnacl did,
+      // so existing swarm-topic derivations resolve to the same peers.
+      // Returns comma-separated bytes to match the old return shape.
+      const sodium = require('sodium-native');
+      const out = Buffer.alloc(sodium.crypto_hash_sha512_BYTES);
+      sodium.crypto_hash_sha512(out, Buffer.from(p.hex, 'hex'));
+      return { bytes: Array.from(out).join(',') };
+    }
     case 'begin_send_file':
       sendFileInfo(p.json_file_data);
       break;
@@ -142,6 +249,9 @@ async function response(request) {
 // Function implementations
 const initBareMain = async (user) => {
   Hugin.init(user, rpc);
+  // Message sync (poll node + decrypt) lives on the RN side now — Hermes can
+  // run noble pure-JS, so there's no reason to ferry encrypted bytes across
+  // the bridge for crypto work.
 };
 
 const updateBareUser = (user) => {

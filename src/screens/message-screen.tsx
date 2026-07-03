@@ -79,8 +79,9 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const contacts = useGlobalStore((state) => state.contacts);
   const { roomKey, name } = route.params;
   const messages = useGlobalStore((state) => state.messages);
-  const messageKey = contacts.find((a) => a.address === roomKey)?.messagekey;
-  const huginAddress = roomKey + messageKey;
+  // hugin address is just the 99-char xkr address now; the nacl message-key
+  // suffix is gone (contacts.messagekey stays as '' for future ML-KEM).
+  const huginAddress = roomKey;
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);

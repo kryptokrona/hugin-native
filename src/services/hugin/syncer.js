@@ -1,8 +1,12 @@
-import {
-  cnFastHash,
-  generateKeyDerivation,
-  setStoreContacts,
-} from '@/services';
+// RN-side poll + decrypt loop. Crypto runs in Hermes via the noble-based
+// hugin-crypto package (ML-KEM-512 + double-encrypt). Bare just ferries
+// network bytes; it doesn't see plaintext.
+//
+// Two entry points hit `check_for_pm`:
+//   1. The periodic node poll below (this file's `tick`).
+//   2. The bridge's `beam-message` event handler (rpc.js), which forwards
+//      raw cipher hex it received over a p2p beam.
+
 import {
   saveMessage,
   addContact,
@@ -11,243 +15,216 @@ import {
   saveFileInfo,
 } from '../bare/sqlite';
 import { setLatestMessages, updateMessage } from '../bare/contacts';
-import { extraDataToMessage } from 'hugin-crypto';
+import {
+  openFriendRequest,
+  decodeExtra,
+  messageHash,
+  hexToUint,
+} from 'hugin-crypto';
 import { sleep } from '@/utils';
-import { trimExtra } from '@/services/utils';
 import { Nodes, Beam } from 'lib/native';
-import { Wallet } from '@/services';
+import {
+  identitySecretKeyBytes,
+  getContactCrypto,
+  onReceivedPeerKemPub,
+  onReceivedKemCapsule,
+} from './identity';
+
+const SYNC_INTERVAL_MS = 3000;
+const MAX_STARTUP_RUNS = 10;
+const MAX_BATCH = 299;
 
 class Syncer {
   constructor() {
     this.node = {};
-    this.incoming_pm_que = [];
+    this.keys = {}; // { privateSpendKey, privateViewKey }
     this.lastChecked = 0;
-    this.incoming_messages = [];
-    this.keys = {};
-    this.known_keys = [];
+    this.startup_runs = 0;
+    this.sync_stopped = false;
     this.sync_interval = null;
-    this.startup_sync_runs = 0;
-    this.max_startup_sync_runs = 10;
-    this.sync_stopped = false;
+    this.incoming = [];
   }
 
-  async init(node, known, keys) {
+  async init(node, keys) {
     this.node = node;
-    this.lastChecked = 0;
     this.keys = keys;
-    this.known_keys = known;
-    this.startup_sync_runs = 0;
-    this.sync_stopped = false;
-    await this.start();
-  }
-
-    reset() {
-    this.node = {};
-    this.incoming_pm_que = [];
     this.lastChecked = 0;
-    this.incoming_messages = [];
-    this.keys = {};
-    this.known_keys = [];
-    this.startup_sync_runs = 0;
+    this.startup_runs = 0;
     this.sync_stopped = false;
-    if (this.sync_interval) {
-      clearInterval(this.sync_interval);
-      this.sync_interval = null;
-    }
-  }
-
-  async start() {
-    if (this.sync_interval) {
-      clearInterval(this.sync_interval);
-      this.sync_interval = null;
-    }
-    this.sync_interval = setInterval(async () => {
-      await this.sync();
-    }, 3000);
-  }
-
-  stop_sync() {
-    if (this.sync_stopped) return;
-    this.sync_stopped = true;
-    if (this.sync_interval) {
-      clearInterval(this.sync_interval);
-      this.sync_interval = null;
-    }
-    console.log('[syncer.js] Startup message sync finished, relying on node push updates.');
+    this.incoming = [];
+    this.start();
   }
 
   set_node(node) {
     this.node = node;
   }
 
-  async fetch() {
-    const incoming = this.incoming_messages.length > 0 ? true : false;
-    //If we already have pending incoming unchecked messages, return
-    //So we do not update the latest checked timestmap and miss any messages.
-    console.log('[syncer.js] Fetching messages, do we have incoming?', incoming)
-    if (incoming) return false;
-    //Latest version, fetch more messages with last checked timestamp
-    const lastChecked = this.lastChecked;
-
-    const {resp, background} = await Nodes.sync({
-      request: true,
-      type: 'some',
-      timestamp: lastChecked,
-    }); 
-
-    console.log('[syncer.js] Fetched messages:', resp)
-    if (resp.length === 0) {
-      console.log('[syncer.js] No messages fetched.')
-      return false;
-    }
-    this.lastChecked = Date.now();
-
-    return {resp, background};
+  start() {
+    if (this.sync_interval) clearInterval(this.sync_interval);
+    this.sync_interval = setInterval(() => this.tick(), SYNC_INTERVAL_MS);
   }
 
-  restart_sync() {
-    console.log("[syncer.js] Restarting sync..")
+  stop() {
+    if (this.sync_stopped) return;
+    this.sync_stopped = true;
+    if (this.sync_interval) {
+      clearInterval(this.sync_interval);
+      this.sync_interval = null;
+    }
+  }
+
+  restart() {
     this.sync_stopped = false;
-    this.startup_sync_runs = 0;
+    this.startup_runs = 0;
     this.lastChecked = 0;
     this.start();
   }
 
-  async sync() {
+  async fetch() {
+    if (this.incoming.length > 0) return false;
+    const { resp, background } = await Nodes.sync({
+      request: true,
+      type: 'some',
+      timestamp: this.lastChecked,
+    });
+    if (!resp || resp.length === 0) return false;
+    this.lastChecked = Date.now();
+    return { resp, background };
+  }
+
+  async tick() {
     if (this.sync_stopped) return;
-    if (this.startup_sync_runs >= this.max_startup_sync_runs) {
-      this.stop_sync();
+    if (this.startup_runs >= MAX_STARTUP_RUNS) {
+      this.stop();
       return;
     }
-    console.log("[syncer.js] Trying to sync messages from node.")
-    this.startup_sync_runs += 1;
-    const incoming = this.incoming_messages.length > 0 ? true : false;
-    //First start, set known pool txs
+    this.startup_runs += 1;
+
+    const had_backlog = this.incoming.length > 0;
     const fetched = await this.fetch();
-    console.log("[syncer.js] Fetched msgs:", fetched)
-    if (!fetched && !incoming) {
-      if (this.startup_sync_runs >= this.max_startup_sync_runs) this.stop_sync();
+    if (!fetched && !had_backlog) return;
+    const { resp = [], background } = fetched || {};
+    const txs = resp;
+
+    if (txs.length > MAX_BATCH) {
+      this.incoming = txs;
+      await this.decrypt_batch(this.take(MAX_BATCH), background);
       return;
     }
-    const {resp = [], background} = fetched || {};
-    const transactions = resp;
-    const large_batch = transactions.length > 299 ? true : false;
-
-    if (large_batch || (large_batch && incoming)) {
-      //Add to que
-      console.log('[syncer.js] Adding que:', transactions.length);
-      this.incoming_messages = transactions;
-      //   Hugin.send('incoming-que', true);
-    }
-
-    if (this.incoming_pm_que.length) {
-      this.clear_pm_que();
-    }
-
-    if (incoming || large_batch) {
-      console.log('[syncer.js] Checking incoming messages:', this.incoming_messages.length);
-      await this.decrypt(this.update_que(), true);
-      // if (incoming_group_que.length) {
-      //     await clear_group_que()
-      // }
-      return;
-    }
-
-    // if (transactions.length < 5) Hugin.send('incoming-que', false);
-    console.log('[syncer.js] Incoming transactions', transactions.length);
-    this.decrypt(transactions, false, background);
-    if (this.startup_sync_runs >= this.max_startup_sync_runs) this.stop_sync();
+    await this.decrypt_batch(txs, background);
   }
 
-  async decrypt(list, que = false, background) {
-    console.log('[syncer.js] Checking nr of txs:', list.length);
-    for (const message of list) {
-      console.log('[syncer.js] Checking message:', message);
+  take(n) {
+    const out = this.incoming.slice(0, n);
+    this.incoming = this.incoming.slice(out.length);
+    return out;
+  }
+
+  async decrypt_batch(list, background) {
+    for (const tx of list) {
       try {
-        const thisHash = message.hash;
-        const thisExtra = '99' + thisHash + message.cipher;
-
-        if (!this.validate(thisExtra, thisHash)) {
-          console.log('[syncer.js] Message is not valid.')
-          continue;
-        };
-        if (thisExtra !== undefined && thisExtra.length > 200) {
-          //Check for viewtag
-
-          console.log('[syncer.js] Checking message for viewtag..')
-
-          if (await this.check_for_viewtag(thisExtra)) {
-            console.log('[syncer.js] Found a message with relevant view tag.')
-            if (await messageExists(thisHash)) {
-              console.log('[syncer.js] Message already exists.')
-              continue;
-            };
-            console.log('[syncer.js] Starting checking message for pm..')
-            await this.check_for_pm(thisExtra, thisHash, background);
-            continue;
-          }
-        }
-      } catch (err) {
-        console.log('[syncer.js] Error decrypting...');
-        console.log(err);
+        // hugin-crypto's encodeExtra emits bare hex(JSON) — no prefix. No
+        // point reconstructing a fake '99'+hash tx-extra prefix just to have
+        // trimExtra() strip it back off. Passing the cipher through raw also
+        // makes the fallback messageHash(extraOrWire) in check_for_pm match
+        // whatever the sender actually hashed (also over the raw cipher).
+        await this.check_for_pm(tx.cipher, tx.hash, background);
+      } catch (e) {
+        // Never let one bad message kill the loop.
       }
     }
   }
 
-  async check_for_pm(thisExtra, thisHash, background) {
-    try {
-    console.log('[syncer.js] Checking message for pm started..')
-    console.log('[syncer.js] Keys:', this.keys)
-    const [privateSpendKey, privateViewKey] = this.keys;
-    console.log('[syncer.js] Keys:', privateSpendKey, privateViewKey)
-    const keys = { privateSpendKey, privateViewKey };
-    console.log('[syncer.js] Keys:', keys, 'Message:', thisExtra)
-    let message = await extraDataToMessage(thisExtra, this.known_keys, keys);
-    console.log('[syncer.js] Message to check', message)
-    if (!message) return false;
-    console.log('[syncer.js] FOUND A MESSAGE WOOHP ------->');
-    const [text, addr, key, timestamp] = this.sanitize_pm(message);
-    console.log('[syncer.js] Got message?', text);
-    if (!text) return;
-    if (message.type === 'sealedbox' || 'box') {
-      if (!this.known_keys.some((a) => a === key)) {
-        const added = await addContact(message?.name || 'Anon' , addr, key);
-        console.log('[syncer.js] Added contact:', added);
-        if (added) {
-          this.known_keys.push(added.messagekey);
-          console.log('[syncer.js] Connecting to new contact:', addr);
-          Beam.new(addr);
-        }
-      }
-      const saved = await saveMessage(
-        addr,
-        text,
-        '', //Todo reply
-        timestamp,
-        thisHash,
-        false,
-        undefined,
-      );
-      if (saved) {
-        updateMessage(saved, background);
-      }
-      setLatestMessages();
-      return true;
-    }
-    return;
-    } catch (e) {
-      console.log('[syncer.js] Error checking message for pm:', e);
+  /**
+   * Decrypt one wire payload + persist. Shared between the poll path and
+   * the beam-message bridge handler.
+   */
+  async check_for_pm(extraOrWire, hashHint, background) {
+    if (typeof extraOrWire !== 'string') return false;
+    const wire = decodeExtra(extraOrWire);
+    if (!wire) {
+      console.log('[pm] decodeExtra rejected wire — falling through');
       return false;
     }
+
+    const identitySecret = await identitySecretKeyBytes();
+    const messageKeyResolver = async (from) => {
+      const c = await getContactCrypto(from);
+      return c.messageKey || null;
+    };
+
+    const opened = await openFriendRequest(
+      wire,
+      {
+        privateViewKey: this.keys.privateViewKey,
+        getMessageKey: messageKeyResolver,
+      },
+      identitySecret,
+    );
+    if (!opened) {
+      // Almost always "not for us" (view-tag miss): every online client sees
+      // every wire message and drops the ones that don't match. Logged so a
+      // truly stuck decrypt (bad key, sig mismatch) doesn't just vanish.
+      console.log('[pm] openFriendRequest returned false (view-tag miss or decrypt failure)');
+      return false;
+    }
+
+    // First contact: save them as a contact + open the direct beam BEFORE we
+    // persist any handshake state. A friend request is the first message we
+    // ever see from `opened.from`, so without this bootstrap the KEM state
+    // handlers below would UPDATE a non-existent row (their internal
+    // INSERT OR IGNORE seed makes that survive, but this keeps the row shape
+    // clean with the real name + latestmessage from the start).
+    const known = (await getContacts()).some((c) => c.address === opened.from);
+    if (!known) {
+      const added = await addContact(opened.name || 'Anon', opened.from, '');
+      if (added) Beam.new(opened.from);
+    }
+
+    // Persist any handshake progress BEFORE saving the message, so a later
+    // outgoing send picks up the new state (pending kem_ct, fresh messageKey).
+    if (opened.handshake?.peerKemPub) {
+      // Peer's initial — encapsulate, save shared secret + pending ct.
+      await onReceivedPeerKemPub(opened.from, opened.handshake.peerKemPub);
+    } else if (opened.handshake?.sharedSecret) {
+      // Peer's first reply — they shipped us a kem capsule, hugin-crypto
+      // decapsulated for us. Persist the derived secret as their messageKey.
+      await onReceivedKemCapsule(opened.from, opened.handshake.sharedSecret);
+    }
+
+    // Symmetric to the outgoing "[ml-kem] Message to <addr> is quantum-encrypted"
+    // log. `opened.type === 'message'` is set by hugin-crypto only when the
+    // outer wire carried a nested `box` that we then inner-decrypted with the
+    // ML-KEM-derived key. Plaintext friend-requests return 'friend-request'.
+    if (opened.type === 'message') {
+      console.log(`[ml-kem] Message from ${opened.from} was quantum-decrypted (ML-KEM shared secret).`);
+    } else {
+      console.log(`[pm] Decrypted plaintext friend-request from ${opened.from}.`);
+    }
+
+    const hash = hashHint || messageHash(extraOrWire);
+    if (await messageExists(hash)) return true;
+
+    const saved = await saveMessage(
+      opened.from,
+      opened.msg,
+      '',
+      opened.t,
+      hash,
+      false,
+      undefined,
+    );
+    if (saved) updateMessage(saved, !!background);
+    setLatestMessages();
+    return true;
   }
 
   async save_file_message(message) {
     const sent = message.conversation ? true : false;
-
     const saved = await saveMessage(
       sent ? message.conversation : message.address,
       message.message,
-      '', //Todo reply
+      '',
       message.timestamp,
       message.hash,
       sent,
@@ -260,77 +237,6 @@ class Syncer {
     }
     setLatestMessages();
     return true;
-  }
-
-  async check_for_viewtag(extra) {
-    try {
-      const rawExtra = trimExtra(extra);
-      const parsed_box = JSON.parse(rawExtra);
-      if (parsed_box.vt) {
-        console.log('[syncer.js] Found a message with view tag:', parsed_box.vt)
-        const [privateSpendKey, privateViewKey] = this.keys;
-        const derivation = await generateKeyDerivation(
-          parsed_box.txKey,
-          privateViewKey,
-        );
-        const hashDerivation = await cnFastHash(derivation);
-        const possibleTag = hashDerivation.substring(0, 2);
-        const view_tag = parsed_box.vt;
-        if (possibleTag === view_tag) {
-          console.log('[syncer.js] **** FOUND VIEWTAG ****');
-          return true;
-        }
-      }
-    } catch (err) {}
-    return false;
-  }
-
-  validate(thisExtra, thisHash, fa) {
-    if (typeof thisExtra !== 'string') return false;
-    if (typeof thisHash !== 'string') return false;
-    return true;
-  }
-
-  trim(json) {
-    json = JSON.stringify(json)
-      .replaceAll('.txPrefix', '')
-      .replaceAll(
-        'transactionPrefixInfo.txHash',
-        'transactionPrefixInfotxHash',
-      );
-
-    json = JSON.parse(json);
-
-    return json.addedTxs;
-  }
-
-  update_que() {
-    const decrypt = this.incoming_messages.slice(0, 299);
-    const update = this.incoming_messages.slice(decrypt.length);
-    this.incoming_messages = update;
-    return decrypt;
-  }
-
-  clear_pm_que() {
-    const sorted = this.incoming_pm_que.sort((a, b) => a.t - b.t);
-    for (const message of sorted) {
-      // save_message(message)
-      ///TODO ** SAVE here
-    }
-    this.incoming_pm_que = [];
-  }
-
-  sanitize_pm(msg) {
-    let addr = msg.from;
-    let timestamp = msg.t;
-    let key = msg.k;
-    let message = msg.msg;
-    if (message?.length > 777 || msg.msg === undefined) return [false];
-    if (addr?.length > 99 || addr === undefined) return [false];
-    if (timestamp?.length > 25) return [false];
-    if (key?.length > 64) return [false];
-
-    return [message, addr, key, timestamp];
   }
 }
 

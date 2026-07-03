@@ -146,8 +146,9 @@ const beam_event = (beam, chat, key) => {
     if (check_data_message(str, chat)) {
       return;
     }
-    const hash = str.substring(0, 64);
-    Hugin.send('beam-message', { message: str.substring(65), hash });
+    // Beam wire IS the cipher (hugin-crypto encodeExtra output). RN computes
+    // the content-addressed id with hugin-crypto.messageHash on receive.
+    Hugin.send('beam-message', { message: str });
   });
 
   beam.on('end', () => {
