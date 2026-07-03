@@ -606,6 +606,24 @@ export async function addContact(
           [address],
           (tx, results) => {
             if (results.rows.length > 0) {
+              // A seed row may exist if updateContactKemState ran first
+              // (pushnotifications path: decryptMessage persists KEM state
+              // before we get here). Detect it by the empty name, promote to
+              // a real contact row instead of bailing — otherwise Beam.new
+              // never fires for this contact and the display name stays
+              // empty. Callers still get truthy back and their bootstrap
+              // continues normally.
+              const existing = results.rows.item(0);
+              if (existing && (!existing.name || existing.name === '')) {
+                const timestamp = Date.now();
+                tx.executeSql(
+                  'UPDATE contacts SET name = ?, latestmessage = ? WHERE address = ?',
+                  [name, timestamp, address],
+                );
+                console.log('[sqlite.ts] Promoted KEM seed row to contact:', address);
+                returnVal = { address, messagekey: existing.messagekey, name };
+                return;
+              }
               console.log('[sqlite.ts] Contact already exists:', name);
               returnVal = false;
               return;
