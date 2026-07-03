@@ -64,7 +64,7 @@
     "expo-video": "~2.1.0",
     "fs": "^0.0.1-security",
     "https-browserify": "~0.0.0",
-    "hugin-crypto": "github:kryptokrona/hugin-crypto#remake",
+    "hugin-crypto": "^1.0.0",
     "huginbeam": "^1.0.0",
     "hyperbee": "^2.27.3",
     "hypercore": "^11.23.1",
