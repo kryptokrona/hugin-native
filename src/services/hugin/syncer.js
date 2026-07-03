@@ -142,7 +142,10 @@ class Syncer {
   async check_for_pm(extraOrWire, hashHint, background) {
     if (typeof extraOrWire !== 'string') return false;
     const wire = decodeExtra(extraOrWire);
-    if (!wire) return false;
+    if (!wire) {
+      console.log('[pm] decodeExtra rejected wire — falling through');
+      return false;
+    }
 
     const identitySecret = await identitySecretKeyBytes();
     const messageKeyResolver = async (from) => {
@@ -158,7 +161,13 @@ class Syncer {
       },
       identitySecret,
     );
-    if (!opened) return false;
+    if (!opened) {
+      // Almost always "not for us" (view-tag miss): every online client sees
+      // every wire message and drops the ones that don't match. Logged so a
+      // truly stuck decrypt (bad key, sig mismatch) doesn't just vanish.
+      console.log('[pm] openFriendRequest returned false (view-tag miss or decrypt failure)');
+      return false;
+    }
 
     // First contact: save them as a contact + open the direct beam BEFORE we
     // persist any handshake state. A friend request is the first message we
@@ -181,6 +190,16 @@ class Syncer {
       // Peer's first reply — they shipped us a kem capsule, hugin-crypto
       // decapsulated for us. Persist the derived secret as their messageKey.
       await onReceivedKemCapsule(opened.from, opened.handshake.sharedSecret);
+    }
+
+    // Symmetric to the outgoing "[ml-kem] Message to <addr> is quantum-encrypted"
+    // log. `opened.type === 'message'` is set by hugin-crypto only when the
+    // outer wire carried a nested `box` that we then inner-decrypted with the
+    // ML-KEM-derived key. Plaintext friend-requests return 'friend-request'.
+    if (opened.type === 'message') {
+      console.log(`[ml-kem] Message from ${opened.from} was quantum-decrypted (ML-KEM shared secret).`);
+    } else {
+      console.log(`[pm] Decrypted plaintext friend-request from ${opened.from}.`);
     }
 
     const hash = hashHint || messageHash(extraOrWire);
