@@ -525,12 +525,16 @@ export class ActiveWallet {
     const contactState = await getContactCrypto(toAddress);
     if (contactState.messageKey) {
       opts.messageKey = contactState.messageKey;
+      console.log(`[ml-kem] Message to ${toAddress} is quantum-encrypted (ML-KEM shared secret).`);
       if (contactState.pendingKemCapsule) {
         opts.kemCiphertext = contactState.pendingKemCapsule;
       }
     } else {
       // Pre-handshake — initiator path. Always include our identity pub so
-      // peers that lost our previous send-attempt can still close out.
+      // peers that lost our previous send-attempt (or haven't replied yet)
+      // can still close out. Re-broadcast on every message until we hold a
+      // confirmed messageKey; onReceivedPeerKemPub on the peer's side is
+      // idempotent once established, so redundant sends are safe.
       opts.myKemPub = await identityPublicKeyBytes();
     }
     const wire = await createFriendRequest(opts);

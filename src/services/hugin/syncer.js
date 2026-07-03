@@ -123,8 +123,12 @@ class Syncer {
   async decrypt_batch(list, background) {
     for (const tx of list) {
       try {
-        const wireHex = '99' + tx.hash + tx.cipher;
-        await this.check_for_pm(wireHex, tx.hash, background);
+        // hugin-crypto's encodeExtra emits bare hex(JSON) — no prefix. No
+        // point reconstructing a fake '99'+hash tx-extra prefix just to have
+        // trimExtra() strip it back off. Passing the cipher through raw also
+        // makes the fallback messageHash(extraOrWire) in check_for_pm match
+        // whatever the sender actually hashed (also over the raw cipher).
+        await this.check_for_pm(tx.cipher, tx.hash, background);
       } catch (e) {
         // Never let one bad message kill the loop.
       }
@@ -156,6 +160,18 @@ class Syncer {
     );
     if (!opened) return false;
 
+    // First contact: save them as a contact + open the direct beam BEFORE we
+    // persist any handshake state. A friend request is the first message we
+    // ever see from `opened.from`, so without this bootstrap the KEM state
+    // handlers below would UPDATE a non-existent row (their internal
+    // INSERT OR IGNORE seed makes that survive, but this keeps the row shape
+    // clean with the real name + latestmessage from the start).
+    const known = (await getContacts()).some((c) => c.address === opened.from);
+    if (!known) {
+      const added = await addContact(opened.name || 'Anon', opened.from, '');
+      if (added) Beam.new(opened.from);
+    }
+
     // Persist any handshake progress BEFORE saving the message, so a later
     // outgoing send picks up the new state (pending kem_ct, fresh messageKey).
     if (opened.handshake?.peerKemPub) {
@@ -165,13 +181,6 @@ class Syncer {
       // Peer's first reply — they shipped us a kem capsule, hugin-crypto
       // decapsulated for us. Persist the derived secret as their messageKey.
       await onReceivedKemCapsule(opened.from, opened.handshake.sharedSecret);
-    }
-
-    // First contact: save them as a contact + open the direct beam.
-    const known = (await getContacts()).some((c) => c.address === opened.from);
-    if (!known) {
-      const added = await addContact(opened.name || 'Anon', opened.from, '');
-      if (added) Beam.new(opened.from);
     }
 
     const hash = hashHint || messageHash(extraOrWire);

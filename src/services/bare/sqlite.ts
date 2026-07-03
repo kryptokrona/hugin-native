@@ -88,15 +88,28 @@ export const initDB = async () => {
       -- successfully ship our first reply (which carries it). NOT a
       -- handshake-completion flag — for that, check messagekey !== ''.
       pending_kem_capsule TEXT DEFAULT '',
+      -- Hex of the peer's ML-KEM public key, as seen the last time we
+      -- processed a handshake with them. Compared against every incoming
+      -- kem_pub so that a peer who restored/reinstalled (fresh keypair)
+      -- triggers a re-encapsulation instead of being silently ignored as a
+      -- redundant announcement.
+      peer_kem_pub TEXT DEFAULT '',
       UNIQUE (address, messagekey)
   )`;
 
     await db.executeSql(query);
 
-    // Idempotent migration for installs that pre-date the ML-KEM column.
+    // Idempotent migrations for installs that pre-date the ML-KEM columns.
     try {
       await db.executeSql(
         "ALTER TABLE contacts ADD COLUMN pending_kem_capsule TEXT DEFAULT ''",
+      );
+    } catch (_) {
+      // Column already exists.
+    }
+    try {
+      await db.executeSql(
+        "ALTER TABLE contacts ADD COLUMN peer_kem_pub TEXT DEFAULT ''",
       );
     } catch (_) {
       // Column already exists.
@@ -674,7 +687,7 @@ export async function updateContact(name: string, address: string) {
  */
 export async function updateContactKemState(
   address: string,
-  patch: { messagekey?: string; pending_kem_capsule?: string },
+  patch: { messagekey?: string; pending_kem_capsule?: string; peer_kem_pub?: string },
 ) {
   const sets: string[] = [];
   const vals: any[] = [];
@@ -686,7 +699,28 @@ export async function updateContactKemState(
     sets.push('pending_kem_capsule = ?');
     vals.push(patch.pending_kem_capsule);
   }
+  if (patch.peer_kem_pub !== undefined) {
+    sets.push('peer_kem_pub = ?');
+    vals.push(patch.peer_kem_pub);
+  }
   if (sets.length === 0) return;
+  // A friend request is by definition the first message from `address`, so
+  // there may be no contacts row yet at this point — the syncer's addContact
+  // call runs after this. Seed it here (messagekey='' matches the NOT NULL
+  // column default; UNIQUE(address, messagekey) tolerates multiple '' rows
+  // for distinct addresses). Without this, the UPDATE below is a no-op and
+  // the derived shared secret gets discarded the moment addContact inserts
+  // the row afterward with a blank messagekey.
+  try {
+    await db.executeSql(
+      "INSERT OR IGNORE INTO contacts (name, address, messagekey) VALUES ('', ?, '')",
+      [address],
+    );
+  } catch (err) {
+    // If the seed fails we still try the update below — surfacing both makes
+    // debugging any real driver problem easier than swallowing silently.
+    console.log('Failed to seed contact row for KEM state:', err);
+  }
   vals.push(address);
   try {
     await db.executeSql(

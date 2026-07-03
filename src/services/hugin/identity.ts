@@ -110,6 +110,13 @@ export interface ContactCrypto {
    * one message at most.
    */
   pendingKemCapsule?: Uint8Array;
+  /**
+   * Hex of the peer's ML-KEM public key at the time of the last handshake.
+   * Kept as hex (not bytes) so the equality check on every incoming pub is
+   * a cheap string compare. Missing when we've never handshaken with this
+   * contact.
+   */
+  peerKemPubHex?: string;
 }
 
 /**
@@ -127,22 +134,50 @@ export async function getContactCrypto(address: string): Promise<ContactCrypto> 
   if (c.pending_kem_capsule && typeof c.pending_kem_capsule === 'string' && c.pending_kem_capsule.length > 0) {
     out.pendingKemCapsule = hexToUint(c.pending_kem_capsule);
   }
+  if (c.peer_kem_pub && typeof c.peer_kem_pub === 'string' && c.peer_kem_pub.length > 0) {
+    out.peerKemPubHex = c.peer_kem_pub;
+  }
   return out;
 }
 
 /**
- * Bob's path: received Alice's `kem_pub`. Immediately encapsulate, persist
- * both halves on the contact row, and stash the ciphertext to ship on the
- * next outgoing send (so a single round-trip closes the handshake).
+ * Bob's path: received Alice's `kem_pub`. Three cases, distinguished by
+ * comparing the incoming pub against the one we cached on the contact row:
+ *
+ *   1. First time we see this contact              → encapsulate + persist.
+ *   2. Pub identical to what we already stored     → in-flight duplicate
+ *      (Alice re-sends her pub on every message until she gets our reply);
+ *      keep the existing messageKey to avoid silently desyncing.
+ *   3. Pub differs from what we stored             → Alice restored or
+ *      reinstalled and has a fresh ML-KEM keypair. Discard the old shared
+ *      secret and re-encapsulate against the new pub — otherwise our
+ *      inner-encrypted replies would use a stale key her new install
+ *      cannot decapsulate.
  */
 export async function onReceivedPeerKemPub(
   address: string,
   peerKemPub: Uint8Array,
-): Promise<{ messageKey: Uint8Array; pendingKemCapsule: Uint8Array }> {
+): Promise<{ messageKey: Uint8Array; pendingKemCapsule?: Uint8Array }> {
+  const incomingHex = uintToHex(peerKemPub);
+  const existing = await getContactCrypto(address);
+  if (existing.messageKey && existing.peerKemPubHex === incomingHex) {
+    console.log(
+      `[ml-kem] Received public key from ${address}, but a shared secret is already established — ignoring redundant handshake.`,
+    );
+    return { messageKey: existing.messageKey, pendingKemCapsule: existing.pendingKemCapsule };
+  }
+  if (existing.messageKey) {
+    console.log(
+      `[ml-kem] Received a NEW public key from ${address}; peer likely restored their account. Rekeying.`,
+    );
+  } else {
+    console.log(`[ml-kem] Received public key from ${address}; deriving shared secret.`);
+  }
   const { ciphertext, sharedSecret } = encapsulate(peerKemPub);
   await updateContactKemState(address, {
     messagekey: uintToHex(sharedSecret),
     pending_kem_capsule: uintToHex(ciphertext),
+    peer_kem_pub: incomingHex,
   });
   return { messageKey: sharedSecret, pendingKemCapsule: ciphertext };
 }
@@ -155,6 +190,7 @@ export async function onReceivedKemCapsule(
   address: string,
   sharedSecret: Uint8Array,
 ): Promise<void> {
+  console.log(`[ml-kem] Received capsule from ${address}; shared secret established.`);
   await updateContactKemState(address, {
     messagekey: uintToHex(sharedSecret),
   });
