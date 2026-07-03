@@ -115,6 +115,50 @@ export const initDB = async () => {
       // Column already exists.
     }
 
+    // One-shot dedup: clean up any duplicate contact rows left behind by a
+    // prior iteration of updateContactKemState that used INSERT OR IGNORE
+    // against the composite UNIQUE(address, messagekey). Once the row's
+    // messagekey moved from '' to <sharedHex>, a second seed pass would
+    // silently insert another `(bob, '')` row, and the follow-up UPDATE
+    // would abort on the composite UNIQUE — leaving an orphan `(name='',
+    // address=bob, messagekey='')` stuck in the DB. Sweep those out here,
+    // keeping the row with the most-progressed messagekey per address
+    // (64-hex > any other non-empty > empty).
+    try {
+      const rowsResult = await db.executeSql(
+        'SELECT rowid, address, messagekey, name FROM contacts',
+      );
+      const byAddr = new Map<string, Array<any>>();
+      for (const r of rowsResult) {
+        for (let i = 0; i < r.rows.length; i++) {
+          const row = r.rows.item(i);
+          if (!row?.address) continue;
+          if (!byAddr.has(row.address)) byAddr.set(row.address, []);
+          byAddr.get(row.address)!.push(row);
+        }
+      }
+      const score = (r: any) =>
+        typeof r.messagekey === 'string' && r.messagekey.length === 64
+          ? 2
+          : typeof r.messagekey === 'string' && r.messagekey.length > 0
+          ? 1
+          : 0;
+      for (const rows of byAddr.values()) {
+        if (rows.length <= 1) continue;
+        const keep = rows.reduce((a: any, b: any) => (score(a) >= score(b) ? a : b));
+        for (const r of rows) {
+          if (r.rowid !== keep.rowid) {
+            await db.executeSql('DELETE FROM contacts WHERE rowid = ?', [r.rowid]);
+          }
+        }
+        console.log(
+          `[sqlite.ts] Startup dedup: removed ${rows.length - 1} duplicate contact row(s) for ${rows[0].address}`,
+        );
+      }
+    } catch (err) {
+      console.log('[sqlite.ts] Startup contact dedup failed:', err);
+    }
+
     // address: peer.address,
     // name: peer.name,
     // room: peer.key,
@@ -724,19 +768,31 @@ export async function updateContactKemState(
   if (sets.length === 0) return;
   // A friend request is by definition the first message from `address`, so
   // there may be no contacts row yet at this point — the syncer's addContact
-  // call runs after this. Seed it here (messagekey='' matches the NOT NULL
-  // column default; UNIQUE(address, messagekey) tolerates multiple '' rows
-  // for distinct addresses). Without this, the UPDATE below is a no-op and
-  // the derived shared secret gets discarded the moment addContact inserts
-  // the row afterward with a blank messagekey.
+  // call runs after this. Seed it here if — and ONLY if — no row exists for
+  // this address.
+  //
+  // `INSERT OR IGNORE ... VALUES ('', ?, '')` is NOT safe: the table's UNIQUE
+  // constraint is composite `(address, messagekey)`, not `address` alone. So
+  // once the first handshake has completed and the row's messagekey is
+  // <sharedHex>, a subsequent seed attempt with `(bob, '')` is a DIFFERENT
+  // composite key and the INSERT succeeds silently, producing a duplicate
+  // row. The follow-up UPDATE below then matches BOTH rows, tries to give
+  // them the same (address, messagekey), trips the composite UNIQUE, and
+  // aborts — leaving the orphaned `(name='', address=bob, messagekey='')`
+  // stuck in the DB. This is the "duplicate contact with no name" symptom.
   try {
-    await db.executeSql(
-      "INSERT OR IGNORE INTO contacts (name, address, messagekey) VALUES ('', ?, '')",
+    const existing = await db.executeSql(
+      'SELECT 1 FROM contacts WHERE address = ? LIMIT 1',
       [address],
     );
+    const found = existing.some((r: any) => r?.rows?.length > 0);
+    if (!found) {
+      await db.executeSql(
+        "INSERT INTO contacts (name, address, messagekey) VALUES ('', ?, '')",
+        [address],
+      );
+    }
   } catch (err) {
-    // If the seed fails we still try the update below — surfacing both makes
-    // debugging any real driver problem easier than swallowing silently.
     console.log('Failed to seed contact row for KEM state:', err);
   }
   vals.push(address);
