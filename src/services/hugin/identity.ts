@@ -128,13 +128,19 @@ export async function getContactCrypto(address: string): Promise<ContactCrypto> 
   const c = contacts.find((x: any) => x.address === address);
   if (!c) return {};
   const out: ContactCrypto = {};
-  if (c.messagekey && typeof c.messagekey === 'string' && c.messagekey.length === 64) {
+  // `contacts.messagekey` is 64 hex chars under both the legacy NACL scheme
+  // (peer pubkey) and ML-KEM (shared secret). `peer_kem_pub` is the
+  // disambiguator — onReceivedPeerKemPub writes it alongside a genuine
+  // ML-KEM key.
+  const hasPeerKemPub =
+    !!c.peer_kem_pub && typeof c.peer_kem_pub === 'string' && c.peer_kem_pub.length > 0;
+  if (hasPeerKemPub && c.messagekey && typeof c.messagekey === 'string' && c.messagekey.length === 64) {
     out.messageKey = hexToUint(c.messagekey);
   }
   if (c.pending_kem_capsule && typeof c.pending_kem_capsule === 'string' && c.pending_kem_capsule.length > 0) {
     out.pendingKemCapsule = hexToUint(c.pending_kem_capsule);
   }
-  if (c.peer_kem_pub && typeof c.peer_kem_pub === 'string' && c.peer_kem_pub.length > 0) {
+  if (hasPeerKemPub) {
     out.peerKemPubHex = c.peer_kem_pub;
   }
   return out;
