@@ -3,27 +3,27 @@
 // Copyright (c) 2019-2025, The Kryptokrona Developers
 
 #ifdef __OBJC__
-#import <Foundation/Foundation.h>
 #import "React/RCTBridgeModule.h"
+#import <Foundation/Foundation.h>
 #endif
-#include "Types.h"
 #include "CryptoTypes.h"
 #include "StringTools.h"
+#include "Types.h"
 #include "kryptokrona.h"
 #include <unordered_map>
 
 // Conversion utilities
 std::vector<KeyOutput> parseKeyOutputs(NSArray *keyOutputsArray);
 WalletBlockInfo convertWalletBlockInfo(NSDictionary *block);
-NSArray *convertInputsToNSArray(const std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> &inputs);
+NSArray *convertInputsToNSArray(
+    const std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> &inputs);
 NSDictionary *transactionInputToNS(const TransactionInput &input);
 
-std::vector<std::tuple<Crypto::PublicKey, TransactionInput>> processBlockOutputsiOS(
-    const WalletBlockInfo &block,
-    const Crypto::SecretKey &privateViewKey,
+std::vector<std::tuple<Crypto::PublicKey, TransactionInput>>
+processBlockOutputsiOS(
+    const WalletBlockInfo &block, const Crypto::SecretKey &privateViewKey,
     const std::unordered_map<Crypto::PublicKey, Crypto::SecretKey> &spendKeys,
-    const bool isViewWallet,
-    const bool processCoinbaseTransactions);
+    const bool isViewWallet, const bool processCoinbaseTransactions);
 
 @interface TurtleCoinModule : NSObject <RCTBridgeModule>
 
