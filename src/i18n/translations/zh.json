@@ -125,5 +125,19 @@
   "areYouSure": "您确定要继续吗？",
   "delete": "删除",
   "noRooms": "您还没有加入任何群聊！可以添加或加入下方推荐的群聊。",
-  "noFeed": "暂无收到动态消息。动态消息将从您的联系人及您所在群组下载。"
+  "noFeed": "暂无收到动态消息。动态消息将从您的联系人及您所在群组下载。",
+  "themeColor": "彩色",
+  "buyXKR": "买卖 XKR",
+  "manual": "手动",
+  "automatic": "自动选择节点",
+  "inputNodeAddress": "输入节点地址",
+  "encrypted": "加密",
+  "private": "私密",
+  "secure": "安全",
+  "decentralized": "去中心化",
+  "thumbsUpInfo": "双击点赞",
+  "newMessage": "条新消息",
+  "newMessages": "条新消息",
+  "openLink": "确定要打开此链接吗？",
+  "open": "打开"
 }
