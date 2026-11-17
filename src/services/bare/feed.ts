@@ -127,6 +127,7 @@ export const saveFeedMessageAndUpdate = async (
   file?: FileInfo | undefined,
   tip?: TipType | undefined,
   background?: boolean | undefined,
+  signature?: string,
 ) => {
   let isFile = false;
   if (typeof file === 'object') {
@@ -144,7 +145,8 @@ export const saveFeedMessageAndUpdate = async (
     reply,
     timestamp,
     nickname,
-    hash
+    hash,
+    signature,
   );
 
 //   if ((newMessage && !history) || (newMessage && history && background)) {

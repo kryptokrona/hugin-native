@@ -1,231 +1,197 @@
-require('./runtime');
+// Entry of the Bare worklet: routes React Native's bare-rpc requests (src/lib/native.js) into
+// bare/host.js (hugin-network: rooms, DMs, feed, files, room calls, hugin-node) and the pure helpers
+// (bare/adapter.js, bare/utils.js). Every request type and answer shape React Native sends and
+// reads is kept; requests React Native sends without waiting for an answer get none.
+//
+// All PM encrypt/decrypt (and the syncer) live in RN so they can use the noble-based
+// hugin-crypto (ML-KEM + double-encrypt) directly without RPC round-trips during the
+// protocol's handshake.
 
-const { create_room_invite, encrypt_sealed_box, decrypt_sealed_box } = require('./utils');
-const {
-  send_message,
-  create_swarm,
-  end_swarm,
-  share_file_info,
-  close_all_connections,
-  idle,
-  send_voice_channel_status,
-  send_typing_status,
-  send_sdp,
-  send_dm_message,
-  send_dm_file,
-  send_feed_message,
-  download_file,
-  Nodes
-} = require('./swarm');
-const { Hugin } = require('./account');
-const { Bridge } = require('./rpc');
-const { new_beam, send_beam_message } = require('./beam');
-// PUSH-ONLY crypto wrappers live in bare/messages.js. All PM encrypt/decrypt
-// (and the syncer) moved back to RN so they can use the noble-based
-// hugin-crypto (ML-KEM + double-encrypt) directly without RPC round-trips
-// during the protocol's handshake.
-const messages = require('./messages');
-const { IPC } = BareKit;
+const sodium = require('sodium-native');
+const b4a = require('b4a');
+const { encrypt_sealed_box, decrypt_sealed_box } = require('./utils');
+const adapter = require('./adapter');
 
-const rpc = new Bridge(IPC);
-rpc.on('data', (data) => response(data));
+function logError(what, err) {
+  console.log(what, (err && err.message) || err);
+}
 
-const onrequest = async (p) => {
-  switch (p.type) {
-    case 'log':
-      break;
-    case 'get_sealed_box':
-      console.log('🎁 Returning sealed box from backend')
-      const box = encrypt_sealed_box(p.data.messageKey, p.data.data);
-      return { box };
-    case 'decrypt_sealed_box':
-      console.log('🎁 Decrypting sealed box from backend')
-      const plaintext = decrypt_sealed_box(p.data);
-      return { plaintext };
-    case 'push_registration':
-      const pushRegistered = await Nodes.register(p.data);
-      return { sent: pushRegistered };
-    case 'push_encrypt': {
-      // Wallet/syncer used to do this with tweetnacl-sealed-box on the RN
-      // side. Now: ship the small descriptor here, get the wire hex back.
-      const wireHex = messages.encrypt_push_registration({
-        deviceId: p.deviceId,
-        viewTag: p.viewTag,
-        type: p.kind === 'call' ? 'call' : undefined,
-      });
-      return { wireHex };
+/**
+ * The request handler: `onrequest(p)` resolves with the answer (`undefined`: none is sent).
+ * @param {object} deps
+ * @param {import('./host').Host} deps.host
+ * @param {object} deps.hugin  bare/account.js
+ * @param {object} deps.rpc  bare/rpc.js Bridge (given to Hugin.init)
+ */
+function createRouter({ host, hugin, rpc }) {
+  const pushRegisterAll = async (p) => {
+    // One trip for N rooms: the device, call and room registrations are sealed here and sent
+    // to the node as one JSON batch.
+    const registrations = [];
+    if (p.includeDevicePush) {
+      registrations.push(adapter.registration_wire({ deviceId: p.deviceId, viewTag: p.deviceViewTag }));
     }
-    case 'room_push_encrypt': {
-      const wireHex = messages.encrypt_room_push({
-        roomKey: p.roomKey,
-        payload: p.payload,
-        timestamp: p.timestamp,
-        viewTag: p.viewTag,
-      });
-      return { wireHex };
+    if (p.includeCallPush) {
+      registrations.push(adapter.registration_wire({ deviceId: p.deviceId, viewTag: p.callViewTag, type: 'call' }));
     }
-    case 'room_push_send': {
-      // One RPC instead of two: previously RN called room_push_encrypt
-      // (Bare→RN→Bare), then send_node_msg (Bare→RN→Bare again). Now we
-      // encrypt and ship to the node inside a single Bare round-trip.
-      const wireHex = messages.encrypt_room_push({
-        roomKey: p.roomKey,
-        payload: p.payload,
-        timestamp: p.timestamp,
-        viewTag: p.viewTag,
-      });
-      const sent = await Nodes.message(wireHex, p.hash, p.viewTag, 'room');
-      return { sent: sent || { success: false } };
+    for (const room of p.rooms || []) {
+      registrations.push(adapter.registration_wire({ deviceId: p.deviceId, viewTag: room.viewTag }));
     }
-    case 'push_register_all': {
-      // Consolidates what used to be N+1 round-trips for N rooms:
-      //   N × push_encrypt   (one per device/call/room registration)
-      // + 1 × push_registration (ship the batch to the node)
-      // into a single trip. RN passes the device id, the flags, the
-      // pre-computed view tags, and the list of rooms — Bare builds every
-      // sealedbox and ships the JSON batch.
-      const registrations = [];
-      if (p.includeDevicePush) {
-        registrations.push(
-          messages.encrypt_push_registration({
+    if (registrations.length === 0) {
+      return { sent: { success: true, skipped: true } };
+    }
+    return { sent: await host.register(JSON.stringify(registrations)) };
+  };
+
+  return async function onrequest(p) {
+    switch (p.type) {
+      case 'log':
+        return;
+
+      // sealed boxes, keys
+      case 'get_sealed_box':
+        return { box: encrypt_sealed_box(p.data.messageKey, p.data.data) };
+      case 'decrypt_sealed_box':
+        return { plaintext: decrypt_sealed_box(p.data) };
+      case 'group_random_key':
+        // [invite, admin seed]; the invite's admin key is derived from the hex seed.
+        return { keys: adapter.create_room_invite() };
+      case 'create_account_keypair': {
+        // Account identity Ed25519 keypair (used to identify the user inside swarms).
+        const publicKey = b4a.alloc(sodium.crypto_sign_PUBLICKEYBYTES);
+        const secretKey = b4a.alloc(sodium.crypto_sign_SECRETKEYBYTES);
+        sodium.crypto_sign_keypair(publicKey, secretKey);
+        return {
+          publicKey: b4a.toString(publicKey, 'hex'),
+          secretKey: b4a.toString(secretKey, 'hex'),
+        };
+      }
+      case 'sha512_hex':
+        // SHA-512 over the hex bytes (hugin-network/keys `swarmKey`), as comma-separated bytes.
+        return { bytes: adapter.sha512_csv(p.hex) };
+
+      // push payloads and hugin-node
+      case 'push_registration':
+        return { sent: await host.register(p.data) };
+      case 'push_encrypt':
+        return {
+          wireHex: adapter.registration_wire({
             deviceId: p.deviceId,
-            viewTag: p.deviceViewTag,
+            viewTag: p.viewTag,
+            type: p.kind === 'call' ? 'call' : undefined,
           }),
-        );
-      }
-      if (p.includeCallPush) {
-        registrations.push(
-          messages.encrypt_push_registration({
-            deviceId: p.deviceId,
-            viewTag: p.callViewTag,
-            type: 'call',
+        };
+      case 'room_push_encrypt':
+        return {
+          wireHex: adapter.room_push_wire({
+            roomKey: p.roomKey,
+            payload: p.payload,
+            timestamp: p.timestamp,
+            viewTag: p.viewTag,
           }),
+        };
+      case 'room_push_send': {
+        // Sealed and posted to the node in one trip.
+        const wireHex = adapter.room_push_wire({
+          roomKey: p.roomKey,
+          payload: p.payload,
+          timestamp: p.timestamp,
+          viewTag: p.viewTag,
+        });
+        const sent = await host.post({ cipher: wireHex, hash: p.hash, viewtag: p.viewTag, kind: 'room' });
+        return { sent: sent || { success: false } };
+      }
+      case 'push_register_all':
+        return pushRegisterAll(p);
+      case 'room_push_decrypt': {
+        // hugin-network/push opens the box (the nonce is in front of the secretbox) and the room
+        // message in it is checked like a live one, signature included.
+        const plain = await adapter.open_verified_room_push(
+          { cipherHex: p.cipherHex, roomKeys: p.roomKeys || [] },
+          host.hooks.verify,
         );
+        if (!plain) return { failed: true };
+        return { plaintext: plain };
       }
-      for (const room of p.rooms || []) {
-        registrations.push(
-          messages.encrypt_push_registration({
-            deviceId: p.deviceId,
-            viewTag: room.viewTag,
-          }),
-        );
-      }
-      if (registrations.length === 0) {
-        return { sent: { success: true, skipped: true } };
-      }
-      const sent = await Nodes.register(JSON.stringify(registrations));
-      return { sent };
-    }
-    case 'room_push_decrypt': {
-      const plain = messages.decrypt_room_push({
-        cipherHex: p.cipherHex,
-        timestamp: p.timestamp,
-        roomKeys: p.roomKeys || [],
-      });
-      if (!plain) return { failed: true };
-      return { plaintext: plain };
-    }
-    case 'init_bare':
-      initBareMain(p.user);
-      break;
-    case 'update_bare_user':
-      updateBareUser(p.user);
-      break;
-    case 'new_beam':
-      await new_beam(p.key, p.huginAddress, p.send);
-      break;
-    case 'beam_message':
-      send_dm_message(p.address, p.message);
-      break;
-    case 'new_swarm':
-      await newSwarm(p.hashkey, p.key, p.admin, p.beam, p.chat);
-      break;
-    case 'end_swarm':
-      return await endSwarm(p.key);
-    case 'send_room_msg':
-      const message = sendRoomMessage(p.hash, p.message, p.key, p.reply, p.tip);
-      return message;
-    case 'send_feed_msg':
-      const feed_message = await send_feed_message(p.message, p.reply, p.tip);
-      return feed_message;
-    case 'send_node_msg':
-      const sent = await Nodes.message(p.payload, p.hash, p.viewtag, p.kind);
-      return {sent};
-    case 'sync_from_node':
-      const resp = await Nodes.sync(p.request)
-      return {resp, background: Hugin.background}
-    case 'connect_to_node':
-      Nodes.connect(p.address, p.pub)
-      return
-    case 'group_random_key':
-      const keys = create_room_invite();
-      return { keys };
-    case 'create_account_keypair': {
-      // Account identity Ed25519 keypair (used to identify the user inside
-      // swarms). Was tweetnacl.sign.keyPair() on the RN side; now sodium.
-      const sodium = require('sodium-native');
-      const publicKey = Buffer.alloc(sodium.crypto_sign_PUBLICKEYBYTES);
-      const secretKey = Buffer.alloc(sodium.crypto_sign_SECRETKEYBYTES);
-      sodium.crypto_sign_keypair(publicKey, secretKey);
-      return {
-        publicKey: publicKey.toString('hex'),
-        secretKey: secretKey.toString('hex'),
-      };
-    }
-    case 'sha512_hex': {
-      // Replaces tweetnacl.hash. SHA-512 is SHA-512 — sodium's
-      // crypto_hash_sha512 produces the exact same 64 bytes tweetnacl did,
-      // so existing swarm-topic derivations resolve to the same peers.
-      // Returns comma-separated bytes to match the old return shape.
-      const sodium = require('sodium-native');
-      const out = Buffer.alloc(sodium.crypto_hash_sha512_BYTES);
-      sodium.crypto_hash_sha512(out, Buffer.from(p.hex, 'hex'));
-      return { bytes: Array.from(out).join(',') };
-    }
-    case 'begin_send_file':
-      sendFileInfo(p.json_file_data);
-      break;
-    case 'send_dm_file':
-      send_dm_file(p.address, p.file);
-      break;
-    case 'request_download':
-      request_download(p.file);
-      break;
-    case 'group_download':
-      download_file(p.file);
-      break;
-    case 'save_to_downloads':
-      const saveResult = await Storage.save_to_downloads(p.hash, p.fileName, p.topic);
-      if (saveResult.success) {
-        Hugin.send('file-saved-to-downloads', { hash: p.hash, filePath: saveResult.filePath, fileName: p.fileName });
-      }
-      return saveResult;
+      case 'send_node_msg':
+        return { sent: await host.post({ cipher: p.payload, hash: p.hash, viewtag: p.viewtag, kind: p.kind }) };
+      case 'sync_from_node':
+        return { resp: await host.syncNode(p.request), background: hugin.background };
+      case 'connect_to_node':
+        host.connectNode(p.address, p.pub).catch((err) => logError('Node connection failed:', err));
+        return;
 
-    case 'keep_alive':
-      break;
-    case 'idle_status':
-      Hugin.sleep(p.mode, p.background);
-      idle(p.background, p.force);
-      break;
-    case 'close_connections':
-      close_all_connections();
-      break;
-    case 'voice_status':
-      send_voice_channel_status(p.status.voice, p.status, p.update);
-      break;
-    case 'typing':
-      send_typing_status(p.typing, p.key);
-      break;
-    case 'send_sdp':
-      send_sdp(p.data);
-      break;
-    default:
-      break;
-  }
-  return;
-};
+      // identity and lifecycle
+      case 'init_bare':
+        hugin.init(p.user, rpc);
+        host.start();
+        return;
+      case 'update_bare_user':
+        hugin.update(p.user);
+        return;
+      case 'keep_alive':
+        return;
+      case 'idle_status':
+        hugin.sleep(p.mode, p.background);
+        await host.idle({ mode: p.mode, background: p.background, force: p.force });
+        return;
+      case 'close_connections':
+        await host.closeConnections();
+        return;
 
-async function response(request) {
+      // rooms and DMs
+      case 'new_swarm':
+        // `hashkey` (SHA-512 of the key) is derived again by hugin-network from the key itself.
+        if (p.beam) await host.joinDm({ key: p.key, chat: p.chat });
+        else await host.joinRoom({ key: p.key, admin: p.admin });
+        return;
+      case 'end_swarm':
+        await host.leave(p.key);
+        return;
+      case 'send_room_msg':
+        return host.sendRoomMessage({ key: p.key, message: p.message, reply: p.reply, tip: p.tip });
+      case 'send_feed_msg':
+        return host.sendFeedMessage({ message: p.message, reply: p.reply, tip: p.tip });
+      case 'beam_message':
+        host.sendDm(p.address, p.message);
+        return;
+      case 'beam_dm':
+        // As beam_message, answered with the number of the contact's peers written to (0: the
+        // contact is not connected and nothing was sent).
+        return { sent: Number(host.sendDm(p.address, p.message)) || 0 };
+      case 'typing':
+        host.typing(p.key, p.typing);
+        return;
+
+      // files
+      case 'begin_send_file':
+        await host.shareFile(JSON.parse(p.json_file_data));
+        return;
+      case 'send_dm_file':
+        await host.shareFile(p.file, { dm: true, conversation: p.address });
+        return;
+      case 'group_download':
+        host.download(p.file).catch((err) => logError('Download failed:', err));
+        return;
+      case 'save_to_downloads':
+        return host.saveToDownloads(p.hash, p.fileName, p.topic);
+
+      // room calls
+      case 'voice_status':
+        await host.setVoiceStatus(p.status, p.update);
+        return;
+      case 'send_sdp':
+        host.sendSdp(p.data);
+        return;
+
+      default:
+        return;
+    }
+  };
+}
+
+/** Answers one request; a failing handler answers `{ id, error }` when the request has an id. */
+async function respond(rpc, onrequest, request) {
   try {
     const send = await onrequest(request);
     if (send === undefined) return;
@@ -237,7 +203,7 @@ async function response(request) {
       if (request?.id !== undefined) {
         rpc.send(request.type, {
           id: request.id,
-          error: (e && typeof e === 'object' && 'message' in e) ? e.message : String(e),
+          error: e && typeof e === 'object' && 'message' in e ? e.message : String(e),
         });
       }
     } catch (_) {
@@ -246,55 +212,22 @@ async function response(request) {
   }
 }
 
-// Function implementations
-const initBareMain = async (user) => {
-  Hugin.init(user, rpc);
-  // Message sync (poll node + decrypt) lives on the RN side now — Hermes can
-  // run noble pure-JS, so there's no reason to ferry encrypted bytes across
-  // the bridge for crypto work.
-};
+/** Starts the worklet on react-native-bare-kit's IPC. */
+function main(IPC) {
+  require('./runtime').installProcessHandlers();
+  const { Bridge } = require('./rpc');
+  const { Hugin } = require('./account');
+  const { Host } = require('./host');
+  const rpc = new Bridge(IPC);
+  const host = new Host({ hugin: Hugin });
+  const onrequest = createRouter({ host, hugin: Hugin, rpc });
+  rpc.on('data', (data) => {
+    if (!data || typeof data !== 'object') return;
+    respond(rpc, onrequest, data);
+  });
+  return { rpc, host, onrequest };
+}
 
-const updateBareUser = (user) => {
-  Hugin.update(user);
-};
+if (typeof BareKit !== 'undefined' && BareKit && BareKit.IPC) main(BareKit.IPC);
 
-const newSwarm = async (hashkey, key, admin, beam, chat) => {
-  if (Hugin.rooms.some((a) => a.key === key)) return;
-  Hugin.rooms.push({ key, topic: null, admin });
-  try {
-    const topic = await create_swarm(hashkey, key, beam, chat);
-    const entry = Hugin.rooms.find((a) => a.key === key);
-    if (entry) entry.topic = topic ?? null;
-  } catch (e) {
-    Hugin.rooms = Hugin.rooms.filter((a) => a.key !== key);
-    return;
-  }
-};
-
-const endSwarm = async (key) => {
-  const swarm = getRoom(key);
-  if (!swarm) return;
-  const rooms = Hugin.rooms.filter((a) => a.key !== key);
-  Hugin.rooms = rooms;
-  end_swarm(swarm.topic);
-};
-
-const sendRoomMessage = (hash, message, key, reply, tip) => {
-  const swarm = getRoom(key);
-  if (!swarm) return { type: 'Error' };
-  return send_message(hash, message, swarm.topic, reply, key, tip);
-};
-
-const getRoom = (key) => {
-  return Hugin.rooms.find((a) => a.key === key);
-};
-
-const sendFileInfo = (json_file_data) => {
-  const file_data = JSON.parse(json_file_data);
-  const room = getRoom(file_data.key);
-  if (!room) {
-    return;
-  }
-
-  share_file_info(file_data, room.topic);
-};
+module.exports = { createRouter, respond, main };

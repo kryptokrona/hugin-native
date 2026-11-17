@@ -100,5 +100,6 @@
   "inputNodeUrl": "Enter node URL",
   "randomNode": "Random node",
   "connectToNode": "Connect to node",
-  "checkNodes": "Check nodes"
+  "checkNodes": "Check nodes",
+  "contactOffline": "Inte levererat: kontakten är offline. Det skickas när kontakten ansluter, eller tryck för att skicka igen."
 }

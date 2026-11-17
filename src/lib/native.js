@@ -203,6 +203,28 @@ class Beams {
     rpc.send(data);
   }
 
+  /**
+   * Sends a DM payload over the contact's DM swarm and resolves the number of the contact's
+   * peers it was written to: 0 when the contact is not connected (nothing was sent), or when
+   * the worklet does not answer within `timeoutMs`.
+   */
+  async send(address, message, timeoutMs = 5000) {
+    const data = { type: 'beam_dm', address, message };
+    let timer;
+    const timeout = new Promise((resolve) => {
+      timer = setTimeout(() => resolve(null), timeoutMs);
+    });
+    try {
+      const answer = await Promise.race([rpc.request(data), timeout]);
+      const sent = Number(answer?.sent);
+      return Number.isFinite(sent) && sent > 0 ? sent : 0;
+    } catch (e) {
+      return 0;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async new(address) {
     const hash = await Wallet.key_derivation_hash(address);
     this.connect(naclHash(hash), hash, address);

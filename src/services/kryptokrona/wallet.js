@@ -1,20 +1,10 @@
 import { Address, CryptoNote } from 'kryptokrona-utils';
 import { Beam, Nodes } from '../../lib/native';
-import {
-  createFriendRequest,
-  encodeExtra,
-  messageHash,
-} from 'hugin-crypto';
-import {
-  identityPublicKeyBytes,
-  getContactCrypto,
-  markKemCapsuleDelivered,
-} from '../hugin/identity';
+import { startDm, stopDm } from '../hugin/dm';
 import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import {
   cnFastHash,
   generateDeterministicSubwalletKeys,
-  generateKeyDerivation,
   generateKeys,
   makePostRequest,
   processBlockOutputs,
@@ -42,10 +32,8 @@ import {
 
 import Clipboard from '@react-native-clipboard/clipboard';
 import { MessageSync } from '../hugin/syncer';
-import { Platform } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { WalletConfig } from 'config/wallet-config';
-import { privateKeys } from './privates';
 import { t } from 'i18next';
 import { getDeviceId } from '../../services/pushnotifications';
 import { fetchWithTimeout, sleep } from '@/utils';
@@ -89,6 +77,7 @@ export class ActiveWallet {
     this.deadNodeEmitted = true;
     this.messageKeys = undefined;
     this.daemon = undefined;
+    stopDm();
 
     console.log('Wallet has been reset.');
   }
@@ -111,6 +100,7 @@ export class ActiveWallet {
     this.address = this.addresses()[0];
     console.log('Created wallet with address:', this.address);
     this.loaded = true;
+    this.dm();
     await this.joinBetaRoom(nickname);
     // await this.start();
     await this.save();
@@ -195,6 +185,14 @@ export class ActiveWallet {
     return this.active.getAddresses();
   }
 
+  /**
+   * The DM crypto of this wallet (hugin-network/dm DmCrypto, src/services/hugin/dm.js), shared with
+   * the syncer and the push handler; made again when the wallet's address changes.
+   */
+  dm() {
+    return startDm(this, { name: () => useUserStore.getState()?.user?.name || '' });
+  }
+
   async getAndSetBalance() {
     let [unlockedBalance, lockedBalance] = await this.active.getBalance();
     setBalance([unlockedBalance, lockedBalance]);
@@ -225,22 +223,9 @@ export class ActiveWallet {
     return this.active.getPrimaryAddressPrivateKeys();
   }
 
-  getIOSkey() {
-    // All iOS users gets free Hugin+ accounts because
-    // Apple does not allow third party payments yet.
-
-    //Get a random pre paid private key pair from a list
-
-    if (Platform.OS !== 'ios') {
-      return;
-    }
-    const key = privateKeys[Math.floor(Math.random() * privateKeys.length)];
-    return key;
-  }
-
   async messageKeyPair() {
     if (this.messageKeys) return this.messageKeys;
-    const priv = Platform.OS === 'android' ? this.spendKey() : this.getIOSkey();
+    const priv = this.spendKey();
     const keys = await generateDeterministicSubwalletKeys(priv, 1);
     const address = await Address.fromSeed(keys.private_key);
     const pub = address.m_keys.m_spendKeys.m_publicKey;
@@ -301,6 +286,7 @@ export class ActiveWallet {
     });
 
     await this.active.start();
+    this.dm();
     await this.create_message_wallet();
     this.messageKeys = await this.messageKeyPair();
     this.optimize_message_inputs();
@@ -311,11 +297,8 @@ export class ActiveWallet {
 
     setInterval(() => this.save(), 30000);
 
-    // Device-push curve25519 keypair / Keychain `encryption` entry is gone:
-    // DMs to mobile now arrive as standard hugin-crypto v0.2 wire bytes
-    // (push server only routes by viewTag, doesn't sealedbox-wrap), so RN
-    // decrypts via openFriendRequest + the ML-KEM identity keypair stored
-    // by services/hugin/identity.ts under Keychain service 'kem-identity'.
+    // DM pushes carry the sender's DM payload as posted to the hugin-node (the push server
+    // routes it by view tag); pushnotifications.ts opens it with this wallet's DmCrypto.
 
     //Incoming transaction event
     this.active.on('incomingtx', async (transaction) => {
@@ -450,8 +433,18 @@ export class ActiveWallet {
   });
 }
 
+  /**
+   * Sends a DM: over the contact's DM swarm when `beam` is set, else as a hugin-node post (with
+   * retries). When the DM swarm write reaches none of the contact's peers, a payload that fits a
+   * node post is posted instead. A payload longer than a node post takes (`fitsNode` false: a
+   * long text, most often with the handshake fields) goes over the DM swarm only: while the
+   * contact is not connected it is not sent, and the answer is `{ success: false, error:
+   * 'contact_offline', hash: '' }` (the message screen keeps it as not delivered, to be sent
+   * again when the contact is connected). Returns `{ success, error, hash }`; `hash` is the
+   * message id the receiver stores.
+   */
   async send_message(message, receiver, beam = false, call = false, _ignored = '') {
-    if (message.length === 0) {
+    if (typeof message !== 'string' || message.length === 0) {
       return { error: 'message', success: false, hash: '' };
     }
 
@@ -461,35 +454,40 @@ export class ActiveWallet {
       return { error: 'address', success: false, hash: '' };
     }
 
-    if (!beam) {
-      try {
-        await this.waitForCondition(
-          () => useGlobalStore.getState().huginNode.connected,
-          10000,
-        );
-      } catch (err) {
-        return { success: false, error: 'not_connected', hash: '' };
+    let out;
+    try {
+      out = await this.encrypt_hugin_message(message, address, { call });
+    } catch (err) {
+      console.log('DM not encrypted:', err?.code || err?.message);
+      return { success: false, error: 'encrypt_failed', hash: '' };
+    }
+
+    if (beam || !out.fitsNode) {
+      // Written to a connected peer of the contact: the DM swarm gives no further
+      // acknowledgement.
+      const written = await Beam.send(address, out.payload);
+      if (written > 0) {
+        return { success: true, error: 'success', hash: out.hash };
+      }
+      if (!out.fitsNode) {
+        return { success: false, error: 'contact_offline', hash: '' };
       }
     }
 
-    const viewtag = await this.generate_view_tag(address, call);
-    const name = useUserStore.getState().user.name;
-    const wireHex = await this.encrypt_hugin_message(message, address, name);
-    const hash = messageHash(wireHex);
-
-    if (beam) {
-      Beam.message(address, wireHex);
-      // Beam delivers without a node ack; treat as best-effort but mark
-      // the kem_ct as delivered (peer will get it next time they sync).
-      await markKemCapsuleDelivered(address);
-      return { success: true, error: 'success', hash };
+    try {
+      await this.waitForCondition(
+        () => useGlobalStore.getState().huginNode.connected,
+        10000,
+      );
+    } catch (err) {
+      return { success: false, error: 'not_connected', hash: '' };
     }
 
-    // Node path: retry-with-backoff like the original behavior.
+    // Node path: retry with backoff.
     let attempt = 0;
     let sent;
     while (attempt < 5) {
-      sent = await Nodes.message(wireHex, hash, viewtag, call ? 'call' : 'dm');
+      sent = await Nodes.message(out.payload, out.hash, out.viewTag, out.kind);
       if (sent?.success === true) break;
       attempt += 1;
       if (attempt < 5) await sleep(3000);
@@ -501,44 +499,18 @@ export class ActiveWallet {
       }
       return { success: false, error: reason || 'send_failed', hash: '' };
     }
-    await markKemCapsuleDelivered(address);
-    return { success: true, error: 'success', hash };
+    return { success: true, error: 'success', hash: out.hash };
   }
 
   /**
-   * Build a hugin-crypto wire payload for `address`. Three branches depending
-   * on per-contact handshake state:
-   *
-   *   - no messageKey yet  → INITIAL: include our ML-KEM pub so the peer can
-   *                          encapsulate.
-   *   - messageKey present + pendingKemCt → FIRST REPLY: include the capsule
-   *                          we owe + inner-encrypt with the shared secret.
-   *   - messageKey only    → ESTABLISHED: inner-encrypt only.
+   * The DM payload of `message` for `toAddress` (hugin-network/dm `encrypt`): without a key for the
+   * contact it carries our ML-KEM public key, with our capsule not yet used by the contact it
+   * carries the capsule, otherwise only the box under the shared key. The contact's state is not
+   * changed by sending. Resolves `{ payload, hash, timestamp, viewTag, kind, handshake, to,
+   * fitsNode }`; `viewTag` is the push view tag (all 64 characters for a call).
    */
-  async encrypt_hugin_message(message, toAddress, name) {
-    const opts = {
-      message,
-      sender: { address: this.address, privateSpendKey: this.spendKey() },
-      toAddress,
-      name,
-    };
-    const contactState = await getContactCrypto(toAddress);
-    if (contactState.messageKey) {
-      opts.messageKey = contactState.messageKey;
-      console.log(`[ml-kem] Message to ${toAddress} is quantum-encrypted (ML-KEM shared secret).`);
-      if (contactState.pendingKemCapsule) {
-        opts.kemCiphertext = contactState.pendingKemCapsule;
-      }
-    } else {
-      // Pre-handshake — initiator path. Always include our identity pub so
-      // peers that lost our previous send-attempt (or haven't replied yet)
-      // can still close out. Re-broadcast on every message until we hold a
-      // confirmed messageKey; onReceivedPeerKemPub on the peer's side is
-      // idempotent once established, so redundant sends are safe.
-      opts.myKemPub = await identityPublicKeyBytes();
-    }
-    const wire = await createFriendRequest(opts);
-    return encodeExtra(wire);
+  async encrypt_hugin_message(message, toAddress, { call = false } = {}) {
+    return this.dm().encrypt(toAddress, message, { call: call === true });
   }
 
   async start_call(roomKey, receiver) {
@@ -594,12 +566,12 @@ export class ActiveWallet {
     };
   }
 
+  /**
+   * The DM swarm key with `chat` (an address): cn_fast_hash of the key derivation of the
+   * contact's view public key and our private view key, the same value on both sides.
+   */
   async key_derivation_hash(chat) {
-    const [privateSpendKey, privateViewKey] = this.privateKeys();
-    const recvAddr = await Address.fromAddress(chat);
-    const recvPubKey = recvAddr.m_keys.m_viewKeys.m_publicKey;
-    const derivation = await generateKeyDerivation(recvPubKey, privateViewKey);
-    return await cnFastHash(derivation);
+    return this.dm().derivationHash(chat);
   }
 
   async generate_view_tag(address = this.active.getAddresses()[0], long = false) {

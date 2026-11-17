@@ -213,7 +213,8 @@ export const saveRoomMessageAndUpdate = async (
   file?: FileInfo | undefined,
   tip?: TipType | undefined,
   background?: boolean | undefined,
-  status: MessageStatus = 'success'
+  status: MessageStatus = 'success',
+  signature?: string,
 ) => {
   let isFile = false;
   if (typeof file === 'object') {
@@ -231,7 +232,8 @@ export const saveRoomMessageAndUpdate = async (
     hash,
     sent,
     tip,
-    status
+    status,
+    signature,
   );
 
   if ((newMessage && !history) || (newMessage && history && background)) {

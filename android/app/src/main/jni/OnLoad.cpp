@@ -5,7 +5,6 @@
 #include <react/renderer/componentregistry/ComponentDescriptorProviderRegistry.h>
 #include <rncore.h>
 #include <BareKitModule.h>
-#include "Java.h"
 
 #ifdef REACT_NATIVE_APP_CODEGEN_HEADER
 #include REACT_NATIVE_APP_CODEGEN_HEADER
@@ -54,7 +53,6 @@ std::shared_ptr<TurboModule> javaModuleProvider(
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
   return facebook::jni::initialize(vm, [] {
-    init_turtlecoin_jni(facebook::jni::Environment::current());
     facebook::react::DefaultTurboModuleManagerDelegate::cxxModuleProvider =
         &facebook::react::cxxModuleProvider;
     facebook::react::DefaultTurboModuleManagerDelegate::javaModuleProvider =

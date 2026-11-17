@@ -2545,7 +2545,7 @@ DEPENDENCIES:
   - RNWorklets (from `../node_modules/react-native-worklets`)
   - sodium-ios
   - TcpSockets (from `../node_modules/react-native-tcp`)
-  - TurtleCoinModule (from `./crypto`)
+  - TurtleCoinModule (from `./TurtleCoinModule`)
   - VisionCamera (from `../node_modules/react-native-vision-camera`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2781,7 +2781,7 @@ EXTERNAL SOURCES:
   TcpSockets:
     :path: "../node_modules/react-native-tcp"
   TurtleCoinModule:
-    :path: "./crypto"
+    :path: "./TurtleCoinModule"
   VisionCamera:
     :path: "../node_modules/react-native-vision-camera"
   Yoga:

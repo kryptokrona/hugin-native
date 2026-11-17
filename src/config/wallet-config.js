@@ -20,6 +20,9 @@ import {
   hashToScalar,
   underivePublicKey,
   generateKeys,
+  deriveViewTag,
+  clsagSign,
+  clsagVerify,
 } from '../services/NativeTest';
 
 class walletConfig {
@@ -159,6 +162,14 @@ class walletConfig {
     this.hashToScalar = hashToScalar;
     this.underivePublicKey = underivePublicKey;
     this.generateKeys = generateKeys;
+
+    /**
+     * Transaction version 2 (fork 14): view tags and CLSAG signatures
+     */
+    this.deriveViewTag = deriveViewTag;
+    this.clsagSign = clsagSign;
+    this.clsagVerify = clsagVerify;
+
     /**
      * Memory to use for storing downloaded blocks - 3MB
      */

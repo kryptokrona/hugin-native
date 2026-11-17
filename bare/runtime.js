@@ -1,43 +1,22 @@
-// const process = require('bare-process');
-// const { SystemLog } = require('bare-logger');
+// Process-wide setup of the worklet (called once by bare/main.js when it runs under BareKit).
+//
+// An exception or rejection nobody handled is logged instead of ending the worklet (React
+// Native keeps talking to it). hugin-network registers no process handlers of its own; the
+// worklet's lifecycle comes from React Native (`idle_status`, worklet terminate).
 
-// Object.defineProperty(globalThis, 'global', {
-//   enumerable: true,
-//   writable: false,
-//   value: globalThis,
-// });
-// Object.defineProperty(globalThis, 'window', {
-//   enumerable: true,
-//   writable: false,
-//   value: globalThis,
-// });
-// Object.defineProperty(globalThis, 'self', {
-//   enumerable: true,
-//   writable: false,
-//   value: globalThis,
-// });
-// Object.defineProperty(globalThis, 'process', {
-//   enumerable: true,
-//   writable: false,
-//   value: process,
-// });
+const process = require('bare-process');
 
-// // error handlers
+let installed = false;
 
-// process.on('uncaughtException', (ex) => {
-//   console.log('uncaughtException', ex);
-// });
+function installProcessHandlers() {
+  if (installed) return;
+  installed = true;
+  process.on('uncaughtException', (err) => {
+    console.log('Caught an unhandled exception:', err);
+  });
+  process.on('unhandledRejection', (reason) => {
+    console.log('Unhandled rejection:', reason);
+  });
+}
 
-// process.on('unhandledRejection', (ex) => {
-//   console.log('unhandledRejection', ex);
-// });
-
-// console redirection to react-native side
-// Bare.sendLog is not active anymore
-
-// const consoleProxy = new Console({
-//   colors: false,
-//   stdout: Bare.sendLog,
-//   stderr: Bare.sendLog,
-// });
-// globalThis.console = consoleProxy;
+module.exports = { installProcessHandlers };

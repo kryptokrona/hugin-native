@@ -136,6 +136,10 @@ export const MessageScreen: React.FC<Props> = ({ route }) => {
   const [callMenuActive, setCallMenuActive] = useState<boolean>(false);
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
   const animatedHashes = useRef<Set<string>>(new Set());
+  // Own messages not delivered because the contact was not connected (Wallet.send_message
+  // `contact_offline`); they stay 'failed' (with the resend button) and are sent again when the
+  // contact connects while this screen is open.
+  const offlineHashes = useRef<Set<string>>(new Set());
 
   function onCloseCallMenu() {
     setCallMenuActive(false);
@@ -526,9 +530,14 @@ useEffect(() => {
 
       if (!success) {
           Toast.show({
-            text1: error,
+            text1: error === 'contact_offline' ? t('contactOffline') : error,
             type: 'error',
           });   
+
+        // A message that only goes over the DM swarm is sent again when the contact connects.
+        if (error === 'contact_offline') {
+          offlineHashes.current.add(outgoingHash);
+        }
 
         // Clear the timeout since we got an error response
         clearTimeout(timeoutId);
@@ -634,6 +643,18 @@ useEffect(() => {
       onSend(item.message || '', undefined, '', false, undefined, hashStr);
     }
   }, [onSend]);
+
+  useEffect(() => {
+    if (!online || offlineHashes.current.size === 0) return;
+    const waiting = [...offlineHashes.current];
+    offlineHashes.current.clear();
+    for (const hashStr of waiting) {
+      const item = messagesRef.current.find(m => m.hash === hashStr);
+      if (item && item.sent && item.status === 'failed') {
+        handleRetryPress(hashStr);
+      }
+    }
+  }, [online, handleRetryPress]);
 
   return (
     <ScreenLayout>

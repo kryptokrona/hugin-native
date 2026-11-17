@@ -1,12 +1,13 @@
+// State of the worklet's user, set by React Native (`init_bare`, `update_bare_user`,
+// `idle_status`) and read by bare/host.js: identity, paths, the files we have, bans and blocks,
+// and the bridge to React Native.
 class Account {
   constructor() {
     this.name = '';
     this.address = '';
     this.avatar = '';
-    this.rooms = [];
     this.downloadDir = '';
     this.rpc = null;
-    this.req = null;
     this.keys = {};
     this.bannedList = [];
     this.blockList = [];
@@ -18,7 +19,7 @@ class Account {
   }
 
   init(data, rpc) {
-    console.log('[account.js] Init bare user:', data);
+    console.log('[account.js] Init bare user');
     this.name = data.name;
     this.address = data.address;
     this.avatar = data.avatar;
@@ -53,16 +54,22 @@ class Account {
     this.blockList.push(address);
   }
 
+  //Entries are addresses (or `{ address }` objects).
   blocked(address) {
-    return this.blockList.some((a) => a.address === address);
+    return this.blockList.some(
+      (a) => a === address || (a && typeof a === 'object' && a.address === address),
+    );
   }
 
   send(type, data) {
+    if (!this.rpc) return;
     this.rpc.send(type, data);
   }
 
-  async request(data) {
-    return await this.rpc.request(data);
+  //Resolves with React Native's answer, or undefined after `timeoutMs` (0: waits for it).
+  async request(data, timeoutMs = 0) {
+    if (!this.rpc) return undefined;
+    return await this.rpc.request(data, { timeoutMs });
   }
 
   sleep(mode, bg) {
@@ -77,4 +84,4 @@ class Account {
 
 let Hugin = new Account();
 
-module.exports = { Hugin };
+module.exports = { Hugin, Account };

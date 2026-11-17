@@ -453,7 +453,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       } else if (state === 'active') {
         console.log('********** ACTIVE STATE **********');
         if (useGlobalStore.getState().started && !joining) {
-          MessageSync.restart_sync();
+          MessageSync.restart();
           joining = true;
           Rooms.idle(false, false);
           
@@ -485,7 +485,9 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
             message.msg,
             '', //Todo reply
             message.timestamp,
-            message.timestamp.toString(),
+            typeof message.hash === 'string' && message.hash.length > 0
+              ? message.hash
+              : String(message.timestamp),
             false,
             undefined,
             false,

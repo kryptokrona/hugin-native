@@ -1,213 +1,123 @@
-// Long-lived ML-KEM-512 identity keypair + per-contact KEM state.
+// The user's ML-KEM-512 identity key pair, used by the DM handshake (hugin-network/dm, through
+// src/services/hugin/dm.js).
 //
-// Why a dedicated module: the rest of the messaging code shouldn't have to
-// know whether the keypair lives in Keychain or memory, or how the per-
-// contact handshake state is persisted. Wallet + syncer just ask for the
-// public bytes to advertise, the secret bytes to decapsulate, and the
-// per-contact crypto state to encrypt/decrypt with.
+// Storage: react-native-keychain, generic password under the service 'kem-identity', as
+// `${secretKeyHex}|${publicKeyHex}` (3264 and 1600 hex characters). The entry is the same one
+// earlier versions of the app wrote, so an existing identity is kept.
 //
-// Storage:
-//   - Identity keypair: react-native-keychain, generic password under the
-//     service label 'kem-identity'. Stored as `${skHex}|${pkHex}` so we keep
-//     both halves together and don't have to recompute the pubkey on every
-//     load. ml_kem512 keypair is ~2.4 KB hex, well within Keychain limits.
-//   - Per-contact KEM state: SQLite `contacts` table — we already kept the
-//     `messagekey` column reserved for exactly this. A new `pending_kem_ct`
-//     column stores the ciphertext we owe the peer on our next outgoing
-//     send (cleared once shipped).
+// `kemIdentity()` is the one place a key pair is made: it reads the entry and, only when there is
+// none (or it cannot be parsed), makes a key pair and writes it. A failed read rejects, so a new
+// identity never replaces one that could not be read. Concurrent callers share one load.
 
 import * as Keychain from 'react-native-keychain';
-import {
-  generateKemKeypair,
-  encapsulate,
-  decapsulate,
-  hexToUint,
-  uintToHex,
-  type IdentityKemKey,
-} from 'hugin-crypto';
-import {
-  getContacts,
-  updateContactKemState,
-} from '../bare/sqlite';
+import { generateKemKeypair, uintToHex } from 'hugin-crypto';
 
 const KEYCHAIN_SERVICE = 'kem-identity';
+const KEYCHAIN_USERNAME = 'kem-identity';
 
-let cachedIdentity: IdentityKemKey | null = null;
+const PUBLIC_KEY_HEX = 1600; // 800 bytes
+const SECRET_KEY_HEX = 3264; // 1632 bytes
+const HEX_RE = /^[0-9a-f]+$/i;
+
+/** The key pair as hex strings, the form hugin-network/dm's loadKemIdentity / saveKemIdentity use. */
+export interface KemIdentityHex {
+  publicKey: string;
+  secretKey: string;
+}
+
+function isHex(value: unknown, length: number): value is string {
+  return typeof value === 'string' && value.length === length && HEX_RE.test(value);
+}
+
+/** Parses the Keychain value; null when it is not `${secretKeyHex}|${publicKeyHex}`. */
+function parseStored(password: unknown): KemIdentityHex | null {
+  if (typeof password !== 'string') return null;
+  const parts = password.split('|');
+  if (parts.length !== 2) return null;
+  const [secretKey, publicKey] = parts;
+  if (!isHex(secretKey, SECRET_KEY_HEX) || !isHex(publicKey, PUBLIC_KEY_HEX)) return null;
+  return { publicKey: publicKey.toLowerCase(), secretKey: secretKey.toLowerCase() };
+}
 
 /**
- * Load the device's long-lived ML-KEM identity keypair, generating it on
- * first launch. Caller (Wallet.init / pushnotifications.init) invokes this
- * once at startup; we cache in module scope so per-message paths are cheap.
+ * Reads the stored key pair: null when there is no entry or it cannot be parsed. Rejects when the
+ * Keychain read fails.
  */
-export async function loadOrCreateIdentity(): Promise<IdentityKemKey> {
-  if (cachedIdentity) return cachedIdentity;
+export async function readKemIdentity(): Promise<KemIdentityHex | null> {
+  const creds = await Keychain.getGenericPassword({ service: KEYCHAIN_SERVICE });
+  if (!creds) return null;
+  const parsed = parseStored(creds.password);
+  if (!parsed) console.warn('[identity] stored ML-KEM identity cannot be parsed');
+  return parsed;
+}
 
-  try {
-    const creds = await Keychain.getGenericPassword({ service: KEYCHAIN_SERVICE });
-    if (creds && creds.password.includes('|')) {
-      const [skHex, pkHex] = creds.password.split('|');
-      cachedIdentity = {
-        secretKey: hexToUint(skHex),
-        publicKey: hexToUint(pkHex),
-      };
-      return cachedIdentity;
-    }
-  } catch (e) {
-    console.warn('[identity] Keychain read failed, generating fresh keypair:', e);
+/** Writes the key pair to the Keychain entry. Rejects when the write fails. */
+export async function saveKemIdentity(identity: KemIdentityHex): Promise<void> {
+  if (!isHex(identity?.publicKey, PUBLIC_KEY_HEX) || !isHex(identity?.secretKey, SECRET_KEY_HEX)) {
+    throw new Error('malformed ML-KEM identity');
   }
+  await Keychain.setGenericPassword(
+    KEYCHAIN_USERNAME,
+    `${identity.secretKey.toLowerCase()}|${identity.publicKey.toLowerCase()}`,
+    { service: KEYCHAIN_SERVICE, accessible: Keychain.ACCESSIBLE.ALWAYS },
+  );
+}
 
+let loaded: KemIdentityHex | null = null;
+let loading: Promise<KemIdentityHex> | null = null;
+
+async function loadOrMake(): Promise<KemIdentityHex> {
+  const stored = await readKemIdentity();
+  if (stored) return stored;
   const kp = generateKemKeypair();
-  const blob = `${uintToHex(kp.secretKey)}|${uintToHex(kp.publicKey)}`;
+  const made = { publicKey: uintToHex(kp.publicKey), secretKey: uintToHex(kp.secretKey) };
   try {
-    await Keychain.setGenericPassword('kem-identity', blob, {
-      service: KEYCHAIN_SERVICE,
-      accessible: Keychain.ACCESSIBLE.ALWAYS,
-    });
+    await saveKemIdentity(made);
   } catch (e) {
-    console.error('[identity] Failed to persist ML-KEM identity:', e);
-    // Continue anyway — we have an in-memory keypair for this session, but
-    // it'll be regenerated next launch and existing contacts will need to
-    // re-handshake. The user sees this as 'a peer that suddenly forgot us'.
+    // The key pair is used for this session; contacts redo the handshake after a restart.
+    console.error('[identity] ML-KEM identity not saved:', e);
   }
-  cachedIdentity = kp;
-  return kp;
-}
-
-/** The 800-byte ML-KEM public key, hex-encoded. Cheap once loaded. */
-export async function identityPublicKey(): Promise<string> {
-  const kp = await loadOrCreateIdentity();
-  return uintToHex(kp.publicKey);
-}
-
-/** Raw public key bytes — what hugin-crypto wants. */
-export async function identityPublicKeyBytes(): Promise<Uint8Array> {
-  const kp = await loadOrCreateIdentity();
-  return kp.publicKey;
-}
-
-/** Secret key bytes for decapsulation. Never expose outside the device. */
-export async function identitySecretKeyBytes(): Promise<Uint8Array> {
-  const kp = await loadOrCreateIdentity();
-  return kp.secretKey;
-}
-
-// ---------------------------------------------------------------------------
-// Per-contact KEM state — read/write through the SQLite contacts row.
-// ---------------------------------------------------------------------------
-
-/** What the message-encrypt path needs to know about a contact. */
-export interface ContactCrypto {
-  /**
-   * 32-byte shared secret. Presence ≡ handshake completed — this is the only
-   * field you need to look at to answer "have we finished the ML-KEM
-   * exchange with this contact?".
-   */
-  messageKey?: Uint8Array;
-  /**
-   * The capsule we generated by encapsulating against the peer's kem_pub
-   * but haven't shipped yet. Include on the next outgoing message, then
-   * clear with `markKemCapsuleDelivered`. Transient — usually populated for
-   * one message at most.
-   */
-  pendingKemCapsule?: Uint8Array;
-  /**
-   * Hex of the peer's ML-KEM public key at the time of the last handshake.
-   * Kept as hex (not bytes) so the equality check on every incoming pub is
-   * a cheap string compare. Missing when we've never handshaken with this
-   * contact.
-   */
-  peerKemPubHex?: string;
+  return made;
 }
 
 /**
- * Lookup the contact's current crypto state. Returns empty object for fresh
- * contacts (they get our kem_pub on the initial send).
+ * The key pair (hex): the stored one, or a new one written to the Keychain when none is stored.
+ * Loaded once per process; rejects (and is tried again on the next call) when the Keychain read
+ * fails.
  */
-export async function getContactCrypto(address: string): Promise<ContactCrypto> {
-  const contacts = await getContacts();
-  const c = contacts.find((x: any) => x.address === address);
-  if (!c) return {};
-  const out: ContactCrypto = {};
-  // `contacts.messagekey` is 64 hex chars under both the legacy NACL scheme
-  // (peer pubkey) and ML-KEM (shared secret). `peer_kem_pub` is the
-  // disambiguator — onReceivedPeerKemPub writes it alongside a genuine
-  // ML-KEM key.
-  const hasPeerKemPub =
-    !!c.peer_kem_pub && typeof c.peer_kem_pub === 'string' && c.peer_kem_pub.length > 0;
-  if (hasPeerKemPub && c.messagekey && typeof c.messagekey === 'string' && c.messagekey.length === 64) {
-    out.messageKey = hexToUint(c.messagekey);
-  }
-  if (c.pending_kem_capsule && typeof c.pending_kem_capsule === 'string' && c.pending_kem_capsule.length > 0) {
-    out.pendingKemCapsule = hexToUint(c.pending_kem_capsule);
-  }
-  if (hasPeerKemPub) {
-    out.peerKemPubHex = c.peer_kem_pub;
-  }
-  return out;
-}
-
-/**
- * Bob's path: received Alice's `kem_pub`. Three cases, distinguished by
- * comparing the incoming pub against the one we cached on the contact row:
- *
- *   1. First time we see this contact              → encapsulate + persist.
- *   2. Pub identical to what we already stored     → in-flight duplicate
- *      (Alice re-sends her pub on every message until she gets our reply);
- *      keep the existing messageKey to avoid silently desyncing.
- *   3. Pub differs from what we stored             → Alice restored or
- *      reinstalled and has a fresh ML-KEM keypair. Discard the old shared
- *      secret and re-encapsulate against the new pub — otherwise our
- *      inner-encrypted replies would use a stale key her new install
- *      cannot decapsulate.
- */
-export async function onReceivedPeerKemPub(
-  address: string,
-  peerKemPub: Uint8Array,
-): Promise<{ messageKey: Uint8Array; pendingKemCapsule?: Uint8Array }> {
-  const incomingHex = uintToHex(peerKemPub);
-  const existing = await getContactCrypto(address);
-  if (existing.messageKey && existing.peerKemPubHex === incomingHex) {
-    console.log(
-      `[ml-kem] Received public key from ${address}, but a shared secret is already established — ignoring redundant handshake.`,
+export function kemIdentity(): Promise<KemIdentityHex> {
+  if (loaded) return Promise.resolve(loaded);
+  if (!loading) {
+    loading = loadOrMake().then(
+      (identity) => {
+        loaded = identity;
+        loading = null;
+        return identity;
+      },
+      (err) => {
+        loading = null;
+        throw err;
+      },
     );
-    return { messageKey: existing.messageKey, pendingKemCapsule: existing.pendingKemCapsule };
   }
-  if (existing.messageKey) {
-    console.log(
-      `[ml-kem] Received a NEW public key from ${address}; peer likely restored their account. Rekeying.`,
-    );
-  } else {
-    console.log(`[ml-kem] Received public key from ${address}; deriving shared secret.`);
-  }
-  const { ciphertext, sharedSecret } = encapsulate(peerKemPub);
-  await updateContactKemState(address, {
-    messagekey: uintToHex(sharedSecret),
-    pending_kem_capsule: uintToHex(ciphertext),
-    peer_kem_pub: incomingHex,
-  });
-  return { messageKey: sharedSecret, pendingKemCapsule: ciphertext };
+  return loading;
 }
 
 /**
- * Alice's path: opened Bob's reply, hugin-crypto decapsulated for us and
- * handed back the shared secret. Persist as the contact's messageKey.
+ * Loads the key pair at start (made on first launch). Never rejects: a failed Keychain read is
+ * logged and the DM code tries again when it needs the key pair.
  */
-export async function onReceivedKemCapsule(
-  address: string,
-  sharedSecret: Uint8Array,
-): Promise<void> {
-  console.log(`[ml-kem] Received capsule from ${address}; shared secret established.`);
-  await updateContactKemState(address, {
-    messagekey: uintToHex(sharedSecret),
-  });
+export async function loadOrCreateIdentity(): Promise<KemIdentityHex | null> {
+  try {
+    return await kemIdentity();
+  } catch (e) {
+    console.warn('[identity] ML-KEM identity not loaded:', e);
+    return null;
+  }
 }
 
-/** After we ship the kem capsule in an outgoing message, clear it. */
-export async function markKemCapsuleDelivered(address: string): Promise<void> {
-  await updateContactKemState(address, { pending_kem_capsule: '' });
-}
-
-/** Test-only — drop cached identity so the next call re-reads Keychain. */
+/** Test-only: forget the loaded key pair so the next call reads the Keychain again. */
 export function _resetCache(): void {
-  cachedIdentity = null;
+  loaded = null;
+  loading = null;
 }

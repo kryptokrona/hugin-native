@@ -17,6 +17,68 @@ import RNFS from 'react-native-fs';
 enablePromise(true);
 
 let db: SQLiteDatabase;
+
+// Page number -> row offset (a non-negative integer).
+function pageOffset(page: unknown, limit: number): number {
+  const n = Number(page);
+  if (!Number.isSafeInteger(n) || n <= 0) {
+    return 0;
+  }
+  return n * limit;
+}
+// Adds a column to an existing table unless it is there already (installs that pre-date it).
+// Existing rows get the column's default.
+async function addColumnIfMissing(table: string, column: string, definition: string) {
+  try {
+    const [info] = await db.executeSql(`PRAGMA table_info(${table})`);
+    for (let i = 0; i < info.rows.length; i++) {
+      if (info.rows.item(i)?.name === column) {
+        return;
+      }
+    }
+    await db.executeSql(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  } catch (err) {
+    console.log(`[sqlite.ts] Column ${table}.${column} not added:`, err);
+  }
+}
+
+// Signatures of our own room and feed messages (the worklet's answer to send_room_msg /
+// send_feed_msg, src/lib/rpc.js), by hash, until the message is saved. Bounded.
+const ownSignatures = new Map<string, string>();
+const MAX_OWN_SIGNATURES = 200;
+
+export function rememberOwnSignature(hash: unknown, signature: unknown) {
+  if (typeof hash !== 'string' || hash.length === 0) {
+    return;
+  }
+  if (typeof signature !== 'string' || signature.length === 0) {
+    return;
+  }
+  ownSignatures.delete(hash);
+  ownSignatures.set(hash, signature);
+  while (ownSignatures.size > MAX_OWN_SIGNATURES) {
+    const oldest = ownSignatures.keys().next().value;
+    if (oldest === undefined) {
+      break;
+    }
+    ownSignatures.delete(oldest);
+  }
+}
+
+// The signature to store with a message: the one given, else a remembered own one, else ''.
+function signatureFor(hash: string, signature?: string): string {
+  if (typeof signature === 'string' && signature.length > 0) {
+    ownSignatures.delete(hash);
+    return signature;
+  }
+  const own = ownSignatures.get(hash);
+  if (own !== undefined) {
+    ownSignatures.delete(hash);
+    return own;
+  }
+  return '';
+}
+
 export const getDBConnection = async () => {
   return openDatabase({ location: 'default', name: 'hugin.db' });
 };
@@ -115,9 +177,9 @@ export const initDB = async () => {
       // Column already exists.
     }
 
-    // One-shot dedup: clean up any duplicate contact rows left behind by a
-    // prior iteration of updateContactKemState that used INSERT OR IGNORE
-    // against the composite UNIQUE(address, messagekey). Once the row's
+    // One-shot dedup: clean up any duplicate contact rows left behind by an
+    // earlier version of the app that stored handshake state with INSERT OR
+    // IGNORE against the composite UNIQUE(address, messagekey). Once the row's
     // messagekey moved from '' to <sharedHex>, a second seed pass would
     // silently insert another `(bob, '')` row, and the follow-up UPDATE
     // would abort on the composite UNIQUE — leaving an orphan `(name='',
@@ -157,6 +219,13 @@ export const initDB = async () => {
       }
     } catch (err) {
       console.log('[sqlite.ts] Startup contact dedup failed:', err);
+    }
+
+    // DM crypto state per address (hugin-network/dm); created when missing, existing rows are kept.
+    try {
+      await ensureContactCryptoTable();
+    } catch (err) {
+      console.log('[sqlite.ts] contact_crypto table not created:', err);
     }
 
     // address: peer.address,
@@ -239,6 +308,11 @@ export const initDB = async () => {
       await db.executeSql(query);
     } catch (err) {}
 
+    // The author's signature of a room / feed message (hugin-network 3.0), stored as received and
+    // served back with the message as history. Rows from before have '' and are not served.
+    await addColumnIfMissing('roomsmessages', 'signature', "TEXT DEFAULT ''");
+    await addColumnIfMissing('feedmessages', 'signature', "TEXT DEFAULT ''");
+
     const xkrwallet = `CREATE TABLE IF NOT EXISTS wallet (
       id INTEGER PRIMARY KEY,
       json TEXT
@@ -315,9 +389,10 @@ export async function loadWallet() {
         for (let i = 1; i <= len; i += databaseRowLimit) {
           const [chunk] = await db.executeSql(
             `SELECT
-                        SUBSTR(json, ${i}, ${databaseRowLimit}) AS data
+                        SUBSTR(json, ?, ?) AS data
                     FROM
                         wallet`,
+            [i, databaseRowLimit],
           );
 
           if (chunk && chunk.rows && chunk.rows.length === 1) {
@@ -380,6 +455,7 @@ export async function resetDB() {
       'roomsmessages',
       'feedmessages',
       'contacts',
+      'contact_crypto',
       'groupusers',
       'messages',
       'account',
@@ -390,6 +466,7 @@ export async function resetDB() {
     for (const table of tables) {
       await db.executeSql(`DROP TABLE IF EXISTS ${table}`);
     }
+    contactCryptoTable = null;
     create = false;
 }
 
@@ -608,7 +685,12 @@ export async function deleteRoomMessage(hash: string) {
   }
 }
 
+const READ_MARK_TABLES = ['messages', 'roomsmessages', 'feedmessages'];
+
 export async function markMessageAsRead(hash: string, type: string) {
+  if (!READ_MARK_TABLES.includes(type)) {
+    return;
+  }
   try {
     const result = await db.executeSql(
       `UPDATE ${type} SET read = 1 WHERE hash = ?`,
@@ -650,13 +732,11 @@ export async function addContact(
           [address],
           (tx, results) => {
             if (results.rows.length > 0) {
-              // A seed row may exist if updateContactKemState ran first
-              // (pushnotifications path: decryptMessage persists KEM state
-              // before we get here). Detect it by the empty name, promote to
-              // a real contact row instead of bailing — otherwise Beam.new
-              // never fires for this contact and the display name stays
-              // empty. Callers still get truthy back and their bootstrap
-              // continues normally.
+              // A row with an empty name (written by earlier versions of the
+              // app, which stored handshake state in contacts before the
+              // contact was added) is promoted to a contact row instead of
+              // bailing, so that Beam.new runs and the name is set. Callers
+              // get a truthy value back and continue as for a new contact.
               const existing = results.rows.item(0);
               if (existing && (!existing.name || existing.name === '')) {
                 const timestamp = Date.now();
@@ -689,8 +769,8 @@ export async function addContact(
                   const tip = false;
 
                   tx.executeSql(
-                    `SELECT * FROM messages WHERE timestamp = '${timestamp}'`,
-                    [],
+                    'SELECT * FROM messages WHERE timestamp = ?',
+                    [timestamp],
                     (tx, msgExistsResult) => {
                       if (msgExistsResult.rows.length === 0) {
                         tx.executeSql(
@@ -741,69 +821,118 @@ export async function updateContact(name: string, address: string) {
   }
 }
 
+// DM crypto state per address, for hugin-network/dm's loadContactCrypto / saveContactCrypto hooks
+// (src/services/hugin/dm.js). One row per address, kept apart from `contacts`: the state of an
+// address is saved when its first message is opened, before it is added as a contact.
+//   message_key          64 hex or '': the key messages to the address are encrypted with
+//   pending_kem_capsule  1536 hex or '': our ML-KEM capsule for that key, sent until the contact uses the key
+//   peer_kem_pub         1600 hex or '': the contact's ML-KEM public key the capsule was made for
+//   key_time             the contact's timestamp (ms) of the last handshake step
+//   previous_keys        JSON array of older keys (64 hex), used only to open late messages
+//   updated              when the row was written (ms)
+// The ML-KEM columns of `contacts` (messagekey, pending_kem_capsule, peer_kem_pub) are not read
+// or written by the DM code.
+const CONTACT_CRYPTO_TABLE = `CREATE TABLE IF NOT EXISTS contact_crypto (
+      address TEXT PRIMARY KEY NOT NULL,
+      message_key TEXT NOT NULL DEFAULT '',
+      pending_kem_capsule TEXT NOT NULL DEFAULT '',
+      peer_kem_pub TEXT NOT NULL DEFAULT '',
+      key_time INTEGER NOT NULL DEFAULT 0,
+      previous_keys TEXT NOT NULL DEFAULT '[]',
+      updated INTEGER NOT NULL DEFAULT 0
+  )`;
+
+export interface ContactCryptoState {
+  messageKey: string;
+  pendingKemCapsule: string;
+  peerKemPub: string;
+  keyTime: number;
+  previousKeys: string[];
+}
+
+let contactCryptoTable: { db: SQLiteDatabase; ready: Promise<unknown> } | null = null;
+
+// Creates contact_crypto when it is missing, once per database connection.
+function ensureContactCryptoTable(): Promise<unknown> {
+  if (!db) {
+    return Promise.reject(new Error('database not open'));
+  }
+  if (!contactCryptoTable || contactCryptoTable.db !== db) {
+    const entry = { db, ready: db.executeSql(CONTACT_CRYPTO_TABLE) };
+    contactCryptoTable = entry;
+    entry.ready.catch(() => {
+      if (contactCryptoTable === entry) {
+        contactCryptoTable = null;
+      }
+    });
+  }
+  return contactCryptoTable.ready;
+}
+
+const HEX_TEXT = /^[0-9a-f]*$/i;
+
+function hexText(value: unknown): string {
+  return typeof value === 'string' && HEX_TEXT.test(value) ? value.toLowerCase() : '';
+}
+
 /**
- * Patch the ML-KEM state for a contact.
- *   - `messagekey`: derived shared secret (hex). Presence ≡ handshake completed.
- *   - `pending_kem_capsule`: responder's capsule we owe the peer on our next
- *     outgoing send (cleared with '' once delivered).
+ * The stored DM crypto state of `address`, or null when there is none. Rejects when the database
+ * cannot be read (hugin-network/dm then tries the message again later instead of starting over).
  */
-export async function updateContactKemState(
-  address: string,
-  patch: { messagekey?: string; pending_kem_capsule?: string; peer_kem_pub?: string },
-) {
-  const sets: string[] = [];
-  const vals: any[] = [];
-  if (patch.messagekey !== undefined) {
-    sets.push('messagekey = ?');
-    vals.push(patch.messagekey);
+export async function loadContactCrypto(address: string): Promise<ContactCryptoState | null> {
+  if (typeof address !== 'string' || address.length === 0) {
+    return null;
   }
-  if (patch.pending_kem_capsule !== undefined) {
-    sets.push('pending_kem_capsule = ?');
-    vals.push(patch.pending_kem_capsule);
+  await ensureContactCryptoTable();
+  const [result] = await db.executeSql(
+    'SELECT message_key, pending_kem_capsule, peer_kem_pub, key_time, previous_keys FROM contact_crypto WHERE address = ? LIMIT 1',
+    [address],
+  );
+  if (!result || result.rows.length === 0) {
+    return null;
   }
-  if (patch.peer_kem_pub !== undefined) {
-    sets.push('peer_kem_pub = ?');
-    vals.push(patch.peer_kem_pub);
-  }
-  if (sets.length === 0) return;
-  // A friend request is by definition the first message from `address`, so
-  // there may be no contacts row yet at this point — the syncer's addContact
-  // call runs after this. Seed it here if — and ONLY if — no row exists for
-  // this address.
-  //
-  // `INSERT OR IGNORE ... VALUES ('', ?, '')` is NOT safe: the table's UNIQUE
-  // constraint is composite `(address, messagekey)`, not `address` alone. So
-  // once the first handshake has completed and the row's messagekey is
-  // <sharedHex>, a subsequent seed attempt with `(bob, '')` is a DIFFERENT
-  // composite key and the INSERT succeeds silently, producing a duplicate
-  // row. The follow-up UPDATE below then matches BOTH rows, tries to give
-  // them the same (address, messagekey), trips the composite UNIQUE, and
-  // aborts — leaving the orphaned `(name='', address=bob, messagekey='')`
-  // stuck in the DB. This is the "duplicate contact with no name" symptom.
+  const row = result.rows.item(0);
+  let previousKeys: unknown = [];
   try {
-    const existing = await db.executeSql(
-      'SELECT 1 FROM contacts WHERE address = ? LIMIT 1',
-      [address],
-    );
-    const found = existing.some((r: any) => r?.rows?.length > 0);
-    if (!found) {
-      await db.executeSql(
-        "INSERT INTO contacts (name, address, messagekey) VALUES ('', ?, '')",
-        [address],
-      );
-    }
-  } catch (err) {
-    console.log('Failed to seed contact row for KEM state:', err);
+    previousKeys = JSON.parse(row.previous_keys || '[]');
+  } catch (_) {
+    previousKeys = [];
   }
-  vals.push(address);
-  try {
-    await db.executeSql(
-      `UPDATE contacts SET ${sets.join(', ')} WHERE address = ?`,
-      vals,
-    );
-  } catch (err) {
-    console.log('Failed to update contact KEM state:', err);
+  const keyTime = Number(row.key_time);
+  return {
+    messageKey: hexText(row.message_key),
+    pendingKemCapsule: hexText(row.pending_kem_capsule),
+    peerKemPub: hexText(row.peer_kem_pub),
+    keyTime: Number.isSafeInteger(keyTime) && keyTime >= 0 ? keyTime : 0,
+    previousKeys: Array.isArray(previousKeys)
+      ? previousKeys.filter((k): k is string => typeof k === 'string' && k.length > 0 && HEX_TEXT.test(k))
+      : [],
+  };
+}
+
+/** Writes the DM crypto state of `address` (one row per address). Rejects when the write fails. */
+export async function saveContactCrypto(address: string, state: Partial<ContactCryptoState>) {
+  if (typeof address !== 'string' || address.length === 0) {
+    throw new Error('address must be a non-empty string');
   }
+  await ensureContactCryptoTable();
+  const s = state || {};
+  const keyTime = Number.isSafeInteger(s.keyTime) && (s.keyTime as number) >= 0 ? s.keyTime : 0;
+  const previousKeys = Array.isArray(s.previousKeys)
+    ? s.previousKeys.map(hexText).filter((k) => k.length > 0)
+    : [];
+  await db.executeSql(
+    'INSERT OR REPLACE INTO contact_crypto (address, message_key, pending_kem_capsule, peer_kem_pub, key_time, previous_keys, updated) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [
+      address,
+      hexText(s.messageKey),
+      hexText(s.pendingKemCapsule),
+      hexText(s.peerKemPub),
+      keyTime,
+      JSON.stringify(previousKeys),
+      Date.now(),
+    ],
+  );
 }
 
 export async function getContacts() {
@@ -899,10 +1028,10 @@ export async function getLatestRoomMessages() {
 
 export async function getRoomMessages(room: string, page: number) {
   const limit: number = 55;
-  let offset: number = page * limit;
+  const offset: number = pageOffset(page, limit);
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`,
-    [room]
+    'SELECT * FROM roomsmessages WHERE room = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?',
+    [room, limit, offset]
   );
 
   return await setReplies(results);
@@ -914,10 +1043,7 @@ export async function getMessages(
   history = true,
 ) {
   const limit: number = 55;
-  let offset: number = 0;
-  if (page !== 0) {
-    offset = page * limit;
-  }
+  const offset: number = pageOffset(page, limit);
   const { name, address } = useUserStore.getState().user;
 
   // Mark pending messages older than 30 seconds as failed
@@ -932,34 +1058,42 @@ export async function getMessages(
   }
 
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM messages WHERE conversation = ? ORDER BY timestamp DESC LIMIT ${offset}, ${limit}`,
-    [conversation],
+    'SELECT * FROM messages WHERE conversation = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?',
+    [conversation, limit, offset],
   );
+  const found: any[] = [];
+  for (const result of results) {
+    for (let index = 0; index < result.rows.length; index++) {
+      const res = result.rows.item(index);
+      if (res !== undefined) {
+        found.push(res);
+      }
+    }
+  }
+  const rows = oneRowPerMessage(found);
 
   if (history) {
     const files = Files.all();
     const messages = [];
-    for (const result of results) {
-      for (let index = 0; index < result.rows.length; index++) {
-        const res = result.rows.item(index);
-        const file = files.find((a) => a.hash === res.hash);
+    for (const res of rows) {
+      const file = files.find((a) => a.hash === res.hash);
 
-        if (file) {
-          res.file = file;
-        }
-        res.room = res.conversation;
-        res.address = res.sent ? address : res.conversation;
-        const contact = await getContact(res.address);
-        res.nickname = res.sent ? name : contact.name;
-        const r: Message = toMessage(res);
-        messages.push(r);
+      if (file) {
+        res.file = file;
       }
+      res.room = res.conversation;
+      res.address = res.sent ? address : res.conversation;
+      const contact = await getContact(res.address);
+      res.nickname = res.sent ? name : contact.name;
+      const r: Message = toMessage(res);
+      messages.push(r);
     }
 
     return messages.reverse();
   }
 
-  return await setReplies(results);
+  const rowSet: any = { rows: { length: rows.length, item: (i: number) => rows[i] } };
+  return await setReplies([rowSet]);
 }
 
 async function setReplies(results: [ResultSet]) {
@@ -1157,32 +1291,58 @@ export async function getFeedRepliesToMessage(hash: string) {
   return replies;
 }
 
-export async function roomMessageExists(hash: string) {
-  const groupMessageExists = `SELECT *
-  FROM roomsmessages
-  WHERE hash = '${hash}'
-  `;
-
-  const results: [ResultSet] = await db.executeSql(groupMessageExists);
-  const res = results[0].rows.item(0);
-  if (res === undefined) {
+// Lookups with a bound parameter; false for a value that is not a string or number.
+async function rowExists(sql: string, value: unknown) {
+  if (typeof value !== 'string' && typeof value !== 'number') {
     return false;
   }
-  return true;
+  const results: [ResultSet] = await db.executeSql(sql, [String(value)]);
+  return results[0].rows.length > 0;
 }
 
-export async function messageExists(time: number) {
-  const messageExist = `SELECT *
-  FROM messages
-  WHERE timestamp = '${time}'
-  `;
+export async function roomMessageExists(hash: string) {
+  return rowExists('SELECT 1 FROM roomsmessages WHERE hash = ? LIMIT 1', hash);
+}
 
-  const results: [ResultSet] = await db.executeSql(messageExist);
-  const res = results[0].rows.item(0);
-  if (res === undefined) {
+/** True when a DM is stored under the message id `hash`. */
+export async function messageExists(hash: string) {
+  return rowExists('SELECT 1 FROM messages WHERE hash = ? LIMIT 1', hash);
+}
+
+/** True when `conversation` has a DM in direction `sent` stored with this timestamp. */
+async function dmAt(conversation: string, timestamp: number, sent: boolean) {
+  if (typeof conversation !== 'string' || !Number.isFinite(Number(timestamp))) {
     return false;
   }
-  return true;
+  const results: [ResultSet] = await db.executeSql(
+    'SELECT 1 FROM messages WHERE conversation = ? AND timestamp = ? AND sent = ? LIMIT 1',
+    [conversation, Number(timestamp), sent ? 1 : 0],
+  );
+  return results[0].rows.length > 0;
+}
+
+const MESSAGE_ID = /^[0-9a-f]{64}$/;
+
+/**
+ * Rows of the messages table with one row per DM: a DM stored twice, under its message id and
+ * under another hash (an earlier push save used the sender's timestamp), is the same
+ * conversation, direction, timestamp and text. The row with the message id is kept; the order
+ * of `rows` is kept.
+ */
+export function oneRowPerMessage(rows: any[]) {
+  const kept = new Map<string, number>();
+  const out: any[] = [];
+  for (const row of rows) {
+    const key = `${row.conversation}|${row.sent ? 1 : 0}|${row.timestamp}|${row.message}`;
+    const at = kept.get(key);
+    if (at === undefined) {
+      kept.set(key, out.length);
+      out.push(row);
+    } else if (!MESSAGE_ID.test(String(out[at].hash)) && MESSAGE_ID.test(String(row.hash))) {
+      out[at] = row;
+    }
+  }
+  return out;
 }
 
 async function setFeedReplies(results: [ResultSet]) {
@@ -1225,11 +1385,12 @@ async function setFeedReplies(results: [ResultSet]) {
 
 export async function getFeedMessages(page: number, replies=false) {
   const limit: number = 4;
-  let offset: number = page * limit;
+  const offset: number = pageOffset(page, limit);
   console.log('Fetching feed messages, offset ', offset, ' limit: ', limit, ' page: ', page);
 
   const results: [ResultSet] = await db.executeSql(
-    `SELECT * FROM feedmessages ${replies ? '' : "WHERE reply = ''"} ORDER BY timestamp DESC LIMIT ${limit} OFFSET ${offset}`
+    `SELECT * FROM feedmessages ${replies ? '' : "WHERE reply = ''"} ORDER BY timestamp DESC LIMIT ? OFFSET ?`,
+    [limit, offset]
   );
 
   // const files = Files.all();
@@ -1295,17 +1456,7 @@ export async function getFeedMessage(hash: string) {
 
 
 export async function feedMessageExists(hash: string) {
-  const feedMessageExists = `SELECT *
-  FROM feedmessages
-  WHERE hash = '${hash}'
-  `;
-
-  const results: [ResultSet] = await db.executeSql(feedMessageExists);
-  const res = results[0].rows.item(0);
-  if (res === undefined) {
-    return false;
-  }
-  return true;
+  return rowExists('SELECT 1 FROM feedmessages WHERE hash = ? LIMIT 1', hash);
 }
 
 
@@ -1316,6 +1467,7 @@ export async function saveFeedMessage(
   timestamp: number,
   nickname: string,
   hash: string,
+  signature?: string,
 ) {
   if (!message || message?.length === 0) {
     return false;
@@ -1328,7 +1480,7 @@ export async function saveFeedMessage(
   //   hash);
   try {
     await db.executeSql(
-      'REPLACE INTO feedmessages (address, message, reply, timestamp, nickname, hash) VALUES (?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO feedmessages (address, message, reply, timestamp, nickname, hash, signature) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         address,
         message,
@@ -1336,6 +1488,7 @@ export async function saveFeedMessage(
         timestamp,
         nickname,
         hash,
+        signatureFor(hash, signature),
       ],
     );
 
@@ -1365,7 +1518,8 @@ export async function saveRoomMessage(
   hash: string,
   sent: boolean,
   tip: TipType | false = false,
-  status: MessageStatus = 'success'
+  status: MessageStatus = 'success',
+  signature?: string,
 ) {
 
   if (await roomMessageExists(hash)) return false
@@ -1375,7 +1529,7 @@ export async function saveRoomMessage(
   }
   try {
     await db.executeSql(
-      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, read, tip, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'REPLACE INTO roomsmessages (address, message, room, reply, timestamp, nickname, hash, sent, read, tip, status, signature) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [
         address,
         message,
@@ -1388,6 +1542,7 @@ export async function saveRoomMessage(
         sent ? 1 : 0,
         JSON.stringify(tip),
         status,
+        signatureFor(hash, signature),
       ],
     );
 
@@ -1424,7 +1579,15 @@ export async function saveMessage(
   status: MessageStatus = 'success'
 ) {
 
-  if (await messageExists(timestamp)) return
+  // A received DM is saved once: not again under its message id, and not when the conversation
+  // already has a received DM with this timestamp (stored under another hash). An own message
+  // saved again under its hash replaces its row (its status changes); another own message with
+  // this conversation and timestamp is not saved.
+  if (await messageExists(hash)) {
+    if (!sent) return;
+  } else if (await dmAt(conversation, timestamp, sent)) {
+    return;
+  }
 
   console.log('Saving message: ', message);
   if ((!message || message?.length === 0) && !tip) {
@@ -1482,7 +1645,7 @@ export async function saveMessage(
 // };
 
 export const toMessage = (res: any) => {
-  const message: Message = {
+  const message: Message & { signature?: string } = {
     address: res.address,
 
     file: res.file,
@@ -1522,6 +1685,9 @@ export const toMessage = (res: any) => {
     status: res.status,
 
     read: res.read === 1,
+
+    //The author's signature (room and feed messages; '' for rows without one)
+    signature: typeof res.signature === 'string' ? res.signature : '',
   };
 
   return message;

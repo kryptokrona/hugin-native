@@ -143,5 +143,6 @@
   "newMessage": "new message",
   "newMessages": "new messages",
   "openLink": "Are you sure you want to open this link?",
-  "open": "Open"
+  "open": "Open",
+  "contactOffline": "Not delivered: the contact is offline. It is sent when they connect, or tap to resend."
 }

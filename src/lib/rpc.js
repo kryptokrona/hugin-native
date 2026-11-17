@@ -16,7 +16,9 @@ import {
   getLatestRoomHashes,
   saveRoomUser,
   saveFeedMessage,
-  getFeedMessages
+  getFeedMessages,
+  feedMessageExists,
+  rememberOwnSignature,
 } from '../services/bare/sqlite';
 import { WebRTC } from '../services/calls/webrtc';
 import { Wallet } from '../services/kryptokrona/wallet';
@@ -31,6 +33,15 @@ import { findPowShare } from '../services/NativeTest';
 const IMAGE_EXTS = ['.png', '.jpg', '.gif', '.jpeg', '.jfif', '.webp'];
 const VIDEO_EXTS = ['.mp4', '.webm', '.avi', '.mov', '.wmv', '.mkv', '.mpeg'];
 const AUDIO_EXTS = ['.m4a', '.mp3', '.wav'];
+
+// bare-rpc commands between React Native and the worklet (bare/rpc.js): requests go out as
+// command 1, answers and events as command 2.
+const REQUEST = 1;
+const MESSAGE = 2;
+
+// Requests whose answer is our own signed message; its signature is kept until the message is
+// saved (sqlite.ts rememberOwnSignature), so that the stored row can be served as history.
+const SIGNED_SENDS = new Set(['send_room_msg', 'send_feed_msg']);
 
 function getImageFlag(fileName) {
   const lower = (fileName ?? '').toLowerCase();
@@ -65,7 +76,9 @@ export class Bridge {
         return;
       }
 
-      if (this.pendingRequests.has(data.id)) {
+      // An answer to one of our requests comes as command 2 with the request's id; a request
+      // from the worklet (command 1) is never taken for one, whatever its id.
+      if (req.command !== REQUEST && this.pendingRequests.has(data.id)) {
         const { resolve, reject } = this.pendingRequests.get(data.id);
         resolve(data);
         this.pendingRequests.delete(data.id);
@@ -79,8 +92,13 @@ export class Bridge {
     return new Promise((resolve, reject) => {
       data.id = this.id++;
       this.pendingRequests.set(data.id, { resolve, reject });
-      const resp = this.rpc.request(1);
+      const resp = this.rpc.request(REQUEST);
       resp.send(JSON.stringify(data));
+    }).then((answer) => {
+      if (SIGNED_SENDS.has(data.type) && answer && typeof answer === 'object') {
+        rememberOwnSignature(answer.hash, answer.signature);
+      }
+      return answer;
     });
   }
 
@@ -93,7 +111,7 @@ export class Bridge {
   }
 
   send(data) {
-    const req = this.rpc.request(2);
+    const req = this.rpc.request(MESSAGE);
     req.send(JSON.stringify(data));
   }
 
@@ -307,9 +325,12 @@ export class Bridge {
           }
           break;
         case 'beam-message':
-          // Bare ferries raw cipher hex from a p2p beam. RN does the noble
-          // outer+inner decrypt (handles double-encrypt + KEM handshake).
-          await MessageSync.check_for_pm(json.message, json.hash, json.background);
+          // A DM swarm payload from the contact `json.address` (hugin-network/dm opens it).
+          await MessageSync.check_for_pm(json.message, json.hash, json.background, json.address);
+          break;
+        case 'pool-messages':
+          // Messages the hugin-node pushes: opened like a sync batch.
+          if (Array.isArray(json.messages)) await MessageSync.decrypt_batch(json.messages, json.background);
           break;
         case 'beam-connected':
           //Change state to -> "connected"
@@ -335,7 +356,8 @@ export class Bridge {
         case 'end-swarm':
           break;
         case 'feed-message':
-          saveFeedMessageAndUpdate(json.data.address, json.data.message, json.data.reply, json.data.timestamp, json.data.nickname, json.data.hash, undefined, undefined);
+          // Stored as signed, `signature` included: peers verify the rows we serve as feed history.
+          saveFeedMessageAndUpdate(json.data.address, json.data.message, json.data.reply, json.data.timestamp, json.data.nickname, json.data.hash, undefined, undefined, undefined, json.data.signature);
           break;
         case 'swarm-message':
           saveRoomUser(
@@ -357,6 +379,9 @@ export class Bridge {
             json.message.file,
             json.message.tip,
             json.message.background,
+            'success',
+            // stored with the message: peers verify the rows we serve as room history
+            json.message.signature,
           );
           break;
         case 'dm-file':
@@ -510,13 +535,11 @@ export class Bridge {
       case 'room-message-exists':
         const exists = await roomMessageExists(request.hash);
         return exists;
+      case 'feed-message-exists':
+        return await feedMessageExists(request.hash);
       case 'get-room-message':
         const message = await getRoomReplyMessage(request.hash, true);
         return message[0];
-      case 'get-priv-key':
-        //Temporary until we sign all messages with xkr address
-        const key = Wallet.spendKey();
-        return key;
       case 'sign-message':
         const sig = await Wallet.sign(request.message, true);
         return sig;

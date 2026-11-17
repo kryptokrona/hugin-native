@@ -14,7 +14,8 @@ export async function loadMessageQueue(): Promise<any[]> {
 
 export async function saveMessageToQueue(newMessage: any): Promise<void> {
   const currentQueue = await loadMessageQueue();
-  if (currentQueue.some(msg => msg.s === newMessage.s)) return;
+  // One entry per message id (`hash`, the DM payload's messageHash).
+  if (currentQueue.some(msg => msg.hash === newMessage.hash)) return;
 
   currentQueue.push(newMessage);
 
