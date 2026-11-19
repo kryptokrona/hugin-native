@@ -344,6 +344,16 @@ export const create_account_keypair = async () => {
   return await rpc.request({ type: 'create_account_keypair' });
 };
 
+/**
+ * One wallet daemon request over Hyperswarm, answered in the Bare worklet by an xkrd node on the
+ * wallets topic (or the private node of `invite`): `{ status, body }` as over HTTP.
+ */
+export const xkr_daemon_request = async (method, path, body, invite) => {
+  const r = await rpc.request({ type: 'xkr_daemon_request', method, path, body, invite });
+  if (!r || r.error) throw new Error((r && r.error) || 'no answer from the Bare worklet');
+  return r.answer;
+};
+
 /** SHA-512 in the comma-bytes shape the swarm topic derivation expects. */
 export const sha512_hex = async (hex) => {
   const { bytes } = await rpc.request({ type: 'sha512_hex', hex });

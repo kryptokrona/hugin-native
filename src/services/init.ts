@@ -6,6 +6,7 @@ import { Notify } from './utils';
 import { Platform } from 'react-native';
 import RNFS from 'react-native-fs';
 import { Connection } from './bare/globals';
+import { parseNode } from './kryptokrona/daemon-node';
 
 export async function init() {
 
@@ -33,12 +34,8 @@ export async function init() {
     await usePreferencesStore.persist.rehydrate();
     const preferences = usePreferencesStore.getState().preferences;
 
-    const node = preferences?.node
-      ? {
-          port: parseInt(preferences.node.split(':')[1]),
-          url: preferences.node.split(':')[0],
-        }
-      : { port: 80, url: 'node.xkr.network' };
+    // no node chosen yet: an xkrd node over Hyperswarm
+    const node = parseNode(preferences?.node);
 
       await Wallet.init(node);
       console.log('☎️ Trying to rehydrate user..')

@@ -1,5 +1,6 @@
 import { Address, CryptoNote } from 'kryptokrona-utils';
-import { Beam, Nodes } from '../../lib/native';
+import { Beam, Nodes, xkr_daemon_request } from '../../lib/native';
+import { isSwarmNode, parseNode, swarmRequester } from './daemon-node';
 import { startDm, stopDm } from '../hugin/dm';
 import { Daemon, WalletBackend } from 'kryptokrona-wallet-backend-js';
 import {
@@ -209,8 +210,12 @@ export class ActiveWallet {
   }
 
   setDaemon(node) {
-    this.daemon = new Daemon(node.url, node.port);
-    this.daemon.makePostRequest = makePostRequest;
+    if (isSwarmNode(node.url)) {
+      this.daemon = Daemon.withRequester(swarmRequester(node.url, xkr_daemon_request));
+    } else {
+      this.daemon = new Daemon(node.url, node.port);
+      this.daemon.makePostRequest = makePostRequest;
+    }
     this.nodeUrl = node.url;
     this.nodePort = node.port;
   }
@@ -375,9 +380,9 @@ export class ActiveWallet {
   }
 
   node(node) {
-    const nodeUrl = node.split(':')[0];
-    const nodePort = parseInt(node.split(':')[1]);
-    const picked = { url: nodeUrl, port: nodePort };
+    const picked = parseNode(node);
+    const nodeUrl = picked.url;
+    const nodePort = picked.port;
     this.setDaemon(picked);
     this.active.swapNode(this.daemon);
     this.nodeUrl = nodeUrl;

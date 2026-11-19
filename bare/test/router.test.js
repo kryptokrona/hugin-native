@@ -388,3 +388,9 @@ test('respond: the answer carries the request id and type; failures answer { id,
   }, { type: 'typing' });
   t.is(sent.length, 2, 'no id: no answer');
 });
+
+test('xkr_daemon_request: a bad invite answers an error, not a throw', async (t) => {
+  const { route } = await setup();
+  const r = await route({ type: 'xkr_daemon_request', method: 'get', path: '/info', invite: 'xkr:00' });
+  t.ok(r.error && /256 hex/.test(r.error), r.error);
+});

@@ -33,6 +33,7 @@ import {
 } from 'lib/native';
 import { dmCrypto, DM_STATUS } from './hugin/dm';
 import { Connection } from './bare/globals';
+import { parseNode } from './kryptokrona/daemon-node';
 import { ConnectionStatus, User } from '../types/user';
 import { setLatestMessages, updateMessage } from './bare/contacts';
 import { WebRTC } from './calls';
@@ -139,12 +140,8 @@ async function init() {
     usePreferencesStore.persist.rehydrate();
     const preferences = usePreferencesStore.getState().preferences;
 
-    const node = preferences?.node
-      ? {
-          port: parseInt(preferences.node.split(':')[1]),
-          url: preferences.node.split(':')[0],
-        }
-      : { port: 80, url: 'node.xkr.network' };
+    // no node chosen yet: an xkrd node over Hyperswarm
+    const node = parseNode(preferences?.node);
 
       await Wallet.init(node);
       console.log('☎️ Trying to rehydrate user..')

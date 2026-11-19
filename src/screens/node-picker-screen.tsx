@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import { SWARM_LIST_ENTRY } from '../services/kryptokrona/daemon-node';
+
 import {
   ActivityIndicator,
   Dimensions,
@@ -95,7 +97,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
   const checkNodes = async () => {
     setCheckLoading(true);
     const updatedNodeList = await Promise.all(
-      nodeList.map(async (node) => {
+      nodeList.filter((node) => !node.swarm).map(async (node) => {
         const nodeURL = `${node.ssl ? 'https://' : 'http://'}${node.url}:${
           node.port
         }/info`;
@@ -230,7 +232,7 @@ export const PickNodeScreen: React.FC<Props> = () => {
         <FlatList
           initialNumToRender={999}
           maxToRenderPerBatch={999}
-          data={nodeList}
+          data={[SWARM_LIST_ENTRY, ...nodeList]}
           keyExtractor={(item) => item.url + ':' + item.port}
           renderItem={renderNode}
           contentContainerStyle={styles.nodeList}

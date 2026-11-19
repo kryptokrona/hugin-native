@@ -11,6 +11,7 @@ const sodium = require('sodium-native');
 const b4a = require('b4a');
 const { encrypt_sealed_box, decrypt_sealed_box } = require('./utils');
 const adapter = require('./adapter');
+const { XkrDaemonRequester } = require('hugin-network/xkr-daemon');
 
 function logError(what, err) {
   console.log(what, (err && err.message) || err);
@@ -24,6 +25,26 @@ function logError(what, err) {
  * @param {object} deps.rpc  bare/rpc.js Bridge (given to Hugin.init)
  */
 function createRouter({ host, hugin, rpc }) {
+  // The wallet's daemon over Hyperswarm (hugin-network/xkr-daemon): one requester per target
+  // (the public wallets topic, or a private node's invite), made on the first request.
+  let daemon = null;
+  const daemonRequest = async (p) => {
+    const target = p.invite || 'public';
+    try {
+      if (!daemon || daemon.target !== target) {
+        if (daemon) daemon.requester.close().catch(() => {});
+        daemon = null;
+        daemon = {
+          target,
+          requester: new XkrDaemonRequester({ network: 'mainnet', invite: p.invite || undefined, client: 'hugin-native' }),
+        };
+      }
+      return { answer: await daemon.requester.request(p.method, p.path, p.body) };
+    } catch (err) {
+      return { error: (err && err.message) || String(err) };
+    }
+  };
+
   const pushRegisterAll = async (p) => {
     // One trip for N rooms: the device, call and room registrations are sealed here and sent
     // to the node as one JSON batch.
@@ -66,6 +87,9 @@ function createRouter({ host, hugin, rpc }) {
           secretKey: b4a.toString(secretKey, 'hex'),
         };
       }
+      case 'xkr_daemon_request':
+        // { method: 'get'|'post', path, body, invite? } -> { answer: { status, body } } or { error }
+        return await daemonRequest(p);
       case 'sha512_hex':
         // SHA-512 over the hex bytes (hugin-network/keys `swarmKey`), as comma-separated bytes.
         return { bytes: adapter.sha512_csv(p.hex) };
